@@ -17,7 +17,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
   describe '#artifacts' do
     context "when option contains archive-type artifacts" do
-      let(:build) { create(:ci_build, options: { artifacts: archive } ) }
+      let(:build) { create(:ci_build, options: { artifacts: archive }) }
 
       it 'presents correct hash' do
         expect(presenter.artifacts.first).to include(archive_expectation)
@@ -189,7 +189,11 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
     it 'returns the correct refspecs' do
       is_expected.to contain_exactly("+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}",
-                                     "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                     "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
+    end
+
+    it 'uses a SHA in the persistent refspec' do
+      expect(subject[0]).to match(/^\+[0-9a-f]{40}:refs\/pipelines\/[0-9]+$/)
     end
 
     context 'when ref is tag' do
@@ -197,7 +201,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
       it 'returns the correct refspecs' do
         is_expected.to contain_exactly("+refs/tags/#{build.ref}:refs/tags/#{build.ref}",
-                                       "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                       "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
       end
 
       context 'when GIT_DEPTH is zero' do
@@ -208,7 +212,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
         it 'returns the correct refspecs' do
           is_expected.to contain_exactly('+refs/tags/*:refs/tags/*',
                                          '+refs/heads/*:refs/remotes/origin/*',
-                                         "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                         "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
         end
       end
     end
@@ -224,7 +228,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
       it 'returns the correct refspecs' do
         is_expected
-          .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+          .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
       end
 
       context 'when GIT_DEPTH is zero' do
@@ -234,7 +238,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
         it 'returns the correct refspecs' do
           is_expected
-            .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+            .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                 '+refs/heads/*:refs/remotes/origin/*',
                                 '+refs/tags/*:refs/tags/*')
         end
@@ -244,8 +248,8 @@ RSpec.describe Ci::BuildRunnerPresenter do
         let(:merge_request) { create(:merge_request, :with_legacy_detached_merge_request_pipeline) }
 
         it 'returns the correct refspecs' do
-          is_expected.to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
-                                          "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
+          is_expected.to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
+                                         "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
         end
       end
     end
@@ -262,9 +266,33 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
       it 'exposes the persistent pipeline ref' do
         is_expected
-          .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+          .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                               "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
       end
+    end
+  end
+
+  describe '#variables' do
+    subject { presenter.variables }
+
+    let(:build) { create(:ci_build) }
+
+    it 'returns a Collection' do
+      is_expected.to be_an_instance_of(Gitlab::Ci::Variables::Collection)
+    end
+  end
+
+  describe '#runner_variables' do
+    subject { presenter.runner_variables }
+
+    let(:build) { create(:ci_build) }
+
+    it 'returns an array' do
+      is_expected.to be_an_instance_of(Array)
+    end
+
+    it 'returns the expected variables' do
+      is_expected.to eq(presenter.variables.to_runner_variables)
     end
   end
 end

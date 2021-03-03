@@ -88,7 +88,7 @@ const completeMock = [
   {
     ...basicStageInfo,
     groups: {
-      nodes: groupsArray.map(group => ({ ...group, jobs: { nodes: jobArrayWithNeeds } })),
+      nodes: groupsArray.map((group) => ({ ...group, jobs: { nodes: jobArrayWithNeeds } })),
     },
   },
 ];

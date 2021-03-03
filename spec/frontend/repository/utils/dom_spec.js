@@ -1,5 +1,5 @@
+import { setHTMLFixture } from 'helpers/fixtures';
 import { TEST_HOST } from 'helpers/test_constants';
-import { setHTMLFixture } from '../../helpers/fixtures';
 import { updateElementsVisibility, updateFormAction } from '~/repository/utils/dom';
 
 describe('updateElementsVisibility', () => {

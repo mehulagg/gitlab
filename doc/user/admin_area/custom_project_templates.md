@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Custom instance-level project templates **(PREMIUM ONLY)**
+# Custom instance-level project templates **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6860) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2.
 
@@ -20,8 +20,8 @@ available to the user if they have access to them. For example:
 - Private projects will be available only if the user is a member of the project.
 
 Repository and database information that are copied over to each new project are
-identical to the data exported with
-[GitLab's Project Import/Export](../project/settings/import_export.md).
+identical to the data exported with the
+[GitLab Project Import/Export](../project/settings/import_export.md).
 
 NOTE:
 To set project templates at a group level,

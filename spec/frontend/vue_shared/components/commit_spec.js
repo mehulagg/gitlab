@@ -1,5 +1,6 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import CommitComponent from '~/vue_shared/components/commit.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
@@ -7,17 +8,20 @@ describe('Commit component', () => {
   let props;
   let wrapper;
 
-  const findIcon = name => {
-    const icons = wrapper.findAll(GlIcon).filter(c => c.attributes('name') === name);
+  const findIcon = (name) => {
+    const icons = wrapper.findAll(GlIcon).filter((c) => c.attributes('name') === name);
     return icons.length ? icons.at(0) : icons;
   };
 
   const findUserAvatar = () => wrapper.find(UserAvatarLink);
+  const findRefName = () => wrapper.findByTestId('ref-name');
 
-  const createComponent = propsData => {
-    wrapper = shallowMount(CommitComponent, {
-      propsData,
-    });
+  const createComponent = (propsData) => {
+    wrapper = extendedWrapper(
+      shallowMount(CommitComponent, {
+        propsData,
+      }),
+    );
   };
 
   afterEach(() => {
@@ -43,12 +47,7 @@ describe('Commit component', () => {
       },
     });
 
-    expect(
-      wrapper
-        .find('.icon-container')
-        .find(GlIcon)
-        .exists(),
-    ).toBe(true);
+    expect(wrapper.find('.icon-container').find(GlIcon).exists()).toBe(true);
   });
 
   describe('Given all the props', () => {
@@ -226,6 +225,22 @@ describe('Commit component', () => {
       createComponent(props);
 
       expect(wrapper.find('.ref-name').exists()).toBe(false);
+    });
+  });
+
+  describe('When commitRef has a path property instead of ref_url property', () => {
+    it('should render path as href attribute', () => {
+      props = {
+        commitRef: {
+          name: 'master',
+          path: 'http://localhost/namespace2/gitlabhq/tree/master',
+        },
+      };
+
+      createComponent(props);
+
+      expect(findRefName().exists()).toBe(true);
+      expect(findRefName().attributes('href')).toBe(props.commitRef.path);
     });
   });
 });

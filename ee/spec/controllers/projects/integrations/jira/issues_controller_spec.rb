@@ -5,28 +5,30 @@ require 'spec_helper'
 RSpec.describe Projects::Integrations::Jira::IssuesController do
   include ProjectForksHelper
 
-  let(:project) { create(:project) }
-  let(:user)    { create(:user) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user, developer_projects: [project]) }
+  let_it_be(:jira) { create(:jira_service, project: project, issues_enabled: true, project_key: 'TEST') }
 
   before do
     stub_licensed_features(jira_issues_integration: true)
+    sign_in(user)
   end
 
   describe 'GET #index' do
-    before do
-      sign_in(user)
-      project.add_developer(user)
-      create(:jira_service, project: project)
-    end
-
     context 'when jira_issues_integration licensed feature is not available' do
-      it 'returns 404 status' do
+      before do
         stub_licensed_features(jira_issues_integration: false)
+      end
 
+      it 'returns 404 status' do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
+    end
+
+    it_behaves_like 'unauthorized when external service denies access' do
+      subject { get :index, params: { namespace_id: project.namespace, project_id: project } }
     end
 
     it 'renders the "index" template' do
@@ -34,6 +36,14 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(response).to render_template(:index)
+    end
+
+    it 'tracks usage' do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+        .to receive(:track_event)
+        .with('i_ecosystem_jira_service_list_issues', values: user.id)
+
+      get :index, params: { namespace_id: project.namespace, project_id: project }
     end
 
     context 'when project has moved' do
@@ -48,7 +58,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'redirects to the new issue tracker from the old one' do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
-        expect(response).to redirect_to(project_integrations_jira_issues_path(new_project))
+        expect(response).to redirect_to(Gitlab::Routing.url_helpers.project_integrations_jira_issues_path(new_project))
         expect(response).to have_gitlab_http_status(:moved_permanently)
       end
     end
@@ -171,15 +181,48 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
     end
   end
 
-  context 'external authorization' do
-    before do
-      sign_in user
-      project.add_developer(user)
-      create(:jira_service, project: project)
+  describe 'GET #show' do
+    context 'when `jira_issues_show_integration` feature is disabled' do
+      before do
+        stub_feature_flags(jira_issues_show_integration: false)
+      end
+
+      it 'returns 404 status' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
     end
 
-    it_behaves_like 'unauthorized when external service denies access' do
-      subject { get :index, params: { namespace_id: project.namespace, project_id: project } }
+    context 'when `jira_issues_show_integration` feature is enabled' do
+      let(:jira_issue) { { 'from' => 'jira' } }
+      let(:issue_json) { { 'from' => 'backend' } }
+
+      before do
+        stub_feature_flags(jira_issues_show_integration: true)
+
+        expect_next_found_instance_of(JiraService) do |service|
+          expect(service).to receive(:find_issue).with('1', rendered_fields: true).and_return(jira_issue)
+        end
+
+        expect_next_instance_of(Integrations::Jira::IssueDetailSerializer) do |serializer|
+          expect(serializer).to receive(:represent).with(jira_issue, project: project).and_return(issue_json)
+        end
+      end
+
+      it 'renders `show` template' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(assigns(:issue_json)).to eq(issue_json)
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:show)
+      end
+
+      it 'returns JSON response' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1, format: :json }
+
+        expect(json_response).to eq(issue_json)
+      end
     end
   end
 end

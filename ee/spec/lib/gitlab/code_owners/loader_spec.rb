@@ -165,6 +165,28 @@ RSpec.describe Gitlab::CodeOwners::Loader do
     end
   end
 
+  describe '#code_owners_sections' do
+    subject { loader.code_owners_sections }
+
+    context 'when CODEOWNERS does not have sections' do
+      it { is_expected.to match_array(['codeowners']) }
+    end
+
+    context 'when CODEOWNERS contains sections' do
+      let(:codeowner_content) do
+        <<~CODEOWNERS
+        [Documentation]
+        docs/* @documentation-owner
+        docs/CODEOWNERS @owner-1 owner2@gitlab.org @owner-3 @documentation-owner
+        [Testing]
+        spec/* @test-owner @test-group @test-group/nested-group
+        CODEOWNERS
+      end
+
+      it { is_expected.to match_array(%w[codeowners Documentation Testing]) }
+    end
+  end
+
   describe '#empty_code_owners?' do
     context 'when file does not exist' do
       let(:codeowner_blob) { nil }

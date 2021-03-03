@@ -1,3 +1,6 @@
+// Custom Fontawesome icons
+@import 'fontawesome_custom';
+
 /**
  * Apply Markup (Markdown/AsciiDoc) typography
  *
@@ -75,7 +78,9 @@
   code {
     font-family: $monospace-font;
     white-space: pre-wrap;
-    word-wrap: normal;
+    // Safari
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     word-break: keep-all;
   }
 
@@ -341,6 +346,9 @@
     // Multi-line code blocks should scroll horizontally
     code {
       white-space: pre;
+      // Safari
+      word-wrap: normal;
+      overflow-wrap: normal;
     }
 
     &.plain-readme {
@@ -427,17 +435,21 @@
     }
   }
 
-  a[href*='/uploads/'],
-  a[href*='storage.googleapis.com/google-code-attachments/'] {
+  a.with-attachment-icon {
     &::before {
       margin-right: 4px;
 
-      font: normal normal normal 14px/1 FontAwesome;
+      font-style: normal;
       font-size: inherit;
       text-rendering: auto;
       -webkit-font-smoothing: antialiased;
-      content: '\f0c6';
+      content: '📎';
     }
+  }
+
+  a[href*='/uploads/'],
+  a[href*='storage.googleapis.com/google-code-attachments/'] {
+    @extend .with-attachment-icon;
 
     &.no-attachment-icon {
       &::before {
@@ -455,7 +467,7 @@
   h6 {
     a.anchor {
       float: left;
-      margin-left: -16px;
+      margin-left: -20px;
       text-decoration: none;
       outline: none;
 
@@ -467,6 +479,11 @@
 
     &:hover > a.anchor::after {
       visibility: visible;
+    }
+
+    > a.anchor:focus::after {
+      visibility: visible;
+      outline: auto;
     }
   }
 
@@ -573,10 +590,6 @@ body {
   font-size: 1.25em;
   font-weight: $gl-font-weight-bold;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-
   &.with-button {
     line-height: 34px;
   }
@@ -600,7 +613,7 @@ pre {
   display: block;
   padding: $gl-padding-8 $input-horizontal-padding;
   margin: 0 0 $gl-padding-8;
-  font-size: 13px;
+  font-size: $gl-font-size-monospace;
   word-break: break-all;
   word-wrap: break-word;
   color: $gl-text-color;
@@ -642,7 +655,7 @@ code {
  */
 textarea.js-gfm-input {
   font-family: $monospace-font;
-  font-size: 13px;
+  font-size: $gl-font-size-monospace;
 }
 
 .strikethrough {
@@ -695,13 +708,11 @@ textarea {
     opacity: 1; // FF defaults to 0.54
   }
 
-  // scss-lint:disable PseudoElement
   // support Edge vendor prefix
   &::-ms-input-placeholder {
     color: $gl-text-color-tertiary;
   }
 
-  // scss-lint:disable PseudoElement
   // support IE vendor prefix
   &:-ms-input-placeholder {
     color: $gl-text-color-tertiary;

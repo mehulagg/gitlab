@@ -1,0 +1,5 @@
+---
+title: Support OpenAPI v3 and Postman variables in API Fuzzing
+merge_request: 53646
+author:
+type: added

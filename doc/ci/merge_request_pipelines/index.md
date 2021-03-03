@@ -166,9 +166,10 @@ Read the [documentation on Pipelines for Merged Results](pipelines_for_merged_re
 
 Read the [documentation on Merge Trains](pipelines_for_merged_results/merge_trains/index.md).
 
-## Run pipelines in the parent project for merge requests from a forked project **(STARTER)**
+## Run pipelines in the parent project for merge requests from a forked project **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217451) in GitLab 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217451) in GitLab 13.3.
+> - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab Premium in 13.9.
 
 By default, external contributors working from forks can't create pipelines in the
 parent project. When a pipeline for merge requests is triggered by a merge request
@@ -176,6 +177,10 @@ coming from a fork:
 
 - It's created and runs in the fork (source) project, not the parent (target) project.
 - It uses the fork project's CI/CD configuration and resources.
+
+If a pipeline runs in a fork, the **fork** icon appears for the pipeline in the merge request.
+
+![Pipeline ran in fork](img/pipeline-fork_v13_7.png)
 
 Sometimes parent project members want the pipeline to run in the parent
 project. This could be to ensure that the post-merge pipeline passes in the parent project.
@@ -208,7 +213,7 @@ The variable names begin with the `CI_MERGE_REQUEST_` prefix.
 ### Two pipelines created when pushing to a merge request
 
 If you are experiencing duplicated pipelines when using `rules`, take a look at
-the [important differences between `rules` and `only`/`except`](../yaml/README.md#prevent-duplicate-pipelines),
+the [important differences between `rules` and `only`/`except`](../yaml/README.md#avoid-duplicate-pipelines),
 which helps you get your starting configuration correct.
 
 If you are seeing two pipelines when using `only/except`, please see the caveats

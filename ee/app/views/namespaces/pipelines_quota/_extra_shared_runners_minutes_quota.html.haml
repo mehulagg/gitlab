@@ -1,5 +1,7 @@
-- return unless Gitlab.com? && namespace.shared_runners_minutes_limit_enabled?
+- return unless Gitlab.com?
+
 - minutes_quota = namespace.ci_minutes_quota
+- return unless minutes_quota.enabled?
 
 .row
   .col-sm-6

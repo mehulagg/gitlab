@@ -53,22 +53,16 @@ describe('vulnerabilities module mutations', () => {
   });
 
   describe('REQUEST_VULNERABILITIES', () => {
-    beforeEach(() => {
+    it('should set properties to expected values', () => {
       state.errorLoadingVulnerabilities = true;
       state.loadingVulnerabilitiesErrorCode = 403;
       mutations[types.REQUEST_VULNERABILITIES](state);
-    });
 
-    it('should set `isLoadingVulnerabilities` to `true`', () => {
-      expect(state.isLoadingVulnerabilities).toBeTruthy();
-    });
-
-    it('should set `errorLoadingVulnerabilities` to `false`', () => {
-      expect(state.errorLoadingVulnerabilities).toBeFalsy();
-    });
-
-    it('should reset `loadingVulnerabilitiesErrorCode`', () => {
-      expect(state.loadingVulnerabilitiesErrorCode).toBe(null);
+      expect(state).toMatchObject({
+        isLoadingVulnerabilities: true,
+        errorLoadingVulnerabilities: false,
+        loadingVulnerabilitiesErrorCode: null,
+      });
     });
   });
 

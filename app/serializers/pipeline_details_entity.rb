@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PipelineDetailsEntity < PipelineEntity
+class PipelineDetailsEntity < Ci::PipelineEntity
   expose :project, using: ProjectEntity
 
   expose :flags do
@@ -10,6 +10,10 @@ class PipelineDetailsEntity < PipelineEntity
   expose :details do
     expose :artifacts do |pipeline, options|
       rel = pipeline.downloadable_artifacts
+
+      if Feature.enabled?(:non_public_artifacts, type: :development)
+        rel = rel.select { |artifact| can?(request.current_user, :read_job_artifacts, artifact.job) }
+      end
 
       BuildArtifactEntity.represent(rel, options)
     end

@@ -49,12 +49,12 @@ describe('MRWidgetFailedToMerge', () => {
     });
 
     describe('mergeError', () => {
-      it('removes forced line breaks', done => {
+      it('removes forced line breaks', (done) => {
         mr.mergeError = 'contains<br />line breaks<br />';
 
         Vue.nextTick()
           .then(() => {
-            expect(vm.mergeError).toBe('contains line breaks');
+            expect(vm.mergeError).toBe('contains line breaks.');
           })
           .then(done)
           .catch(done.fail);
@@ -98,7 +98,7 @@ describe('MRWidgetFailedToMerge', () => {
   });
 
   describe('while it is refreshing', () => {
-    it('renders Refresing now', done => {
+    it('renders Refresing now', (done) => {
       vm.isRefreshing = true;
 
       Vue.nextTick(() => {
@@ -113,14 +113,14 @@ describe('MRWidgetFailedToMerge', () => {
   describe('while it is not regresing', () => {
     it('renders warning icon and disabled merge button', () => {
       expect(vm.$el.querySelector('.js-ci-status-icon-warning')).not.toBeNull();
-      expect(vm.$el.querySelector('.js-disabled-merge-button').getAttribute('disabled')).toEqual(
-        'disabled',
-      );
+      expect(
+        vm.$el.querySelector('[data-testid="disabled-merge-button"]').getAttribute('disabled'),
+      ).toEqual('disabled');
     });
 
     it('renders given error', () => {
       expect(vm.$el.querySelector('.has-error-message').textContent.trim()).toEqual(
-        'Merge error happened',
+        'Merge error happened.',
       );
     });
 
@@ -139,7 +139,7 @@ describe('MRWidgetFailedToMerge', () => {
     });
   });
 
-  it('should just generic merge failed message if merge_error is not available', done => {
+  it('should just generic merge failed message if merge_error is not available', (done) => {
     vm.mr.mergeError = null;
 
     Vue.nextTick(() => {
@@ -149,7 +149,7 @@ describe('MRWidgetFailedToMerge', () => {
     });
   });
 
-  it('should show refresh label when refresh requested', done => {
+  it('should show refresh label when refresh requested', (done) => {
     vm.refresh();
     Vue.nextTick(() => {
       expect(vm.$el.innerText).not.toContain('Merge failed. Refreshing');

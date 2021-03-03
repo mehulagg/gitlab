@@ -1,7 +1,7 @@
 <script>
 import { s__ } from '~/locale';
-import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import ReportItem from '~/reports/components/report_item.vue';
+import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 
 export default {
   components: {
@@ -41,7 +41,7 @@ export default {
   computed: {
     groups() {
       return this.$options.groups
-        .map(group => ({
+        .map((group) => ({
           name: group,
           issues: this[`${group}Issues`],
           heading: this[`${group}Heading`],

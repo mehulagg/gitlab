@@ -1,8 +1,0 @@
----
-name: value_stream_analytics_create_multiple_value_streams
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35822
-rollout_issue_url: 
-milestone: '13.2'
-type: development
-group: group::analytics
-default_enabled: true

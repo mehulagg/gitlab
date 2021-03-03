@@ -11,6 +11,15 @@ jest.mock('~/lib/utils/dom_utils', () => ({
     throw new Error('this needs to be mocked');
   }),
 }));
+jest.mock('@gitlab/ui', () => ({
+  GlTooltipDirective: {
+    bind(el, binding) {
+      el.classList.add('gl-tooltip');
+      el.setAttribute('data-original-title', el.title);
+      el.dataset.placement = binding.value.placement;
+    },
+  },
+}));
 
 describe('TooltipOnTruncate component', () => {
   let wrapper;
@@ -18,7 +27,7 @@ describe('TooltipOnTruncate component', () => {
 
   const createComponent = ({ propsData, ...options } = {}) => {
     wrapper = shallowMount(TooltipOnTruncate, {
-      attachToDocument: true,
+      attachTo: document.body,
       propsData: {
         ...propsData,
       },
@@ -44,7 +53,7 @@ describe('TooltipOnTruncate component', () => {
       },
       {
         propsData: { ...propsData },
-        attachToDocument: true,
+        attachTo: document.body,
         ...options,
       },
     );
@@ -52,7 +61,7 @@ describe('TooltipOnTruncate component', () => {
     wrapper = parent.find(TooltipOnTruncate);
   };
 
-  const hasTooltip = () => wrapper.classes('js-show-tooltip');
+  const hasTooltip = () => wrapper.classes('gl-tooltip');
 
   afterEach(() => {
     wrapper.destroy();
@@ -139,7 +148,7 @@ describe('TooltipOnTruncate component', () => {
       createComponent({
         propsData: {
           title: DUMMY_TEXT,
-          truncateTarget: el => el.childNodes[1],
+          truncateTarget: (el) => el.childNodes[1],
         },
         slots: {
           default: [createChildElement(), createChildElement()],

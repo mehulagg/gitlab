@@ -1,6 +1,9 @@
-import commitState from '~/ide/stores/modules/commit/state';
+import {
+  COMMIT_TO_CURRENT_BRANCH,
+  COMMIT_TO_NEW_BRANCH,
+} from '~/ide/stores/modules/commit/constants';
 import * as getters from '~/ide/stores/modules/commit/getters';
-import consts from '~/ide/stores/modules/commit/constants';
+import commitState from '~/ide/stores/modules/commit/state';
 
 describe('IDE commit module getters', () => {
   let state;
@@ -103,7 +106,7 @@ describe('IDE commit module getters', () => {
       expect(getters.preBuiltCommitMessage(state, null, rootState)).toBe('test commit message');
     });
 
-    ['changedFiles', 'stagedFiles'].forEach(key => {
+    ['changedFiles', 'stagedFiles'].forEach((key) => {
       it('returns commitMessage with updated file', () => {
         rootState[key].push({
           path: 'test-file',
@@ -147,13 +150,13 @@ describe('IDE commit module getters', () => {
 
   describe('isCreatingNewBranch', () => {
     it('returns false if NOT creating a new branch', () => {
-      state.commitAction = consts.COMMIT_TO_CURRENT_BRANCH;
+      state.commitAction = COMMIT_TO_CURRENT_BRANCH;
 
       expect(getters.isCreatingNewBranch(state)).toBeFalsy();
     });
 
     it('returns true if creating a new branch', () => {
-      state.commitAction = consts.COMMIT_TO_NEW_BRANCH;
+      state.commitAction = COMMIT_TO_NEW_BRANCH;
 
       expect(getters.isCreatingNewBranch(state)).toBeTruthy();
     });

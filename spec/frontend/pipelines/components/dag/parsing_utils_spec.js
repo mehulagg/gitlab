@@ -1,3 +1,4 @@
+import { createSankey } from '~/pipelines/components/dag/drawing_utils';
 import {
   createNodeDict,
   makeLinksFromNodes,
@@ -7,7 +8,6 @@ import {
   getMaxNodes,
 } from '~/pipelines/components/parsing_utils';
 
-import { createSankey } from '~/pipelines/components/dag/drawing_utils';
 import { mockParsedGraphQLNodes } from './mock_data';
 
 describe('DAG visualization parsing utilities', () => {
@@ -30,7 +30,10 @@ describe('DAG visualization parsing utilities', () => {
       { source: 'job2', target: 'job4' },
     ];
 
-    const dedupedLinks = [{ source: 'job1', target: 'job2' }, { source: 'job2', target: 'job4' }];
+    const dedupedLinks = [
+      { source: 'job1', target: 'job2' },
+      { source: 'job2', target: 'job4' },
+    ];
 
     const nodeLookup = {
       job1: {

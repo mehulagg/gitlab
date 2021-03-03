@@ -16,6 +16,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - The group-level Container Registry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23315) in GitLab 12.10.
 > - Searching by image repository name was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31322) in GitLab 13.0.
 
+NOTE:
+If you pull container images from Docker Hub, you can also use the [GitLab Dependency Proxy](../dependency_proxy/index.md#use-the-dependency-proxy-for-docker-images) to avoid running into rate limits and speed up your pipelines.
+
 With the Docker Container Registry integrated into GitLab, every GitLab project can
 have its own space to store its Docker images.
 
@@ -141,7 +144,7 @@ Before you can build and push images by using GitLab CI/CD, you must authenticat
 
 To use CI/CD to authenticate, you can use:
 
-- The `CI_REGISTRY_USER` variable.
+- The `CI_REGISTRY_USER` CI/CD variable.
 
   This variable has read-write access to the Container Registry and is valid for
   one job only. Its password is also automatically created and assigned to `CI_REGISTRY_PASSWORD`.
@@ -206,7 +209,7 @@ build:
     - docker push $CI_REGISTRY/group/project/image:latest
 ```
 
-You can also make use of [other variables](../../../ci/variables/README.md) to avoid hard-coding:
+You can also make use of [other CI/CD variables](../../../ci/variables/README.md) to avoid hard-coding:
 
 ```yaml
 build:
@@ -302,7 +305,7 @@ is set to `always`.
 
 To use your own Docker images for Docker-in-Docker, follow these steps
 in addition to the steps in the
-[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor) section:
+[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker) section:
 
 1. Update the `image` and `service` to point to your registry.
 1. Add a service [alias](../../../ci/yaml/README.md#servicesalias).
@@ -379,7 +382,7 @@ The following example defines two stages: `build`, and `clean`. The
 `build_image` job builds the Docker image for the branch, and the
 `delete_image` job deletes it. The `reg` executable is downloaded and used to
 remove the image matching the `$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG`
-[environment variable](../../../ci/variables/predefined_variables.md).
+[predefined CI/CD variable](../../../ci/variables/predefined_variables.md).
 
 To use this example, change the `IMAGE_TAG` variable to match your needs:
 
@@ -556,17 +559,69 @@ Here are examples of regex patterns you may want to use:
   v.+
   ```
 
-- Match tags that contain `master`:
+- Match only the tag named `master`:
 
   ```plaintext
   master
   ```
 
-- Match tags that either start with `v`, contain `master`, or contain `release`:
+- Match tags that are either named or start with `release`:
 
   ```plaintext
-  (?:v.+|master|release)
+  release.*
   ```
+
+- Match tags that either start with `v`, are named `master`, or begin with `release`:
+
+  ```plaintext
+  (?:v.+|master|release.*)
+  ```
+
+### Set cleanup limits to conserve resources 
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/288812) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-cleanup-policy-limits).
+
+Cleanup policies are executed as a background process. This process is complex, and depending on the number of tags to delete,
+the process can take time to finish.
+
+To prevent server resource starvation, the following application settings are available:
+
+- `container_registry_expiration_policies_worker_capacity`. The maximum number of cleanup workers running concurrently. This must be greater than `1`.
+   We recommend starting with a low number and increasing it after monitoring the resources used by the background workers.
+- `container_registry_delete_tags_service_timeout`. The maximum time, in seconds, that the cleanup process can take to delete a batch of tags.
+- `container_registry_cleanup_tags_service_max_list_size`. The maximum number of tags that can be deleted in a single execution. Additional tags must be deleted in another execution.
+   We recommend starting with a low number, like `100`, and increasing it after monitoring that container images are properly deleted.
+   
+For self-managed instances, those settings can be updated in the [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session):
+
+  ```ruby
+  ApplicationSetting.last.update(container_registry_expiration_policies_worker_capacity: 3)
+  ```
+
+Alternatively, once the limits are [enabled](#enable-or-disable-cleanup-policy-limits), they are available in the [admin area](../../admin_area/index.md) **Settings > CI/CD > Container Registry**.
+
+#### Enable or disable cleanup policy limits
+
+The cleanup policies limits are under development and not ready for production use. They are
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:container_registry_expiration_policies_throttling)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:container_registry_expiration_policies_throttling)
+```
 
 ### Use the cleanup policy API
 
@@ -600,7 +655,7 @@ If you see the following message:
 
 Check the regex patterns to ensure they are valid.
 
-You can use [Rubular](https://rubular.com/) to check your regex.
+GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular expressions in the cleanup policy. You can test them with the [regex101 regex tester](https://regex101.com/).
 View some common [regex pattern examples](#regex-pattern-examples).
 
 ## Use the Container Registry to store Helm Charts
@@ -644,7 +699,7 @@ project or branch name. Special characters can include:
 - Leading underscore
 - Trailing hyphen/dash
 
-To get around this, you can [change the group path](../../group/index.md#changing-a-groups-path),
+To get around this, you can [change the group path](../../group/index.md#change-a-groups-path),
 [change the project path](../../project/settings/index.md#renaming-a-repository) or change the branch
 name.
 
@@ -662,6 +717,23 @@ When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/c
 For example, you may have two individual images, one for `amd64` and another for `arm64v8`, and you want to build a multi-arch image with them. The `amd64` and `arm64v8` images must be pushed to the same repository where you want to push the multi-arch image.
 
 As a workaround, you should include the architecture in the tag name of individual images. For example, use `mygroup/myapp:1.0.0-amd64` instead of using sub repositories, like `mygroup/myapp/amd64:1.0.0`. You can then tag the manifest list with `mygroup/myapp:1.0.0`.
+
+### The cleanup policy doesn't delete any tags
+
+In GitLab 13.6 and earlier, when you run the cleanup policy,
+you may expect it to delete tags and it does not.
+
+This issue occurs when the cleanup policy was saved without
+editing the value in the **Remove tags matching** field.
+
+This field had a grayed out `.*` value as a placeholder.
+Unless `.*` (or other regex pattern) was entered explicitly into the
+field, a `nil` value was submitted. This value prevents the
+saved cleanup policy from matching any tags.
+
+As a workaround, edit the cleanup policy. In the **Remove tags matching**
+field, enter `.*` and save. This value indicates that all tags should
+be removed.
 
 ### Troubleshoot as a GitLab server admin
 

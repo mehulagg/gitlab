@@ -41,30 +41,51 @@ RSpec.describe MergeRequestsFinder do
         expect(merge_requests).to contain_exactly(merge_request1)
       end
 
-      it 'filters by nonexistent author ID and MR term using CTE for search' do
-        params = {
-          author_id: 'does-not-exist',
-          search: 'git',
-          attempt_group_search_optimizations: true
-        }
+      context 'filtering by author' do
+        subject(:merge_requests) { described_class.new(user, params).execute }
 
-        merge_requests = described_class.new(user, params).execute
+        context 'using OR' do
+          let(:params) { { or: { author_username: [merge_request1.author.username, merge_request2.author.username] } } }
 
-        expect(merge_requests).to be_empty
-      end
+          before do
+            merge_request1.update!(author: create(:user))
+            merge_request2.update!(author: create(:user))
+          end
 
-      context 'filtering by not author ID' do
-        let(:params) { { not: { author_id: user2.id } } }
+          it 'returns merge requests created by any of the given users' do
+            expect(merge_requests).to contain_exactly(merge_request1, merge_request2)
+          end
 
-        before do
-          merge_request2.update!(author: user2)
-          merge_request3.update!(author: user2)
+          context 'when feature flag is disabled' do
+            before do
+              stub_feature_flags(or_issuable_queries: false)
+            end
+
+            it 'does not add any filter' do
+              expect(merge_requests).to contain_exactly(merge_request1, merge_request2, merge_request3, merge_request4, merge_request5)
+            end
+          end
         end
 
-        it 'returns merge requests not created by that user' do
-          merge_requests = described_class.new(user, params).execute
+        context 'with nonexistent author ID and MR term using CTE for search' do
+          let(:params) { { author_id: 'does-not-exist', search: 'git', attempt_group_search_optimizations: true } }
 
-          expect(merge_requests).to contain_exactly(merge_request1, merge_request4, merge_request5)
+          it 'returns no results' do
+            expect(merge_requests).to be_empty
+          end
+        end
+
+        context 'filtering by not author ID' do
+          let(:params) { { not: { author_id: user2.id } } }
+
+          before do
+            merge_request2.update!(author: user2)
+            merge_request3.update!(author: user2)
+          end
+
+          it 'returns merge requests not created by that user' do
+            expect(merge_requests).to contain_exactly(merge_request1, merge_request4, merge_request5)
+          end
         end
       end
 
@@ -76,13 +97,40 @@ RSpec.describe MergeRequestsFinder do
         expect(merge_requests).to contain_exactly(merge_request3, merge_request4)
       end
 
-      it 'filters by commit sha' do
-        merge_requests = described_class.new(
-          user,
-          commit_sha: merge_request5.merge_request_diff.last_commit_sha
-        ).execute
+      context 'filters by commit sha' do
+        subject(:merge_requests) { described_class.new(user, commit_sha: commit_sha).execute }
 
-        expect(merge_requests).to contain_exactly(merge_request5)
+        context 'when commit belongs to the merge request' do
+          let(:commit_sha) { merge_request5.merge_request_diff.last_commit_sha }
+
+          it 'filters by commit sha' do
+            is_expected.to contain_exactly(merge_request5)
+          end
+        end
+
+        context 'when commit is a squash commit' do
+          before do
+            merge_request4.update!(squash_commit_sha: commit_sha)
+          end
+
+          let(:commit_sha) { '1234abcd' }
+
+          it 'filters by commit sha' do
+            is_expected.to contain_exactly(merge_request4)
+          end
+        end
+
+        context 'when commit is a merge commit' do
+          before do
+            merge_request4.update!(merge_commit_sha: commit_sha)
+          end
+
+          let(:commit_sha) { '1234dcba' }
+
+          it 'filters by commit sha' do
+            is_expected.to contain_exactly(merge_request4)
+          end
+        end
       end
 
       context 'filters by merged_at date' do
@@ -697,10 +745,18 @@ RSpec.describe MergeRequestsFinder do
     context 'with admin user' do
       let(:user) { create(:user, :admin) }
 
-      it 'returns all merge requests' do
-        expect(merge_requests).to eq(
-          [mr_internal_private_repo_access, mr_private_repo_access, mr_internal, mr_private, mr_public]
-        )
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'returns all merge requests' do
+          expect(merge_requests).to contain_exactly(
+            mr_internal_private_repo_access, mr_private_repo_access, mr_internal, mr_private, mr_public
+          )
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'returns public and internal merge requests' do
+          expect(merge_requests).to contain_exactly(mr_internal, mr_public)
+        end
       end
     end
 

@@ -161,7 +161,6 @@ module API
 
       def self.services
         {
-          'alerts' => [],
           'asana' => [
             {
               required: true,
@@ -636,7 +635,7 @@ module API
               required: true,
               name: :google_iap_audience_client_id,
               type: String,
-              desc: 'Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'
+              desc: 'Client ID of the IAP-secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'
             },
             {
               required: true,
@@ -807,7 +806,6 @@ module API
 
       def self.service_classes
         [
-          ::AlertsService,
           ::AsanaService,
           ::AssemblaService,
           ::BambooService,
@@ -847,7 +845,6 @@ module API
       def self.development_service_classes
         [
           ::MockCiService,
-          ::MockDeploymentService,
           ::MockMonitoringService
         ]
       end

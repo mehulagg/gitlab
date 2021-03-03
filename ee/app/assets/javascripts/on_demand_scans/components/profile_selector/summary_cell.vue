@@ -17,8 +17,8 @@ export default {
 <template>
   <div class="col-md-6">
     <div class="row gl-my-2">
-      <div class="col-md-3">{{ label }}:</div>
-      <div class="col-md-9">
+      <div class="col-md-4">{{ label }}:</div>
+      <div class="col-md-8">
         <strong>{{ value }}</strong>
       </div>
     </div>

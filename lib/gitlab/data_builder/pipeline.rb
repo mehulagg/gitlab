@@ -13,7 +13,7 @@ module Gitlab
           user: pipeline.user.try(:hook_attrs),
           project: pipeline.project.hook_attrs(backward: false),
           commit: pipeline.commit.try(:hook_attrs),
-          builds: pipeline.builds.map(&method(:build_hook_attrs))
+          builds: pipeline.builds.latest.map(&method(:build_hook_attrs))
         }
       end
 
@@ -67,7 +67,8 @@ module Gitlab
           artifacts_file: {
             filename: build.artifacts_file&.filename,
             size: build.artifacts_size
-          }
+          },
+          environment: environment_hook_attrs(build)
         }
       end
 
@@ -76,7 +77,17 @@ module Gitlab
           id: runner.id,
           description: runner.description,
           active: runner.active?,
-          is_shared: runner.instance_type?
+          is_shared: runner.instance_type?,
+          tags: runner.tags&.map(&:name)
+        }
+      end
+
+      def environment_hook_attrs(build)
+        return unless build.has_environment?
+
+        {
+          name: build.expanded_environment_name,
+          action: build.environment_action
         }
       end
     end

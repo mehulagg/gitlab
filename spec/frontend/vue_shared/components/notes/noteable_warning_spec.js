@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import NoteableWarning from '~/vue_shared/components/notes/noteable_warning.vue';
 
 describe('Issue Warning Component', () => {
@@ -10,7 +10,7 @@ describe('Issue Warning Component', () => {
   const findConfidentialBlock = (w = wrapper) => w.find({ ref: 'confidential' });
   const findLockedAndConfidentialBlock = (w = wrapper) => w.find({ ref: 'lockedAndConfidential' });
 
-  const createComponent = props =>
+  const createComponent = (props) =>
     shallowMount(NoteableWarning, {
       propsData: {
         ...props,

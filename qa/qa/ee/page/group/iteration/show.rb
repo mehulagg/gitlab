@@ -6,7 +6,7 @@ module QA
       module Group
         module Iteration
           class Show < QA::Page::Base
-            view 'ee/app/assets/javascripts/iterations/components/iteration_report_tabs.vue' do
+            view 'ee/app/assets/javascripts/iterations/components/iteration_report_issues.vue' do
               element :iteration_issues_container, required: true
               element :iteration_issue_link
             end

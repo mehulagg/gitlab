@@ -1,7 +1,7 @@
 <script>
 import { GlBanner } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
 import Tracking from '~/tracking';
 
 const trackingMixin = Tracking.mixin();
@@ -57,7 +57,7 @@ export default {
         .post(this.calloutsPath, {
           feature_name: this.calloutsFeatureId,
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line @gitlab/require-i18n-strings, no-console
           console.error('Failed to dismiss banner.', e);
         });

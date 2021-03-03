@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::GitAccess do
   include TermsHelper
   include GitHelpers
+  include AdminModeHelper
 
   let(:user) { create(:user) }
 
@@ -387,108 +388,6 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
-  describe '#check_otp_session!' do
-    let_it_be(:user) { create(:user, :two_factor_via_otp)}
-    let_it_be(:key) { create(:key, user: user) }
-    let_it_be(:actor) { key }
-
-    before do
-      project.add_developer(user)
-      stub_feature_flags(two_factor_for_cli: true)
-    end
-
-    context 'with an OTP session', :clean_gitlab_redis_shared_state do
-      before do
-        Gitlab::Redis::SharedState.with do |redis|
-          redis.set("#{Gitlab::Auth::Otp::SessionEnforcer::OTP_SESSIONS_NAMESPACE}:#{key.id}", true)
-        end
-      end
-
-      it 'allows push and pull access' do
-        aggregate_failures do
-          expect { push_access_check }.not_to raise_error
-          expect { pull_access_check }.not_to raise_error
-        end
-      end
-    end
-
-    context 'without OTP session' do
-      it 'does not allow push or pull access' do
-        user = 'jane.doe'
-        host = 'fridge.ssh'
-        port = 42
-
-        stub_config(
-          gitlab_shell: {
-            ssh_user: user,
-            ssh_host: host,
-            ssh_port: port
-          }
-        )
-
-        error_message = "OTP verification is required to access the repository.\n\n"\
-                        "   Use: ssh #{user}@#{host} -p #{port} 2fa_verify"
-
-        aggregate_failures do
-          expect { push_access_check }.to raise_forbidden(error_message)
-          expect { pull_access_check }.to raise_forbidden(error_message)
-        end
-      end
-
-      context 'when protocol is HTTP' do
-        let(:protocol) { 'http' }
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-
-      context 'when actor is not an SSH key' do
-        let(:deploy_key) { create(:deploy_key, user: user) }
-        let(:actor) { deploy_key }
-
-        before do
-          deploy_key.deploy_keys_projects.create(project: project, can_push: true)
-        end
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-
-      context 'when 2FA is not enabled for the user' do
-        let(:user) { create(:user)}
-        let(:actor) { create(:key, user: user) }
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-
-      context 'when feature flag is disabled' do
-        before do
-          stub_feature_flags(two_factor_for_cli: false)
-        end
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-    end
-  end
-
   describe '#check_db_accessibility!' do
     context 'when in a read-only GitLab instance' do
       before do
@@ -769,19 +668,39 @@ RSpec.describe Gitlab::GitAccess do
       describe 'admin user' do
         let(:user) { create(:admin) }
 
-        context 'when member of the project' do
-          before do
-            project.add_reporter(user)
+        context 'when admin mode enabled', :enable_admin_mode do
+          context 'when member of the project' do
+            before do
+              project.add_reporter(user)
+            end
+
+            context 'pull code' do
+              it { expect { pull_access_check }.not_to raise_error }
+            end
           end
 
-          context 'pull code' do
-            it { expect { pull_access_check }.not_to raise_error }
+          context 'when is not member of the project' do
+            context 'pull code' do
+              it { expect { pull_access_check }.to raise_forbidden(described_class::ERROR_MESSAGES[:download]) }
+            end
           end
         end
 
-        context 'when is not member of the project' do
-          context 'pull code' do
-            it { expect { pull_access_check }.to raise_forbidden(described_class::ERROR_MESSAGES[:download]) }
+        context 'when admin mode disabled' do
+          context 'when member of the project' do
+            before do
+              project.add_reporter(user)
+            end
+
+            context 'pull code' do
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+          end
+
+          context 'when is not member of the project' do
+            context 'pull code' do
+              it { expect { pull_access_check }.to raise_not_found }
+            end
           end
         end
       end
@@ -870,8 +789,13 @@ RSpec.describe Gitlab::GitAccess do
         # Expectations are given a custom failure message proc so that it's
         # easier to identify which check(s) failed.
         it "has the correct permissions for #{role}s" do
-          if role == :admin
+          if role == :admin_without_admin_mode
+            skip("All admins are allowed to perform actions https://gitlab.com/gitlab-org/gitlab/-/issues/296509")
+          end
+
+          if [:admin_with_admin_mode, :admin_without_admin_mode].include?(role)
             user.update_attribute(:admin, true)
+            enable_admin_mode!(user) if role == :admin_with_admin_mode
             project.add_guest(user)
           else
             project.add_role(user, role)
@@ -897,7 +821,7 @@ RSpec.describe Gitlab::GitAccess do
     end
 
     permissions_matrix = {
-      admin: {
+      admin_with_admin_mode: {
         any: true,
         push_new_branch: true,
         push_master: true,
@@ -907,6 +831,18 @@ RSpec.describe Gitlab::GitAccess do
         push_new_tag: true,
         push_all: true,
         merge_into_protected_branch: true
+      },
+
+      admin_without_admin_mode: {
+        any: false,
+        push_new_branch: false,
+        push_master: false,
+        push_protected_branch: false,
+        push_remove_protected_branch: false,
+        push_tag: false,
+        push_new_tag: false,
+        push_all: false,
+        merge_into_protected_branch: false
       },
 
       maintainer: {
@@ -1009,7 +945,7 @@ RSpec.describe Gitlab::GitAccess do
 
         run_permission_checks(permissions_matrix.deep_merge(developer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false },
                                                             maintainer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false },
-                                                            admin: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false }))
+                                                            admin_with_admin_mode: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false }))
       end
     end
 

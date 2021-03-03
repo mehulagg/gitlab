@@ -37,12 +37,12 @@ module API
             get 'dist-tags', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
               package_name = params[:package_name]
 
-              bad_request!('Package Name') if package_name.blank?
+              bad_request_missing_attribute!('Package Name') if package_name.blank?
 
               authorize_read_package!(project)
 
-              packages = ::Packages::Npm::PackageFinder.new(project, package_name)
-                                                      .execute
+              packages = ::Packages::Npm::PackageFinder.new(package_name, project: project)
+                                                       .execute
 
               not_found! if packages.empty?
 
@@ -62,15 +62,14 @@ module API
                 version = env['api.request.body']
                 tag = params[:tag]
 
-                bad_request!('Package Name') if package_name.blank?
-                bad_request!('Version') if version.blank?
-                bad_request!('Tag') if tag.blank?
+                bad_request_missing_attribute!('Package Name') if package_name.blank?
+                bad_request_missing_attribute!('Version') if version.blank?
+                bad_request_missing_attribute!('Tag') if tag.blank?
 
                 authorize_create_package!(project)
 
-                package = ::Packages::Npm::PackageFinder
-                  .new(project, package_name)
-                  .find_by_version(version)
+                package = ::Packages::Npm::PackageFinder.new(package_name, project: project)
+                                                        .find_by_version(version)
                 not_found!('Package') unless package
 
                 ::Packages::Npm::CreateTagService.new(package, tag).execute
@@ -85,8 +84,8 @@ module API
                 package_name = params[:package_name]
                 tag = params[:tag]
 
-                bad_request!('Package Name') if package_name.blank?
-                bad_request!('Tag') if tag.blank?
+                bad_request_missing_attribute!('Package Name') if package_name.blank?
+                bad_request_missing_attribute!('Tag') if tag.blank?
 
                 authorize_destroy_package!(project)
 
@@ -112,9 +111,8 @@ module API
           route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
           get '*package_name', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
             package_name = params[:package_name]
-
-            packages = ::Packages::Npm::PackageFinder.new(project_or_nil, package_name)
-                                                    .execute
+            packages = ::Packages::Npm::PackageFinder.new(package_name, project: project_or_nil)
+                                                     .execute
 
             redirect_request = project_or_nil.blank? || packages.empty?
 

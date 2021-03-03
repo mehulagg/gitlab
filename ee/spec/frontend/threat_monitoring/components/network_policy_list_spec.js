@@ -4,15 +4,12 @@ import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_li
 import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 import createStore from 'ee/threat_monitoring/store';
-import { useFakeDate } from 'helpers/fake_date';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mockPoliciesResponse } from '../mock_data';
 
-const mockData = mockPoliciesResponse.map(policy => convertObjectPropsToCamelCase(policy));
+const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
 
 describe('NetworkPolicyList component', () => {
-  useFakeDate();
-
   let store;
   let wrapper;
 
@@ -129,9 +126,7 @@ spec:
     });
 
     it('renders policies table', () => {
-      const namespaceHeader = findPoliciesTable()
-        .findAll('[role="columnheader"]')
-        .at(1);
+      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(1);
       expect(namespaceHeader.text()).toBe('Namespace');
     });
   });
@@ -143,9 +138,7 @@ spec:
   });
 
   it('renders opened editor drawer on row selection', () => {
-    findPoliciesTable()
-      .find('td')
-      .trigger('click');
+    findPoliciesTable().find('td').trigger('click');
 
     return wrapper.vm.$nextTick().then(() => {
       const editorDrawer = findEditorDrawer();

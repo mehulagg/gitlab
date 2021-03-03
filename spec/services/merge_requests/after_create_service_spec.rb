@@ -27,6 +27,14 @@ RSpec.describe MergeRequests::AfterCreateService do
       execute_service
     end
 
+    it 'calls the merge request activity counter' do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_create_mr_action)
+        .with(user: merge_request.author)
+
+      execute_service
+    end
+
     it 'creates a new merge request notification' do
       expect(notification_service)
         .to receive(:new_merge_request).with(merge_request, merge_request.author)
@@ -56,11 +64,8 @@ RSpec.describe MergeRequests::AfterCreateService do
       execute_service
     end
 
-    it 'records a namespace onboarding progress action' do
-      expect(NamespaceOnboardingAction).to receive(:create_action)
-        .with(merge_request.target_project.namespace, :merge_request_created).and_call_original
-
-      expect { execute_service }.to change(NamespaceOnboardingAction, :count).by(1)
+    it_behaves_like 'records an onboarding progress action', :merge_request_created do
+      let(:namespace) { merge_request.target_project.namespace }
     end
   end
 end

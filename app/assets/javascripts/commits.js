@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { n__ } from '~/locale';
+import axios from './lib/utils/axios_utils';
 import { localTimeAgo } from './lib/utils/datetime_utility';
 import Pager from './pager';
-import axios from './lib/utils/axios_utils';
 
 export default class CommitsList {
   constructor(limit = 0) {
@@ -85,10 +85,7 @@ export default class CommitsList {
 
       // Update commits count in the previous commits header.
       commitsCount += Number(
-        $(processedData)
-          .nextUntil('li.js-commit-header')
-          .first()
-          .find('li.commit').length,
+        $(processedData).nextUntil('li.js-commit-header').first().find('li.commit').length,
       );
 
       $commitsHeadersLast

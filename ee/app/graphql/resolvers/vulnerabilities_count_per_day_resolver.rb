@@ -5,10 +5,10 @@ module Resolvers
     type Types::VulnerabilitiesCountByDayType, null: true
 
     argument :start_date, GraphQL::Types::ISO8601Date, required: true,
-              description: 'First day for which to fetch vulnerability history'
+              description: 'First day for which to fetch vulnerability history.'
 
     argument :end_date, GraphQL::Types::ISO8601Date, required: true,
-              description: 'Last day for which to fetch vulnerability history'
+              description: 'Last day for which to fetch vulnerability history.'
 
     def resolve(**args)
       return [] unless vulnerable
@@ -25,7 +25,7 @@ module Resolvers
     private
 
     def generate_missing_dates(calendar_entries, start_date, end_date)
-      severities = ::Vulnerabilities::Finding::SEVERITY_LEVELS.keys
+      severities = ::Enums::Vulnerability.severity_levels.keys
       (start_date..end_date)
         .each_with_object({}) { |date, result| result[date] = build_calendar_entry(date, calendar_entries[date], result[date - 1.day]) }
         .values

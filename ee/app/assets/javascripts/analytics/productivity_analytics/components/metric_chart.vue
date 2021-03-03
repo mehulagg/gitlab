@@ -1,8 +1,8 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlAlert, GlIcon } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { isEmpty } from 'lodash';
 import httpStatusCodes from '~/lib/utils/http_status';
+import { s__ } from '~/locale';
 
 export default {
   name: 'MetricChart',
@@ -55,7 +55,7 @@ export default {
       return this.metricTypes.length;
     },
     metricDropdownLabel() {
-      const foundMetric = this.metricTypes.find(m => m.key === this.selectedMetric);
+      const foundMetric = this.metricTypes.find((m) => m.key === this.selectedMetric);
       return foundMetric ? foundMetric.label : s__('MetricChart|Please select a metric');
     },
     isServerError() {

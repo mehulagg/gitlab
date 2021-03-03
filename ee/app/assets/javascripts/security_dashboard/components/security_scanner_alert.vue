@@ -9,6 +9,7 @@ export default {
     GlLink,
     GlSprintf,
   },
+  inject: ['notEnabledScannersHelpPath', 'noPipelineRunScannersHelpPath'],
   props: {
     notEnabledScanners: {
       type: Array,
@@ -19,7 +20,6 @@ export default {
       required: true,
     },
   },
-  inject: ['notEnabledScannersHelpPath', 'noPipelineRunScannersHelpPath'],
   computed: {
     alertMessages() {
       return [

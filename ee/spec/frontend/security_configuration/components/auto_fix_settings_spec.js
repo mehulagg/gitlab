@@ -55,10 +55,7 @@ describe('Auto-fix Settings', () => {
   const findCheckbox = () => wrapper.find('input[type="checkbox"]');
   const findFooter = () => wrapper.find('footer');
   const findFooterLinks = () => findFooter().findAll('a');
-  const getFooterTextContent = () =>
-    findFooter()
-      .text()
-      .trim();
+  const getFooterTextContent = () => findFooter().text().trim();
 
   const expectCheckboxDisabled = () => expect(findCheckbox().attributes().disabled).toBeTruthy();
 

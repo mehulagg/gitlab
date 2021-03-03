@@ -100,15 +100,11 @@ describe('Approvals ModalRuleCreate', () => {
     });
   });
 
-  describe('with approvalSuggestions feature flag', () => {
+  describe('with approval suggestions', () => {
     beforeEach(() => {
       createModalState.data = { ...TEST_RULE, defaultRuleName: 'Vulnerability-Check' };
 
-      factory({
-        provide: {
-          glFeatures: { approvalSuggestions: true },
-        },
-      });
+      factory();
       modal = findModal();
       form = findForm();
     });

@@ -6,7 +6,7 @@ module Security
   #
   class ScannedResourcesService
     # @param [Ci::Pipeline] pipeline
-    # @param Array[Symbol] report_types Summary report types. Valid values are members of Vulnerabilities::Finding::REPORT_TYPES
+    # @param Array[Symbol] report_types Summary report types. Valid values are members of Enums::Vulnerability.report_types
     # @param [Int] The maximum number of scanned resources to return
     def initialize(pipeline, report_types, limit = nil)
       @pipeline = pipeline

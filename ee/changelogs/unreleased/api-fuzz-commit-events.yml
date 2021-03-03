@@ -1,5 +1,0 @@
----
-title: Only run fuzzing on commit events, not all events
-merge_request: 48264
-author:
-type: changed

@@ -20,7 +20,9 @@ module Geo
     end
 
     def max_capacity
-      current_node.files_max_capacity
+      # Transition-period-solution.
+      # Explained in https://gitlab.com/gitlab-org/gitlab/-/issues/213872#note_336828581
+      [current_node.files_max_capacity / 2, 1].max
     end
 
     def schedule_job(object_type, object_db_id)

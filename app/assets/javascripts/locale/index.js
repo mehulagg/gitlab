@@ -11,7 +11,7 @@ delete window.translations;
   @param text The text to be translated
   @returns {String} The translated text
 */
-const gettext = text => locale.gettext(ensureSingleLine(text));
+const gettext = (text) => locale.gettext(ensureSingleLine(text));
 
 /**
   Translate the text with a number
@@ -56,7 +56,26 @@ const pgettext = (keyOrContext, key) => {
   @param formatOptions for available options, please see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
   @returns {Intl.DateTimeFormat}
 */
-const createDateTimeFormat = formatOptions => Intl.DateTimeFormat(languageCode(), formatOptions);
+const createDateTimeFormat = (formatOptions) => Intl.DateTimeFormat(languageCode(), formatOptions);
+
+/**
+ * Formats a number as a string using `toLocaleString`.
+ *
+ * @param {Number} value - number to be converted
+ * @param {options?} options - options to be passed to
+ * `toLocaleString` such as `unit` and `style`.
+ * @param {langCode?} langCode - If set, forces a different
+ * language code from the one currently in the document.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+ *
+ * @returns If value is a number, the formatted value as a string
+ */
+function formatNumber(value, options = {}, langCode = languageCode()) {
+  if (typeof value !== 'number' && typeof value !== 'bigint') {
+    return value;
+  }
+  return value.toLocaleString(langCode, options);
+}
 
 export { languageCode };
 export { gettext as __ };
@@ -64,4 +83,5 @@ export { ngettext as n__ };
 export { pgettext as s__ };
 export { sprintf };
 export { createDateTimeFormat };
+export { formatNumber };
 export default locale;

@@ -9,12 +9,14 @@ RSpec.describe 'User manages merge trains option', :js do
   before do
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
 
+    project.update!(merge_pipelines_enabled: true)
     project.add_maintainer(user)
     sign_in(user)
   end
 
   it 'sees unchecked merge trains checkbox' do
     visit edit_project_path(project)
+    wait_for_requests
 
     expect(page.find('#project_merge_trains_enabled')).not_to be_checked
   end
@@ -22,6 +24,7 @@ RSpec.describe 'User manages merge trains option', :js do
   context 'when user enabled the checkbox' do
     before do
       visit edit_project_path(project)
+      wait_for_requests
 
       check('Enable merge trains.')
     end

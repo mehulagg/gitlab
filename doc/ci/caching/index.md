@@ -87,7 +87,7 @@ use one or more of the following:
   that are only available to a particular project.
 - [Use a `key`](../yaml/README.md#cachekey) that fits your workflow (for example,
   different caches on each branch). For that, you can take advantage of the
-  [CI/CD predefined variables](../variables/README.md#predefined-environment-variables).
+  [predefined CI/CD variables](../variables/README.md#predefined-cicd-variables).
 
 For runners to work with caches efficiently, you must do one of the following:
 
@@ -314,6 +314,37 @@ before_script:
 rspec:
   script:
     - rspec spec
+```
+
+If you have jobs that each need a different selection of gems, use the `prefix`
+keyword in the global `cache` definition. This configuration generates a different
+cache for each job.
+
+For example, a testing job might not need the same gems as a job that deploys to
+production:
+
+```yaml
+cache:
+  key:
+    files:
+      - Gemfile.lock
+    prefix: ${CI_JOB_NAME}
+  paths:
+    - vendor/ruby
+
+test_job:
+  stage: test
+  before_script:
+    - bundle install --without production --path vendor/ruby
+  script:
+    - bundle exec rspec
+
+deploy_job:
+  stage: production
+  before_script:
+    - bundle install --without test --path vendor/ruby
+  script:
+    - bundle exec deploy
 ```
 
 ### Caching Go dependencies

@@ -1,9 +1,15 @@
-import axios from './lib/utils/axios_utils';
-import { joinPaths } from './lib/utils/url_utility';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
+import axios from './lib/utils/axios_utils';
+import { joinPaths } from './lib/utils/url_utility';
 
 const DEFAULT_PER_PAGE = 20;
+
+/**
+ * Slow deprecation Notice: Please rather use for new calls
+ * or during refactors /rest_api as this is doing named exports
+ * which support treeshaking
+ */
 
 const Api = {
   DEFAULT_PER_PAGE,
@@ -13,16 +19,19 @@ const Api = {
   groupMilestonesPath: '/api/:version/groups/:id/milestones',
   subgroupsPath: '/api/:version/groups/:id/subgroups',
   namespacesPath: '/api/:version/namespaces.json',
+  groupInvitationsPath: '/api/:version/groups/:id/invitations',
   groupPackagesPath: '/api/:version/groups/:id/packages',
   projectPackagesPath: '/api/:version/projects/:id/packages',
   projectPackagePath: '/api/:version/projects/:id/packages/:package_id',
   groupProjectsPath: '/api/:version/groups/:id/projects.json',
+  groupSharePath: '/api/:version/groups/:id/share',
   projectsPath: '/api/:version/projects.json',
   projectPath: '/api/:version/projects/:id',
   forkedProjectsPath: '/api/:version/projects/:id/forks',
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
   projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
+  projectInvitationsPath: '/api/:version/projects/:id/invitations',
   projectMembersPath: '/api/:version/projects/:id/members',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
   projectMergeRequestPath: '/api/:version/projects/:id/merge_requests/:mrid',
@@ -31,6 +40,7 @@ const Api = {
   projectRunnersPath: '/api/:version/projects/:id/runners',
   projectProtectedBranchesPath: '/api/:version/projects/:id/protected_branches',
   projectSearchPath: '/api/:version/projects/:id/search',
+  projectSharePath: '/api/:version/projects/:id/share',
   projectMilestonesPath: '/api/:version/projects/:id/milestones',
   projectIssuePath: '/api/:version/projects/:id/issues/:issue_iid',
   mergeRequestsPath: '/api/:version/merge_requests',
@@ -73,8 +83,10 @@ const Api = {
   usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
-  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
   containerRegistryDetailsPath: '/api/:version/registry/repositories/:id/',
+  projectNotificationSettingsPath: '/api/:version/projects/:id/notification_settings',
+  groupNotificationSettingsPath: '/api/:version/groups/:id/notification_settings',
+  notificationSettingsPath: '/api/:version/notification_settings',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -127,8 +139,14 @@ const Api = {
     });
   },
 
-  inviteGroupMember(id, data) {
+  addGroupMembersByUserId(id, data) {
     const url = Api.buildUrl(this.groupMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
+  },
+
+  inviteGroupMembersByEmail(id, data) {
+    const url = Api.buildUrl(this.groupInvitationsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
   },
@@ -144,7 +162,10 @@ const Api = {
     });
   },
 
-  // Return groups list. Filtered by query
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getGroups` method in `~/rest_api` instead.
+   */
   groups(query, options, callback = () => {}) {
     const url = Api.buildUrl(Api.groupsPath);
     return axios
@@ -162,9 +183,9 @@ const Api = {
       });
   },
 
-  groupLabels(namespace) {
+  groupLabels(namespace, options = {}) {
     const url = Api.buildUrl(Api.groupLabelsPath).replace(':namespace_path', namespace);
-    return axios.get(url).then(({ data }) => data);
+    return axios.get(url, options).then(({ data }) => data);
   },
 
   // Return namespaces list. Filtered by query
@@ -180,7 +201,10 @@ const Api = {
       .then(({ data }) => callback(data));
   },
 
-  // Return projects list. Filtered by query
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getProjects` method in `~/rest_api` instead.
+   */
   projects(query, options, callback = () => {}) {
     const url = Api.buildUrl(Api.projectsPath);
     const defaults = {
@@ -217,8 +241,14 @@ const Api = {
       .then(({ data }) => data);
   },
 
-  inviteProjectMembers(id, data) {
+  addProjectMembersByUserId(id, data) {
     const url = Api.buildUrl(this.projectMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
+  },
+
+  inviteProjectMembersByEmail(id, data) {
+    const url = Api.buildUrl(this.projectInvitationsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
   },
@@ -337,6 +367,16 @@ const Api = {
     });
   },
 
+  projectShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.projectSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
+  },
+
   projectMilestones(id, params = {}) {
     const url = Api.buildUrl(Api.projectMilestonesPath).replace(':id', encodeURIComponent(id));
 
@@ -374,8 +414,8 @@ const Api = {
       .post(url, {
         label: data,
       })
-      .then(res => callback(res.data))
-      .catch(e => callback(e.response.data));
+      .then((res) => callback(res.data))
+      .catch((e) => callback(e.response.data));
   },
 
   // Return group projects list. Filtered by query
@@ -389,8 +429,23 @@ const Api = {
       .get(url, {
         params: { ...defaults, ...options },
       })
-      .then(({ data }) => callback(data))
-      .catch(() => flash(__('Something went wrong while fetching projects')));
+      .then(({ data }) => (callback ? callback(data) : data))
+      .catch(() => {
+        flash(__('Something went wrong while fetching projects'));
+        if (callback) {
+          callback();
+        }
+      });
+  },
+
+  groupShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.groupSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
   },
 
   commit(id, sha, params = {}) {
@@ -411,10 +466,11 @@ const Api = {
     });
   },
 
-  applySuggestion(id) {
+  applySuggestion(id, message = '') {
     const url = Api.buildUrl(Api.applySuggestionPath).replace(':id', encodeURIComponent(id));
+    const params = { commit_message: message };
 
-    return axios.put(url);
+    return axios.put(url, params);
   },
 
   applySuggestionBatch(ids) {
@@ -426,7 +482,7 @@ const Api = {
   commitPipelines(projectId, sha) {
     const encodedProjectId = projectId
       .split('/')
-      .map(fragment => encodeURIComponent(fragment))
+      .map((fragment) => encodeURIComponent(fragment))
       .join('/');
 
     const url = Api.buildUrl(Api.commitPipelinesPath)
@@ -450,7 +506,7 @@ const Api = {
       .replace(':type', type)
       .replace(':key', encodeURIComponent(key));
 
-    return axios.get(url, { params: options }).then(res => {
+    return axios.get(url, { params: options }).then((res) => {
       if (callback) callback(res.data);
 
       return res;
@@ -462,7 +518,7 @@ const Api = {
       .replace(':id', encodeURIComponent(id))
       .replace(':type', type);
 
-    return axios.get(url, { params }).then(res => {
+    return axios.get(url, { params }).then((res) => {
       if (callback) callback(res.data);
 
       return res;
@@ -502,6 +558,10 @@ const Api = {
       .replace(':namespace_path', namespacePath);
   },
 
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getUsers` method in `~/rest_api` instead.
+   */
   users(query, options) {
     const url = Api.buildUrl(this.usersPath);
     return axios.get(url, {
@@ -513,6 +573,10 @@ const Api = {
     });
   },
 
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getUser` method in `~/rest_api` instead.
+   */
   user(id, options) {
     const url = Api.buildUrl(this.userPath).replace(':id', encodeURIComponent(id));
     return axios.get(url, {
@@ -520,11 +584,19 @@ const Api = {
     });
   },
 
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getUserCounts` method in `~/rest_api` instead.
+   */
   userCounts() {
     const url = Api.buildUrl(this.userCountsPath);
     return axios.get(url);
   },
 
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getUserStatus` method in `~/rest_api` instead.
+   */
   userStatus(id, options) {
     const url = Api.buildUrl(this.userStatusPath).replace(':id', encodeURIComponent(id));
     return axios.get(url, {
@@ -532,6 +604,10 @@ const Api = {
     });
   },
 
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getUserProjects` method in `~/rest_api` instead.
+   */
   userProjects(userId, query, options, callback) {
     const url = Api.buildUrl(Api.userProjectsPath).replace(':id', userId);
     const defaults = {
@@ -567,6 +643,10 @@ const Api = {
     });
   },
 
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `updateUserStatus` method in `~/rest_api` instead.
+   */
   postUserStatus({ emoji, message, availability }) {
     const url = Api.buildUrl(this.userPostStatusPath);
 
@@ -824,24 +904,32 @@ const Api = {
     return axios.delete(url);
   },
 
-  fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
-    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
-    const defaults = {
-      per_page: DEFAULT_PER_PAGE,
-      page: 1,
-    };
+  async updateNotificationSettings(projectId, groupId, data = {}) {
+    let url = Api.buildUrl(this.notificationSettingsPath);
 
-    return axios
-      .get(url, {
-        params: {
-          ...defaults,
-          ...options,
-        },
-      })
-      .then(({ data, headers }) => {
-        callback(data);
-        return { data, headers };
-      });
+    if (projectId) {
+      url = Api.buildUrl(this.projectNotificationSettingsPath).replace(':id', projectId);
+    } else if (groupId) {
+      url = Api.buildUrl(this.groupNotificationSettingsPath).replace(':id', groupId);
+    }
+
+    const result = await axios.put(url, data);
+
+    return result;
+  },
+
+  async getNotificationSettings(projectId, groupId) {
+    let url = Api.buildUrl(this.notificationSettingsPath);
+
+    if (projectId) {
+      url = Api.buildUrl(this.projectNotificationSettingsPath).replace(':id', projectId);
+    } else if (groupId) {
+      url = Api.buildUrl(this.groupNotificationSettingsPath).replace(':id', groupId);
+    }
+
+    const result = await axios.get(url);
+
+    return result;
   },
 };
 

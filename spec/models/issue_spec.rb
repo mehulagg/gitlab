@@ -1244,9 +1244,7 @@ RSpec.describe Issue do
   end
 
   describe '#allows_reviewers?' do
-    it 'returns false as issues do not support reviewers feature' do
-      stub_feature_flags(merge_request_reviewers: true)
-
+    it 'returns false as we do not support reviewers on issues yet' do
       issue = build_stubbed(:issue)
 
       expect(issue.allows_reviewers?).to be(false)
@@ -1258,6 +1256,14 @@ RSpec.describe Issue do
 
     it 'raises error when feature is invalid' do
       expect { issue.issue_type_supports?(:unkown_feature) }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe '#email_participants_downcase' do
+    it 'returns a list of emails with all uppercase letters replaced with their lowercase counterparts' do
+      participant = create(:issue_email_participant, email: 'SomEoNe@ExamPLe.com')
+
+      expect(participant.issue.email_participants_downcase).to match([participant.email.downcase])
     end
   end
 end

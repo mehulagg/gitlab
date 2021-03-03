@@ -28,7 +28,8 @@ GitLab Shell solves this by providing a way to authorize SSH users via a fast,
 indexed lookup in the GitLab database. This page describes how to enable the fast
 lookup of authorized SSH keys.
 
-> **Warning:** OpenSSH version 6.9+ is required because
+WARNING:
+OpenSSH version 6.9+ is required because
 `AuthorizedKeysCommand` must be able to accept a fingerprint. These
 instructions will break installations using older versions of OpenSSH, such as
 those included with CentOS 6 as of September 2017. If you want to use this
@@ -223,5 +224,5 @@ the database. The following instructions can be used to build OpenSSH 7.5:
 GitLab supports `authorized_keys` database lookups with [SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux).
 
 Because the SELinux policy is static, GitLab doesn't support the ability to change
-internal Unicorn ports at the moment. Admins would have to create a special `.te`
+internal Unicorn ports at the moment. Administrators would have to create a special `.te`
 file for the environment, since it isn't generated dynamically.

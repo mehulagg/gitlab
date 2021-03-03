@@ -4,14 +4,14 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Go proxy for GitLab
+# Go proxy for GitLab **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27376) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27376) in GitLab Premium 13.1.
 > - It's deployed behind a feature flag, disabled by default.
 > - It's disabled for GitLab.com.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-the-go-proxy).
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 With the Go proxy for GitLab, every project in GitLab can be fetched with the
 [Go proxy protocol](https://proxy.golang.org/).
@@ -96,7 +96,7 @@ following steps work only if GitLab is configured for HTTPS:
 Create a [personal access token](../../profile/personal_access_tokens.md) with
 the scope set to `api` or `read_api`.
 
-Open your [`~/.netrc`](https://ec.haxx.se/usingcurl/usingcurl-netrc) file
+Open your [`~/.netrc`](https://everything.curl.dev/usingcurl/netrc) file
 and add the following text. Replace the variables in `< >` with your values.
 
 ```plaintext

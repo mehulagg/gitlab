@@ -49,6 +49,14 @@ RSpec.describe DastSiteProfilesFinder do
       end
     end
 
+    context 'filtering by name' do
+      let(:params) { { name: dast_site_profile1.name } }
+
+      it 'returns a single dast_site_profile' do
+        expect(subject).to contain_exactly(dast_site_profile1)
+      end
+    end
+
     context 'when the dast_site_profile1 does not exist' do
       let(:params) { { id: 0 } }
 

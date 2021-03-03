@@ -88,7 +88,7 @@ module EE
 
       tags = {}
       tags[:doc_link_start], tags[:doc_link_end] = tag.a(PLACEHOLDER,
-                                                         href: help_page_path('user/search/advanced_search_syntax.md'),
+                                                         href: help_page_path('user/search/advanced_search'),
                                                          rel: :noopener,
                                                          target: '_blank')
                                                      .split(PLACEHOLDER)
@@ -114,6 +114,20 @@ module EE
 
       # wrap it inside a `div` for testing purposes
       tag.div(message.html_safe, data: { testid: 'es-status-marker', enabled: enabled })
+    end
+
+    override :search_sort_options
+    def search_sort_options
+      options = []
+      if search_service.use_elasticsearch?
+        options << {
+          title: _('Most relevant'),
+          sortable: false,
+          sortParam: 'relevant'
+        }
+      end
+
+      options + super
     end
 
     private

@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/forking_workflow.html'
 ---
 
-# Project forking workflow
+# Project forking workflow **(FREE)**
 
 Whenever possible, it's recommended to work in a common Git repository and use
 [branching strategies](../../../topics/gitlab_flow.md) to manage your work. However,
@@ -32,10 +32,6 @@ Forking a project is, in most cases, a two-step process.
    ![Choose namespace](img/forking_workflow_choose_namespace_v13_2.png)
 
 The fork is created. The permissions you have in the namespace are the permissions you will have in the fork.
-
-WARNING:
-In GitLab 12.6 and later, when project owners [reduce a project's visibility](../../../public_access/public_access.md#reducing-visibility),
-it **removes the relationship** between a project and all its forks.
 
 WARNING:
 When a public project with the repository feature set to "Members

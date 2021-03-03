@@ -1,7 +1,7 @@
 <script>
 import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import { n__ } from '~/locale';
 import { truncate } from '~/lib/utils/text_utility';
+import { n__ } from '~/locale';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 import { COUNT_OF_AVATARS_IN_GUTTER, LENGTH_OF_AVATAR_TOOLTIP } from '../constants';
 
@@ -29,7 +29,7 @@ export default {
       return this.discussions.reduce((acc, note) => acc.concat(note.notes), []);
     },
     notesInGutter() {
-      return this.allDiscussions.slice(0, COUNT_OF_AVATARS_IN_GUTTER).map(n => ({
+      return this.allDiscussions.slice(0, COUNT_OF_AVATARS_IN_GUTTER).map((n) => ({
         note: n.note,
         author: n.author,
       }));

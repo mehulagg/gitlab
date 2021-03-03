@@ -1,4 +1,4 @@
-import { GlButton, GlDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
@@ -9,7 +9,10 @@ localVue.use(Vuex);
 
 describe('Filter component', () => {
   const projectId = 1;
-  const jobs = [{ ref: 'master', name: 'fuzz' }, { ref: 'master', name: 'fuzz 2' }];
+  const jobs = [
+    { ref: 'master', name: 'fuzz' },
+    { ref: 'master', name: 'fuzz 2' },
+  ];
 
   let wrapper;
   let store;
@@ -60,11 +63,11 @@ describe('Filter component', () => {
     it('should render a dropdown button with several items', () => {
       expect(wrapper.find(GlButton).exists()).toBe(false);
       expect(wrapper.find(GlDropdown).exists()).toBe(true);
-      expect(wrapper.findAll(GlDeprecatedDropdownItem).length).toBe(2);
+      expect(wrapper.findAll(GlDropdownItem).length).toBe(2);
     });
 
     it('should render with href set to the correct filepath for every element', () => {
-      const wrapperArray = wrapper.findAll(GlDeprecatedDropdownItem);
+      const wrapperArray = wrapper.findAll(GlDropdownItem);
       wrapperArray.wrappers.forEach((_, index) => {
         const href = `/api/v4/projects/${projectId}/jobs/artifacts/${
           jobs[index].ref

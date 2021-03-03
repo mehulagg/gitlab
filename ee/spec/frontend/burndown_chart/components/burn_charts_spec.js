@@ -5,10 +5,12 @@ import MockAdapter from 'axios-mock-adapter';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import BurndownChart from 'ee/burndown_chart/components/burndown_chart.vue';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
+import OpenTimeboxSummary from 'ee/burndown_chart/components/open_timebox_summary.vue';
+import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_cards.vue';
 import { useFakeDate } from 'helpers/fake_date';
 import { day1, day2, day3, day4 } from '../mock_data';
 
-function fakeDate({ date }) {
+function useFakeDateFromDay({ date }) {
   const [year, month, day] = date.split('-');
 
   useFakeDate(year, month - 1, day);
@@ -18,17 +20,18 @@ describe('burndown_chart', () => {
   let wrapper;
   let mock;
 
-  const findChartsTitle = () => wrapper.find({ ref: 'chartsTitle' });
+  const findFilterLabel = () => wrapper.find({ ref: 'filterLabel' });
   const findIssuesButton = () => wrapper.find({ ref: 'totalIssuesButton' });
   const findWeightButton = () => wrapper.find({ ref: 'totalWeightButton' });
   const findActiveButtons = () =>
-    wrapper.findAll(GlButton).filter(button => button.attributes().category === 'primary');
+    wrapper.findAll(GlButton).filter((button) => button.attributes().category === 'primary');
   const findBurndownChart = () => wrapper.find(BurndownChart);
   const findBurnupChart = () => wrapper.find(BurnupChart);
   const findOldBurndownChartButton = () => wrapper.find({ ref: 'oldBurndown' });
   const findNewBurndownChartButton = () => wrapper.find({ ref: 'newBurndown' });
 
   const defaultProps = {
+    fullPath: 'gitlab-org/subgroup',
     startDate: '2020-08-07',
     dueDate: '2020-09-09',
     openIssuesCount: [],
@@ -36,11 +39,20 @@ describe('burndown_chart', () => {
     burndownEventsPath: '/api/v4/projects/1234/milestones/1/burndown_events',
   };
 
-  const createComponent = ({ props = {}, data = {} } = {}) => {
+  const createComponent = ({ props = {}, data = {}, loading = false } = {}) => {
     wrapper = shallowMount(BurnCharts, {
       propsData: {
         ...defaultProps,
         ...props,
+      },
+      mocks: {
+        $apollo: {
+          queries: {
+            report: {
+              loading,
+            },
+          },
+        },
       },
       data() {
         return data;
@@ -57,6 +69,20 @@ describe('burndown_chart', () => {
     wrapper.destroy();
   });
 
+  it('passes loading=true through to charts', () => {
+    createComponent({ loading: true });
+
+    expect(findBurndownChart().props('loading')).toBe(true);
+    expect(findBurnupChart().props('loading')).toBe(true);
+  });
+
+  it('passes loading=false through to charts', () => {
+    createComponent({ loading: false });
+
+    expect(findBurndownChart().props('loading')).toBe(false);
+    expect(findBurnupChart().props('loading')).toBe(false);
+  });
+
   it('includes Issues and Issue weight buttons', () => {
     createComponent();
 
@@ -68,11 +94,7 @@ describe('burndown_chart', () => {
     createComponent();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issues');
+    expect(findActiveButtons().at(0).text()).toBe('Issues');
     expect(findBurndownChart().props('issuesSelected')).toBe(true);
   });
 
@@ -84,11 +106,7 @@ describe('burndown_chart', () => {
     await wrapper.vm.$nextTick();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issue weight');
+    expect(findActiveButtons().at(0).text()).toBe('Issue weight');
     expect(findBurndownChart().props('issuesSelected')).toBe(false);
   });
 
@@ -101,7 +119,7 @@ describe('burndown_chart', () => {
   it('sets section title and chart title correctly', () => {
     createComponent();
 
-    expect(findChartsTitle().text()).toBe('Charts');
+    expect(findFilterLabel().text()).toBe('Filter by');
     expect(findBurndownChart().props().showTitle).toBe(true);
   });
 
@@ -115,10 +133,49 @@ describe('burndown_chart', () => {
     expect(findBurnupChart().props('issuesSelected')).toBe(false);
   });
 
+  it('renders IterationReportSummaryOpen for open iteration', () => {
+    createComponent({
+      data: {
+        report: {
+          stats: {},
+        },
+      },
+      props: {
+        iterationState: 'open',
+        iterationId: 'gid://gitlab/Iteration/11',
+      },
+    });
+
+    expect(wrapper.find(OpenTimeboxSummary).props()).toEqual({
+      iterationId: 'gid://gitlab/Iteration/11',
+      displayValue: 'count',
+      namespaceType: 'group',
+      fullPath: defaultProps.fullPath,
+    });
+  });
+
+  it('renders TimeboxSummaryCards for closed iterations', () => {
+    createComponent({
+      data: {
+        report: {
+          stats: {},
+        },
+      },
+      props: {
+        iterationState: 'closed',
+        iterationId: 'gid://gitlab/Iteration/1',
+      },
+    });
+
+    expect(wrapper.find(TimeboxSummaryCards).exists()).toBe(true);
+  });
+
   it('uses burndown data computed from burnup data', () => {
     createComponent({
       data: {
-        burnupData: [day1],
+        report: {
+          burnupData: [day1],
+        },
       },
     });
     const { openIssuesCount, openIssuesWeight } = findBurndownChart().props();
@@ -158,12 +215,12 @@ describe('burndown_chart', () => {
 
   // some separate tests for the update function since it has a bunch of logic
   describe('padSparseBurnupData function', () => {
+    useFakeDateFromDay(day4);
+
     beforeEach(() => {
       createComponent({
         props: { startDate: day1.date, dueDate: day4.date },
       });
-
-      fakeDate(day4);
     });
 
     it('pads data from startDate if no startDate values', () => {
@@ -193,15 +250,18 @@ describe('burndown_chart', () => {
       });
     });
 
-    it('if dueDate is in the future, pad data up to current date using last existing value', () => {
-      fakeDate(day3);
+    describe('when dueDate is in the future', () => {
+      // day3 is before the day4 we set to dueDate in the beforeEach
+      useFakeDateFromDay(day3);
 
-      const result = wrapper.vm.padSparseBurnupData([day1, day2]);
+      it('pad data up to current date using last existing value', () => {
+        const result = wrapper.vm.padSparseBurnupData([day1, day2]);
 
-      expect(result.length).toBe(3);
-      expect(result[2]).toEqual({
-        ...day2,
-        date: day3.date,
+        expect(result.length).toBe(3);
+        expect(result[2]).toEqual({
+          ...day2,
+          date: day3.date,
+        });
       });
     });
 

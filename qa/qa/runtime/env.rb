@@ -63,7 +63,7 @@ module QA
       end
 
       def pipeline_from_project_name
-        ci_project_name.to_s.start_with?('gitlab-qa') ? 'master' : ci_project_name
+        ci_project_name.to_s.start_with?('gitlab-qa') ? Runtime::Env.default_branch : ci_project_name
       end
 
       def additional_repository_storage
@@ -100,6 +100,10 @@ module QA
 
       def debug?
         enabled?(ENV['QA_DEBUG'], default: false)
+      end
+
+      def default_branch
+        ENV['QA_DEFAULT_BRANCH'] || 'master'
       end
 
       def log_destination
@@ -397,6 +401,18 @@ module QA
 
       def user_agent
         ENV['GITLAB_QA_USER_AGENT']
+      end
+
+      def geo_environment?
+        QA::Runtime::Scenario.attributes.include?(:geo_secondary_address)
+      end
+
+      def gitlab_agentk_version
+        ENV.fetch('GITLAB_AGENTK_VERSION', 'v13.7.0')
+      end
+
+      def transient_trials
+        ENV.fetch('GITLAB_QA_TRANSIENT_TRIALS', 10).to_i
       end
 
       private

@@ -16,7 +16,6 @@ module QA
       end
 
       before do
-        Runtime::Feature.enable('vue_2fa_recovery_codes', user: user)
         enable_2fa_for_user(user)
       end
 
@@ -47,13 +46,9 @@ module QA
         expect(page).to have_text('Invalid two-factor code')
       end
 
-      after do
-        Runtime::Feature.disable('vue_2fa_recovery_codes', user: user)
-      end
-
       def enable_2fa_for_user(user)
         Flow::Login.while_signed_in(as: user) do
-          Page::Main::Menu.perform(&:click_settings_link)
+          Page::Main::Menu.perform(&:click_edit_profile_link)
           Page::Profile::Menu.perform(&:click_account)
           Page::Profile::Accounts::Show.perform(&:click_enable_2fa_button)
 

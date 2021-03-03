@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Getting started with GitLab GraphQL API
 
-This guide demonstrates basic usage of GitLab's GraphQL API.
+This guide demonstrates basic usage of the GitLab GraphQL API.
 
 See the [GraphQL API style guide](../../development/api_graphql_styleguide.md) for implementation details
 aimed at developers who wish to work on developing the API itself.
@@ -69,7 +69,7 @@ In the GitLab GraphQL API, `id` refers to a
 [Global ID](https://graphql.org/learn/global-object-identification/),
 which is an object identifier in the format of `"gid://gitlab/Issue/123"`.
 
-[GitLab's GraphQL Schema](reference/index.md) outlines which objects and fields are
+[GitLab GraphQL Schema](reference/index.md) outlines which objects and fields are
 available for clients to query and their corresponding data types.
 
 Example: Get only the names of all the projects the currently logged in user can access (up to a limit, more on that later)
@@ -289,7 +289,7 @@ More about introspection:
 
 ## Sorting
 
-Some of GitLab's GraphQL endpoints allow you to specify how you'd like a collection of
+Some of the GitLab GraphQL endpoints allow you to specify how you'd like a collection of
 objects to be sorted. You can only sort by what the schema allows you to.
 
 Example: Issues can be sorted by creation date:
@@ -314,9 +314,10 @@ Pagination is a way of only asking for a subset of the records (say, the first 1
 If we want more of them, we can make another request for the next 10 from the server
 (in the form of something like "please give me the next 10 records").
 
-By default, GitLab's GraphQL API returns only the first 100 records of any collection.
+By default, the GitLab GraphQL API returns 100 records per page.
 This can be changed by using `first` or `last` arguments. Both arguments take a value,
 so `first: 10` returns the first 10 records, and `last: 10` the last 10 records.
+There is a limit on how many records will be returned per page, which is generally `100`.
 
 Example: Retrieve only the first 2 issues (slicing). The `cursor` field gives us a position from which
 we can retrieve further records relative to that one.

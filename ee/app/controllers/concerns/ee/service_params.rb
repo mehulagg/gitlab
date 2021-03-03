@@ -10,8 +10,6 @@ module EE
       :multiproject_enabled,
       :pass_unstable,
       :project_name,
-      :opsgenie_mvc_enabled,
-      :opsgenie_mvc_target_url,
       :repository_url,
       :static_context,
       :vulnerabilities_enabled,

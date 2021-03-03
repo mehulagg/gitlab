@@ -17,6 +17,10 @@ class TimeboxReportService
   end
 
   def execute
+    # There is no data to return for fake timeboxes like
+    # Milestone::None, Milestone::Any, Milestone::Started, Milestone::Upcoming,
+    # Iteration::None, Iteration::Any, Iteration::Current
+    return ServiceResponse.success(payload: { burnup_time_series: {}, stats: {} }) if timebox.is_a?(::Timebox::TimeboxStruct)
     return ServiceResponse.error(message: _('%{timebox_type} does not support burnup charts' % { timebox_type: timebox_type })) unless timebox.supports_timebox_charts?
     return ServiceResponse.error(message: _('%{timebox_type} must have a start and due date' % { timebox_type: timebox_type })) if timebox.start_date.blank? || timebox.due_date.blank?
     return ServiceResponse.error(message: _('Burnup chart could not be generated due to too many events')) if resource_events.num_tuples > EVENT_COUNT_LIMIT

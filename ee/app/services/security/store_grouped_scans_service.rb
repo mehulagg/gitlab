@@ -46,7 +46,7 @@ module Security
       @sorted_artifacts ||= artifacts.sort_by { |artifact| [scanner_order_for(artifact), artifact.job.name] }
     end
 
-    # This method returns the priority of scanners for dependency_scanning
+    # This method returns the priority of scanners for dependency_scanning and sast
     # and `INFINITY` for all the other scan types. There is no problem with
     # calling this method for all the scan types to get rid of branching.
     def scanner_order_for(artifact)

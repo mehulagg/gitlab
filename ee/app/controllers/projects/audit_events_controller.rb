@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Projects::AuditEventsController < Projects::ApplicationController
+  include SecurityAndCompliancePermissions
   include Gitlab::Utils::StrongMemoize
   include LicenseHelper
   include AuditEvents::EnforcesValidDateParams
@@ -8,10 +9,7 @@ class Projects::AuditEventsController < Projects::ApplicationController
   include AuditEvents::Sortable
   include AuditEvents::DateRange
 
-  before_action :authorize_admin_project!
   before_action :check_audit_events_available!
-
-  layout 'project_settings'
 
   feature_category :audit_events
 
@@ -25,7 +23,8 @@ class Projects::AuditEventsController < Projects::ApplicationController
   private
 
   def check_audit_events_available!
-    render_404 unless @project.feature_available?(:audit_events) || LicenseHelper.show_promotions?(current_user)
+    render_404 unless can?(current_user, :read_project_audit_events, project) &&
+      (project.feature_available?(:audit_events) || LicenseHelper.show_promotions?(current_user))
   end
 
   def events
@@ -41,16 +40,7 @@ class Projects::AuditEventsController < Projects::ApplicationController
     end
   end
 
-  def audit_params
-    # This is an interim change until we have proper API support within Audit Events
-    transform_author_entity_type(audit_logs_params)
-  end
-
-  def transform_author_entity_type(params)
-    return params unless params[:entity_type] == 'Author'
-
-    params[:author_id] = params[:entity_id]
-
-    params.except(:entity_type, :entity_id)
+  def filter_by_author(params)
+    can?(current_user, :admin_project, project) ? params : params.merge(author_id: current_user.id)
   end
 end

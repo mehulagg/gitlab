@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import CiVariableSettings from '~/ci_variable_list/components/ci_variable_settings.vue';
 import createStore from '~/ci_variable_list/store';
 
@@ -11,7 +11,7 @@ describe('Ci variable table', () => {
   let store;
   let isGroup;
 
-  const createComponent = groupState => {
+  const createComponent = (groupState) => {
     store = createStore();
     store.state.isGroup = groupState;
     jest.spyOn(store, 'dispatch').mockImplementation();

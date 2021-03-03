@@ -1,8 +1,8 @@
 <script>
 import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Suggestion from './item.vue';
 import query from '../queries/issues.query.graphql';
+import Suggestion from './item.vue';
 
 export default {
   components: {
@@ -29,7 +29,7 @@ export default {
       skip() {
         return this.isSearchEmpty;
       },
-      update: data => data.project.issues.edges.map(({ node }) => node),
+      update: (data) => data.project.issues.edges.map(({ node }) => node),
       variables() {
         return {
           fullPath: this.projectPath,

@@ -1,6 +1,6 @@
 <script>
-import ApprovalCheckPopover from './approval_check_popover.vue';
 import { VULNERABILITY_CHECK_NAME, LICENSE_CHECK_NAME, APPROVAL_RULE_CONFIGS } from '../constants';
+import ApprovalCheckPopover from './approval_check_popover.vue';
 
 export default {
   name: 'ApprovalCheckRulePopover',

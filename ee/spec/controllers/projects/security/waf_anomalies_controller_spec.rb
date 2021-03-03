@@ -15,7 +15,7 @@ RSpec.describe Projects::Security::WafAnomaliesController do
   let(:es_client) { nil }
 
   describe 'GET #summary' do
-    subject { get :summary, params: action_params, format: :json }
+    subject(:request) { get :summary, params: action_params, format: :json }
 
     before do
       stub_licensed_features(threat_monitoring: true)
@@ -25,6 +25,14 @@ RSpec.describe Projects::Security::WafAnomaliesController do
       allow_next_instance_of(::Security::WafAnomalySummaryService) do |instance|
         allow(instance).to receive(:elasticsearch_client).at_most(3).times { es_client }
         allow(instance).to receive(:chart_above_v3?) { true }
+      end
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { request }
+
+      before_request do
+        group.add_developer(user)
       end
     end
 

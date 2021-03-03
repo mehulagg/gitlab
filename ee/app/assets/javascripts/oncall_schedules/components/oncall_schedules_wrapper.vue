@@ -1,13 +1,12 @@
 <script>
 import { GlAlert, GlButton, GlEmptyState, GlLoadingIcon, GlModalDirective } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
-import AddScheduleModal from './add_schedule_modal.vue';
-import OncallSchedule from './oncall_schedule.vue';
+import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
-import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
-import { fetchPolicies } from '~/lib/graphql';
+import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
+import AddScheduleModal from './add_edit_schedule_modal.vue';
+import OncallSchedule from './oncall_schedule.vue';
 
-const addScheduleModalId = 'addScheduleModal';
+export const addScheduleModalId = 'addScheduleModal';
 
 export const i18n = {
   title: s__('OnCallSchedules|On-call schedule'),
@@ -27,7 +26,6 @@ export const i18n = {
 export default {
   i18n,
   addScheduleModalId,
-  inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
   components: {
     GlAlert,
     GlButton,
@@ -39,6 +37,7 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
+  inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
   data() {
     return {
       schedule: {},
@@ -47,8 +46,7 @@ export default {
   },
   apollo: {
     schedule: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: getOncallSchedulesQuery,
+      query: getOncallSchedulesWithRotationsQuery,
       variables() {
         return {
           projectPath: this.projectPath,

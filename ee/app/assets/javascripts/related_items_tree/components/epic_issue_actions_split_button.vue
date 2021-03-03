@@ -1,10 +1,5 @@
 <script>
-import {
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownDivider,
-  GlDeprecatedDropdownHeader,
-  GlDeprecatedDropdownItem,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownDivider, GlDropdownSectionHeader, GlDropdownItem } from '@gitlab/ui';
 
 import { s__, __ } from '~/locale';
 
@@ -34,10 +29,10 @@ export default {
   epicActionItems,
   issueActionItems,
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownDivider,
-    GlDeprecatedDropdownHeader,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownSectionHeader,
+    GlDropdownItem,
   },
   props: {
     allowSubEpics: {
@@ -55,32 +50,25 @@ export default {
 </script>
 
 <template>
-  <gl-deprecated-dropdown
-    :text="__('Add')"
-    variant="secondary"
-    data-qa-selector="epic_issue_actions_split_button"
-    right
-  >
-    <gl-deprecated-dropdown-header>{{ __('Issue') }}</gl-deprecated-dropdown-header>
-    <gl-deprecated-dropdown-item
+  <gl-dropdown :text="__('Add')" data-qa-selector="epic_issue_actions_split_button" right>
+    <gl-dropdown-section-header>{{ __('Issue') }}</gl-dropdown-section-header>
+    <gl-dropdown-item
       v-for="item in $options.issueActionItems"
       :key="item.eventName"
-      active-class="is-active"
       @click="change(item)"
     >
       {{ item.title }}
-    </gl-deprecated-dropdown-item>
+    </gl-dropdown-item>
     <template v-if="allowSubEpics">
-      <gl-deprecated-dropdown-divider />
-      <gl-deprecated-dropdown-header>{{ __('Epic') }}</gl-deprecated-dropdown-header>
-      <gl-deprecated-dropdown-item
+      <gl-dropdown-divider />
+      <gl-dropdown-section-header>{{ __('Epic') }}</gl-dropdown-section-header>
+      <gl-dropdown-item
         v-for="item in $options.epicActionItems"
         :key="item.eventName"
-        active-class="is-active"
         @click="change(item)"
       >
         {{ item.title }}
-      </gl-deprecated-dropdown-item>
+      </gl-dropdown-item>
     </template>
-  </gl-deprecated-dropdown>
+  </gl-dropdown>
 </template>

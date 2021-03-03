@@ -242,7 +242,7 @@ class Environment < ApplicationRecord
   def cancel_deployment_jobs!
     jobs = active_deployments.with_deployable
     jobs.each do |deployment|
-      Gitlab::OptimisticLocking.retry_lock(deployment.deployable) do |deployable|
+      Gitlab::OptimisticLocking.retry_lock(deployment.deployable, name: 'environment_cancel_deployment_jobs') do |deployable|
         deployable.cancel! if deployable&.cancelable?
       end
     rescue => e
@@ -405,6 +405,11 @@ class Environment < ApplicationRecord
     deployment_platform.patch_ingress(deployment_namespace, ingress, data)
   end
 
+  def clear_all_caches
+    expire_etag_cache
+    clear_reactive_cache!
+  end
+
   private
 
   def rollout_status_available?
@@ -423,11 +428,6 @@ class Environment < ApplicationRecord
 
   def generate_slug
     self.slug = Gitlab::Slug::Environment.new(name).generate
-  end
-
-  # Overrides ReactiveCaching default to activate limit checking behind a FF
-  def reactive_cache_limit_enabled?
-    Feature.enabled?(:reactive_caching_limit_environment, project, default_enabled: true)
   end
 end
 

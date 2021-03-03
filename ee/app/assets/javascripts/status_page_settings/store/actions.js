@@ -1,7 +1,7 @@
-import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 import * as mutationTypes from './mutation_types';
 
 export const setStatusPageEnabled = ({ commit }, { enabled }) =>
@@ -34,7 +34,7 @@ export const updateStatusPageSettings = ({ state, dispatch, commit }) => {
       },
     })
     .then(() => dispatch('receiveStatusPageSettingsUpdateSuccess'))
-    .catch(error => dispatch('receiveStatusPageSettingsUpdateError', error))
+    .catch((error) => dispatch('receiveStatusPageSettingsUpdateError', error))
     .finally(() => commit(mutationTypes.LOADING, false));
 };
 

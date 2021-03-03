@@ -19,6 +19,7 @@ class Project < ApplicationRecord
   include Presentable
   include HasRepository
   include HasWiki
+  include CanMoveRepositoryStorage
   include Routable
   include GroupDescendant
   include Gitlab::SQL::Pattern
@@ -33,6 +34,7 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
+  include Repositories::CanHousekeepRepository
   include EachBatch
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
@@ -73,7 +75,7 @@ class Project < ApplicationRecord
   default_value_for :resolve_outdated_diff_discussions, false
   default_value_for :container_registry_enabled, gitlab_config_features.container_registry
   default_value_for(:repository_storage) do
-    pick_repository_storage
+    Repository.pick_storage_shard
   end
 
   default_value_for(:shared_runners_enabled) { Gitlab::CurrentSettings.shared_runners_enabled }
@@ -115,7 +117,7 @@ class Project < ApplicationRecord
 
   use_fast_destroy :build_trace_chunks
 
-  after_destroy -> { run_after_commit { remove_pages } }
+  after_destroy -> { run_after_commit { legacy_remove_pages } }
   after_destroy :remove_exports
 
   after_validation :check_pending_delete
@@ -145,7 +147,6 @@ class Project < ApplicationRecord
   has_many :boards
 
   # Project services
-  has_one :alerts_service
   has_one :campfire_service
   has_one :datadog_service
   has_one :discord_service
@@ -199,6 +200,8 @@ class Project < ApplicationRecord
   # Packages
   has_many :packages, class_name: 'Packages::Package'
   has_many :package_files, through: :packages, class_name: 'Packages::PackageFile'
+  # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
+  has_many :debian_distributions, class_name: 'Packages::Debian::ProjectDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_one :import_state, autosave: true, class_name: 'ProjectImportState', inverse_of: :project
   has_one :import_export_upload, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -215,6 +218,7 @@ class Project < ApplicationRecord
 
   # Merge Requests for target project should be removed with it
   has_many :merge_requests, foreign_key: 'target_project_id', inverse_of: :target_project
+  has_many :merge_request_metrics, foreign_key: 'target_project', class_name: 'MergeRequest::Metrics', inverse_of: :target_project
   has_many :source_of_merge_requests, foreign_key: 'source_project_id', class_name: 'MergeRequest'
   has_many :issues
   has_many :labels, class_name: 'ProjectLabel'
@@ -341,7 +345,7 @@ class Project < ApplicationRecord
 
   has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
 
-  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove'
+  has_many :repository_storage_moves, class_name: 'Projects::RepositoryStorageMove', inverse_of: :container
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
@@ -384,11 +388,12 @@ class Project < ApplicationRecord
 
   delegate :feature_available?, :builds_enabled?, :wiki_enabled?,
     :merge_requests_enabled?, :forking_enabled?, :issues_enabled?,
-    :pages_enabled?, :snippets_enabled?, :public_pages?, :private_pages?,
+    :pages_enabled?, :analytics_enabled?, :snippets_enabled?, :public_pages?, :private_pages?,
     :merge_requests_access_level, :forking_access_level, :issues_access_level,
     :wiki_access_level, :snippets_access_level, :builds_access_level,
-    :repository_access_level, :pages_access_level, :metrics_dashboard_access_level,
-    :operations_enabled?, :operations_access_level, to: :project_feature, allow_nil: true
+    :repository_access_level, :pages_access_level, :metrics_dashboard_access_level, :analytics_access_level,
+    :operations_enabled?, :operations_access_level, :security_and_compliance_access_level,
+    to: :project_feature, allow_nil: true
   delegate :show_default_award_emojis, :show_default_award_emojis=,
     :show_default_award_emojis?,
     to: :project_setting, allow_nil: true
@@ -407,6 +412,9 @@ class Project < ApplicationRecord
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
+  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings
+  delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
+    to: :ci_cd_settings
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
@@ -450,7 +458,7 @@ class Project < ApplicationRecord
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
-  validates :variables, variable_duplicates: { scope: :environment_scope }
+  validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
@@ -828,6 +836,14 @@ class Project < ApplicationRecord
 
   def active_webide_pipelines(user:)
     webide_pipelines.running_or_pending.for_user(user)
+  end
+
+  def default_pipeline_lock
+    if keep_latest_artifacts_available?
+      return :artifacts_locked
+    end
+
+    :unlocked
   end
 
   def autoclose_referenced_issues
@@ -1304,21 +1320,11 @@ class Project < ApplicationRecord
   end
 
   def external_issue_tracker
-    if has_external_issue_tracker.nil?
-      cache_has_external_issue_tracker
-    end
+    cache_has_external_issue_tracker if has_external_issue_tracker.nil?
 
-    if has_external_issue_tracker?
-      strong_memoize(:external_issue_tracker) do
-        services.external_issue_trackers.first
-      end
-    else
-      nil
-    end
-  end
+    return unless has_external_issue_tracker?
 
-  def cache_has_external_issue_tracker
-    update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
+    @external_issue_tracker ||= services.external_issue_trackers.first
   end
 
   def external_references_supported?
@@ -1330,19 +1336,11 @@ class Project < ApplicationRecord
   end
 
   def external_wiki
-    if has_external_wiki.nil?
-      cache_has_external_wiki
-    end
+    cache_has_external_wiki if has_external_wiki.nil?
 
-    if has_external_wiki
-      @external_wiki ||= services.external_wikis.first
-    else
-      nil
-    end
-  end
+    return unless has_external_wiki?
 
-  def cache_has_external_wiki
-    update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
+    @external_wiki ||= services.external_wikis.first
   end
 
   def find_or_initialize_services
@@ -1354,7 +1352,7 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return ['datadog'] unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w(datadog) unless Feature.enabled?(:datadog_ci_integration, self)
 
     []
   end
@@ -1795,15 +1793,15 @@ class Project < ApplicationRecord
                .delete_all
   end
 
-  # TODO: what to do here when not using Legacy Storage? Do we still need to rename and delay removal?
+  # TODO: remove this method https://gitlab.com/gitlab-org/gitlab/-/issues/320775
   # rubocop: disable CodeReuse/ServiceClass
-  def remove_pages
+  def legacy_remove_pages
+    return unless Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
+
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
 
     mark_pages_as_not_deployed unless destroyed?
-
-    DestroyPagesDeploymentsWorker.perform_async(id)
 
     # 1. We rename pages to temporary directory
     # 2. We wait 5 minutes, due to NFS caching
@@ -1826,6 +1824,15 @@ class Project < ApplicationRecord
 
   def update_pages_deployment!(deployment)
     ensure_pages_metadatum.update!(pages_deployment: deployment)
+  end
+
+  def set_first_pages_deployment!(deployment)
+    ensure_pages_metadatum
+
+    # where().update_all to perform update in the single transaction with check for null
+    ProjectPagesMetadatum
+      .where(project_id: id, pages_deployment_id: nil)
+      .update_all(pages_deployment_id: deployment.id)
   end
 
   def write_repository_config(gl_full_path: full_path)
@@ -1979,6 +1986,7 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_VISIBILITY', value: Gitlab::VisibilityLevel.string_level(visibility_level))
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
+      .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
   end
 
   def predefined_ci_server_variables
@@ -2110,51 +2118,6 @@ class Project < ApplicationRecord
     return [] unless auto_devops_enabled?
 
     (auto_devops || build_auto_devops)&.predefined_variables
-  end
-
-  RepositoryReadOnlyError = Class.new(StandardError)
-
-  # Tries to set repository as read_only, checking for existing Git transfers in
-  # progress beforehand. Setting a repository read-only will fail if it is
-  # already in that state.
-  #
-  # @return nil. Failures will raise an exception
-  def set_repository_read_only!(skip_git_transfer_check: false)
-    with_lock do
-      raise RepositoryReadOnlyError, _('Git transfer in progress') if
-        !skip_git_transfer_check && git_transfer_in_progress?
-
-      raise RepositoryReadOnlyError, _('Repository already read-only') if
-        self.class.where(id: id).pick(:repository_read_only)
-
-      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
-        update_column(:repository_read_only, true)
-
-      nil
-    end
-  end
-
-  # Set repository as writable again. Unlike setting it read-only, this will
-  # succeed if the repository is already writable.
-  def set_repository_writable!
-    with_lock do
-      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
-        update_column(:repository_read_only, false)
-
-      nil
-    end
-  end
-
-  def pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.get(pushes_since_gc_redis_shared_state_key).to_i }
-  end
-
-  def increment_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.incr(pushes_since_gc_redis_shared_state_key) }
-  end
-
-  def reset_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.del(pushes_since_gc_redis_shared_state_key) }
   end
 
   def route_map_for(commit_sha)
@@ -2294,6 +2257,7 @@ class Project < ApplicationRecord
     end
   end
 
+  override :git_transfer_in_progress?
   def git_transfer_in_progress?
     GL_REPOSITORY_TYPES.any? do |type|
       reference_counter(type: type).value > 0
@@ -2304,10 +2268,6 @@ class Project < ApplicationRecord
     super
 
     @storage = nil if storage_version_changed?
-  end
-
-  def reference_counter(type: Gitlab::GlRepository::PROJECT)
-    Gitlab::ReferenceCounter.new(type.identifier_for_container(self))
   end
 
   def badges
@@ -2465,10 +2425,6 @@ class Project < ApplicationRecord
     protected_branches.limit(limit)
   end
 
-  def alerts_service_activated?
-    alerts_service&.active?
-  end
-
   def self_monitoring?
     Gitlab::CurrentSettings.self_monitoring_project_id == id
   end
@@ -2521,16 +2477,12 @@ class Project < ApplicationRecord
   end
 
   def service_desk_custom_address
-    return unless service_desk_custom_address_enabled?
+    return unless Gitlab::ServiceDeskEmail.enabled?
 
     key = service_desk_setting&.project_key
     return unless key.present?
 
-    ::Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
-  end
-
-  def service_desk_custom_address_enabled?
-    ::Gitlab::ServiceDeskEmail.enabled? && ::Feature.enabled?(:service_desk_custom_address, self)
+    Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
   end
 
   def root_namespace
@@ -2574,6 +2526,15 @@ class Project < ApplicationRecord
 
   def tracing_external_url
     tracing_setting&.external_url
+  end
+
+  override :git_garbage_collect_worker_klass
+  def git_garbage_collect_worker_klass
+    Projects::GitGarbageCollectWorker
+  end
+
+  def inherited_issuable_templates_enabled?
+    Feature.enabled?(:inherited_issuable_templates, self, default_enabled: :yaml)
   end
 
   private
@@ -2668,10 +2629,6 @@ class Project < ApplicationRecord
     from && self != from
   end
 
-  def pushes_since_gc_redis_shared_state_key
-    "projects/#{id}/pushes_since_gc"
-  end
-
   def update_project_statistics
     stats = statistics || build_statistics
     stats.update(namespace_id: namespace_id)
@@ -2733,6 +2690,14 @@ class Project < ApplicationRecord
     [].tap do |out|
       objects.each_batch { |relation| out.concat(relation.pluck(:oid)) }
     end
+  end
+
+  def cache_has_external_wiki
+    update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
+  end
+
+  def cache_has_external_issue_tracker
+    update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
   end
 end
 

@@ -34,15 +34,15 @@ RSpec.describe 'Getting issues for an epic' do
     NODE
   end
 
-  def epic_query(params = {})
+  def epic_query(params = {}, epic_fields = epic_node)
     graphql_query_for("group", { "fullPath" => group.full_path },
-                       query_graphql_field("epics", params, epic_node)
+                       query_graphql_field("epics", params, epic_fields)
     )
   end
 
-  def issue_ids
-    node_array(epics_data).each_with_object({}) do |node, result|
-      result[node['iid'].to_i] = node_array(node['issues']['edges'], 'id')
+  def issue_ids(epics = epics_data)
+    node_array(epics).to_h do |node|
+      [node['iid'].to_i, node_array(node['issues']['edges'], 'id')]
     end
   end
 
@@ -75,52 +75,21 @@ RSpec.describe 'Getting issues for an epic' do
       end
 
       context 'pagination' do
-        let(:after_cursor) { '' }
-        let(:epic_node) do
-          <<~NODE
-            edges {
-              node {
-                iid
-                issues(first: 1, after: "#{after_cursor}") {
-                  pageInfo {
-                    hasNextPage
-                    hasPreviousPage
-                    startCursor
-                    endCursor
-                  },
-                  edges {
-                    node {
-                      id
-                    }
-                  }
-                }
-              }
-            }
-          NODE
+        let(:data_path) { %i[group epics nodes] + [0] + %i[issues] }
+
+        def pagination_query(args)
+          epic_query({ iid: epic.iid }, epic_fields(args))
         end
 
-        context 'without a cursor' do
-          it 'return first page of issues' do
-            post_graphql(epic_query(iid: epic.iid), current_user: user)
-
-            expect(response).to have_gitlab_http_status(:success)
-            expect(first_epic_issues_page_info['hasNextPage']).to be_truthy
-            expect(first_epic_issues_page_info['endCursor']).to eq 'MQ'
-            expect(issue_ids[epic.iid]).to eq [issue.to_global_id.to_s]
-          end
+        def epic_fields(args)
+          query_graphql_field(:nodes, query_nodes(:issues, :id, args: args, include_pagination_info: true))
         end
 
-        context 'with an after cursor' do
-          let(:after_cursor) { 'MQ' }
-
-          it 'return first page after the cursor' do
-            post_graphql(epic_query(iid: epic.iid), current_user: user)
-
-            expect(response).to have_gitlab_http_status(:success)
-            expect(first_epic_issues_page_info['hasNextPage']).to be_falsey
-            expect(first_epic_issues_page_info['endCursor']).to eq 'Mg'
-            expect(issue_ids[epic.iid]).to eq [confidential_issue.to_global_id.to_s]
-          end
+        it_behaves_like 'sorted paginated query' do
+          let(:current_user) { user }
+          let(:sort_param) { }
+          let(:first_param) { 1 }
+          let(:expected_results) { [issue, confidential_issue].map { |i| global_id_of(i) } }
         end
       end
     end
@@ -144,11 +113,8 @@ RSpec.describe 'Getting issues for an epic' do
       let_it_be(:epic_issue3) { create(:epic_issue, epic: epic2, issue: issue2, relative_position: 3) }
       let(:params) { { iids: [epic.iid, epic2.iid] } }
 
-      before do
-        project.add_developer(user)
-      end
-
       it 'returns issues for each epic' do
+        project.add_developer(user)
         post_graphql(epic_query(params), current_user: user)
 
         expect(response).to have_gitlab_http_status(:success)
@@ -157,17 +123,17 @@ RSpec.describe 'Getting issues for an epic' do
         expect(result[epic2.iid]).to eq [issue2.to_global_id.to_s]
       end
 
-      # TODO remove the pending state of this spec when
-      # we have an efficient way of preloading data on GraphQL.
-      # For more information check: https://gitlab.com/gitlab-org/gitlab/-/issues/207898
-      xit 'avoids N+1 queries' do
-        control_count = ActiveRecord::QueryRecorder.new do
-          post_graphql(epic_query(iid: epic.iid), current_user: user)
-        end.count
+      it 'avoids N+1 queries' do
+        user_1 = create(:user, developer_projects: [project])
+        user_2 = create(:user, developer_projects: [project])
+
+        control_count = ActiveRecord::QueryRecorder.new(query_recorder_debug: true) do
+          post_graphql(epic_query(iid: epic.iid), current_user: user_1)
+        end
 
         expect do
-          post_graphql(epic_query(params), current_user: user)
-        end.not_to exceed_query_limit(control_count)
+          post_graphql(epic_query(params), current_user: user_2)
+        end.not_to exceed_query_limit(control_count).ignoring(/FROM "namespaces"/)
 
         expect(graphql_errors).to be_nil
       end

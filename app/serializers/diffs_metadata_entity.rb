@@ -2,7 +2,9 @@
 
 class DiffsMetadataEntity < DiffsEntity
   unexpose :diff_files
-  expose :raw_diff_files, as: :diff_files, using: DiffFileMetadataEntity
+  expose :diff_files, using: DiffFileMetadataEntity do |diffs, _|
+    diffs.raw_diff_files(sorted: true)
+  end
 
   expose :conflict_resolution_path do |_, options|
     presenter(options[:merge_request]).conflict_resolution_path
@@ -16,7 +18,29 @@ class DiffsMetadataEntity < DiffsEntity
     options[:merge_request].can_be_merged_by?(request.current_user)
   end
 
+  expose :project_path
+  expose :project_name
+
+  expose :username
+  expose :user_full_name
+
   private
+
+  def project_path
+    request.project&.full_path
+  end
+
+  def project_name
+    request.project&.name
+  end
+
+  def username
+    request.current_user&.username
+  end
+
+  def user_full_name
+    request.current_user&.name
+  end
 
   def presenter(merge_request)
     @presenters ||= {}

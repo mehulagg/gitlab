@@ -1,10 +1,10 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import VueRouter from 'vue-router';
+import Dashboard from '~/monitoring/components/dashboard.vue';
 import DashboardPage from '~/monitoring/pages/dashboard_page.vue';
 import PanelNewPage from '~/monitoring/pages/panel_new_page.vue';
-import Dashboard from '~/monitoring/components/dashboard.vue';
-import { createStore } from '~/monitoring/stores';
 import createRouter from '~/monitoring/router';
+import { createStore } from '~/monitoring/stores';
 import { dashboardProps } from './fixture_data';
 import { dashboardHeaderProps } from './mock_data';
 
@@ -63,12 +63,7 @@ describe('Monitoring router', () => {
       });
 
       expect(wrapper.find(DashboardPage).exists()).toBe(true);
-      expect(
-        wrapper
-          .find(DashboardPage)
-          .find(Dashboard)
-          .exists(),
-      ).toBe(true);
+      expect(wrapper.find(DashboardPage).find(Dashboard).exists()).toBe(true);
     });
   });
 
@@ -91,12 +86,7 @@ describe('Monitoring router', () => {
       });
 
       expect(wrapper.find(DashboardPage).exists()).toBe(true);
-      expect(
-        wrapper
-          .find(DashboardPage)
-          .find(Dashboard)
-          .exists(),
-      ).toBe(true);
+      expect(wrapper.find(DashboardPage).find(Dashboard).exists()).toBe(true);
     });
   });
 

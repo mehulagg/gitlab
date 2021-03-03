@@ -1,21 +1,27 @@
 <script>
-import Mousetrap from 'mousetrap';
 import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import Mousetrap from 'mousetrap';
 import { ApolloMutation } from 'vue-apollo';
 import createFlash from '~/flash';
 import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import allVersionsMixin from '../../mixins/all_versions';
-import Toolbar from '../../components/toolbar/index.vue';
 import DesignDestroyer from '../../components/design_destroyer.vue';
-import DesignScaler from '../../components/design_scaler.vue';
-import DesignPresentation from '../../components/design_presentation.vue';
 import DesignReplyForm from '../../components/design_notes/design_reply_form.vue';
+import DesignPresentation from '../../components/design_presentation.vue';
+import DesignScaler from '../../components/design_scaler.vue';
 import DesignSidebar from '../../components/design_sidebar.vue';
-import getDesignQuery from '../../graphql/queries/get_design.query.graphql';
+import Toolbar from '../../components/toolbar/index.vue';
+import { ACTIVE_DISCUSSION_SOURCE_TYPES, DESIGN_DETAIL_LAYOUT_CLASSLIST } from '../../constants';
 import createImageDiffNoteMutation from '../../graphql/mutations/create_image_diff_note.mutation.graphql';
 import repositionImageDiffNoteMutation from '../../graphql/mutations/reposition_image_diff_note.mutation.graphql';
 import updateActiveDiscussionMutation from '../../graphql/mutations/update_active_discussion.mutation.graphql';
+import getDesignQuery from '../../graphql/queries/get_design.query.graphql';
+import allVersionsMixin from '../../mixins/all_versions';
+import { DESIGNS_ROUTE_NAME } from '../../router/constants';
+import {
+  updateStoreAfterAddImageDiffNote,
+  updateStoreAfterRepositionImageDiffNote,
+} from '../../utils/cache_update';
 import {
   extractDiscussions,
   extractDesign,
@@ -24,10 +30,6 @@ import {
   extractDesignNoteId,
   getPageLayoutElement,
 } from '../../utils/design_management_utils';
-import {
-  updateStoreAfterAddImageDiffNote,
-  updateStoreAfterRepositionImageDiffNote,
-} from '../../utils/cache_update';
 import {
   ADD_DISCUSSION_COMMENT_ERROR,
   ADD_IMAGE_DIFF_NOTE_ERROR,
@@ -39,8 +41,6 @@ import {
   designDeletionError,
 } from '../../utils/error_messages';
 import { trackDesignDetailView, usagePingDesignDetailView } from '../../utils/tracking';
-import { DESIGNS_ROUTE_NAME } from '../../router/constants';
-import { ACTIVE_DISCUSSION_SOURCE_TYPES, DESIGN_DETAIL_LAYOUT_CLASSLIST } from '../../constants';
 
 const DEFAULT_SCALE = 1;
 
@@ -57,6 +57,27 @@ export default {
     DesignSidebar,
   },
   mixins: [allVersionsMixin, glFeatureFlagsMixin()],
+  beforeRouteUpdate(to, from, next) {
+    // reset scale when the active design changes
+    this.scale = DEFAULT_SCALE;
+    next();
+  },
+  beforeRouteEnter(to, from, next) {
+    const pageEl = getPageLayoutElement();
+    if (pageEl) {
+      pageEl.classList.add(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
+    }
+
+    next();
+  },
+  beforeRouteLeave(to, from, next) {
+    const pageEl = getPageLayoutElement();
+    if (pageEl) {
+      pageEl.classList.remove(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
+    }
+
+    next();
+  },
   props: {
     id: {
       type: String,
@@ -81,7 +102,7 @@ export default {
       variables() {
         return this.designVariables;
       },
-      update: data => extractDesign(data),
+      update: (data) => extractDesign(data),
       result(res) {
         this.onDesignQueryResult(res);
       },
@@ -139,7 +160,7 @@ export default {
       return Boolean(this.annotationCoordinates);
     },
     resolvedDiscussions() {
-      return this.discussions.filter(discussion => discussion.resolved);
+      return this.discussions.filter((discussion) => discussion.resolved);
     },
   },
   watch: {
@@ -161,18 +182,8 @@ export default {
   beforeDestroy() {
     Mousetrap.unbind('esc', this.closeDesign);
   },
-  beforeRouteUpdate(to, from, next) {
-    // reset scale when the active design changes
-    this.scale = DEFAULT_SCALE;
-    next();
-  },
   methods: {
-    addImageDiffNoteToStore(
-      store,
-      {
-        data: { createImageDiffNote },
-      },
-    ) {
+    addImageDiffNoteToStore(store, { data: { createImageDiffNote } }) {
       updateStoreAfterAddImageDiffNote(
         store,
         createImageDiffNote,
@@ -180,12 +191,7 @@ export default {
         this.designVariables,
       );
     },
-    updateImageDiffNoteInStore(
-      store,
-      {
-        data: { repositionImageDiffNote },
-      },
-    ) {
+    updateImageDiffNoteInStore(store, { data: { repositionImageDiffNote } }) {
       return updateStoreAfterRepositionImageDiffNote(
         store,
         repositionImageDiffNote,
@@ -213,7 +219,7 @@ export default {
         update: this.updateImageDiffNoteInStore,
       };
 
-      return this.$apollo.mutate(mutationPayload).catch(e => this.onUpdateImageDiffNoteError(e));
+      return this.$apollo.mutate(mutationPayload).catch((e) => this.onUpdateImageDiffNoteError(e));
     },
     onDesignQueryResult({ data, loading }) {
       // On the initial load with cache-and-network policy data is undefined while loading is true
@@ -305,22 +311,6 @@ export default {
     toggleResolvedComments() {
       this.resolvedDiscussionsExpanded = !this.resolvedDiscussionsExpanded;
     },
-  },
-  beforeRouteEnter(to, from, next) {
-    const pageEl = getPageLayoutElement();
-    if (pageEl) {
-      pageEl.classList.add(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
-    }
-
-    next();
-  },
-  beforeRouteLeave(to, from, next) {
-    const pageEl = getPageLayoutElement();
-    if (pageEl) {
-      pageEl.classList.remove(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
-    }
-
-    next();
   },
   createImageDiffNoteMutation,
   DESIGNS_ROUTE_NAME,

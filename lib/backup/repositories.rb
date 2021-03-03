@@ -40,29 +40,40 @@ module Backup
     end
 
     def restore
-      Project.find_each(batch_size: 1000) do |project|
-        restore_repository(project, Gitlab::GlRepository::PROJECT)
-        restore_repository(project, Gitlab::GlRepository::WIKI)
-        restore_repository(project, Gitlab::GlRepository::DESIGN)
-      end
-
-      invalid_ids = Snippet.find_each(batch_size: 1000)
-        .map { |snippet| restore_snippet_repository(snippet) }
-        .compact
-
-      cleanup_snippets_without_repositories(invalid_ids)
+      restore_project_repositories
+      restore_snippets
 
       restore_object_pools
     end
 
     private
 
+    def restore_project_repositories
+      Project.find_each(batch_size: 1000) do |project|
+        restore_repository(project, Gitlab::GlRepository::PROJECT)
+        restore_repository(project, Gitlab::GlRepository::WIKI)
+        restore_repository(project, Gitlab::GlRepository::DESIGN)
+      end
+    end
+
+    def restore_snippets
+      invalid_ids = Snippet.find_each(batch_size: 1000)
+        .map { |snippet| restore_snippet_repository(snippet) }
+        .compact
+
+      cleanup_snippets_without_repositories(invalid_ids)
+    end
+
     def check_valid_storages!
-      [ProjectRepository, SnippetRepository].each do |klass|
+      repository_storage_klasses.each do |klass|
         if klass.excluding_repository_storage(Gitlab.config.repositories.storages.keys).exists?
           raise Error, "repositories.storages in gitlab.yml does not include all storages used by #{klass}"
         end
       end
+    end
+
+    def repository_storage_klasses
+      [ProjectRepository, SnippetRepository]
     end
 
     def backup_repos_path
@@ -103,12 +114,7 @@ module Backup
               end
 
               begin
-                case container
-                when Project
-                  dump_project(container)
-                when Snippet
-                  dump_snippet(container)
-                end
+                dump_container(container)
               rescue => e
                 errors << e
                 break
@@ -127,6 +133,15 @@ module Backup
       queue.close
       ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
         threads.each(&:join)
+      end
+    end
+
+    def dump_container(container)
+      case container
+      when Project
+        dump_project(container)
+      when Snippet
+        dump_snippet(container)
       end
     end
 
@@ -186,7 +201,12 @@ module Backup
       PoolRepository.includes(:source_project).find_each do |pool|
         progress.puts " - Object pool #{pool.disk_path}..."
 
-        pool.source_project ||= pool.member_projects.first.root_of_fork_network
+        pool.source_project ||= pool.member_projects.first&.root_of_fork_network
+        unless pool.source_project
+          progress.puts " - Object pool #{pool.disk_path}... " + "[SKIPPED]".color(:cyan)
+          next
+        end
+
         pool.state = 'none'
         pool.save
 
@@ -308,3 +328,5 @@ module Backup
     end
   end
 end
+
+Backup::Repositories.prepend_if_ee('EE::Backup::Repositories')

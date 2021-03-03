@@ -1,7 +1,7 @@
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
-import CodeReviewAnalyticsFilteredSearchTokenKeys from './code_review_analytics_filtered_search_token_keys';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import CodeReviewAnalyticsFilteredSearchTokenKeys from './code_review_analytics_filtered_search_token_keys';
 import store from './store';
 import transformFilters from './utils';
 
@@ -23,7 +23,7 @@ export default class FilteredSearchCodeReviewAnalytics extends FilteredSearchMan
   /**
    * Updates filters in code review analytics store
    */
-  updateObject = path => {
+  updateObject = (path) => {
     const filters = urlParamsToObject(path);
     const { selectedLabels: selectedLabelList, selectedMilestone } = transformFilters(filters);
 

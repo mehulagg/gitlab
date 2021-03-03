@@ -1,16 +1,16 @@
 /* eslint-disable no-new */
 import { debounce } from 'lodash';
-import axios from './lib/utils/axios_utils';
-import { deprecatedCreateFlash as Flash } from './flash';
-import DropLab from './droplab/drop_lab';
-import ISetter from './droplab/plugins/input_setter';
-import { __, sprintf } from './locale';
 import {
   init as initConfidentialMergeRequest,
   isConfidentialIssue,
   canCreateConfidentialMergeRequest,
 } from './confidential_merge_request';
 import confidentialMergeRequestState from './confidential_merge_request/state';
+import DropLab from './droplab/drop_lab';
+import ISetter from './droplab/plugins/input_setter';
+import { deprecatedCreateFlash as Flash } from './flash';
+import axios from './lib/utils/axios_utils';
+import { __, sprintf } from './locale';
 
 // Todo: Remove this when fixing issue in input_setter plugin
 const InputSetter = { ...ISetter };
@@ -191,7 +191,7 @@ export default class CreateMergeRequestDropdown {
   static findByValue(objects, ref, returnFirstMatch = false) {
     if (!objects || !objects.length) return false;
     if (objects.indexOf(ref) > -1) return ref;
-    if (returnFirstMatch) return objects.find(item => new RegExp(`^${ref}`).test(item));
+    if (returnFirstMatch) return objects.find((item) => new RegExp(`^${ref}`).test(item));
 
     return false;
   }
@@ -356,7 +356,7 @@ export default class CreateMergeRequestDropdown {
     event.preventDefault();
 
     if (isConfidentialIssue() && !event.target.classList.contains('js-create-target')) {
-      this.droplab.hooks.forEach(hook => hook.list.toggle());
+      this.droplab.hooks.forEach((hook) => hook.list.toggle());
 
       return;
     }
@@ -404,8 +404,8 @@ export default class CreateMergeRequestDropdown {
     const inputClasses = ['gl-field-error-outline', 'gl-field-success-outline'];
     const messageClasses = ['text-muted', 'text-danger', 'text-success'];
 
-    inputClasses.forEach(cssClass => input.classList.remove(cssClass));
-    messageClasses.forEach(cssClass => message.classList.remove(cssClass));
+    inputClasses.forEach((cssClass) => input.classList.remove(cssClass));
+    messageClasses.forEach((cssClass) => message.classList.remove(cssClass));
     message.style.display = 'none';
   }
 

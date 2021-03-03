@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'assignee board list' do
+  before do
+    stub_licensed_features(board_assignee_lists: true)
+  end
+
   context 'when assignee_id is sent' do
     it 'returns 400 if user is not found' do
       other_user = create(:user)
@@ -17,12 +21,10 @@ RSpec.shared_examples 'assignee board list' do
 
       expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response.dig('message', 'error'))
-          .to eq('List type Assignee lists not available with your current license')
+          .to eq('Assignee lists not available with your current license')
     end
 
     it 'creates an assignee list if user is found' do
-      stub_licensed_features(board_assignee_lists: true)
-
       post api(url, user), params: { assignee_id: user.id }
 
       expect(response).to have_gitlab_http_status(:created)

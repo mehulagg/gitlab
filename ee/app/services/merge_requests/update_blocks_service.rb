@@ -33,17 +33,24 @@ module MergeRequests
       return unless update?
       return unless merge_request.target_project.feature_available?(:blocking_merge_requests)
 
-      merge_request
-        .blocks_as_blockee
-        .with_blocking_mr_ids(ids_to_del)
-        .delete_all
+      valid_references, invalid_references = extract_references
 
-      # If the block is invalid, silently fail to add it
-      ids_to_add.each do |blocking_id|
-        ::MergeRequestBlock.create(
-          blocking_merge_request_id: blocking_id,
-          blocked_merge_request_id: merge_request.id
-        )
+      delete_old_blockers!(valid_references)
+
+      errors = create_blockers(valid_references)
+
+      if invalid_references.present?
+        merge_request.errors.add(:dependencies, 'failed to save: ' + invalid_references.join(', '))
+      end
+
+      if errors.present?
+        merge_request.errors.add(:dependencies, 'failed to save: ' + errors.join(', '))
+      end
+
+      if invalid_references.present? || errors.present?
+        # When there are invalid references, we need to reset the associations
+        # so that the latest blocking merge requests are shown in the UI
+        merge_request.blocking_merge_requests.reset
       end
 
       true
@@ -65,15 +72,59 @@ module MergeRequests
       params.fetch(:references, [])
     end
 
-    def requested_ids
-      strong_memoize(:requested_ids) do
-        next [] unless references.present?
+    # Returns two lists of references separating valid from invalid ones
+    #
+    # @return [Array<Array>] an array of valid and an array of invalid references
+    def extract_references
+      invalid_references = []
+      valid_references = []
 
-        # The analyzer will only return references the current user can see
+      return [], [] unless references.present?
+
+      # The analyzer will only return references the current user can see
+      references.each do |reference|
         analyzer = ::Gitlab::ReferenceExtractor.new(merge_request.target_project, current_user)
-        analyzer.analyze(references.join(" "))
+        analyzer.analyze(reference)
 
-        analyzer.merge_requests.map(&:id)
+        if analyzer.merge_requests.any?
+          valid_references << analyzer.merge_requests
+        else
+          invalid_references << reference
+        end
+      end
+
+      [valid_references.flatten.map(&:id), invalid_references]
+    end
+
+    def delete_old_blockers!(valid_references)
+      merge_request
+        .blocks_as_blockee
+        .with_blocking_mr_ids(ids_to_delete(valid_references))
+        .delete_all
+    end
+
+    def create_blockers(valid_references)
+      new_ids = ids_to_add(valid_references)
+
+      new_ids.each_with_object([]) do |blocking_id, errors|
+        blocked = ::MergeRequestBlock.create(
+          blocking_merge_request_id: blocking_id,
+          blocked_merge_request_id: merge_request.id
+        )
+
+        unless blocked.persisted?
+          errors << blocked.errors.full_messages
+        end
+      end
+    end
+
+    def ids_to_add(valid_references)
+      valid_references - visible_ids
+    end
+
+    def ids_to_delete(valid_references)
+      (visible_ids - valid_references).tap do |ary|
+        ary.push(*hidden_ids) if remove_hidden?
       end
     end
 
@@ -82,19 +133,7 @@ module MergeRequests
     end
 
     def hidden_ids
-      strong_memoize(:hidden_ids) { hidden_blocks.map(&:blocking_merge_request_id) }
-    end
-
-    def ids_to_add
-      strong_memoize(:ids_to_add) { requested_ids - visible_ids }
-    end
-
-    def ids_to_del
-      strong_memoize(:ids_to_del) do
-        (visible_ids - requested_ids).tap do |ary|
-          ary.push(*hidden_ids) if remove_hidden?
-        end
-      end
+      hidden_blocks.map(&:blocking_merge_request_id)
     end
   end
 end

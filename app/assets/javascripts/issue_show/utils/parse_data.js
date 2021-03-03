@@ -1,10 +1,10 @@
-import * as Sentry from '~/sentry/wrapper';
+import * as Sentry from '@sentry/browser';
 import { sanitize } from '~/lib/dompurify';
 
 // We currently load + parse the data from the issue app and related merge request
 let cachedParsedData;
 
-export const parseIssuableData = el => {
+export const parseIssuableData = (el) => {
   try {
     if (cachedParsedData) return cachedParsedData;
 

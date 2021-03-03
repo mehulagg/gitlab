@@ -17,14 +17,17 @@ module Ci
 
     private
 
+    PAYLOAD_VARIABLE_KEY = 'TRIGGER_PAYLOAD'
+    PAYLOAD_VARIABLE_HIDDEN_PARAMS = %i(token).freeze
+
     def create_pipeline_from_trigger(trigger)
       # this check is to not leak the presence of the project if user cannot read it
       return unless trigger.project == project
 
-      pipeline = Ci::CreatePipelineService.new(project, trigger.owner, ref: params[:ref])
+      pipeline = Ci::CreatePipelineService
+        .new(project, trigger.owner, ref: params[:ref], variables_attributes: variables)
         .execute(:trigger, ignore_skip_ci: true) do |pipeline|
           pipeline.trigger_requests.build(trigger: trigger)
-          pipeline.variables.build(variables)
         end
 
       if pipeline.persisted?
@@ -44,7 +47,8 @@ module Ci
       # this check is to not leak the presence of the project if user cannot read it
       return unless can?(job.user, :read_project, project)
 
-      pipeline = Ci::CreatePipelineService.new(project, job.user, ref: params[:ref])
+      pipeline = Ci::CreatePipelineService
+        .new(project, job.user, ref: params[:ref], variables_attributes: variables)
         .execute(:pipeline, ignore_skip_ci: true) do |pipeline|
           source = job.sourced_pipelines.build(
             source_pipeline: job.pipeline,
@@ -53,7 +57,6 @@ module Ci
             project: project)
 
           pipeline.source_pipeline = source
-          pipeline.variables.build(variables)
         end
 
       if pipeline.persisted?
@@ -70,9 +73,23 @@ module Ci
     end
 
     def variables
+      if ::Feature.enabled?(:ci_trigger_payload_into_pipeline, project, default_enabled: :yaml)
+        param_variables + [payload_variable]
+      else
+        param_variables
+      end
+    end
+
+    def param_variables
       params[:variables].to_h.map do |key, value|
         { key: key, value: value }
       end
+    end
+
+    def payload_variable
+      { key: PAYLOAD_VARIABLE_KEY,
+        value: params.except(*PAYLOAD_VARIABLE_HIDDEN_PARAMS).to_json,
+        variable_type: :file }
     end
   end
 end

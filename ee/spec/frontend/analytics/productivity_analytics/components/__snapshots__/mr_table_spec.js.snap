@@ -40,6 +40,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
               category="primary"
               class="w-100 metric-col"
               headertext=""
+              hideheaderborder="true"
               menu-class="w-100 mw-100"
               size="medium"
               text="Time from first comment to last commit"

@@ -9,7 +9,6 @@ describe('Pipelines Empty State', () => {
   const createWrapper = () => {
     wrapper = shallowMount(EmptyState, {
       propsData: {
-        helpPagePath: 'foo',
         emptyStateSvgPath: 'foo',
         canSetCi: true,
       },
@@ -35,18 +34,18 @@ describe('Pipelines Empty State', () => {
     });
 
     it('should render a link with provided help path', () => {
-      expect(findGetStartedButton().attributes('href')).toBe('foo');
+      expect(findGetStartedButton().attributes('href')).toBe('/help/ci/quick_start/index.md');
     });
 
     it('should render empty state information', () => {
       expect(findInfoText()).toContain(
-        'Continuous Integration can help catch bugs by running your tests automatically',
-        'while Continuous Deployment can help you deliver code to your product environment',
+        'GitLab CI/CD can automatically build, test, and deploy your code. Let GitLab take care of time',
+        'consuming tasks, so you can spend more time creating',
       );
     });
 
-    it('should render a button', () => {
-      expect(findGetStartedButton().text()).toBe('Get started with Pipelines');
+    it('should render button text', () => {
+      expect(findGetStartedButton().text()).toBe('Get started with CI/CD');
     });
   });
 });

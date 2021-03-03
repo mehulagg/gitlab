@@ -1,12 +1,12 @@
+import { GlAlert } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { GlAlert } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
-import createStore from '~/user_lists/store/new';
-import NewUserList from '~/user_lists/components/new_user_list.vue';
 import { redirectTo } from '~/lib/utils/url_utility';
+import NewUserList from '~/user_lists/components/new_user_list.vue';
+import createStore from '~/user_lists/store/new';
 import { userList } from '../../feature_flags/mock_data';
 
 jest.mock('~/api');
@@ -18,9 +18,9 @@ localVue.use(Vuex);
 describe('user_lists/components/new_user_list', () => {
   let wrapper;
 
-  const setInputValue = value => wrapper.find('[data-testid="user-list-name"]').setValue(value);
+  const setInputValue = (value) => wrapper.find('[data-testid="user-list-name"]').setValue(value);
 
-  const click = button => wrapper.find(`[data-testid="${button}"]`).trigger('click');
+  const click = (button) => wrapper.find(`[data-testid="${button}"]`).trigger('click');
 
   beforeEach(() => {
     wrapper = mount(NewUserList, {

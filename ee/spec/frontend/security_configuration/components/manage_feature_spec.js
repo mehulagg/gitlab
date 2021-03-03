@@ -10,7 +10,7 @@ describe('ManageFeature component', () => {
   let wrapper;
   let feature;
 
-  const createComponent = options => {
+  const createComponent = (options) => {
     wrapper = shallowMount(
       ManageFeature,
       merge(
@@ -30,7 +30,7 @@ describe('ManageFeature component', () => {
   });
 
   const findCreateMergeRequestButton = () => wrapper.find(CreateMergeRequestButton);
-  const findTestId = id => wrapper.find(`[data-testid="${id}"]`);
+  const findTestId = (id) => wrapper.find(`[data-testid="${id}"]`);
 
   describe('given sastConfigurationUi feature flag is enabled', () => {
     const featureFlagEnabled = {

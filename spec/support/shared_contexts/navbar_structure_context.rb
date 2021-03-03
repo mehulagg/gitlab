@@ -14,6 +14,16 @@ RSpec.shared_context 'project navbar structure' do
     }
   end
 
+  let(:security_and_compliance_nav_item) do
+    {
+      nav_item: _('Security & Compliance'),
+      nav_sub_items: [
+        _('Configuration'),
+        (_('Audit Events') if Gitlab.ee?)
+      ]
+    }
+  end
+
   let(:structure) do
     [
       {
@@ -62,6 +72,7 @@ RSpec.shared_context 'project navbar structure' do
           _('Schedules')
         ]
       },
+      security_and_compliance_nav_item,
       {
         nav_item: _('Operations'),
         nav_sub_items: [
@@ -101,8 +112,7 @@ RSpec.shared_context 'project navbar structure' do
           _('Access Tokens'),
           _('Repository'),
           _('CI / CD'),
-          _('Operations'),
-          (_('Audit Events') if Gitlab.ee?)
+          _('Operations')
         ].compact
       }
     ].compact
@@ -128,8 +138,8 @@ RSpec.shared_context 'group navbar structure' do
         _('Projects'),
         _('Repository'),
         _('CI / CD'),
-        _('Webhooks'),
-        _('Audit Events')
+        _('Packages & Registries'),
+        _('Webhooks')
       ]
     }
   end
@@ -139,6 +149,15 @@ RSpec.shared_context 'group navbar structure' do
       nav_item: _('Administration'),
       nav_sub_items: [
         s_('UsageQuota|Usage Quotas')
+      ]
+    }
+  end
+
+  let(:security_and_compliance_nav_item) do
+    {
+      nav_item: _('Security & Compliance'),
+      nav_sub_items: [
+        _('Audit Events')
       ]
     }
   end
@@ -172,6 +191,7 @@ RSpec.shared_context 'group navbar structure' do
         nav_item: _('Merge Requests'),
         nav_sub_items: []
       },
+      security_and_compliance_nav_item,
       (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),

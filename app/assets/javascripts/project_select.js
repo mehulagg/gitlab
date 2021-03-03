@@ -2,14 +2,14 @@
 
 import $ from 'jquery';
 import Api from './api';
-import ProjectSelectComboButton from './project_select_combo_button';
-import { s__ } from './locale';
 import { loadCSSFile } from './lib/utils/css_utils';
+import { s__ } from './locale';
+import ProjectSelectComboButton from './project_select_combo_button';
 
 const projectSelect = () => {
   loadCSSFile(gon.select2_css_path)
     .then(() => {
-      $('.ajax-project-select').each(function(i, select) {
+      $('.ajax-project-select').each(function (i, select) {
         let placeholder;
         const simpleFilter = $(select).data('simpleFilter') || false;
         const isInstantiated = $(select).data('select2');
@@ -33,17 +33,17 @@ const projectSelect = () => {
         $(select).select2({
           placeholder,
           minimumInputLength: 0,
-          query: query => {
+          query: (query) => {
             let projectsCallback;
-            const finalCallback = function(projects) {
+            const finalCallback = function (projects) {
               const data = {
                 results: projects,
               };
               return query.callback(data);
             };
             if (this.includeGroups) {
-              projectsCallback = function(projects) {
-                const groupsCallback = function(groups) {
+              projectsCallback = function (projects) {
+                const groupsCallback = function (groups) {
                   const data = groups.concat(projects);
                   return finalCallback(data);
                 };

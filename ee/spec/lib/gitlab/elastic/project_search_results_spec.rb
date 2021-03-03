@@ -180,6 +180,7 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
       create(:wiki_page, wiki: project.wiki)
     end
 
-    include_examples 'does not hit Elasticsearch twice for objects and counts', %w|notes blobs wiki_blobs commits issues merge_requests milestones|
+    include_examples 'does not hit Elasticsearch twice for objects and counts', %w[notes blobs wiki_blobs commits issues merge_requests milestones]
+    include_examples 'does not load results for count only queries', %w[notes blobs wiki_blobs commits issues merge_requests milestones]
   end
 end

@@ -23,11 +23,11 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:weight_issue4) { create(:issue, project: project, weight: nil) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :weight_asc)).to eq [weight_issue3, weight_issue1, weight_issue4, weight_issue2]
+            expect(resolve_issues(sort: :weight_asc).to_a).to eq [weight_issue3, weight_issue1, weight_issue4, weight_issue2]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :weight_desc)).to eq [weight_issue1, weight_issue3, weight_issue4, weight_issue2]
+            expect(resolve_issues(sort: :weight_desc).to_a).to eq [weight_issue1, weight_issue3, weight_issue4, weight_issue2]
           end
         end
 
@@ -36,11 +36,11 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:published) { create(:issue, :published, project: project) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :published_asc)).to eq [not_published, published]
+            expect(resolve_issues(sort: :published_asc).to_a).to eq [not_published, published]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :published_desc)).to eq [published, not_published]
+            expect(resolve_issues(sort: :published_desc).to_a).to eq [published, not_published]
           end
         end
 
@@ -54,11 +54,11 @@ RSpec.describe Resolvers::IssuesResolver do
           end
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :sla_due_at_asc)).to eq [sla_due_first, sla_due_last]
+            expect(resolve_issues(sort: :sla_due_at_asc).to_a).to eq [sla_due_first, sla_due_last]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :sla_due_at_desc)).to eq [sla_due_last, sla_due_first]
+            expect(resolve_issues(sort: :sla_due_at_desc).to_a).to eq [sla_due_last, sla_due_first]
           end
         end
       end
@@ -69,7 +69,7 @@ RSpec.describe Resolvers::IssuesResolver do
         let_it_be(:issue_without_iteration) { create(:issue, project: project) }
 
         it 'returns issues with iteration' do
-          expect(resolve_issues(iteration_id: iteration1.id)).to eq [issue_with_iteration]
+          expect(resolve_issues(iteration_id: [iteration1.id])).to contain_exactly(issue_with_iteration)
         end
       end
 

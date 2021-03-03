@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { Rails } from '~/lib/utils/rails_ujs';
 import projectNew from '~/projects/project_new';
 
 const bindEvents = () => {
@@ -29,18 +30,13 @@ const bindEvents = () => {
 
   function hideNonRootParentPathOptions() {
     const rootParent = `/${
-      $namespaceSelect
-        .find('option:selected')
-        .data('show-path')
-        .split('/')[1]
+      $namespaceSelect.find('option:selected').data('show-path').split('/')[1]
     }`;
 
     $namespaceSelect
       .find('option')
       .filter(function doesNotMatchParent() {
-        return !$(this)
-          .data('show-path')
-          .includes(rootParent);
+        return !$(this).data('show-path').includes(rootParent);
       })
       .addClass('hidden');
   }
@@ -100,10 +96,7 @@ const bindEvents = () => {
       ),
     );
 
-    $projectFieldsForm
-      .find('.js-select-namespace')
-      .first()
-      .val(groupId);
+    $projectFieldsForm.find('.js-select-namespace').first().val(groupId);
   }
 
   $useCustomTemplateBtn.on('change', chooseTemplate);
@@ -133,13 +126,11 @@ export default () => {
   $groupTabContent.on('ajax:success', bindEvents);
 
   $navElement.one('click', () => {
-    // eslint-disable-next-line no-jquery/no-ajax
-    $.get($tabContent.data('initialTemplates'));
+    Rails.ajax({ url: $tabContent.data('initialTemplates'), type: 'GET' });
   });
 
   $groupNavElement.one('click', () => {
-    // eslint-disable-next-line no-jquery/no-ajax
-    $.get($groupTabContent.data('initialTemplates'));
+    Rails.ajax({ url: $groupTabContent.data('initialTemplates'), type: 'GET' });
   });
 
   bindEvents();

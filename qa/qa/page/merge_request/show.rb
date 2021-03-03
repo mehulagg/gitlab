@@ -26,6 +26,10 @@ module QA
           element :merge_immediately_option
         end
 
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_auto_merge_enabled.vue' do
+          element :merge_request_status_content
+        end
+
         view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_merged.vue' do
           element :merged_status_content
         end
@@ -58,6 +62,9 @@ module QA
 
         view 'app/assets/javascripts/diffs/components/diff_file_header.vue' do
           element :file_name_content
+          element :file_title_container
+          element :dropdown_button
+          element :edit_in_ide_button
         end
 
         view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
@@ -85,6 +92,15 @@ module QA
 
         view 'app/assets/javascripts/batch_comments/components/preview_dropdown.vue' do
           element :review_preview_toggle
+        end
+
+        view 'app/assets/javascripts/vue_shared/components/markdown/suggestion_diff_header.vue' do
+          element :apply_suggestions_batch_button
+          element :add_suggestion_batch_button
+        end
+
+        view 'app/assets/javascripts/vue_shared/components/markdown/header.vue' do
+          element :suggestion_button
         end
 
         def start_review
@@ -150,15 +166,12 @@ module QA
         def click_discussions_tab
           click_element(:notes_tab)
 
-          wait_for_loading
+          wait_for_requests
         end
 
         def click_diffs_tab
           click_element(:diffs_tab)
-
-          wait_for_loading
-
-          click_element(:dismiss_popover_button) if has_element?(:dismiss_popover_button)
+          click_element(:dismiss_popover_button) if has_element?(:dismiss_popover_button, wait: 1)
         end
 
         def click_pipeline_link
@@ -215,8 +228,7 @@ module QA
         end
 
         def merge!
-          wait_until_ready_to_merge
-          click_element(:merge_button)
+          try_to_merge!
           finished_loading?
 
           raise "Merge did not appear to be successful" unless merged?
@@ -227,8 +239,18 @@ module QA
           click_element(:merge_immediately_option)
         end
 
+        def merge_when_pipeline_succeeds!
+          wait_until_ready_to_merge
+
+          click_element(:merge_button, text: 'Merge when pipeline succeeds')
+        end
+
         def merged?
-          has_element?(:merged_status_content, text: 'The changes were merged into', wait: 60)
+          # Revisit after merge page re-architect is done https://gitlab.com/gitlab-org/gitlab/-/issues/300042
+          # To remove page refresh logic if possible
+          retry_until(max_attempts: 3, reload: true) do
+            has_element?(:merged_status_content, text: 'The changes were merged into', wait: 20)
+          end
         end
 
         # Check if the MR is able to be merged
@@ -238,6 +260,10 @@ module QA
           # `wait_for_requests`, which should ensure the disabled/enabled
           # state of the element is reliable
           has_element?(:merge_button, disabled: false)
+        end
+
+        def merge_request_status
+          find_element(:merge_request_status_content).text
         end
 
         # Waits up 60 seconds and raises an error if unable to merge
@@ -271,7 +297,10 @@ module QA
         end
 
         def try_to_merge!
+          # Revisit after merge page re-architect is done https://gitlab.com/gitlab-org/gitlab/-/issues/300042
+          # To remove page refresh logic if possible
           wait_until_ready_to_merge
+          wait_until { !find_element(:merge_button).has_text?("when pipeline succeeds") }
 
           click_element(:merge_button)
         end
@@ -295,6 +324,31 @@ module QA
         def click_open_in_web_ide
           click_element(:open_in_web_ide_button)
           wait_for_requests
+        end
+
+        def edit_file_in_web_ide(file_name)
+          within_element(:file_title_container, file_name: file_name) do
+            click_element(:dropdown_button)
+            click_element(:edit_in_ide_button)
+          end
+        end
+
+        def add_suggestion_to_diff(suggestion, line)
+          find("a[data-linenumber='#{line}']").hover
+          click_element(:diff_comment)
+          click_element(:suggestion_button)
+          initial_content = find_element(:reply_field).value
+          fill_element(:reply_field, '')
+          fill_element(:reply_field, initial_content.gsub(/(```suggestion:-0\+0\n).*(\n```)/, "\\1#{suggestion}\\2"))
+          click_element(:comment_now_button)
+        end
+
+        def add_suggestion_to_batch
+          all_elements(:add_suggestion_batch_button, minimum: 1).first.click
+        end
+
+        def apply_suggestions_batch
+          all_elements(:apply_suggestions_batch_button, minimum: 1).first.click
         end
       end
     end

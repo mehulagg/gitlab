@@ -5,14 +5,12 @@ require 'spec_helper'
 RSpec.describe Resolvers::DastSiteProfileResolver do
   include GraphqlHelpers
 
-  let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
+  let_it_be(:developer) { create(:user, developer_projects: [project] ) }
   let_it_be(:dast_site_profile1) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_site_profile2) { create(:dast_site_profile, project: project) }
 
-  before do
-    project.add_maintainer(current_user)
-  end
+  let(:current_user) { developer }
 
   specify do
     expect(described_class).to have_nullable_graphql_type(Types::DastSiteProfileType.connection_type)
@@ -21,7 +19,7 @@ RSpec.describe Resolvers::DastSiteProfileResolver do
   context 'when resolving a single DAST site profile' do
     subject { sync(single_dast_site_profile(id: dast_site_profile1.to_global_id)) }
 
-    it { is_expected.to contain_exactly(dast_site_profile1) }
+    it { is_expected.to eq dast_site_profile1 }
   end
 
   context 'when resolving multiple DAST site profiles' do
@@ -32,11 +30,11 @@ RSpec.describe Resolvers::DastSiteProfileResolver do
 
   private
 
-  def dast_site_profiles(args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: project, args: args, ctx: context)
+  def dast_site_profiles
+    resolve(described_class, obj: project, ctx: { current_user: current_user })
   end
 
-  def single_dast_site_profile(args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: project, args: args, ctx: context)
+  def single_dast_site_profile(**args)
+    resolve(described_class.single, obj: project, args: args, ctx: { current_user: current_user })
   end
 end

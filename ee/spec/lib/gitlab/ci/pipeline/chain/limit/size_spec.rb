@@ -13,7 +13,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
     double(:command,
       project: project,
       current_user: user,
-      stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+      pipeline_seed: double(:seed, size: 1))
   end
 
   let(:step) { described_class.new(pipeline, command) }
@@ -22,9 +22,9 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
 
   context 'when pipeline size limit is exceeded' do
     before do
-      gold_plan = create(:gold_plan)
-      create(:plan_limits, plan: gold_plan, ci_pipeline_size: 1)
-      create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+      ultimate_plan = create(:ultimate_plan)
+      create(:plan_limits, plan: ultimate_plan, ci_pipeline_size: 1)
+      create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
     end
 
     context 'when saving incomplete pipelines' do
@@ -33,7 +33,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
           project: project,
           current_user: user,
           save_incompleted: true,
-          stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+          pipeline_seed: double(:seed, size: 2))
       end
 
       it 'drops the pipeline' do
@@ -83,7 +83,7 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
           project: project,
           current_user: user,
           save_incompleted: false,
-          stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+          pipeline_seed: double(:seed, size: 2))
       end
 
       it 'does not drop the pipeline' do
@@ -102,9 +102,9 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
 
   context 'when pipeline size limit is not exceeded' do
     before do
-      gold_plan = create(:gold_plan)
-      create(:plan_limits, plan: gold_plan, ci_pipeline_size: 100)
-      create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+      ultimate_plan = create(:ultimate_plan)
+      create(:plan_limits, plan: ultimate_plan, ci_pipeline_size: 100)
+      create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
     end
 
     it 'does not break the chain' do

@@ -1,7 +1,7 @@
-import $ from 'jquery';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { removeBreakLine } from 'helpers/text_helper';
+import $ from 'jquery';
 import { TEST_HOST } from 'helpers/test_constants';
+import { removeBreakLine } from 'helpers/text_helper';
 import ConflictsComponent from '~/vue_merge_request_widget/components/states/mr_widget_conflicts.vue';
 
 describe('MRWidgetConflicts', () => {
@@ -54,7 +54,7 @@ describe('MRWidgetConflicts', () => {
     vm.destroy();
   });
 
-  [false, true].forEach(featureEnabled => {
+  [false, true].forEach((featureEnabled) => {
     describe(`with GraphQL feature flag ${featureEnabled ? 'enabled' : 'disabled'}`, () => {
       beforeEach(() => {
         mergeRequestWidgetGraphql = featureEnabled;
@@ -167,12 +167,9 @@ describe('MRWidgetConflicts', () => {
             },
           });
 
-          expect(
-            vm
-              .text()
-              .trim()
-              .replace(/\s\s+/g, ' '),
-          ).toContain('ask someone with write access');
+          expect(vm.text().trim().replace(/\s\s+/g, ' ')).toContain(
+            'ask someone with write access',
+          );
         });
 
         it('should not have action buttons', async () => {

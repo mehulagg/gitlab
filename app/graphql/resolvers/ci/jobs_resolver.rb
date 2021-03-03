@@ -5,9 +5,11 @@ module Resolvers
     class JobsResolver < BaseResolver
       alias_method :pipeline, :object
 
+      type ::Types::Ci::JobType.connection_type, null: true
+
       argument :security_report_types, [Types::Security::ReportTypeEnum],
               required: false,
-              description: 'Filter jobs by the type of security report they produce'
+              description: 'Filter jobs by the type of security report they produce.'
 
       def resolve(security_report_types: [])
         if security_report_types.present?

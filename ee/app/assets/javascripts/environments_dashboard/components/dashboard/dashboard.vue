@@ -1,6 +1,4 @@
 <script>
-import { isEmpty } from 'lodash';
-import { mapState, mapActions } from 'vuex';
 import {
   GlButton,
   GlDashboardSkeleton,
@@ -11,10 +9,12 @@ import {
   GlPagination,
   GlSprintf,
 } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 import { s__ } from '~/locale';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
-import ProjectHeader from './project_header.vue';
 import Environment from './environment.vue';
+import ProjectHeader from './project_header.vue';
 
 export default {
   addProjectsModalHeader: s__('EnvironmentsDashboard|Add projects'),
@@ -108,7 +108,7 @@ export default {
     },
   },
   watch: {
-    currentPage: () => {
+    currentPage() {
       window.scrollTo(0, 0);
     },
   },

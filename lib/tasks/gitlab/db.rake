@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :db do
     desc 'GitLab | DB | Manually insert schema migration version'
@@ -192,11 +194,17 @@ namespace :gitlab do
         exit
       end
 
-      indexes = if args[:index_name]
-                  [Gitlab::Database::PostgresIndex.by_identifier(args[:index_name])]
-                else
-                  Gitlab::Database::Reindexing.candidate_indexes
-                end
+      indexes = Gitlab::Database::Reindexing.candidate_indexes
+
+      if identifier = args[:index_name]
+        raise ArgumentError, "Index name is not fully qualified with a schema: #{identifier}" unless identifier =~ /^\w+\.\w+$/
+
+        indexes = indexes.where(identifier: identifier)
+
+        raise "Index not found or not supported: #{args[:index_name]}" if indexes.empty?
+      end
+
+      ActiveRecord::Base.logger = Logger.new(STDOUT) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
 
       Gitlab::Database::Reindexing.perform(indexes)
     rescue => e
@@ -222,6 +230,38 @@ namespace :gitlab do
 
       puts "Found user created projects. Database active"
       exit 0
+    end
+
+    desc 'Run migrations with instrumentation'
+    task :migration_testing, [:result_file] => :environment do |_, args|
+      result_file = args[:result_file] || raise("Please specify result_file argument")
+      raise "File exists already, won't overwrite: #{result_file}" if File.exist?(result_file)
+
+      verbose_was, ActiveRecord::Migration.verbose = ActiveRecord::Migration.verbose, true
+
+      ctx = ActiveRecord::Base.connection.migration_context
+      existing_versions = ctx.get_all_versions.to_set
+
+      pending_migrations = ctx.migrations.reject do |migration|
+        existing_versions.include?(migration.version)
+      end
+
+      instrumentation = Gitlab::Database::Migrations::Instrumentation.new
+
+      pending_migrations.each do |migration|
+        instrumentation.observe(migration.version) do
+          ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
+        end
+      end
+    ensure
+      if instrumentation
+        File.open(result_file, 'wb+') do |io|
+          io << instrumentation.observations.to_json
+        end
+      end
+
+      ActiveRecord::Base.clear_cache!
+      ActiveRecord::Migration.verbose = verbose_was
     end
   end
 end

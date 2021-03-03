@@ -10,7 +10,7 @@ const CustomNumber = {
 
     const isValidNumber = !Number.isNaN(parsedValue) && value !== '';
     const customOption = [{ id: parsedValue, title: parsedValue }];
-    const defaultDropdownOptions = defaultOptions.map(o => ({ id: o, title: o }));
+    const defaultDropdownOptions = defaultOptions.map((o) => ({ id: o, title: o }));
 
     list.setData(isValidNumber ? customOption : defaultDropdownOptions);
     list.currentIndex = 0;

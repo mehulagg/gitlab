@@ -55,7 +55,7 @@ describe('Security Configuration App', () => {
   const getFeaturesTable = () => wrapper.find({ ref: 'securityControlTable' });
   const getFeaturesRows = () => getFeaturesTable().findAll('tbody tr');
   const getAlert = () => wrapper.find(GlAlert);
-  const getRowCells = row => {
+  const getRowCells = (row) => {
     const [feature, status, manage] = row.findAll('td').wrappers;
     return { feature, status, manage };
   };

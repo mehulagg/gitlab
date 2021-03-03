@@ -1,10 +1,10 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
 import { GlButton } from '@gitlab/ui';
+import { mapActions, mapGetters } from 'vuex';
 import { visitUrl } from '~/lib/utils/url_utility';
+import GeoNodeFormCapacities from './geo_node_form_capacities.vue';
 import GeoNodeFormCore from './geo_node_form_core.vue';
 import GeoNodeFormSelectiveSync from './geo_node_form_selective_sync.vue';
-import GeoNodeFormCapacities from './geo_node_form_capacities.vue';
 
 export default {
   name: 'GeoNodeForm',

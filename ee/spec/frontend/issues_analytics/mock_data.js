@@ -1,6 +1,6 @@
 import { TEST_HOST } from 'helpers/test_constants';
 
-const createIssue = values => {
+const createIssue = (values) => {
   return {
     state: 'closed',
     epic: {

@@ -82,11 +82,9 @@ describe('MergeRequestTableRow component', () => {
       });
 
       it('renders the "Time to merge" metric column with the "days_to_merge" metric', () => {
-        expect(
-          findMetricColumns()
-            .at(0)
-            .props('value'),
-        ).toBe(defaultProps.mergeRequest.days_to_merge);
+        expect(findMetricColumns().at(0).props('value')).toBe(
+          defaultProps.mergeRequest.days_to_merge,
+        );
       });
     });
   });

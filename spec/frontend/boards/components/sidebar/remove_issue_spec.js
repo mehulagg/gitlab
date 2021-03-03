@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import RemoveIssue from '~/boards/components/sidebar/remove_issue.vue';
 
@@ -8,7 +8,7 @@ describe('boards sidebar remove issue', () => {
 
   const findButton = () => wrapper.find(GlButton);
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(RemoveIssue, {
       propsData: {
         issue: {},

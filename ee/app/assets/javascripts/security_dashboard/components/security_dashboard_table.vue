@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlEmptyState, GlFormCheckbox } from '@gitlab/ui';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
 import SecurityDashboardTableRow from './security_dashboard_table_row.vue';
 import SelectionSummary from './selection_summary_vuex.vue';
@@ -45,7 +45,6 @@ export default {
     ...mapActions('vulnerabilities', [
       'deselectAllVulnerabilities',
       'fetchVulnerabilities',
-      'openModal',
       'selectAllVulnerabilities',
     ]),
     fetchPage(page) {
@@ -107,7 +106,6 @@ export default {
         v-for="vulnerability in vulnerabilities"
         :key="vulnerability.id"
         :vulnerability="vulnerability"
-        @openModal="openModal({ vulnerability })"
       />
 
       <slot v-if="showEmptyState" name="empty-state">

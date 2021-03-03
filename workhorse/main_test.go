@@ -642,6 +642,24 @@ func TestPropagateCorrelationIdHeader(t *testing.T) {
 	}
 }
 
+func TestRejectUnknownMethod(t *testing.T) {
+	ts := testhelper.TestServerWithHandler(regexp.MustCompile(`.`), func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+	defer ts.Close()
+	ws := startWorkhorseServer(ts.URL)
+	defer ws.Close()
+
+	req, err := http.NewRequest("UNKNOWN", ws.URL+"/api/v3/projects/123/repository/not/special", nil)
+	require.NoError(t, err)
+
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
+}
+
 func setupStaticFile(fpath, content string) error {
 	return setupStaticFileHelper(fpath, content, testDocumentRoot)
 }
@@ -675,6 +693,12 @@ func newBranch() string {
 func testAuthServer(t *testing.T, url *regexp.Regexp, params url.Values, code int, body interface{}) *httptest.Server {
 	return testhelper.TestServerWithHandler(url, func(w http.ResponseWriter, r *http.Request) {
 		require.NotEmpty(t, r.Header.Get("X-Request-Id"))
+
+		// return a 204 No Content response if we don't receive the JWT header
+		if r.Header.Get(secret.RequestHeader) == "" {
+			w.WriteHeader(204)
+			return
+		}
 
 		w.Header().Set("Content-Type", api.ResponseContentType)
 

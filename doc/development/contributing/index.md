@@ -144,10 +144,10 @@ Keep the following in mind when submitting merge requests:
 
 - When reviewers are reading through a merge request they may request guidance from other
   reviewers.
-- If the code quality is found to not meet GitLab’s standards, the merge request reviewer will
+- If the code quality is found to not meet GitLab standards, the merge request reviewer will
   provide guidance and refer the author to our:
   - [Documentation](../documentation/styleguide/index.md) style guide.
-  - Code style guides.
+  - [Code style guides](style_guides.md).
 - Sometimes style guides will be followed but the code will lack structural integrity, or the
   reviewer will have reservations about the code’s overall quality. When there is a reservation,
   the reviewer will inform the author and provide some guidance.
@@ -181,10 +181,20 @@ reasons for including it.
 `@mention` a maintainer in merge requests that contain:
 
 - More than 500 changes.
-- Any major breaking changes.
+- Any major [breaking changes](#breaking-changes).
 - External libraries.
 
 If you are not sure who to mention, the reviewer will do this for you early in the merge request process.
+
+#### Breaking changes
+
+A "breaking change" is any change that requires users to make a corresponding change to their code, settings, or workflow. "Users" might be humans, API clients, or even code classes that "use" another class. Examples of breaking changes include:
+
+- Removing a user-facing feature without a replacement/workaround.
+- Changing the definition of an existing API (by re-naming query parameters, changing routes, etc.).
+- Removing a public method from a code class.
+
+A breaking change can be considered "major" if it affects many users, or represents a significant change in behavior.
 
 #### Issues workflow
 

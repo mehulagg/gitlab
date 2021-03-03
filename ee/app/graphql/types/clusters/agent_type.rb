@@ -12,31 +12,36 @@ module Types
       field :created_at,
             Types::TimeType,
             null: true,
-            description: 'Timestamp the cluster agent was created'
+            description: 'Timestamp the cluster agent was created.'
+
+      field :created_by_user,
+            Types::UserType,
+            null: true,
+            description: 'User object, containing information about the person who created the agent.'
 
       field :id, GraphQL::ID_TYPE,
             null: false,
-            description: 'ID of the cluster agent'
+            description: 'ID of the cluster agent.'
 
       field :name,
             GraphQL::STRING_TYPE,
             null: true,
-            description: 'Name of the cluster agent'
+            description: 'Name of the cluster agent.'
 
       field :project, Types::ProjectType,
-            description: 'The project this cluster agent is associated with',
+            description: 'The project this cluster agent is associated with.',
             null: true,
             authorize: :read_project
 
       field :tokens, Types::Clusters::AgentTokenType.connection_type,
-            description: 'Tokens associated with the cluster agent',
+            description: 'Tokens associated with the cluster agent.',
             null: true,
             resolver: ::Resolvers::Clusters::AgentTokensResolver
 
       field :updated_at,
             Types::TimeType,
             null: true,
-            description: 'Timestamp the cluster agent was updated'
+            description: 'Timestamp the cluster agent was updated.'
 
       def project
         Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, object.project_id).find

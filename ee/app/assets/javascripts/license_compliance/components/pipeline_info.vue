@@ -1,6 +1,6 @@
 <script>
-import { escape } from 'lodash';
 import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { escape } from 'lodash';
 import { s__, sprintf } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 

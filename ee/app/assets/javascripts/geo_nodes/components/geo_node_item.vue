@@ -1,8 +1,8 @@
 <script>
 import eventHub from '../event_hub';
 
-import GeoNodeHeader from './geo_node_header.vue';
 import GeoNodeDetails from './geo_node_details.vue';
+import GeoNodeHeader from './geo_node_header.vue';
 
 export default {
   components: {

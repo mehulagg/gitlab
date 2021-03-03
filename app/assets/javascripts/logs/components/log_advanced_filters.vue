@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlFilteredSearch } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import { __, s__ } from '~/locale';
 import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
 import { timeRanges } from '~/vue_shared/constants';
@@ -42,7 +42,7 @@ export default {
      */
     podOptions() {
       if (this.pods.options.length) {
-        return this.pods.options.map(podName => ({ value: podName, title: podName }));
+        return this.pods.options.map((podName) => ({ value: podName, title: podName }));
       }
       return null;
     },

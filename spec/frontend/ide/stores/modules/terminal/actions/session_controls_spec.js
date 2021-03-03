@@ -1,12 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import * as actions from '~/ide/stores/modules/terminal/actions/session_controls';
 import { STARTING, PENDING, STOPPING, STOPPED } from '~/ide/stores/modules/terminal/constants';
 import * as messages from '~/ide/stores/modules/terminal/messages';
 import * as mutationTypes from '~/ide/stores/modules/terminal/mutation_types';
-import * as actions from '~/ide/stores/modules/terminal/actions/session_controls';
-import httpStatus from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import httpStatus from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 
@@ -281,7 +281,7 @@ describe('IDE store terminal session controls actions', () => {
       );
     });
 
-    [httpStatus.NOT_FOUND, httpStatus.UNPROCESSABLE_ENTITY].forEach(status => {
+    [httpStatus.NOT_FOUND, httpStatus.UNPROCESSABLE_ENTITY].forEach((status) => {
       it(`dispatches request and startSession on ${status}`, () => {
         mock
           .onPost(state.session.retryPath, { branch: rootState.currentBranchId, format: 'json' })

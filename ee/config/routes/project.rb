@@ -40,6 +40,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :subscriptions, only: [:create, :destroy]
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
+          get '/alerts/:id', action: 'alert_details'
           resources :policies, only: [:new, :edit], controller: :threat_monitoring
         end
 
@@ -63,9 +64,13 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :dashboard, only: [:index], controller: :dashboard
           resources :vulnerability_report, only: [:index], controller: :vulnerability_report
 
-          resource :configuration, only: [:show], controller: :configuration do
+          resource :policy, only: [:show]
+
+          resource :configuration, only: [], controller: :configuration do
             post :auto_fix, on: :collection
+            resource :corpus_management, only: [:show], controller: :corpus_management
             resource :sast, only: [:show, :create], controller: :sast_configuration
+            resource :api_fuzzing, only: :show, controller: :api_fuzzing_configuration
             resource :dast_profiles, only: [:show] do
               resources :dast_site_profiles, only: [:new, :edit]
               resources :dast_scanner_profiles, only: [:new, :edit]
@@ -79,7 +84,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :vulnerabilities, only: [:show] do
             member do
               get :discussions, format: :json
-              post :create_issue, format: :json
             end
 
             scope module: :vulnerabilities do
@@ -105,21 +109,20 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
         end
 
-        scope :on_demand_scans do
-          root 'on_demand_scans#index', as: 'on_demand_scans'
-        end
+        resources :on_demand_scans, only: [:index, :new, :edit]
 
         namespace :integrations do
           namespace :jira do
-            resources :issues, only: [:index]
+            resources :issues, only: [:index, :show]
           end
         end
 
-        resources :iterations, only: [:index]
+        # Added for backward compatibility with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39543
+        # TODO: Cleanup https://gitlab.com/gitlab-org/gitlab/-/issues/320814
+        get 'iterations/inherited/:id', to: redirect('%{namespace_id}/%{project_id}/-/iterations/%{id}'),
+            as: :legacy_project_iterations_inherited
 
-        namespace :iterations do
-          resources :inherited, only: [:show], constraints: { id: /\d+/ }
-        end
+        resources :iterations, only: [:index, :show], constraints: { id: /\d+/ }
 
         namespace :incident_management, path: '' do
           resources :oncall_schedules, only: [:index], path: 'oncall_schedules'

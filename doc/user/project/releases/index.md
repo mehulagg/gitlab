@@ -200,7 +200,7 @@ If the job that's executing is within a freeze period, GitLab CI/CD creates an e
 variable named `$CI_DEPLOY_FREEZE`.
 
 To prevent the deployment job from executing, create a `rules` entry in your
-`gitlab-ci.yaml`, for example:
+`gitlab-ci.yml`, for example:
 
 ```yaml
 deploy_to_production:
@@ -274,13 +274,10 @@ Release note descriptions are unrelated. Description supports [Markdown](../../m
 
 ### Release assets
 
-You can currently add the following types of assets to each release:
+You can add the following types of assets to each release:
 
 - [Source code](#source-code)
 - [Links](#links)
-
-GitLab will support more asset types in the future, including objects such
-as pre-built packages, compliance/security evidence, or container images.
 
 #### Permanent links to release assets
 
@@ -336,8 +333,8 @@ The four types of links are "Runbook," "Package," "Image," and "Other."
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26019) in GitLab 12.6.
 
 Each time a release is created, GitLab takes a snapshot of data that's related to it.
-This data is saved in a JSON file and called *release evidence*. The feature currently
-includes test artifacts and linked milestones (and will include issues) to facilitate
+This data is saved in a JSON file and called *release evidence*. The feature
+includes test artifacts and linked milestones to facilitate
 internal processes, like external audits.
 
 To access the release evidence, on the Releases page, click the link to the JSON file that's listed
@@ -410,7 +407,7 @@ Here is an example of a release evidence object:
 }
 ```
 
-### Collect release evidence **(PREMIUM ONLY)**
+### Collect release evidence **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/199065) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 
@@ -470,13 +467,23 @@ In the API:
 > [Introduced](https://gitlab.com/gitlab-org/release-cli/-/merge_requests/6) in GitLab 12.10.
 
 The Release CLI is a command-line tool for managing GitLab Releases from the command line or from
-GitLab's CI/CD configuration file, `.gitlab-ci.yml`.
+the GitLab CI/CD configuration file, `.gitlab-ci.yml`.
 
 With it, you can create, update, modify, and delete releases right through the
 terminal.
 
 Read the [Release CLI documentation](https://gitlab.com/gitlab-org/release-cli/-/blob/master/docs/index.md)
 for details.
+
+## Release Metrics **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259703) in GitLab Premium 13.9.
+
+Group-level release metrics are available by navigating to **Group > Analytics > CI/CD**.
+These metrics include:
+
+- Total number of releases in the group
+- Percentage of projects in the group that have at least one release
 
 <!-- ## Troubleshooting
 

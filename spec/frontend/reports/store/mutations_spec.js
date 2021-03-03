@@ -1,6 +1,6 @@
-import state from '~/reports/store/state';
-import mutations from '~/reports/store/mutations';
 import * as types from '~/reports/store/mutation_types';
+import mutations from '~/reports/store/mutations';
+import state from '~/reports/store/state';
 import { issue } from '../mock_data/mock_data';
 
 describe('Reports Store Mutations', () => {
@@ -126,6 +126,33 @@ describe('Reports Store Mutations', () => {
     it('should set modal data', () => {
       expect(stateCopy.modal.data.execution_time.value).toEqual(issue.execution_time);
       expect(stateCopy.modal.data.system_output.value).toEqual(issue.system_output);
+    });
+
+    it('should open modal', () => {
+      expect(stateCopy.modal.open).toEqual(true);
+    });
+  });
+
+  describe('RESET_ISSUE_MODAL_DATA', () => {
+    beforeEach(() => {
+      mutations[types.SET_ISSUE_MODAL_DATA](stateCopy, {
+        issue,
+      });
+
+      mutations[types.RESET_ISSUE_MODAL_DATA](stateCopy);
+    });
+
+    it('should reset modal title', () => {
+      expect(stateCopy.modal.title).toEqual(null);
+    });
+
+    it('should reset modal data', () => {
+      expect(stateCopy.modal.data.execution_time.value).toEqual(null);
+      expect(stateCopy.modal.data.system_output.value).toEqual(null);
+    });
+
+    it('should close modal', () => {
+      expect(stateCopy.modal.open).toEqual(false);
     });
   });
 });

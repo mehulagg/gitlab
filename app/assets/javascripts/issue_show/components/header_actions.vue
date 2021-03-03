@@ -2,6 +2,7 @@
 import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlLink, GlModal } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import createFlash, { FLASH_TYPES } from '~/flash';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import { IssuableType } from '~/issuable_show/constants';
 import { IssuableStatus, IssueStateEvent } from '~/issue_show/constants';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
@@ -148,9 +149,9 @@ export default {
           };
 
           // Dispatch event which updates open/close state, shared among the issue show page
-          document.dispatchEvent(new CustomEvent('issuable_vue_app:change', payload));
+          document.dispatchEvent(new CustomEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, payload));
         })
-        .catch(() => createFlash({ message: __('Update failed. Please try again.') }))
+        .catch(() => createFlash({ message: __('Error occurred while updating the issue status') }))
         .finally(() => {
           this.toggleStateButtonLoading(false);
         });
@@ -192,22 +193,19 @@ export default {
 
 <template>
   <div class="detail-page-header-actions">
-    <gl-dropdown class="gl-display-block gl-display-sm-none!" block :text="dropdownText">
-      <gl-dropdown-item
-        v-if="showToggleIssueStateButton"
-        :disabled="isToggleStateButtonLoading"
-        @click="toggleIssueState"
-      >
+    <gl-dropdown
+      class="gl-display-block gl-sm-display-none!"
+      block
+      :text="dropdownText"
+      :loading="isToggleStateButtonLoading"
+    >
+      <gl-dropdown-item v-if="showToggleIssueStateButton" @click="toggleIssueState">
         {{ buttonText }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
         {{ newIssueTypeText }}
       </gl-dropdown-item>
-      <gl-dropdown-item
-        v-if="canPromoteToEpic"
-        :disabled="isToggleStateButtonLoading"
-        @click="promoteToEpic"
-      >
+      <gl-dropdown-item v-if="canPromoteToEpic" @click="promoteToEpic">
         {{ __('Promote to epic') }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="!isIssueAuthor" :href="reportAbusePath">
@@ -225,7 +223,7 @@ export default {
 
     <gl-button
       v-if="showToggleIssueStateButton"
-      class="gl-display-none gl-display-sm-inline-flex!"
+      class="gl-display-none gl-sm-display-inline-flex!"
       category="secondary"
       :data-qa-selector="qaSelector"
       :loading="isToggleStateButtonLoading"
@@ -236,7 +234,7 @@ export default {
     </gl-button>
 
     <gl-dropdown
-      class="gl-display-none gl-display-sm-inline-flex!"
+      class="gl-display-none gl-sm-display-inline-flex!"
       toggle-class="gl-border-0! gl-shadow-none!"
       no-caret
       right

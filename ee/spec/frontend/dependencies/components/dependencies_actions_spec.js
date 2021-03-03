@@ -41,7 +41,7 @@ describe('DependenciesActions component', () => {
   it('dispatches the right setSortField action on clicking each item in the dropdown', () => {
     const dropdownItems = wrapper.findAll(GlDropdownItem).wrappers;
 
-    dropdownItems.forEach(item => {
+    dropdownItems.forEach((item) => {
       // trigger() does not work on stubbed/shallow mounted components
       // https://github.com/vuejs/vue-test-utils/issues/919
       item.vm.$emit('click');
@@ -49,7 +49,7 @@ describe('DependenciesActions component', () => {
 
     expect(store.dispatch.mock.calls).toEqual(
       expect.arrayContaining(
-        Object.keys(SORT_FIELDS).map(field => [`${namespace}/setSortField`, field]),
+        Object.keys(SORT_FIELDS).map((field) => [`${namespace}/setSortField`, field]),
       ),
     );
   });

@@ -15,7 +15,9 @@ source branch into a target branch. By default, the CI pipeline runs jobs
 against the source branch.
 
 With *pipelines for merged results*, the pipeline runs as if the changes from
-the source branch have already been merged into the target branch.
+the source branch have already been merged into the target branch. The commit shown for the pipeline does not exist on the source or target branches but represents the combined target and source branches.
+
+![Merge request widget for merged results pipeline](img/merged_result_pipeline.png)
 
 If the pipeline fails due to a problem in the target branch, you can wait until the
 target is fixed and re-run the pipeline.
@@ -30,7 +32,7 @@ can still be successfully merged into the target.
 When the merge request can't be merged, the pipeline runs against the source branch only. For example, when:
 
 - The target branch has changes that conflict with the changes in the source branch.
-- The merge request is a [**Draft** merge request](../../../user/project/merge_requests/work_in_progress_merge_requests.md).
+- The merge request is a [**Draft** merge request](../../../user/project/merge_requests/drafts.md).
 
 In these cases, the pipeline runs as a [pipeline for merge requests](../index.md)
 and is labeled as `detached`. If these cases no longer exist, new pipelines
@@ -48,6 +50,8 @@ To enable pipelines for merge results:
 - You must not be using
   [fast forward merges](../../../user/project/merge_requests/fast_forward_merge.md) yet.
   To follow progress, see [#58226](https://gitlab.com/gitlab-org/gitlab/-/issues/26996).
+- Your repository must be a GitLab repository, not an
+  [external repository](../../ci_cd_for_external_repos/index.md).
 
 ## Enable pipelines for merged results
 
@@ -56,7 +60,7 @@ To enable pipelines for merged results for your project:
 1. [Configure your CI/CD configuration file](../index.md#configuring-pipelines-for-merge-requests)
    so that the pipeline or individual jobs run for merge requests.
 1. Visit your project's **Settings > General** and expand **Merge requests**.
-1. Check **Enable merged results pipelines.**.
+1. Check **Enable merged results pipelines**.
 1. Click **Save changes**.
 
 WARNING:

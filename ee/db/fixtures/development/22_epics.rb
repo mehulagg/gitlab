@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Gitlab::Seeder.quiet do
   Group.all.each do |group|
     5.times do

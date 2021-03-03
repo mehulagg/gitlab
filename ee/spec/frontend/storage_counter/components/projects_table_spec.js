@@ -52,7 +52,9 @@ describe('Usage Quotas project table component', () => {
     });
 
     it('renders excess storage rows with error state', () => {
-      const rowsWithError = findTableRowsWithExcessStorage().filter(r => r.classes('gl-bg-red-50'));
+      const rowsWithError = findTableRowsWithExcessStorage().filter((r) =>
+        r.classes('gl-bg-red-50'),
+      );
       expect(rowsWithError).toHaveLength(1);
     });
   });

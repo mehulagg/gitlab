@@ -84,7 +84,8 @@ RSpec.describe 'Update Epic', :js do
       it 'creates a todo only for mentioned users' do
         mentioned = create(:user)
 
-        fill_in 'issue-description', with: "FYI #{mentioned.to_reference}"
+        # Add a trailing space to close mention auto-complete dialog, which might block the save button
+        fill_in 'issue-description', with: "FYI #{mentioned.to_reference} "
 
         click_button 'Save changes'
 
@@ -149,8 +150,8 @@ RSpec.describe 'Update Epic', :js do
       it 'opens datepicker when clicking Edit button' do
         page.within('.issuable-sidebar .block.start-date') do
           click_button('Edit')
-          expect(find('.value-type-fixed')).to have_selector('.pikaday-container')
-          expect(find('.value-type-fixed')).to have_selector('.pikaday-container .pika-single.is-bound')
+          expect(find('.value-type-fixed')).to have_selector('.gl-datepicker')
+          expect(find('.value-type-fixed')).to have_selector('.gl-datepicker .pika-single.is-bound')
         end
       end
     end

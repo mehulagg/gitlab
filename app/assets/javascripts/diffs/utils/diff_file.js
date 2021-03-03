@@ -1,13 +1,17 @@
+import { truncateSha } from '~/lib/utils/text_utility';
+
 import {
   DIFF_FILE_SYMLINK_MODE,
   DIFF_FILE_DELETED_MODE,
   DIFF_FILE_MANUAL_COLLAPSE,
   DIFF_FILE_AUTOMATIC_COLLAPSE,
 } from '../constants';
+import { getDerivedMergeRequestInformation } from './merge_request';
+import { uuids } from './uuids';
 
 function fileSymlinkInformation(file, fileList) {
-  const duplicates = fileList.filter(iteratedFile => iteratedFile.file_hash === file.file_hash);
-  const includesSymlink = duplicates.some(iteratedFile => {
+  const duplicates = fileList.filter((iteratedFile) => iteratedFile.file_hash === file.file_hash);
+  const includesSymlink = duplicates.some((iteratedFile) => {
     return [iteratedFile.a_mode, iteratedFile.b_mode].includes(DIFF_FILE_SYMLINK_MODE);
   });
   const brokenSymlinkScenario = duplicates.length > 1 && includesSymlink;
@@ -32,16 +36,33 @@ function collapsed(file) {
   };
 }
 
-export function prepareRawDiffFile({ file, allFiles }) {
-  Object.assign(file, {
+function identifier(file) {
+  const { userOrGroup, project, id } = getDerivedMergeRequestInformation({
+    endpoint: file.load_collapsed_diff_url,
+  });
+
+  return uuids({
+    seeds: [userOrGroup, project, id, file.file_identifier_hash, file.blob?.id],
+  })[0];
+}
+
+export function prepareRawDiffFile({ file, allFiles, meta = false }) {
+  const additionalProperties = {
     brokenSymlink: fileSymlinkInformation(file, allFiles),
     viewer: {
       ...file.viewer,
       ...collapsed(file),
     },
-  });
+  };
 
-  return file;
+  // It's possible, but not confirmed, that `blob.id` isn't available sometimes
+  // See: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49506#note_464692057
+  // We don't want duplicate IDs if that's the case, so we just don't assign an ID
+  if (!meta && file.blob?.id && file.load_collapsed_diff_url) {
+    additionalProperties.id = identifier(file);
+  }
+
+  return Object.assign(file, additionalProperties);
 }
 
 export function collapsedType(file) {
@@ -58,4 +79,8 @@ export function isCollapsed(file) {
   };
 
   return collapsedStates[type];
+}
+
+export function getShortShaFromFile(file) {
+  return file.content_sha ? truncateSha(String(file.content_sha)) : null;
 }

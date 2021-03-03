@@ -9,7 +9,7 @@ RSpec.describe PersonalAccessTokens::CreateService do
 
     context 'when non-admin user' do
       context 'when user creates their own token' do
-        it 'creates audit logs with success message' do
+        it 'creates AuditEvent with success message' do
           expect_to_log(user, user, /Created personal access token with id \d+/)
 
           described_class.new(current_user: user, target_user: user, params: params).execute
@@ -19,7 +19,7 @@ RSpec.describe PersonalAccessTokens::CreateService do
       context 'when user attempts to create a token for a different user' do
         let(:other_user) { create(:user) }
 
-        it 'creates audit logs with failure message' do
+        it 'creates AuditEvent with failure message' do
           expect_to_log(user, other_user, 'Attempted to create personal access token but failed with message: Not permitted to create')
 
           described_class.new(current_user: user, target_user: other_user, params: params).execute

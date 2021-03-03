@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
-import { listObj } from 'jest/boards/mock_data';
-import BoardCard from '~/boards/components/board_card_layout.vue';
+import { mockList } from 'jest/boards/mock_data';
+import BoardCard from '~/boards/components/board_card.vue';
 import { ListType } from '~/boards/constants';
-import List from '~/boards/models/list';
 import { createStore } from '~/boards/stores';
 import { mockIssues } from '../mock_data';
 
@@ -13,8 +13,8 @@ describe('IssuesLaneList', () => {
 
   const createComponent = ({ listType = ListType.backlog, collapsed = false } = {}) => {
     const listMock = {
-      ...listObj,
-      list_type: listType,
+      ...mockList,
+      listType,
       collapsed,
     };
 
@@ -23,12 +23,10 @@ describe('IssuesLaneList', () => {
       listMock.user = {};
     }
 
-    const list = new List({ ...listMock, doNotFetchIssues: true });
-
     wrapper = shallowMount(IssuesLaneList, {
       store,
       propsData: {
-        list,
+        list: listMock,
         issues: mockIssues,
         disabled: false,
         canAdminList: true,
@@ -117,6 +115,25 @@ describe('IssuesLaneList', () => {
         });
 
         expect(document.body.classList.contains('is-dragging')).toBe(false);
+      });
+    });
+
+    describe('highlighting', () => {
+      it('scrolls to column when highlighted', async () => {
+        const defaultStore = createStore();
+        store = {
+          ...defaultStore,
+          state: {
+            ...defaultStore.state,
+            highlightedLists: [mockList.id],
+          },
+        };
+
+        createComponent();
+
+        await nextTick();
+
+        expect(wrapper.element.scrollIntoView).toHaveBeenCalled();
       });
     });
   });

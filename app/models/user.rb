@@ -31,7 +31,7 @@ class User < ApplicationRecord
 
   INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
-  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'
 
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
   add_authentication_token_field :feed_token
@@ -116,6 +116,13 @@ class User < ApplicationRecord
   has_one :user_synced_attributes_metadata, autosave: true
   has_one :aws_role, class_name: 'Aws::Role'
 
+  # Followers
+  has_many :followed_users, foreign_key: :follower_id, class_name: 'Users::UserFollowUser'
+  has_many :followees, through: :followed_users
+
+  has_many :following_users, foreign_key: :followee_id, class_name: 'Users::UserFollowUser'
+  has_many :followers, through: :following_users
+
   # Groups
   has_many :members
   has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, source: 'GroupMember'
@@ -172,6 +179,7 @@ class User < ApplicationRecord
   has_many :merge_request_reviewers, inverse_of: :reviewer
   has_many :assigned_issues, class_name: "Issue", through: :issue_assignees, source: :issue
   has_many :assigned_merge_requests, class_name: "MergeRequest", through: :merge_request_assignees, source: :merge_request
+  has_many :created_custom_emoji, class_name: 'CustomEmoji', inverse_of: :creator
 
   has_many :bulk_imports
 
@@ -286,6 +294,7 @@ class User < ApplicationRecord
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
+            :markdown_surround_selection, :markdown_surround_selection=,
             to: :user_preference
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
@@ -352,6 +361,7 @@ class User < ApplicationRecord
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
   scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
   scope :external, -> { where(external: true) }
+  scope :non_external, -> { where(external: false) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :active, -> { with_state(:active).non_internal }
   scope :active_without_ghosts, -> { with_state(:active).without_ghosts }
@@ -722,6 +732,7 @@ class User < ApplicationRecord
         u.name = 'GitLab Security Bot'
         u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/application_security/security_bot/index.md')
         u.avatar = bot_avatar(image: 'security-bot.png')
+        u.confirmed_at = Time.zone.now
       end
     end
 
@@ -959,8 +970,8 @@ class User < ApplicationRecord
   end
 
   # rubocop: disable CodeReuse/ServiceClass
-  def refresh_authorized_projects
-    Users::RefreshAuthorizedProjectsService.new(self).execute
+  def refresh_authorized_projects(source: nil)
+    Users::RefreshAuthorizedProjectsService.new(self, source: source).execute
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -1357,6 +1368,7 @@ class User < ApplicationRecord
 
   def hook_attrs
     {
+      id: id,
       name: name,
       username: username,
       avatar_url: avatar_url(only_path: false),
@@ -1376,7 +1388,14 @@ class User < ApplicationRecord
 
   def set_username_errors
     namespace_path_errors = self.errors.delete(:"namespace.path")
-    self.errors[:username].concat(namespace_path_errors) if namespace_path_errors
+
+    return unless namespace_path_errors&.any?
+
+    if namespace_path_errors.include?('has already been taken') && !User.exists?(username: username)
+      self.errors.add(:base, :username_exists_as_a_different_namespace)
+    else
+      self.errors[:username].concat(namespace_path_errors)
+    end
   end
 
   def username_changed_hook
@@ -1430,6 +1449,29 @@ class User < ApplicationRecord
       else
         UsersStarProject.create!(project: project, user: self)
       end
+    end
+  end
+
+  def following?(user)
+    self.followees.exists?(user.id)
+  end
+
+  def follow(user)
+    return false if self.id == user.id
+
+    begin
+      followee = Users::UserFollowUser.create(follower_id: self.id, followee_id: user.id)
+      self.followees.reset if followee.persisted?
+    rescue ActiveRecord::RecordNotUnique
+      false
+    end
+  end
+
+  def unfollow(user)
+    if Users::UserFollowUser.where(follower_id: self.id, followee_id: user.id).delete_all > 0
+      self.followees.reset
+    else
+      false
     end
   end
 
@@ -1490,6 +1532,10 @@ class User < ApplicationRecord
 
   def can_be_removed?
     !solo_owned_groups.present?
+  end
+
+  def can_remove_self?
+    true
   end
 
   def ci_owned_runners
@@ -1559,6 +1605,12 @@ class User < ApplicationRecord
     end
   end
 
+  def review_requested_open_merge_requests_count(force: false)
+    Rails.cache.fetch(['users', id, 'review_requested_open_merge_requests_count'], force: force, expires_in: 20.minutes) do
+      MergeRequestsFinder.new(self, reviewer_id: id, state: 'opened', non_archived: true).execute.count
+    end
+  end
+
   def assigned_open_issues_count(force: false)
     Rails.cache.fetch(['users', id, 'assigned_open_issues_count'], force: force, expires_in: 20.minutes) do
       IssuesFinder.new(self, assignee_id: self.id, state: 'opened', non_archived: true).execute.count
@@ -1602,6 +1654,7 @@ class User < ApplicationRecord
 
   def invalidate_merge_request_cache_counts
     Rails.cache.delete(['users', id, 'assigned_open_merge_requests_count'])
+    Rails.cache.delete(['users', id, 'review_requested_open_merge_requests_count'])
   end
 
   def invalidate_todos_done_count
@@ -1664,7 +1717,7 @@ class User < ApplicationRecord
     save
   end
 
-  # each existing user needs to have an `feed_token`.
+  # each existing user needs to have a `feed_token`.
   # we do this on read since migrating all existing users is not a feasible
   # solution.
   def feed_token

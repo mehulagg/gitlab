@@ -8,10 +8,11 @@ module API
 
     feature_category :continuous_integration
 
-    params do
-      requires :id, type: String, desc: 'The ID of a project'
-    end
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+      params do
+        requires :id, type: String, desc: 'The ID of a project'
+      end
+
       helpers do
         params :optional_scope do
           optional :scope, types: [String, Array[String]], desc: 'The scope of builds to show',
@@ -45,7 +46,7 @@ module API
         builds = user_project.builds.order('id DESC')
         builds = filter_builds(builds, params[:scope])
 
-        builds = builds.preload(:user, :job_artifacts_archive, :job_artifacts, :runner, pipeline: :project)
+        builds = builds.preload(:user, :job_artifacts_archive, :job_artifacts, :runner, :tags, pipeline: :project)
         present paginate(builds), with: Entities::Ci::Job
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -82,7 +83,8 @@ module API
         content_type 'text/plain'
         env['api.format'] = :binary
 
-        trace = build.trace.raw
+        # The trace can be nil bu body method expects a string as an argument.
+        trace = build.trace.raw || ''
         body trace
       end
 
@@ -138,25 +140,46 @@ module API
         present build, with: Entities::Ci::Job
       end
 
-      desc 'Trigger a actionable job (manual, delayed, etc)' do
-        success Entities::Ci::Job
+      desc 'Trigger an actionable job (manual, delayed, etc)' do
+        success Entities::Ci::JobBasic
         detail 'This feature was added in GitLab 8.11'
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a Job'
       end
+
       post ":id/jobs/:job_id/play" do
         authorize_read_builds!
 
-        build = find_build!(params[:job_id])
+        job = find_job!(params[:job_id])
 
-        authorize!(:update_build, build)
-        bad_request!("Unplayable Job") unless build.playable?
+        authorize!(:play_job, job)
 
-        build.play(current_user)
+        bad_request!("Unplayable Job") unless job.playable?
+
+        job.play(current_user)
 
         status 200
-        present build, with: Entities::Ci::Job
+
+        if job.is_a?(::Ci::Build)
+          present job, with: Entities::Ci::Job
+        else
+          present job, with: Entities::Ci::Bridge
+        end
+      end
+    end
+
+    resource :job do
+      desc 'Get current project using job token' do
+        success Entities::Ci::Job
+      end
+      route_setting :authentication, job_token_allowed: true
+      get do
+        # current_authenticated_job will be nil if user is using
+        # a valid authentication that is not CI_JOB_TOKEN
+        not_found!('Job') unless current_authenticated_job
+
+        present current_authenticated_job, with: Entities::Ci::Job
       end
     end
 

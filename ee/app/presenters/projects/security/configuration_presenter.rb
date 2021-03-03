@@ -41,7 +41,7 @@ module Projects
         {
           container_scanning: _('Container Scanning'),
           dast: _('Dynamic Application Security Testing (DAST)'),
-          dast_profiles: _('DAST Profiles'),
+          dast_profiles: _('DAST Scans'),
           dependency_scanning: _('Dependency Scanning'),
           license_management: 'License Management',
           license_scanning: _('License Compliance'),
@@ -82,8 +82,8 @@ module Projects
 
       def autofix_enabled
         {
-          dependency_scanning: project_settings.auto_fix_dependency_scanning,
-          container_scanning: project_settings.auto_fix_container_scanning
+          dependency_scanning: project_settings&.auto_fix_dependency_scanning,
+          container_scanning: project_settings&.auto_fix_container_scanning
         }
       end
 
@@ -177,13 +177,14 @@ module Projects
       end
 
       def project_settings
-        ProjectSecuritySetting.safe_find_or_create_for(project)
+        project.security_setting
       end
 
       def configuration_path(type)
         {
           sast: project_security_configuration_sast_path(project),
-          dast_profiles: project_security_configuration_dast_profiles_path(project)
+          dast_profiles: project_security_configuration_dast_profiles_path(project),
+          api_fuzzing: ::Feature.enabled?(:api_fuzzing_configuration_ui, project, default_enabled: :yaml) ? project_security_configuration_api_fuzzing_path(project) : nil
         }[type]
       end
     end

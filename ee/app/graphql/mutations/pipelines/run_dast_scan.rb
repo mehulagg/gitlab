@@ -3,7 +3,7 @@
 module Mutations
   module Pipelines
     class RunDastScan < BaseMutation
-      include ResolvesProject
+      include FindsProject
 
       graphql_name 'RunDASTScan'
 
@@ -30,7 +30,7 @@ module Mutations
       authorize :create_on_demand_dast_scan
 
       def resolve(project_path:, target_url:, branch:, scan_type:)
-        project = authorized_find!(full_path: project_path)
+        project = authorized_find!(project_path)
 
         service = ::Ci::RunDastScanService.new(project, current_user)
         result = service.execute(branch: branch, target_url: target_url)
@@ -43,10 +43,6 @@ module Mutations
       end
 
       private
-
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
-      end
 
       def success_response(project:, pipeline:)
         pipeline_url = Rails.application.routes.url_helpers.project_pipeline_url(

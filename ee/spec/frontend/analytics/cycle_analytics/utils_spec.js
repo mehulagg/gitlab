@@ -16,6 +16,7 @@ import {
   toggleSelectedLabel,
   transformStagesForPathNavigation,
   prepareTimeMetricsData,
+  prepareStageErrors,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
@@ -39,7 +40,7 @@ import {
   timeMetricsData,
 } from './mock_data';
 
-const labelEventIds = labelEvents.map(ev => ev.identifier);
+const labelEventIds = labelEvents.map((ev) => ev.identifier);
 
 describe('Value Stream Analytics utils', () => {
   describe('isStartEvent', () => {
@@ -49,7 +50,7 @@ describe('Value Stream Analytics utils', () => {
 
     it('will return false for input that is not a start event', () => {
       [{ identifier: 'fake-event', canBeStartEvent: false }, {}, [], null, undefined].forEach(
-        ev => {
+        (ev) => {
           expect(isStartEvent(ev)).toEqual(false);
         },
       );
@@ -62,7 +63,7 @@ describe('Value Stream Analytics utils', () => {
     });
 
     it('will return false if the given event identifier is not in the labelEvents array', () => {
-      [startEvents[1].identifier, null, undefined, ''].forEach(ev => {
+      [startEvents[1].identifier, null, undefined, ''].forEach((ev) => {
         expect(isLabelEvent(labelEventIds, ev)).toEqual(false);
       });
       expect(isLabelEvent(labelEventIds)).toEqual(false);
@@ -71,20 +72,20 @@ describe('Value Stream Analytics utils', () => {
 
   describe('eventToOption', () => {
     it('will return null if no valid object is passed in', () => {
-      [{}, [], null, undefined].forEach(i => {
+      [{}, [], null, undefined].forEach((i) => {
         expect(eventToOption(i)).toEqual(null);
       });
     });
 
     it('will set the "value" property to the events identifier', () => {
-      events.forEach(ev => {
+      events.forEach((ev) => {
         const res = eventToOption(ev);
         expect(res.value).toEqual(ev.identifier);
       });
     });
 
     it('will set the "text" property to the events name', () => {
-      events.forEach(ev => {
+      events.forEach((ev) => {
         const res = eventToOption(ev);
         expect(res.text).toEqual(ev.name);
       });
@@ -111,7 +112,7 @@ describe('Value Stream Analytics utils', () => {
     });
 
     it('will return an empty array if there are no end events available', () => {
-      ['cool_issue_label_added', [], {}, null, undefined].forEach(ev => {
+      ['cool_issue_label_added', [], {}, null, undefined].forEach((ev) => {
         expect(getAllowedEndEvents(events, ev)).toEqual([]);
       });
     });
@@ -123,7 +124,7 @@ describe('Value Stream Analytics utils', () => {
     });
 
     it('will return an empty array if there are no matching events', () => {
-      [['lol', 'bad'], [], {}, null, undefined].forEach(items => {
+      [['lol', 'bad'], [], {}, null, undefined].forEach((items) => {
         expect(eventsByIdentifier(events, items)).toEqual([]);
       });
       expect(eventsByIdentifier([], labelEvents)).toEqual([]);
@@ -162,17 +163,40 @@ describe('Value Stream Analytics utils', () => {
 
     it('sets the slug to the value of the stage id', () => {
       const transformed = transformRawStages([issueStage, rawCustomStage]);
-      transformed.forEach(t => {
+      transformed.forEach((t) => {
         expect(t.slug).toEqual(t.id);
       });
     });
 
     it('sets the name to the value of the stage title if its not set', () => {
       const transformed = transformRawStages([issueStage, rawCustomStage]);
-      transformed.forEach(t => {
+      transformed.forEach((t) => {
         expect(t.name.length > 0).toBe(true);
         expect(t.name).toEqual(t.title);
       });
+    });
+  });
+
+  describe('prepareStageErrors', () => {
+    const stages = [{ name: 'stage 1' }, { name: 'stage 2' }, { name: 'stage 3' }];
+    const nameError = { name: "Can't be blank" };
+    const stageErrors = { 1: nameError };
+
+    it('returns an object for each stage', () => {
+      const res = prepareStageErrors(stages, stageErrors);
+      expect(res[0]).toEqual({});
+      expect(res[1]).toEqual(nameError);
+      expect(res[2]).toEqual({});
+    });
+
+    it('returns the same number of error objects as stages', () => {
+      const res = prepareStageErrors(stages, stageErrors);
+      expect(res.length).toEqual(stages.length);
+    });
+
+    it('returns an empty object for each stage if there are no errors', () => {
+      const res = prepareStageErrors(stages, {});
+      expect(res).toEqual([{}, {}, {}]);
     });
   });
 
@@ -204,7 +228,7 @@ describe('Value Stream Analytics utils', () => {
 
     it('extracts the value from an array of datetime / value pairs', () => {
       expect(transformedDummySeries.every(isNumber)).toEqual(true);
-      Object.values(dummySeries).forEach(v => {
+      Object.values(dummySeries).forEach((v) => {
         expect(transformedDummySeries.includes(v)).toBeTruthy();
       });
     });
@@ -232,21 +256,21 @@ describe('Value Stream Analytics utils', () => {
     const extractSeriesValues = ({ label: { title: name }, series }) => {
       return {
         name,
-        data: series.map(kv => kv[1]),
+        data: series.map((kv) => kv[1]),
       };
     };
 
     const data = rawTasksByTypeData.map(extractSeriesValues);
 
-    const labels = rawTasksByTypeData.map(d => {
+    const labels = rawTasksByTypeData.map((d) => {
       const { label } = d;
       return label.title;
     });
 
     it('will return blank arrays if given no data', () => {
-      [{ data: [], startDate, endDate }, [], {}].forEach(chartData => {
+      [{ data: [], startDate, endDate }, [], {}].forEach((chartData) => {
         transformed = getTasksByTypeData(chartData);
-        ['data', 'groupBy'].forEach(key => {
+        ['data', 'groupBy'].forEach((key) => {
           expect(transformed[key]).toEqual([]);
         });
       });
@@ -258,7 +282,7 @@ describe('Value Stream Analytics utils', () => {
       });
 
       it('will return an object with the properties needed for the chart', () => {
-        ['data', 'groupBy'].forEach(key => {
+        ['data', 'groupBy'].forEach((key) => {
           expect(transformed).toHaveProperty(key);
         });
       });
@@ -287,7 +311,7 @@ describe('Value Stream Analytics utils', () => {
         });
 
         it('contains a value for each day in the groupBy', () => {
-          transformed.data.forEach(d => {
+          transformed.data.forEach((d) => {
             expect(d.data).toHaveLength(transformed.groupBy.length);
           });
         });
@@ -326,13 +350,13 @@ describe('Value Stream Analytics utils', () => {
       });
 
       it('selects the correct stage', () => {
-        const selected = response.filter(stage => stage.selected === true)[0];
+        const selected = response.filter((stage) => stage.selected === true)[0];
 
         expect(selected.title).toEqual(issueStage.title);
       });
 
       it('includes the correct metric for the associated stage', () => {
-        const issue = response.filter(stage => stage.name === 'Issue')[0];
+        const issue = response.filter((stage) => stage.name === 'Issue')[0];
 
         expect(issue.metric).toEqual(pathNavIssueMetric);
       });

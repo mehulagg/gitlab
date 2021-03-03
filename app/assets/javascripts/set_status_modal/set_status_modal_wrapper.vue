@@ -1,15 +1,16 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
 import $ from 'jquery';
 import Vue from 'vue';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
-import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, s__ } from '~/locale';
-import Api from '~/api';
-import EmojiMenuInModal from './emoji_menu_in_modal';
-import { isUserBusy, isValidAvailibility } from './utils';
 import * as Emoji from '~/emoji';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
+import { __, s__ } from '~/locale';
+import { updateUserStatus } from '~/rest_api';
+import EmojiMenuInModal from './emoji_menu_in_modal';
+import { isUserBusy } from './utils';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
 export const AVAILABILITY_STATUS = {
@@ -45,7 +46,6 @@ export default {
     currentAvailability: {
       type: String,
       required: false,
-      validator: isValidAvailibility,
       default: '',
     },
     canSetUserAvailability: {
@@ -76,14 +76,14 @@ export default {
     },
   },
   mounted() {
-    this.$root.$emit('bv::show::modal', this.modalId);
+    this.$root.$emit(BV_SHOW_MODAL, this.modalId);
   },
   beforeDestroy() {
     this.emojiMenu.destroy();
   },
   methods: {
     closeModal() {
-      this.$root.$emit('bv::hide::modal', this.modalId);
+      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
     },
     setupEmojiListAndAutocomplete() {
       const toggleEmojiMenuButtonSelector = '#set-user-status-modal .js-toggle-emoji-menu';
@@ -163,7 +163,7 @@ export default {
     setStatus() {
       const { emoji, message, availability } = this;
 
-      Api.postUserStatus({
+      updateUserStatus({
         emoji,
         message,
         availability: availability ? AVAILABILITY_STATUS.BUSY : AVAILABILITY_STATUS.NOT_SET,
@@ -172,10 +172,7 @@ export default {
         .catch(this.onUpdateFail);
     },
     onUpdateSuccess() {
-      this.$toast.show(s__('SetStatusModal|Status updated'), {
-        type: 'success',
-        position: 'top-center',
-      });
+      this.$toast.show(s__('SetStatusModal|Status updated'));
       this.closeModal();
       window.location.reload();
     },

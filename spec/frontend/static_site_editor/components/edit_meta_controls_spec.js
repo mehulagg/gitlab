@@ -1,6 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
-
 import { GlDropdown, GlDropdownItem, GlFormInput, GlFormTextarea } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import EditMetaControls from '~/static_site_editor/components/edit_meta_controls.vue';
 
@@ -35,7 +34,7 @@ describe('~/static_site_editor/components/edit_meta_controls.vue', () => {
   const findGlFormInputTitle = () => wrapper.find(GlFormInput);
   const findGlDropdownDescriptionTemplate = () => wrapper.find(GlDropdown);
   const findAllDropdownItems = () => wrapper.findAll(GlDropdownItem);
-  const findDropdownItemByIndex = index => findAllDropdownItems().at(index);
+  const findDropdownItemByIndex = (index) => findAllDropdownItems().at(index);
 
   const findGlFormTextAreaDescription = () => wrapper.find(GlFormTextarea);
 

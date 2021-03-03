@@ -4,7 +4,7 @@ module Mutations
   module QualityManagement
     module TestCases
       class Create < BaseMutation
-        include ResolvesProject
+        include FindsProject
 
         graphql_name 'CreateTestCase'
 
@@ -12,11 +12,11 @@ module Mutations
 
         argument :title, GraphQL::STRING_TYPE,
                  required: true,
-                 description: 'The test case title'
+                 description: 'The test case title.'
 
         argument :description, GraphQL::STRING_TYPE,
                  required: false,
-                 description: 'The test case description'
+                 description: 'The test case description.'
 
         argument :label_ids,
                  [GraphQL::ID_TYPE],
@@ -25,15 +25,15 @@ module Mutations
 
         argument :project_path, GraphQL::ID_TYPE,
                  required: true,
-                 description: 'The project full path to create the test case'
+                 description: 'The project full path to create the test case.'
 
         field :test_case, Types::IssueType,
               null: true,
-              description: 'The test case created'
+              description: 'The test case created.'
 
         def resolve(args)
           project_path = args.delete(:project_path)
-          project = authorized_find!(full_path: project_path)
+          project = authorized_find!(project_path)
 
           result = ::QualityManagement::TestCases::CreateService.new(
             project,
@@ -47,12 +47,6 @@ module Mutations
             test_case: test_case&.persisted? ? test_case : nil,
             errors: Array.wrap(result.message)
           }
-        end
-
-        private
-
-        def find_object(full_path:)
-          resolve_project(full_path: full_path)
         end
       end
     end

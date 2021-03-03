@@ -61,7 +61,7 @@ describe('GeoNodeFormCapacities', () => {
   const findGeoNodeFormReverificationIntervalField = () =>
     wrapper.find('#node-reverification-interval-field');
   const findErrorMessage = () => wrapper.find('.invalid-feedback');
-  const findFieldLabel = id => wrapper.vm.formGroups.find(el => el.id === id).label;
+  const findFieldLabel = (id) => wrapper.vm.formGroups.find((el) => el.id === id).label;
 
   describe('template', () => {
     describe.each`
@@ -276,11 +276,15 @@ describe('GeoNodeFormCapacities', () => {
         });
 
         it('contains conditional form groups for primary', () => {
-          expect(wrapper.vm.visibleFormGroups.some(g => g.conditional === 'primary')).toBeTruthy();
+          expect(
+            wrapper.vm.visibleFormGroups.some((g) => g.conditional === 'primary'),
+          ).toBeTruthy();
         });
 
         it('does not contain conditional form groups for secondary', () => {
-          expect(wrapper.vm.visibleFormGroups.some(g => g.conditional === 'secondary')).toBeFalsy();
+          expect(
+            wrapper.vm.visibleFormGroups.some((g) => g.conditional === 'secondary'),
+          ).toBeFalsy();
         });
       });
 
@@ -291,12 +295,12 @@ describe('GeoNodeFormCapacities', () => {
 
         it('contains conditional form groups for secondary', () => {
           expect(
-            wrapper.vm.visibleFormGroups.some(g => g.conditional === 'secondary'),
+            wrapper.vm.visibleFormGroups.some((g) => g.conditional === 'secondary'),
           ).toBeTruthy();
         });
 
         it('does not contain conditional form groups for primary', () => {
-          expect(wrapper.vm.visibleFormGroups.some(g => g.conditional === 'primary')).toBeFalsy();
+          expect(wrapper.vm.visibleFormGroups.some((g) => g.conditional === 'primary')).toBeFalsy();
         });
       });
     });

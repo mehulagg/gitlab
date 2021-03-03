@@ -1,22 +1,21 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
-import { once } from 'lodash';
 import { GlButton } from '@gitlab/ui';
+import { once } from 'lodash';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { sprintf, s__ } from '~/locale';
-import { componentNames } from './issue_body';
-import ReportSection from './report_section.vue';
-import SummaryRow from './summary_row.vue';
-import IssuesList from './issues_list.vue';
-import Modal from './modal.vue';
-import createStore from '../store';
 import Tracking from '~/tracking';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import createStore from '../store';
 import {
   summaryTextBuilder,
   reportTextBuilder,
   statusIcon,
   recentFailuresTextBuilder,
 } from '../store/utils';
+import { componentNames } from './issue_body';
+import IssuesList from './issues_list.vue';
+import Modal from './modal.vue';
+import ReportSection from './report_section.vue';
+import SummaryRow from './summary_row.vue';
 
 export default {
   name: 'GroupedTestReportsApp',
@@ -28,7 +27,7 @@ export default {
     Modal,
     GlButton,
   },
-  mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
+  mixins: [Tracking.mixin()],
   props: {
     endpoint: {
       type: String,
@@ -44,8 +43,9 @@ export default {
   computed: {
     ...mapState(['reports', 'isLoading', 'hasError', 'summary']),
     ...mapState({
-      modalTitle: state => state.modal.title || '',
-      modalData: state => state.modal.data || {},
+      modalTitle: (state) => state.modal.title || '',
+      modalData: (state) => state.modal.data || {},
+      modalOpen: (state) => state.modal.open || false,
     }),
     ...mapGetters(['summaryStatus']),
     groupedSummaryText() {
@@ -77,7 +77,7 @@ export default {
     this.fetchReports();
   },
   methods: {
-    ...mapActions(['setEndpoint', 'fetchReports']),
+    ...mapActions(['setEndpoint', 'fetchReports', 'closeModal']),
     reportText(report) {
       const { name, summary } = report || {};
 
@@ -86,13 +86,13 @@ export default {
       }
 
       if (!report.name) {
-        return s__('Reports|An error occured while loading report');
+        return s__('Reports|An error occurred while loading report');
       }
 
       return reportTextBuilder(name, summary);
     },
     hasRecentFailures(summary) {
-      return this.glFeatures.testFailureHistory && summary?.recentlyFailed > 0;
+      return summary?.recentlyFailed > 0;
     },
     recentFailuresText(summary) {
       return recentFailuresTextBuilder(summary);
@@ -151,7 +151,11 @@ export default {
     <template #body>
       <div class="mr-widget-grouped-section report-block">
         <template v-for="(report, i) in reports">
-          <summary-row :key="`summary-row-${i}`" :status-icon="getReportIcon(report)">
+          <summary-row
+            :key="`summary-row-${i}`"
+            :status-icon="getReportIcon(report)"
+            nested-summary
+          >
             <template #summary>
               <div class="gl-display-inline-flex gl-flex-direction-column">
                 <div>{{ reportText(report) }}</div>
@@ -168,11 +172,15 @@ export default {
             :new-issues="newIssues(report)"
             :resolved-issues="resolvedIssues(report)"
             :component="$options.componentNames.TestIssueBody"
-            class="report-block-group-list"
+            :nested-level="2"
           />
         </template>
-
-        <modal :title="modalTitle" :modal-data="modalData" />
+        <modal
+          :visible="modalOpen"
+          :title="modalTitle"
+          :modal-data="modalData"
+          @hide="closeModal"
+        />
       </div>
     </template>
   </report-section>

@@ -58,7 +58,7 @@ EOT
 
       context 'using a diff that is too large' do
         it 'prunes the diff' do
-          diff = described_class.new(diff: 'a' * 204800)
+          diff = described_class.new({ diff: 'a' * 204800 })
 
           expect(diff.diff).to be_empty
           expect(diff).to be_too_large
@@ -99,6 +99,13 @@ EOT
         it 'prunes the diff' do
           expect(diff.diff).to be_empty
           expect(diff).to be_too_large
+        end
+
+        it 'logs the event' do
+          expect(Gitlab::Metrics).to receive(:add_event)
+            .with(:patch_hard_limit_bytes_hit)
+
+          diff
         end
       end
 

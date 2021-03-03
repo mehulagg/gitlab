@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Issuable::BulkUpdateService do
-  let(:user)    { create(:user) }
-  let(:project) { create(:project, :repository, namespace: user.namespace) }
+  let_it_be(:user)    { create(:user) }
+  let_it_be(:project) { create(:project, :repository, namespace: user.namespace) }
 
   def bulk_update(issuables, extra_params = {})
     bulk_update_params = extra_params
@@ -283,7 +283,7 @@ RSpec.describe Issuable::BulkUpdateService do
   end
 
   context 'with issuables at a group level' do
-    let(:group) { create(:group) }
+    let_it_be(:group) { create(:group) }
     let(:parent) { group }
 
     before do

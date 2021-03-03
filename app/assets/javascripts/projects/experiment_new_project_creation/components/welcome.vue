@@ -1,15 +1,13 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlPopover } from '@gitlab/ui';
 import Tracking from '~/tracking';
-import LegacyContainer from './legacy_container.vue';
+import NewProjectPushTipPopover from './new_project_push_tip_popover.vue';
 
 const trackingMixin = Tracking.mixin(gon.tracking_data);
 
 export default {
   components: {
-    GlPopover,
-    LegacyContainer,
+    NewProjectPushTipPopover,
   },
   mixins: [trackingMixin],
   props: {
@@ -37,7 +35,7 @@ export default {
         class="blank-state blank-state-link experiment-new-project-page-blank-state"
         @click="track('click_tab', { label: panel.name })"
       >
-        <div class="blank-state-icon" v-html="panel.illustration"></div>
+        <div class="blank-state-icon gl-text-white" v-html="panel.illustration"></div>
         <div class="blank-state-body gl-pl-4!">
           <h3 class="blank-state-title experiment-new-project-page-blank-state-title">
             {{ panel.title }}
@@ -52,19 +50,15 @@ export default {
       <p>
         {{ __('You can also create a project from the command line.') }}
         <a
-          id="cli-tip"
+          ref="clipTip"
           href="#"
           click.prevent
           class="push-new-project-tip"
-          data-title="Push to create a project"
           rel="noopener noreferrer"
         >
           {{ __('Show command') }}
         </a>
-
-        <gl-popover target="cli-tip" triggers="click blur" placement="top">
-          <legacy-container selector=".push-new-project-tip-template" />
-        </gl-popover>
+        <new-project-push-tip-popover :target="() => $refs.clipTip" />
       </p>
     </div>
   </div>

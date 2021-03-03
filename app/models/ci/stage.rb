@@ -84,7 +84,7 @@ module Ci
     end
 
     def set_status(new_status)
-      retry_optimistic_lock(self) do
+      retry_optimistic_lock(self, name: 'ci_stage_set_status') do
         case new_status
         when 'created' then nil
         when 'waiting_for_resource' then request_resource
@@ -118,7 +118,7 @@ module Ci
 
     def number_of_warnings
       BatchLoader.for(id).batch(default_value: 0) do |stage_ids, loader|
-        ::Ci::Build.where(stage_id: stage_ids)
+        ::CommitStatus.where(stage_id: stage_ids)
           .latest
           .failed_but_allowed
           .group(:stage_id)

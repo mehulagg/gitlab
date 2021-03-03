@@ -19,14 +19,19 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
 
+    it { is_expected.to delegate_method(:pipeline_configuration_full_path).to(:compliance_management_framework) }
+
     it { is_expected.to belong_to(:deleting_user) }
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
     it { is_expected.to have_one(:repository_state).class_name('ProjectRepositoryState').inverse_of(:project) }
+    it { is_expected.to have_one(:push_rule).inverse_of(:project) }
     it { is_expected.to have_one(:status_page_setting).class_name('StatusPage::ProjectSetting') }
     it { is_expected.to have_one(:compliance_framework_setting).class_name('ComplianceManagement::ComplianceFramework::ProjectSettings') }
+    it { is_expected.to have_one(:compliance_management_framework).class_name('ComplianceManagement::Framework') }
     it { is_expected.to have_one(:security_setting).class_name('ProjectSecuritySetting') }
     it { is_expected.to have_one(:vulnerability_statistic).class_name('Vulnerabilities::Statistic') }
+    it { is_expected.to have_one(:security_orchestration_policy_configuration).class_name('Security::OrchestrationPolicyConfiguration').inverse_of(:project) }
 
     it { is_expected.to have_many(:path_locks) }
     it { is_expected.to have_many(:vulnerability_feedback) }
@@ -52,6 +57,71 @@ RSpec.describe Project do
     it { is_expected.to have_many(:approval_rules) }
 
     it { is_expected.to have_many(:incident_management_oncall_schedules).class_name('IncidentManagement::OncallSchedule') }
+    it { is_expected.to have_many(:incident_management_oncall_rotations).through(:incident_management_oncall_schedules).source(:rotations) }
+
+    describe '#jira_vulnerabilities_integration_enabled?' do
+      context 'when project lacks a jira_service relation' do
+        it 'returns false' do
+          expect(project.jira_vulnerabilities_integration_enabled?).to be false
+        end
+      end
+
+      context 'when project has a jira_service relation' do
+        before do
+          create(:jira_service, project: project)
+        end
+
+        it 'accesses the value from the jira_service' do
+          expect(project.jira_service)
+            .to receive(:jira_vulnerabilities_integration_enabled?)
+
+          project.jira_vulnerabilities_integration_enabled?
+        end
+      end
+    end
+
+    describe '#configured_to_create_issues_from_vulnerabilities?' do
+      context 'when project lacks a jira_service relation' do
+        it 'returns false' do
+          expect(project.configured_to_create_issues_from_vulnerabilities?).to be false
+        end
+      end
+
+      context 'when project has a jira_service relation' do
+        before do
+          create(:jira_service, project: project)
+        end
+
+        it 'accesses the value from the jira_service' do
+          expect(project.jira_service)
+            .to receive(:configured_to_create_issues_from_vulnerabilities?)
+
+          project.configured_to_create_issues_from_vulnerabilities?
+        end
+      end
+    end
+
+    describe '#jira_issue_association_required_to_merge_enabled?' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:licensed, :feature_flag, :result) do
+        true  | true  | true
+        true  | false | false
+        false | false | false
+        false | true  | false
+      end
+
+      before do
+        stub_licensed_features(jira_issue_association_enforcement: licensed)
+        stub_feature_flags(jira_issue_association_on_merge_request: feature_flag)
+      end
+
+      with_them do
+        it 'returns the correct value' do
+          expect(project.jira_issue_association_required_to_merge_enabled?).to eq(result)
+        end
+      end
+    end
 
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
@@ -791,7 +861,7 @@ RSpec.describe Project do
 
               context 'allowed by Plan License AND Global License' do
                 let(:allowed_on_global_license) { true }
-                let(:plan_license) { build(:gold_plan) }
+                let(:plan_license) { build(:ultimate_plan) }
 
                 before do
                   allow(namespace).to receive(:plans) { [plan_license] }
@@ -835,7 +905,7 @@ RSpec.describe Project do
 
               context 'not allowed by Global License' do
                 let(:allowed_on_global_license) { false }
-                let(:plan_license) { build(:gold_plan) }
+                let(:plan_license) { build(:ultimate_plan) }
 
                 it 'returns false' do
                   is_expected.to eq(false)
@@ -869,9 +939,11 @@ RSpec.describe Project do
 
     it 'only loads licensed availability once' do
       expect(project).to receive(:load_licensed_feature_available)
-                             .once.and_call_original
+        .once.and_call_original
 
-      2.times { project.feature_available?(:push_rules) }
+      with_license_feature_cache do
+        2.times { project.feature_available?(:push_rules) }
+      end
     end
 
     context 'when feature symbol is not included on Namespace features code' do
@@ -896,7 +968,7 @@ RSpec.describe Project do
       let(:project) { build(:project, :mirror, import_url: import_url, import_data_attributes: { auth_method: auth_method } ) }
 
       specify do
-        expect(project.repository).to receive(:fetch_upstream).with(expected, forced: false)
+        expect(project.repository).to receive(:fetch_upstream).with(expected, forced: false, check_tags_changed: false)
 
         project.fetch_mirror
       end
@@ -1423,9 +1495,9 @@ RSpec.describe Project do
     before do
       allow(License).to receive(:current).and_return(global_license)
       allow(global_license).to receive(:features).and_return([
-        :subepics, # Gold only
-        :epics, # Silver and up
-        :push_rules, # Silver and up
+        :subepics, # Ultimate only
+        :epics, # Premium and up
+        :push_rules, # Premium and up
         :audit_events, # Bronze and up
         :geo # Global feature, should not be checked at namespace level
       ])
@@ -1446,18 +1518,18 @@ RSpec.describe Project do
         end
       end
 
-      context 'when silver' do
-        let(:plan_license) { :silver }
+      context 'when premium' do
+        let(:plan_license) { :premium }
 
-        it 'filters for silver features' do
+        it 'filters for premium features' do
           is_expected.to contain_exactly(:push_rules, :audit_events, :geo, :epics)
         end
       end
 
-      context 'when gold' do
-        let(:plan_license) { :gold }
+      context 'when ultimate' do
+        let(:plan_license) { :ultimate }
 
-        it 'filters for gold features' do
+        it 'filters for ultimate features' do
           is_expected.to contain_exactly(:epics, :push_rules, :audit_events, :geo, :subepics)
         end
       end
@@ -2257,8 +2329,6 @@ RSpec.describe Project do
   end
 
   describe '#repository_size_excess' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.repository_size_excess }
 
     let_it_be(:statistics) { create(:project_statistics) }
@@ -2491,8 +2561,6 @@ RSpec.describe Project do
   end
 
   describe '#adjourned_deletion?' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.adjourned_deletion? }
 
     where(:licensed?, :feature_enabled_on_group?, :adjourned_period, :result) do
@@ -2639,8 +2707,8 @@ RSpec.describe Project do
       let!(:issue) { create(:issue, project: project) }
 
       context 'when updating the visibility_level' do
-        it 'triggers ElasticAssociationIndexerWorker to update issues' do
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+        it 'triggers ElasticAssociationIndexerWorker to update issues and notes' do
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
 
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end

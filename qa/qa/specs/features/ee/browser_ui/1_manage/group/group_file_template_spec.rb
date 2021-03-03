@@ -24,13 +24,7 @@ module QA
           file_name: '.gitlab-ci.yml',
           template: 'custom_gitlab-ci',
           file_path: 'gitlab-ci/custom_gitlab-ci.yml',
-          content:
-            <<~CI
-              job:
-                script: echo "Skipped"
-                except:
-                  - master
-            CI
+          content: 'gitlab-ci.yml template test'
         },
         {
           file_name: 'LICENSE',

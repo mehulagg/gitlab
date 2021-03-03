@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import produce from 'immer';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import getCurrentIntegrationQuery from './graphql/queries/get_current_integration.query.graphql';
@@ -10,11 +10,22 @@ const resolvers = {
   Mutation: {
     updateCurrentIntegration: (
       _,
-      { id = null, name, active, token, type, url, apiUrl },
+      {
+        id = null,
+        name,
+        active,
+        token,
+        type,
+        url,
+        apiUrl,
+        payloadExample,
+        payloadAttributeMappings,
+        payloadAlertFields,
+      },
       { cache },
     ) => {
       const sourceData = cache.readQuery({ query: getCurrentIntegrationQuery });
-      const data = produce(sourceData, draftData => {
+      const data = produce(sourceData, (draftData) => {
         if (id === null) {
           // eslint-disable-next-line no-param-reassign
           draftData.currentIntegration = null;
@@ -28,6 +39,9 @@ const resolvers = {
             type,
             url,
             apiUrl,
+            payloadExample,
+            payloadAttributeMappings,
+            payloadAlertFields,
           };
         }
       });

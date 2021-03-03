@@ -1,6 +1,5 @@
 <script>
 import { GlCard, GlButton, GlSprintf } from '@gitlab/ui';
-import Tracking from '~/tracking';
 import {
   UPDATE_SETTINGS_ERROR_MESSAGE,
   UPDATE_SETTINGS_SUCCESS_MESSAGE,
@@ -19,13 +18,14 @@ import {
   CADENCE_LABEL,
   EXPIRATION_POLICY_FOOTER_NOTE,
 } from '~/registry/settings/constants';
-import { formOptionsGenerator } from '~/registry/settings/utils';
-import updateContainerExpirationPolicyMutation from '~/registry/settings/graphql/mutations/update_container_expiration_policy.graphql';
+import updateContainerExpirationPolicyMutation from '~/registry/settings/graphql/mutations/update_container_expiration_policy.mutation.graphql';
 import { updateContainerExpirationPolicy } from '~/registry/settings/graphql/utils/cache_update';
+import { formOptionsGenerator } from '~/registry/settings/utils';
+import Tracking from '~/tracking';
 import ExpirationDropdown from './expiration_dropdown.vue';
 import ExpirationInput from './expiration_input.vue';
-import ExpirationToggle from './expiration_toggle.vue';
 import ExpirationRunText from './expiration_run_text.vue';
+import ExpirationToggle from './expiration_toggle.vue';
 
 export default {
   components: {
@@ -96,7 +96,7 @@ export default {
       return this.isLoading || this.mutationLoading;
     },
     fieldsAreValid() {
-      return Object.values(this.localErrors).every(error => error);
+      return Object.values(this.localErrors).every((error) => error);
     },
     isSubmitButtonDisabled() {
       return !this.fieldsAreValid || this.showLoadingIcon;
@@ -121,7 +121,7 @@ export default {
   },
   methods: {
     findDefaultOption(option) {
-      return this.value[option] || this.$options.formOptions[option].find(f => f.default)?.key;
+      return this.value[option] || this.$options.formOptions[option].find((f) => f.default)?.key;
     },
     reset() {
       this.track('reset_form');
@@ -131,7 +131,7 @@ export default {
     },
     setApiErrors(response) {
       this.apiErrors = response.graphQLErrors.reduce((acc, curr) => {
-        curr.extensions.problems.forEach(item => {
+        curr.extensions.problems.forEach((item) => {
           acc[item.path[0]] = item.message;
         });
         return acc;
@@ -163,7 +163,7 @@ export default {
             this.$toast.show(UPDATE_SETTINGS_SUCCESS_MESSAGE, { type: 'success' });
           }
         })
-        .catch(error => {
+        .catch((error) => {
           this.setApiErrors(error);
           this.$toast.show(UPDATE_SETTINGS_ERROR_MESSAGE, { type: 'error' });
         })
@@ -214,10 +214,10 @@ export default {
         <div>
           <p>
             <gl-sprintf :message="$options.i18n.KEEP_INFO_TEXT">
-              <template #strong="{content}">
+              <template #strong="{ content }">
                 <strong>{{ content }}</strong>
               </template>
-              <template #secondStrong="{content}">
+              <template #secondStrong="{ content }">
                 <strong>{{ content }}</strong>
               </template>
             </gl-sprintf>
@@ -253,10 +253,10 @@ export default {
         <div>
           <p>
             <gl-sprintf :message="$options.i18n.REMOVE_INFO_TEXT">
-              <template #strong="{content}">
+              <template #strong="{ content }">
                 <strong>{{ content }}</strong>
               </template>
-              <template #secondStrong="{content}">
+              <template #secondStrong="{ content }">
                 <strong>{{ content }}</strong>
               </template>
             </gl-sprintf>

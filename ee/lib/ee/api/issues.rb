@@ -65,9 +65,28 @@ module EE
                   iids: [params[:issue_iid]]
                 ).execute.first
 
-                present issue.metric_images, with: Entities::IssuableMetricImage
+                present issue.metric_images.order_created_at_asc, with: Entities::IssuableMetricImage
               else
                 render_api_error!('Issue not found', 404)
+              end
+            end
+
+            desc 'Remove a metric image for an issue' do
+              success Entities::IssuableMetricImage
+            end
+            params do
+              requires :metric_image_id, type: Integer, desc: 'The ID of metric image'
+            end
+            delete ':metric_image_id' do
+              issue = find_project_issue(params[:issue_iid])
+              metric_image = issue.metric_images.find_by_id(params[:metric_image_id])
+
+              render_api_error!('Metric image not found', 404) unless metric_image
+
+              if metric_image&.destroy
+                no_content!
+              else
+                render_api_error!('Metric image could not be deleted', 400)
               end
             end
           end

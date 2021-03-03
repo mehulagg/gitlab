@@ -2,7 +2,13 @@ export const generateVulnerabilities = () => [
   {
     id: 'id_0',
     detectedAt: '2020-07-29T15:36:54Z',
-    solutions: true,
+    hasSolutions: true,
+    mergeRequest: {
+      webUrl: 'www.testmr.com/1',
+      state: 'status_warning',
+      securityAutoFix: true,
+      iid: 1,
+    },
     identifiers: [
       {
         externalType: 'cve',
@@ -31,11 +37,14 @@ export const generateVulnerabilities = () => [
     issueLinks: {
       nodes: [{ issue: { iid: 15 } }],
     },
+    externalIssueLinks: {
+      nodes: [{ issue: { iid: 15, externalTracker: 'jira' } }],
+    },
   },
   {
     id: 'id_1',
     detectedAt: '2020-07-22T19:31:24Z',
-    solutions: false,
+    hasSolutions: false,
     identifiers: [
       {
         externalType: 'gemnasium',
@@ -94,6 +103,19 @@ export const generateVulnerabilities = () => [
     severity: 'critical',
     state: 'DISMISSED',
     location: {},
+    project: {
+      nameWithNamespace: 'Administrator / Security reports',
+    },
+    scanner: {},
+  },
+  {
+    id: 'id_5',
+    title: 'Vulnerability 5',
+    severity: 'high',
+    state: 'DETECTED',
+    location: {
+      path: '/v1/trees',
+    },
     project: {
       nameWithNamespace: 'Administrator / Security reports',
     },

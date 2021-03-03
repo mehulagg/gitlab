@@ -141,7 +141,7 @@ RSpec.describe UpdateAllMirrorsWorker do
     context 'when the instance is licensed' do
       def scheduled_mirror(at:)
         project = create(:project, :mirror)
-        project.import_state.update!(next_execution_timestamp: at)
+        project.import_state.update_column(:next_execution_timestamp, at)
         project
       end
 
@@ -165,8 +165,8 @@ RSpec.describe UpdateAllMirrorsWorker do
 
         create(:gitlab_subscription, (licensed ? :bronze : :free), namespace: namespace.root_ancestor)
 
-        project.import_state.update!(next_execution_timestamp: at)
-        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE) unless public
+        project.import_state.update_column(:next_execution_timestamp, at)
+        project.update_column(:visibility_level, Gitlab::VisibilityLevel::PRIVATE) unless public
         project
       end
 
@@ -232,7 +232,17 @@ RSpec.describe UpdateAllMirrorsWorker do
           end
 
           it "does not schedule a mirror of an archived project" do
-            licensed_project1.update!(archived: true)
+            licensed_project1.update_column(:archived, true)
+
+            schedule_mirrors!(capacity: 4)
+
+            expect_import_scheduled(licensed_project2, public_project)
+            expect_import_not_scheduled(licensed_project1)
+            expect_import_not_scheduled(*unlicensed_projects)
+          end
+
+          it "does not schedule a mirror of an pending_delete project" do
+            licensed_project1.update_column(:pending_delete, true)
 
             schedule_mirrors!(capacity: 4)
 

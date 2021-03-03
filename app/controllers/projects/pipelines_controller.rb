@@ -9,16 +9,15 @@ class Projects::PipelinesController < Projects::ApplicationController
   before_action :set_pipeline_path, only: [:show]
   before_action :authorize_read_pipeline!
   before_action :authorize_read_build!, only: [:index]
+  before_action :authorize_read_analytics!, only: [:charts]
   before_action :authorize_create_pipeline!, only: [:new, :create, :config_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
-    push_frontend_feature_flag(:dag_pipeline_tab, project, default_enabled: true)
-    push_frontend_feature_flag(:pipelines_security_report_summary, project)
-    push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_pipeline_header, project, type: :development, default_enabled: false)
-    push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: false)
-    push_frontend_feature_flag(:graphql_pipeline_analytics, project, type: :development)
-    push_frontend_feature_flag(:new_pipeline_form_prefilled_vars, project, type: :development)
+    push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:graphql_pipeline_details_users, current_user, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:jira_for_vulnerabilities, project, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:new_pipelines_table, project, default_enabled: :yaml)
   end
   before_action :ensure_pipeline, only: [:show]
 
@@ -182,23 +181,6 @@ class Projects::PipelinesController < Projects::ApplicationController
 
       format.json { head :no_content }
     end
-  end
-
-  def charts
-    @charts = {}
-    @counts = {}
-
-    return unless Feature.enabled?(:graphql_pipeline_analytics)
-
-    @charts[:week] = Gitlab::Ci::Charts::WeekChart.new(project)
-    @charts[:month] = Gitlab::Ci::Charts::MonthChart.new(project)
-    @charts[:year] = Gitlab::Ci::Charts::YearChart.new(project)
-    @charts[:pipeline_times] = Gitlab::Ci::Charts::PipelineTime.new(project)
-
-    @counts[:total] = @project.all_pipelines.count(:all)
-    @counts[:success] = @project.all_pipelines.success.count(:all)
-    @counts[:failed] = @project.all_pipelines.failed.count(:all)
-    @counts[:total_duration] = @project.all_pipelines.total_duration
   end
 
   def test_report

@@ -1,11 +1,11 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlPopover } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import NodeErrorHelpText from '~/clusters_list/components/node_error_help_text.vue';
 
 describe('NodeErrorHelpText', () => {
   let wrapper;
 
-  const createWrapper = propsData => {
+  const createWrapper = (propsData) => {
     wrapper = shallowMount(NodeErrorHelpText, { propsData, stubs: { GlPopover } });
     return wrapper.vm.$nextTick();
   };

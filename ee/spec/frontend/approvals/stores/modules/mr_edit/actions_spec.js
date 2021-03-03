@@ -4,7 +4,7 @@ import testAction from 'helpers/vuex_action_helper';
 
 describe('Approval MR edit module actions', () => {
   describe('setTargetBranch', () => {
-    it('commits SET_TARGET_BRANCH', done => {
+    it('commits SET_TARGET_BRANCH', (done) => {
       testAction(
         actions.setTargetBranch,
         'master',
@@ -17,7 +17,7 @@ describe('Approval MR edit module actions', () => {
   });
 
   describe('undoRulesChange', () => {
-    it('commits UNDO_RULES', done => {
+    it('commits UNDO_RULES', (done) => {
       testAction(actions.undoRulesChange, null, {}, [{ type: types.UNDO_RULES }], [], done);
     });
   });

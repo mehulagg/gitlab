@@ -1,6 +1,6 @@
 import { flattenDeep } from 'lodash';
-import FilteredSearchTokenKeys from './filtered_search_token_keys';
 import { __ } from '~/locale';
+import FilteredSearchTokenKeys from './filtered_search_token_keys';
 
 export const tokenKeys = [
   {
@@ -20,15 +20,6 @@ export const tokenKeys = [
     symbol: '@',
     icon: 'user',
     tag: '@assignee',
-  },
-  {
-    formattedKey: __('Reviewer'),
-    key: 'reviewer',
-    type: 'string',
-    param: 'username',
-    symbol: '@',
-    icon: 'user',
-    tag: '@reviewer',
   },
   {
     formattedKey: __('Milestone'),
@@ -159,7 +150,7 @@ export const conditions = flattenDeep(
       tokenKey: 'my-reaction',
       value: __('Any'),
     },
-  ].map(condition => {
+  ].map((condition) => {
     const [keyPart, valuePart] = condition.url.split('=');
     const hasBrackets = keyPart.includes('[]');
 

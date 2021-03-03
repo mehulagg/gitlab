@@ -11,22 +11,33 @@ RSpec.describe ApprovalRules::UpdateService do
     let(:new_approvers) { create_list(:user, 2) }
     let(:new_groups) { create_list(:group, 2, :private) }
 
-    it 'updates approval, excluding non-eligible users and groups' do
-      result = described_class.new(approval_rule, user, {
-        name: 'security',
-        approvals_required: 1,
-        user_ids: new_approvers.map(&:id),
-        group_ids: new_groups.map(&:id)
-      }).execute
+    context 'basic update action' do
+      let(:result) do
+        described_class.new(approval_rule, user, {
+          name: 'security',
+          approvals_required: 1,
+          user_ids: new_approvers.map(&:id),
+          group_ids: new_groups.map(&:id)
+        }).execute
+      end
 
-      expect(result[:status]).to eq(:success)
+      it 'updates approval, excluding non-eligible users and groups' do
+        expect(result[:status]).to eq(:success)
 
-      rule = result[:rule]
+        rule = result[:rule]
 
-      expect(rule.name).to eq('security')
-      expect(rule.approvals_required).to eq(1)
-      expect(rule.users).to be_empty
-      expect(rule.groups).to be_empty
+        expect(rule.name).to eq('security')
+        expect(rule.approvals_required).to eq(1)
+        expect(rule.users).to be_empty
+        expect(rule.groups).to be_empty
+      end
+
+      it 'tracks update event via a usage counter' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_approval_rule_edited_action).once.with(user: user)
+
+        result
+      end
     end
 
     context 'when some users and groups are eligible' do

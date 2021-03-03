@@ -100,8 +100,6 @@
   color: $orange-600;
   background-color: $orange-50;
   border-radius: $border-radius-default $border-radius-default 0 0;
-  border: 1px solid $border-gray-normal;
-  border-bottom: 0;
   padding: 3px 12px;
   margin: auto;
   align-items: center;
@@ -214,8 +212,12 @@ table {
   }
 }
 
-.note-edit-form {
+// Snippets are the only non-vue form left
+.snippets.note-edit-form {
   display: none;
+}
+
+.note-edit-form {
   font-size: 14px;
 
   .md-area {
@@ -300,8 +302,21 @@ table {
       width: 100%;
     }
   }
+}
 
-  .btn-text-field {
+.discussion-reply-holder {
+  .reply-placeholder-text-field {
+    font-family: $monospace-font;
+    font-size: $gl-font-size-monospace;
+    border-radius: $gl-border-radius-base;
+    width: 100%;
+    resize: none;
+    padding: $gl-padding-8 $gl-padding-12;
+    line-height: 1;
+    border: 1px solid $border-color;
+    background-color: $white;
+    overflow: hidden;
+
     @include media-breakpoint-down(xs) {
       margin-bottom: $gl-padding-8;
     }
@@ -379,32 +394,6 @@ table {
 }
 
 .comment-type-dropdown {
-  .btn-success {
-    width: auto;
-  }
-
-  .dropdown-toggle {
-    float: right;
-
-    i {
-      color: $white;
-      padding-right: 2px;
-      margin-top: 2px;
-    }
-
-    &[disabled] {
-      i {
-        color: $gl-text-color-disabled;
-      }
-    }
-  }
-
-  .dropdown-menu {
-    top: initial;
-    bottom: 100%;
-    width: 298px;
-  }
-
   @include media-breakpoint-down(xs) {
     display: flex;
     width: 100%;
@@ -453,4 +442,10 @@ table {
 
 .markdown-selector {
   color: $blue-600;
+}
+
+.comment-warning-wrapper {
+  .md-area {
+    border: 0;
+  }
 }

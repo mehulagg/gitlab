@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import SubscriptionApp from './components/app.vue';
 import initialStore from './store';
 
@@ -16,10 +17,12 @@ export default (containerId = 'js-billing-plans') => {
     namespaceId,
     namespaceName,
     addSeatsHref,
+    isGroup,
     planUpgradeHref,
     planRenewHref,
     customerPortalUrl,
     billableSeatsHref,
+    planName,
   } = containerEl.dataset;
 
   return new Vue({
@@ -29,10 +32,12 @@ export default (containerId = 'js-billing-plans') => {
       namespaceId,
       namespaceName,
       addSeatsHref,
+      isGroup: parseBoolean(isGroup),
       planUpgradeHref,
       planRenewHref,
       customerPortalUrl,
       billableSeatsHref,
+      planName,
     },
     render(createElement) {
       return createElement(SubscriptionApp);

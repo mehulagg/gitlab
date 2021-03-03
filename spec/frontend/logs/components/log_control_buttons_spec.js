@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import LogControlButtons from '~/logs/components/log_control_buttons.vue';
 
 describe('LogControlButtons', () => {
@@ -9,7 +9,7 @@ describe('LogControlButtons', () => {
   const findScrollToBottom = () => wrapper.find('.js-scroll-to-bottom');
   const findRefreshBtn = () => wrapper.find('.js-refresh-log');
 
-  const initWrapper = opts => {
+  const initWrapper = (opts) => {
     wrapper = shallowMount(LogControlButtons, {
       listeners: {
         scrollUp: () => {},

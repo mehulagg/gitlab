@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { createLocalVue, mount } from '@vue/test-utils';
 import { GlTable } from '@gitlab/ui';
+import { createLocalVue, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import CiVariableTable from '~/ci_variable_list/components/ci_variable_table.vue';
 import createStore from '~/ci_variable_list/store';
 import mockData from '../services/mock_data';
@@ -17,7 +17,7 @@ describe('Ci variable table', () => {
     store.state.isGroup = true;
     jest.spyOn(store, 'dispatch').mockImplementation();
     wrapper = mount(CiVariableTable, {
-      attachToDocument: true,
+      attachTo: document.body,
       localVue,
       store,
     });

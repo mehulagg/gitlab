@@ -5,7 +5,7 @@ import DependenciesLicenseLinks from 'ee/dependencies/components/dependency_lice
 
 describe('DependencyLicenseLinks component', () => {
   // data helpers
-  const createLicenses = n => [...Array(n).keys()].map(i => ({ name: `license ${i + 1}` }));
+  const createLicenses = (n) => [...Array(n).keys()].map((i) => ({ name: `license ${i + 1}` }));
   const addUrls = (licenses, numLicensesWithUrls = Infinity) =>
     licenses.map((ls, i) => ({
       ...ls,
@@ -26,7 +26,7 @@ describe('DependencyLicenseLinks component', () => {
   };
 
   // query helpers
-  const jsTestClassSelector = name => `.js-license-links-${name}`;
+  const jsTestClassSelector = (name) => `.js-license-links-${name}`;
   const findLicensesList = () => wrapper.find(jsTestClassSelector('license-list'));
   const findLicenseListItems = () => wrapper.findAll(jsTestClassSelector('license-list-item'));
   const findModal = () => wrapper.find(jsTestClassSelector('modal'));
@@ -46,7 +46,7 @@ describe('DependencyLicenseLinks component', () => {
     expect(intersperseInstance.attributes('lastseparator')).toBe(' and ');
   });
 
-  it.each([3, 5, 8, 13])('limits the number of visible licenses to 2', numLicenses => {
+  it.each([3, 5, 8, 13])('limits the number of visible licenses to 2', (numLicenses) => {
     factory({ numLicenses });
 
     expect(findLicenseListItems()).toHaveLength(2);
@@ -76,7 +76,7 @@ describe('DependencyLicenseLinks component', () => {
 
     const links = wrapper.findAll(GlLink);
 
-    links.wrappers.forEach(link => {
+    links.wrappers.forEach((link) => {
       expect(link.attributes('target')).toBe('_blank');
     });
   });

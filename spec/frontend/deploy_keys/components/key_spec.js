@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import DeployKeysStore from '~/deploy_keys/store';
 import key from '~/deploy_keys/components/key.vue';
+import DeployKeysStore from '~/deploy_keys/store';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 
 describe('Deploy keys key', () => {
@@ -9,13 +9,9 @@ describe('Deploy keys key', () => {
 
   const data = getJSONFixture('deploy_keys/keys.json');
 
-  const findTextAndTrim = selector =>
-    wrapper
-      .find(selector)
-      .text()
-      .trim();
+  const findTextAndTrim = (selector) => wrapper.find(selector).text().trim();
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = mount(key, {
       propsData: {
         store,
@@ -80,7 +76,7 @@ describe('Deploy keys key', () => {
       createComponent({ deployKey: { ...deployKey, deploy_keys_projects: deployKeysProjects } });
 
       expect(wrapper.find('.deploy-project-label').attributes('title')).toBe(
-        'Write access allowed',
+        'Grant write permissions to this key',
       );
     });
 
@@ -103,10 +99,7 @@ describe('Deploy keys key', () => {
     it('expands all project labels after click', () => {
       createComponent({ deployKey });
       const { length } = deployKey.deploy_keys_projects;
-      wrapper
-        .findAll('.deploy-project-label')
-        .at(1)
-        .trigger('click');
+      wrapper.findAll('.deploy-project-label').at(1).trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         const labels = wrapper.findAll('.deploy-project-label');

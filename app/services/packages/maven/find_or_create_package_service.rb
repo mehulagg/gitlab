@@ -2,13 +2,17 @@
 module Packages
   module Maven
     class FindOrCreatePackageService < BaseService
-      MAVEN_METADATA_FILE = 'maven-metadata.xml'.freeze
-      SNAPSHOT_TERM = '-SNAPSHOT'.freeze
+      MAVEN_METADATA_FILE = 'maven-metadata.xml'
+      SNAPSHOT_TERM = '-SNAPSHOT'
 
       def execute
         package =
           ::Packages::Maven::PackageFinder.new(params[:path], current_user, project: project)
                                           .execute
+
+        unless Namespace::PackageSetting.duplicates_allowed?(package)
+          return ServiceResponse.error(message: 'Duplicate package is not allowed') if target_package_is_duplicate?(package)
+        end
 
         unless package
           # Maven uploads several files during `mvn deploy` in next order:
@@ -38,6 +42,7 @@ module Packages
           package_params = {
             name: package_name,
             path: params[:path],
+            status: params[:status],
             version: version
           }
 
@@ -48,7 +53,26 @@ module Packages
 
         package.build_infos.safe_find_or_create_by!(pipeline: params[:build].pipeline) if params[:build].present?
 
+        ServiceResponse.success(payload: { package: package })
+      end
+
+      private
+
+      def extname(filename)
+        return if filename.blank?
+
+        File.extname(filename)
+      end
+
+      def target_package_is_duplicate?(package)
+        # duplicate metadata files can be uploaded multiple times
+        return false if package.version.nil?
+
         package
+          .package_files
+          .map { |file| extname(file.file_name) }
+          .compact
+          .include?(extname(params[:file_name]))
       end
     end
   end

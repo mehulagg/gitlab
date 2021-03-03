@@ -17,9 +17,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
   end
 
   describe '/api/v4/jobs' do
-    let(:root_namespace) { create(:namespace) }
-    let(:namespace) { create(:namespace, parent: root_namespace) }
-    let(:project) { create(:project, namespace: namespace, shared_runners_enabled: false) }
+    let(:group) { create(:group, :nested) }
+    let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master') }
     let(:runner) { create(:ci_runner, :project, projects: [project]) }
     let(:user) { create(:user) }
@@ -156,7 +155,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
               'sha' => job.sha,
               'before_sha' => job.before_sha,
               'ref_type' => 'branch',
-              'refspecs' => ["+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+              'refspecs' => ["+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                              "+refs/heads/#{job.ref}:refs/remotes/origin/#{job.ref}"],
               'depth' => project.ci_default_git_depth }
           end
@@ -198,7 +197,12 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
                'when' => 'on_success' }]
           end
 
-          let(:expected_features) { { 'trace_sections' => true } }
+          let(:expected_features) do
+            {
+              'trace_sections' => true,
+              'failure_reasons' => include('script_failure')
+            }
+          end
 
           it 'picks a job' do
             request_job info: { platform: :darwin }
@@ -220,7 +224,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             expect(json_response['artifacts']).to eq(expected_artifacts)
             expect(json_response['cache']).to eq(expected_cache)
             expect(json_response['variables']).to include(*expected_variables)
-            expect(json_response['features']).to eq(expected_features)
+            expect(json_response['features']).to match(expected_features)
           end
 
           it 'creates persistent ref' do
@@ -284,7 +288,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
                 expect(response).to have_gitlab_http_status(:created)
                 expect(json_response['git_info']['refspecs'])
-                  .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+                  .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                       '+refs/tags/*:refs/tags/*',
                                       '+refs/heads/*:refs/remotes/origin/*')
               end
@@ -346,7 +350,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
                 expect(response).to have_gitlab_http_status(:created)
                 expect(json_response['git_info']['refspecs'])
-                  .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+                  .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                       '+refs/tags/*:refs/tags/*',
                                       '+refs/heads/*:refs/remotes/origin/*')
               end

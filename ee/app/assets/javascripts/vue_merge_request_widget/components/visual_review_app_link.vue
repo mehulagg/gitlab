@@ -8,9 +8,9 @@ import {
   GlSearchBoxByType,
   GlModalDirective,
 } from '@gitlab/ui';
-import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 import { s__, sprintf } from '~/locale';
+import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
+import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 
 export default {
   components: {
@@ -77,7 +77,7 @@ export default {
       /* eslint-enable no-useless-escape */
     },
     filteredChanges() {
-      return this.changes.filter(change => change.path.includes(this.changesSearchTerm));
+      return this.changes.filter((change) => change.path.includes(this.changesSearchTerm));
     },
     instructionText() {
       return {

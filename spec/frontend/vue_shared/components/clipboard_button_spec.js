@@ -1,5 +1,6 @@
-import { mount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import initCopyToClipboard from '~/behaviors/copy_to_clipboard';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
 describe('clipboard button', () => {
@@ -86,5 +87,26 @@ describe('clipboard button', () => {
     findButton().trigger('click');
 
     expect(onClick).toHaveBeenCalled();
+  });
+
+  describe('integration', () => {
+    it('actually copies to clipboard', () => {
+      initCopyToClipboard();
+
+      document.execCommand = () => {};
+      jest.spyOn(document, 'execCommand').mockImplementation(() => true);
+
+      createWrapper(
+        {
+          text: 'copy me',
+          title: 'Copy this value',
+        },
+        { attachTo: document.body },
+      );
+
+      findButton().trigger('click');
+
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
+    });
   });
 });

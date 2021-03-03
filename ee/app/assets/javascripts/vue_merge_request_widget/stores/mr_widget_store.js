@@ -1,7 +1,7 @@
-import CEMergeRequestStore from '~/vue_merge_request_widget/stores/mr_widget_store';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { mapApprovalsResponse, mapApprovalRulesResponse } from '../mappers';
 import { s__ } from '~/locale';
+import CEMergeRequestStore from '~/vue_merge_request_widget/stores/mr_widget_store';
+import { mapApprovalsResponse, mapApprovalRulesResponse } from '../mappers';
 
 export default class MergeRequestStore extends CEMergeRequestStore {
   constructor(data) {
@@ -53,6 +53,8 @@ export default class MergeRequestStore extends CEMergeRequestStore {
   setPaths(data) {
     // Paths are set on the first load of the page and not auto-refreshed
     super.setPaths(data);
+
+    this.discoverProjectSecurityPath = data.discover_project_security_path;
 
     // Security scan diff paths
     this.containerScanningComparisonPath = data.container_scanning_comparison_path;
@@ -110,9 +112,9 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const degraded = [];
     const same = [];
 
-    Object.keys(headMetricsIndexed).forEach(subject => {
+    Object.keys(headMetricsIndexed).forEach((subject) => {
       const subjectMetrics = headMetricsIndexed[subject];
-      Object.keys(subjectMetrics).forEach(metric => {
+      Object.keys(subjectMetrics).forEach((metric) => {
         const headMetricData = subjectMetrics[metric];
 
         if (baseMetricsIndexed[subject] && baseMetricsIndexed[subject][metric]) {
@@ -166,7 +168,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const degraded = [];
     const same = [];
 
-    Object.keys(headMetricsIndexed).forEach(metric => {
+    Object.keys(headMetricsIndexed).forEach((metric) => {
       const headMetricData = headMetricsIndexed[metric];
       if (metric in baseMetricsIndexed) {
         const baseMetricData = baseMetricsIndexed[metric];
@@ -202,7 +204,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const { metrics } = loadPerformanceData;
     const indexedMetrics = {};
 
-    Object.keys(loadPerformanceData.metrics).forEach(metric => {
+    Object.keys(loadPerformanceData.metrics).forEach((metric) => {
       switch (metric) {
         case 'http_reqs':
           indexedMetrics[s__('ciReport|RPS')] = metrics.http_reqs.rate;

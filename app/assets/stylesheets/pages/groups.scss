@@ -260,7 +260,6 @@
 }
 
 .pipeline-quota {
-  border-top: 1px solid $table-border-color;
   border-bottom: 1px solid $table-border-color;
   margin: 0 0 $gl-padding;
 
@@ -291,12 +290,6 @@
 
 table.pipeline-project-metrics tr td {
   padding: $gl-padding;
-}
-
-.mattermost-icon svg {
-  width: 16px;
-  height: 16px;
-  vertical-align: text-bottom;
 }
 
 .mattermost-team-name {

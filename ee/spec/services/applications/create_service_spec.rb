@@ -9,7 +9,7 @@ RSpec.describe ::Applications::CreateService do
 
   subject { described_class.new(user, params) }
 
-  it 'creates an audit log' do
+  it 'creates an AuditEvent' do
     stub_licensed_features(extended_audit_events: true)
 
     expect { subject.execute(request) }.to change { AuditEvent.count }.by(1)

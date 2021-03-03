@@ -1,12 +1,12 @@
 import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { invalidPlanWithName, plans, validPlanWithName } from './mock_data';
 import axios from '~/lib/utils/axios_utils';
+import Poll from '~/lib/utils/poll';
 import MrWidgetExpanableSection from '~/vue_merge_request_widget/components/mr_widget_expandable_section.vue';
 import MrWidgetTerraformContainer from '~/vue_merge_request_widget/components/terraform/mr_widget_terraform_container.vue';
-import Poll from '~/lib/utils/poll';
 import TerraformPlan from '~/vue_merge_request_widget/components/terraform/terraform_plan.vue';
+import { invalidPlanWithName, plans, validPlanWithName } from './mock_data';
 
 describe('MrWidgetTerraformConainer', () => {
   let mock;
@@ -15,7 +15,7 @@ describe('MrWidgetTerraformConainer', () => {
   const propsData = { endpoint: '/path/to/terraform/report.json' };
 
   const findHeader = () => wrapper.find('[data-testid="terraform-header-text"]');
-  const findPlans = () => wrapper.findAll(TerraformPlan).wrappers.map(x => x.props('plan'));
+  const findPlans = () => wrapper.findAll(TerraformPlan).wrappers.map((x) => x.props('plan'));
 
   const mockPollingApi = (response, body, header) => {
     mock.onGet(propsData.endpoint).reply(response, body, header);

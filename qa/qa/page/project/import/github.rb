@@ -12,7 +12,7 @@ module QA
             element :authenticate_button
           end
 
-          view 'app/assets/javascripts/import_projects/components/provider_repo_table_row.vue' do
+          view 'app/assets/javascripts/import_entities/import_projects/components/provider_repo_table_row.vue' do
             element :project_import_row
             element :project_namespace_select
             element :project_path_field
@@ -30,6 +30,7 @@ module QA
             set_path(full_path, name)
             import_project(full_path)
             wait_for_success
+            go_to_project(name)
           end
 
           private
@@ -71,6 +72,13 @@ module QA
             # https://gitlab.com/gitlab-org/gitlab/-/issues/231542 is fixed
             wait_until(max_duration: 60, sleep_interval: 5.0, reload: true, skip_finished_loading_check_on_refresh: true) do
               page.has_content?('Done', wait: 1.0)
+            end
+          end
+
+          def go_to_project(name)
+            Page::Main::Menu.perform(&:go_to_projects)
+            Page::Dashboard::Projects.perform do |dashboard|
+              dashboard.go_to_project(name)
             end
           end
         end

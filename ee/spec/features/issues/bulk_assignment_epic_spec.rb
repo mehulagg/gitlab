@@ -93,7 +93,7 @@ RSpec.describe 'Issues > Epic bulk assignment', :js do
     page.within('.issues-bulk-update') do
       click_button 'Select epic'
       items.map do |item|
-        find('.gl-link', text: item).click
+        find('.gl-new-dropdown-item', text: item).click
       end
     end
   end

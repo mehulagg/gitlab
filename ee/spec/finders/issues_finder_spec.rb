@@ -18,7 +18,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { weight: Issue::WEIGHT_NONE } }
 
           it 'returns all issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5)
           end
         end
 
@@ -35,6 +35,14 @@ RSpec.describe IssuesFinder do
 
           it 'returns all issues' do
             expect(issues).to contain_exactly(issue_with_weight_42)
+          end
+        end
+
+        context 'filer issues by negated weight' do
+          let(:params) { { not: { weight: 1 } } }
+
+          it 'filters out issues with the specified weight' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, issue_with_weight_42)
           end
         end
       end
@@ -88,7 +96,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { epic_id: ::IssuableFinder::Params::FILTER_NONE } }
 
           it 'returns filtered issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5)
           end
         end
 
@@ -124,7 +132,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { not: { epic_id: epic_1.id } } }
 
           it 'returns issues not assigned to the epic' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue_2, issue_subepic)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, issue_2, issue_subepic)
           end
         end
       end
@@ -140,7 +148,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { iteration_id: ::IssuableFinder::Params::FILTER_NONE } }
 
           it 'returns all issues without iterations' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5)
           end
         end
 
@@ -154,7 +162,7 @@ RSpec.describe IssuesFinder do
 
         context 'filter issues by current iteration' do
           let(:current_iteration) { nil }
-          let(:params) { { group_id: group, iteration_id: ::Iteration::Current.title } }
+          let(:params) { { group_id: group, iteration_id: ::Iteration::Predefined::Current.title } }
           let!(:current_iteration_issue) { create(:issue, project: project1, iteration: current_iteration) }
 
           context 'when no current iteration is found' do
@@ -171,10 +179,10 @@ RSpec.describe IssuesFinder do
             end
 
             context 'filter by negated current iteration' do
-              let(:params) { { group_id: group, not: { iteration_id: ::Iteration::Current.title } } }
+              let(:params) { { group_id: group, not: { iteration_id: ::Iteration::Predefined::Current.title } } }
 
               it 'returns filtered issues' do
-                expect(issues).to contain_exactly(issue1, iteration_1_issue, iteration_2_issue)
+                expect(issues).to contain_exactly(issue1, issue5, iteration_1_issue, iteration_2_issue)
               end
             end
           end
@@ -208,7 +216,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { not: { iteration_title: iteration_1.title } } }
 
           it 'returns all issues that do not match the iteration title' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, iteration_2_issue)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, iteration_2_issue)
           end
         end
 
@@ -216,7 +224,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { iteration_id: nil } }
 
           it 'returns unfiltered issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, iteration_1_issue, iteration_2_issue)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, iteration_1_issue, iteration_2_issue)
           end
         end
       end

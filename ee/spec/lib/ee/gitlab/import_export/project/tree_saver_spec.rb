@@ -15,7 +15,6 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
 
   let_it_be(:export_path) { "#{Dir.tmpdir}/project_tree_saver_spec_ee" }
 
-  let_it_be(:security_setting) { create(:project_security_setting, project: project, auto_fix_dast: false) }
   let_it_be(:push_rule) { create(:push_rule, project: project, max_file_size: 10) }
 
   after :all do
@@ -75,7 +74,6 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
       end
 
       it 'has security settings' do
-        expect(security_json['auto_fix_dast']).to be_falsey
         expect(security_json['auto_fix_dependency_scanning']).to be_truthy
       end
     end

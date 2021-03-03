@@ -1,7 +1,7 @@
 import { debounce } from 'lodash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 
 const USERNAME_SUGGEST_DEBOUNCE_TIME = 300;
 
@@ -29,7 +29,9 @@ export default class UsernameSuggester {
       throw new Error('The API path was not specified.');
     }
 
-    this.sourceElements = sourceElementsIds.map(id => document.getElementById(id)).filter(Boolean);
+    this.sourceElements = sourceElementsIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
     this.isLoading = false;
     this.debouncedSuggestWrapper = debounce(
       this.suggestUsername.bind(this),
@@ -42,7 +44,7 @@ export default class UsernameSuggester {
   }
 
   bindEvents() {
-    this.sourceElements.forEach(sourceElement => {
+    this.sourceElements.forEach((sourceElement) => {
       sourceElement.addEventListener('change', this.debouncedSuggestWrapper);
     });
   }
@@ -76,7 +78,7 @@ export default class UsernameSuggester {
    */
   joinSources() {
     return this.sourceElements
-      .map(el => el.value)
+      .map((el) => el.value)
       .filter(Boolean)
       .join('_');
   }
@@ -84,7 +86,7 @@ export default class UsernameSuggester {
   cleanup() {
     window.removeEventListener('beforeunload', this.cleanupWrapper);
 
-    this.sourceElements.forEach(sourceElement =>
+    this.sourceElements.forEach((sourceElement) =>
       sourceElement.removeEventListener('change', this.debouncedSuggestWrapper),
     );
   }

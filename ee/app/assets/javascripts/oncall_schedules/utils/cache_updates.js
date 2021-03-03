@@ -1,9 +1,17 @@
 import produce from 'immer';
 import createFlash from '~/flash';
 
-import { DELETE_SCHEDULE_ERROR, UPDATE_SCHEDULE_ERROR } from './error_messages';
+import {
+  DELETE_SCHEDULE_ERROR,
+  UPDATE_SCHEDULE_ERROR,
+  UPDATE_ROTATION_ERROR,
+  DELETE_ROTATION_ERROR,
+} from './error_messages';
 
-const addScheduleToStore = (store, query, { oncallSchedule: schedule }, variables) => {
+const ROTATION_CONNECTION_TYPE = 'IncidentManagementOncallRotationConnection';
+
+const addScheduleToStore = (store, query, { oncallScheduleCreate }, variables) => {
+  const schedule = oncallScheduleCreate?.oncallSchedule;
   if (!schedule) {
     return;
   }
@@ -13,8 +21,11 @@ const addScheduleToStore = (store, query, { oncallSchedule: schedule }, variable
     variables,
   });
 
-  const data = produce(sourceData, draftData => {
-    draftData.project.incidentManagementOncallSchedules.nodes.push(schedule);
+  const data = produce(sourceData, (draftData) => {
+    draftData.project.incidentManagementOncallSchedules.nodes.push({
+      ...schedule,
+      rotations: { nodes: [], __typename: ROTATION_CONNECTION_TYPE },
+    });
   });
 
   store.writeQuery({
@@ -35,7 +46,7 @@ const deleteScheduleFromStore = (store, query, { oncallScheduleDestroy }, variab
     variables,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
     draftData.project.incidentManagementOncallSchedules.nodes = draftData.project.incidentManagementOncallSchedules.nodes.filter(
       ({ id }) => id !== schedule.id,
@@ -60,12 +71,83 @@ const updateScheduleFromStore = (store, query, { oncallScheduleUpdate }, variabl
     variables,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
-    draftData.project.incidentManagementOncallSchedules.nodes = [
-      ...draftData.project.incidentManagementOncallSchedules.nodes,
-      schedule,
-    ];
+    draftData.project.incidentManagementOncallSchedules.nodes = draftData.project.incidentManagementOncallSchedules.nodes.map(
+      (scheduleToUpdate) => {
+        return scheduleToUpdate.iid === schedule.iid ? schedule : scheduleToUpdate;
+      },
+    );
+  });
+
+  store.writeQuery({
+    query,
+    variables,
+    data,
+  });
+};
+
+const updateRotationFromStore = (
+  store,
+  query,
+  { oncallRotationUpdate, scheduleIid },
+  variables,
+) => {
+  const rotation = oncallRotationUpdate?.oncallRotation;
+  if (!rotation) {
+    return;
+  }
+
+  const sourceData = store.readQuery({
+    query,
+    variables,
+  });
+
+  const data = produce(sourceData, (draftData) => {
+    const scheduleToUpdate = draftData.project.incidentManagementOncallSchedules.nodes.find(
+      ({ iid }) => iid === scheduleIid,
+    );
+
+    const updatedRotations = scheduleToUpdate.rotations.nodes.map((rotationToUpdate) => {
+      return rotationToUpdate.id === rotation.id ? rotation : rotationToUpdate;
+    });
+
+    scheduleToUpdate.rotations.nodes = updatedRotations;
+  });
+
+  store.writeQuery({
+    query,
+    variables,
+    data,
+  });
+};
+
+const deleteRotationFromStore = (
+  store,
+  query,
+  { oncallRotationDestroy, scheduleIid },
+  variables,
+) => {
+  const rotation = oncallRotationDestroy?.oncallRotation;
+  if (!rotation) {
+    return;
+  }
+
+  const sourceData = store.readQuery({
+    query,
+    variables,
+  });
+
+  const data = produce(sourceData, (draftData) => {
+    const scheduleToUpdate = draftData.project.incidentManagementOncallSchedules.nodes.find(
+      ({ iid }) => iid === scheduleIid,
+    );
+
+    const updatedRotations = scheduleToUpdate.rotations.nodes.filter(
+      ({ id }) => id !== rotation.id,
+    );
+
+    scheduleToUpdate.rotations.nodes = updatedRotations;
   });
 
   store.writeQuery({
@@ -101,5 +183,21 @@ export const updateStoreAfterScheduleEdit = (store, query, data, variables) => {
     onError(data, UPDATE_SCHEDULE_ERROR);
   } else {
     updateScheduleFromStore(store, query, data, variables);
+  }
+};
+
+export const updateStoreAfterRotationEdit = (store, query, data, variables) => {
+  if (hasErrors(data)) {
+    onError(data, UPDATE_ROTATION_ERROR);
+  } else {
+    updateRotationFromStore(store, query, data, variables);
+  }
+};
+
+export const updateStoreAfterRotationDelete = (store, query, data, variables) => {
+  if (hasErrors(data)) {
+    onError(data, DELETE_ROTATION_ERROR);
+  } else {
+    deleteRotationFromStore(store, query, data, variables);
   }
 };

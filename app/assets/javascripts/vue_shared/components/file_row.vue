@@ -1,8 +1,8 @@
 <script>
 import { GlTruncate } from '@gitlab/ui';
-import FileHeader from '~/vue_shared/components/file_row_header.vue';
-import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { escapeFileUrl } from '~/lib/utils/url_utility';
+import FileIcon from '~/vue_shared/components/file_icon.vue';
+import FileHeader from '~/vue_shared/components/file_row_header.vue';
 
 export default {
   name: 'FileRow',
@@ -137,12 +137,17 @@ export default {
     @click="clickFile"
     @mouseleave="$emit('mouseleave', $event)"
   >
-    <div class="file-row-name-container">
+    <div
+      class="file-row-name-container"
+      data-qa-selector="file_row_container"
+      :data-qa-file-name="file.name"
+    >
       <span
         ref="textOutput"
         :style="levelIndentation"
         class="file-row-name"
         data-qa-selector="file_name_content"
+        :data-qa-file-name="file.name"
         data-testid="file-row-name-container"
         :class="[fileClasses, { 'str-truncated': !truncateMiddle, 'gl-min-w-0': truncateMiddle }]"
       >

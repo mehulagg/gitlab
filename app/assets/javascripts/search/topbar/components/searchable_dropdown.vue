@@ -81,7 +81,7 @@ export default {
   <gl-dropdown
     class="gl-w-full"
     menu-class="gl-w-full!"
-    toggle-class="gl-text-truncate gl-reset-line-height!"
+    toggle-class="gl-text-truncate"
     :header-text="headerText"
     @show="$emit('search', searchText)"
     @shown="$refs.searchBox.focusInput()"
@@ -101,7 +101,7 @@ export default {
         @keydown.enter.stop="resetDropdown"
         @click.stop="resetDropdown"
       >
-        <gl-icon name="clear" class="gl-text-gray-200! gl-hover-text-blue-800!" />
+        <gl-icon name="clear" />
       </gl-button>
       <gl-icon name="chevron-down" />
     </template>

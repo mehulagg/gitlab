@@ -17,8 +17,6 @@ module EE
       DEPENDENCY_LIST_REPORT_FILE_TYPES = %w[dependency_scanning].freeze
       METRICS_REPORT_FILE_TYPES = %w[metrics].freeze
       CONTAINER_SCANNING_REPORT_TYPES = %w[container_scanning].freeze
-      SAST_REPORT_TYPES = %w[sast].freeze
-      SECRET_DETECTION_REPORT_TYPES = %w[secret_detection].freeze
       DAST_REPORT_TYPES = %w[dast].freeze
       REQUIREMENTS_REPORT_FILE_TYPES = %w[requirements].freeze
       COVERAGE_FUZZING_REPORT_TYPES = %w[coverage_fuzzing].freeze
@@ -44,14 +42,6 @@ module EE
 
       scope :container_scanning_reports, -> do
         with_file_types(CONTAINER_SCANNING_REPORT_TYPES)
-      end
-
-      scope :sast_reports, -> do
-        with_file_types(SAST_REPORT_TYPES)
-      end
-
-      scope :secret_detection_reports, -> do
-        with_file_types(SECRET_DETECTION_REPORT_TYPES)
       end
 
       scope :dast_reports, -> do
@@ -87,8 +77,7 @@ module EE
       def replicables_for_current_secondary(primary_key_in)
         node = ::Gitlab::Geo.current_node
 
-        not_expired
-          .primary_key_in(primary_key_in)
+        primary_key_in(primary_key_in)
           .merge(selective_sync_scope(node))
           .merge(object_storage_scope(node))
       end
@@ -118,9 +107,9 @@ module EE
       strong_memoize(:security_report) do
         next unless file_type.in?(SECURITY_REPORT_FILE_TYPES)
 
-        report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, nil, nil).tap do |report|
+        report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
-            ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
+            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report).parse!
           end
         end
 

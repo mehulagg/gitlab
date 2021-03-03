@@ -1,10 +1,16 @@
 <script>
 import { GlModal } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
+import { getParameterByName } from '~/lib/utils/common_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import boardsStore from '~/boards/stores/boards_store';
+import { __, s__ } from '~/locale';
+import { fullLabelId, fullBoardId } from '../boards_util';
+import { formType } from '../constants';
 
+import createBoardMutation from '../graphql/board_create.mutation.graphql';
+import destroyBoardMutation from '../graphql/board_destroy.mutation.graphql';
+import updateBoardMutation from '../graphql/board_update.mutation.graphql';
 import BoardConfigurationOptions from './board_configuration_options.vue';
 
 const boardDefaults = {
@@ -12,17 +18,12 @@ const boardDefaults = {
   name: '',
   labels: [],
   milestone_id: undefined,
+  iteration_id: undefined,
   assignee: {},
   assignee_id: undefined,
   weight: null,
   hide_backlog_list: false,
   hide_closed_list: false,
-};
-
-const formType = {
-  new: 'new',
-  delete: 'delete',
-  edit: 'edit',
 };
 
 export default {
@@ -42,6 +43,14 @@ export default {
     BoardScope: () => import('ee_component/boards/components/board_scope.vue'),
     GlModal,
     BoardConfigurationOptions,
+  },
+  inject: {
+    fullPath: {
+      default: '',
+    },
+    rootPath: {
+      default: '',
+    },
   },
   props: {
     canAdminBoard: {
@@ -81,12 +90,18 @@ export default {
       required: false,
       default: false,
     },
+    currentBoard: {
+      type: Object,
+      required: true,
+    },
+    currentPage: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       board: { ...boardDefaults, ...this.currentBoard },
-      currentBoard: boardsStore.state.currentBoard,
-      currentPage: boardsStore.state.currentPage,
       isLoading: false,
     };
   },
@@ -143,6 +158,52 @@ export default {
         text: this.$options.i18n.cancelButtonText,
       };
     },
+    currentMutation() {
+      return this.board.id ? updateBoardMutation : createBoardMutation;
+    },
+    baseMutationVariables() {
+      const { board } = this;
+      const variables = {
+        name: board.name,
+        hideBacklogList: board.hide_backlog_list,
+        hideClosedList: board.hide_closed_list,
+      };
+
+      return board.id
+        ? {
+            ...variables,
+            id: fullBoardId(board.id),
+          }
+        : {
+            ...variables,
+            projectPath: this.projectId ? this.fullPath : undefined,
+            groupPath: this.groupId ? this.fullPath : undefined,
+          };
+    },
+    boardScopeMutationVariables() {
+      /* eslint-disable @gitlab/require-i18n-strings */
+      return {
+        weight: this.board.weight,
+        assigneeId: this.board.assignee?.id
+          ? convertToGraphQLId('User', this.board.assignee.id)
+          : null,
+        milestoneId:
+          this.board.milestone?.id || this.board.milestone?.id === 0
+            ? convertToGraphQLId('Milestone', this.board.milestone.id)
+            : null,
+        labelIds: this.board.labels.map(fullLabelId),
+        iterationId: this.board.iteration_id
+          ? convertToGraphQLId('Iteration', this.board.iteration_id)
+          : null,
+      };
+      /* eslint-enable @gitlab/require-i18n-strings */
+    },
+    mutationVariables() {
+      return {
+        ...this.baseMutationVariables,
+        ...(this.scopedIssueBoardFeatureEnabled ? this.boardScopeMutationVariables : {}),
+      };
+    },
   },
   mounted() {
     this.resetFormState();
@@ -151,46 +212,61 @@ export default {
     }
   },
   methods: {
-    submit() {
+    setIteration(iterationId) {
+      this.board.iteration_id = iterationId;
+    },
+    boardCreateResponse(data) {
+      return data.createBoard.board.webPath;
+    },
+    boardUpdateResponse(data) {
+      const path = data.updateBoard.board.webPath;
+      const param = getParameterByName('group_by')
+        ? `?group_by=${getParameterByName('group_by')}`
+        : '';
+      return `${path}${param}`;
+    },
+    async createOrUpdateBoard() {
+      const response = await this.$apollo.mutate({
+        mutation: this.currentMutation,
+        variables: { input: this.mutationVariables },
+      });
+
+      if (!this.board.id) {
+        return this.boardCreateResponse(response.data);
+      }
+
+      return this.boardUpdateResponse(response.data);
+    },
+    async submit() {
       if (this.board.name.length === 0) return;
       this.isLoading = true;
       if (this.isDeleteForm) {
-        boardsStore
-          .deleteBoard(this.currentBoard)
-          .then(() => {
-            this.isLoading = false;
-            visitUrl(boardsStore.rootPath);
-          })
-          .catch(() => {
-            Flash(this.$options.i18n.deleteErrorMessage);
-            this.isLoading = false;
+        try {
+          await this.$apollo.mutate({
+            mutation: destroyBoardMutation,
+            variables: {
+              id: fullBoardId(this.board.id),
+            },
           });
+          visitUrl(this.rootPath);
+        } catch {
+          Flash(this.$options.i18n.deleteErrorMessage);
+        } finally {
+          this.isLoading = false;
+        }
       } else {
-        boardsStore
-          .createBoard(this.board)
-          .then(resp => {
-            // This handles 2 use cases
-            // - In create call we only get one parameter, the new board
-            // - In update call, due to Promise.all, we get REST response in
-            // array index 0
-
-            if (Array.isArray(resp)) {
-              return resp[0].data;
-            }
-            return resp.data ? resp.data : resp;
-          })
-          .then(data => {
-            this.isLoading = false;
-            visitUrl(data.board_path);
-          })
-          .catch(() => {
-            Flash(this.$options.i18n.saveErrorMessage);
-            this.isLoading = false;
-          });
+        try {
+          const url = await this.createOrUpdateBoard();
+          visitUrl(url);
+        } catch {
+          Flash(this.$options.i18n.saveErrorMessage);
+        } finally {
+          this.isLoading = false;
+        }
       }
     },
     cancel() {
-      boardsStore.showPage('');
+      this.$emit('cancel');
     },
     resetFormState() {
       if (this.isNewForm) {
@@ -219,9 +295,11 @@ export default {
     @close="cancel"
     @hide.prevent
   >
-    <p v-if="isDeleteForm">{{ $options.i18n.deleteConfirmationMessage }}</p>
-    <form v-else class="js-board-config-modal" @submit.prevent>
-      <div v-if="!readonly" class="gl-mb-5">
+    <p v-if="isDeleteForm" data-testid="delete-confirmation-message">
+      {{ $options.i18n.deleteConfirmationMessage }}
+    </p>
+    <form v-else class="js-board-config-modal" data-testid="board-form-wrapper" @submit.prevent>
+      <div v-if="!readonly" class="gl-mb-5" data-testid="board-form">
         <label class="gl-font-weight-bold gl-font-lg" for="board-new-name">
           {{ $options.i18n.titleFieldLabel }}
         </label>
@@ -238,9 +316,9 @@ export default {
       </div>
 
       <board-configuration-options
-        :is-new-form="isNewForm"
-        :board="board"
-        :current-board="currentBoard"
+        :hide-backlog-list.sync="board.hide_backlog_list"
+        :hide-closed-list.sync="board.hide_closed_list"
+        :readonly="readonly"
       />
 
       <board-scope
@@ -254,6 +332,7 @@ export default {
         :project-id="projectId"
         :group-id="groupId"
         :weights="weights"
+        @set-iteration="setIteration"
       />
     </form>
   </gl-modal>

@@ -16,6 +16,13 @@ import {
   valueStreams,
 } from '../mock_data';
 
+const mockStartEventIdentifier = 'issue_first_mentioned_in_commit';
+const mockEndEventIdentifier = 'issue_first_added_to_board';
+const mockEvents = {
+  startEventIdentifier: mockStartEventIdentifier,
+  endEventIdentifier: mockEndEventIdentifier,
+};
+
 const group = { fullPath: 'fake_group_full_path' };
 const milestonesPath = 'fake_milestones_path';
 const labelsPath = 'fake_labels_path';
@@ -904,7 +911,18 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('createValueStream', () => {
-    const payload = { name: 'cool value stream' };
+    const payload = {
+      name: 'cool value stream',
+      stages: [
+        {
+          ...selectedStage,
+          ...mockEvents,
+          id: null,
+        },
+        { ...hiddenStage, ...mockEvents },
+      ],
+    };
+
     const createResp = { id: 'new value stream', is_custom: true, ...payload };
 
     beforeEach(() => {
@@ -948,11 +966,68 @@ describe('Value Stream Analytics actions', () => {
             { type: types.REQUEST_CREATE_VALUE_STREAM },
             {
               type: types.RECEIVE_CREATE_VALUE_STREAM_ERROR,
-              payload: { message, errors },
+              payload: { message, data: payload, errors },
             },
           ],
           [],
         );
+      });
+    });
+  });
+
+  describe('updateValueStream', () => {
+    const payload = {
+      name: 'cool value stream',
+      stages: [
+        {
+          ...selectedStage,
+          ...mockEvents,
+          id: 'stage-1',
+        },
+        { ...hiddenStage, ...mockEvents },
+      ],
+    };
+    const updateResp = { id: 'new value stream', is_custom: true, ...payload };
+
+    beforeEach(() => {
+      state = { currentGroup };
+    });
+
+    describe('with no errors', () => {
+      beforeEach(() => {
+        mock.onPut(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, updateResp);
+      });
+
+      it(`commits the ${types.REQUEST_UPDATE_VALUE_STREAM} and ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} actions`, () => {
+        return testAction(
+          actions.updateValueStream,
+          payload,
+          state,
+          [
+            { type: types.REQUEST_UPDATE_VALUE_STREAM },
+            { type: types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS, payload: updateResp },
+          ],
+          [{ type: 'fetchCycleAnalyticsData' }],
+        );
+      });
+    });
+
+    describe('with errors', () => {
+      const errors = { name: ['is taken'] };
+      const message = { message: 'error' };
+      const resp = { message, payload: { errors } };
+      beforeEach(() => {
+        mock.onPut(endpoints.valueStreamData).replyOnce(httpStatusCodes.NOT_FOUND, resp);
+      });
+
+      it(`commits the ${types.REQUEST_UPDATE_VALUE_STREAM} and ${types.RECEIVE_UPDATE_VALUE_STREAM_ERROR} actions `, () => {
+        return testAction(actions.updateValueStream, payload, state, [
+          { type: types.REQUEST_UPDATE_VALUE_STREAM },
+          {
+            type: types.RECEIVE_UPDATE_VALUE_STREAM_ERROR,
+            payload: { message, data: payload, errors },
+          },
+        ]);
       });
     });
   });
@@ -1020,7 +1095,6 @@ describe('Value Stream Analytics actions', () => {
         currentGroup,
         featureFlags: {
           ...state.featureFlags,
-          hasCreateMultipleValueStreams: true,
         },
       };
       mock = new MockAdapter(axios);
@@ -1102,21 +1176,6 @@ describe('Value Stream Analytics actions', () => {
         );
       });
     });
-
-    describe('with hasCreateMultipleValueStreams disabled', () => {
-      beforeEach(() => {
-        state = {
-          ...state,
-          featureFlags: {
-            ...state.featureFlags,
-            hasCreateMultipleValueStreams: false,
-          },
-        };
-      });
-
-      it(`will dispatch the 'fetchGroupStagesAndEvents' request`, () =>
-        testAction(actions.fetchValueStreams, null, state, [], [{ type: 'fetchValueStreamData' }]));
-    });
   });
 
   describe('fetchValueStreamData', () => {
@@ -1127,7 +1186,6 @@ describe('Value Stream Analytics actions', () => {
         currentGroup,
         featureFlags: {
           ...state.featureFlags,
-          hasCreateMultipleValueStreams: true,
         },
       };
       mock = new MockAdapter(axios);

@@ -197,7 +197,19 @@ RSpec.shared_examples 'Value Stream Analytics Stages controller' do
       it 'matches the response schema' do
         subject
 
-        expect(response).to match_response_schema('analytics/cycle_analytics/median', dir: 'ee')
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
+      end
+
+      include_examples 'Value Stream Analytics data endpoint examples'
+    end
+
+    describe 'GET #average' do
+      subject { get :average, params: params }
+
+      it 'matches the response schema' do
+        subject
+
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
       end
 
       include_examples 'Value Stream Analytics data endpoint examples'
@@ -208,6 +220,20 @@ RSpec.shared_examples 'Value Stream Analytics Stages controller' do
 
       include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
+
+      context 'sort params' do
+        before do
+          params.merge!(sort: 'duration', direction: 'asc')
+        end
+
+        it 'accepts sort params' do
+          expect(Gitlab::Analytics::CycleAnalytics::Sorting).to receive(:apply).with(kind_of(ActiveRecord::Relation), kind_of(Analytics::CycleAnalytics::GroupStage), :duration, :asc).and_call_original
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
     end
 
     describe 'GET #duration_chart' do

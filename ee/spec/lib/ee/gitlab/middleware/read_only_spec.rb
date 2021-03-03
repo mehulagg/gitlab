@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Middleware::ReadOnly do
   context 'when maintenance mode is on' do
     before do
-      stub_application_setting(maintenance_mode: true)
+      stub_maintenance_mode_setting(true)
     end
 
     it_behaves_like 'write access for a read-only GitLab (EE) instance in maintenance mode'
@@ -13,7 +13,7 @@ RSpec.describe Gitlab::Middleware::ReadOnly do
 
   context 'when maintenance mode is not on' do
     before do
-      stub_application_setting(maintenance_mode: false)
+      stub_maintenance_mode_setting(false)
     end
 
     it_behaves_like 'write access for a read-only GitLab (EE) instance'

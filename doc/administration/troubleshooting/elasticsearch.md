@@ -36,6 +36,7 @@ The type of problem will determine what steps to take. The possible troubleshoot
 - Indexing.
 - Integration.
 - Performance.
+- Background Migrations.
 
 ### Search Results workflow
 
@@ -147,6 +148,30 @@ graph TD;
   F7(Escalate to<br>GitLab support.)
 ```
 
+### Background Migrations workflow
+
+```mermaid
+graph TD;
+  D --> |No| D1
+  D --> |Yes| D2
+  D2 --> |No| D3
+  D2 --> |Yes| D4
+  D4 --> |No| D5
+  D4 --> |Yes| D6
+  D6 --> |No| D8
+  D6 --> |Yes| D7
+
+  D{Is there a halted migration?}
+  D1[Migrations run in the<br>background and will<br>stop when completed.]
+  D2{Does the elasticsearch.log<br>file contain errors?}
+  D3[This is likely a bug/issue<br>in GitLab and will require<br>deeper investigation. Escalate<br>to GitLab support.]
+  D4{Have the errors<br>been addressed?}
+  D5[Have an Elasticsearch admin<br>review and address<br>the errors.]
+  D6{Has the migration<br>been retried?}
+  D7[This is likely a bug/issue<br>in GitLab and will require<br>deeper investigation. Escalate<br>to GitLab support.]
+  D8[Retry the migration from<br>the Admin > Settings ><br>Advanced Search UI.]
+```
+
 ## Troubleshooting walkthrough
 
 Most Elasticsearch troubleshooting can be broken down into 4 categories:
@@ -155,6 +180,7 @@ Most Elasticsearch troubleshooting can be broken down into 4 categories:
 - [Troubleshooting indexing](#troubleshooting-indexing)
 - [Troubleshooting integration](#troubleshooting-integration)
 - [Troubleshooting performance](#troubleshooting-performance)
+- [Troubleshooting background migrations](#troubleshooting-background-migrations)
 
 Generally speaking, if it does not fall into those four categories, it is either:
 
@@ -206,7 +232,7 @@ If the results:
 ### Troubleshooting indexing
 
 Troubleshooting indexing issues can be tricky. It can pretty quickly go to either GitLab
-support or your Elasticsearch admin.
+support or your Elasticsearch administrator.
 
 The best place to start is to determine if the issue is with creating an empty index.
 If it is, check on the Elasticsearch side to determine if the `gitlab-production` (the
@@ -219,7 +245,7 @@ If you still encounter issues, try creating an index manually on the Elasticsear
 instance. The details of the index aren't important here, as we want to test if indices
 can be made. If the indices:
 
-- Cannot be made, speak with your Elasticsearch admin.
+- Cannot be made, speak with your Elasticsearch administrator.
 - Can be made, Escalate this to GitLab support.
 
 If the issue is not with creating an empty index, the next step is to check for errors
@@ -227,7 +253,7 @@ during the indexing of projects. If errors do occur, they will either stem from 
 
 - On the GitLab side. You need to rectify those. If they are not
   something you are familiar with, contact GitLab support for guidance.
-- Within the Elasticsearch instance itself. See if the error is [documented and has a fix](../../integration/elasticsearch.md#troubleshooting). If not, speak with your Elasticsearch admin.
+- Within the Elasticsearch instance itself. See if the error is [documented and has a fix](../../integration/elasticsearch.md#troubleshooting). If not, speak with your Elasticsearch administrator.
 
 If the indexing process does not present errors, you will want to check the status of the indexed projects. You can do this via the following Rake tasks:
 
@@ -245,7 +271,7 @@ If reindexing the project shows:
 
 - Errors on the GitLab side, escalate those to GitLab support.
 - Elasticsearch errors or doesn't present any errors at all, reach out to your
-  Elasticsearch admin to check the instance.
+  Elasticsearch administrator to check the instance.
 
 ### Troubleshooting integration
 
@@ -258,7 +284,7 @@ If the issue is:
   This is a required package so make sure you install it.
   Go indexer was a beta indexer which can be optionally turned on/off, but in 12.3 it reached stable status and is now the default.
 - Not concerning the Go indexer, it is almost always an
-  Elasticsearch-side issue. This means you should reach out to your Elasticsearch admin
+  Elasticsearch-side issue. This means you should reach out to your Elasticsearch administrator
   regarding the error(s) you are seeing. If you are unsure here, it never hurts to reach
   out to GitLab support.
 
@@ -268,7 +294,7 @@ Beyond that, you will want to review the error. If it is:
   GitLab support.
 - An OS issue, you will want to reach out to your systems administrator.
 - A `Faraday::TimeoutError (execution expired)` error **and** you're using a proxy,
-  [set a custom  `gitlab_rails['env']` environment variable, called `no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
+  [set a custom `gitlab_rails['env']` environment variable, called `no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
   with the IP address of your Elasticsearch host.
 
 ### Troubleshooting performance
@@ -328,7 +354,19 @@ learn them, so it is best to escalate/pair with an Elasticsearch expert if you n
 dig further into these.
 
 Feel free to reach out to GitLab support, but this is likely to be something a skilled
-Elasticsearch admin has more experience with.
+Elasticsearch administrator has more experience with.
+
+### Troubleshooting background migrations
+
+Troubleshooting background migration failures can be difficult and may require contacting 
+an Elasticsearch administrator or GitLab Support.
+
+The best place to start while debugging issues with a background migration is the 
+[`elasticsearch.log` file](../logs.md#elasticsearchlog). Migrations will
+print information while a migration is in progress and any errors encountered.
+Apply fixes for any errors found in the log and retry the migration.
+
+If you still encounter issues after retrying the migration, reach out to GitLab support.
 
 ## Common issues
 

@@ -6,15 +6,14 @@ RSpec.describe Projects::Alerting::NotifyService do
   let_it_be(:project, refind: true) { create(:project) }
 
   describe '#execute' do
-    let(:service) { described_class.new(project, nil, payload) }
+    let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+    let(:service) { described_class.new(project, payload) }
     let(:token) { integration.token }
     let(:payload) do
       {
         'title' => 'Test alert title'
       }
     end
-
-    let(:integration) { create(:alert_management_http_integration, project: project) }
 
     subject { service.execute(token, integration) }
 
@@ -63,6 +62,18 @@ RSpec.describe Projects::Alerting::NotifyService do
           end
         end
       end
+    end
+
+    context 'with on-call schedules' do
+      let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+      let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+      let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+      let(:payload) { { 'fingerprint' => 'fingerprint' } }
+      let(:resolving_payload) { { 'fingerprint' => 'fingerprint', "end_time": Time.current.iso8601 } }
+      let(:users) { [participant.user] }
+      let(:fingerprint) { Digest::SHA1.hexdigest('fingerprint') }
+
+      it_behaves_like 'oncall users are correctly notified'
     end
   end
 end

@@ -1,8 +1,8 @@
 <script>
 import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import eventHub from '../event_hub';
 import { NODE_ACTIONS } from '../constants';
+import eventHub from '../event_hub';
 
 export default {
   components: {

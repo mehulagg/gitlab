@@ -76,6 +76,8 @@ module ServicesHelper
   end
 
   def scoped_reset_integration_path(integration, group: nil)
+    return '' unless integration.persisted?
+
     if group.present?
       reset_group_settings_integration_path(group, integration)
     else
@@ -102,7 +104,7 @@ module ServicesHelper
       cancel_path: scoped_integrations_path,
       can_test: integration.can_test?.to_s,
       test_path: scoped_test_integration_path(integration),
-      reset_path: reset_integrations?(group: group) ? scoped_reset_integration_path(integration, group: group) : ''
+      reset_path: scoped_reset_integration_path(integration, group: group)
     }
   end
 
@@ -126,8 +128,11 @@ module ServicesHelper
     !Gitlab.com?
   end
 
-  def reset_integrations?(group: nil)
-    Feature.enabled?(:reset_integrations, group, type: :development)
+  def jira_issue_breadcrumb_link(issue_reference)
+    link_to '', { class: 'gl-display-flex gl-align-items-center gl-white-space-nowrap' } do
+      icon = image_tag image_path('illustrations/logos/jira.svg'), width: 15, height: 15, class: 'gl-mr-2'
+      [icon, issue_reference].join.html_safe
+    end
   end
 
   extend self

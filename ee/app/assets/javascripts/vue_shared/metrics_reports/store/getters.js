@@ -1,6 +1,6 @@
 import { LOADING, ERROR, SUCCESS } from '../constants';
 
-export const summaryStatus = state => {
+export const summaryStatus = (state) => {
   if (state.isLoading) {
     return LOADING;
   }
@@ -12,8 +12,8 @@ export const summaryStatus = state => {
   return SUCCESS;
 };
 
-export const metrics = state => [
-  ...state.newMetrics.map(metric => ({ ...metric, isNew: true })),
+export const metrics = (state) => [
+  ...state.newMetrics.map((metric) => ({ ...metric, isNew: true })),
   ...state.existingMetrics,
-  ...state.removedMetrics.map(metric => ({ ...metric, wasRemoved: true })),
+  ...state.removedMetrics.map((metric) => ({ ...metric, wasRemoved: true })),
 ];

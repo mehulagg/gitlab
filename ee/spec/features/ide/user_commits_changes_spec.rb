@@ -24,11 +24,25 @@ RSpec.describe 'EE IDE user commits changes', :js do
     ide_visit(project)
   end
 
-  it 'shows error message' do
+  it 'does not show an error message' do
     ide_create_new_file('test.rb', content: '# A ruby file')
 
     ide_commit
 
-    expect(page).to have_content('CODEOWNERS rule violation')
+    expect(page).not_to have_content('CODEOWNERS rule violation')
+  end
+
+  context 'when the push_rules_supersede_codeowners is false' do
+    before do
+      stub_feature_flags(push_rules_supersede_code_owners: false)
+    end
+
+    it 'shows error message' do
+      ide_create_new_file('test.rb', content: '# A ruby file')
+
+      ide_commit
+
+      expect(page).to have_content('CODEOWNERS rule violation')
+    end
   end
 end

@@ -1,21 +1,19 @@
 <script>
-import { mapState, mapActions } from 'vuex';
-import { isEmpty } from 'lodash';
 import { GlAlert, GlButton, GlModalDirective, GlSprintf, GlTabs } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 
-import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
-import FeatureFlagsTab from './feature_flags_tab.vue';
-import FeatureFlagsTable from './feature_flags_table.vue';
-import UserListsTable from './user_lists_table.vue';
-import { s__ } from '~/locale';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import {
   buildUrlWithCurrentLocation,
   getParameterByName,
   historyPushState,
 } from '~/lib/utils/common_utils';
-
+import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
+import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
 import ConfigureFeatureFlagsModal from './configure_feature_flags_modal.vue';
+import FeatureFlagsTab from './feature_flags_tab.vue';
+import FeatureFlagsTable from './feature_flags_table.vue';
+import UserListsTable from './user_lists_table.vue';
 
 const SCOPES = { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE };
 
@@ -96,9 +94,6 @@ export default {
     hasNewPath() {
       return !isEmpty(this.newFeatureFlagPath);
     },
-    emptyStateTitle() {
-      return s__('FeatureFlags|Get started with feature flags');
-    },
   },
   created() {
     this.setFeatureFlagsOptions({ scope: this.scope, page: this.page });
@@ -137,7 +132,7 @@ export default {
     },
     updateFeatureFlagOptions(parameters) {
       const queryString = Object.keys(parameters)
-        .map(parameter => {
+        .map((parameter) => {
           const value = parameters[parameter];
           return `${parameter}=${encodeURIComponent(value)}`;
         })
@@ -202,7 +197,7 @@ export default {
       @token="rotateInstanceId()"
     />
     <div :class="topAreaBaseClasses">
-      <div class="gl-display-flex gl-flex-direction-column gl-display-md-none!">
+      <div class="gl-display-flex gl-flex-direction-column gl-md-display-none!">
         <gl-button
           v-if="canUserConfigure"
           v-gl-modal="'configure-feature-flags'"
@@ -246,7 +241,12 @@ export default {
           :error-state="shouldRenderErrorState"
           :error-title="s__(`FeatureFlags|There was an error fetching the feature flags.`)"
           :empty-state="shouldShowEmptyState"
-          :empty-title="emptyStateTitle"
+          :empty-title="s__('FeatureFlags|Get started with feature flags')"
+          :empty-description="
+            s__(
+              'FeatureFlags|Feature flags allow you to configure your code into different flavors by dynamically toggling certain functionality.',
+            )
+          "
           data-testid="feature-flags-tab"
           @dismissAlert="clearAlert"
           @changeTab="onFeatureFlagsTab"
@@ -266,7 +266,12 @@ export default {
           :error-state="shouldRenderErrorState"
           :error-title="s__(`FeatureFlags|There was an error fetching the user lists.`)"
           :empty-state="shouldShowEmptyState"
-          :empty-title="emptyStateTitle"
+          :empty-title="s__('FeatureFlags|Get started with user lists')"
+          :empty-description="
+            s__(
+              'FeatureFlags|User lists allow you to define a set of users to use with Feature Flags.',
+            )
+          "
           data-testid="user-lists-tab"
           @dismissAlert="clearAlert"
           @changeTab="onUserListsTab"
@@ -279,7 +284,7 @@ export default {
         </feature-flags-tab>
         <template #tabs-end>
           <li
-            class="gl-display-none gl-display-md-flex gl-align-items-center gl-flex-fill-1 gl-justify-content-end"
+            class="gl-display-none gl-md-display-flex gl-align-items-center gl-flex-fill-1 gl-justify-content-end"
           >
             <gl-button
               v-if="canUserConfigure"

@@ -1,6 +1,6 @@
 <script>
-import { mapGetters } from 'vuex';
 import { GlEmptyState, GlSprintf, GlLink } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'GeoReplicableEmptyState',

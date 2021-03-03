@@ -12,6 +12,7 @@ module EE
       include ::Emails::AdminNotification
       include ::Emails::Epics
       include ::Emails::Requirements
+      include ::Emails::UserCap
     end
 
     attr_reader :group

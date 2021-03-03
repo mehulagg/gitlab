@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Create a GitLab Pages website from scratch
 
-This tutorial shows you how to create a Pages site from scratch. You will start with
+This tutorial shows you how to create a Pages site from scratch. You start with
 a blank project and create your own CI file, which gives instruction to
 a [runner](https://docs.gitlab.com/runner/). When your CI/CD
 [pipeline](../../../../ci/pipelines/index.md) runs, the Pages site is created.
@@ -218,7 +218,7 @@ There are three default stages for GitLab CI/CD: build, test,
 and deploy.
 
 If you want to test your script and check the built site before deploying
-to production, you can run the test exactly as it will run when you
+to production, you can run the test exactly as it runs when you
 push to `master`.
 
 To specify a stage for your job to run in,
@@ -376,7 +376,7 @@ test:
 
 In this case, you need to exclude the `/vendor`
 directory from the list of folders Jekyll builds. Otherwise, Jekyll
-will try to build the directory contents along with the site.
+tries to build the directory contents along with the site.
 
 In the root directory, create a file called `_config.yml`
 and add this content:
@@ -396,7 +396,7 @@ but also pushes with **continuous tests** to feature-branches,
 For more information, see the following blog posts.
 
 - [Use GitLab CI/CD `environments` to deploy your
-  web app to staging and production](https://about.gitlab.com/blog/2016/08/26/ci-deployment-and-environments/).
+  web app to staging and production](https://about.gitlab.com/blog/2021/02/05/ci-deployment-and-environments/).
 - Learn [how to run jobs sequentially,
   in parallel, or build a custom pipeline](https://about.gitlab.com/blog/2016/07/29/the-basics-of-gitlab-ci/).
 - Learn [how to pull specific directories from different projects](https://about.gitlab.com/blog/2016/12/07/building-a-new-gitlab-docs-site-with-nanoc-gitlab-ci-and-gitlab-pages/)

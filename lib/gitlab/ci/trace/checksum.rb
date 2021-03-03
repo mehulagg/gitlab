@@ -30,7 +30,11 @@ module Gitlab
         end
 
         def state_crc32
-          strong_memoize(:state_crc32) { build.pending_state&.crc32 }
+          strong_memoize(:state_crc32) do
+            ::Gitlab::Database::Consistency.with_read_consistency do
+              build.pending_state&.crc32
+            end
+          end
         end
 
         def chunks_crc32
@@ -59,13 +63,38 @@ module Gitlab
         #
         def trace_chunks
           strong_memoize(:trace_chunks) do
-            build.trace_chunks.persisted
-              .select(::Ci::BuildTraceChunk.metadata_attributes)
+            ::Ci::BuildTraceChunk.with_read_consistency(build) do
+              build.trace_chunks.persisted
+                .select(::Ci::BuildTraceChunk.metadata_attributes)
+            end
           end
+        end
+
+        def state_bytesize
+          strong_memoize(:state_bytesize) do
+            build.pending_state&.trace_bytesize
+          end
+        end
+
+        def trace_size
+          strong_memoize(:trace_size) do
+            trace_chunks.sum { |chunk| chunk_size(chunk) }
+          end
+        end
+
+        def corrupted?
+          return false unless has_bytesize?
+          return false if valid?
+
+          state_bytesize.to_i != trace_size.to_i
         end
 
         def chunks_count
           trace_chunks.to_a.size
+        end
+
+        def has_bytesize?
+          state_bytesize.present?
         end
 
         private

@@ -25,7 +25,7 @@ describe('DependenciesTable component', () => {
   const findTableRows = () => wrapper.findAll('tbody > tr');
   const findRowToggleButtons = () => wrapper.findAll(GlButton);
   const findDependencyVulnerabilities = () => wrapper.find(DependencyVulnerabilities);
-  const normalizeWhitespace = string => string.replace(/\s+/g, ' ');
+  const normalizeWhitespace = (string) => string.replace(/\s+/g, ' ');
 
   const expectDependencyRow = (rowWrapper, dependency) => {
     const [
@@ -95,9 +95,11 @@ describe('DependenciesTable component', () => {
 
     it('renders the table header', () => {
       const expectedLabels = DependenciesTable.fields.map(({ label }) => label);
-      const headerCells = wrapper.findAll('thead th').wrappers;
+      const headerCells = wrapper.findAll('thead th');
 
-      expect(headerCells.map(cell => cell.text())).toEqual(expectedLabels);
+      expectedLabels.forEach((expectedLabel, i) => {
+        expect(headerCells.at(i).text()).toContain(expectedLabel);
+      });
     });
 
     it('does not render any rows', () => {
@@ -189,7 +191,9 @@ describe('DependenciesTable component', () => {
       let rowIndexWithVulnerabilities;
 
       beforeEach(() => {
-        rowIndexWithVulnerabilities = dependencies.findIndex(dep => dep.vulnerabilities.length > 0);
+        rowIndexWithVulnerabilities = dependencies.findIndex(
+          (dep) => dep.vulnerabilities.length > 0,
+        );
       });
 
       it('can be displayed by clicking on the toggle button', () => {
@@ -204,9 +208,7 @@ describe('DependenciesTable component', () => {
       });
 
       it('can be displayed by clicking on the vulnerabilities badge', () => {
-        const badge = findTableRows()
-          .at(rowIndexWithVulnerabilities)
-          .find(GlBadge);
+        const badge = findTableRows().at(rowIndexWithVulnerabilities).find(GlBadge);
         badge.trigger('click');
 
         return nextTick().then(() => {

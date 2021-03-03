@@ -1,5 +1,5 @@
-import axios from '../../lib/utils/axios_utils';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import axios from '../../lib/utils/axios_utils';
 
 export default class PerformanceBarService {
   static interceptor = null;
@@ -9,7 +9,7 @@ export default class PerformanceBarService {
   }
 
   static registerInterceptor(peekUrl, callback) {
-    PerformanceBarService.interceptor = response => {
+    PerformanceBarService.interceptor = (response) => {
       const [fireCallback, requestId, requestUrl] = PerformanceBarService.callbackParams(
         response,
         peekUrl,

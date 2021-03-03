@@ -120,7 +120,8 @@ RSpec.describe API::GroupHooks do
         pipeline_events: true,
         wiki_page_events: true,
         deployment_events: true,
-        releases_events: true
+        releases_events: true,
+        subgroup_events: true
       }
     end
 
@@ -146,6 +147,7 @@ RSpec.describe API::GroupHooks do
         expect(json_response['wiki_page_events']).to eq(true)
         expect(json_response['deployment_events']).to eq(true)
         expect(json_response['releases_events']).to eq(true)
+        expect(json_response['subgroup_events']).to eq(true)
         expect(json_response['enable_ssl_verification']).to eq(true)
       end
 

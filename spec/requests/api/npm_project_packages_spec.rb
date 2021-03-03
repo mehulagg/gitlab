@@ -6,36 +6,40 @@ RSpec.describe API::NpmProjectPackages do
   include_context 'npm api setup'
 
   describe 'GET /api/v4/projects/:id/packages/npm/*package_name' do
-    it_behaves_like 'handling get metadata requests' do
+    it_behaves_like 'handling get metadata requests', scope: :project do
       let(:url) { api("/projects/#{project.id}/packages/npm/#{package_name}") }
     end
   end
 
   describe 'GET /api/v4/projects/:id/packages/npm/-/package/*package_name/dist-tags' do
-    it_behaves_like 'handling get dist tags requests' do
+    it_behaves_like 'handling get dist tags requests', scope: :project do
       let(:url) { api("/projects/#{project.id}/packages/npm/-/package/#{package_name}/dist-tags") }
     end
   end
 
   describe 'PUT /api/v4/projects/:id/packages/npm/-/package/*package_name/dist-tags/:tag' do
-    it_behaves_like 'handling create dist tag requests' do
+    it_behaves_like 'handling create dist tag requests', scope: :project do
       let(:url) { api("/projects/#{project.id}/packages/npm/-/package/#{package_name}/dist-tags/#{tag_name}") }
     end
   end
 
   describe 'DELETE /api/v4/projects/:id/packages/npm/-/package/*package_name/dist-tags/:tag' do
-    it_behaves_like 'handling delete dist tag requests' do
+    it_behaves_like 'handling delete dist tag requests', scope: :project do
       let(:url) { api("/projects/#{project.id}/packages/npm/-/package/#{package_name}/dist-tags/#{tag_name}") }
     end
   end
 
   describe 'GET /api/v4/projects/:id/packages/npm/*package_name/-/*file_name' do
-    let_it_be(:package_file) { package.package_files.first }
+    let(:package_file) { package.package_files.first }
 
-    let(:params) { {} }
-    let(:url) { api("/projects/#{project.id}/packages/npm/#{package_file.package.name}/-/#{package_file.file_name}") }
+    let(:headers) { {} }
+    let(:url) { api("/projects/#{project.id}/packages/npm/#{package.name}/-/#{package_file.file_name}") }
 
-    subject { get(url, params: params) }
+    subject { get(url, headers: headers) }
+
+    before do
+      project.add_developer(user)
+    end
 
     shared_examples 'a package file that requires auth' do
       it 'denies download with no token' do
@@ -45,7 +49,7 @@ RSpec.describe API::NpmProjectPackages do
       end
 
       context 'with access token' do
-        let(:params) { { access_token: token.token } }
+        let(:headers) { build_token_auth_header(token.token) }
 
         it 'returns the file' do
           subject
@@ -56,7 +60,7 @@ RSpec.describe API::NpmProjectPackages do
       end
 
       context 'with job token' do
-        let(:params) { { job_token: job.token } }
+        let(:headers) { build_token_auth_header(job.token) }
 
         it 'returns the file' do
           subject
@@ -86,7 +90,7 @@ RSpec.describe API::NpmProjectPackages do
       it_behaves_like 'a package file that requires auth'
 
       context 'with guest' do
-        let(:params) { { access_token: token.token } }
+        let(:headers) { build_token_auth_header(token.token) }
 
         it 'denies download when not enough permissions' do
           project.add_guest(user)
@@ -108,7 +112,11 @@ RSpec.describe API::NpmProjectPackages do
   end
 
   describe 'PUT /api/v4/projects/:id/packages/npm/:package_name' do
-    RSpec.shared_examples 'handling invalid record with 400 error' do
+    before do
+      project.add_developer(user)
+    end
+
+    shared_examples 'handling invalid record with 400 error' do
       it 'handles an ActiveRecord::RecordInvalid exception with 400 error' do
         expect { upload_package_with_token(package_name, params) }
           .not_to change { project.packages.count }
@@ -119,24 +127,6 @@ RSpec.describe API::NpmProjectPackages do
 
     context 'when params are correct' do
       context 'invalid package record' do
-        context 'unscoped package' do
-          let(:package_name) { 'my_unscoped_package' }
-          let(:params) { upload_params(package_name: package_name) }
-
-          it_behaves_like 'handling invalid record with 400 error'
-
-          context 'with empty versions' do
-            let(:params) { upload_params(package_name: package_name).merge!(versions: {}) }
-
-            it 'throws a 400 error' do
-              expect { upload_package_with_token(package_name, params) }
-              .not_to change { project.packages.count }
-
-              expect(response).to have_gitlab_http_status(:bad_request)
-            end
-          end
-        end
-
         context 'invalid package name' do
           let(:package_name) { "@#{group.path}/my_inv@@lid_package_name" }
           let(:params) { upload_params(package_name: package_name) }
@@ -167,52 +157,71 @@ RSpec.describe API::NpmProjectPackages do
         end
       end
 
-      context 'scoped package' do
-        let(:package_name) { "@#{group.path}/my_package_name" }
+      context 'valid package record' do
         let(:params) { upload_params(package_name: package_name) }
 
-        context 'with access token' do
-          subject { upload_package_with_token(package_name, params) }
+        shared_examples 'handling upload with different authentications' do
+          context 'with access token' do
+            subject { upload_package_with_token(package_name, params) }
 
-          it_behaves_like 'a package tracking event', 'API::NpmPackages', 'push_package'
+            it_behaves_like 'a package tracking event', 'API::NpmPackages', 'push_package'
 
-          it 'creates npm package with file' do
-            expect { subject }
-              .to change { project.packages.count }.by(1)
-              .and change { Packages::PackageFile.count }.by(1)
-              .and change { Packages::Tag.count }.by(1)
+            it 'creates npm package with file' do
+              expect { subject }
+                .to change { project.packages.count }.by(1)
+                .and change { Packages::PackageFile.count }.by(1)
+                .and change { Packages::Tag.count }.by(1)
 
-            expect(response).to have_gitlab_http_status(:ok)
-          end
-        end
-
-        it 'creates npm package with file with job token' do
-          expect { upload_package_with_job_token(package_name, params) }
-            .to change { project.packages.count }.by(1)
-            .and change { Packages::PackageFile.count }.by(1)
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
-
-        context 'with an authenticated job token' do
-          let!(:job) { create(:ci_build, user: user) }
-
-          before do
-            Grape::Endpoint.before_each do |endpoint|
-              expect(endpoint).to receive(:current_authenticated_job) { job }
+              expect(response).to have_gitlab_http_status(:ok)
             end
           end
 
-          after do
-            Grape::Endpoint.before_each nil
-          end
-
-          it 'creates the package metadata' do
-            upload_package_with_token(package_name, params)
+          it 'creates npm package with file with job token' do
+            expect { upload_package_with_job_token(package_name, params) }
+              .to change { project.packages.count }.by(1)
+              .and change { Packages::PackageFile.count }.by(1)
 
             expect(response).to have_gitlab_http_status(:ok)
-            expect(project.reload.packages.find(json_response['id']).original_build_info.pipeline).to eq job.pipeline
           end
+
+          context 'with an authenticated job token' do
+            let!(:job) { create(:ci_build, user: user) }
+
+            before do
+              Grape::Endpoint.before_each do |endpoint|
+                expect(endpoint).to receive(:current_authenticated_job) { job }
+              end
+            end
+
+            after do
+              Grape::Endpoint.before_each nil
+            end
+
+            it 'creates the package metadata' do
+              upload_package_with_token(package_name, params)
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(project.reload.packages.find(json_response['id']).original_build_info.pipeline).to eq job.pipeline
+            end
+          end
+        end
+
+        context 'with a scoped name' do
+          let(:package_name) { "@#{group.path}/my_package_name" }
+
+          it_behaves_like 'handling upload with different authentications'
+        end
+
+        context 'with any scoped name' do
+          let(:package_name) { "@any_scope/my_package_name" }
+
+          it_behaves_like 'handling upload with different authentications'
+        end
+
+        context 'with an unscoped name' do
+          let(:package_name) { "my_unscoped_package_name" }
+
+          it_behaves_like 'handling upload with different authentications'
         end
       end
 
@@ -261,7 +270,9 @@ RSpec.describe API::NpmProjectPackages do
     end
 
     def upload_package(package_name, params = {})
-      put api("/projects/#{project.id}/packages/npm/#{package_name.sub('/', '%2f')}"), params: params
+      token = params.delete(:access_token) || params.delete(:job_token)
+      headers = build_token_auth_header(token)
+      put api("/projects/#{project.id}/packages/npm/#{package_name.sub('/', '%2f')}"), params: params, headers: headers
     end
 
     def upload_package_with_token(package_name, params = {})

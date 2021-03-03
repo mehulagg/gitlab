@@ -22,6 +22,7 @@ class Issue < ApplicationRecord
   include Presentable
   include IssueAvailableFeatures
   include Todoable
+  include FromUnion
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
@@ -131,7 +132,7 @@ class Issue < ApplicationRecord
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
-  scope :inc_relations_for_view, -> { includes(author: :status) }
+  scope :inc_relations_for_view, -> { includes(author: :status, assignees: :status) }
 
   # An issue can be uniquely identified by project_id and iid
   # Takes one or more sets of composite IDs, expressed as hash-like records of
@@ -431,6 +432,14 @@ class Issue < ApplicationRecord
 
   def relocation_target
     moved_to || duplicated_to
+  end
+
+  def supports_assignee?
+    issue_type_supports?(:assignee)
+  end
+
+  def email_participants_downcase
+    issue_email_participants.pluck(IssueEmailParticipant.arel_table[:email].lower)
   end
 
   private

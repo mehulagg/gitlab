@@ -1,12 +1,15 @@
 import Vue from 'vue';
-import Members from 'ee_else_ce/members';
-import memberExpirationDate from '~/member_expiration_date';
-import UsersSelect from '~/users_select';
+import { groupMemberRequestFormatter } from '~/groups/members/utils';
 import groupsSelect from '~/groups_select';
-import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
-import { initGroupMembersApp } from '~/groups/members';
-import { memberRequestFormatter, groupLinkRequestFormatter } from '~/groups/members/utils';
+import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
+import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
+import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
 import { s__ } from '~/locale';
+import memberExpirationDate from '~/member_expiration_date';
+import { initMembersApp } from '~/members/index';
+import { groupLinkRequestFormatter } from '~/members/utils';
+import UsersSelect from '~/users_select';
+import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
 
 function mountRemoveMemberModal() {
   const el = document.querySelector('.js-remove-member-modal');
@@ -24,11 +27,11 @@ function mountRemoveMemberModal() {
 
 const SHARED_FIELDS = ['account', 'expires', 'maxRole', 'expiration', 'actions'];
 
-initGroupMembersApp(document.querySelector('.js-group-members-list'), {
+initMembersApp(document.querySelector('.js-group-members-list'), {
   tableFields: SHARED_FIELDS.concat(['source', 'granted']),
   tableAttrs: { tr: { 'data-qa-selector': 'member_row' } },
   tableSortableFields: ['account', 'granted', 'maxRole', 'lastSignIn'],
-  requestFormatter: memberRequestFormatter,
+  requestFormatter: groupMemberRequestFormatter,
   filteredSearchBar: {
     show: true,
     tokens: ['two_factor', 'with_inherited_permissions'],
@@ -37,7 +40,8 @@ initGroupMembersApp(document.querySelector('.js-group-members-list'), {
     recentSearchesStorageKey: 'group_members',
   },
 });
-initGroupMembersApp(document.querySelector('.js-group-linked-list'), {
+
+initMembersApp(document.querySelector('.js-group-group-links-list'), {
   tableFields: SHARED_FIELDS.concat('granted'),
   tableAttrs: {
     table: { 'data-qa-selector': 'groups_list' },
@@ -45,9 +49,9 @@ initGroupMembersApp(document.querySelector('.js-group-linked-list'), {
   },
   requestFormatter: groupLinkRequestFormatter,
 });
-initGroupMembersApp(document.querySelector('.js-group-invited-members-list'), {
+initMembersApp(document.querySelector('.js-group-invited-members-list'), {
   tableFields: SHARED_FIELDS.concat('invited'),
-  requestFormatter: memberRequestFormatter,
+  requestFormatter: groupMemberRequestFormatter,
   filteredSearchBar: {
     show: true,
     tokens: [],
@@ -56,15 +60,17 @@ initGroupMembersApp(document.querySelector('.js-group-invited-members-list'), {
     recentSearchesStorageKey: 'group_invited_members',
   },
 });
-initGroupMembersApp(document.querySelector('.js-group-access-requests-list'), {
+initMembersApp(document.querySelector('.js-group-access-requests-list'), {
   tableFields: SHARED_FIELDS.concat('requested'),
-  requestFormatter: memberRequestFormatter,
+  requestFormatter: groupMemberRequestFormatter,
 });
 
 groupsSelect();
 memberExpirationDate();
 memberExpirationDate('.js-access-expiration-date-groups');
 mountRemoveMemberModal();
+initInviteMembersModal();
+initInviteMembersTrigger();
+initInviteGroupTrigger();
 
-new Members(); // eslint-disable-line no-new
 new UsersSelect(); // eslint-disable-line no-new

@@ -1,12 +1,12 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
 import { GlLabel } from '@gitlab/ui';
-import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { mapGetters, mapActions } from 'vuex';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import { isScopedLabel } from '~/lib/utils/common_utils';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
 export default {
   components: {
@@ -14,18 +14,18 @@ export default {
     LabelsSelect,
     GlLabel,
   },
+  inject: ['labelsFetchPath', 'labelsManagePath', 'labelsFilterBasePath'],
   data() {
     return {
       loading: false,
     };
   },
-  inject: ['labelsFetchPath', 'labelsManagePath', 'labelsFilterBasePath'],
   computed: {
     ...mapGetters(['activeIssue', 'projectPathForActiveIssue']),
     selectedLabels() {
       const { labels = [] } = this.activeIssue;
 
-      return labels.map(label => ({
+      return labels.map((label) => ({
         ...label,
         id: getIdFromGraphQLId(label.id),
       }));
@@ -33,7 +33,7 @@ export default {
     issueLabels() {
       const { labels = [] } = this.activeIssue;
 
-      return labels.map(label => ({
+      return labels.map((label) => ({
         ...label,
         scoped: isScopedLabel(label),
       }));
@@ -46,10 +46,10 @@ export default {
       this.$refs.sidebarItem.collapse();
 
       try {
-        const addLabelIds = payload.filter(label => label.set).map(label => label.id);
+        const addLabelIds = payload.filter((label) => label.set).map((label) => label.id);
         const removeLabelIds = this.selectedLabels
-          .filter(label => !payload.find(selected => selected.id === label.id))
-          .map(label => label.id);
+          .filter((label) => !payload.find((selected) => selected.id === label.id))
+          .map((label) => label.id);
 
         const input = { addLabelIds, removeLabelIds, projectPath: this.projectPathForActiveIssue };
         await this.setActiveIssueLabels(input);

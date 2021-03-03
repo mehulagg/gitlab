@@ -37,9 +37,7 @@ describe('PolicyRuleBuilder component', () => {
 
   function selectFirstOption(sel) {
     const el = wrapper.find(sel);
-    el.findAll('option')
-      .at(1)
-      .setSelected();
+    el.findAll('option').at(1).setSelected();
     el.trigger('change');
   }
 
@@ -131,7 +129,7 @@ describe('PolicyRuleBuilder component', () => {
     it('updates entity types', async () => {
       const el = findRuleEntity();
       el.findAll('button')
-        .filter(e => e.text() === 'host')
+        .filter((e) => e.text() === 'host')
         .trigger('click');
       await wrapper.vm.$nextTick();
       expect(rule.entities).toEqual(['host']);

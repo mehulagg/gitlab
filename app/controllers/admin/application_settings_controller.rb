@@ -31,7 +31,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
 
   feature_category :source_code_management, [:repository, :clear_repository_check_states]
   feature_category :continuous_integration, [:ci_cd, :reset_registration_token]
-  feature_category :collection, [:usage_data]
+  feature_category :usage_ping, [:usage_data]
   feature_category :integrations, [:integrations]
   feature_category :pages, [:lets_encrypt_terms_of_service]
 
@@ -238,11 +238,13 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       *::ApplicationSettingsHelper.visible_attributes,
       *::ApplicationSettingsHelper.external_authorization_service_attributes,
       *ApplicationSetting.repository_storages_weighted_attributes,
+      *ApplicationSetting.kroki_formats_attributes.keys.map { |key| "kroki_formats_#{key}".to_sym },
       :lets_encrypt_notification_email,
       :lets_encrypt_terms_of_service_accepted,
       :domain_denylist_file,
       :raw_blob_request_limit,
       :issues_create_limit,
+      :notes_create_limit,
       :default_branch_name,
       disabled_oauth_sign_in_sources: [],
       import_sources: [],

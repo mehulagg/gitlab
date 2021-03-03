@@ -5,6 +5,8 @@ module Gitlab
     module Aggregations
       module Issues
         class LazyBlockAggregate
+          include ::Gitlab::Graphql::Deferred
+
           attr_reader :issue_id, :lazy_state
 
           def initialize(query_ctx, issue_id, &block)
@@ -34,6 +36,8 @@ module Gitlab
 
             result
           end
+
+          alias_method :execute, :block_aggregate
 
           private
 

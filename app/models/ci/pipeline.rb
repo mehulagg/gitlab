@@ -7,6 +7,7 @@ module Ci
     include Importable
     include AfterCommitQueue
     include Presentable
+    include Gitlab::Allowable
     include Gitlab::OptimisticLocking
     include Gitlab::Utils::StrongMemoize
     include AtomicInternalId
@@ -15,6 +16,9 @@ module Ci
     include ShaAttribute
     include FromUnion
     include UpdatedAtFilterable
+    include EachBatch
+
+    MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
     PROJECT_ROUTE_AND_NAMESPACE_ROUTE = {
       project: [:project_feature, :route, { namespace: :route }]
@@ -65,8 +69,8 @@ module Ci
     has_many :variables, class_name: 'Ci::PipelineVariable'
     has_many :deployments, through: :builds
     has_many :environments, -> { distinct }, through: :deployments
-    has_many :latest_builds, -> { latest }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
-    has_many :downloadable_artifacts, -> { not_expired.downloadable }, through: :latest_builds, source: :job_artifacts
+    has_many :latest_builds, -> { latest.with_project_and_metadata }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
+    has_many :downloadable_artifacts, -> { not_expired.downloadable.with_job }, through: :latest_builds, source: :job_artifacts
 
     has_many :messages, class_name: 'Ci::PipelineMessage', inverse_of: :pipeline
 
@@ -104,7 +108,6 @@ module Ci
 
     accepts_nested_attributes_for :variables, reject_if: :persisted?
 
-    delegate :id, to: :project, prefix: true
     delegate :full_path, to: :project, prefix: true
 
     validates :sha, presence: { unless: :importing? }
@@ -225,7 +228,7 @@ module Ci
 
         pipeline.run_after_commit do
           PipelineHooksWorker.perform_async(pipeline.id)
-          ExpirePipelineCacheWorker.perform_async(pipeline.id) if pipeline.cacheable?
+          ExpirePipelineCacheWorker.perform_async(pipeline.id)
         end
       end
 
@@ -247,7 +250,8 @@ module Ci
 
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
-          ::Ci::Pipelines::CreateArtifactWorker.perform_async(pipeline.id)
+          ::Ci::PipelineArtifacts::CoverageReportWorker.perform_async(pipeline.id)
+          ::Ci::PipelineArtifacts::CreateQualityReportWorker.perform_async(pipeline.id)
         end
       end
 
@@ -260,8 +264,6 @@ module Ci
       end
 
       after_transition any => any do |pipeline|
-        next unless Feature.enabled?(:jira_sync_builds, pipeline.project)
-
         pipeline.run_after_commit do
           # Passing the seq-id ensures this is idempotent
           seq_id = ::Atlassian::JiraConnect::Client.generate_update_sequence_id
@@ -571,7 +573,7 @@ module Ci
     end
 
     def cancel_running(retries: nil)
-      retry_optimistic_lock(cancelable_statuses, retries) do |cancelable|
+      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelable|
         cancelable.find_each do |job|
           yield(job) if block_given?
           job.cancel
@@ -675,7 +677,7 @@ module Ci
 
     def number_of_warnings
       BatchLoader.for(id).batch(default_value: 0) do |pipeline_ids, loader|
-        ::Ci::Build.where(commit_id: pipeline_ids)
+        ::CommitStatus.where(commit_id: pipeline_ids)
           .latest
           .failed_but_allowed
           .group(:commit_id)
@@ -742,7 +744,7 @@ module Ci
     end
 
     def set_status(new_status)
-      retry_optimistic_lock(self) do
+      retry_optimistic_lock(self, name: 'ci_pipeline_set_status') do
         case new_status
         when 'created' then nil
         when 'waiting_for_resource' then request_resource
@@ -800,6 +802,10 @@ module Ci
           end
 
           variables.concat(merge_request.predefined_variables)
+        end
+
+        if open_merge_requests_refs.any?
+          variables.append(key: 'CI_OPEN_MERGE_REQUESTS', value: open_merge_requests_refs.join(','))
         end
 
         variables.append(key: 'CI_KUBERNETES_ACTIVE', value: 'true') if has_kubernetes_active?
@@ -868,6 +874,36 @@ module Ci
       all_merge_requests.order(id: :desc)
     end
 
+    # This returns a list of MRs that point
+    # to the same source project/branch
+    def related_merge_requests
+      if merge_request?
+        # We look for all other MRs that this branch might be pointing to
+        MergeRequest.where(
+          source_project_id: merge_request.source_project_id,
+          source_branch: merge_request.source_branch)
+      else
+        MergeRequest.where(
+          source_project_id: project_id,
+          source_branch: ref)
+      end
+    end
+
+    # We cannot use `all_merge_requests`, due to race condition
+    # This returns a list of at most 4 open MRs
+    def open_merge_requests_refs
+      strong_memoize(:open_merge_requests_refs) do
+        # We ensure that triggering user can actually read the pipeline
+        related_merge_requests
+          .opened
+          .limit(MAX_OPEN_MERGE_REQUESTS_REFS)
+          .order(id: :desc)
+          .preload(:target_project)
+          .select { |mr| can?(user, :read_merge_request, mr) }
+          .map { |mr| mr.to_reference(project, full: true) }
+      end
+    end
+
     def same_family_pipeline_ids
       ::Gitlab::Ci::PipelineObjectHierarchy.new(
         self.class.where(id: root_ancestor), options: { same_project: true }
@@ -902,6 +938,12 @@ module Ci
         .first
     end
 
+    def self_with_ancestors_and_descendants(same_project: false)
+      ::Gitlab::Ci::PipelineObjectHierarchy
+        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
+        .all_objects
+    end
+
     def bridge_triggered?
       source_bridge.present?
     end
@@ -925,7 +967,7 @@ module Ci
 
     def detailed_status(current_user)
       Gitlab::Ci::Status::Pipeline::Factory
-        .new(self, current_user)
+        .new(self.present, current_user)
         .fabricate!
     end
 
@@ -961,11 +1003,21 @@ module Ci
     end
 
     def has_coverage_reports?
-      pipeline_artifacts&.has_code_coverage?
+      pipeline_artifacts&.report_exists?(:code_coverage)
     end
 
     def can_generate_coverage_reports?
       has_reports?(Ci::JobArtifact.coverage_reports)
+    end
+
+    def has_codequality_mr_diff_report?
+      pipeline_artifacts&.report_exists?(:code_quality_mr_diff)
+    end
+
+    def can_generate_codequality_reports?
+      return false unless ::Gitlab::Ci::Features.display_quality_on_mr_diff?(project)
+
+      has_reports?(Ci::JobArtifact.codequality_reports)
     end
 
     def test_report_summary
@@ -1071,7 +1123,7 @@ module Ci
       detached_merge_request_pipeline? && !merge_request_ref?
     end
 
-    def merge_request_pipeline?
+    def merged_result_pipeline?
       merge_request? && target_sha.present?
     end
 
@@ -1111,7 +1163,7 @@ module Ci
       return unless merge_request?
 
       strong_memoize(:merge_request_event_type) do
-        if merge_request_pipeline?
+        if merged_result_pipeline?
           :merged_result
         elsif detached_merge_request_pipeline?
           :detached
@@ -1121,10 +1173,6 @@ module Ci
 
     def persistent_ref
       @persistent_ref ||= PersistentRef.new(pipeline: self)
-    end
-
-    def cacheable?
-      !dangling?
     end
 
     def dangling?
@@ -1169,6 +1217,21 @@ module Ci
     end
     # rubocop:enable Rails/FindEach
 
+    # EE-only
+    def merge_train_pipeline?
+      false
+    end
+
+    def security_reports(report_types: [])
+      reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
+
+      ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
+        latest_report_builds(reports_scope).each do |build|
+          build.collect_security_reports!(security_reports)
+        end
+      end
+    end
+
     private
 
     def add_message(severity, content)
@@ -1186,7 +1249,7 @@ module Ci
     def merge_request_diff_sha
       return unless merge_request?
 
-      if merge_request_pipeline?
+      if merged_result_pipeline?
         source_sha
       else
         sha

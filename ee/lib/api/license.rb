@@ -4,7 +4,7 @@ module API
   class License < ::API::Base
     before { authenticated_as_admin! }
 
-    feature_category :provision
+    feature_category :license
 
     resource :license do
       desc 'Get information on the currently active license' do

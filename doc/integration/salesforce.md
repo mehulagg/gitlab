@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Salesforce OmniAuth Provider
+# Salesforce OmniAuth Provider **(FREE)**
 
 You can integrate your GitLab instance with [Salesforce](https://www.salesforce.com/) to enable users to log in to your GitLab instance with their Salesforce account.
 
@@ -86,4 +86,6 @@ Click the icon to begin the authentication process. Salesforce asks the user to 
 If everything goes well, the user is returned to GitLab and is signed in.
 
 NOTE:
-GitLab requires the email address of each new user. Once the user is logged in using Salesforce, GitLab redirects the user to the profile page where they must provide the email and verify the email.
+GitLab requires the email address of each new user. After the user is signed in
+using Salesforce, GitLab redirects the user to the profile page where they must
+provide the email and verify the email.

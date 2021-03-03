@@ -31,9 +31,8 @@ RSpec.describe Vulnerabilities::FindingReportsComparerEntity do
         allow(request).to receive(:current_user).and_return(user)
       end
 
-      it 'contains the added existing and fixed vulnerabilities for container scanning' do
+      it 'contains the added and fixed vulnerabilities for container scanning' do
         expect(subject.keys).to include(:added)
-        expect(subject.keys).to include(:existing)
         expect(subject.keys).to include(:fixed)
       end
 

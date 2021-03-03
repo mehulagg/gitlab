@@ -1,7 +1,7 @@
 <script>
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { camelCase } from 'lodash';
 import { mapState, mapActions } from 'vuex';
-import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { LICENSE_CHECK_NAME, VULNERABILITY_CHECK_NAME, JOB_TYPES } from 'ee/approvals/constants';
 import { s__ } from '~/locale';
 import UnconfiguredSecurityRule from './unconfigured_security_rule.vue';
@@ -34,9 +34,9 @@ export default {
   computed: {
     ...mapState('securityConfiguration', ['configuration']),
     ...mapState({
-      rules: state => state.approvals.rules,
-      isApprovalsLoading: state => state.approvals.isLoading,
-      isSecurityConfigurationLoading: state => state.securityConfiguration.isLoading,
+      rules: (state) => state.approvals.rules,
+      isApprovalsLoading: (state) => state.approvals.isLoading,
+      isSecurityConfigurationLoading: (state) => state.securityConfiguration.isLoading,
     }),
     isRulesLoading() {
       return this.isApprovalsLoading || this.isSecurityConfigurationLoading;
@@ -46,17 +46,17 @@ export default {
         {
           name: VULNERABILITY_CHECK_NAME,
           description: s__(
-            'SecurityApprovals|One or more of the security scanners must be enabled. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|Configurable if security scanners are enabled. %{linkStart}Learn more.%{linkEnd}',
           ),
           enableDescription: s__(
-            'SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}Learn more.%{linkEnd}',
           ),
           docsPath: this.vulnerabilityCheckHelpPagePath,
         },
         {
           name: LICENSE_CHECK_NAME,
           description: s__(
-            'SecurityApprovals|License Scanning must be enabled. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|License Scanning must be enabled. %{linkStart}Learn more%{linkEnd}.',
           ),
           enableDescription: s__(
             'SecurityApprovals|Requires approval for Denied licenses. %{linkStart}More information%{linkEnd}',
@@ -84,14 +84,14 @@ export default {
     ...mapActions('securityConfiguration', ['fetchSecurityConfiguration']),
     ...mapActions({ openCreateModal: 'createModal/open' }),
     hasApprovalRuleDefined(matchRule) {
-      return this.rules.some(rule => {
+      return this.rules.some((rule) => {
         return matchRule.name === rule.name;
       });
     },
     hasConfiguredJob(matchRule) {
       const { features = [] } = this.configuration;
-      return this.$options.featureTypes[camelCase(matchRule.name)].some(featureType => {
-        return features.some(feature => {
+      return this.$options.featureTypes[camelCase(matchRule.name)].some((featureType) => {
+        return features.some((feature) => {
           return feature.type === featureType && feature.configured;
         });
       });

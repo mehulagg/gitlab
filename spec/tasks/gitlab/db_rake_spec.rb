@@ -246,17 +246,25 @@ RSpec.describe 'gitlab:db namespace rake task' do
     context 'with index name given' do
       let(:index) { double('index') }
 
+      before do
+        allow(Gitlab::Database::Reindexing).to receive(:candidate_indexes).and_return(indexes)
+      end
+
       it 'calls the index rebuilder with the proper arguments' do
-        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.foo_idx').and_return(index)
+        allow(indexes).to receive(:where).with(identifier: 'public.foo_idx').and_return([index])
         expect(Gitlab::Database::Reindexing).to receive(:perform).with([index])
 
         run_rake_task('gitlab:db:reindex', '[public.foo_idx]')
       end
 
       it 'raises an error if the index does not exist' do
-        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.absent_index').and_raise(ActiveRecord::RecordNotFound)
+        allow(indexes).to receive(:where).with(identifier: 'public.absent_index').and_return([])
 
-        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(ActiveRecord::RecordNotFound)
+        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(/Index not found/)
+      end
+
+      it 'raises an error if the index is not fully qualified with a schema' do
+        expect { run_rake_task('gitlab:db:reindex', '[foo_idx]') }.to raise_error(/Index name is not fully qualified/)
       end
     end
   end
@@ -286,6 +294,57 @@ RSpec.describe 'gitlab:db namespace rake task' do
           expect(error.success?).to be(exit_code)
         end
       end
+    end
+  end
+
+  describe '#migrate_with_instrumentation' do
+    subject { run_rake_task('gitlab:db:migration_testing', "[#{filename}]") }
+
+    let(:ctx) { double('ctx', migrations: all_migrations, schema_migration: double, get_all_versions: existing_versions) }
+    let(:instrumentation) { instance_double(Gitlab::Database::Migrations::Instrumentation, observations: observations) }
+    let(:existing_versions) { [1] }
+    let(:all_migrations) { [double('migration1', version: 1), pending_migration] }
+    let(:pending_migration) { double('migration2', version: 2) }
+    let(:filename) { 'results-file.json'}
+    let(:buffer) { StringIO.new }
+    let(:observations) { %w[some data] }
+
+    before do
+      allow(ActiveRecord::Base.connection).to receive(:migration_context).and_return(ctx)
+      allow(Gitlab::Database::Migrations::Instrumentation).to receive(:new).and_return(instrumentation)
+      allow(ActiveRecord::Migrator).to receive_message_chain('new.run').with(any_args).with(no_args)
+
+      allow(instrumentation).to receive(:observe).and_yield
+
+      allow(File).to receive(:open).with(filename, 'wb+').and_yield(buffer)
+    end
+
+    it 'fails when given no filename argument' do
+      expect { run_rake_task('gitlab:db:migration_testing') }.to raise_error(/specify result_file/)
+    end
+
+    it 'fails when the given file already exists' do
+      expect(File).to receive(:exist?).with(filename).and_return(true)
+
+      expect { subject }.to raise_error(/File exists/)
+    end
+
+    it 'instruments the pending migration' do
+      expect(instrumentation).to receive(:observe).with(2).and_yield
+
+      subject
+    end
+
+    it 'executes the pending migration' do
+      expect(ActiveRecord::Migrator).to receive_message_chain('new.run').with(:up, ctx.migrations, ctx.schema_migration, pending_migration.version).with(no_args)
+
+      subject
+    end
+
+    it 'writes observations out to JSON file' do
+      subject
+
+      expect(buffer.string).to eq(observations.to_json)
     end
   end
 

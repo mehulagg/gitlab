@@ -1,14 +1,18 @@
 import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
+import Vuex from 'vuex';
 import SidebarStatus from 'ee/sidebar/components/status/sidebar_status.vue';
 import Status from 'ee/sidebar/components/status/status.vue';
+
+Vue.use(Vuex);
 
 describe('SidebarStatus', () => {
   let mediator;
   let wrapper;
-  let handleDropdownClickMock;
 
-  const createMediator = states => {
+  const createMediator = (states) => {
     mediator = {
+      updateStatus: jest.fn().mockResolvedValue(),
       store: {
         isFetching: {
           status: true,
@@ -19,24 +23,27 @@ describe('SidebarStatus', () => {
     };
   };
 
-  const createWrapper = (mockStore = {}) => {
+  const createWrapper = ({ noteableState } = {}) => {
+    const store = new Vuex.Store({
+      getters: {
+        getNoteableData: () => ({ state: noteableState }),
+      },
+    });
     wrapper = shallowMount(SidebarStatus, {
       propsData: {
         mediator,
       },
-      methods: {
-        handleDropdownClick: handleDropdownClickMock,
-      },
-      mocks: {
-        $store: mockStore,
-      },
+      store,
     });
   };
 
   beforeEach(() => {
-    handleDropdownClickMock = jest.fn();
     createMediator();
-    createWrapper();
+    createWrapper({
+      getters: {
+        getNoteableData: {},
+      },
+    });
   });
 
   afterEach(() => {
@@ -52,15 +59,8 @@ describe('SidebarStatus', () => {
       ${'closed'}   | ${false}
     `('isOpen', ({ noteableState, isOpen }) => {
       beforeEach(() => {
-        const mockStore = {
-          getters: {
-            getNoteableData: {
-              state: noteableState,
-            },
-          },
-        };
         createMediator({ editable: true });
-        createWrapper(mockStore);
+        createWrapper({ noteableState });
       });
 
       it(`returns ${isOpen} when issue is ${noteableState}`, () => {
@@ -76,16 +76,10 @@ describe('SidebarStatus', () => {
       expect(wrapper.find(Status).exists()).toBe(true);
     });
 
-    it('calls handleFormSubmission when receiving an onDropdownClick event from Status component', () => {
+    it('calls mediator status update when receiving an onDropdownClick event from Status component', () => {
       wrapper.find(Status).vm.$emit('onDropdownClick', 'onTrack');
 
-      expect(handleDropdownClickMock).toHaveBeenCalledWith('onTrack');
+      expect(mediator.updateStatus).toHaveBeenCalledWith('onTrack');
     });
-  });
-
-  it('calls handleFormSubmission when receiving an onFormSubmit event from Status component', () => {
-    wrapper.find(Status).vm.$emit('onDropdownClick', 'onTrack');
-
-    expect(handleDropdownClickMock).toHaveBeenCalledWith('onTrack');
   });
 });

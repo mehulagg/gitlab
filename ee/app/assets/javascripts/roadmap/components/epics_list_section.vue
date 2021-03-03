@@ -1,15 +1,14 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import VirtualList from 'vue-virtual-scroll-list';
+import { mapState, mapActions } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
+import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT } from '../constants';
 import eventHub from '../event_hub';
 import { generateKey } from '../utils/epic_utils';
 
-import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT } from '../constants';
-
-import EpicItem from './epic_item.vue';
 import CurrentDayIndicator from './current_day_indicator.vue';
+import EpicItem from './epic_item.vue';
 
 export default {
   EpicItem,
@@ -68,7 +67,7 @@ export default {
     },
     epicsWithAssociatedParents() {
       return this.epics.filter(
-        epic => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
+        (epic) => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
       );
     },
     displayedEpics() {
@@ -123,8 +122,10 @@ export default {
     getEmptyRowContainerStyles() {
       if (this.$refs.epicItems && this.$refs.epicItems.length) {
         return {
-          height: `${this.$el.clientHeight -
-            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight}px`,
+          height: `${
+            this.$el.clientHeight -
+            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight
+          }px`,
         };
       }
       return {};

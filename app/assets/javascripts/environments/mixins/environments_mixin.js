@@ -3,18 +3,18 @@
  */
 import { isEqual, isFunction, omitBy } from 'lodash';
 import Visibility from 'visibilityjs';
-import EnvironmentsStore from 'ee_else_ce/environments/stores/environments_store';
-import Poll from '../../lib/utils/poll';
-import { getParameterByName } from '../../lib/utils/common_utils';
-import { s__ } from '../../locale';
 import { deprecatedCreateFlash as Flash } from '../../flash';
+import { getParameterByName } from '../../lib/utils/common_utils';
+import Poll from '../../lib/utils/poll';
+import { s__ } from '../../locale';
+import tabs from '../../vue_shared/components/navigation_tabs.vue';
+import tablePagination from '../../vue_shared/components/pagination/table_pagination.vue';
+import container from '../components/container.vue';
+import environmentTable from '../components/environments_table.vue';
 import eventHub from '../event_hub';
 
 import EnvironmentsService from '../services/environments_service';
-import tablePagination from '../../vue_shared/components/pagination/table_pagination.vue';
-import environmentTable from '../components/environments_table.vue';
-import tabs from '../../vue_shared/components/navigation_tabs.vue';
-import container from '../components/container.vue';
+import EnvironmentsStore from '../stores/environments_store';
 
 export default {
   components: {
@@ -64,7 +64,7 @@ export default {
     },
 
     filterNilValues(obj) {
-      return omitBy(obj, value => value === undefined || value === null);
+      return omitBy(obj, (value) => value === undefined || value === null);
     },
 
     /**
@@ -80,7 +80,7 @@ export default {
       // fetch new data
       return this.service
         .fetchEnvironments(this.requestData)
-        .then(response => {
+        .then((response) => {
           this.successCallback(response);
           this.poll.enable({ data: this.requestData, response });
         })
@@ -107,7 +107,7 @@ export default {
         this.service
           .postAction(endpoint)
           .then(() => this.fetchEnvironments())
-          .catch(err => {
+          .catch((err) => {
             this.isLoading = false;
             Flash(isFunction(errorMessage) ? errorMessage(err.response.data) : errorMessage);
           });
@@ -219,7 +219,7 @@ export default {
         data: this.requestData,
         successCallback: this.successCallback,
         errorCallback: this.errorCallback,
-        notificationCallback: isMakingRequest => {
+        notificationCallback: (isMakingRequest) => {
           this.isMakingRequest = isMakingRequest;
         },
       });

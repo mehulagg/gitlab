@@ -1,5 +1,5 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
 import DagAnnotations from '~/pipelines/components/dag/dag_annotations.vue';
 import { singleNote, multiNote } from './mock_data';
 
@@ -66,11 +66,7 @@ describe('The DAG annotations', () => {
       expect(getAllTextBlocks().length).toBe(Object.keys(multiNote).length);
 
       Object.values(multiNote).forEach((item, idx) => {
-        expect(
-          getAllTextBlocks()
-            .at(idx)
-            .text(),
-        ).toBe(`${item.source.name} → ${item.target.name}`);
+        expect(getAllTextBlocks().at(idx).text()).toBe(`${item.source.name} → ${item.target.name}`);
       });
     });
 

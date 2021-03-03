@@ -4,7 +4,7 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Distributed Tracing - development guidelines
+# Distributed Tracing - development guidelines **(FREE)**
 
 GitLab is instrumented for distributed tracing. Distributed Tracing in GitLab is currently considered **experimental**, as it has not yet been tested at scale on GitLab.com.
 
@@ -206,7 +206,7 @@ If `GITLAB_TRACING` is not configured correctly, this issue is logged:
 
 By default, GitLab ships with the Jaeger tracer, but other tracers can be included at compile time.
 Details of how this can be done are included in the [LabKit tracing
-documentation](https://godoc.org/gitlab.com/gitlab-org/labkit/tracing).
+documentation](https://pkg.go.dev/gitlab.com/gitlab-org/labkit/tracing).
 
 If no log messages about tracing are emitted, the `GITLAB_TRACING` environment variable is likely
 not set.

@@ -5,13 +5,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# GitLab Rails Console Cheat Sheet **(CORE ONLY)**
+# GitLab Rails Console Cheat Sheet **(FREE SELF)**
 
 This is the GitLab Support Team's collection of information regarding the GitLab Rails
 console, for use while troubleshooting. It is listed here for transparency,
 and it may be useful for users with experience with these tools. If you are currently
-having an issue with GitLab, it is highly recommended that you check your
-[support options](https://about.gitlab.com/support/) first, before attempting to use
+having an issue with GitLab, it is highly recommended that you first check
+our guide on [navigating our Rails console](navigating_gitlab_via_rails_console.md),
+and your [support options](https://about.gitlab.com/support/), before attempting to use
 this information.
 
 WARNING:
@@ -374,6 +375,26 @@ Clear the cache:
 sudo gitlab-rake cache:clear
 ```
 
+### Export a repository
+
+It's typically recommended to export a project through [the web interface](../../user/project/settings/import_export.md#exporting-a-project-and-its-data) or through [the API](../../api/project_import_export.md). In situations where this is not working as expected, it may be preferable to export a project directly via the Rails console:
+
+```ruby
+user = User.find_by_username('USERNAME')
+project = Project.find_by_full_path('PROJECT_PATH')
+Projects::ImportExport::ExportService.new(project, user).execute
+```
+
+If the project you wish to export is available at `https://gitlab.example.com/baltig/pipeline-templates`, the value to use for `PROJECT_PATH` would be `baltig/pipeline-templates`.
+
+If this all runs successfully, you will see output like the following before being returned to the Rails console prompt:
+
+```ruby
+=> nil
+```
+
+The exported project will be located within a `.tar.gz` file in `/var/opt/gitlab/gitlab-rails/uploads/-/system/import_export_upload/export_file/`.
+
 ## Repository
 
 ### Search sequence of pushes to a repository
@@ -542,7 +563,7 @@ service = ::Groups::TransferService.new(group, user)
 service.execute(parent_group)
 ```
 
-### Count unique users in a group and sub-groups
+### Count unique users in a group and subgroups
 
 ```ruby
 group = Group.find_by_path_or_name("groupname")
@@ -576,6 +597,17 @@ GroupDestroyWorker.perform_async(group_id, user_id)
 # Project creation levels: 0 - No one, 1 - Maintainers, 2 - Developers + Maintainers
 group = Group.find_by_path_or_name('group-name')
 group.project_creation_level=0
+```
+
+### Modify group - disable 2FA requirement
+
+WARNING:
+When disabling the 2FA Requirement on a subgroup, the whole parent group (including all subgroups) is affected by this change.
+
+```ruby
+group = Group.find_by_path_or_name('group-name')
+group.require_two_factor_authentication=false
+group.save
 ```
 
 ## SCIM
@@ -712,7 +744,7 @@ m.project.try(:ci_service)
 ```ruby
 project = Project.find_by_full_path 'group/project'
 content = project.repository.gitlab_ci_yml_for(project.repository.root_ref_sha)
-Gitlab::Ci::YamlProcessor.validation_message(content,  user: User.first)
+Gitlab::Ci::Lint.new(project: project,  current_user: User.first).validate(content)
 ```
 
 ### Disable AutoDevOps on Existing Projects

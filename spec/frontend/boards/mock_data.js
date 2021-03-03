@@ -1,7 +1,7 @@
 /* global List */
 
-import Vue from 'vue';
 import { keyBy } from 'lodash';
+import Vue from 'vue';
 import '~/boards/models/list';
 import boardsStore from '~/boards/stores/boards_store';
 
@@ -97,7 +97,7 @@ export const mockMilestone = {
   due_date: '2019-12-31',
 };
 
-const assignees = [
+export const assignees = [
   {
     id: 'gid://gitlab/User/2',
     username: 'angelina.herman',
@@ -137,7 +137,7 @@ export const rawIssue = {
       {
         id: 1,
         title: 'test',
-        color: 'red',
+        color: '#F0AD4E',
         description: 'testing',
       },
     ],
@@ -165,7 +165,7 @@ export const mockIssue = {
     {
       id: 1,
       title: 'test',
-      color: 'red',
+      color: '#F0AD4E',
       description: 'testing',
     },
   ],
@@ -263,7 +263,7 @@ export const BoardsMockData = {
   },
 };
 
-export const boardsMockInterceptor = config => {
+export const boardsMockInterceptor = (config) => {
   const body = BoardsMockData[config.method.toUpperCase()][config.url];
   return [200, body];
 };
@@ -282,42 +282,43 @@ export const setMockEndpoints = (opts = {}) => {
   });
 };
 
-export const mockLists = [
-  {
-    id: 'gid://gitlab/List/1',
-    title: 'Backlog',
-    position: null,
-    listType: 'backlog',
-    collapsed: false,
-    label: null,
-    assignee: null,
-    milestone: null,
-    loading: false,
-    issuesSize: 1,
-  },
-  {
-    id: 'gid://gitlab/List/2',
+export const mockList = {
+  id: 'gid://gitlab/List/1',
+  title: 'Backlog',
+  position: -Infinity,
+  listType: 'backlog',
+  collapsed: false,
+  label: null,
+  assignee: null,
+  milestone: null,
+  loading: false,
+  issuesCount: 1,
+};
+
+export const mockLabelList = {
+  id: 'gid://gitlab/List/2',
+  title: 'To Do',
+  position: 0,
+  listType: 'label',
+  collapsed: false,
+  label: {
+    id: 'gid://gitlab/GroupLabel/121',
     title: 'To Do',
-    position: 0,
-    listType: 'label',
-    collapsed: false,
-    label: {
-      id: 'gid://gitlab/GroupLabel/121',
-      title: 'To Do',
-      color: '#F0AD4E',
-      textColor: '#FFFFFF',
-      description: null,
-    },
-    assignee: null,
-    milestone: null,
-    loading: false,
-    issuesSize: 0,
+    color: '#F0AD4E',
+    textColor: '#FFFFFF',
+    description: null,
   },
-];
+  assignee: null,
+  milestone: null,
+  loading: false,
+  issuesCount: 0,
+};
+
+export const mockLists = [mockList, mockLabelList];
 
 export const mockListsById = keyBy(mockLists, 'id');
 
-export const mockListsWithModel = mockLists.map(listMock =>
+export const mockListsWithModel = mockLists.map((listMock) =>
   Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),
 );
 
@@ -349,3 +350,33 @@ export const issues = {
   [mockIssue3.id]: mockIssue3,
   [mockIssue4.id]: mockIssue4,
 };
+
+export const mockRawGroupProjects = [
+  {
+    id: 0,
+    name: 'Example Project',
+    name_with_namespace: 'Awesome Group / Example Project',
+    path_with_namespace: 'awesome-group/example-project',
+  },
+  {
+    id: 1,
+    name: 'Foobar Project',
+    name_with_namespace: 'Awesome Group / Foobar Project',
+    path_with_namespace: 'awesome-group/foobar-project',
+  },
+];
+
+export const mockGroupProjects = [
+  {
+    id: 0,
+    name: 'Example Project',
+    nameWithNamespace: 'Awesome Group / Example Project',
+    fullPath: 'awesome-group/example-project',
+  },
+  {
+    id: 1,
+    name: 'Foobar Project',
+    nameWithNamespace: 'Awesome Group / Foobar Project',
+    fullPath: 'awesome-group/foobar-project',
+  },
+];

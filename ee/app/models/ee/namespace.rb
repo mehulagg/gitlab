@@ -11,19 +11,17 @@ module EE
     include ::Gitlab::Utils::StrongMemoize
 
     NAMESPACE_PLANS_TO_LICENSE_PLANS = {
-      ::Plan::BRONZE        => License::STARTER_PLAN,
-      ::Plan::SILVER        => License::PREMIUM_PLAN,
-      ::Plan::GOLD          => License::ULTIMATE_PLAN
+      ::Plan::BRONZE => License::STARTER_PLAN,
+      [::Plan::SILVER, ::Plan::PREMIUM] => License::PREMIUM_PLAN,
+      [::Plan::GOLD, ::Plan::ULTIMATE] => License::ULTIMATE_PLAN
     }.freeze
 
     LICENSE_PLANS_TO_NAMESPACE_PLANS = NAMESPACE_PLANS_TO_LICENSE_PLANS.invert.freeze
-    PLANS = (NAMESPACE_PLANS_TO_LICENSE_PLANS.keys + [Plan::FREE]).freeze
+    PLANS = (NAMESPACE_PLANS_TO_LICENSE_PLANS.keys + [Plan::FREE]).flatten.freeze
     TEMPORARY_STORAGE_INCREASE_DAYS = 30
 
     prepended do
       include EachBatch
-
-      attr_writer :root_ancestor
 
       has_one :namespace_statistics
       has_one :namespace_limit, inverse_of: :namespace
@@ -38,8 +36,6 @@ module EE
       scope :include_gitlab_subscription, -> { includes(:gitlab_subscription) }
       scope :include_gitlab_subscription_with_hosted_plan, -> { includes(gitlab_subscription: :hosted_plan) }
       scope :join_gitlab_subscription, -> { joins("LEFT OUTER JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id=namespaces.id") }
-
-      scope :top_most, -> { where(parent_id: nil) }
 
       scope :in_active_trial, -> do
         left_joins(gitlab_subscription: :hosted_plan)
@@ -92,7 +88,9 @@ module EE
                 numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true,
                                 less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
-      delegate :trial?, :trial_ends_on, :trial_starts_on, :upgradable?, to: :gitlab_subscription, allow_nil: true
+      delegate :trial?, :trial_ends_on, :trial_starts_on, :trial_days_remaining,
+        :trial_percentage_complete, :upgradable?,
+        to: :gitlab_subscription, allow_nil: true
 
       before_create :sync_membership_lock_with_parent
 
@@ -101,14 +99,16 @@ module EE
     end
 
     def namespace_limit
-      super.presence || build_namespace_limit
+      limit = has_parent? ? root_ancestor.namespace_limit : super
+
+      limit.presence || build_namespace_limit
     end
 
     class_methods do
       extend ::Gitlab::Utils::Override
 
       def plans_with_feature(feature)
-        LICENSE_PLANS_TO_NAMESPACE_PLANS.values_at(*License.plans_with_feature(feature))
+        LICENSE_PLANS_TO_NAMESPACE_PLANS.values_at(*License.plans_with_feature(feature)).flatten
       end
     end
 
@@ -171,7 +171,7 @@ module EE
           root_ancestor.actual_plan
         else
           subscription = find_or_create_subscription
-          subscription&.hosted_plan
+          hosted_plan_for(subscription)
         end
       end || fallback_plan
     end
@@ -245,14 +245,9 @@ module EE
       @ci_minutes_quota ||= ::Ci::Minutes::Quota.new(self)
     end
 
-    def shared_runner_minutes_supported?
-      !has_parent?
-    end
-
+    # The same method name is used also at project and job level
     def shared_runners_minutes_limit_enabled?
-      shared_runner_minutes_supported? &&
-        any_project_with_shared_runners_enabled? &&
-        ci_minutes_quota.total_minutes.nonzero?
+      ci_minutes_quota.enabled?
     end
 
     def any_project_with_shared_runners_enabled?
@@ -339,8 +334,16 @@ module EE
       actual_plan_name == ::Plan::SILVER
     end
 
+    def premium_plan?
+      actual_plan_name == ::Plan::PREMIUM
+    end
+
     def gold_plan?
       actual_plan_name == ::Plan::GOLD
+    end
+
+    def ultimate_plan?
+      actual_plan_name == ::Plan::ULTIMATE
     end
 
     def plan_eligible_for_trial?
@@ -376,7 +379,7 @@ module EE
     end
 
     def validate_shared_runner_minutes_support
-      return if shared_runner_minutes_supported?
+      return if root?
 
       if shared_runners_minutes_limit_changed?
         errors.add(:shared_runners_minutes_limit, 'is not supported for this namespace')
@@ -443,6 +446,17 @@ module EE
         all_projects
           .with_total_repository_size_greater_than(::Project.arel_table[:repository_size_limit])
           .without_unlimited_repository_size_limit
+      end
+    end
+
+    def hosted_plan_for(subscription)
+      return unless subscription
+
+      plan = subscription.hosted_plan
+      if plan && !subscription.legacy?
+        ::Subscriptions::NewPlanPresenter.new(plan)
+      else
+        plan
       end
     end
   end

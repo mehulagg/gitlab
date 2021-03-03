@@ -95,6 +95,10 @@ RSpec.describe 'getting a requirement list for a project' do
       let_it_be(:requirement2) { create(:requirement, project: filter_project, author: other_user, title: 'something about kubernetes') }
 
       before do
+        create(:test_report, requirement: requirement1, state: :failed)
+        create(:test_report, requirement: requirement1, state: :passed)
+        create(:test_report, requirement: requirement2, state: :failed)
+
         post_graphql(query, current_user: current_user)
       end
 
@@ -154,6 +158,27 @@ RSpec.describe 'getting a requirement list for a project' do
         it 'returns filtered requirements' do
           expect(graphql_errors).to be_nil
           match_single_result(requirement2)
+        end
+      end
+
+      context 'when given lastTestReportState' do
+        let(:params) { '(lastTestReportState: PASSED)' }
+
+        it 'returns filtered requirements' do
+          expect(graphql_errors).to be_nil
+
+          match_single_result(requirement1)
+        end
+
+        context 'for MISSING status' do
+          let_it_be(:requirement3) { create(:requirement, project: filter_project, author: other_user, title: 'need test report') }
+          let(:params) { '(lastTestReportState: MISSING)' }
+
+          it 'returns filtered requirements' do
+            expect(graphql_errors).to be_nil
+
+            match_single_result(requirement3)
+          end
         end
       end
     end

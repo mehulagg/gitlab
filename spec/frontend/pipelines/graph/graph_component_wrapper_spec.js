@@ -1,14 +1,16 @@
+import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { shallowMount } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
-import PipelineGraphWrapper from '~/pipelines/components/graph/graph_component_wrapper.vue';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import PipelineGraph from '~/pipelines/components/graph/graph_component.vue';
-import getPipelineDetails from '~/pipelines/graphql/queries/get_pipeline_details.query.graphql';
+import PipelineGraphWrapper from '~/pipelines/components/graph/graph_component_wrapper.vue';
 import { mockPipelineResponse } from './mock_data';
 
 const defaultProvide = {
+  graphqlResourceEtag: 'frog/amphibirama/etag/',
+  metricsPath: '',
   pipelineProjectPath: 'frog/amphibirama',
   pipelineIid: '22',
 };
@@ -87,6 +89,13 @@ describe('Pipeline graph wrapper', () => {
     it('displays the graph', () => {
       expect(getGraph().exists()).toBe(true);
     });
+
+    it('passes the etag resource and metrics path to the graph', () => {
+      expect(getGraph().props('configPaths')).toMatchObject({
+        graphqlResourceEtag: defaultProvide.graphqlResourceEtag,
+        metricsPath: defaultProvide.metricsPath,
+      });
+    });
   });
 
   describe('when there is an error', () => {
@@ -106,6 +115,19 @@ describe('Pipeline graph wrapper', () => {
 
     it('does not display the graph', () => {
       expect(getGraph().exists()).toBe(false);
+    });
+  });
+
+  describe('when refresh action is emitted', () => {
+    beforeEach(async () => {
+      createComponentWithApollo();
+      jest.spyOn(wrapper.vm.$apollo.queries.pipeline, 'refetch');
+      await wrapper.vm.$nextTick();
+      getGraph().vm.$emit('refreshPipelineGraph');
+    });
+
+    it('calls refetch', () => {
+      expect(wrapper.vm.$apollo.queries.pipeline.refetch).toHaveBeenCalled();
     });
   });
 });

@@ -1,4 +1,3 @@
-import jQuery from 'jquery';
 import {
   add,
   initTooltips,
@@ -20,7 +19,7 @@ describe('tooltips/index.js', () => {
       title: 'default title',
     };
 
-    Object.keys(attributes).forEach(name => {
+    Object.keys(attributes).forEach((name) => {
       target.setAttribute(name, attributes[name]);
     });
 
@@ -42,11 +41,11 @@ describe('tooltips/index.js', () => {
   };
 
   beforeEach(() => {
-    window.gon.glTooltipsEnabled = true;
+    window.gon.features = { glTooltips: true };
   });
 
   afterEach(() => {
-    document.body.childNodes.forEach(node => node.remove());
+    document.body.childNodes.forEach((node) => node.remove());
     destroy();
   });
 
@@ -145,30 +144,5 @@ describe('tooltips/index.js', () => {
     fixTitle([target]);
 
     expect(tooltipsApp.fixTitle).toHaveBeenCalledWith(target);
-  });
-
-  describe('when glTooltipsEnabled feature flag is disabled', () => {
-    beforeEach(() => {
-      window.gon.glTooltipsEnabled = false;
-    });
-
-    it.each`
-      method      | methodName    | bootstrapParams
-      ${dispose}  | ${'dispose'}  | ${'dispose'}
-      ${fixTitle} | ${'fixTitle'} | ${'_fixTitle'}
-      ${enable}   | ${'enable'}   | ${'enable'}
-      ${disable}  | ${'disable'}  | ${'disable'}
-      ${hide}     | ${'hide'}     | ${'hide'}
-      ${show}     | ${'show'}     | ${'show'}
-      ${add}      | ${'init'}     | ${{ title: 'the title' }}
-    `('delegates $methodName to bootstrap tooltip API', ({ method, bootstrapParams }) => {
-      const elements = jQuery(createTooltipTarget());
-
-      jest.spyOn(jQuery.fn, 'tooltip');
-
-      method(elements, bootstrapParams);
-
-      expect(elements.tooltip).toHaveBeenCalledWith(bootstrapParams);
-    });
   });
 });

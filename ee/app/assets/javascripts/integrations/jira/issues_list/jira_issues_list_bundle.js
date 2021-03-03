@@ -1,7 +1,7 @@
 import Vue from 'vue';
 
-import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { IssuableStates } from '~/issuable_list/constants';
+import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import JiraIssuesListApp from './components/jira_issues_list_root.vue';
 
@@ -32,7 +32,7 @@ export default function initJiraIssuesList({ mountPointSelector }) {
       initialState,
       initialSortBy,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement(JiraIssuesListApp, {
         props: {
           initialFilterParams,

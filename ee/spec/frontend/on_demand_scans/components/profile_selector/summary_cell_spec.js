@@ -20,6 +20,6 @@ describe('OnDemandScansProfileSummaryCell', () => {
   it('renders properly', () => {
     createFullComponent();
 
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.element).toMatchSnapshot();
   });
 });

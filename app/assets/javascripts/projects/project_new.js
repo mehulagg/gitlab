@@ -1,7 +1,5 @@
 import $ from 'jquery';
 import DEFAULT_PROJECT_TEMPLATES from 'ee_else_ce/projects/default_project_templates';
-import DEFAULT_SAMPLE_DATA_TEMPLATES from '~/projects/default_sample_data_templates';
-import { addSelectOnFocusBehaviour } from '../lib/utils/common_utils';
 import {
   convertToTitleCase,
   humanize,
@@ -40,7 +38,7 @@ const setProjectNamePathHandlers = ($projectNameInput, $projectPathInput) => {
   });
 };
 
-const deriveProjectPathFromUrl = $projectImportUrl => {
+const deriveProjectPathFromUrl = ($projectImportUrl) => {
   const $currentProjectName = $projectImportUrl
     .parents('.toggle-import-form')
     .find('#project_name');
@@ -82,7 +80,6 @@ const bindEvents = () => {
   const $selectedTemplateText = $('.selected-template');
   const $changeTemplateBtn = $('.change-template');
   const $selectedIcon = $('.selected-icon');
-  const $pushNewProjectTipTrigger = $('.push-new-project-tip');
   const $projectTemplateButtons = $('.project-templates-buttons');
   const $projectName = $('.tab-pane.active #project_name');
 
@@ -90,11 +87,9 @@ const bindEvents = () => {
     return;
   }
 
-  $('.how_to_import_link').on('click', e => {
+  $('.how_to_import_link').on('click', (e) => {
     e.preventDefault();
-    $(e.currentTarget)
-      .next('.modal')
-      .show();
+    $(e.currentTarget).next('.modal').show();
   });
 
   $('.modal-header .close').on('click', () => {
@@ -111,52 +106,15 @@ const bindEvents = () => {
     );
   });
 
-  if ($pushNewProjectTipTrigger) {
-    $pushNewProjectTipTrigger
-      .removeAttr('rel')
-      .removeAttr('target')
-      .on('click', e => {
-        e.preventDefault();
-      })
-      .popover({
-        title: $pushNewProjectTipTrigger.data('title'),
-        placement: 'bottom',
-        html: true,
-        content: $('.push-new-project-tip-template').html(),
-      })
-      .on('shown.bs.popover', () => {
-        $(document).on('click.popover touchstart.popover', event => {
-          if ($(event.target).closest('.popover').length === 0) {
-            $pushNewProjectTipTrigger.trigger('click');
-          }
-        });
-
-        const target = $(`#${$pushNewProjectTipTrigger.attr('aria-describedby')}`).find(
-          '.js-select-on-focus',
-        );
-        addSelectOnFocusBehaviour(target);
-
-        target.focus();
-      })
-      .on('hide.bs.popover', () => {
-        // eslint-disable-next-line @gitlab/no-global-event-off
-        $(document).off('click.popover touchstart.popover');
-      });
-  }
-
   function chooseTemplate() {
     $projectTemplateButtons.addClass('hidden');
     $projectFieldsForm.addClass('selected');
     $selectedIcon.empty();
     const value = $(this).val();
 
-    const selectedTemplate =
-      DEFAULT_PROJECT_TEMPLATES[value] || DEFAULT_SAMPLE_DATA_TEMPLATES[value];
+    const selectedTemplate = DEFAULT_PROJECT_TEMPLATES[value];
     $selectedTemplateText.text(selectedTemplate.text);
-    $(selectedTemplate.icon)
-      .clone()
-      .addClass('d-block')
-      .appendTo($selectedIcon);
+    $(selectedTemplate.icon).clone().addClass('d-block').appendTo($selectedIcon);
 
     const $activeTabProjectName = $('.tab-pane.active #project_name');
     const $activeTabProjectPath = $('.tab-pane.active #project_path');

@@ -192,7 +192,7 @@ describe('buildCycleAnalyticsInitialData', () => {
     });
 
     it('with no search term returns the data', () => {
-      ['', null].forEach(search => {
+      ['', null].forEach((search) => {
         expect(filterBySearchTerm(data, search)).toEqual(data);
       });
     });

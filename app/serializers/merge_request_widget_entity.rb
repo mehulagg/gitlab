@@ -115,16 +115,6 @@ class MergeRequestWidgetEntity < Grape::Entity
     end
   end
 
-  expose :blob_path do
-    expose :head_path, if: -> (mr, _) { mr.source_branch_sha } do |merge_request|
-      project_blob_path(merge_request.project, merge_request.source_branch_sha)
-    end
-
-    expose :base_path, if: -> (mr, _) { mr.diff_base_sha } do |merge_request|
-      project_blob_path(merge_request.project, merge_request.diff_base_sha)
-    end
-  end
-
   expose :codeclimate, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:codequality) } do
     expose :head_path do |merge_request|
       head_pipeline_downloadable_path_for_report_type(:codequality)
@@ -141,6 +131,10 @@ class MergeRequestWidgetEntity < Grape::Entity
 
   expose :security_reports_docs_path do |merge_request|
     help_page_path('user/application_security/index.md', anchor: 'viewing-security-scan-information-in-merge-requests')
+  end
+
+  expose :enabled_reports do |merge_request|
+    merge_request.enabled_reports
   end
 
   private
@@ -163,7 +157,7 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 
   def use_merge_base_with_merged_results?
-    object.actual_head_pipeline&.merge_request_event_type == :merged_result
+    object.actual_head_pipeline&.merged_result_pipeline?
   end
 
   def head_pipeline_downloadable_path_for_report_type(file_type)

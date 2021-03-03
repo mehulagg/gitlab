@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Upgrading PostgreSQL for Auto DevOps
+# Upgrading PostgreSQL for Auto DevOps **(FREE)**
 
 Auto DevOps provides an [in-cluster PostgreSQL database](customize.md#postgresql-database-support)
 for your application.
@@ -34,7 +34,7 @@ involves:
    so that the in-cluster database does not get modified after the database dump is created.
 1. Ensure you have not set `POSTGRES_ENABLED` to `false`, as this setting deletes
    any existing channel 1 database. For more information, see
-   [Detected an existing PostgreSQL database](index.md#detected-an-existing-postgresql-database).
+   [Detected an existing PostgreSQL database](troubleshooting.md#detected-an-existing-postgresql-database).
 
 NOTE:
 If you have configured Auto DevOps to have staging,

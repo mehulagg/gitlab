@@ -4,7 +4,6 @@ import {
   registerLanguages,
   registerSchema,
   trimPathComponents,
-  insertFinalNewline,
   trimTrailingWhitespace,
   getPathParents,
   getPathParent,
@@ -225,29 +224,6 @@ describe('WebIDE utils', () => {
     });
   });
 
-  describe('addFinalNewline', () => {
-    it.each`
-      input              | output
-      ${'some text'}     | ${'some text\n'}
-      ${'some text\n'}   | ${'some text\n'}
-      ${'some text\n\n'} | ${'some text\n\n'}
-      ${'some\n text'}   | ${'some\n text\n'}
-    `('adds a newline if it doesnt already exist for input: $input', ({ input, output }) => {
-      expect(insertFinalNewline(input)).toBe(output);
-    });
-
-    it.each`
-      input                  | output
-      ${'some text'}         | ${'some text\r\n'}
-      ${'some text\r\n'}     | ${'some text\r\n'}
-      ${'some text\n'}       | ${'some text\n\r\n'}
-      ${'some text\r\n\r\n'} | ${'some text\r\n\r\n'}
-      ${'some\r\n text'}     | ${'some\r\n text\r\n'}
-    `('works with CRLF newline style; input: $input', ({ input, output }) => {
-      expect(insertFinalNewline(input, '\r\n')).toBe(output);
-    });
-  });
-
   describe('getPathParents', () => {
     it.each`
       path                                  | parents
@@ -287,7 +263,7 @@ describe('WebIDE utils', () => {
     it('reads a file and returns its output as a data url', () => {
       const file = new File(['foo'], 'foo.png', { type: 'image/png' });
 
-      return readFileAsDataURL(file).then(contents => {
+      return readFileAsDataURL(file).then((contents) => {
         expect(contents).toBe('data:image/png;base64,Zm9v');
       });
     });

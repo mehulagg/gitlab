@@ -54,7 +54,7 @@ RSpec.describe 'Admin Groups' do
       click_button "Create group"
 
       expect(current_path).to eq admin_group_path(Group.find_by(path: path_component))
-      content = page.find('div#content-body')
+      content = page.find('#content-body')
       h3_texts = content.all('h3').collect(&:text).join("\n")
       expect(h3_texts).to match group_name
       li_texts = content.all('li').collect(&:text).join("\n")
@@ -175,6 +175,7 @@ RSpec.describe 'Admin Groups' do
 
   describe 'add admin himself to a group' do
     before do
+      stub_feature_flags(invite_members_group_modal: false)
       group.add_user(:user, Gitlab::Access::OWNER)
     end
 

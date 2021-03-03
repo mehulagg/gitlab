@@ -31,12 +31,14 @@ module EE
       after_update :remove_mirror_repository_reference,
         if: ->(project) { project.mirror? && project.import_url_updated? }
 
+      after_create :create_security_setting, unless: :security_setting
+
       belongs_to :mirror_user, class_name: 'User'
       belongs_to :deleting_user, foreign_key: 'marked_for_deletion_by_user_id', class_name: 'User'
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
       has_one :project_registry, class_name: 'Geo::ProjectRegistry', inverse_of: :project
-      has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
+      has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }, inverse_of: :project
       has_one :index_status
 
       has_one :github_service
@@ -44,7 +46,7 @@ module EE
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
-      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
+      has_one :compliance_management_framework, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -60,6 +62,7 @@ module EE
           includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
         end
       end
+      has_many :external_approval_rules, class_name: 'ApprovalRules::ExternalApprovalRule'
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -101,8 +104,12 @@ module EE
       has_many :sourced_pipelines, class_name: 'Ci::Sources::Project', foreign_key: :source_project_id
 
       has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
+      has_many :incident_management_oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :incident_management_oncall_schedules, source: :rotations
+
+      has_one :security_orchestration_policy_configuration, class_name: 'Security::OrchestrationPolicyConfiguration', foreign_key: :project_id, inverse_of: :project
 
       elastic_index_dependant_association :issues, on_change: :visibility_level
+      elastic_index_dependant_association :notes, on_change: :visibility_level
 
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
@@ -195,9 +202,10 @@ module EE
 
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
-      delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
+      delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
+      alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
@@ -227,6 +235,19 @@ module EE
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true
 
       alias_attribute :fallback_approvals_required, :approvals_before_merge
+
+      def jira_issue_association_required_to_merge_enabled?
+        ::Feature.enabled?(:jira_issue_association_on_merge_request, self) &&
+          feature_available?(:jira_issue_association_enforcement)
+      end
+
+      def jira_vulnerabilities_integration_enabled?
+        !!jira_service&.jira_vulnerabilities_integration_enabled?
+      end
+
+      def configured_to_create_issues_from_vulnerabilities?
+        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
+      end
     end
 
     class_methods do
@@ -295,7 +316,7 @@ module EE
       mirror? && !empty_repo?
     end
 
-    def fetch_mirror(forced: false)
+    def fetch_mirror(forced: false, check_tags_changed: false)
       return unless mirror?
 
       # Only send the password if it's needed
@@ -306,7 +327,7 @@ module EE
           username_only_import_url
         end
 
-      repository.fetch_upstream(url, forced: forced)
+      repository.fetch_upstream(url, forced: forced, check_tags_changed: check_tags_changed)
     end
 
     def can_override_approvers?

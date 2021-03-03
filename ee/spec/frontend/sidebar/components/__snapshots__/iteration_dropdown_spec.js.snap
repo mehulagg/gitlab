@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IterationDropdown default shows gl-dropdown 1`] = `
+<gl-dropdown-stub
+  category="primary"
+  class="gl-w-full"
+  headertext=""
+  hideheaderborder="true"
+  size="medium"
+  text="Select iteration"
+  variant="default"
+>
+  <gl-dropdown-section-header-stub
+    class="gl-display-flex! gl-justify-content-center"
+  >
+    Assign Iteration
+  </gl-dropdown-section-header-stub>
+   
+  <gl-search-box-by-type-stub
+    clearbuttontitle="Clear"
+    value=""
+  />
+   
+</gl-dropdown-stub>
+`;

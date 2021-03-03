@@ -1,6 +1,6 @@
 import { GlLink } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
 import { within } from '@testing-library/dom';
+import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import PipelineStatusBadge from 'ee/security_dashboard/components/pipeline_status_badge.vue';
 import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';

@@ -42,11 +42,7 @@ describe('GeoNodeHealthStatusComponent', () => {
     });
 
     it(`sets background of StatusPill to ${healthCssClass} when status is ${status}`, () => {
-      expect(
-        findStatusPill()
-          .classes()
-          .join(' '),
-      ).toContain(healthCssClass);
+      expect(findStatusPill().classes().join(' ')).toContain(healthCssClass);
     });
 
     it('renders StatusPill correctly', () => {

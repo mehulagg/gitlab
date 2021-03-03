@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Mattermost Notifications Service
+# Mattermost Notifications Service **(FREE)**
 
 The Mattermost Notifications Service allows your GitLab project to send events (e.g., `issue created`) to your existing Mattermost team as notifications. This requires configurations in both Mattermost and GitLab.
 
@@ -58,5 +58,7 @@ At the end, fill in your Mattermost details:
 | **Webhook**  | The incoming webhook URL which you have to set up on Mattermost, similar to: `http://mattermost.example/hooks/5xo…` |
 | **Username** | Optional username which can be on messages sent to Mattermost. Fill this in if you want to change the username of the bot. |
 | **Notify only broken pipelines** | If you choose to enable the **Pipeline** event and you want to be only notified about failed pipelines. |
+| **Branches to be notified** | Select which types of branches to send notifications for. |
+| **Labels to be notified** | Optional labels that the issue or merge request must have in order to trigger a notification. Leave blank to get all notifications. |
 
-![Mattermost configuration](img/mattermost_configuration.png)
+![Mattermost configuration](img/mattermost_configuration_v2.png)

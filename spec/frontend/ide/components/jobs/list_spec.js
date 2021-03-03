@@ -1,5 +1,5 @@
-import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import StageList from '~/ide/components/jobs/list.vue';
 import Stage from '~/ide/components/jobs/stage.vue';
@@ -36,7 +36,7 @@ describe('IDE stages list', () => {
     status: { icon: 'status_success' },
   }));
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(StageList, {
       propsData: {
         ...defaultProps,
@@ -48,7 +48,7 @@ describe('IDE stages list', () => {
   };
 
   afterEach(() => {
-    Object.values(storeActions).forEach(actionMock => actionMock.mockClear());
+    Object.values(storeActions).forEach((actionMock) => actionMock.mockClear());
   });
 
   afterAll(() => {

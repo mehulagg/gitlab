@@ -1,10 +1,10 @@
+import MockAdapter from 'axios-mock-adapter';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import MockAdapter from 'axios-mock-adapter';
 import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
-import axios from '~/lib/utils/axios_utils';
 import loadAwardsHandler from '~/awards_handler';
 import { EMOJI_VERSION } from '~/emoji';
+import axios from '~/lib/utils/axios_utils';
 
 window.gl = window.gl || {};
 window.gon = window.gon || {};
@@ -53,19 +53,23 @@ describe('AwardsHandler', () => {
       d: 'smiling face with sunglasses',
       u: '6.0',
     },
+    grey_question: {
+      c: 'symbols',
+      e: '❔',
+      d: 'white question mark ornament',
+      u: '6.0',
+    },
   };
   preloadFixtures('snippets/show.html');
 
   const openAndWaitForEmojiMenu = (sel = '.js-add-award') => {
-    $(sel)
-      .eq(0)
-      .click();
+    $(sel).eq(0).click();
 
     jest.runOnlyPendingTimers();
 
     const $menu = $('.emoji-menu');
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       $menu.one('build-emoji-menu-finish', () => {
         resolve();
       });
@@ -287,16 +291,6 @@ describe('AwardsHandler', () => {
       expect($('.js-emoji-menu-search').val()).toBe('');
     });
 
-    it('should fuzzy filter the emoji', async () => {
-      await openAndWaitForEmojiMenu();
-
-      awardsHandler.searchEmojis('sgls');
-
-      expect($('[data-name=angel]').is(':visible')).toBe(false);
-      expect($('[data-name=anger]').is(':visible')).toBe(false);
-      expect($('[data-name=sunglasses]').is(':visible')).toBe(true);
-    });
-
     it('should filter by emoji description', async () => {
       await openAndWaitForEmojiMenu();
 
@@ -337,9 +331,7 @@ describe('AwardsHandler', () => {
     it('should remove already selected emoji', async () => {
       await openEmojiMenuAndAddEmoji();
 
-      $('.js-add-award')
-        .eq(0)
-        .click();
+      $('.js-add-award').eq(0).click();
       const $block = $('.js-awards-block');
       const $emoji = $('.emoji-menu').find(
         `.emoji-menu-list:not(.frequent-emojis) ${emojiSelector}`,
@@ -360,7 +352,7 @@ describe('AwardsHandler', () => {
       await openAndWaitForEmojiMenu();
 
       const emojiMenu = document.querySelector('.emoji-menu');
-      Array.prototype.forEach.call(emojiMenu.querySelectorAll('.emoji-menu-title'), title => {
+      Array.prototype.forEach.call(emojiMenu.querySelectorAll('.emoji-menu-title'), (title) => {
         expect(title.textContent.trim().toLowerCase()).not.toBe('frequently used');
       });
     });
@@ -373,7 +365,7 @@ describe('AwardsHandler', () => {
       const emojiMenu = document.querySelector('.emoji-menu');
       const hasFrequentlyUsedHeading = Array.prototype.some.call(
         emojiMenu.querySelectorAll('.emoji-menu-title'),
-        title => title.textContent.trim().toLowerCase() === 'frequently used',
+        (title) => title.textContent.trim().toLowerCase() === 'frequently used',
       );
 
       expect(hasFrequentlyUsedHeading).toBe(true);

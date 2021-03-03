@@ -22,6 +22,10 @@ module Elastic
       def maintain_elasticsearch_destroy
         ElasticDeleteProjectWorker.perform_async(self.id, self.es_id)
       end
+
+      def invalidate_elasticsearch_indexes_cache!
+        ::Gitlab::CurrentSettings.invalidate_elasticsearch_indexes_cache_for_project!(self.id)
+      end
     end
   end
 end

@@ -2,26 +2,33 @@
 
 module Issues
   class CreateService < Issues::BaseService
-    include SpamCheckMethods
     include ResolveDiscussions
 
     def execute(skip_system_notes: false)
+      @request = params.delete(:request)
+      @spam_params = Spam::SpamActionService.filter_spam_params!(params)
+
       @issue = BuildService.new(project, current_user, params).execute
 
-      filter_spam_check_params
       filter_resolve_discussion_params
 
       create(@issue, skip_system_notes: skip_system_notes)
     end
 
     def before_create(issue)
-      spam_check(issue, current_user, action: :create)
+      Spam::SpamActionService.new(
+        spammable: issue,
+        request: request,
+        user: current_user,
+        action: :create
+      ).execute(spam_params: spam_params)
 
       # current_user (defined in BaseService) is not available within run_after_commit block
       user = current_user
       issue.run_after_commit do
         NewIssueWorker.perform_async(issue.id, user.id)
         IssuePlacementWorker.perform_async(nil, issue.project_id)
+        Namespaces::OnboardingIssueCreatedWorker.perform_async(issue.namespace.id)
       end
     end
 
@@ -46,8 +53,10 @@ module Issues
 
     private
 
+    attr_reader :request, :spam_params
+
     def user_agent_detail_service
-      UserAgentDetailService.new(@issue, @request)
+      UserAgentDetailService.new(@issue, request)
     end
 
     # Applies label "incident" (creates it if missing) to incident issues.

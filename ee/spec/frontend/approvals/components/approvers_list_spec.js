@@ -50,7 +50,9 @@ describe('ApproversList', () => {
     it('renders items', () => {
       factory();
 
-      const items = wrapper.findAll(ApproversListItem).wrappers.map(item => item.props('approver'));
+      const items = wrapper
+        .findAll(ApproversListItem)
+        .wrappers.map((item) => item.props('approver'));
 
       expect(items).toEqual(TEST_APPROVERS);
     });

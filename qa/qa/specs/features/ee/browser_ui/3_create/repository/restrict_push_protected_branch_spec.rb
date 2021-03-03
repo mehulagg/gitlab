@@ -80,7 +80,7 @@ module QA
           login
 
           group.add_member(user_developer, Resource::Members::AccessLevel::DEVELOPER)
-          project.share_with_group(group, Resource::Members::AccessLevel::DEVELOPER)
+          project.invite_group(group, Resource::Members::AccessLevel::DEVELOPER)
 
           project.add_member(user_maintainer, Resource::Members::AccessLevel::MAINTAINER)
 

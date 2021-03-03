@@ -1,15 +1,15 @@
 import { mount } from '@vue/test-utils';
+import waitForPromises from 'helpers/wait_for_promises';
 import PipelinesTableRowComponent from '~/pipelines/components/pipelines_list/pipelines_table_row.vue';
 import eventHub from '~/pipelines/event_hub';
 
 describe('Pipelines Table Row', () => {
   const jsonFixtureName = 'pipelines/pipelines.json';
 
-  const createWrapper = pipeline =>
+  const createWrapper = (pipeline) =>
     mount(PipelinesTableRowComponent, {
       propsData: {
         pipeline,
-        autoDevopsHelpPath: 'foo',
         viewType: 'root',
       },
     });
@@ -24,9 +24,9 @@ describe('Pipelines Table Row', () => {
   beforeEach(() => {
     const { pipelines } = getJSONFixture(jsonFixtureName);
 
-    pipeline = pipelines.find(p => p.user !== null && p.commit !== null);
-    pipelineWithoutAuthor = pipelines.find(p => p.user === null && p.commit !== null);
-    pipelineWithoutCommit = pipelines.find(p => p.user === null && p.commit === null);
+    pipeline = pipelines.find((p) => p.user !== null && p.commit !== null);
+    pipelineWithoutAuthor = pipelines.find((p) => p.user === null && p.commit !== null);
+    pipelineWithoutCommit = pipelines.find((p) => p.user === null && p.commit === null);
   });
 
   afterEach(() => {
@@ -82,10 +82,7 @@ describe('Pipelines Table Row', () => {
         ).toEqual(pipeline.user.path);
 
         expect(
-          wrapper
-            .find('.table-section:nth-child(3) .js-user-avatar-image-toolip')
-            .text()
-            .trim(),
+          wrapper.find('.table-section:nth-child(3) .js-user-avatar-image-tooltip').text().trim(),
         ).toEqual(pipeline.user.name);
       });
     });
@@ -112,7 +109,7 @@ describe('Pipelines Table Row', () => {
 
       const commitAuthorLink = commitAuthorElement.attributes('href');
       const commitAuthorName = commitAuthorElement
-        .find('.js-user-avatar-image-toolip')
+        .find('.js-user-avatar-image-tooltip')
         .text()
         .trim();
 
@@ -157,9 +154,10 @@ describe('Pipelines Table Row', () => {
     });
 
     it('should render an icon for each stage', () => {
-      expect(
-        wrapper.findAll('.table-section:nth-child(4) .js-builds-dropdown-button').length,
-      ).toEqual(pipeline.details.stages.length);
+      const stages = wrapper.findAll(
+        '.table-section:nth-child(5) [data-testid="mini-pipeline-graph-dropdown"]',
+      );
+      expect(stages).toHaveLength(pipeline.details.stages.length);
     });
   });
 
@@ -184,13 +182,20 @@ describe('Pipelines Table Row', () => {
       expect(wrapper.find('.js-pipelines-retry-button').attributes('title')).toMatch('Retry');
       expect(wrapper.find('.js-pipelines-cancel-button').exists()).toBe(true);
       expect(wrapper.find('.js-pipelines-cancel-button').attributes('title')).toMatch('Cancel');
-      const dropdownMenu = wrapper.find('.dropdown-menu');
+    });
 
-      expect(dropdownMenu.text()).toContain(scheduledJobAction.name);
+    it('should render the manual actions', async () => {
+      const manualActions = wrapper.find('[data-testid="pipelines-manual-actions-dropdown"]');
+
+      // Click on the dropdown and wait for `lazy` dropdown items
+      manualActions.find('.dropdown-toggle').trigger('click');
+      await waitForPromises();
+
+      expect(manualActions.text()).toContain(scheduledJobAction.name);
     });
 
     it('emits `retryPipeline` event when retry button is clicked and toggles loading', () => {
-      eventHub.$on('retryPipeline', endpoint => {
+      eventHub.$on('retryPipeline', (endpoint) => {
         expect(endpoint).toBe('/retry');
       });
 
@@ -199,7 +204,7 @@ describe('Pipelines Table Row', () => {
     });
 
     it('emits `openConfirmationModal` event when cancel button is clicked and toggles loading', () => {
-      eventHub.$once('openConfirmationModal', data => {
+      eventHub.$once('openConfirmationModal', (data) => {
         const { id, ref, commit } = pipeline;
 
         expect(data.endpoint).toBe('/cancel');
@@ -215,7 +220,7 @@ describe('Pipelines Table Row', () => {
       wrapper.find('.js-pipelines-cancel-button').trigger('click');
     });
 
-    it('renders a loading icon when `cancelingPipeline` matches pipeline id', done => {
+    it('renders a loading icon when `cancelingPipeline` matches pipeline id', (done) => {
       wrapper.setProps({ cancelingPipeline: pipeline.id });
       wrapper.vm
         .$nextTick()

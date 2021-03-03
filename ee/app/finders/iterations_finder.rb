@@ -116,6 +116,8 @@ class IterationsFinder
   end
 
   def by_state(items)
+    return items unless params[:state].present?
+
     Iteration.filter_by_state(items, params[:state])
   end
 

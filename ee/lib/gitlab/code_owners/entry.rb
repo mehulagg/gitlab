@@ -7,15 +7,15 @@ module Gitlab
 
       DEFAULT_SECTION = "codeowners"
 
-      Data = Struct.new(:pattern, :owner_line, :section)
+      Data = Struct.new(:pattern, :owner_line, :section, :optional)
 
       attr_reader :data
       protected :data
 
       delegate :pattern, :hash, :owner_line, :section, to: :data
 
-      def initialize(pattern, owner_line, section = DEFAULT_SECTION)
-        @data = Data.new(pattern, owner_line, section)
+      def initialize(pattern, owner_line, section = DEFAULT_SECTION, optional = false)
+        @data = Data.new(pattern, owner_line, section, optional)
       end
 
       def all_users
@@ -54,6 +54,10 @@ module Gitlab
 
         matching_users = new_users.select { |u| matching_user?(u) }
         @users.merge(matching_users)
+      end
+
+      def optional?
+        data.optional
       end
 
       def ==(other)

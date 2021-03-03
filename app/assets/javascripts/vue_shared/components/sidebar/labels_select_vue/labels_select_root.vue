@@ -7,14 +7,12 @@ import { __ } from '~/locale';
 
 import DropdownValueCollapsed from '~/vue_shared/components/sidebar/labels_select/dropdown_value_collapsed.vue';
 
-import labelsSelectModule from './store';
-
-import DropdownTitle from './dropdown_title.vue';
-import DropdownValue from './dropdown_value.vue';
+import { DropdownVariant } from './constants';
 import DropdownButton from './dropdown_button.vue';
 import DropdownContents from './dropdown_contents.vue';
-
-import { DropdownVariant } from './constants';
+import DropdownTitle from './dropdown_title.vue';
+import DropdownValue from './dropdown_value.vue';
+import labelsSelectModule from './store';
 
 Vue.use(Vuex);
 
@@ -35,11 +33,13 @@ export default {
     },
     allowLabelEdit: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     allowLabelCreate: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     allowMultiselect: {
       type: Boolean,
@@ -48,7 +48,8 @@ export default {
     },
     allowScopedLabels: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     variant: {
       type: String,
@@ -79,6 +80,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    labelsFilterParam: {
+      type: String,
+      required: false,
+      default: 'label_name',
     },
     dropdownButtonText: {
       type: String,
@@ -155,6 +161,7 @@ export default {
       labelsFetchPath: this.labelsFetchPath,
       labelsManagePath: this.labelsManagePath,
       labelsFilterBasePath: this.labelsFilterBasePath,
+      labelsFilterParam: this.labelsFilterParam,
       labelsListTitle: this.labelsListTitle,
       labelsCreateTitle: this.labelsCreateTitle,
       footerCreateLabelTitle: this.footerCreateLabelTitle,
@@ -182,9 +189,9 @@ export default {
         !state.showDropdownButton &&
         !state.showDropdownContents
       ) {
-        let filterFn = label => label.touched;
+        let filterFn = (label) => label.touched;
         if (this.isDropdownVariantEmbedded) {
-          filterFn = label => label.set;
+          filterFn = (label) => label.set;
         }
         this.handleDropdownClose(state.labels.filter(filterFn));
       }
@@ -204,13 +211,13 @@ export default {
         'js-btn-cancel-create',
         'js-sidebar-dropdown-toggle',
       ].some(
-        className =>
+        (className) =>
           target?.classList.contains(className) ||
           target?.parentElement?.classList.contains(className),
       );
 
       const hadExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
-        className => $(target).parents(className).length,
+        (className) => $(target).parents(className).length,
       );
 
       if (

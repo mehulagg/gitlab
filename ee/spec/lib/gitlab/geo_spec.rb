@@ -407,7 +407,6 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
     context 'when there are no Replicator classes with verification enabled' do
       it 'returns the total capacity' do
         stub_feature_flags(geo_package_file_verification: false)
-        stub_feature_flags(geo_framework_verification: false)
 
         expect(described_class.verification_max_capacity_per_replicator_class).to eq(verification_max_capacity)
       end
@@ -415,8 +414,6 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
 
     context 'when there is 1 Replicator class with verification enabled' do
       it 'returns half capacity' do
-        stub_feature_flags(geo_framework_verification: false)
-
         expect(described_class.verification_max_capacity_per_replicator_class).to eq(verification_max_capacity / 2)
       end
     end

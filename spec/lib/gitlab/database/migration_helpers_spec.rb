@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::MigrationHelpers do
+  include Database::TableSchemaHelpers
+
   let(:model) do
     ActiveRecord::Migration.new.extend(described_class)
   end
@@ -92,6 +94,131 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         expect do
           model.add_timestamps_with_timezone(:foo)
         end.not_to raise_error
+      end
+    end
+  end
+
+  describe '#create_table_with_constraints' do
+    let(:table_name) { :test_table }
+    let(:column_attributes) do
+      [
+        { name: 'id',         sql_type: 'bigint',                   null: false, default: nil    },
+        { name: 'created_at', sql_type: 'timestamp with time zone', null: false, default: nil    },
+        { name: 'updated_at', sql_type: 'timestamp with time zone', null: false, default: nil    },
+        { name: 'some_id',    sql_type: 'integer',                  null: false, default: nil    },
+        { name: 'active',     sql_type: 'boolean',                  null: false, default: 'true' },
+        { name: 'name',       sql_type: 'text',                     null: true,  default: nil    }
+      ]
+    end
+
+    before do
+      allow(model).to receive(:transaction_open?).and_return(true)
+    end
+
+    context 'when no check constraints are defined' do
+      it 'creates the table as expected' do
+        model.create_table_with_constraints table_name do |t|
+          t.timestamps_with_timezone
+          t.integer :some_id, null: false
+          t.boolean :active, null: false, default: true
+          t.text :name
+        end
+
+        expect_table_columns_to_match(column_attributes, table_name)
+      end
+    end
+
+    context 'when check constraints are defined' do
+      context 'when the text_limit is explicity named' do
+        it 'creates the table as expected' do
+          model.create_table_with_constraints table_name do |t|
+            t.timestamps_with_timezone
+            t.integer :some_id, null: false
+            t.boolean :active, null: false, default: true
+            t.text :name
+
+            t.text_limit :name, 255, name: 'check_name_length'
+            t.check_constraint :some_id_is_positive, 'some_id > 0'
+          end
+
+          expect_table_columns_to_match(column_attributes, table_name)
+
+          expect_check_constraint(table_name, 'check_name_length', 'char_length(name) <= 255')
+          expect_check_constraint(table_name, 'some_id_is_positive', 'some_id > 0')
+        end
+      end
+
+      context 'when the text_limit is not named' do
+        it 'creates the table as expected, naming the text limit' do
+          model.create_table_with_constraints table_name do |t|
+            t.timestamps_with_timezone
+            t.integer :some_id, null: false
+            t.boolean :active, null: false, default: true
+            t.text :name
+
+            t.text_limit :name, 255
+            t.check_constraint :some_id_is_positive, 'some_id > 0'
+          end
+
+          expect_table_columns_to_match(column_attributes, table_name)
+
+          expect_check_constraint(table_name, 'check_cda6f69506', 'char_length(name) <= 255')
+          expect_check_constraint(table_name, 'some_id_is_positive', 'some_id > 0')
+        end
+      end
+
+      it 'runs the change within a with_lock_retries' do
+        expect(model).to receive(:with_lock_retries).ordered.and_yield
+        expect(model).to receive(:create_table).ordered.and_call_original
+        expect(model).to receive(:execute).with(<<~SQL).ordered
+          ALTER TABLE "#{table_name}"\nADD CONSTRAINT "check_cda6f69506" CHECK (char_length("name") <= 255)
+        SQL
+
+        model.create_table_with_constraints table_name do |t|
+          t.text :name
+          t.text_limit :name, 255
+        end
+      end
+
+      context 'when constraints are given invalid names' do
+        let(:expected_max_length) { described_class::MAX_IDENTIFIER_NAME_LENGTH }
+        let(:expected_error_message) { "The maximum allowed constraint name is #{expected_max_length} characters" }
+
+        context 'when the explicit text limit name is not valid' do
+          it 'raises an error' do
+            too_long_length = expected_max_length + 1
+
+            expect do
+              model.create_table_with_constraints table_name do |t|
+                t.timestamps_with_timezone
+                t.integer :some_id, null: false
+                t.boolean :active, null: false, default: true
+                t.text :name
+
+                t.text_limit :name, 255, name: ('a' * too_long_length)
+                t.check_constraint :some_id_is_positive, 'some_id > 0'
+              end
+            end.to raise_error(expected_error_message)
+          end
+        end
+
+        context 'when a check constraint name is not valid' do
+          it 'raises an error' do
+            too_long_length = expected_max_length + 1
+
+            expect do
+              model.create_table_with_constraints table_name do |t|
+                t.timestamps_with_timezone
+                t.integer :some_id, null: false
+                t.boolean :active, null: false, default: true
+                t.text :name
+
+                t.text_limit :name, 255
+                t.check_constraint ('a' * too_long_length), 'some_id > 0'
+              end
+            end.to raise_error(expected_error_message)
+          end
+        end
       end
     end
   end
@@ -992,7 +1119,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           temp_undo_cleanup_column,
           type: :string,
           batch_column_name: :id,
-          type_cast_function: nil
+          type_cast_function: nil,
+          limit: nil
         ).and_return(true)
 
         expect(model).to receive(:rename_column)
@@ -1007,7 +1135,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         model.undo_cleanup_concurrent_column_type_change(:users, :old, :string)
       end
 
-      it 'passes the type_cast_function and batch_column_name' do
+      it 'passes the type_cast_function, batch_column_name and limit' do
         expect(model).to receive(:column_exists?).with(:users, :other_batch_column).and_return(true)
         expect(model).to receive(:check_trigger_permissions!).with(:users)
 
@@ -1017,7 +1145,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           temp_undo_cleanup_column,
           type: :string,
           batch_column_name: :other_batch_column,
-          type_cast_function: :custom_type_cast_function
+          type_cast_function: :custom_type_cast_function,
+          limit: 8
         ).and_return(true)
 
         expect(model).to receive(:rename_column)
@@ -1034,7 +1163,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           :old,
           :string,
           type_cast_function: :custom_type_cast_function,
-          batch_column_name: :other_batch_column
+          batch_column_name: :other_batch_column,
+          limit: 8
         )
       end
 
@@ -1545,6 +1675,69 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
+  describe '#initialize_conversion_of_integer_to_bigint' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project, :repository) }
+    let(:issue) { create(:issue, project: project) }
+    let!(:event) do
+      create(:event, :created, project: project, target: issue, author: user)
+    end
+
+    context 'in a transaction' do
+      it 'raises RuntimeError' do
+        allow(model).to receive(:transaction_open?).and_return(true)
+
+        expect { model.initialize_conversion_of_integer_to_bigint(:events, :id) }
+          .to raise_error(RuntimeError)
+      end
+    end
+
+    context 'outside a transaction' do
+      before do
+        allow(model).to receive(:transaction_open?).and_return(false)
+      end
+
+      it 'creates a bigint column and starts backfilling it' do
+        expect(model)
+          .to receive(:add_column)
+          .with(
+            :events,
+            'id_convert_to_bigint',
+            :bigint,
+            default: 0,
+            null: false
+          )
+
+        expect(model)
+          .to receive(:install_rename_triggers)
+          .with(:events, :id, 'id_convert_to_bigint')
+
+        expect(model).to receive(:queue_background_migration_jobs_by_range_at_intervals).and_call_original
+
+        expect(BackgroundMigrationWorker)
+          .to receive(:perform_in)
+          .ordered
+          .with(
+            2.minutes,
+            'CopyColumnUsingBackgroundMigrationJob',
+            [event.id, event.id, :events, :id, :id, 'id_convert_to_bigint', 100]
+          )
+
+        expect(Gitlab::BackgroundMigration)
+          .to receive(:steal)
+          .ordered
+          .with('CopyColumnUsingBackgroundMigrationJob')
+
+        model.initialize_conversion_of_integer_to_bigint(
+          :events,
+          :id,
+          batch_size: 300,
+          sub_batch_size: 100
+        )
+      end
+    end
+  end
+
   describe '#index_exists_by_name?' do
     it 'returns true if an index exists' do
       ActiveRecord::Base.connection.execute(
@@ -1681,7 +1874,6 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         has_internal_id :iid,
           scope: :project,
           init: ->(s, _scope) { s&.project&.issues&.maximum(:iid) },
-          backfill: true,
           presence: false
       end
     end
@@ -1733,258 +1925,6 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       expect(issue_a.iid).to eq(2)
       expect(issue_b.iid).to eq(3)
-    end
-
-    context 'when the new code creates a row post deploy but before the migration runs' do
-      it 'does not change the row iid' do
-        project = setup
-        issue = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue.reload.iid).to eq(1)
-      end
-
-      it 'backfills iids for rows already in the database' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-      end
-
-      it 'backfills iids across multiple projects' do
-        project_a = setup
-        project_b = setup
-        issue_a = issues.create!(project_id: project_a.id)
-        issue_b = issues.create!(project_id: project_b.id)
-        issue_c = Issue.create!(project_id: project_a.id)
-        issue_d = Issue.create!(project_id: project_b.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(1)
-        expect(issue_c.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(2)
-      end
-
-      it 'generates iids properly for models created after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_d = Issue.create!(project_id: project.id)
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.iid).to eq(4)
-        expect(issue_e.iid).to eq(5)
-      end
-
-      it 'backfills iids and properly generates iids for new models across multiple projects' do
-        project_a = setup
-        project_b = setup
-        issue_a = issues.create!(project_id: project_a.id)
-        issue_b = issues.create!(project_id: project_b.id)
-        issue_c = Issue.create!(project_id: project_a.id)
-        issue_d = Issue.create!(project_id: project_b.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project_a.id)
-        issue_f = Issue.create!(project_id: project_b.id)
-        issue_g = Issue.create!(project_id: project_a.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(1)
-        expect(issue_c.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(2)
-        expect(issue_e.iid).to eq(3)
-        expect(issue_f.iid).to eq(3)
-        expect(issue_g.iid).to eq(4)
-      end
-    end
-
-    context 'when the new code creates a model and then old code creates a model post deploy but before the migration runs' do
-      it 'backfills iids' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = Issue.create!(project_id: project.id)
-        issue_c = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-      end
-
-      it 'generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_d = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.reload.iid).to eq(4)
-        expect(issue_e.iid).to eq(5)
-      end
-    end
-
-    context 'when the new code and old code alternate creating models post deploy but before the migration runs' do
-      it 'backfills iids' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = Issue.create!(project_id: project.id)
-        issue_c = issues.create!(project_id: project.id)
-        issue_d = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.reload.iid).to eq(4)
-      end
-
-      it 'generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_d = issues.create!(project_id: project.id)
-        issue_e = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_f = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.reload.iid).to eq(4)
-        expect(issue_e.reload.iid).to eq(5)
-        expect(issue_f.iid).to eq(6)
-      end
-    end
-
-    context 'when the new code creates and deletes a model post deploy but before the migration runs' do
-      it 'backfills iids for rows already in the database' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-      end
-
-      it 'successfully creates a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-
-        model.backfill_iids('issues')
-
-        issue_d = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.iid).to eq(3)
-      end
-    end
-
-    context 'when the new code creates and deletes a model and old code creates a model post deploy but before the migration runs' do
-      it 'backfills iids' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-      end
-
-      it 'successfully creates a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-        expect(issue_e.iid).to eq(4)
-      end
-    end
-
-    context 'when the new code creates and deletes a model and then creates another model post deploy but before the migration runs' do
-      it 'successfully generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-      end
-
-      it 'successfully generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-        expect(issue_e.iid).to eq(4)
-      end
     end
 
     context 'when the first model is created for a project after the migration' do

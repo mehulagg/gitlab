@@ -8,17 +8,29 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-    let(:parser) { described_class.new }
     let(:location) { ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(file_path: 'yarn/yarn.lock', package_version: 'v2', package_name: 'saml2') }
-
-    before do
-      allow(parser).to receive(:create_location).and_return(location)
-      artifact.each_blob do |blob|
-        parser.parse!(blob, report)
-      end
+    let(:tracking_data) do
+      {
+        'type' => 'source',
+        'items' => [
+          'fingerprints' => [
+            { 'algorithm' => 'hash', 'value' => 'hash_value' },
+            { 'algorithm' => 'location', 'value' => 'location_value' },
+            { 'algorithm' => 'scope_offset', 'value' => 'scope_offset_value' }
+          ]
+        ]
+      }
     end
 
-    context 'parsing finding.name' do
+    before do
+      allow_next_instance_of(described_class) do |parser|
+        allow(parser).to receive(:create_location).and_return(location)
+        allow(parser).to receive(:tracking_data).and_return(tracking_data)
+      end
+      artifact.each_blob { |blob| described_class.parse!(blob, report) }
+    end
+
+    describe 'parsing finding.name' do
       let(:artifact) { build(:ee_ci_job_artifact, :common_security_report_with_blank_names) }
 
       context 'when message is provided' do
@@ -65,9 +77,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing finding.details' do
-      let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
-
+    describe 'parsing finding.details' do
       context 'when details are provided' do
         it 'sets details from the report' do
           vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1020' }
@@ -85,7 +95,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing remediations' do
+    describe 'parsing remediations' do
       let(:expected_remediation) { create(:ci_reports_security_remediation, diff: '') }
 
       it 'finds remediation with same cve' do
@@ -122,7 +132,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing scanners' do
+    describe 'parsing scanners' do
       subject(:scanner) { report.findings.first.scanner }
 
       context 'when vendor is not missing in scanner' do
@@ -132,7 +142,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing scan' do
+    describe 'parsing scan' do
       it 'returns scan object for each finding' do
         scans = report.findings.map(&:scan)
 
@@ -145,15 +155,14 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
 
       it 'returns nil when scan is not a hash' do
-        parser =  described_class.new
         empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
-        parser.parse!({}.to_json, empty_report)
+        described_class.parse!({}.to_json, empty_report)
 
         expect(empty_report.scan).to be(nil)
       end
     end
 
-    context 'parsing links' do
+    describe 'parsing links' do
       it 'returns links object for each finding', :aggregate_failures do
         links = report.findings.flat_map(&:links)
 
@@ -161,6 +170,64 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         expect(links.map(&:name)).to match_array([nil, 'CVE-1030'])
         expect(links.size).to eq(2)
         expect(links.first).to be_a(::Gitlab::Ci::Reports::Security::Link)
+      end
+    end
+
+    describe 'setting the uuid' do
+      let(:finding_uuids) { report.findings.map(&:uuid) }
+      let(:uuid_1) do
+        Security::VulnerabilityUUID.generate(
+          report_type: "dependency_scanning",
+          primary_identifier_fingerprint: "4ff8184cd18485b6e85d5b101e341b12eacd1b3b",
+          location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+          project_id: pipeline.project_id
+        )
+      end
+
+      let(:uuid_2) do
+        Security::VulnerabilityUUID.generate(
+          report_type: "dependency_scanning",
+          primary_identifier_fingerprint: "d55f9e66e79882ae63af9fd55cc822ab75307e31",
+          location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+          project_id: pipeline.project_id
+        )
+      end
+
+      let(:expected_uuids) { [uuid_1, uuid_2, nil] }
+
+      it 'sets the UUIDv5 for findings', :aggregate_failures do
+        expect(finding_uuids).to match_array(expected_uuids)
+      end
+    end
+
+    describe 'parsing tracking' do
+      context 'with valid tracking information' do
+        it 'creates fingerprints for each algorithm' do
+          finding = report.findings.first
+          expect(finding.fingerprints.size).to eq(3)
+          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location', 'scope_offset'])
+        end
+      end
+
+      context 'with invalid tracking information' do
+        let(:tracking_data) do
+          {
+            'type' => 'source',
+            'items' => [
+              'fingerprints' => [
+                { 'algorithm' => 'hash', 'value' => 'hash_value' },
+                { 'algorithm' => 'location', 'value' => 'location_value' },
+                { 'algorithm' => 'INVALID', 'value' => 'scope_offset_value' }
+              ]
+            ]
+          }
+        end
+
+        it 'ignores invalid algorithm types' do
+          finding = report.findings.first
+          expect(finding.fingerprints.size).to eq(2)
+          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
+        end
       end
     end
   end

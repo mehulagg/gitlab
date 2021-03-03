@@ -1,8 +1,8 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlButton, GlLink } from '@gitlab/ui';
-import StatusFilter from './status_filter.vue';
+import { mapActions, mapState } from 'vuex';
 import ConfidentialityFilter from './confidentiality_filter.vue';
+import StatusFilter from './status_filter.vue';
 
 export default {
   name: 'GlobalSearchSidebar',
@@ -26,7 +26,7 @@ export default {
 
 <template>
   <form
-    class="gl-display-flex gl-flex-direction-column col-md-3 gl-mr-4 gl-mb-6 gl-mt-5"
+    class="search-sidebar gl-display-flex gl-flex-direction-column gl-mr-4 gl-mb-6 gl-mt-5"
     @submit.prevent="applyQuery"
   >
     <status-filter />

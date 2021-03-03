@@ -9,7 +9,7 @@ module Resolvers
 
       argument :issue_filters, Types::Boards::BoardIssueInputType,
                required: false,
-               description: 'Filters applied when selecting issues on the board'
+               description: 'Filters applied when selecting issues on the board.'
 
       type Types::Boards::BoardEpicType, null: true
 
@@ -19,7 +19,7 @@ module Resolvers
 
         context.scoped_set!(:board, board)
 
-        Epic.for_ids(board_epic_ids(args[:issue_filters]))
+        Epic.id_in(board_epic_ids(args[:issue_filters]))
       end
 
       private

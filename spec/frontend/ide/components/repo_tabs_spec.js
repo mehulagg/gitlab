@@ -1,7 +1,7 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
-import { createStore } from '~/ide/stores';
+import Vuex from 'vuex';
 import RepoTabs from '~/ide/components/repo_tabs.vue';
+import { createStore } from '~/ide/stores';
 import { file } from '../helpers';
 
 const localVue = createLocalVue();
@@ -30,7 +30,7 @@ describe('RepoTabs', () => {
     wrapper.destroy();
   });
 
-  it('renders a list of tabs', done => {
+  it('renders a list of tabs', (done) => {
     store.state.openFiles[0].active = true;
 
     wrapper.vm.$nextTick(() => {

@@ -31,7 +31,7 @@ Jest tests can be found in `/spec/frontend` and `/ee/spec/frontend` in EE.
 ## Karma test suite
 
 While GitLab has switched over to [Jest](https://jestjs.io), Karma tests still exist in our
-application because some of our specs require a browser and can't be easiliy migrated to Jest.
+application because some of our specs require a browser and can't be easily migrated to Jest.
 Those specs intend to eventually drop Karma in favor of either Jest or RSpec. You can track this migration
 in the [related epic](https://gitlab.com/groups/gitlab-org/-/epics/4900).
 
@@ -89,7 +89,7 @@ If your test exceeds that time, it fails.
 
 If you cannot improve the performance of the tests, you can increase the timeout
 for a specific test using
-[`setTestTimeout`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/helpers/timeout.js).
+[`setTestTimeout`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__/timeout.js).
 
 ```javascript
 import { setTestTimeout } from 'helpers/timeout';
@@ -193,7 +193,7 @@ When it comes to querying DOM elements in your tests, it is best to uniquely and
 the element.
 
 Preferentially, this is done by targeting what the user actually sees using [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro/).
-When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/dom-testing-library/api-queries/#byrole)
+When selecting by text it is best to use [`getByRole` or `findByRole`](https://testing-library.com/docs/queries/byrole)
 as these enforce accessibility best practices as well. The examples below demonstrate the order of preference.
 
 When writing Vue component unit tests, it can be wise to query children by component, so that the unit test can focus on comprehensive value coverage
@@ -258,7 +258,7 @@ it('exists', () => {
 ### Naming unit tests
 
 When writing describe test blocks to test specific functions/methods,
-please use the method name as the describe block name.
+use the method name as the describe block name.
 
 **Bad**:
 
@@ -439,7 +439,7 @@ it('waits for an Ajax call', done => {
 });
 ```
 
-If you are not able to register handlers to the `Promise`, for example because it is executed in a synchronous Vue life cycle hook, please take a look at the [waitFor](#wait-until-axios-requests-finish) helpers or you can flush all pending `Promise`s:
+If you are not able to register handlers to the `Promise`, for example because it is executed in a synchronous Vue life cycle hook, take a look at the [waitFor](#wait-until-axios-requests-finish) helpers or you can flush all pending `Promise`s:
 
 **in Jest:**
 
@@ -539,17 +539,6 @@ When looking at this initially you'd suspect that the component is setup before 
 
 This is however not entirely true as the `destroy` method does not remove everything which has been mutated on the `wrapper` object. For functional components, destroy only removes the rendered DOM elements from the document.
 
-In order to ensure that a clean wrapper object and DOM are being used in each test, the breakdown of the component should rather be performed as follows:
-
-```javascript
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-  });
-```
-
-See also the [Vue Test Utils documentation on `destroy`](https://vue-test-utils.vuejs.org/api/wrapper/#destroy).
-
 ### Jest best practices
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34209) in GitLab 13.2.
@@ -646,20 +635,46 @@ The latter is useful when you have `setInterval` in the code. **Remember:** our 
 
 Non-determinism is the breeding ground for flaky and brittle specs. Such specs end up breaking the CI pipeline, interrupting the work flow of other contributors.
 
-1. Make sure your test subject's collaborators (e.g., axios, apollo, lodash helpers) and test environment (e.g., Date) behave consistently across systems and over time.
+1. Make sure your test subject's collaborators (e.g., Axios, apollo, Lodash helpers) and test environment (e.g., Date) behave consistently across systems and over time.
 1. Make sure tests are focused and not doing "extra work" (e.g., needlessly creating the test subject more than once in an individual test)
 
 ### Faking `Date` for determinism
 
-Consider using `useFakeDate` to ensure a consistent value is returned with every `new Date()` or `Date.now()`.
+`Date` is faked by default in our Jest environment. This means every call to `Date()` or `Date.now()` returns a fixed deterministic value.
+
+If you really need to change the default fake date, you can call `useFakeDate` within any `describe` block, and
+the date will be replaced for that specs within that `describe` context only:
 
 ```javascript
 import { useFakeDate } from 'helpers/fake_date';
 
 describe('cool/component', () => {
-  useFakeDate();
+  // Default fake `Date`
+  const TODAY = new Date();
 
-  // ...
+  // NOTE: `useFakeDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.).
+  describe("on Ada Lovelace's Birthday", () => {
+    useFakeDate(1815, 11, 10)
+
+    it('Date is no longer default', () => {
+      expect(new Date()).not.toEqual(TODAY);
+    });
+  });
+
+  it('Date is still default in this scope', () => {
+    expect(new Date()).toEqual(TODAY)
+  });
+})
+```
+
+Similarly, if you really need to use the real `Date` class, then you can import and call `useRealDate` within any `describe` block:
+
+```javascript
+import { useRealDate } from 'helpers/fake_date';
+
+// NOTE: `useRealDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.).
+describe('with real date', () => {
+  useRealDate();
 });
 ```
 
@@ -702,10 +717,10 @@ unit testing by mocking out modules which cannot be easily consumed in our test 
 Jest supports [manual module mocks](https://jestjs.io/docs/en/manual-mocks) by placing a mock in a `__mocks__/` directory next to the source module
 (e.g. `app/assets/javascripts/ide/__mocks__`). **Don't do this.** We want to keep all of our test-related code in one place (the `spec/` folder).
 
-If a manual mock is needed for a `node_modules` package, please use the `spec/frontend/__mocks__` folder. Here's an example of
+If a manual mock is needed for a `node_modules` package, use the `spec/frontend/__mocks__` folder. Here's an example of
 a [Jest mock for the package `monaco-editor`](https://gitlab.com/gitlab-org/gitlab/blob/b7f914cddec9fc5971238cdf12766e79fa1629d7/spec/frontend/__mocks__/monaco-editor/index.js#L1).
 
-If a manual mock is needed for a CE module, please place it in `spec/frontend/mocks/ce`.
+If a manual mock is needed for a CE module, place it in `spec/frontend/mocks/ce`.
 
 - Files in `spec/frontend/mocks/ce` mocks the corresponding CE module from `app/assets/javascripts`, mirroring the source module's path.
   - Example: `spec/frontend/mocks/ce/lib/utils/axios_utils` mocks the module `~/lib/utils/axios_utils`.
@@ -728,11 +743,11 @@ If a manual mock is needed for a CE module, please place it in `spec/frontend/mo
 Global mocks introduce magic and technically can reduce test coverage. When mocking is deemed profitable:
 
 - Keep the mock short and focused.
-- Please leave a top-level comment in the mock on why it is necessary.
+- Leave a top-level comment in the mock on why it is necessary.
 
 ### Additional mocking techniques
 
-Please consult the [official Jest docs](https://jestjs.io/docs/en/jest-object#mock-modules) for a full overview of the available mocking features.
+Consult the [official Jest docs](https://jestjs.io/docs/en/jest-object#mock-modules) for a full overview of the available mocking features.
 
 ## Running Frontend Tests
 
@@ -807,7 +822,7 @@ yarn karma -f 'spec/javascripts/ide/**/file_spec.js'
 ## Frontend test fixtures
 
 Frontend fixtures are files containing responses from backend controllers. These responses can be either HTML
-generated from haml templates or JSON payloads. Frontend tests that rely on these responses are
+generated from HAML templates or JSON payloads. Frontend tests that rely on these responses are
 often using fixtures to validate correct integration with the backend code.
 
 ### Generate fixtures
@@ -834,12 +849,50 @@ The `response` variable gets automatically set if the test is marked as `type: :
 When creating a new fixture, it often makes sense to take a look at the corresponding tests for the
 endpoint in `(ee/)spec/controllers/` or `(ee/)spec/requests/`.
 
+##### GraphQL query fixtures
+
+You can create a fixture that represents the result of a GraphQL query using the `get_graphql_query_as_string`
+helper method. For example:
+
+```ruby
+# spec/frontend/fixtures/releases.rb
+
+describe GraphQL::Query, type: :request do
+  include GraphqlHelpers
+
+  all_releases_query_path = 'releases/queries/all_releases.query.graphql'
+  fragment_paths = ['releases/queries/release.fragment.graphql']
+
+  before(:all) do
+    clean_frontend_fixtures('graphql/releases/')
+  end
+
+  it "graphql/#{all_releases_query_path}.json" do
+    query = get_graphql_query_as_string(all_releases_query_path, fragment_paths)
+
+    post_graphql(query, current_user: admin, variables: { fullPath: project.full_path })
+
+    expect_graphql_errors_to_be_empty
+  end
+end
+```
+
+This will create a new fixture located at
+`tmp/tests/frontend/fixtures-ee/graphql/releases/queries/all_releases.query.graphql.json`.
+
+You will need to provide the paths to all fragments used by the query.
+`get_graphql_query_as_string` reads all of the provided file paths and returns
+the result as a single, concatenated string.
+
+You can import the JSON fixture in a Jest test using the `getJSONFixture` method
+[as described below](#use-fixtures).
+
 ### Use fixtures
 
 Jest and Karma test suites import fixtures in different ways:
 
 - The Karma test suite are served by [jasmine-jquery](https://github.com/velesin/jasmine-jquery).
-- Jest use `spec/frontend/helpers/fixtures.js`.
+- Jest use `spec/frontend/__helpers__/fixtures.js`.
 
 The following are examples of tests that work for both Karma and Jest:
 
@@ -891,7 +944,8 @@ it.each([
 );
 ```
 
-**Note**: only use template literal block if pretty print is **not** needed for spec output. For example, empty strings, nested objects etc.
+NOTE:
+Only use template literal block if pretty print is not needed for spec output. For example, empty strings, nested objects etc.
 
 For example, when testing the difference between an empty search string and a non-empty search string, the use of the array block syntax with the pretty print option would be preferred. That way the differences between an empty string e.g. `''` and a non-empty string e.g. `'search string'` would be visible in the spec output. Whereas with a template literal block, the empty string would be shown as a space, which could lead to a confusing developer experience
 
@@ -965,7 +1019,7 @@ describe "Admin::AbuseReports", :js do
 end
 ```
 
-### Jest test timeout due to async imports
+### Jest test timeout due to asynchronous imports
 
 If a module asynchronously imports some other modules at runtime, these modules must be
 transpiled by the Jest loaders at runtime. It's possible that this can cause [Jest to timeout](https://gitlab.com/gitlab-org/gitlab/-/issues/280809).
@@ -1000,9 +1054,10 @@ import Subject from '~/feature/the_subject.vue';
 import _Thing from '~/feature/path/to/thing.vue';
 ```
 
-**PLEASE NOTE:** Do not simply disregard test timeouts. This could be a sign that there's
+NOTE:
+Do not disregard test timeouts. This could be a sign that there's
 actually a production problem. Use this opportunity to analyze the production webpack bundles and
-chunks and confirm that there is not a production issue with the async imports.
+chunks and confirm that there is not a production issue with the asynchronous imports.
 
 ## Overview of Frontend Testing Levels
 
@@ -1023,6 +1078,9 @@ Before May 2018, `features/` also contained feature tests run by Spinach. These 
 See also [Notes on testing Vue components](../fe_guide/vue.md#testing-vue-components).
 
 ## Test helpers
+
+Test helpers can be found in [`spec/frontend/__helpers__`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__).
+If you introduce new helpers, place them in that directory.
 
 ### Vuex Helper: `testAction`
 
@@ -1049,8 +1107,12 @@ Check an example in [`spec/frontend/ide/stores/actions_spec.js`](https://gitlab.
 
 ### Wait until Axios requests finish
 
+<!-- vale gitlab.Spelling = NO -->
+
 The Axios Utils mock module located in `spec/frontend/mocks/ce/lib/utils/axios_utils.js` contains two helper methods for Jest tests that spawn HTTP requests.
 These are very useful if you don't have a handle to the request's Promise, for example when a Vue component does a request as part of its life cycle.
+
+<!-- vale gitlab.Spelling = YES -->
 
 - `waitFor(url, callback)`: Runs `callback` after a request to `url` finishes (either successfully or unsuccessfully).
 - `waitForAll(callback)`: Runs `callback` once all pending requests have finished. If no requests are pending, runs `callback` on the next tick.
@@ -1065,7 +1127,7 @@ By doing so, the `wrapper` provides you with the ability to perform a `findByTes
 which is a shortcut to the more verbose `wrapper.find('[data-testid="my-test-id"]');`
 
 ```javascript
-import { extendedWrapper } from 'jest/helpers/vue_test_utils_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('FooComponent', () => {
   const wrapper = extendedWrapper(shallowMount({
@@ -1088,7 +1150,7 @@ Some regressions only affect a specific browser version. We can install and test
 
 [BrowserStack](https://www.browserstack.com/) allows you to test more than 1200 mobile devices and browsers.
 You can use it directly through the [live app](https://www.browserstack.com/live) or you can install the [chrome extension](https://chrome.google.com/webstore/detail/browserstack/nkihdmlheodkdfojglpcjjmioefjahjb) for easy access.
-Sign in to BrowserStack with the credentials saved in the **Engineering** vault of GitLab's
+Sign in to BrowserStack with the credentials saved in the **Engineering** vault of the GitLab
 [shared 1Password account](https://about.gitlab.com/handbook/security/#1password-guide).
 
 ### Firefox
@@ -1105,6 +1167,95 @@ You can download any older version of Firefox from the releases FTP server, <htt
 1. Move the application to the `Applications` folder.
 1. Open up a terminal and run `/Applications/Firefox_Old.app/Contents/MacOS/firefox-bin -profilemanager` to create a new profile specific to that Firefox version.
 1. Once the profile has been created, quit the app, and run it again like normal. You now have a working older Firefox version.
+
+## Snapshots
+
+By now you've probably heard of [Jest snapshot tests](https://jestjs.io/docs/en/snapshot-testing) and why they are useful for various reasons.
+To use them within GitLab, there are a few guidelines that should be highlighted:
+
+- Treat snapshots as code
+- Don't think of a snapshot file as a Blackbox
+- Care for the output of the snapshot, otherwise, it's not providing any real value. This will usually involve reading the generated snapshot file as you would read any other piece of code
+
+Think of a snapshot test as a simple way to store a raw `String` representation of what you've put into the item being tested. This can be used to evaluate changes in a component, a store, a complex piece of generated output, etc. You can see more in the list below for some recommended `Do's and Don'ts`.
+While snapshot tests can be a very powerful tool. They are meant to supplement, not to replace unit tests.
+
+Jest provides a great set of docs on [best practices](https://jestjs.io/docs/en/snapshot-testing#best-practices) that we should keep in mind when creating snapshots.
+
+### How does a snapshot work?
+
+A snapshot is purely a stringified version of what you ask to be tested on the lefthand side of the function call. This means any kind of changes you make to the formatting of the string has an impact on the outcome. This process is done by leveraging serializers for an automatic transform step. For Vue this is already taken care of by leveraging the `vue-jest` package, which offers the proper serializer.
+
+Should the outcome of your spec be different from what is in the generated snapshot file, you'll be notified about it by a failing test in your test suite.
+
+Find all the details in Jests official documentation [https://jestjs.io/docs/en/snapshot-testing](https://jestjs.io/docs/en/snapshot-testing)
+
+### How to take a snapshot
+
+```javascript
+it('makes the name look pretty', () => {
+  expect(prettifyName('Homer Simpson')).toMatchSnapshot()
+})
+```
+
+When this test runs the first time a fresh `.snap` file will be created. It will look something like this:
+
+```txt
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`makes the name look pretty`] = `
+Sir Homer Simpson the Third
+`
+```
+
+Now, every time you call this test, the new snapshot will be evaluated against the previously created version. This should highlight the fact that it's important to understand the content of your snapshot file and treat it with care. Snapshots will lose their value if the output of the snapshot is too big or complex to read, this means keeping snapshots isolated to human-readable items that can be either evaluated in a merge request review or are guaranteed to never change.
+The same can be done for `wrappers` or `elements`
+
+```javascript
+it('renders the component correctly', () => {
+  expect(wrapper).toMatchSnapshot()
+  expect(wrapper.element).toMatchSnapshot();
+})
+```
+
+The above test will create two snapshots, what's important is to decide which of the snapshots provide more value for the codebase safety i.e. if one of these snapshots changes, does that highlight a possible un-wanted break in the codebase? This can help catch unexpected changes if something in an underlying dependency changes without our knowledge.
+
+### Pros and Cons
+
+**Pros**
+
+- Speed up the creation of unit tests
+- Easy to maintain
+- Provides a good safety net to protect against accidental breakage of important HTML structures
+
+**Cons**
+
+- Is not a catch-all solution that replaces the work of integration or unit tests
+- No meaningful assertions or expectations within snapshots
+- When carelessly used with [GitLab UI](https://gitlab.com/gitlab-org/gitlab-ui) it can create fragility in tests when the underlying library changes the HTML of a component we are testing
+
+A good guideline to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
+
+### When to use
+
+**Use snapshots when**
+
+- to capture a components rendered output
+- to fully or partially match templates
+- to match readable data structures
+- to verify correctly composed native HTML elements
+- as a safety net for critical structures so others don't break it by accident
+- Template heavy component
+- Not a lot of logic in the component
+- Composed of native HTML elements
+
+### When not to use
+
+**Don't use snapshots when**
+
+- To capture large data structures just to have something
+- To just have some kind of test written
+- To capture highly volatile ui elements without stubbing them (Think of GitLab UI version updates)
 
 ---
 

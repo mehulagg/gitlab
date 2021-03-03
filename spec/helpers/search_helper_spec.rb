@@ -580,7 +580,7 @@ RSpec.describe SearchHelper do
   describe '#issuable_state_to_badge_class' do
     context 'with merge request' do
       it 'returns correct badge based on status' do
-        expect(issuable_state_to_badge_class(build(:merge_request, :merged))).to eq(:primary)
+        expect(issuable_state_to_badge_class(build(:merge_request, :merged))).to eq(:info)
         expect(issuable_state_to_badge_class(build(:merge_request, :closed))).to eq(:danger)
         expect(issuable_state_to_badge_class(build(:merge_request, :opened))).to eq(:success)
       end
@@ -608,6 +608,37 @@ RSpec.describe SearchHelper do
         expect(issuable_state_text(build(:issue, :closed))).to eq(_('Closed'))
         expect(issuable_state_text(build(:issue, :opened))).to eq(_('Open'))
       end
+    end
+  end
+
+  describe '#search_sort_options' do
+    let(:user) { create(:user) }
+
+    mock_created_sort = [
+      {
+        title: _('Created date'),
+        sortable: true,
+        sortParam: {
+          asc: 'created_asc',
+          desc: 'created_desc'
+        }
+      },
+      {
+        title: _('Last updated'),
+        sortable: true,
+        sortParam: {
+          asc: 'updated_asc',
+          desc: 'updated_desc'
+        }
+      }
+    ]
+
+    before do
+      allow(self).to receive(:current_user).and_return(user)
+    end
+
+    it 'returns the correct data' do
+      expect(search_sort_options).to eq(mock_created_sort)
     end
   end
 end

@@ -1,9 +1,9 @@
-import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
-import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
 import pipelinesTable from '~/commit/pipelines/pipelines_table.vue';
+import axios from '~/lib/utils/axios_utils';
 
 describe('Pipelines table in Commits and Merge requests', () => {
   const jsonFixtureName = 'pipelines/pipelines.json';
@@ -13,10 +13,8 @@ describe('Pipelines table in Commits and Merge requests', () => {
   let vm;
   const props = {
     endpoint: 'endpoint.json',
-    helpPagePath: 'foo',
     emptyStateSvgPath: 'foo',
     errorStateSvgPath: 'foo',
-    autoDevopsHelpPath: 'foo',
   };
 
   preloadFixtures(jsonFixtureName);
@@ -31,7 +29,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
     const { pipelines } = getJSONFixture(jsonFixtureName);
 
     PipelinesTable = Vue.extend(pipelinesTable);
-    pipeline = pipelines.find(p => p.user !== null && p.commit !== null);
+    pipeline = pipelines.find((p) => p.user !== null && p.commit !== null);
   });
 
   afterEach(() => {
@@ -47,7 +45,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         vm = mountComponent(PipelinesTable, props);
       });
 
-      it('should render the empty state', done => {
+      it('should render the empty state', (done) => {
         setImmediate(() => {
           expect(vm.$el.querySelector('.empty-state')).toBeDefined();
           expect(vm.$el.querySelector('.realtime-loading')).toBe(null);
@@ -63,7 +61,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         vm = mountComponent(PipelinesTable, props);
       });
 
-      it('should render a table with the received pipelines', done => {
+      it('should render a table with the received pipelines', (done) => {
         setImmediate(() => {
           expect(vm.$el.querySelectorAll('.ci-table .commit').length).toEqual(1);
           expect(vm.$el.querySelector('.realtime-loading')).toBe(null);
@@ -74,7 +72,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
       });
 
       describe('with pagination', () => {
-        it('should make an API request when using pagination', done => {
+        it('should make an API request when using pagination', (done) => {
           setImmediate(() => {
             jest.spyOn(vm, 'updateContent').mockImplementation(() => {});
 
@@ -102,11 +100,11 @@ describe('Pipelines table in Commits and Merge requests', () => {
         mock.onGet('endpoint.json').reply(200, [pipeline]);
       });
 
-      it('should receive update-pipelines-count event', done => {
+      it('should receive update-pipelines-count event', (done) => {
         const element = document.createElement('div');
         document.body.appendChild(element);
 
-        element.addEventListener('update-pipelines-count', event => {
+        element.addEventListener('update-pipelines-count', (event) => {
           expect(event.detail.pipelines).toEqual([pipeline]);
           done();
         });
@@ -126,7 +124,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
     });
 
     describe('when latest pipeline has detached flag', () => {
-      it('renders the run pipeline button', done => {
+      it('renders the run pipeline button', (done) => {
         pipelineCopy.flags.detached_merge_request_pipeline = true;
         pipelineCopy.flags.merge_request_pipeline = true;
 
@@ -143,7 +141,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
     });
 
     describe('when latest pipeline does not have detached flag', () => {
-      it('does not render the run pipeline button', done => {
+      it('does not render the run pipeline button', (done) => {
         pipelineCopy.flags.detached_merge_request_pipeline = false;
         pipelineCopy.flags.merge_request_pipeline = false;
 
@@ -163,7 +161,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
       const findModal = () =>
         document.querySelector('#create-pipeline-for-fork-merge-request-modal');
 
-      beforeEach(done => {
+      beforeEach((done) => {
         pipelineCopy.flags.detached_merge_request_pipeline = true;
 
         mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
@@ -182,7 +180,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         });
       });
 
-      it('on desktop, shows a loading button', done => {
+      it('on desktop, shows a loading button', (done) => {
         findRunPipelineBtn().click();
 
         vm.$nextTick(() => {
@@ -200,7 +198,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         });
       });
 
-      it('on mobile, shows a loading button', done => {
+      it('on mobile, shows a loading button', (done) => {
         findRunPipelineBtnMobile().click();
 
         vm.$nextTick(() => {
@@ -223,7 +221,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
       const findModal = () =>
         document.querySelector('#create-pipeline-for-fork-merge-request-modal');
 
-      beforeEach(done => {
+      beforeEach((done) => {
         pipelineCopy.flags.detached_merge_request_pipeline = true;
 
         mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
@@ -244,7 +242,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         });
       });
 
-      it('on desktop, shows a security warning modal', done => {
+      it('on desktop, shows a security warning modal', (done) => {
         findRunPipelineBtn().click();
 
         vm.$nextTick(() => {
@@ -253,7 +251,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         });
       });
 
-      it('on mobile, shows a security warning modal', done => {
+      it('on mobile, shows a security warning modal', (done) => {
         findRunPipelineBtnMobile().click();
 
         vm.$nextTick(() => {
@@ -271,7 +269,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
       vm = mountComponent(PipelinesTable, props);
     });
 
-    it('should render error state', done => {
+    it('should render error state', (done) => {
       setImmediate(() => {
         expect(vm.$el.querySelector('.js-pipelines-error-state')).toBeDefined();
         expect(vm.$el.querySelector('.realtime-loading')).toBe(null);

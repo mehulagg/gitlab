@@ -3,6 +3,7 @@ import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ThroughputChart from 'ee/analytics/merge_request_analytics/components/throughput_chart.vue';
+import ThroughputStats from 'ee/analytics/merge_request_analytics/components/throughput_stats.vue';
 import { THROUGHPUT_CHART_STRINGS } from 'ee/analytics/merge_request_analytics/constants';
 import store from 'ee/analytics/merge_request_analytics/store';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
@@ -65,6 +66,10 @@ describe('ThroughputChart', () => {
   describe('default state', () => {
     beforeEach(() => {
       wrapper = createComponent();
+    });
+
+    it('displays the throughput stats component', () => {
+      expect(wrapper.find(ThroughputStats).exists()).toBe(true);
     });
 
     it('displays the chart title', () => {
@@ -206,7 +211,10 @@ describe('ThroughputChart', () => {
         selectedAssignee: { value: assigneeUsername, operator },
         selectedAuthor: { value: authorUsername, operator },
         selectedMilestone: { value: milestoneTitle, operator },
-        selectedLabelList: [{ value: labels[0], operator }, { value: labels[1], operator }],
+        selectedLabelList: [
+          { value: labels[0], operator },
+          { value: labels[1], operator },
+        ],
       });
       await wrapper.vm.$nextTick();
       expect(

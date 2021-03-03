@@ -30,7 +30,7 @@ RSpec.describe API::Releases do
       }
     end
 
-    context 'updates the audit log' do
+    context 'updates the AuditEvent' do
       subject { AuditEvent.last.details }
 
       it 'without milestone' do
@@ -141,7 +141,7 @@ RSpec.describe API::Releases do
              description: 'Super nice release')
     end
 
-    it 'updates the audit log when a release is updated' do
+    it 'creates an AuditEvent when a release is updated' do
       params = { name: 'A new name', description: 'a new description' }
 
       expect do

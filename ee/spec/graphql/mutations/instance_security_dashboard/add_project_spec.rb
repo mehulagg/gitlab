@@ -43,7 +43,7 @@ RSpec.describe Mutations::InstanceSecurityDashboard::AddProject do
 
           it 'does not add project to the security dashboard', :aggregate_failures do
             expect(subject[:project]).to be_nil
-            expect(subject[:errors]).to include('Only projects created under a Gold license are available in Security Dashboards.')
+            expect(subject[:errors]).to include('Only projects created under a Ultimate license are available in Security Dashboards.')
             expect(user.security_dashboard_projects).to include(already_added_project)
           end
         end

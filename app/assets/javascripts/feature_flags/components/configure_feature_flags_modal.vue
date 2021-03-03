@@ -9,10 +9,10 @@ import {
   GlSprintf,
   GlLink,
   GlIcon,
+  GlAlert,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import Callout from '~/vue_shared/components/callout.vue';
 
 export default {
   components: {
@@ -22,15 +22,22 @@ export default {
     GlModal,
     ModalCopyButton,
     GlIcon,
-    Callout,
     GlLoadingIcon,
     GlSprintf,
     GlLink,
+    GlAlert,
   },
 
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  inject: [
+    'projectName',
+    'featureFlagsHelpPagePath',
+    'unleashApiUrl',
+    'featureFlagsClientExampleHelpPagePath',
+    'featureFlagsClientLibrariesHelpPagePath',
+  ],
 
   props: {
     instanceId: {
@@ -55,13 +62,6 @@ export default {
       required: true,
     },
   },
-  inject: [
-    'projectName',
-    'featureFlagsHelpPagePath',
-    'unleashApiUrl',
-    'featureFlagsClientExampleHelpPagePath',
-    'featureFlagsClientLibrariesHelpPagePath',
-  ],
   translations: {
     cancelActionLabel: __('Close'),
     modalTitle: s__('FeatureFlags|Configure feature flags'),
@@ -84,6 +84,11 @@ export default {
     cancelActionProps() {
       return {
         text: this.$options.translations.cancelActionLabel,
+        attributes: [
+          {
+            category: 'secondary',
+          },
+        ],
       };
     },
     canRegenerateInstanceId() {
@@ -120,11 +125,11 @@ export default {
 <template>
   <gl-modal
     :modal-id="modalId"
-    :action-cancel="cancelActionProps"
-    :action-primary="regenerateInstanceIdActionProps"
-    @canceled="clearState"
+    :action-primary="cancelActionProps"
+    :action-secondary="regenerateInstanceIdActionProps"
+    @secondary.prevent="rotateToken"
     @hide="clearState"
-    @primary.prevent="rotateToken"
+    @primary="clearState"
   >
     <template #modal-title>
       {{ $options.translations.modalTitle }}
@@ -153,8 +158,7 @@ export default {
         </template>
       </gl-sprintf>
     </p>
-
-    <callout category="warning">
+    <gl-alert variant="warning" class="gl-mb-5" :dismissible="false">
       <gl-sprintf
         :message="
           s__(
@@ -168,7 +172,7 @@ export default {
           }}</gl-link>
         </template>
       </gl-sprintf>
-    </callout>
+    </gl-alert>
     <gl-form-group :label="$options.translations.apiUrlLabelText" label-for="api-url">
       <gl-form-input-group id="api-url" :value="unleashApiUrl" readonly type="text" name="api-url">
         <template #append>
@@ -212,11 +216,9 @@ export default {
       <gl-icon name="warning" class="gl-mr-2" />
       <span>{{ $options.translations.instanceIdRegenerateError }}</span>
     </div>
-    <callout
-      v-if="canUserRotateToken"
-      category="danger"
-      :message="$options.translations.instanceIdRegenerateText"
-    />
+    <gl-alert v-if="canUserRotateToken" variant="danger" class="gl-mb-5" :dismissible="false">
+      {{ $options.translations.instanceIdRegenerateText }}
+    </gl-alert>
     <p v-if="canUserRotateToken" data-testid="prevent-accident-text">
       <gl-sprintf
         :message="

@@ -12,46 +12,55 @@ RSpec.describe GroupWiki do
     end
 
     describe '#create_wiki_repository' do
-      before do
+      it 'tracks the repository storage in the database' do
+        shard = 'foo'
         # Use a custom storage shard value, to make sure we're not falling back to the default.
-        allow(subject).to receive(:repository_storage).and_return('foo')
+        allow(subject).to receive(:repository_storage).and_return(shard)
 
         # Don't actually create the repository, because the storage shard doesn't exist.
-        allow(subject.repository).to receive(:create_if_not_exists)
+        expect(subject.repository).to receive(:create_if_not_exists)
         allow(subject).to receive(:repository_exists?).and_return(true)
+
+        expect(subject).to receive(:track_wiki_repository).with(shard)
+
+        subject.create_wiki_repository
       end
+    end
+
+    describe '#track_wiki_repository' do
+      let(:shard) { 'foo' }
 
       context 'when a tracking entry does not exist' do
         let(:wiki_container) { wiki_container_without_repo }
 
         it 'creates a new entry' do
-          expect { subject.create_wiki_repository }.to change(wiki_container, :group_wiki_repository)
+          expect { subject.track_wiki_repository(shard) }.to change(wiki_container, :group_wiki_repository)
             .from(nil).to(kind_of(GroupWikiRepository))
         end
 
         it 'tracks the storage location' do
-          subject.create_wiki_repository
+          subject.track_wiki_repository(shard)
 
           expect(wiki_container.group_wiki_repository).to have_attributes(
             disk_path: subject.storage.disk_path,
-            shard_name: 'foo'
+            shard_name: shard
           )
         end
       end
 
       context 'when a tracking entry exists' do
         it 'does not create a new entry in the database' do
-          expect { subject.create_wiki_repository }.not_to change(wiki_container, :group_wiki_repository)
+          expect { subject.track_wiki_repository(shard) }.not_to change(wiki_container, :group_wiki_repository)
         end
 
         it 'updates the storage location' do
           expect(subject.storage).to receive(:disk_path).and_return('fancy/new/path')
 
-          subject.create_wiki_repository
+          subject.track_wiki_repository(shard)
 
           expect(wiki_container.group_wiki_repository).to have_attributes(
             disk_path: 'fancy/new/path',
-            shard_name: 'foo'
+            shard_name: shard
           )
         end
       end
@@ -64,34 +73,10 @@ RSpec.describe GroupWiki do
     end
 
     describe '#repository_storage' do
-      context 'when a tracking entry does not exist' do
-        let(:wiki_container) { wiki_container_without_repo }
+      it 'gets the repository storage from the container' do
+        expect(wiki.container).to receive(:repository_storage).and_return('foo')
 
-        it 'returns the default shard' do
-          expect(subject.repository_storage).to eq('default')
-        end
-
-        context 'when multiple shards are configured' do
-          let(:shards) { (1..).each }
-
-          before do
-            # Force pick_repository_storage to always return a different value
-            allow(Gitlab::CurrentSettings).to receive(:pick_repository_storage) { "storage-#{shards.next}" }
-          end
-
-          it 'always returns the same shard when called repeatedly' do
-            shard = subject.repository_storage
-
-            expect(subject.repository_storage).to eq(shard)
-          end
-        end
-      end
-
-      context 'when a tracking entry exists' do
-        it 'returns the persisted shard if the repository is tracked' do
-          expect(wiki_container.group_wiki_repository).to receive(:shard_name).and_return('foo')
-          expect(subject.repository_storage).to eq('foo')
-        end
+        expect(subject.repository_storage).to eq 'foo'
       end
     end
 
@@ -106,6 +91,14 @@ RSpec.describe GroupWiki do
         expect(subject.disk_path).to eq("#{subject.storage.disk_path}.wiki")
       end
     end
+
+    describe '#after_post_receive' do
+      it 'updates group statistics' do
+        expect(Groups::UpdateStatisticsWorker).to receive(:perform_async).with(wiki.container.id, [:wiki_size])
+
+        subject.send(:after_post_receive)
+      end
+    end
   end
 
   it_behaves_like 'EE wiki model' do
@@ -118,5 +111,12 @@ RSpec.describe GroupWiki do
     it 'does not use Elasticsearch' do
       expect(subject).not_to be_a(Elastic::WikiRepositoriesSearch)
     end
+  end
+
+  it_behaves_like 'can housekeep repository' do
+    let_it_be(:resource) { create(:group_wiki) }
+
+    let(:resource_key) { 'group_wikis' }
+    let(:expected_worker_class) { ::GroupWikis::GitGarbageCollectWorker }
   end
 end

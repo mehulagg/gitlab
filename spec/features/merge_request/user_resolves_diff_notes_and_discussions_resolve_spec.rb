@@ -149,7 +149,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
 
           it 'allows user to comment' do
             page.within '.diff-content' do
-              click_button 'Reply...'
+              find_field('Reply…').click
 
               find(".js-unresolve-checkbox").set false
               find('.js-note-text').set 'testing'
@@ -179,7 +179,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
 
           it 'allows user to comment & unresolve thread' do
             page.within '.diff-content' do
-              click_button 'Reply...'
+              find_field('Reply…').click
 
               find('.js-note-text').set 'testing'
 
@@ -208,7 +208,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
 
       it 'allows user to comment & resolve thread' do
         page.within '.diff-content' do
-          click_button 'Reply...'
+          find_field('Reply…').click
 
           find('.js-note-text').set 'testing'
 
@@ -228,6 +228,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
           page.find('.discussion-next-btn').click
         end
 
+        expect(page).to have_button('Resolve thread', visible: true)
         expect(page.evaluate_script("window.pageYOffset")).to be > 0
       end
 
@@ -441,7 +442,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
 
       it 'allows user to comment & resolve thread' do
         page.within '.diff-content' do
-          click_button 'Reply...'
+          find_field('Reply…').click
 
           find('.js-note-text').set 'testing'
 
@@ -460,7 +461,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
         page.within '.diff-content' do
           click_button 'Resolve thread'
 
-          click_button 'Reply...'
+          find_field('Reply…').click
 
           find('.js-note-text').set 'testing'
 

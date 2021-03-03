@@ -277,4 +277,32 @@ RSpec.describe AuditEvent, type: :model do
       expect(event.formatted_details[:from]).to eq('false')
     end
   end
+
+  describe 'author' do
+    subject { event.author }
+
+    context 'when author exists' do
+      let_it_be(:event) { create(:project_audit_event) }
+
+      it 'returns the author object' do
+        expect(subject).to eq(User.find(event.author_id))
+      end
+    end
+
+    context 'when author is unauthenticated' do
+      let_it_be(:event) { create(:project_audit_event, :unauthenticated) }
+
+      it 'is an unauthenticated user' do
+        expect(subject).to be_a(Gitlab::Audit::UnauthenticatedAuthor)
+      end
+    end
+
+    context 'when author no longer exists' do
+      let_it_be(:event) { create(:project_audit_event, author_id: non_existing_record_id) }
+
+      it 'is a deleted user' do
+        expect(subject).to be_a(Gitlab::Audit::DeletedAuthor)
+      end
+    end
+  end
 end

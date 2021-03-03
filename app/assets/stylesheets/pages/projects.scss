@@ -140,10 +140,6 @@
       margin-left: 0;
     }
 
-    .fa {
-      color: $layout-link-gray;
-    }
-
     svg {
       fill: $layout-link-gray;
     }
@@ -161,13 +157,6 @@
   .count-badge,
   .btn-xs {
     height: 24px;
-  }
-
-  .dropdown-toggle,
-  .clone-dropdown-btn {
-    .fa {
-      color: unset;
-    }
   }
 
   .home-panel-action-button,
@@ -492,7 +481,7 @@
       top: 0;
       height: calc(100% - #{$browser-scrollbar-size});
 
-      .fa {
+      svg {
         top: 50%;
         margin-top: -$gl-padding-8;
       }
@@ -581,10 +570,6 @@
       .icon {
         top: 0;
       }
-    }
-
-    .btn-missing {
-      @extend .btn-missing;
     }
   }
 }
@@ -1005,6 +990,32 @@ pre.light-well {
     @include media-breakpoint-up(sm) {
       margin: 0 $gl-padding-8;
       width: auto;
+    }
+  }
+
+  // Remove once gitlab/ui solution is implemented:
+  // https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1157
+  // https://gitlab.com/gitlab-org/gitlab/-/issues/300405
+  .gl-search-box-by-type-input {
+    width: 100%;
+  }
+
+  // Remove once gitlab/ui solution is implemented
+  // https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1158
+  // https://gitlab.com/gitlab-org/gitlab/-/issues/300405
+  .gl-new-dropdown-button-text {
+    @include str-truncated;
+  }
+}
+
+.compare-revision-cards {
+  @media (min-width: $breakpoint-lg) {
+    .gl-card {
+      width: calc(50% - 15px);
+    }
+
+    .compare-ellipsis {
+      width: 30px;
     }
   }
 }

@@ -10,7 +10,7 @@ export const isIncomplete = ({ currentList }, getters) => getters[`${currentList
 export const hasNoDependencies = ({ currentList }, getters) =>
   getters[`${currentList}/hasNoDependencies`];
 
-export const totals = state =>
+export const totals = (state) =>
   state.listTypes.reduce(
     (acc, { namespace }) => ({
       ...acc,

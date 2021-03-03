@@ -76,7 +76,7 @@ describe('system note component', () => {
     expect(findDescriptionVersion().exists()).toBe(false);
   });
 
-  it('click on button to toggle description diff displays description diff with delete icon button', done => {
+  it('click on button to toggle description diff displays description diff with delete icon button', (done) => {
     mockFetchDiff();
     expect(findDescriptionVersion().exists()).toBe(false);
 

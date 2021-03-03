@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import $ from 'jquery';
-import waitForPromises from 'helpers/wait_for_promises';
 import Dropdown from 'ee/vue_shared/license_compliance/components/add_license_form_dropdown.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 
 let vm;
 let wrapper;
@@ -25,9 +25,7 @@ describe('AddLicenseFormDropdown', () => {
 
     jest.spyOn(vm, '$emit').mockImplementation(() => {});
 
-    $(vm.$el)
-      .val('LGPL')
-      .trigger('change');
+    $(vm.$el).val('LGPL').trigger('change');
 
     expect(vm.$emit).toHaveBeenCalledWith('input', 'LGPL');
   });
@@ -48,7 +46,7 @@ describe('AddLicenseFormDropdown', () => {
     expect(vm.$el.value).toContain(value);
   });
 
-  it('shows all defined licenses', async done => {
+  it('shows all defined licenses', async (done) => {
     await createComponent();
 
     const element = $(vm.$el);

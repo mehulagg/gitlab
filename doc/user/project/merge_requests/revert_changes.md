@@ -1,11 +1,11 @@
 ---
 stage: Create
-group: Source Code
+group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, concepts
 ---
 
-# Reverting changes
+# Reverting changes **(FREE)**
 
 You can use Git's powerful feature to [revert any commit](https://git-scm.com/docs/git-revert "Git revert documentation")
 by clicking the **Revert** button in merge requests and commit details.

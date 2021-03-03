@@ -9,7 +9,7 @@ RSpec.describe API::GroupBoards do
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:board_parent) { create(:group, :public) }
 
-  before do
+  before_all do
     board_parent.add_owner(user)
   end
 
@@ -54,5 +54,8 @@ RSpec.describe API::GroupBoards do
 
     it_behaves_like 'milestone board list'
     it_behaves_like 'assignee board list'
+    it_behaves_like 'iteration board list' do
+      let_it_be(:iteration) { create(:iteration, group: board_parent) }
+    end
   end
 end

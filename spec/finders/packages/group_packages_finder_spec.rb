@@ -122,15 +122,9 @@ RSpec.describe Packages::GroupPackagesFinder do
       end
 
       context 'when there are processing packages' do
-        let_it_be(:package4) { create(:nuget_package, project: project, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+        let_it_be(:package4) { create(:nuget_package, project: project, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
         it { is_expected.to match_array([package1, package2]) }
-      end
-
-      context 'does not include packages without version number' do
-        let_it_be(:package_without_version) { create(:maven_package, project: project, version: nil) }
-
-        it { is_expected.not_to include(package_without_version) }
       end
 
       context 'with package_name' do
@@ -151,6 +145,9 @@ RSpec.describe Packages::GroupPackagesFinder do
           end
         end
       end
+
+      it_behaves_like 'concerning versionless param'
+      it_behaves_like 'concerning package statuses'
     end
 
     context 'group has package of all types' do

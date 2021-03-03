@@ -2,20 +2,20 @@ import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
 import {
-  createFeatureFlag,
-  requestCreateFeatureFlag,
-  receiveCreateFeatureFlagSuccess,
-  receiveCreateFeatureFlagError,
-} from '~/feature_flags/store/new/actions';
-import state from '~/feature_flags/store/new/state';
-import * as types from '~/feature_flags/store/new/mutation_types';
-import {
   ROLLOUT_STRATEGY_ALL_USERS,
   ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
   LEGACY_FLAG,
   NEW_VERSION_FLAG,
 } from '~/feature_flags/constants';
 import { mapFromScopesViewModel, mapStrategiesToRails } from '~/feature_flags/store/helpers';
+import {
+  createFeatureFlag,
+  requestCreateFeatureFlag,
+  receiveCreateFeatureFlagSuccess,
+  receiveCreateFeatureFlagError,
+} from '~/feature_flags/store/new/actions';
+import * as types from '~/feature_flags/store/new/mutation_types';
+import state from '~/feature_flags/store/new/state';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/lib/utils/url_utility');
@@ -59,7 +59,7 @@ describe('Feature flags New Module Actions', () => {
     });
 
     describe('success', () => {
-      it('dispatches requestCreateFeatureFlag and receiveCreateFeatureFlagSuccess ', done => {
+      it('dispatches requestCreateFeatureFlag and receiveCreateFeatureFlagSuccess ', (done) => {
         const convertedActionParams = mapFromScopesViewModel(actionParams);
 
         mock.onPost(`${TEST_HOST}/endpoint.json`, convertedActionParams).replyOnce(200);
@@ -81,7 +81,7 @@ describe('Feature flags New Module Actions', () => {
         );
       });
 
-      it('sends strategies for new style feature flags', done => {
+      it('sends strategies for new style feature flags', (done) => {
         const newVersionFlagParams = {
           name: 'name',
           description: 'description',
@@ -120,7 +120,7 @@ describe('Feature flags New Module Actions', () => {
     });
 
     describe('error', () => {
-      it('dispatches requestCreateFeatureFlag and receiveCreateFeatureFlagError ', done => {
+      it('dispatches requestCreateFeatureFlag and receiveCreateFeatureFlagError ', (done) => {
         const convertedActionParams = mapFromScopesViewModel(actionParams);
 
         mock
@@ -148,7 +148,7 @@ describe('Feature flags New Module Actions', () => {
   });
 
   describe('requestCreateFeatureFlag', () => {
-    it('should commit REQUEST_CREATE_FEATURE_FLAG mutation', done => {
+    it('should commit REQUEST_CREATE_FEATURE_FLAG mutation', (done) => {
       testAction(
         requestCreateFeatureFlag,
         null,
@@ -161,7 +161,7 @@ describe('Feature flags New Module Actions', () => {
   });
 
   describe('receiveCreateFeatureFlagSuccess', () => {
-    it('should commit RECEIVE_CREATE_FEATURE_FLAG_SUCCESS mutation', done => {
+    it('should commit RECEIVE_CREATE_FEATURE_FLAG_SUCCESS mutation', (done) => {
       testAction(
         receiveCreateFeatureFlagSuccess,
         null,
@@ -178,7 +178,7 @@ describe('Feature flags New Module Actions', () => {
   });
 
   describe('receiveCreateFeatureFlagError', () => {
-    it('should commit RECEIVE_CREATE_FEATURE_FLAG_ERROR mutation', done => {
+    it('should commit RECEIVE_CREATE_FEATURE_FLAG_ERROR mutation', (done) => {
       testAction(
         receiveCreateFeatureFlagError,
         'There was an error',

@@ -29,7 +29,7 @@ module Mutations
         field :list,
               ::Types::BoardListType,
               null: true,
-              description: 'The updated list'
+              description: 'The updated list.'
 
         def ready?(**args)
           if limit_metric_settings_of(args).blank?
@@ -69,7 +69,7 @@ module Mutations
         end
 
         def authorize_admin_rights!
-          raise_resource_not_available_error! unless Ability.allowed?(current_user, :admin_list, board)
+          raise_resource_not_available_error! unless Ability.allowed?(current_user, :admin_issue_board_list, board)
         end
 
         def find_list_by_global_id(gid)

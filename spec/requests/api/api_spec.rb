@@ -36,6 +36,12 @@ RSpec.describe API::API do
         expect(response).to have_gitlab_http_status(:ok)
       end
 
+      it 'does authorize user for head request' do
+        head api('/groups', personal_access_token: token)
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
       it 'does not authorize user for revoked token' do
         revoked = create(:personal_access_token, :revoked, user: user, scopes: [:read_api])
 
@@ -102,6 +108,7 @@ RSpec.describe API::API do
         Labkit::Context.current.to_h.tap do |log_context|
           expect(log_context).to match('correlation_id' => an_instance_of(String),
                                        'meta.caller_id' => '/api/:version/projects/:id/issues',
+                                       'meta.remote_ip' => an_instance_of(String),
                                        'meta.project' => project.full_path,
                                        'meta.root_namespace' => project.namespace.full_path,
                                        'meta.user' => user.username,
@@ -117,11 +124,42 @@ RSpec.describe API::API do
         Labkit::Context.current.to_h.tap do |log_context|
           expect(log_context).to match('correlation_id' => an_instance_of(String),
                                        'meta.caller_id' => '/api/:version/users',
+                                       'meta.remote_ip' => an_instance_of(String),
                                        'meta.feature_category' => 'users')
         end
       end
 
       get(api('/users'))
+    end
+  end
+
+  describe 'supported content-types' do
+    context 'GET /user/:id.txt' do
+      let_it_be(:user) { create(:user) }
+
+      subject { get api("/users/#{user.id}.txt", user) }
+
+      it 'returns application/json' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.media_type).to eq('application/json')
+        expect(response.body).to include('{"id":')
+      end
+
+      context 'when api_always_use_application_json is disabled' do
+        before do
+          stub_feature_flags(api_always_use_application_json: false)
+        end
+
+        it 'returns text/plain' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type).to eq('text/plain')
+          expect(response.body).to include('#<API::Entities::User:')
+        end
+      end
     end
   end
 end

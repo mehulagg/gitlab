@@ -1,20 +1,20 @@
 <script>
 import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
 import Visibility from 'visibilityjs';
-import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { visitUrl } from '~/lib/utils/url_utility';
 import Poll from '~/lib/utils/poll';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { __, s__, sprintf } from '~/locale';
+import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
+import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 import eventHub from '../event_hub';
 import Service from '../services/index';
 import Store from '../stores';
-import titleComponent from './title.vue';
 import descriptionComponent from './description.vue';
 import editedComponent from './edited.vue';
 import formComponent from './form.vue';
 import PinnedLinks from './pinned_links.vue';
-import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
-import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
+import titleComponent from './title.vue';
 
 export default {
   components: {
@@ -130,6 +130,10 @@ export default {
     },
     projectPath: {
       type: String,
+      required: true,
+    },
+    projectId: {
+      type: Number,
       required: true,
     },
     projectNamespace: {
@@ -250,7 +254,7 @@ export default {
     this.poll = new Poll({
       resource: this.service,
       method: 'getData',
-      successCallback: res => this.store.updateState(res.data),
+      successCallback: (res) => this.store.updateState(res.data),
       errorCallback(err) {
         throw new Error(err);
       },
@@ -294,8 +298,8 @@ export default {
     updateStoreState() {
       return this.service
         .getData()
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           this.store.updateState(data);
         })
         .catch(() => {
@@ -303,7 +307,7 @@ export default {
         });
     },
 
-    updateAndShowForm(templates = []) {
+    updateAndShowForm(templates = {}) {
       if (!this.showForm) {
         this.showForm = true;
         this.store.setFormState({
@@ -320,7 +324,7 @@ export default {
     requestTemplatesAndShowForm() {
       return this.service
         .loadTemplates(this.issuableTemplateNamesPath)
-        .then(res => {
+        .then((res) => {
           this.updateAndShowForm(res.data);
         })
         .catch(() => {
@@ -345,9 +349,9 @@ export default {
     updateIssuable() {
       return this.service
         .updateIssuable(this.store.formState)
-        .then(res => res.data)
-        .then(data => this.checkForSpam(data))
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => this.checkForSpam(data))
+        .then((data) => {
           if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
           }
@@ -384,8 +388,8 @@ export default {
     deleteIssuable(payload) {
       return this.service
         .deleteIssuable(payload)
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           // Stop the poll so we don't get 404's with the issuable not existing
           this.poll.stop();
 
@@ -419,6 +423,7 @@ export default {
         :markdown-docs-path="markdownDocsPath"
         :markdown-preview-path="markdownPreviewPath"
         :project-path="projectPath"
+        :project-id="projectId"
         :project-namespace="projectNamespace"
         :show-delete-button="showDeleteButton"
         :can-attach-file="canAttachFile"

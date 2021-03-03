@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import MockAxiosAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
 import SharedRunnersForm from '~/group_settings/components/shared_runners_form.vue';
@@ -32,7 +32,7 @@ describe('group_settings/components/shared_runners_form', () => {
   const findErrorAlert = () => wrapper.find(GlAlert);
   const findEnabledToggle = () => wrapper.find('[data-testid="enable-runners-toggle"]');
   const findOverrideToggle = () => wrapper.find('[data-testid="override-runners-toggle"]');
-  const changeToggle = toggle => toggle.vm.$emit('change', !toggle.props('value'));
+  const changeToggle = (toggle) => toggle.vm.$emit('change', !toggle.props('value'));
   const getRequestPayload = () => JSON.parse(mock.history.put[0].data);
   const isLoadingIconVisible = () => findLoadingIcon().exists();
 

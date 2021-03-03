@@ -1,7 +1,7 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
-import $ from 'jquery';
 import { GlTooltipDirective, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import $ from 'jquery';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { CONTEXT_LINE_CLASS_NAME, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
 import DiffGutterAvatars from './diff_gutter_avatars.vue';
 import * as utils from './diff_row_utils';
@@ -68,20 +68,20 @@ export default {
       return this.fileLineCoverage(this.filePath, this.line.right.new_line);
     },
     classNameMapCellLeft() {
-      return utils.classNameMapCell(
-        this.line.left,
-        this.isHighlighted,
-        this.isLoggedIn,
-        this.isLeftHover,
-      );
+      return utils.classNameMapCell({
+        line: this.line.left,
+        hll: this.isHighlighted,
+        isLoggedIn: this.isLoggedIn,
+        isHover: this.isLeftHover,
+      });
     },
     classNameMapCellRight() {
-      return utils.classNameMapCell(
-        this.line.right,
-        this.isHighlighted,
-        this.isLoggedIn,
-        this.isRightHover,
-      );
+      return utils.classNameMapCell({
+        line: this.line.right,
+        hll: this.isHighlighted,
+        isLoggedIn: this.isLoggedIn,
+        isHover: this.isRightHover,
+      });
     },
     addCommentTooltipLeft() {
       return utils.addCommentTooltip(this.line.left);
@@ -112,8 +112,8 @@ export default {
   mounted() {
     this.scrollToLineIfNeededParallel(this.line);
     this.unwatchShouldShowCommentButton = this.$watch(
-      vm => [vm.shouldShowCommentButtonLeft, vm.shouldShowCommentButtonRight].join(),
-      newVal => {
+      (vm) => [vm.shouldShowCommentButtonLeft, vm.shouldShowCommentButtonRight].join(),
+      (newVal) => {
         if (newVal) {
           this.isCommentButtonRendered = true;
           this.unwatchShouldShowCommentButton();
@@ -150,7 +150,7 @@ export default {
       const table = line.closest('table');
 
       table.removeClass('left-side-selected right-side-selected');
-      const [lineClass] = ['left-side', 'right-side'].filter(name => line.hasClass(name));
+      const [lineClass] = ['left-side', 'right-side'].filter((name) => line.hasClass(name));
 
       if (lineClass) {
         table.addClass(`${lineClass}-selected`);

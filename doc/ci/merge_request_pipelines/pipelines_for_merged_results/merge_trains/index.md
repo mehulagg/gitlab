@@ -74,6 +74,8 @@ To enable merge trains:
 - You must have maintainer [permissions](../../../../user/permissions.md).
 - You must be using [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner) 11.9 or later.
 - In GitLab 12.0 and later, you need [Redis](https://redis.io/) 3.2 or later.
+- Your repository must be a GitLab repository, not an
+  [external repository](../../../ci_cd_for_external_repos/index.md).
 
 ## Enable merge trains
 
@@ -82,9 +84,10 @@ To enable merge trains for your project:
 1. If you are on a self-managed GitLab instance, ensure the [feature flag](#merge-trains-feature-flag) is set correctly.
 1. [Configure your CI/CD configuration file](../../index.md#configuring-pipelines-for-merge-requests)
    so that the pipeline or individual jobs run for merge requests.
-1. Visit your project's **Settings > General** and expand **Merge requests**
-1. Check **Enable merged results pipelines.** (if not enabled)
-1. Check **Enable merge trains.**
+1. Visit your project's **Settings > General** and expand **Merge requests**.
+1. In the **Merge method** section, verify that **Merge commit** is selected.
+   You cannot use **Merge commit with semi-linear history** or **Fast-forward merge** with merge trains.
+1. In the **Merge options** section, select **Enable merged results pipelines.** (if not already selected) and **Enable merge trains.**
 1. Click **Save changes**
 
 In GitLab 13.5 and earlier, there is only one checkbox, named
@@ -177,9 +180,13 @@ for more information.
 
 ### Merge Train Pipeline cannot be retried
 
-A Merge Train pipeline cannot be retried because the merge request is dropped from the merge train upon failure. For this reason, the retry button does not appear next to the pipeline icon.
+When a pipeline for merge trains fails the merge request is dropped from the train and the pipeline can't be retried.
+Pipelines for merge trains run on the merged result of the changes in the merge request and
+the changes from other merge requests already on the train. If the merge request is dropped from the train,
+the merged result is out of date and the pipeline can't be retried.
 
-In the case of pipeline failure, you should [re-enqueue](#add-a-merge-request-to-a-merge-train) the merge request to the merge train, which then initiates a new pipeline.
+Instead, you should [add the merge request to the train](#add-a-merge-request-to-a-merge-train)
+again, which triggers a new pipeline.
 
 ### Unable to add to merge train with message "The pipeline for this merge request failed."
 
@@ -203,7 +210,7 @@ Trains, create a new pipeline for merged results when this error occurs:
 See [the related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/35135)
 for more information.
 
-### Merge Trains feature flag **(PREMIUM ONLY)**
+### Merge Trains feature flag **(PREMIUM SELF)**
 
 In [GitLab 13.6 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/244831),
 you can [enable or disable merge trains in the project settings](#enable-merge-trains).

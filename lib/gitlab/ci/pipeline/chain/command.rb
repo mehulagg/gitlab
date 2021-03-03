@@ -12,7 +12,7 @@ module Gitlab
           :seeds_block, :variables_attributes, :push_options,
           :chat_data, :allow_mirror_update, :bridge, :content, :dry_run,
           # These attributes are set by Chains during processing:
-          :config_content, :yaml_processor_result, :stage_seeds
+          :config_content, :yaml_processor_result, :pipeline_seed
         ) do
           include Gitlab::Utils::StrongMemoize
 
@@ -77,6 +77,10 @@ module Gitlab
 
           def parent_pipeline
             bridge&.parent_pipeline
+          end
+
+          def creates_child_pipeline?
+            bridge&.triggers_child_pipeline?
           end
 
           def metrics

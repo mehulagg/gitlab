@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Slack application **(FREE ONLY)**
+# GitLab Slack application **(FREE SAAS)**
 
 > - Introduced in GitLab 9.4.
 > - Distributed to Slack App Directory in GitLab 10.2.
@@ -37,9 +37,9 @@ integration settings.
 
 Keep in mind that you need to have the appropriate permissions for your Slack
 team in order to be able to install a new application, read more in Slack's
-docs on [Adding an app to your workspace](https://slack.com/help/articles/202035138-Add-an-app-to-your-workspace).
+docs on [Adding an app to your workspace](https://slack.com/help/articles/202035138-Add-apps-to-your-Slack-workspace).
 
-To enable GitLab's service for your Slack team:
+To enable the GitLab service for your Slack team:
 
 1. Go to your project's **Settings > Integration > Slack application** (only
    visible on GitLab.com).

@@ -14,6 +14,7 @@ RSpec.describe Gitlab::Geo::GitSSHProxy, :geo do
   let(:project) { create(:project, :repository) }
   let(:user) { project.creator }
   let(:key) { create(:key, user: user) }
+  let(:key_identifier) { "key-#{key.id}" }
   let(:base_request) { double(Gitlab::Geo::BaseRequest.new.authorization) }
 
   let(:info_refs_body_short) do
@@ -22,7 +23,6 @@ RSpec.describe Gitlab::Geo::GitSSHProxy, :geo do
 
   let(:base_headers) do
     {
-      'Geo-GL-Id' => "key-#{key.id}",
       'Authorization' => 'secret'
     }
   end
@@ -72,13 +72,13 @@ RSpec.describe Gitlab::Geo::GitSSHProxy, :geo do
 
         context 'authorization header is scoped' do
           it 'passes the scope when .info_refs_upload_pack is called' do
-            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path)
+            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path, gl_id: key_identifier)
 
             subject.info_refs_upload_pack
           end
 
           it 'passes the scope when .receive_pack is called' do
-            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path)
+            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path, gl_id: key_identifier)
 
             subject.receive_pack(info_refs_body_short)
           end
@@ -299,13 +299,13 @@ RSpec.describe Gitlab::Geo::GitSSHProxy, :geo do
 
         context 'authorization header is scoped' do
           it 'passes the scope when .info_refs_receive_pack is called' do
-            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path)
+            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path, gl_id: key_identifier )
 
             subject.info_refs_receive_pack
           end
 
           it 'passes the scope when .receive_pack is called' do
-            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path)
+            expect(Gitlab::Geo::BaseRequest).to receive(:new).with(scope: project.repository.full_path, gl_id: key_identifier)
 
             subject.receive_pack(info_refs_body_short)
           end

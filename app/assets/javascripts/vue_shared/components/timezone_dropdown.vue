@@ -1,8 +1,8 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
+import { secondsToHours } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
-import { secondsToHours } from '~/lib/utils/datetime_utility';
 
 export default {
   name: 'TimezoneDropdown',
@@ -36,14 +36,14 @@ export default {
   },
   computed: {
     timezones() {
-      return this.timezoneData.map(timezone => ({
+      return this.timezoneData.map((timezone) => ({
         formattedTimezone: this.formatTimezone(timezone),
         identifier: timezone.identifier,
       }));
     },
     filteredResults() {
       const lowerCasedSearchTerm = this.searchTerm.toLowerCase();
-      return this.timezones.filter(timezone =>
+      return this.timezones.filter((timezone) =>
         timezone.formattedTimezone.toLowerCase().includes(lowerCasedSearchTerm),
       );
     },

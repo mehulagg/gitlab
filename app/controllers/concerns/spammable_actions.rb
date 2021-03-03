@@ -3,9 +3,6 @@
 module SpammableActions
   extend ActiveSupport::Concern
 
-  include Recaptcha::Verify
-  include Gitlab::Utils::StrongMemoize
-
   included do
     before_action :authorize_submit_spammable!, only: :mark_as_spam
   end
@@ -20,21 +17,11 @@ module SpammableActions
 
   private
 
-  def ensure_spam_config_loaded!
-    strong_memoize(:spam_config_loaded) do
-      Gitlab::Recaptcha.load_configurations!
-    end
-  end
-
   def recaptcha_check_with_fallback(should_redirect = true, &fallback)
     if should_redirect && spammable.valid?
       redirect_to spammable_path
-    elsif render_recaptcha?
-      ensure_spam_config_loaded!
-
-      if params[:recaptcha_verification]
-        flash[:alert] = _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
-      end
+    elsif spammable.render_recaptcha?
+      Gitlab::Recaptcha.load_configurations!
 
       respond_to do |format|
         format.html do
@@ -54,16 +41,30 @@ module SpammableActions
   end
 
   def spammable_params
-    default_params = { request: request }
+    # NOTE: For the legacy reCAPTCHA implementation based on the HTML/HAML form, the
+    # 'g-recaptcha-response' field name comes from `Recaptcha::ClientHelper#recaptcha_tags` in the
+    # recaptcha gem, which is called from the HAML `_recaptcha_form.html.haml` form.
+    #
+    # It is used in the `Recaptcha::Verify#verify_recaptcha` to extract the value from `params`,
+    # if the `response` option is not passed explicitly.
+    #
+    # Instead of relying on this behavior, we are extracting and passing it explicitly. This will
+    # make it consistent with the newer, modern reCAPTCHA verification process as it will be
+    # implemented via the GraphQL API and in Vue components via the native reCAPTCHA Javascript API,
+    # which requires that the recaptcha response param be obtained and passed explicitly.
+    #
+    # It can also be expanded to multiple fields when we move to future alternative captcha
+    # implementations such as FriendlyCaptcha. See https://gitlab.com/gitlab-org/gitlab/-/issues/273480
 
-    recaptcha_check = params[:recaptcha_verification] &&
-      ensure_spam_config_loaded! &&
-      verify_recaptcha
+    # After this newer GraphQL/JS API process is fully supported by the backend, we can remove the
+    # check for the 'g-recaptcha-response' field and other HTML/HAML form-specific support.
+    captcha_response = params['g-recaptcha-response']
 
-    return default_params unless recaptcha_check
-
-    { recaptcha_verified: true,
-      spam_log_id: params[:spam_log_id] }.merge(default_params)
+    {
+      request: request,
+      spam_log_id: params[:spam_log_id],
+      captcha_response: captcha_response
+    }
   end
 
   def spammable
@@ -76,12 +77,5 @@ module SpammableActions
 
   def authorize_submit_spammable!
     access_denied! unless current_user.admin?
-  end
-
-  def render_recaptcha?
-    return false if spammable.errors.count > 1 # re-render "new" template in case there are other errors
-    return false unless Gitlab::Recaptcha.enabled?
-
-    spammable.needs_recaptcha?
   end
 end

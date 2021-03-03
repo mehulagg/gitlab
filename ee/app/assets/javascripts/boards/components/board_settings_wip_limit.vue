@@ -1,11 +1,11 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlFormInput } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
+import { inactiveId } from '~/boards/constants';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, n__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
-import { inactiveId } from '~/boards/constants';
 
 export default {
   i18n: {

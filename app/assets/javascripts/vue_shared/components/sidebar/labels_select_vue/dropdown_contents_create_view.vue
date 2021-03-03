@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlTooltipDirective, GlButton, GlFormInput, GlLink, GlLoadingIcon } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -25,7 +25,7 @@ export default {
     },
     suggestedColors() {
       const colorsMap = gon.suggested_label_colors;
-      return Object.keys(colorsMap).map(color => ({ [color]: colorsMap[color] }));
+      return Object.keys(colorsMap).map((color) => ({ [color]: colorsMap[color] }));
     },
   },
   methods: {

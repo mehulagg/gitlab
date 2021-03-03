@@ -4,9 +4,9 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Sign into GitLab with (almost) any OAuth2 provider
+# Sign into GitLab with (almost) any OAuth2 provider **(FREE)**
 
-The `omniauth-oauth2-generic` gem allows Single Sign On between GitLab and your own OAuth2 provider
+The `omniauth-oauth2-generic` gem allows Single Sign-On between GitLab and your own OAuth2 provider
 (or any OAuth2 provider compatible with this gem)
 
 This strategy is designed to allow configuration of the simple OmniAuth SSO process outlined below:
@@ -26,7 +26,7 @@ This strategy is designed to allow configuration of the simple OmniAuth SSO proc
 - It is not able to fetch user information from more than one URL
 - It has not been tested with user information formats other than JSON
 
-## Config Instructions
+## Configuration Instructions
 
 1. Register your application in the OAuth2 provider you wish to authenticate with.
 

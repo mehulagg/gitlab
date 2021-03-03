@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
-import SeverityToken from '~/sidebar/components/severity/severity.vue';
+import { shallowMount } from '@vue/test-utils';
 import { INCIDENT_SEVERITY } from '~/sidebar/components/severity/constants';
+import SeverityToken from '~/sidebar/components/severity/severity.vue';
 
 describe('SeverityToken', () => {
   let wrapper;
@@ -24,7 +24,7 @@ describe('SeverityToken', () => {
   const findIcon = () => wrapper.find(GlIcon);
 
   it('renders severity token for each severity type', () => {
-    Object.values(INCIDENT_SEVERITY).forEach(severity => {
+    Object.values(INCIDENT_SEVERITY).forEach((severity) => {
       createComponent({ severity });
       expect(findIcon().classes()).toContain(`icon-${severity.icon}`);
       expect(findIcon().attributes('name')).toBe(`severity-${severity.icon}`);

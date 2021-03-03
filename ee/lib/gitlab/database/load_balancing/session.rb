@@ -28,6 +28,8 @@ module Gitlab
           @use_primary
         end
 
+        alias_method :using_primary?, :use_primary?
+
         def use_primary!
           @use_primary = true
         end

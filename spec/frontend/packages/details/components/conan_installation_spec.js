@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import ConanInstallation from '~/packages/details/components/conan_installation.vue';
 import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
 import { conanPackage as packageEntity } from '../../mock_data';
@@ -48,21 +48,13 @@ describe('ConanInstallation', () => {
 
   describe('installation commands', () => {
     it('renders the correct command', () => {
-      expect(
-        findCodeInstructions()
-          .at(0)
-          .props('instruction'),
-      ).toBe(conanInstallationCommandStr);
+      expect(findCodeInstructions().at(0).props('instruction')).toBe(conanInstallationCommandStr);
     });
   });
 
   describe('setup commands', () => {
     it('renders the correct command', () => {
-      expect(
-        findCodeInstructions()
-          .at(1)
-          .props('instruction'),
-      ).toBe(conanSetupCommandStr);
+      expect(findCodeInstructions().at(1).props('instruction')).toBe(conanSetupCommandStr);
     });
   });
 });

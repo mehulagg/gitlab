@@ -1,10 +1,10 @@
-import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
+import SidebarMoveIssue from '~/sidebar/lib/sidebar_move_issue';
+import SidebarService from '~/sidebar/services/sidebar_service';
 import SidebarMediator from '~/sidebar/sidebar_mediator';
 import SidebarStore from '~/sidebar/stores/sidebar_store';
-import SidebarService from '~/sidebar/services/sidebar_service';
-import SidebarMoveIssue from '~/sidebar/lib/sidebar_move_issue';
 import Mock from './mock_data';
 
 describe('SidebarMoveIssue', () => {
@@ -74,7 +74,7 @@ describe('SidebarMoveIssue', () => {
       expect(test.sidebarMoveIssue.$dropdownToggle.data('deprecatedJQueryDropdown')).toBeTruthy();
     });
 
-    it('escapes html from project name', done => {
+    it('escapes html from project name', (done) => {
       test.$toggleButton.dropdown('toggle');
 
       setImmediate(() => {
@@ -98,7 +98,7 @@ describe('SidebarMoveIssue', () => {
       expect(test.$confirmButton.hasClass('is-loading')).toBe(true);
     });
 
-    it('should remove loading state from confirm button on failure', done => {
+    it('should remove loading state from confirm button on failure', (done) => {
       jest.spyOn(window, 'Flash').mockImplementation(() => {});
       jest.spyOn(test.mediator, 'moveIssue').mockReturnValue(Promise.reject());
       test.mediator.setMoveToProjectId(7);
@@ -125,7 +125,7 @@ describe('SidebarMoveIssue', () => {
     });
   });
 
-  it('should set moveToProjectId on dropdown item "No project" click', done => {
+  it('should set moveToProjectId on dropdown item "No project" click', (done) => {
     jest.spyOn(test.mediator, 'setMoveToProjectId').mockImplementation(() => {});
 
     // Open the dropdown
@@ -133,10 +133,7 @@ describe('SidebarMoveIssue', () => {
 
     // Wait for the autocomplete request to finish
     setImmediate(() => {
-      test.$content
-        .find('.js-move-issue-dropdown-item')
-        .eq(0)
-        .trigger('click');
+      test.$content.find('.js-move-issue-dropdown-item').eq(0).trigger('click');
 
       expect(test.mediator.setMoveToProjectId).toHaveBeenCalledWith(0);
       expect(test.$confirmButton.prop('disabled')).toBeTruthy();
@@ -144,7 +141,7 @@ describe('SidebarMoveIssue', () => {
     });
   });
 
-  it('should set moveToProjectId on dropdown item click', done => {
+  it('should set moveToProjectId on dropdown item click', (done) => {
     jest.spyOn(test.mediator, 'setMoveToProjectId').mockImplementation(() => {});
 
     // Open the dropdown
@@ -152,10 +149,7 @@ describe('SidebarMoveIssue', () => {
 
     // Wait for the autocomplete request to finish
     setImmediate(() => {
-      test.$content
-        .find('.js-move-issue-dropdown-item')
-        .eq(1)
-        .trigger('click');
+      test.$content.find('.js-move-issue-dropdown-item').eq(1).trigger('click');
 
       expect(test.mediator.setMoveToProjectId).toHaveBeenCalledWith(20);
       expect(test.$confirmButton.attr('disabled')).toBe(undefined);

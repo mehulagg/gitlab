@@ -32,6 +32,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
       it 'saves given value' do
         expect(subject[:key]).to eq variable_key
         expect(subject[:value]).to eq expected_value
+        expect(subject.value).to eq expected_value
       end
     end
 
@@ -64,6 +65,43 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
           let(:variable_value) { val }
 
           it_behaves_like 'raises error for invalid type'
+        end
+      end
+    end
+  end
+
+  describe '#depends_on' do
+    let(:item) { Gitlab::Ci::Variables::Collection::Item.new(**variable) }
+
+    subject { item.depends_on }
+
+    context 'table tests' do
+      using RSpec::Parameterized::TableSyntax
+
+      where do
+        {
+          "no variable references": {
+            variable: { key: 'VAR', value: 'something' },
+            expected_depends_on: nil
+          },
+          "simple variable reference": {
+            variable: { key: 'VAR', value: 'something_$VAR2' },
+            expected_depends_on: %w(VAR2)
+          },
+          "complex expansion": {
+            variable: { key: 'VAR', value: 'something_${VAR2}_$VAR3' },
+            expected_depends_on: %w(VAR2 VAR3)
+          },
+          "complex expansions for Windows": {
+            variable: { key: 'variable3', value: 'key%variable%%variable2%' },
+            expected_depends_on: %w(variable variable2)
+          }
+        }
+      end
+
+      with_them do
+        it 'contains referenced variable names' do
+          is_expected.to eq(expected_depends_on)
         end
       end
     end
@@ -137,6 +175,14 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
 
         expect(runner_variable)
           .to eq(key: 'VAR', value: 'value', public: true, file: true, masked: false)
+      end
+    end
+
+    context 'when referencing a variable' do
+      it '#depends_on contains names of dependencies' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '${CI_VAR_2}-123-$CI_VAR_3')
+
+        expect(runner_variable.depends_on).to eq(%w(CI_VAR_2 CI_VAR_3))
       end
     end
   end

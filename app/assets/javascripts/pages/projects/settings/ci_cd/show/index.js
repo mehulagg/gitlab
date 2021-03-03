@@ -1,9 +1,13 @@
-import initSettingsPanels from '~/settings_panels';
+import initArtifactsSettings from '~/artifacts_settings';
 import SecretValues from '~/behaviors/secret_values';
-import registrySettingsApp from '~/registry/settings/registry_settings_bundle';
+import initSettingsPipelinesTriggers from '~/ci_settings_pipeline_triggers';
 import initVariableList from '~/ci_variable_list';
 import initDeployFreeze from '~/deploy_freeze';
-import initSettingsPipelinesTriggers from '~/ci_settings_pipeline_triggers';
+import { initInstallRunner } from '~/pages/shared/mount_runner_instructions';
+import initSharedRunnersToggle from '~/projects/settings/mount_shared_runners_toggle';
+import registrySettingsApp from '~/registry/settings/registry_settings_bundle';
+import initSearchSettings from '~/search_settings';
+import initSettingsPanels from '~/settings_panels';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize expandable settings panels
@@ -22,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // hide extra auto devops settings based checkbox state
   const autoDevOpsExtraSettings = document.querySelector('.js-extra-settings');
   const instanceDefaultBadge = document.querySelector('.js-instance-default-badge');
-  document.querySelector('.js-toggle-extra-settings').addEventListener('click', event => {
+  document.querySelector('.js-toggle-extra-settings').addEventListener('click', (event) => {
     const { target } = event;
     if (instanceDefaultBadge) instanceDefaultBadge.style.display = 'none';
     autoDevOpsExtraSettings.classList.toggle('hidden', !target.checked);
@@ -32,4 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initDeployFreeze();
 
   initSettingsPipelinesTriggers();
+  initArtifactsSettings();
+
+  if (gon?.features?.vueifySharedRunnersToggle) {
+    initSharedRunnersToggle();
+  }
+
+  initInstallRunner();
+
+  initSearchSettings();
 });

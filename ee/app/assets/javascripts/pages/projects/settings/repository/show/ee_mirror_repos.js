@@ -1,8 +1,8 @@
 import $ from 'jquery';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import MirrorRepos from '~/mirrors/mirror_repos';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { __ } from '~/locale';
+import MirrorRepos from '~/mirrors/mirror_repos';
 
 export default class EEMirrorRepos extends MirrorRepos {
   constructor(...args) {
@@ -37,7 +37,7 @@ export default class EEMirrorRepos extends MirrorRepos {
   }
 
   hideForm() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.$insertionPoint.html()) return resolve();
 
       this.$insertionPoint.one('hidden.bs.collapse', () => {
@@ -48,7 +48,7 @@ export default class EEMirrorRepos extends MirrorRepos {
   }
 
   showForm() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.$insertionPoint.one('shown.bs.collapse', () => {
         resolve();
       });

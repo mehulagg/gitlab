@@ -33,6 +33,7 @@ RSpec.describe 'Group navbar' do
         nav_item: _('Merge Requests'),
         nav_sub_items: []
       },
+      (security_and_compliance_nav_item if Gitlab.ee?),
       (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),
@@ -85,13 +86,5 @@ RSpec.describe 'Group navbar' do
     end
 
     it_behaves_like 'verified navigation bar'
-  end
-
-  context 'when invite team members is not available' do
-    it 'does not display the js-invite-members-trigger' do
-      visit group_path(group)
-
-      expect(page).not_to have_selector('.js-invite-members-trigger')
-    end
   end
 end

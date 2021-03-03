@@ -1,7 +1,7 @@
 <script>
+import actionCable from '~/actioncable_consumer';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import query from '~/issuable_sidebar/queries/issue_sidebar.query.graphql';
-import actionCable from '~/actioncable_consumer';
 
 export default {
   subscription: null,
@@ -59,7 +59,7 @@ export default {
     handleFetchResult({ data }) {
       const { nodes } = data.project.issue.assignees;
 
-      const assignees = nodes.map(n => ({
+      const assignees = nodes.map((n) => ({
         ...n,
         avatar_url: n.avatarUrl,
         id: getIdFromGraphQLId(n.id),

@@ -1,10 +1,13 @@
-const role = document.querySelector('.js-user-role-dropdown');
 const otherRoleGroup = document.querySelector('.js-other-role-group');
 
-role.addEventListener('change', () => {
-  const enableOtherRole = role.value === 'other';
+if (otherRoleGroup) {
+  const role = document.querySelector('.js-user-role-dropdown');
 
-  otherRoleGroup.classList.toggle('hidden', !enableOtherRole);
-});
+  const showOtherRoleGroup = () => {
+    const enableOtherRole = role.value === 'other';
+    otherRoleGroup.classList.toggle('hidden', !enableOtherRole);
+  };
 
-role.dispatchEvent(new Event('change'));
+  role.addEventListener('change', showOtherRoleGroup);
+  showOtherRoleGroup();
+}

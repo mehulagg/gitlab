@@ -1,4 +1,3 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import {
   GlFilteredSearch,
   GlButtonGroup,
@@ -7,25 +6,29 @@ import {
   GlDropdownItem,
   GlFormCheckbox,
 } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
 
+import RecentSearchesService from '~/filtered_search/services/recent_searches_service';
+import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store';
+import { SortDirection } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import { uniqueTokens } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import { SortDirection } from '~/vue_shared/components/filtered_search_bar/constants';
-
-import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store';
-import RecentSearchesService from '~/filtered_search/services/recent_searches_service';
 
 import {
   mockAvailableTokens,
+  mockMembershipToken,
+  mockMembershipTokenOptionsWithoutTitles,
   mockSortOptions,
   mockHistoryItems,
   tokenValueAuthor,
   tokenValueLabel,
   tokenValueMilestone,
+  tokenValueMembership,
+  tokenValueConfidential,
 } from './mock_data';
 
 jest.mock('~/vue_shared/components/filtered_search_bar/filtered_search_utils', () => ({
-  uniqueTokens: jest.fn().mockImplementation(tokens => tokens),
+  uniqueTokens: jest.fn().mockImplementation((tokens) => tokens),
   stripQuotes: jest.requireActual(
     '~/vue_shared/components/filtered_search_bar/filtered_search_utils',
   ).stripQuotes,
@@ -224,12 +227,13 @@ describe('FilteredSearchBarRoot', () => {
     });
 
     describe('removeQuotesEnclosure', () => {
-      const mockFilters = [tokenValueAuthor, tokenValueLabel, 'foo'];
+      const mockFilters = [tokenValueAuthor, tokenValueLabel, tokenValueConfidential, 'foo'];
 
       it('returns filter array with unescaped strings for values which have spaces', () => {
         expect(wrapper.vm.removeQuotesEnclosure(mockFilters)).toEqual([
           tokenValueAuthor,
           tokenValueLabel,
+          tokenValueConfidential,
           'foo',
         ]);
       });
@@ -410,6 +414,42 @@ describe('FilteredSearchBarRoot', () => {
       );
 
       wrapperFullMount.destroy();
+    });
+
+    describe('when token options have `title` attribute defined', () => {
+      it('renders search history items using the provided `title` attribute', async () => {
+        const wrapperFullMount = createComponent({
+          sortOptions: mockSortOptions,
+          tokens: [mockMembershipToken],
+          shallow: false,
+        });
+
+        wrapperFullMount.vm.recentSearchesStore.addRecentSearch([tokenValueMembership]);
+
+        await wrapperFullMount.vm.$nextTick();
+
+        expect(wrapperFullMount.find(GlDropdownItem).text()).toBe('Membership := Direct');
+
+        wrapperFullMount.destroy();
+      });
+    });
+
+    describe('when token options have do not have `title` attribute defined', () => {
+      it('renders search history items using the provided `value` attribute', async () => {
+        const wrapperFullMount = createComponent({
+          sortOptions: mockSortOptions,
+          tokens: [mockMembershipTokenOptionsWithoutTitles],
+          shallow: false,
+        });
+
+        wrapperFullMount.vm.recentSearchesStore.addRecentSearch([tokenValueMembership]);
+
+        await wrapperFullMount.vm.$nextTick();
+
+        expect(wrapperFullMount.find(GlDropdownItem).text()).toBe('Membership := exclude');
+
+        wrapperFullMount.destroy();
+      });
     });
 
     it('renders sort dropdown component', () => {

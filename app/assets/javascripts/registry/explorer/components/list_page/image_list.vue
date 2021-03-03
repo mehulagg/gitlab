@@ -13,6 +13,11 @@ export default {
       type: Array,
       required: true,
     },
+    metadataLoading: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
     pageInfo: {
       type: Object,
       required: true,
@@ -32,7 +37,7 @@ export default {
       v-for="(listItem, index) in images"
       :key="index"
       :item="listItem"
-      :first="index === 0"
+      :metadata-loading="metadataLoading"
       @delete="$emit('delete', $event)"
     />
     <div class="gl-display-flex gl-justify-content-center">

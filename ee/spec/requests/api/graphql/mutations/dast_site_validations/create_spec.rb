@@ -5,9 +5,10 @@ require 'spec_helper'
 RSpec.describe 'Creating a DAST Site Token' do
   include GraphqlHelpers
 
-  let(:dast_site_token) { create(:dast_site_token, project: project) }
-  let(:dast_site_validation) { DastSiteValidation.find_by!(url_path: validation_path) }
+  let(:dast_site) { create(:dast_site, project: project) }
+  let(:dast_site_token) { create(:dast_site_token, project: project, url: dast_site.url) }
   let(:validation_path) { SecureRandom.hex }
+  let(:dast_site_validation) { DastSiteValidation.find_by!(url_path: validation_path) }
 
   let(:mutation_name) { :dast_site_validation_create }
   let(:mutation) do

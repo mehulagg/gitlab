@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlSprintf, GlModal } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import Badge from './badge.vue';
@@ -42,7 +42,7 @@ export default {
         .then(() => {
           createFlash(s__('Badges|The badge was deleted.'), 'notice');
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash(s__('Badges|Deleting the badge failed, please try again.'));
           throw error;
         });

@@ -1,6 +1,7 @@
-import Vue from 'vue';
 import { GlToast } from '@gitlab/ui';
+import Vue from 'vue';
 import InviteMembersModal from '~/invite_members/components/invite_members_modal.vue';
+import { parseBoolean } from '~/lib/utils/common_utils';
 
 Vue.use(GlToast);
 
@@ -13,10 +14,11 @@ export default function initInviteMembersModal() {
 
   return new Vue({
     el,
-    render: createElement =>
+    render: (createElement) =>
       createElement(InviteMembersModal, {
         props: {
           ...el.dataset,
+          isProject: parseBoolean(el.dataset.isProject),
           accessLevels: JSON.parse(el.dataset.accessLevels),
         },
       }),

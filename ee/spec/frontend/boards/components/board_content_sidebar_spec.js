@@ -1,31 +1,49 @@
 import { GlDrawer } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
-import waitForPromises from 'helpers/wait_for_promises';
-import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
-import IssuableTitle from '~/boards/components/issuable_title.vue';
+import BoardSidebarIterationSelect from 'ee_component/boards/components/sidebar/board_sidebar_iteration_select.vue';
+import { stubComponent } from 'helpers/stub_component';
+import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
+import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
+import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
+import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
+import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import { ISSUABLE } from '~/boards/constants';
-import { createStore } from '~/boards/stores';
+import { mockIssue } from '../mock_data';
 
 describe('ee/BoardContentSidebar', () => {
   let wrapper;
   let store;
 
+  const createStore = ({ mockGetters = {}, mockActions = {} } = {}) => {
+    store = new Vuex.Store({
+      state: {
+        sidebarType: ISSUABLE,
+        issues: { [mockIssue.id]: mockIssue },
+        activeId: mockIssue.id,
+      },
+      getters: {
+        activeIssue: () => mockIssue,
+        isSidebarOpen: () => true,
+        ...mockGetters,
+      },
+      actions: mockActions,
+    });
+  };
+
   const createComponent = () => {
-    wrapper = mount(BoardContentSidebar, {
+    wrapper = shallowMount(BoardContentSidebar, {
       provide: {
         canUpdate: true,
-        rootPath: '',
+        rootPath: '/',
+        groupId: '#',
       },
       store,
       stubs: {
-        'board-sidebar-epic-select': '<div></div>',
-        'board-sidebar-time-tracker': '<div></div>',
-        'board-sidebar-weight-input': '<div></div>',
-        'board-sidebar-labels-select': '<div></div>',
-        'board-sidebar-due-date': '<div></div>',
-        'board-sidebar-subscription': '<div></div>',
-        'board-sidebar-milestone-select': '<div></div>',
+        GlDrawer: stubComponent(GlDrawer, {
+          template: '<div><slot name="header"></slot><slot></slot></div>',
+        }),
       },
       mocks: {
         $apollo: {
@@ -40,11 +58,7 @@ describe('ee/BoardContentSidebar', () => {
   };
 
   beforeEach(() => {
-    store = createStore();
-    store.state.sidebarType = ISSUABLE;
-    store.state.issues = { '1': { title: 'One', referencePath: 'path', assignees: [] } };
-    store.state.activeId = '1';
-
+    createStore();
     createComponent();
   });
 
@@ -57,27 +71,58 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(GlDrawer).exists()).toBe(true);
   });
 
+  it('does not render GlDrawer when isSidebarOpen is false', () => {
+    createStore({ mockGetters: { isSidebarOpen: () => false } });
+    createComponent();
+
+    expect(wrapper.find(GlDrawer).exists()).toBe(false);
+  });
+
   it('applies an open attribute', () => {
     expect(wrapper.find(GlDrawer).props('open')).toBe(true);
   });
 
-  it('finds IssuableTitle', () => {
-    expect(wrapper.find(IssuableTitle).text()).toContain('One');
+  it('renders BoardSidebarLabelsSelect', () => {
+    expect(wrapper.find(BoardSidebarLabelsSelect).exists()).toBe(true);
   });
 
-  it('renders BoardAssigneeDropdown', () => {
-    expect(wrapper.find(BoardAssigneeDropdown).exists()).toBe(true);
+  it('renders BoardSidebarIssueTitle', () => {
+    expect(wrapper.find(BoardSidebarIssueTitle).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarDueDate', () => {
+    expect(wrapper.find(BoardSidebarDueDate).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarSubscription', () => {
+    expect(wrapper.find(BoardSidebarSubscription).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarMilestoneSelect', () => {
+    expect(wrapper.find(BoardSidebarMilestoneSelect).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarIterationSelect', () => {
+    expect(wrapper.find(BoardSidebarIterationSelect).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {
-    it('hides GlDrawer', async () => {
-      expect(wrapper.find(GlDrawer).props('open')).toBe(true);
+    let toggleBoardItem;
 
+    beforeEach(() => {
+      toggleBoardItem = jest.fn();
+      createStore({ mockActions: { toggleBoardItem } });
+      createComponent();
+    });
+
+    it('calls toggleBoardItem with correct parameters', async () => {
       wrapper.find(GlDrawer).vm.$emit('close');
 
-      await waitForPromises();
-
-      expect(wrapper.find(GlDrawer).exists()).toBe(false);
+      expect(toggleBoardItem).toHaveBeenCalledTimes(1);
+      expect(toggleBoardItem).toHaveBeenCalledWith(expect.any(Object), {
+        boardItem: mockIssue,
+        sidebarType: ISSUABLE,
+      });
     });
   });
 });

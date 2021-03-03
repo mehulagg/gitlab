@@ -8,12 +8,12 @@ module Gitlab
           include BaseEvent
 
           def process
-            registry.reset_checksum! unless skippable?
+            registry.reset_checksum! unless registry_exists?
 
             log_event(
               'Reset checksum',
               project_id: event.project_id,
-              skippable: skippable?)
+              skippable: registry_exists?)
           end
         end
       end

@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitHub import **(CORE ONLY)**
+# GitHub import **(FREE SELF)**
 
 > [Introduced]( https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10308) in GitLab 9.1.
 
@@ -19,8 +19,8 @@ before/after the brackets. Also, some shells (for example, `zsh`) can interpret 
 
 ## Caveats
 
-If the GitHub [rate limit](https://developer.github.com/v3/#rate-limiting) is reached while importing,
-the importing process waits (`sleep()`) until it can continue importing.
+If the GitHub [rate limit](https://docs.github.com/en/rest/reference/rate-limit) is reached while
+importing, the importing process waits (`sleep()`) until it can continue importing.
 
 ## Importing multiple projects
 

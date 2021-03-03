@@ -24,6 +24,56 @@ module Gitlab
           http_get("api/payment_methods/#{id}", admin_headers)
         end
 
+        def activate(activation_code)
+          uuid = Gitlab::CurrentSettings.uuid
+
+          query = <<~GQL
+            mutation {
+              cloudActivationActivate(input: { activationCode: "#{activation_code}", instanceIdentifier: "#{uuid}" }) {
+                authenticationToken
+                errors
+              }
+            }
+          GQL
+
+          response = http_post("graphql", admin_headers, { query: query }).dig(:data, 'data', 'cloudActivationActivate')
+
+          if response['errors'].blank?
+            { success: true, authentication_token: response['authenticationToken'] }
+          else
+            { success: false, errors: response['errors'] }
+          end
+        end
+
+        def plan_upgrade_offer(namespace_id)
+          query = <<~GQL
+            {
+              subscription(namespaceId: "#{namespace_id}") {
+                eoaStarterBronzeEligible
+                assistedUpgradePlanId
+                freeUpgradePlanId
+              }
+            }
+          GQL
+
+          response = http_post("graphql", admin_headers, { query: query }).dig(:data)
+
+          if response['errors'].blank?
+            eligible = response.dig('data', 'subscription', 'eoaStarterBronzeEligible')
+            assisted_upgrade = response.dig('data', 'subscription', 'assistedUpgradePlanId')
+            free_upgrade = response.dig('data', 'subscription', 'freeUpgradePlanId')
+
+            {
+              success: true,
+              eligible_for_free_upgrade: eligible,
+              assisted_upgrade_plan_id: assisted_upgrade,
+              free_upgrade_plan_id: free_upgrade
+            }
+          else
+            { success: false }
+          end
+        end
+
         private
 
         def http_get(path, headers)

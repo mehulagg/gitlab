@@ -24,7 +24,7 @@ module Subscriptions
 
       response = client.create_subscription(create_subscription_params, billing_email, token)
 
-      NamespaceOnboardingAction.create_action(@group, :subscription_created) if response[:success]
+      OnboardingProgressService.new(@group).execute(action: :subscription_created) if response[:success]
 
       response
     end

@@ -25,11 +25,23 @@ export const lastYearChartData = {
 export const transformedAreaChartData = [
   {
     name: 'all',
-    data: [['01 Jan', 4], ['02 Jan', 6], ['03 Jan', 3], ['04 Jan', 6], ['05 Jan', 7]],
+    data: [
+      ['01 Jan', 4],
+      ['02 Jan', 6],
+      ['03 Jan', 3],
+      ['04 Jan', 6],
+      ['05 Jan', 7],
+    ],
   },
   {
     name: 'success',
-    data: [['01 Jan', 3], ['02 Jan', 3], ['03 Jan', 3], ['04 Jan', 3], ['05 Jan', 5]],
+    data: [
+      ['01 Jan', 3],
+      ['02 Jan', 3],
+      ['03 Jan', 3],
+      ['04 Jan', 3],
+      ['05 Jan', 5],
+    ],
   },
 ];
 
@@ -42,6 +54,16 @@ export const mockPipelineCount = {
       totalPipelineDuration: 2471,
       __typename: 'Project',
     },
+  },
+};
+
+export const chartOptions = {
+  xAxis: {
+    name: 'X axis title',
+    type: 'category',
+  },
+  yAxis: {
+    name: 'Y axis title',
   },
 };
 

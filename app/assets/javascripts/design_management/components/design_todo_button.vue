@@ -1,8 +1,8 @@
 <script>
 import todoMarkDoneMutation from '~/graphql_shared/mutations/todo_mark_done.mutation.graphql';
-import getDesignQuery from '../graphql/queries/get_design.query.graphql';
-import createDesignTodoMutation from '../graphql/mutations/create_design_todo.mutation.graphql';
 import TodoButton from '~/vue_shared/components/todo_button.vue';
+import createDesignTodoMutation from '../graphql/mutations/create_design_todo.mutation.graphql';
+import getDesignQuery from '../graphql/queries/get_design.query.graphql';
 import allVersionsMixin from '../mixins/all_versions';
 import { updateStoreAfterDeleteDesignTodo } from '../utils/cache_update';
 import { findIssueId, findDesignId } from '../utils/design_management_utils';
@@ -13,18 +13,18 @@ export default {
     TodoButton,
   },
   mixins: [allVersionsMixin],
-  props: {
-    design: {
-      type: Object,
-      required: true,
-    },
-  },
   inject: {
     projectPath: {
       default: '',
     },
     issueIid: {
       default: '',
+    },
+  },
+  props: {
+    design: {
+      type: Object,
+      required: true,
     },
   },
   data() {
@@ -95,7 +95,7 @@ export default {
         .then(() => {
           this.incrementGlobalTodoCount();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$emit('error', Error(CREATE_DESIGN_TODO_ERROR));
           throw err;
         })
@@ -116,12 +116,7 @@ export default {
           variables: {
             id,
           },
-          update(
-            store,
-            {
-              data: { todoMarkDone },
-            },
-          ) {
+          update(store, { data: { todoMarkDone } }) {
             const todoMarkDoneFirstError = (todoMarkDone.errors || [])[0];
             if (todoMarkDoneFirstError) {
               this.$emit('error', Error(todoMarkDoneFirstError));
@@ -138,7 +133,7 @@ export default {
         .then(() => {
           this.decrementGlobalTodoCount();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$emit('error', Error(DELETE_DESIGN_TODO_ERROR));
           throw err;
         })

@@ -1,7 +1,7 @@
 <script>
-import MarkdownViewer from './viewers/markdown_viewer.vue';
-import ImageViewer from './viewers/image_viewer.vue';
 import DownloadViewer from './viewers/download_viewer.vue';
+import ImageViewer from './viewers/image_viewer.vue';
+import MarkdownViewer from './viewers/markdown_viewer.vue';
 
 export default {
   components: {
@@ -11,7 +11,7 @@ export default {
   },
   props: {
     content: {
-      type: String,
+      type: [String, ArrayBuffer],
       default: '',
       required: false,
     },
@@ -54,7 +54,7 @@ export default {
 </script>
 
 <template>
-  <div class="preview-container">
+  <div class="preview-container" data-qa-selector="preview_container">
     <image-viewer v-if="type === 'image'" :path="path" :file-size="fileSize" />
     <markdown-viewer
       v-if="type === 'markdown'"

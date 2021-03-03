@@ -92,6 +92,8 @@ RSpec.describe Groups::AutocompleteService do
   end
 
   describe '#epics' do
+    let(:expected_attributes) { %i(iid title group_id) }
+
     before do
       stub_licensed_features(epics: true)
     end
@@ -105,16 +107,18 @@ RSpec.describe Groups::AutocompleteService do
     end
 
     it 'returns epics from group' do
-      expect(subject.epics.map(&:iid)).to contain_exactly(epic.iid)
+      result = subject.epics.map { |epic| epic.slice(expected_attributes) }
+
+      expect(result).to contain_exactly(epic.slice(expected_attributes))
     end
 
     it 'returns only confidential epics if confidential_only is true' do
       confidential_epic = create(:epic, :confidential, group: group)
 
-      epics = subject.epics(confidential_only: true)
+      result = subject.epics(confidential_only: true)
+                 .map { |epic| epic.slice(expected_attributes) }
 
-      expect(epics.map(&:iid)).to contain_exactly(confidential_epic.iid)
-      expect(epics.map(&:title)).to contain_exactly(confidential_epic.title)
+      expect(result).to contain_exactly(confidential_epic.slice(expected_attributes))
     end
   end
 

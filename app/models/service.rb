@@ -11,7 +11,7 @@ class Service < ApplicationRecord
   include EachBatch
 
   SERVICE_NAMES = %w[
-    alerts asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker datadog discord
+    asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker datadog discord
     drone_ci emails_on_push ewm external_wiki flowdock hangouts_chat hipchat irker jira
     mattermost mattermost_slash_commands microsoft_teams packagist pipelines_email
     pivotaltracker prometheus pushover redmine slack slack_slash_commands teamcity unify_circuit webex_teams youtrack
@@ -23,7 +23,7 @@ class Service < ApplicationRecord
 
   # Fake services to help with local development.
   DEV_SERVICE_NAMES = %w[
-    mock_ci mock_deployment mock_monitoring
+    mock_ci mock_monitoring
   ].freeze
 
   serialize :properties, JSON # rubocop:disable Cop/ActiveRecordSerialize
@@ -46,8 +46,6 @@ class Service < ApplicationRecord
   after_initialize :initialize_properties
 
   after_commit :reset_updated_properties
-  after_commit :cache_project_has_external_issue_tracker
-  after_commit :cache_project_has_external_wiki
 
   belongs_to :project, inverse_of: :services
   belongs_to :group, inverse_of: :services
@@ -56,11 +54,11 @@ class Service < ApplicationRecord
   validates :project_id, presence: true, unless: -> { template? || instance? || group_id }
   validates :group_id, presence: true, unless: -> { template? || instance? || project_id }
   validates :project_id, :group_id, absence: true, if: -> { template? || instance? }
-  validates :type, uniqueness: { scope: :project_id }, unless: -> { template? || instance? || group_id }, on: :create
-  validates :type, uniqueness: { scope: :group_id }, unless: -> { template? || instance? || project_id }
   validates :type, presence: true
-  validates :template, uniqueness: { scope: :type }, if: -> { template? }
-  validates :instance, uniqueness: { scope: :type }, if: -> { instance? }
+  validates :type, uniqueness: { scope: :template }, if: :template?
+  validates :type, uniqueness: { scope: :instance }, if: :instance?
+  validates :type, uniqueness: { scope: :project_id }, if: :project_id?
+  validates :type, uniqueness: { scope: :group_id }, if: :group_id?
   validate :validate_is_instance_or_template
   validate :validate_belongs_to_project_or_group
 
@@ -439,10 +437,6 @@ class Service < ApplicationRecord
     ProjectServiceWorker.perform_async(id, data)
   end
 
-  def external_issue_tracker?
-    category == :issue_tracker && active?
-  end
-
   def external_wiki?
     type == 'ExternalWikiService' && active?
   end
@@ -460,18 +454,6 @@ class Service < ApplicationRecord
 
   def validate_belongs_to_project_or_group
     errors.add(:project_id, 'The service cannot belong to both a project and a group') if project_id && group_id
-  end
-
-  def cache_project_has_external_issue_tracker
-    if project && !project.destroyed?
-      project.cache_has_external_issue_tracker
-    end
-  end
-
-  def cache_project_has_external_wiki
-    if project && !project.destroyed?
-      project.cache_has_external_wiki
-    end
   end
 
   def valid_recipients?

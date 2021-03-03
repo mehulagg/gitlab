@@ -11,6 +11,7 @@ RSpec.describe Vulnerabilities::Feedback do
     )
   }
   it { is_expected.to define_enum_for(:category) }
+  it { is_expected.to define_enum_for(:dismissal_reason) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
@@ -275,6 +276,32 @@ RSpec.describe Vulnerabilities::Feedback do
         existing_feedback = described_class.find_or_init_for(feedback_params)
 
         expect(existing_feedback).to eq(feedback)
+      end
+
+      context 'when a finding_uuid is provided' do
+        let(:finding) { create(:vulnerabilities_finding) }
+        let(:feedback_params_with_finding) { feedback_params.merge(finding_uuid: finding.uuid) }
+
+        subject(:feedback) { described_class.find_or_init_for(feedback_params_with_finding) }
+
+        it 'sets finding_uuid' do
+          feedback.save!
+
+          expect(feedback.finding_uuid).to eq(finding.uuid)
+        end
+      end
+
+      context 'when the finding_uuid provided is nil' do
+        let(:finding) { create(:vulnerabilities_finding) }
+        let(:feedback_params_with_finding) { feedback_params.merge(finding_uuid: nil) }
+
+        subject(:feedback) { described_class.find_or_init_for(feedback_params_with_finding) }
+
+        it 'sets finding_uuid as nil' do
+          feedback.save!
+
+          expect(feedback.finding_uuid).to be_nil
+        end
       end
 
       context 'when attempting to save duplicate' do

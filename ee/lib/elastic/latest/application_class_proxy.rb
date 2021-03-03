@@ -10,6 +10,11 @@ module Elastic
       def search(query, search_options = {})
         es_options = routing_options(search_options)
 
+        # Counts need to be fast as we load one count per type of document
+        # on every page load. Fail early if they are slow since they don't
+        # need to be accurate.
+        es_options[:timeout] = '1s' if search_options[:count_only]
+
         # Calling elasticsearch-ruby method
         super(query, es_options)
       end
@@ -54,31 +59,45 @@ module Elastic
         }
       end
 
-      def basic_query_hash(fields, query)
+      def basic_query_hash(fields, query, count_only: false)
         fields = CustomLanguageAnalyzers.add_custom_analyzers_fields(fields)
+
+        fields = remove_fields_boost(fields) if count_only
 
         query_hash =
           if query.present?
+            simple_query_string = {
+              simple_query_string: {
+                _name: context.name(self.es_type, :match, :search_terms),
+                fields: fields,
+                query: query,
+                lenient: true,
+                default_operator: default_operator
+              }
+            }
+
+            must = []
+
+            filter = [{
+              term: {
+                type: {
+                  _name: context.name(:doc, :is_a, self.es_type),
+                  value: self.es_type
+                }
+              }
+            }]
+
+            if count_only
+              filter << simple_query_string
+            else
+              must << simple_query_string
+            end
+
             {
               query: {
                 bool: {
-                  must: [{
-                    simple_query_string: {
-                      _name: context.name(self.es_type, :match, :search_terms),
-                      fields: fields,
-                      query: query,
-                      lenient: true,
-                      default_operator: default_operator
-                    }
-                  }],
-                  filter: [{
-                    term: {
-                      type: {
-                        _name: context.name(:doc, :is_a, self.es_type),
-                        value: self.es_type
-                      }
-                    }
-                  }]
+                  must: must,
+                  filter: filter
                 }
               }
             }
@@ -93,7 +112,11 @@ module Elastic
             }
           end
 
-        query_hash[:highlight] = highlight_options(fields)
+        if count_only
+          query_hash[:size] = 0
+        else
+          query_hash[:highlight] = highlight_options(fields)
+        end
 
         query_hash
       end
@@ -163,9 +186,25 @@ module Elastic
               order: 'desc'
             }
           })
+        when :updated_at_asc
+          query_hash.merge(sort: {
+            updated_at: {
+              order: 'asc'
+            }
+          })
+        when :updated_at_desc
+          query_hash.merge(sort: {
+            updated_at: {
+              order: 'desc'
+            }
+          })
         else
           query_hash
         end
+      end
+
+      def remove_fields_boost(fields)
+        fields.map { |m| m.split('^').first }
       end
 
       # Builds an elasticsearch query that will select projects the user is

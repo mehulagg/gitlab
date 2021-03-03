@@ -6,7 +6,7 @@ type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/administration/custom_hooks.html'
 ---
 
-# Server hooks **(CORE ONLY)**
+# Server hooks **(FREE SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196051) in GitLab 12.8 replacing Custom Hooks.
 
@@ -54,7 +54,7 @@ Follow the steps below to set up a server-side hook for a repository:
 1. Navigate to **Admin area > Projects** and click on the project you want to add a server hook to.
 1. Locate the **Gitaly relative path** on the page that appears. This is where the server hook
    must be implemented. For information on interpreting the relative path, see
-   [Translating hashed storage paths](repository_storage_types.md#translating-hashed-storage-paths).
+   [Translate hashed storage paths](repository_storage_types.md#translate-hashed-storage-paths).
 1. On the file system, create a new directory in this location called `custom_hooks`.
 1. Inside the new `custom_hooks` directory, create a file with a name matching the hook type. For
    example, for a pre-receive hook the filename should be `pre-receive` with no extension.
@@ -123,13 +123,13 @@ Within a directory, server hooks:
 - Are executed in alphabetical order.
 - Stop executing when a hook exits with a non-zero value.
 
-Note:
+`<hook_name>.d` must be either `pre-receive.d`, `post-receive.d`, or `update.d` to work properly.
+Any other names are ignored.
 
-- `<hook_name>.d` must be either `pre-receive.d`, `post-receive.d`, or `update.d` to work properly.
-  Any other names are ignored.
-- Files in `.d` directories must be executable and not match the backup file pattern (`*~`).
-- For `<project>.git` you need to [translate](repository_storage_types.md#translating-hashed-storage-paths)
-  your project name into the hashed storage format that GitLab uses.
+Files in `.d` directories must be executable and not match the backup file pattern (`*~`).
+
+For `<project>.git` you need to [translate](repository_storage_types.md#translate-hashed-storage-paths)
+your project name into the hashed storage format that GitLab uses.
 
 ## Environment Variables
 
@@ -160,7 +160,7 @@ them as they can change.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5073) in GitLab 8.10.
 
-To have custom error messages appear in GitLab's UI when a commit is declined or an error occurs
+To have custom error messages appear in the GitLab UI when a commit is declined or an error occurs
 during the Git hook, your script should:
 
 - Send the custom error messages to either the script's `stdout` or `stderr`.
@@ -168,7 +168,7 @@ during the Git hook, your script should:
 
 ### Example custom error message
 
-This hook script written in Bash generates the following message in GitLab's UI:
+This hook script written in Bash generates the following message in the GitLab UI:
 
 ```shell
 #!/bin/sh

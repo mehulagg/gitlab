@@ -7,7 +7,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
 
   let_it_be(:project, reload: true) { create(:project) }
 
-  let(:service) { described_class.new(project, nil, payload) }
+  let(:service) { described_class.new(project, payload) }
   let(:token_input) { 'token' }
 
   let!(:setting) do
@@ -15,11 +15,6 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
   end
 
   let(:subject) { service.execute(token_input) }
-
-  before do
-    # We use `let_it_be(:project)` so we make sure to clear caches
-    project.clear_memoization(:licensed_feature_available)
-  end
 
   context 'with valid payload' do
     let(:alert_firing) { create(:prometheus_alert, project: project) }

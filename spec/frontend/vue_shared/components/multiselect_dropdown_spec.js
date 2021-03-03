@@ -1,5 +1,6 @@
-import { shallowMount } from '@vue/test-utils';
+import { GlDropdown } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
+import { shallowMount } from '@vue/test-utils';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 
 describe('MultiSelectDropdown Component', () => {
@@ -24,6 +25,9 @@ describe('MultiSelectDropdown Component', () => {
       },
       slots: {
         search: '<p>Search</p>',
+      },
+      stubs: {
+        GlDropdown,
       },
     });
     expect(getByText(wrapper.element, 'Search')).toBeDefined();

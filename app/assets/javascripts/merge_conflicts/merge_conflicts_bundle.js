@@ -1,15 +1,12 @@
 import $ from 'jquery';
 import Vue from 'vue';
-import FileIcon from '~/vue_shared/components/file_icon.vue';
+import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '../flash';
 import initIssuableSidebar from '../init_issuable_sidebar';
 import './merge_conflict_store';
-import MergeConflictsService from './merge_conflict_service';
-import './components/diff_file_editor';
-import './components/inline_conflict_lines';
-import './components/parallel_conflict_lines';
 import syntaxHighlight from '../syntax_highlight';
-import { __ } from '~/locale';
+import MergeConflictsResolverApp from './merge_conflict_resolver_app.vue';
+import MergeConflictsService from './merge_conflict_service';
 
 export default function initMergeConflicts() {
   const INTERACTIVE_RESOLVE_MODE = 'interactive';
@@ -20,15 +17,15 @@ export default function initMergeConflicts() {
     resolveConflictsPath: conflictsEl.dataset.resolveConflictsPath,
   });
 
+  const { sourceBranchPath, mergeRequestPath } = conflictsEl.dataset;
+
   initIssuableSidebar();
 
-  gl.MergeConflictsResolverApp = new Vue({
-    el: '#conflicts',
-    components: {
-      FileIcon,
-      'diff-file-editor': gl.mergeConflicts.diffFileEditor,
-      'inline-conflict-lines': gl.mergeConflicts.inlineConflictLines,
-      'parallel-conflict-lines': gl.mergeConflicts.parallelConflictLines,
+  return new Vue({
+    el: conflictsEl,
+    provide: {
+      sourceBranchPath,
+      mergeRequestPath,
     },
     data: mergeConflictsStore.state,
     computed: {
@@ -98,6 +95,9 @@ export default function initMergeConflicts() {
             createFlash(__('Failed to save merge conflicts resolutions. Please try again!'));
           });
       },
+    },
+    render(createElement) {
+      return createElement(MergeConflictsResolverApp);
     },
   });
 }

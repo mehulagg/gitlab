@@ -3,13 +3,13 @@ import $ from 'jquery';
 import { camelCase, difference, union } from 'lodash';
 import updateIssueLabelsMutation from '~/boards/graphql/issue_set_labels.mutation.graphql';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId, MutationOperationMode } from '~/graphql_shared/utils';
 import { IssuableType } from '~/issue_show/constants';
 import { __ } from '~/locale';
 import updateMergeRequestLabelsMutation from '~/sidebar/queries/update_merge_request_labels.mutation.graphql';
 import { toLabelGid } from '~/sidebar/utils';
 import { DropdownVariant } from '~/vue_shared/components/sidebar/labels_select_vue/constants';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
-import { getIdFromGraphQLId, MutationOperationMode } from '~/graphql_shared/utils';
 
 const mutationMap = {
   [IssuableType.Issue]: {
@@ -50,9 +50,13 @@ export default {
       $(this.$el).trigger('hidden.gl.dropdown');
     },
     getUpdateVariables(dropdownLabels) {
-      const currentLabelIds = this.selectedLabels.map(label => label.id);
-      const userAddedLabelIds = dropdownLabels.filter(label => label.set).map(label => label.id);
-      const userRemovedLabelIds = dropdownLabels.filter(label => !label.set).map(label => label.id);
+      const currentLabelIds = this.selectedLabels.map((label) => label.id);
+      const userAddedLabelIds = dropdownLabels
+        .filter((label) => label.set)
+        .map((label) => label.id);
+      const userRemovedLabelIds = dropdownLabels
+        .filter((label) => !label.set)
+        .map((label) => label.id);
 
       const labelIds = difference(union(currentLabelIds, userAddedLabelIds), userRemovedLabelIds);
 
@@ -116,7 +120,7 @@ export default {
           }
 
           const issuableType = camelCase(this.issuableType);
-          this.selectedLabels = data[mutationName]?.[issuableType]?.labels?.nodes?.map(label => ({
+          this.selectedLabels = data[mutationName]?.[issuableType]?.labels?.nodes?.map((label) => ({
             ...label,
             id: getIdFromGraphQLId(label.id),
           }));

@@ -3,6 +3,7 @@ export default {
     return {
       packagesEnabled: true,
       requirementsEnabled: true,
+      securityAndComplianceEnabled: true,
     };
   },
   watch: {

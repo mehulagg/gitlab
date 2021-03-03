@@ -1,11 +1,11 @@
 <script>
 import { GlLink, GlTable } from '@gitlab/ui';
 import { last } from 'lodash';
+import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
   name: 'PackageFiles',
@@ -25,14 +25,14 @@ export default {
   },
   computed: {
     filesTableRows() {
-      return this.packageFiles.map(pf => ({
+      return this.packageFiles.map((pf) => ({
         ...pf,
         size: this.formatSize(pf.size),
         pipeline: last(pf.pipelines),
       }));
     },
     showCommitColumn() {
-      return this.filesTableRows.some(row => Boolean(row.pipeline?.id));
+      return this.filesTableRows.some((row) => Boolean(row.pipeline?.id));
     },
     filesTableHeaderFields() {
       return [
@@ -55,7 +55,7 @@ export default {
           label: __('Created'),
           class: 'gl-text-right',
         },
-      ].filter(c => !c.hide);
+      ].filter((c) => !c.hide);
     },
   },
   methods: {
@@ -90,7 +90,7 @@ export default {
         </gl-link>
       </template>
 
-      <template #cell(commit)="{item}">
+      <template #cell(commit)="{ item }">
         <gl-link
           :href="item.pipeline.project.commit_url"
           class="gl-text-gray-500"

@@ -33,7 +33,7 @@ describe('getters', () => {
       state = createState();
     });
 
-    it.each([5, null])('returns true if given license is being updated', licenseId => {
+    it.each([5, null])('returns true if given license is being updated', (licenseId) => {
       state.pendingLicenses = [licenseId];
 
       expect(getters.isLicenseBeingUpdated(state)(licenseId)).toBe(true);
@@ -60,7 +60,7 @@ describe('getters', () => {
   });
 
   describe('isAddingNewLicense', () => {
-    it.each([true, false])('calls isLicenseBeingUpdated internally', returnValue => {
+    it.each([true, false])('calls isLicenseBeingUpdated internally', (returnValue) => {
       const isLicenseBeingUpdatedMock = jest.fn().mockImplementation(() => returnValue);
       expect(
         getters.isAddingNewLicense({}, { isLicenseBeingUpdated: isLicenseBeingUpdatedMock }),
@@ -131,7 +131,7 @@ describe('getters', () => {
 
     it.each(['failed', 'neutral', 'success'])(
       `it filters report-groups that don't have the given status: %s`,
-      status => {
+      (status) => {
         const newLicenses = [{ status }];
 
         expect(getters.licenseReportGroups({ newLicenses })).toEqual([

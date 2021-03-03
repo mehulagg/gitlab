@@ -11,7 +11,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 Custom project templates are useful for organizations that need to create many similar types of [projects](../project/index.md) and want to start from the same jumping-off point.
 
-## Setting up Group-level Project Templates
+## Setting up group-level project templates
 
 To use a custom project template for a new project you need to:
 
@@ -30,7 +30,7 @@ To use a custom project template for a new project you need to:
 
 Here is a sample group/project structure for a hypothetical "Acme Co" for project templates:
 
-```txt
+```plaintext
 # GitLab instance and group
 gitlab.com/acmeco/
     # Subgroups
@@ -70,7 +70,7 @@ NOTE:
 Only direct subgroups can be set as the template source. Projects of nested subgroups of a selected template source cannot be used.
 
 Repository and database information that are copied over to each new project are
-identical to the data exported with [GitLab's Project Import/Export](../project/settings/import_export.md).
+identical to the data exported with the [GitLab Project Import/Export](../project/settings/import_export.md).
 
 <!-- ## Troubleshooting
 

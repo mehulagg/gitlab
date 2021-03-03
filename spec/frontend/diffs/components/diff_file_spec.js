@@ -1,23 +1,25 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 
-import createDiffsStore from '~/diffs/store/modules';
-import createNotesStore from '~/notes/stores/modules';
-import diffFileMockDataReadable from '../mock_data/diff_file';
-import diffFileMockDataUnreadable from '../mock_data/diff_file_unreadable';
-
+import DiffContentComponent from '~/diffs/components/diff_content.vue';
 import DiffFileComponent from '~/diffs/components/diff_file.vue';
 import DiffFileHeaderComponent from '~/diffs/components/diff_file_header.vue';
-import DiffContentComponent from '~/diffs/components/diff_content.vue';
 
-import eventHub from '~/diffs/event_hub';
 import {
   EVT_EXPAND_ALL_FILES,
   EVT_PERF_MARK_DIFF_FILES_END,
   EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN,
 } from '~/diffs/constants';
+import eventHub from '~/diffs/event_hub';
+import createDiffsStore from '~/diffs/store/modules';
 
 import { diffViewerModes, diffViewerErrors } from '~/ide/constants';
+import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
+import createNotesStore from '~/notes/stores/modules';
+import diffFileMockDataReadable from '../mock_data/diff_file';
+import diffFileMockDataUnreadable from '../mock_data/diff_file_unreadable';
 
 function changeViewer(store, index, { automaticallyCollapsed, manuallyCollapsed, name }) {
   const file = store.state.diffs.diffFiles[index];
@@ -63,7 +65,7 @@ function markFileToBeRendered(store, index = 0) {
   });
 }
 
-function createComponent({ file, first = false, last = false }) {
+function createComponent({ file, first = false, last = false, options = {}, props = {} }) {
   const localVue = createLocalVue();
 
   localVue.use(Vuex);
@@ -86,7 +88,9 @@ function createComponent({ file, first = false, last = false }) {
       viewDiffsFileByFile: false,
       isFirstFile: first,
       isLastFile: last,
+      ...props,
     },
+    ...options,
   });
 
   return {
@@ -96,13 +100,13 @@ function createComponent({ file, first = false, last = false }) {
   };
 }
 
-const findDiffHeader = wrapper => wrapper.find(DiffFileHeaderComponent);
-const findDiffContentArea = wrapper => wrapper.find('[data-testid="content-area"]');
-const findLoader = wrapper => wrapper.find('[data-testid="loader-icon"]');
-const findToggleButton = wrapper => wrapper.find('[data-testid="expand-button"]');
+const findDiffHeader = (wrapper) => wrapper.find(DiffFileHeaderComponent);
+const findDiffContentArea = (wrapper) => wrapper.find('[data-testid="content-area"]');
+const findLoader = (wrapper) => wrapper.find('[data-testid="loader-icon"]');
+const findToggleButton = (wrapper) => wrapper.find('[data-testid="expand-button"]');
 
-const toggleFile = wrapper => findDiffHeader(wrapper).vm.$emit('toggleFile');
-const isDisplayNone = element => element.style.display === 'none';
+const toggleFile = (wrapper) => findDiffHeader(wrapper).vm.$emit('toggleFile');
+const isDisplayNone = (element) => element.style.display === 'none';
 const getReadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataReadable));
 const getUnreadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataUnreadable));
 
@@ -118,14 +122,17 @@ const changeViewerType = (store, newType, index = 0) =>
 describe('DiffFile', () => {
   let wrapper;
   let store;
+  let axiosMock;
 
   beforeEach(() => {
+    axiosMock = new MockAdapter(axios);
     ({ wrapper, store } = createComponent({ file: getReadableFile() }));
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    axiosMock.restore();
   });
 
   describe('bus events', () => {
@@ -157,7 +164,7 @@ describe('DiffFile', () => {
           await wrapper.vm.$nextTick();
 
           expect(eventHub.$emit).toHaveBeenCalledTimes(events.length);
-          events.forEach(event => {
+          events.forEach((event) => {
             expect(eventHub.$emit).toHaveBeenCalledWith(event);
           });
         },
@@ -174,7 +181,7 @@ describe('DiffFile', () => {
         }));
 
         jest.spyOn(wrapper.vm, 'loadCollapsedDiff').mockResolvedValue(getReadableFile());
-        jest.spyOn(window, 'requestIdleCallback').mockImplementation(fn => fn());
+        jest.spyOn(window, 'requestIdleCallback').mockImplementation((fn) => fn());
 
         makeFileAutomaticallyCollapsed(store);
 
@@ -214,6 +221,53 @@ describe('DiffFile', () => {
     });
   });
 
+  describe('computed', () => {
+    describe('showLocalFileReviews', () => {
+      let gon;
+
+      function setLoggedIn(bool) {
+        window.gon.current_user_id = bool;
+      }
+
+      beforeAll(() => {
+        gon = window.gon;
+        window.gon = {};
+      });
+
+      afterEach(() => {
+        window.gon = gon;
+      });
+
+      it.each`
+        loggedIn | featureOn | bool
+        ${true}  | ${true}   | ${true}
+        ${false} | ${true}   | ${false}
+        ${true}  | ${false}  | ${false}
+        ${false} | ${false}  | ${false}
+      `(
+        'should be $bool when { userIsLoggedIn: $loggedIn, featureEnabled: $featureOn }',
+        ({ loggedIn, featureOn, bool }) => {
+          setLoggedIn(loggedIn);
+
+          ({ wrapper } = createComponent({
+            options: {
+              provide: {
+                glFeatures: {
+                  localFileReviews: featureOn,
+                },
+              },
+            },
+            props: {
+              file: store.state.diffs.diffFiles[0],
+            },
+          }));
+
+          expect(wrapper.vm.showLocalFileReviews).toBe(bool);
+        },
+      );
+    });
+  });
+
   describe('collapsing', () => {
     describe(`\`${EVT_EXPAND_ALL_FILES}\` event`, () => {
       beforeEach(() => {
@@ -247,7 +301,7 @@ describe('DiffFile', () => {
       it('should not have any content at all', async () => {
         await wrapper.vm.$nextTick();
 
-        Array.from(findDiffContentArea(wrapper).element.children).forEach(child => {
+        Array.from(findDiffContentArea(wrapper).element.children).forEach((child) => {
           expect(isDisplayNone(child)).toBe(true);
         });
       });
@@ -353,8 +407,10 @@ describe('DiffFile', () => {
 
     describe('loading', () => {
       it('should have loading icon while loading a collapsed diffs', async () => {
+        const { load_collapsed_diff_url } = store.state.diffs.diffFiles[0];
+        axiosMock.onGet(load_collapsed_diff_url).reply(httpStatus.OK, getReadableFile());
         makeFileAutomaticallyCollapsed(store);
-        wrapper.vm.isLoadingCollapsedDiff = true;
+        wrapper.vm.requestDiff();
 
         await wrapper.vm.$nextTick();
 
@@ -414,9 +470,11 @@ describe('DiffFile', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.vm.$el.innerText).toContain(
-        'This source diff could not be displayed because it is too large',
-      );
+      const button = wrapper.find('[data-testid="blob-button"]');
+
+      expect(wrapper.text()).toContain('Changes are too large to be shown.');
+      expect(button.html()).toContain('View file @');
+      expect(button.attributes('href')).toBe('/file/view/path');
     });
   });
 });

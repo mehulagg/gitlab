@@ -9,9 +9,9 @@ import {
 
 import Default from './strategies/default.vue';
 import FlexibleRollout from './strategies/flexible_rollout.vue';
+import GitlabUserList from './strategies/gitlab_user_list.vue';
 import PercentRollout from './strategies/percent_rollout.vue';
 import UsersWithId from './strategies/users_with_id.vue';
-import GitlabUserList from './strategies/gitlab_user_list.vue';
 
 const STRATEGIES = Object.freeze({
   [ROLLOUT_STRATEGY_ALL_USERS]: Default,
@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     strategyComponent() {
-      return STRATEGIES[(this.strategy?.name)];
+      return STRATEGIES[this.strategy?.name];
     },
   },
   methods: {

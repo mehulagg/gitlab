@@ -20,6 +20,8 @@ module Analytics
           segment.assign_attributes(attributes)
 
           if segment.save
+            Analytics::DevopsAdoption::CreateSnapshotWorker.perform_async(segment.id)
+
             ServiceResponse.success(payload: response_payload)
           else
             ServiceResponse.error(message: 'Validation error', payload: response_payload)
@@ -35,15 +37,7 @@ module Analytics
         end
 
         def attributes
-          { name: params[:name], segment_selections_attributes: segment_selections_attributes }.compact
-        end
-
-        def segment_selections_attributes
-          groups.map { |group| { group: group } }
-        end
-
-        def groups
-          @groups ||= Array(params[:groups]).uniq
+          params.slice(:namespace, :namespace_id)
         end
       end
     end

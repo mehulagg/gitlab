@@ -1,10 +1,10 @@
 <script>
+import { GlTable, GlLink, GlIcon, GlAvatarLink, GlAvatar, GlTooltipDirective } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapState } from 'vuex';
-import { GlTable, GlLink, GlIcon, GlAvatarLink, GlAvatar, GlTooltipDirective } from '@gitlab/ui';
 import { sanitize } from '~/lib/dompurify';
-import { __, sprintf, n__ } from '~/locale';
 import { getTimeago } from '~/lib/utils/datetime_utility';
+import { __, sprintf, n__ } from '~/locale';
 import ApproversColumn from './approvers_column.vue';
 
 export default {
@@ -121,9 +121,7 @@ export default {
         <!-- eslint-disable-next-line vue/no-v-html-->
         <span v-html="formatReviewTime(value)"></span>
       </template>
-      <template v-else>
-        &ndash;
-      </template>
+      <template v-else> &ndash; </template>
     </template>
 
     <template #cell(author)="{ value }">

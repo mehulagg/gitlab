@@ -13,7 +13,7 @@ module Resolvers
           jira_issues(external_issue_keys).each do |external_issue|
             loader.call(
               external_issue.id,
-              ::Integrations::Jira::IssueSerializer.new.represent(external_issue, project: object.vulnerability.project)
+              serialize_external_issue(external_issue, args[:key])
             )
           end
         end
@@ -29,6 +29,15 @@ module Resolvers
       raise GraphQL::ExecutionError, result[:error] if result[:error].present?
 
       result[:issues]
+    end
+
+    def serialize_external_issue(external_issue, external_type)
+      case external_type
+      when 'jira'
+        ::Integrations::Jira::IssueSerializer
+          .new
+          .represent(external_issue, project: object.vulnerability.project, only: %i[title references status external_tracker web_url created_at updated_at] )
+      end
     end
   end
 end

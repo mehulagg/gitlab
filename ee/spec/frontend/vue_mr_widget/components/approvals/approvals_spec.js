@@ -19,10 +19,10 @@ import eventHub from '~/vue_merge_request_widget/event_hub';
 
 const TEST_HELP_PATH = 'help/path';
 const TEST_PASSWORD = 'password';
-const testApprovedBy = () => [1, 7, 10].map(id => ({ id }));
+const testApprovedBy = () => [1, 7, 10].map((id) => ({ id }));
 const testApprovals = () => ({
   approved: false,
-  approved_by: testApprovedBy().map(user => ({ user })),
+  approved_by: testApprovedBy().map((user) => ({ user })),
   approval_rules_left: [],
   approvals_left: 4,
   suggested_approvers: [],

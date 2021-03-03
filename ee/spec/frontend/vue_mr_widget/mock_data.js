@@ -11,6 +11,7 @@ export default {
     license_management: false,
     secret_detection: false,
   },
+  discover_project_security_path: '/discover_project_security',
   container_scanning_comparison_path: '/container_scanning_comparison_path',
   dependency_scanning_comparison_path: '/dependency_scanning_comparison_path',
   dast_comparison_path: '/dast_comparison_path',
@@ -132,14 +133,3 @@ export const codequalityParsedIssues = [
 ];
 
 export { mockStore };
-
-// TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/249544
-export const pipelineJobs = [
-  {
-    artifacts: [
-      {
-        file_type: 'sast',
-      },
-    ],
-  },
-];

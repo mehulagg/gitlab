@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Customizing Auto DevOps
+# Customizing Auto DevOps **(FREE)**
 
 While [Auto DevOps](index.md) provides great defaults to get you started, you can customize
 almost everything to fit your needs. Auto DevOps offers everything from custom
@@ -17,7 +17,7 @@ staging and canary deployments,
 ## Custom buildpacks
 
 If the automatic buildpack detection fails for your project, or if you want to
-use a custom buildpack, you can override the buildpack using a project variable
+use a custom buildpack, you can override the buildpack using a project CI/CD variable
 or a `.buildpacks` file in your project:
 
 - **Project variable** - Create a project variable `BUILDPACK_URL` with the URL
@@ -43,7 +43,7 @@ can't use the `.buildpacks` file. The buildpack
 in the backend to parse the `.buildpacks` file, does not provide the necessary commands
 `bin/test-compile` and `bin/test`.
 
-If your goal is to use only a single custom buildpack, you should provide the project variable
+If your goal is to use only a single custom buildpack, you should provide the project CI/CD variable
 `BUILDPACK_URL` instead.
 
 ## Custom `Dockerfile`
@@ -55,13 +55,13 @@ builds a Docker image based on the Dockerfile, rather than using buildpacks.
 This can be much faster and result in smaller images, especially if your
 Dockerfile is based on [Alpine](https://hub.docker.com/_/alpine/).
 
-If you set the `DOCKERFILE_PATH` CI variable, Auto Build looks for a Dockerfile there
+If you set the `DOCKERFILE_PATH` CI/CD variable, Auto Build looks for a Dockerfile there
 instead.
 
 ## Passing arguments to `docker build`
 
 Arguments can be passed to the `docker build` command using the
-`AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS` project variable. For example, to build a
+`AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS` project CI/CD variable. For example, to build a
 Docker image based on based on the `ruby:alpine` instead of the default `ruby:latest`:
 
 1. Set `AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS` to `--build-arg=RUBY_VERSION=alpine`.
@@ -93,12 +93,12 @@ You can extend and manage your Auto DevOps configuration with GitLab APIs:
 - [Editing groups](../../api/groups.md#update-group).
 - [Editing projects](../../api/projects.md#edit-project).
 
-## Forward CI variables to the build environment
+## Forward CI/CD variables to the build environment
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25514) in GitLab 12.3, but available in versions 11.9 and above.
 
-CI variables can be forwarded into the build environment using the
-`AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES` CI variable.
+CI/CD variables can be forwarded into the build environment using the
+`AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES` CI/CD variable.
 The forwarded variables should be specified by name in a comma-separated
 list. For example, to forward the variables `CI_COMMIT_SHA` and
 `CI_ENVIRONMENT_NAME`, set `AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES`
@@ -130,13 +130,13 @@ feature to use the `--secret` flag.
 
 Auto DevOps uses [Helm](https://helm.sh/) to deploy your application to Kubernetes.
 You can override the Helm chart used by bundling up a chart into your project
-repository or by specifying a project variable:
+repository or by specifying a project CI/CD variable:
 
 - **Bundled chart** - If your project has a `./chart` directory with a `Chart.yaml`
   file in it, Auto DevOps detects the chart and uses it instead of the
   [default chart](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app), enabling
   you to control exactly how your application is deployed.
-- **Project variable** - Create a [project variable](../../ci/variables/README.md#gitlab-cicd-environment-variables)
+- **Project variable** - Create a [project CI/CD variable](../../ci/variables/README.md)
   `AUTO_DEVOPS_CHART` with the URL of a custom chart to use, or create two project
   variables: `AUTO_DEVOPS_CHART_REPOSITORY` with the URL of a custom chart repository,
   and `AUTO_DEVOPS_CHART` with the path to the chart.
@@ -151,27 +151,27 @@ You can override the default values in the `values.yaml` file in the
 - Adding a file named `.gitlab/auto-deploy-values.yaml` to your repository, which is
   automatically used, if found.
 - Adding a file with a different name or path to the repository, and setting the
-  `HELM_UPGRADE_VALUES_FILE` [environment variable](#environment-variables) with
+  `HELM_UPGRADE_VALUES_FILE` [CI/CD variable](#cicd-variables) with
   the path and name.
 
 NOTE:
-For GitLab 12.5 and earlier, use the `HELM_UPGRADE_EXTRA_ARGS` environment variable
+For GitLab 12.5 and earlier, use the `HELM_UPGRADE_EXTRA_ARGS` variable
 to override the default chart values by setting `HELM_UPGRADE_EXTRA_ARGS` to `--values <my-values.yaml>`.
 
 ## Customize the `helm upgrade` command
 
 You can customize the `helm upgrade` command used in the [auto-deploy-image](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image)
-by passing options to the command with the `HELM_UPGRADE_EXTRA_ARGS` variable.
+by passing options to the command with the `HELM_UPGRADE_EXTRA_ARGS` CI/CD variable.
 For example, set the value of `HELM_UPGRADE_EXTRA_ARGS` to `--no-hooks` to disable
-pre and post upgrade hooks when the command is executed.
+pre-upgrade and post-upgrade hooks when the command is executed.
 
 See [the official documentation](https://helm.sh/docs/helm/helm_upgrade/) for the full
 list of options.
 
 ## Custom Helm chart per environment
 
-You can specify the use of a custom Helm chart per environment by scoping the environment variable
-to the desired environment. See [Limiting environment scopes of variables](../../ci/variables/README.md#limit-the-environment-scopes-of-environment-variables).
+You can specify the use of a custom Helm chart per environment by scoping the CI/CD variable
+to the desired environment. See [Limiting environment scopes of variables](../../ci/variables/README.md#limit-the-environment-scopes-of-cicd-variables).
 
 ## Customizing `.gitlab-ci.yml`
 
@@ -260,7 +260,7 @@ the [GitLab 12.10 based templates](https://gitlab.com/gitlab-org/auto-devops-v12
 To support applications requiring a database,
 [PostgreSQL](https://www.postgresql.org/) is provisioned by default. The credentials to access
 the database are preconfigured, but can be customized by setting the associated
-[variables](#environment-variables). You can use these credentials to define a `DATABASE_URL`:
+[CI/CD variables](#cicd-variables). You can use these credentials to define a `DATABASE_URL`:
 
 ```yaml
 postgres://user:password@postgres-host:postgres-port/postgres-database
@@ -269,7 +269,7 @@ postgres://user:password@postgres-host:postgres-port/postgres-database
 ### Upgrading PostgresSQL
 
 WARNING:
-The variable `AUTO_DEVOPS_POSTGRES_CHANNEL` that controls default provisioned
+The CI/CD variable `AUTO_DEVOPS_POSTGRES_CHANNEL` that controls default provisioned
 PostgreSQL was changed to `2` in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/210499).
 To keep using the old PostgreSQL, set the `AUTO_DEVOPS_POSTGRES_CHANNEL` variable to
 `1`.
@@ -290,17 +290,17 @@ production environments, for some use cases, it may not be sufficiently secure o
 resilient, and you may want to use an external managed provider (such as
 AWS Relational Database Service) for PostgreSQL.
 
-You must define environment-scoped variables for `POSTGRES_ENABLED` and
+You must define environment-scoped CI/CD variables for `POSTGRES_ENABLED` and
 `DATABASE_URL` in your project's CI/CD settings:
 
 1. Disable the built-in PostgreSQL installation for the required environments using
-   scoped [environment variables](../../ci/environments/index.md#scoping-environments-with-specs).
+   environment-scoped [CI/CD variables](../../ci/environments/index.md#scoping-environments-with-specs).
    For this use case, it's likely that only `production` must be added to this
    list. The built-in PostgreSQL setup for Review Apps and staging is sufficient.
 
    ![Auto Metrics](img/disable_postgres.png)
 
-1. Define the `DATABASE_URL` CI variable as a scoped environment variable that is
+1. Define the `DATABASE_URL` variable as an environment-scoped variable that is
    available to your application. This should be a URL in the following format:
 
    ```yaml
@@ -310,7 +310,7 @@ You must define environment-scoped variables for `POSTGRES_ENABLED` and
 You must ensure that your Kubernetes cluster has network access to wherever
 PostgreSQL is hosted.
 
-## Environment variables
+## CI/CD variables
 
 The following variables can be used for setting up the Auto DevOps domain,
 providing a custom Helm chart, or scaling your application. PostgreSQL can
@@ -318,10 +318,10 @@ also be customized, and you can use a [custom buildpack](#custom-buildpacks).
 
 ### Build and deployment
 
-The following table lists variables related to building and deploying
+The following table lists CI/CD variables related to building and deploying
 applications.
 
-| **Variable**                            | **Description**                    |
+| **CI/CD Variable**                      | **Description**                    |
 |-----------------------------------------|------------------------------------|
 | `ADDITIONAL_HOSTS`                      | Fully qualified domain names specified as a comma-separated list that are added to the Ingress hosts. |
 | `<ENVIRONMENT>_ADDITIONAL_HOSTS`        | For a specific environment, the fully qualified domain names specified as a comma-separated list that are added to the Ingress hosts. This takes precedence over `ADDITIONAL_HOSTS`. |
@@ -329,7 +329,7 @@ applications.
 | `AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED`   | When set to a non-empty value and no `Dockerfile` is present, Auto Build builds your application using Cloud Native Buildpacks instead of Herokuish. [More details](stages.md#auto-build-using-cloud-native-buildpacks-beta). |
 | `AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER`   | The builder used when building with Cloud Native Buildpacks. The default builder is `heroku/buildpacks:18`. [More details](stages.md#auto-build-using-cloud-native-buildpacks-beta). |
 | `AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS`    | Extra arguments to be passed to the `docker build` command. Note that using quotes doesn't prevent word splitting. [More details](#passing-arguments-to-docker-build). |
-| `AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES` | A [comma-separated list of CI variable names](#forward-ci-variables-to-the-build-environment) to be forwarded to the build environment (the buildpack builder or `docker build`). |
+| `AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES` | A [comma-separated list of CI/CD variable names](#forward-cicd-variables-to-the-build-environment) to be forwarded to the build environment (the buildpack builder or `docker build`). |
 | `AUTO_DEVOPS_CHART`                     | Helm Chart used to deploy your apps. Defaults to the one [provided by GitLab](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app). |
 | `AUTO_DEVOPS_CHART_REPOSITORY`          | Helm Chart repository used to search for charts. Defaults to `https://charts.gitlab.io`. |
 | `AUTO_DEVOPS_CHART_REPOSITORY_NAME`     | From GitLab 11.11, used to set the name of the Helm repository. Defaults to `gitlab`. |
@@ -357,7 +357,7 @@ applications.
 
 NOTE:
 After you set up your replica variables using a
-[project variable](../../ci/variables/README.md#gitlab-cicd-environment-variables),
+[project CI/CD variable](../../ci/variables/README.md),
 you can scale your application by redeploying it.
 
 WARNING:
@@ -367,73 +367,73 @@ Auto DevOps can undo your changes.
 
 ### Database
 
-The following table lists variables related to the database.
+The following table lists CI/CD variables related to the database.
 
-| **Variable**                            | **Description**                    |
+| **CI/CD Variable**                            | **Description**                    |
 |-----------------------------------------|------------------------------------|
 | `DB_INITIALIZE`                         | From GitLab 11.4, used to specify the command to run to initialize the application's PostgreSQL database. Runs inside the application pod. |
 | `DB_MIGRATE`                            | From GitLab 11.4, used to specify the command to run to migrate the application's PostgreSQL database. Runs inside the application pod. |
 | `POSTGRES_ENABLED`                      | Whether PostgreSQL is enabled. Defaults to `true`. Set to `false` to disable the automatic deployment of PostgreSQL. |
 | `POSTGRES_USER`                         | The PostgreSQL user. Defaults to `user`. Set it to use a custom username. |
 | `POSTGRES_PASSWORD`                     | The PostgreSQL password. Defaults to `testing-password`. Set it to use a custom password. |
-| `POSTGRES_DB`                           | The PostgreSQL database name. Defaults to the value of [`$CI_ENVIRONMENT_SLUG`](../../ci/variables/README.md#predefined-environment-variables). Set it to use a custom database name. |
+| `POSTGRES_DB`                           | The PostgreSQL database name. Defaults to the value of [`$CI_ENVIRONMENT_SLUG`](../../ci/variables/README.md#predefined-cicd-variables). Set it to use a custom database name. |
 | `POSTGRES_VERSION`                      | Tag for the [`postgres` Docker image](https://hub.docker.com/_/postgres) to use. Defaults to `9.6.16` for tests and deployments as of GitLab 13.0 (previously `9.6.2`). If `AUTO_DEVOPS_POSTGRES_CHANNEL` is set to `1`, deployments uses the default version `9.6.2`. |
 
 ### Disable jobs
 
 The following table lists variables used to disable jobs.
 
-| **Job Name**                           | **Variable**                    | **GitLab version**    | **Description** |
+| **Job Name**                           | **CI/CDVariable**               | **GitLab version**    | **Description** |
 |----------------------------------------|---------------------------------|-----------------------|-----------------|
-| `.fuzz_base`                           | `COVFUZZ_DISABLED`              | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34984) | [Read more](../../user/application_security/coverage_fuzzing/) about how `.fuzz_base` provide capability for your own jobs. If the variable is present, your jobs won't be created. |
-| `apifuzzer_fuzz`                       | `API_FUZZING_DISABLED`          | [From GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39135) | If the variable is present, the job won't be created. |
-| `bandit-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `brakeman-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `bundler-audit-dependency_scanning`    | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
+| `.fuzz_base`                           | `COVFUZZ_DISABLED`              | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34984) | [Read more](../../user/application_security/coverage_fuzzing/) about how `.fuzz_base` provide capability for your own jobs. If the variable is present, your jobs aren't created. |
+| `apifuzzer_fuzz`                       | `API_FUZZING_DISABLED`          | [From GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39135) | If the variable is present, the job isn't created. |
+| `bandit-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `brakeman-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `bundler-audit-dependency_scanning`    | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
 | `canary`                               | `CANARY_ENABLED`                |                       | This manual job is created if the variable is present. |
 | `code_intelligence`                    | `CODE_INTELLIGENCE_DISABLED`    | From GitLab 13.6      | If the variable is present, the job isn't created. |
-| `codequality`                          | `CODE_QUALITY_DISABLED`         | Until GitLab 11.0     | If the variable is present, the job won't be created. |
-| `code_quality`                         | `CODE_QUALITY_DISABLED`         | [From GitLab 11.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5773) | If the variable is present, the job won't be created. |
-| `container_scanning`                   | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `dast`                                 | `DAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `dast_environment_deploy`              | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job won't be created. |
-| `dependency_scanning`                  | `DEPENDENCY_SCANNING_DISABLED`  | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `eslint-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `flawfinder-sast`                      | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `gemnasium-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `gemnasium-maven-dependency_scanning`  | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `gemnasium-python-dependency_scanning` | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `gosec-sast`                           | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `kubesec-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `license_management`                   | `LICENSE_MANAGEMENT_DISABLED`   | GitLab 11.0 to 12.7   | If the variable is present, the job won't be created. Job deprecated [from GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) |
-| `license_scanning`                     | `LICENSE_MANAGEMENT_DISABLED`   | [From GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job won't be created. |
-| `load_performance`                     | `LOAD_PERFORMANCE_DISABLED`     | From GitLab 13.2      | If the variable is present, the job won't be created. |
-| `nodejs-scan-sast`                     | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `performance`                          | `PERFORMANCE_DISABLED`          | From GitLab 11.0      | Browser performance. If the variable is present, the job won't be created. |
-| `phpcs-security-audit-sast`            | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `pmd-apex-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `retire-js-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job won't be created. |
-| `review`                               | `REVIEW_DISABLED`               | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `review:stop`                          | `REVIEW_DISABLED`               | From GitLab 11.0      | Manual job. If the variable is present, the job won't be created. |
-| `sast`                                 | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `sast:container`                       | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `secret_detection`                     | `SECRET_DETECTION_DISABLED`     | From GitLab 13.1      | If the variable is present, the job won't be created. |
-| `secret_detection_default_branch`      | `SECRET_DETECTION_DISABLED`     | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job won't be created. |
-| `security-code-scan-sast`              | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `secrets-sast`                         | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
-| `sobelaw-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `stop_dast_environment`                | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job won't be created. |
-| `spotbugs-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job won't be created. |
-| `test`                                 | `TEST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job won't be created. |
+| `codequality`                          | `CODE_QUALITY_DISABLED`         | Until GitLab 11.0     | If the variable is present, the job isn't created. |
+| `code_quality`                         | `CODE_QUALITY_DISABLED`         | [From GitLab 11.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5773) | If the variable is present, the job isn't created. |
+| `container_scanning`                   | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `dast`                                 | `DAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `dast_environment_deploy`              | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job isn't created. |
+| `dependency_scanning`                  | `DEPENDENCY_SCANNING_DISABLED`  | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `eslint-sast`                          | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `flawfinder-sast`                      | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `gemnasium-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `gemnasium-maven-dependency_scanning`  | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `gemnasium-python-dependency_scanning` | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `gosec-sast`                           | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `kubesec-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `license_management`                   | `LICENSE_MANAGEMENT_DISABLED`   | GitLab 11.0 to 12.7   | If the variable is present, the job isn't created. Job deprecated [from GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) |
+| `license_scanning`                     | `LICENSE_MANAGEMENT_DISABLED`   | [From GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job isn't created. |
+| `load_performance`                     | `LOAD_PERFORMANCE_DISABLED`     | From GitLab 13.2      | If the variable is present, the job isn't created. |
+| `nodejs-scan-sast`                     | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `performance`                          | `PERFORMANCE_DISABLED`          | From GitLab 11.0      | Browser performance. If the variable is present, the job isn't created. |
+| `phpcs-security-audit-sast`            | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `pmd-apex-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `retire-js-dependency_scanning`        | `DEPENDENCY_SCANNING_DISABLED`  |                       | If the variable is present, the job isn't created. |
+| `review`                               | `REVIEW_DISABLED`               | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `review:stop`                          | `REVIEW_DISABLED`               | From GitLab 11.0      | Manual job. If the variable is present, the job isn't created. |
+| `sast`                                 | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `sast:container`                       | `CONTAINER_SCANNING_DISABLED`   | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `secret_detection`                     | `SECRET_DETECTION_DISABLED`     | From GitLab 13.1      | If the variable is present, the job isn't created. |
+| `secret_detection_default_branch`      | `SECRET_DETECTION_DISABLED`     | [From GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22773) | If the variable is present, the job isn't created. |
+| `security-code-scan-sast`              | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `secrets-sast`                         | `SAST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
+| `sobelaw-sast`                         | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `stop_dast_environment`                | `DAST_DISABLED_FOR_DEFAULT_BRANCH` or `DAST_DISABLED` | [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17789) | If either variable is present, the job isn't created. |
+| `spotbugs-sast`                        | `SAST_DISABLED`                 |                       | If the variable is present, the job isn't created. |
+| `test`                                 | `TEST_DISABLED`                 | From GitLab 11.0      | If the variable is present, the job isn't created. |
 | `staging`                              | `STAGING_ENABLED`               |                       | The job is created if the variable is present. |
-| `stop_review`                          | `REVIEW_DISABLED`               |                       | If the variable is present, the job won't be created. |
+| `stop_review`                          | `REVIEW_DISABLED`               |                       | If the variable is present, the job isn't created. |
 
 ### Application secret variables
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49056) in GitLab 11.7.
 
 Some applications need to define secret variables that are accessible by the deployed
-application. Auto DevOps detects variables starting with `K8S_SECRET_`, and makes
+application. Auto DevOps detects CI/CD variables starting with `K8S_SECRET_`, and makes
 these prefixed variables available to the deployed application as environment variables.
 
 To configure your application variables:
@@ -545,7 +545,7 @@ The normal behavior of Auto DevOps is to use continuous deployment, pushing
 automatically to the `production` environment every time a new pipeline is run
 on the default branch. However, there are cases where you might want to use a
 staging environment, and deploy to production manually. For this scenario, the
-`STAGING_ENABLED` environment variable was introduced.
+`STAGING_ENABLED` CI/CD variable was introduced.
 
 If you define `STAGING_ENABLED` with a non-empty value, then GitLab automatically deploys the application
 to a `staging` environment, and creates a `production_manual` job for
@@ -584,7 +584,7 @@ are created:
 1. `rollout 50%`
 1. `rollout 100%`
 
-The percentage is based on the `REPLICAS` variable, and defines the number of
+The percentage is based on the `REPLICAS` CI/CD variable, and defines the number of
 pods you want to have for your deployment. If the value is `10`, and you run the
 `10%` rollout job, there is `1` new pod and `9` old ones.
 
@@ -593,7 +593,7 @@ required to go from `10%` to `100%`, you can jump to whatever job you want.
 You can also scale down by running a lower percentage job, just before hitting
 `100%`. Once you get to `100%`, you can't scale down, and you'd have to roll
 back by redeploying the old version using the
-[rollback button](../../ci/environments/index.md#retrying-and-rolling-back) in the
+[rollback button](../../ci/environments/index.md#retry-or-roll-back-a-deployment) in the
 environment page.
 
 Below, you can see how the pipeline appears if the rollout or staging
@@ -616,8 +616,8 @@ With `INCREMENTAL_ROLLOUT_MODE` set to `manual` and with `STAGING_ENABLED`
 ![Rollout and staging enabled](img/rollout_staging_enabled.png)
 
 WARNING:
-Before GitLab 11.4, the presence of the `INCREMENTAL_ROLLOUT_ENABLED` environment
-variable enabled this feature. This configuration is deprecated, and is scheduled to be
+Before GitLab 11.4, the presence of the `INCREMENTAL_ROLLOUT_ENABLED` CI/CD variable
+enabled this feature. This configuration is deprecated, and is scheduled to be
 removed in the future.
 
 ### Timed incremental rollout to production **(PREMIUM)**
@@ -632,7 +632,7 @@ This configuration is based on
 
 Everything behaves the same way, except:
 
-- To enable it, set the `INCREMENTAL_ROLLOUT_MODE` variable to `timed`.
+- To enable it, set the `INCREMENTAL_ROLLOUT_MODE` CI/CD variable to `timed`.
 - Instead of the standard `production` job, the following jobs are created with
   a 5 minute delay between each:
 

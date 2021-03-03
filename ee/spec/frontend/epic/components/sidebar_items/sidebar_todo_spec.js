@@ -31,7 +31,7 @@ describe('SidebarTodoComponent', () => {
   });
 
   describe('template', () => {
-    it('renders component container element with classes `block` & `todo` when `isUserSignedIn` & `sidebarCollapsed` is `true`', done => {
+    it('renders component container element with classes `block` & `todo` when `isUserSignedIn` & `sidebarCollapsed` is `true`', (done) => {
       vm.sidebarCollapsed = true;
 
       vm.$nextTick()

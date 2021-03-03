@@ -93,6 +93,48 @@ RSpec.describe MergeRequest do
         end
       end
     end
+
+    describe '#merge_requests_author_approval?' do
+      context 'when project lacks a target_project relation' do
+        before do
+          merge_request.target_project = nil
+        end
+
+        it 'returns false' do
+          expect(merge_request.merge_requests_author_approval?).to be false
+        end
+      end
+
+      context 'when project has a target_project relation' do
+        it 'accesses the value from the target_project' do
+          expect(merge_request.target_project)
+            .to receive(:merge_requests_author_approval?)
+
+          merge_request.merge_requests_author_approval?
+        end
+      end
+    end
+
+    describe '#merge_requests_disable_committers_approval?' do
+      context 'when project lacks a target_project relation' do
+        before do
+          merge_request.target_project = nil
+        end
+
+        it 'returns false' do
+          expect(merge_request.merge_requests_disable_committers_approval?).to be false
+        end
+      end
+
+      context 'when project has a target_project relation' do
+        it 'accesses the value from the target_project' do
+          expect(merge_request.target_project)
+            .to receive(:merge_requests_disable_committers_approval?)
+
+          merge_request.merge_requests_disable_committers_approval?
+        end
+      end
+    end
   end
 
   it_behaves_like 'an editable mentionable with EE-specific mentions' do
@@ -241,6 +283,7 @@ RSpec.describe MergeRequest do
       :license_scanning    | :with_license_management_reports  | :license_scanning
       :license_scanning    | :with_license_scanning_reports    | :license_scanning
       :coverage_fuzzing    | :with_coverage_fuzzing_reports    | :coverage_fuzzing
+      :secret_detection    | :with_secret_detection_reports    | :secret_detection
       :api_fuzzing         | :with_api_fuzzing_reports         | :api_fuzzing
     end
 
@@ -284,6 +327,28 @@ RSpec.describe MergeRequest do
       end
 
       it { is_expected.to eq(expected) }
+    end
+  end
+
+  describe '#has_security_reports?' do
+    subject { merge_request.has_security_reports? }
+
+    let_it_be(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(dast: true)
+    end
+
+    context 'when head pipeline has security reports' do
+      let(:merge_request) { create(:ee_merge_request, :with_dast_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have security reports' do
+      let(:merge_request) { create(:ee_merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
     end
   end
 
@@ -347,50 +412,6 @@ RSpec.describe MergeRequest do
     end
 
     context 'when head pipeline does not have container scanning reports' do
-      let(:merge_request) { create(:ee_merge_request, source_project: project) }
-
-      it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#has_sast_reports?' do
-    subject { merge_request.has_sast_reports? }
-
-    let(:project) { create(:project, :repository) }
-
-    before do
-      stub_licensed_features(sast: true)
-    end
-
-    context 'when head pipeline has sast reports' do
-      let(:merge_request) { create(:ee_merge_request, :with_sast_reports, source_project: project) }
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when head pipeline does not have sast reports' do
-      let(:merge_request) { create(:ee_merge_request, source_project: project) }
-
-      it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#has_secret_detection_reports?' do
-    subject { merge_request.has_secret_detection_reports? }
-
-    let(:project) { create(:project, :repository) }
-
-    before do
-      stub_licensed_features(secret_detection: true)
-    end
-
-    context 'when head pipeline has secret detection reports' do
-      let(:merge_request) { create(:ee_merge_request, :with_secret_detection_reports, source_project: project) }
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when head pipeline does not have secrets detection reports' do
       let(:merge_request) { create(:ee_merge_request, source_project: project) }
 
       it { is_expected.to be_falsey }
@@ -998,47 +1019,6 @@ RSpec.describe MergeRequest do
           it 'raises an InvalidateReactiveCache error' do
             expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
           end
-        end
-      end
-    end
-  end
-
-  describe '#mergeable_with_quick_action?' do
-    def create_pipeline(status)
-      pipeline = create(:ci_pipeline,
-        project: project,
-        ref:     merge_request.source_branch,
-        sha:     merge_request.diff_head_sha,
-        status:  status,
-        head_pipeline_of: merge_request)
-
-      pipeline
-    end
-
-    let(:project)       { create(:project, :public, :repository, only_allow_merge_if_pipeline_succeeds: true) }
-    let(:developer)     { create(:user) }
-    let(:user)          { create(:user) }
-    let(:merge_request) { create(:merge_request, source_project: project) }
-    let(:mr_sha)        { merge_request.diff_head_sha }
-
-    before do
-      project.add_developer(developer)
-    end
-
-    context 'when autocomplete_precheck is set to false' do
-      context 'with approvals' do
-        before do
-          merge_request.target_project.update(approvals_before_merge: 1)
-        end
-
-        it 'is not mergeable when not approved' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_falsey
-        end
-
-        it 'is mergeable when approved' do
-          merge_request.approvals.create(user: user)
-
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_truthy
         end
       end
     end

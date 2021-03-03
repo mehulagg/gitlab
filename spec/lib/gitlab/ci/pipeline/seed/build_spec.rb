@@ -71,6 +71,22 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       end
     end
 
+    context 'with job:rules:[variables:]' do
+      let(:attributes) do
+        { name: 'rspec',
+          ref: 'master',
+          yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true },
+                           { key: 'VAR2', value: 'var 2', public: true }],
+          rules: [{ if: '$VAR == null', variables: { VAR1: 'new var 1', VAR3: 'var 3' } }] }
+      end
+
+      it do
+        is_expected.to include(yaml_variables: [{ key: 'VAR1', value: 'new var 1', public: true },
+                                                { key: 'VAR2', value: 'var 2', public: true },
+                                                { key: 'VAR3', value: 'var 3', public: true }])
+      end
+    end
+
     context 'with cache:key' do
       let(:attributes) do
         {
@@ -164,6 +180,45 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       end
 
       it { is_expected.to include(options: {}) }
+    end
+
+    context 'with allow_failure' do
+      let(:options) do
+        { allow_failure_criteria: { exit_codes: [42] } }
+      end
+
+      let(:rules) do
+        [{ if: '$VAR == null', when: 'always' }]
+      end
+
+      let(:attributes) do
+        {
+          name: 'rspec',
+          ref: 'master',
+          options: options,
+          rules: rules
+        }
+      end
+
+      context 'when rules does not override allow_failure' do
+        it { is_expected.to match a_hash_including(options: options) }
+      end
+
+      context 'when rules set allow_failure to true' do
+        let(:rules) do
+          [{ if: '$VAR == null', when: 'always', allow_failure: true }]
+        end
+
+        it { is_expected.to match a_hash_including(options: { allow_failure_criteria: nil }) }
+      end
+
+      context 'when rules set allow_failure to false' do
+        let(:rules) do
+          [{ if: '$VAR == null', when: 'always', allow_failure: false }]
+        end
+
+        it { is_expected.to match a_hash_including(options: { allow_failure_criteria: nil }) }
+      end
     end
   end
 
@@ -317,14 +372,25 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
     end
 
     context 'when job is a bridge' do
-      let(:attributes) do
+      let(:base_attributes) do
         {
           name: 'rspec', ref: 'master', options: { trigger: 'my/project' }, scheduling_type: :stage
         }
       end
 
+      let(:attributes) { base_attributes }
+
       it { is_expected.to be_a(::Ci::Bridge) }
       it { is_expected.to be_valid }
+
+      context 'when job belongs to a resource group' do
+        let(:attributes) { base_attributes.merge(resource_group_key: 'iOS') }
+
+        it 'returns a job with resource group' do
+          expect(subject.resource_group).not_to be_nil
+          expect(subject.resource_group.key).to eq('iOS')
+        end
+      end
     end
 
     it 'memoizes a resource object' do
@@ -900,7 +966,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
 
       it "returns an error" do
         expect(subject.errors).to contain_exactly(
-          "rspec: needs 'build'")
+          "'rspec' job needs 'build' job, but it was not added to the pipeline")
       end
     end
 

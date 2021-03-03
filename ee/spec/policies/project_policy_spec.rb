@@ -34,7 +34,7 @@ RSpec.describe ProjectPolicy do
 
     let(:auditor_permissions) do
       %i[
-        download_code download_wiki_code read_project read_board read_list
+        download_code download_wiki_code read_project read_issue_board read_issue_board_list
         read_project_for_iids read_issue_iid read_merge_request_iid read_wiki
         read_issue read_label read_issue_link read_milestone read_iteration
         read_snippet read_project_member read_note read_cycle_analytics
@@ -190,7 +190,7 @@ RSpec.describe ProjectPolicy do
       end
 
       it 'disables boards permissions' do
-        expect_disallowed :admin_board
+        expect_disallowed :admin_issue_board
       end
     end
   end
@@ -358,6 +358,24 @@ RSpec.describe ProjectPolicy do
           end
         end
 
+        context 'as a group maintainer' do
+          before do
+            group.add_maintainer(current_user)
+          end
+
+          it 'prevents access without a SAML session' do
+            is_expected.not_to allow_action(:read_project)
+          end
+        end
+
+        context 'as an auditor' do
+          let(:current_user) { create(:user, :auditor) }
+
+          it 'allows access without a SAML session' do
+            is_expected.to allow_action(:read_project)
+          end
+        end
+
         context 'with public access' do
           let(:group) { create(:group, :public) }
           let(:project) { create(:project, :public, group: saml_provider.group) }
@@ -420,6 +438,12 @@ RSpec.describe ProjectPolicy do
 
           context 'with admin disabled' do
             it { is_expected.to be_disallowed(:read_project) }
+          end
+
+          context 'with auditor' do
+            let(:current_user) { create(:user, :auditor) }
+
+            it { is_expected.to be_allowed(:read_project) }
           end
         end
       end
@@ -527,6 +551,70 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'permissions for security bot' do
+    let_it_be(:current_user) { create(:user, :security_bot) }
+    let(:project) { private_project }
+
+    let(:permissions) do
+      %i(
+        reporter_access
+        push_code
+        create_merge_request_from
+        create_merge_request_in
+        create_vulnerability_feedback
+        read_project
+        admin_merge_request
+      )
+    end
+
+    context 'when auto_fix feature is enabled' do
+      context 'when licensed feature is enabled' do
+        before do
+          stub_licensed_features(vulnerability_auto_fix: true)
+        end
+
+        it { is_expected.to be_allowed(*permissions) }
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(security_auto_fix: false)
+          end
+
+          it { is_expected.to be_disallowed(*permissions) }
+        end
+      end
+
+      context 'when licensed feature is disabled' do
+        before do
+          stub_licensed_features(vulnerability_auto_fix: false)
+        end
+
+        it { is_expected.to be_disallowed(*permissions) }
+      end
+    end
+
+    context 'when auto_fix feature is disabled' do
+      before do
+        stub_licensed_features(vulnerability_auto_fix: true)
+        project.security_setting.update!(auto_fix_dependency_scanning: false, auto_fix_container_scanning: false)
+      end
+
+      it { is_expected.to be_disallowed(*permissions) }
+    end
+
+    context 'when project does not have a security_setting' do
+      before do
+        stub_licensed_features(vulnerability_auto_fix: true)
+        project.security_setting.delete
+        project.reload
+      end
+
+      it do
+        is_expected.to be_disallowed(*permissions)
+      end
+    end
+  end
+
   describe 'read_threat_monitoring' do
     context 'when threat monitoring feature is available' do
       before do
@@ -588,6 +676,84 @@ RSpec.describe ProjectPolicy do
       end
 
       it { is_expected.to be_disallowed(:read_threat_monitoring) }
+    end
+  end
+
+  describe 'security complience policy' do
+    before do
+      stub_licensed_features(security_orchestration_policies: true)
+    end
+
+    context 'with developer or higher role' do
+      where(role: %w[owner maintainer developer])
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to be_allowed(:security_orchestration_policies) }
+      end
+    end
+  end
+
+  describe 'read_corpus_management' do
+    context 'when corpus_management feature is available' do
+      before do
+        stub_licensed_features(coverage_fuzzing: true)
+      end
+
+      context 'with developer or higher role' do
+        where(role: %w[owner maintainer developer])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_allowed(:read_coverage_fuzzing) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with less than developer role' do
+        where(role: %w[reporter guest])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+      end
+    end
+
+    context 'when coverage fuzzing feature is not available' do
+      let(:current_user) { admin }
+
+      before do
+        stub_licensed_features(coverage_fuzzing: true)
+      end
+
+      it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
     end
   end
 
@@ -1158,6 +1324,26 @@ RSpec.describe ProjectPolicy do
     it { is_expected.to be_disallowed(:read_group_timelogs) }
   end
 
+  context 'when dora4 analytics is available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: true)
+    end
+
+    it { is_expected.to be_allowed(:read_dora4_analytics) }
+  end
+
+  context 'when dora4 analytics is not available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_dora4_analytics) }
+  end
+
   describe ':read_code_review_analytics' do
     let(:project) { private_project }
 
@@ -1287,27 +1473,29 @@ RSpec.describe ProjectPolicy do
 
     let(:policy) { :admin_compliance_framework }
 
-    where(:role, :feature_enabled, :admin_mode, :allowed) do
-      :guest      | false | nil   | false
-      :guest      | true  | nil   | false
-      :reporter   | false | nil   | false
-      :reporter   | true  | nil   | false
-      :developer  | false | nil   | false
-      :developer  | true  | nil   | false
-      :maintainer | false | nil   | false
-      :maintainer | true  | nil   | true
-      :owner      | false | nil   | false
-      :owner      | true  | nil   | true
-      :admin      | false | false | false
-      :admin      | false | true  | false
-      :admin      | true  | false | false
-      :admin      | true  | true  | true
+    where(:role, :feature_enabled, :admin_mode, :custom_framework_flag, :allowed) do
+      :guest      | false | nil   | false | false
+      :guest      | true  | nil   | false | false
+      :reporter   | false | nil   | false | false
+      :reporter   | true  | nil   | false | false
+      :developer  | false | nil   | false | false
+      :developer  | true  | nil   | false | false
+      :maintainer | false | nil   | false | false
+      :maintainer | true  | nil   | false | true
+      :maintainer | true  | nil   | true  | false
+      :owner      | false | nil   | false | false
+      :owner      | true  | nil   | false | true
+      :admin      | false | false | false | false
+      :admin      | false | true  | false | false
+      :admin      | true  | false | false | false
+      :admin      | true  | true  | false | true
     end
 
     with_them do
       let(:current_user) { public_send(role) }
 
       before do
+        stub_feature_flags(ff_custom_compliance_frameworks: custom_framework_flag)
         stub_licensed_features(compliance_framework: feature_enabled)
         enable_admin_mode!(current_user) if admin_mode
       end
@@ -1453,7 +1641,8 @@ RSpec.describe ProjectPolicy do
       # These are abilities that are not explicitly allowed by policies because most of them are not
       # real abilities.  They are prevented due to the use of create_update_admin helper method.
       let(:abilities_not_currently_enabled) do
-        %i[create_merge_request create_list update_list create_label update_label create_milestone
+        %i[create_merge_request create_issue_board_list create_issue_board update_issue_board
+           update_issue_board_list create_label update_label create_milestone
            update_milestone update_wiki update_design admin_design update_note
            update_pipeline_schedule admin_pipeline_schedule create_trigger update_trigger
            admin_trigger create_pages admin_release request_access create_board update_board
@@ -1495,6 +1684,82 @@ RSpec.describe ProjectPolicy do
         end
 
         it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
+
+  describe 'read_analytics' do
+    context 'with various analytics features' do
+      let_it_be(:project_with_analytics_disabled) { create(:project, :analytics_disabled) }
+      let_it_be(:project_with_analytics_private) { create(:project, :analytics_private) }
+      let_it_be(:project_with_analytics_enabled) { create(:project, :analytics_enabled) }
+
+      before do
+        stub_licensed_features(issues_analytics: true, code_review_analytics: true, project_merge_request_analytics: true)
+
+        project_with_analytics_disabled.add_developer(developer)
+        project_with_analytics_private.add_developer(developer)
+        project_with_analytics_enabled.add_developer(developer)
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_disabled }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+      end
+
+      context 'when analytics is private for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_allowed(:read_code_review_analytics) }
+          it { is_expected.to be_allowed(:read_issue_analytics) }
+        end
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_allowed(:read_code_review_analytics) }
+          it { is_expected.to be_allowed(:read_issue_analytics) }
+        end
       end
     end
   end

@@ -218,7 +218,7 @@ RSpec.shared_examples 'wiki controller actions' do
       end
 
       context 'page view tracking' do
-        it_behaves_like 'tracking unique hll events', :track_unique_wiki_page_views do
+        it_behaves_like 'tracking unique hll events' do
           let(:target_id) { 'wiki_action' }
           let(:expected_type) { instance_of(String) }
         end
@@ -501,6 +501,17 @@ RSpec.shared_examples 'wiki controller actions' do
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
+    end
+  end
+
+  describe '#git_access' do
+    render_views
+
+    it 'renders the git access page' do
+      get :git_access, params: routing_params
+
+      expect(response).to render_template('shared/wikis/git_access')
+      expect(response.body).to include(wiki.http_url_to_repo)
     end
   end
 

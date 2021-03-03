@@ -52,8 +52,6 @@ module EE
 
       delegate :sha, to: :head_pipeline, prefix: :head_pipeline, allow_nil: true
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
-      delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
-      delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -71,6 +69,14 @@ module EE
       scope :including_merge_train, -> do
         includes(:merge_train)
       end
+
+      def merge_requests_author_approval?
+        !!target_project&.merge_requests_author_approval?
+      end
+
+      def merge_requests_disable_committers_approval?
+        !!target_project&.merge_requests_disable_committers_approval?
+      end
     end
 
     class_methods do
@@ -79,7 +85,7 @@ module EE
         super.preload(:blocking_merge_requests)
       end
 
-      def sort_by_attribute(method, *args)
+      def sort_by_attribute(method, *args, **kwargs)
         if method.to_s == 'review_time_desc'
           order_review_time_desc
         else
@@ -169,6 +175,10 @@ module EE
       }
     end
 
+    def has_security_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.security_reports)
+    end
+
     def has_dependency_scanning_reports?
       !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.dependency_list_reports)
     end
@@ -191,26 +201,6 @@ module EE
       return missing_report_error("container scanning") unless has_container_scanning_reports?
 
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'container_scanning')
-    end
-
-    def has_sast_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.sast_reports)
-    end
-
-    def has_secret_detection_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.secret_detection_reports)
-    end
-
-    def compare_sast_reports(current_user)
-      return missing_report_error("SAST") unless has_sast_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'sast')
-    end
-
-    def compare_secret_detection_reports(current_user)
-      return missing_report_error("secret detection") unless has_secret_detection_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'secret_detection')
     end
 
     def has_dast_reports?
@@ -275,7 +265,7 @@ module EE
     end
 
     def applicable_approval_rules_for_user(user_id)
-      approval_rules.applicable_to_branch(target_branch).select do |rule|
+      wrapped_approval_rules.select do |rule|
         rule.approvers.pluck(:id).include?(user_id)
       end
     end
@@ -286,14 +276,6 @@ module EE
       if rule = approval_rules.license_compliance.last
         ApprovalWrappedRule.wrap(self, rule).approved?
       end
-    end
-
-    def missing_report_error(report_type)
-      { status: :error, status_reason: "This merge request does not have #{report_type} reports" }
-    end
-
-    def report_type_enabled?(report_type)
-      !!actual_head_pipeline&.batch_lookup_report_artifact_for_file_type(report_type)
     end
   end
 end

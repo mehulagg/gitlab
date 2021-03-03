@@ -1,6 +1,10 @@
 import { s__ } from '~/locale';
 
 export default {
+  sample: {
+    text: s__('ProjectTemplates|Sample GitLab Project'),
+    icon: '.template-option .icon-sample',
+  },
   rails: {
     text: s__('ProjectTemplates|Ruby on Rails'),
     icon: '.template-option .icon-rails',
@@ -92,5 +96,9 @@ export default {
   cluster_management: {
     text: s__('ProjectTemplates|GitLab Cluster Management'),
     icon: '.template-option .icon-cluster_management',
+  },
+  kotlin_native_linux: {
+    text: s__('ProjectTemplates|Kotlin Native for Linux'),
+    icon: '.template-option .icon-gitlab_logo',
   },
 };

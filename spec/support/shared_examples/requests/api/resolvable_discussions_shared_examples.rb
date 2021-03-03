@@ -9,15 +9,20 @@ RSpec.shared_examples 'resolvable discussions API' do |parent_type, noteable_typ
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['notes'].size).to eq(1)
       expect(json_response['notes'][0]['resolved']).to eq(true)
+      expect(Time.parse(json_response['notes'][0]['resolved_at'])).to be_like_time(note.reload.resolved_at)
     end
 
     it "unresolves discussion if resolved is false" do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_unresolve_thread_action).with(user: user)
+
       put api("/#{parent_type}/#{parent.id}/#{noteable_type}/#{noteable[id_name]}/"\
               "discussions/#{note.discussion_id}", user), params: { resolved: false }
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['notes'].size).to eq(1)
       expect(json_response['notes'][0]['resolved']).to eq(false)
+      expect(json_response['notes'][0]['resolved_at']).to be_nil
     end
 
     it "returns a 400 bad request error if resolved parameter is not passed" do

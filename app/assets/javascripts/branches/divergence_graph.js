@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import { __ } from '../locale';
 import { deprecatedCreateFlash as createFlash } from '../flash';
 import axios from '../lib/utils/axios_utils';
+import { __ } from '../locale';
 import DivergenceGraph from './components/divergence_graph.vue';
 
 export function createGraphVueApp(el, data, maxCommits) {
@@ -21,7 +21,7 @@ export function createGraphVueApp(el, data, maxCommits) {
   });
 }
 
-export default endpoint => {
+export default (endpoint) => {
   const names = [...document.querySelectorAll('.js-branch-item')].map(
     ({ dataset }) => dataset.name,
   );

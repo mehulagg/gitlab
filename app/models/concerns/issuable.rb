@@ -86,6 +86,7 @@ module Issuable
     before_validation :truncate_description_on_import!
 
     scope :authored, ->(user) { where(author_id: user) }
+    scope :not_authored, ->(user) { where.not(author_id: user) }
     scope :recent, -> { reorder(id: :desc) }
     scope :of_projects, ->(ids) { where(project_id: ids) }
     scope :opened, -> { with_state(:opened) }
@@ -196,6 +197,10 @@ module Issuable
       is_a?(Issue)
     end
 
+    def supports_assignee?
+      false
+    end
+
     def severity
       return IssuableSeverity::DEFAULT unless supports_severity?
 
@@ -216,6 +221,10 @@ module Issuable
   end
 
   class_methods do
+    def participant_includes
+      [:assignees, :author, { notes: [:author, :award_emoji] }]
+    end
+
     # Searches for records with a matching title.
     #
     # This method uses ILIKE on PostgreSQL.
@@ -344,12 +353,15 @@ module Issuable
     #
     # Returns an array of arel columns
     def grouping_columns(sort)
+      sort = sort.to_s
       grouping_columns = [arel_table[:id]]
 
       if %w(milestone_due_desc milestone_due_asc milestone).include?(sort)
         milestone_table = Milestone.arel_table
         grouping_columns << milestone_table[:id]
         grouping_columns << milestone_table[:due_date]
+      elsif %w(merged_at_desc merged_at_asc).include?(sort)
+        grouping_columns << MergeRequest::Metrics.arel_table[:merged_at]
       end
 
       grouping_columns

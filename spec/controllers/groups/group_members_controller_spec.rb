@@ -9,6 +9,10 @@ RSpec.describe Groups::GroupMembersController do
   let(:group) { create(:group, :public) }
   let(:membership) { create(:group_member, group: group) }
 
+  around do |example|
+    travel_to DateTime.new(2019, 4, 1) { example.run }
+  end
+
   describe 'GET index' do
     it 'renders index with 200 status code' do
       get :index, params: { group_id: group }
@@ -220,6 +224,18 @@ RSpec.describe Groups::GroupMembersController do
           subject
 
           expect(requester.reload.expires_at).not_to eq(expires_at.to_date)
+        end
+
+        it 'returns error status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        end
+
+        it 'returns error message' do
+          subject
+
+          expect(json_response).to eq({ 'message' => 'Expires at cannot be a date in the past' })
         end
       end
 

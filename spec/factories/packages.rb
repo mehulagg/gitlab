@@ -6,6 +6,15 @@ FactoryBot.define do
     name { 'my/company/app/my-app' }
     sequence(:version) { |n| "1.#{n}-SNAPSHOT" }
     package_type { :maven }
+    status { :default }
+
+    trait :hidden do
+      status { :hidden }
+    end
+
+    trait :processing do
+      status { :processing }
+    end
 
     factory :maven_package do
       maven_metadatum
@@ -21,8 +30,64 @@ FactoryBot.define do
       end
     end
 
+    factory :rubygems_package do
+      sequence(:name) { |n| "my_gem_#{n}" }
+      sequence(:version) { |n| "1.#{n}" }
+      package_type { :rubygems }
+
+      after :create do |package|
+        create :package_file, :gem, package: package
+        create :package_file, :gemspec, package: package
+      end
+
+      trait(:with_metadatum) do
+        after :build do |pkg|
+          pkg.rubygems_metadatum = build(:rubygems_metadatum)
+        end
+      end
+    end
+
     factory :debian_package do
+      sequence(:name) { |n| "package-#{n}" }
+      sequence(:version) { |n| "1.0-#{n}" }
       package_type { :debian }
+
+      transient do
+        without_package_files { false }
+        file_metadatum_trait { :keep }
+        published_in { :create }
+      end
+
+      after :build do |package, evaluator|
+        if evaluator.published_in == :create
+          create(:debian_publication, package: package)
+        elsif !evaluator.published_in.nil?
+          create(:debian_publication, package: package, distribution: evaluator.published_in)
+        end
+      end
+
+      after :create do |package, evaluator|
+        unless evaluator.without_package_files
+          create :debian_package_file, :source, evaluator.file_metadatum_trait, package: package
+          create :debian_package_file, :dsc, evaluator.file_metadatum_trait, package: package
+          create :debian_package_file, :deb, evaluator.file_metadatum_trait, package: package
+          create :debian_package_file, :deb2, evaluator.file_metadatum_trait, package: package
+          create :debian_package_file, :udeb, evaluator.file_metadatum_trait, package: package
+          create :debian_package_file, :buildinfo, evaluator.file_metadatum_trait, package: package
+          create :debian_package_file, :changes, evaluator.file_metadatum_trait, package: package
+        end
+      end
+
+      factory :debian_incoming do
+        name { 'incoming' }
+        version { nil }
+
+        transient do
+          without_package_files { false }
+          file_metadatum_trait { :unknown }
+          published_in { nil }
+        end
+      end
     end
 
     factory :npm_package do
@@ -145,6 +210,24 @@ FactoryBot.define do
 
     target_sha { '123' }
     composer_json { { name: 'foo' } }
+  end
+
+  factory :composer_cache_file, class: 'Packages::Composer::CacheFile' do
+    group
+
+    file_sha256 { '1' * 64 }
+
+    transient do
+      file_fixture { 'spec/fixtures/packages/composer/package.json' }
+    end
+
+    after(:build) do |cache_file, evaluator|
+      cache_file.file = fixture_file_upload(evaluator.file_fixture)
+    end
+
+    trait(:object_storage) do
+      file_store { Packages::Composer::CacheUploader::Store::REMOTE }
+    end
   end
 
   factory :maven_metadatum, class: 'Packages::Maven::Metadatum' do

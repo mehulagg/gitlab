@@ -7,7 +7,7 @@ class Profiles::BillingsController < Profiles::ApplicationController
 
   def index
     @plans_data = FetchSubscriptionPlansService
-      .new(plan: current_user.namespace.plan_name_for_upgrading)
+      .new(plan: current_user.namespace.plan_name_for_upgrading, namespace_id: current_user.namespace_id)
       .execute
     track_experiment_event(:contact_sales_btn_in_app, 'page_view:billing_plans:profile')
     record_experiment_user(:contact_sales_btn_in_app)

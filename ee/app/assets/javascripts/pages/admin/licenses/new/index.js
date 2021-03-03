@@ -15,6 +15,6 @@ const toggleUploadLicenseButton = () => {
   uploadLicenseBtn.toggleAttribute('disabled', !acceptEULACheckBox.checked);
 };
 
-licenseType.forEach(el => el.addEventListener('change', showLicenseType));
+licenseType.forEach((el) => el.addEventListener('change', showLicenseType));
 acceptEULACheckBox.addEventListener('change', toggleUploadLicenseButton);
 showLicenseType();

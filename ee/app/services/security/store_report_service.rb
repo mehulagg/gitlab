@@ -21,6 +21,8 @@ module Security
       vulnerability_ids = create_all_vulnerabilities!
       mark_as_resolved_except(vulnerability_ids)
 
+      start_auto_fix
+
       success
     end
 
@@ -48,13 +50,14 @@ module Security
       end
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
-      vulnerability_params[:uuid] = calculate_uuid_v5(finding)
-      vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
+      entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
+      vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       update_vulnerability_scanner(finding)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
+      update_finding_fingerprints(finding, vulnerability_finding)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
@@ -78,35 +81,35 @@ module Security
       }
 
       begin
-        vulnerability_finding = project
-          .vulnerability_findings
-          .create_with(create_params)
-          .find_or_initialize_by(find_params)
+        # Look for existing Findings using UUID
+        vulnerability_finding = project.vulnerability_findings.find_by(uuid: finding.uuid)
+
+        # If there's no Finding then we're dealing with one of two cases:
+        # 1. The Finding is a new one
+        # 2. The Finding is already saved but has UUIDv4
+        unless vulnerability_finding
+          vulnerability_finding = project.vulnerability_findings
+            .create_with(create_params)
+            .find_or_initialize_by(find_params)
+          vulnerability_finding.uuid = finding.uuid
+        end
 
         vulnerability_finding.save!
         vulnerability_finding
-      rescue ActiveRecord::RecordNotUnique
-        project.vulnerability_findings.find_by!(find_params)
+      rescue ActiveRecord::RecordNotUnique => e
+        # This might happen if we're processing another report in parallel and it finds the same Finding
+        # faster. In that case we need to perform the lookup again
+
+        by_uuid = project.vulnerability_findings.reset.find_by(uuid: finding.uuid)
+        return by_uuid if by_uuid
+
+        by_find_params = project.vulnerability_findings.reset.find_by(find_params)
+        return by_find_params if by_find_params
+
+        Gitlab::ErrorTracking.track_and_raise_exception(e, find_params: find_params, uuid: finding.uuid)
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
-    end
-
-    def calculate_uuid_v5(vulnerability_finding)
-      uuid_v5_name_components = {
-        report_type: vulnerability_finding.report_type,
-        primary_identifier_fingerprint: vulnerability_finding.primary_fingerprint,
-        location_fingerprint: vulnerability_finding.location.fingerprint,
-        project_id: project.id
-      }
-
-      if uuid_v5_name_components.values.any?(&:nil?)
-        Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
-      end
-
-      name = uuid_v5_name_components.values.join('-')
-
-      Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
 
     def update_vulnerability_scanner(finding)
@@ -168,6 +171,43 @@ module Security
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
+    def update_finding_fingerprints(finding, vulnerability_finding)
+      to_update = {}
+      to_create = []
+
+      poro_fingerprints = finding.fingerprints.index_by(&:algorithm_type)
+
+      vulnerability_finding.fingerprints.each do |fingerprint|
+        # NOTE: index_by takes the last entry if there are duplicates of the same algorithm, which should never occur.
+        poro_fingerprint = poro_fingerprints[fingerprint.algorithm_type]
+
+        # We're no longer generating these types of fingerprints. Since
+        # we're updating the persisted vulnerability, no need to do anything
+        # with these fingerprints now. We will track growth with
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/322186
+        next if poro_fingerprint.nil?
+
+        poro_fingerprints.delete(fingerprint.algorithm_type)
+        to_update[fingerprint.id] = poro_fingerprint.to_h
+      end
+
+      # any remaining poro fingerprints left are new
+      poro_fingerprints.values.each do |poro_fingerprint|
+        attributes = poro_fingerprint.to_h.merge(finding_id: vulnerability_finding.id)
+        to_create << ::Vulnerabilities::FindingFingerprint.new(attributes: attributes, created_at: Time.zone.now, updated_at: Time.zone.now)
+      end
+
+      ::Vulnerabilities::FindingFingerprint.transaction do
+        if to_update.count > 0
+          ::Vulnerabilities::FindingFingerprint.update(to_update.keys, to_update.values)
+        end
+
+        if to_create.count > 0
+          ::Vulnerabilities::FindingFingerprint.bulk_insert!(to_create)
+        end
+      end
+    end
+
     def create_vulnerability(vulnerability_finding, pipeline)
       if vulnerability_finding.vulnerability_id
         Vulnerabilities::UpdateService.new(vulnerability_finding.project, pipeline.user, finding: vulnerability_finding, resolved_on_default_branch: false).execute
@@ -218,6 +258,18 @@ module Security
 
     def put_warning_for(finding)
       Gitlab::AppLogger.warn(message: "Invalid vulnerability finding record found", finding: finding.to_hash)
+    end
+
+    def start_auto_fix
+      return unless auto_fix_enabled?
+
+      ::Security::AutoFixWorker.perform_async(pipeline.id)
+    end
+
+    def auto_fix_enabled?
+      return false unless project.security_setting&.auto_fix_enabled?
+
+      project.security_setting.auto_fix_enabled_types.include?(report.type.to_sym)
     end
   end
 end

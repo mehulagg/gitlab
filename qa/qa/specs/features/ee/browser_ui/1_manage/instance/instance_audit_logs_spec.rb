@@ -61,11 +61,11 @@ module QA
         it_behaves_like 'audit event', ["Added SSH key"]
       end
 
-      context 'Add and delete email', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/217831', type: :bug }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/741' do
+      context 'Add and delete email', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/741' do
         before do
           sign_in
           new_email_address = 'new_email@example.com'
-          Page::Main::Menu.perform(&:click_settings_link)
+          Page::Main::Menu.perform(&:click_edit_profile_link)
           Page::Profile::Menu.perform(&:click_emails)
           Support::Retrier.retry_until(sleep_interval: 3) do
             Page::Profile::Emails.perform do |emails|
@@ -91,7 +91,7 @@ module QA
             login_page.sign_in_using_credentials(user: user)
           end
 
-          Page::Main::Menu.perform(&:click_settings_link)
+          Page::Main::Menu.perform(&:click_edit_profile_link)
           Page::Profile::Menu.perform(&:click_password)
           Page::Profile::Password.perform do |password_page|
             password_page.update_password('new_password', user.password)

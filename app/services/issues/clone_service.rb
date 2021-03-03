@@ -48,7 +48,7 @@ module Issues
         id: nil,
         iid: nil,
         project: target_project,
-        author: original_entity.author,
+        author: current_user,
         assignee_ids: original_entity.assignee_ids
       }
 
@@ -88,3 +88,5 @@ module Issues
     end
   end
 end
+
+Issues::CloneService.prepend_if_ee('EE::Issues::CloneService')

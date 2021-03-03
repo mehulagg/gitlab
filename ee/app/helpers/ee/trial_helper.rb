@@ -31,7 +31,7 @@ module EE
       elsif any_trial_group_namespaces?
         s_('Trials|You can apply your trial to a new group or an existing group.')
       else
-        s_('Trials|Create a new group to start your GitLab Gold trial.')
+        s_('Trials|Create a new group to start your GitLab Ultimate trial.')
       end
     end
 

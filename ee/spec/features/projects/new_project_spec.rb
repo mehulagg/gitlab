@@ -214,7 +214,7 @@ RSpec.describe 'New project', :js do
         it 'the tab shows the list of templates available' do
           page.within('#custom-group-project-templates') do
             # Show templates in case they're collapsed
-            page.all(:xpath, "//div[@class='js-template-group-options template-group-options']", wait: false).each(&:click)
+            page.find_all('div', class: ['js-template-group-options', 'template-group-options', '!expanded'], wait: false).each(&:click)
 
             expect(page).to have_selector('.template-option', count: template_number)
           end
@@ -361,7 +361,7 @@ RSpec.describe 'New project', :js do
 
               before do
                 allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
-                create(:gitlab_subscription, :gold, namespace: group1)
+                create(:gitlab_subscription, :ultimate, namespace: group1)
               end
 
               it 'show Group tab in Templates section' do

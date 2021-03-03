@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import DeployKeysStore from '~/deploy_keys/store';
 import deployKeysPanel from '~/deploy_keys/components/keys_panel.vue';
+import DeployKeysStore from '~/deploy_keys/store';
 
 describe('Deploy keys panel', () => {
   const data = getJSONFixture('deploy_keys/keys.json');
@@ -8,7 +8,7 @@ describe('Deploy keys panel', () => {
 
   const findTableRowHeader = () => wrapper.find('.table-row-header');
 
-  const mountComponent = props => {
+  const mountComponent = (props) => {
     const store = new DeployKeysStore();
     store.keys = data;
     wrapper = mount(deployKeysPanel, {
@@ -48,12 +48,9 @@ describe('Deploy keys panel', () => {
 
     expect(wrapper.find('.settings-message').exists()).toBe(true);
 
-    expect(
-      wrapper
-        .find('.settings-message')
-        .text()
-        .trim(),
-    ).toBe('No deploy keys found. Create one with the form above.');
+    expect(wrapper.find('.settings-message').text().trim()).toBe(
+      'No deploy keys found. Create one with the form above.',
+    );
   });
 
   it('renders no table header if keys are empty', () => {

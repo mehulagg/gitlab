@@ -12,6 +12,7 @@ class Namespace < ApplicationRecord
   include FromUnion
   include Gitlab::Utils::StrongMemoize
   include IgnorableColumns
+  include Namespaces::Traversal::Recursive
 
   # Prevent users from creating unreasonably deep level of nesting.
   # The number 20 was taken based on maximum nesting level of
@@ -28,7 +29,7 @@ class Namespace < ApplicationRecord
 
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
-  has_many :namespace_onboarding_actions
+  has_one :onboarding_progress
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
@@ -40,6 +41,7 @@ class Namespace < ApplicationRecord
   has_one :chat_team, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :root_storage_statistics, class_name: 'Namespace::RootStorageStatistics'
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
+  has_one :package_setting_relation, inverse_of: :namespace, class_name: 'PackageSetting'
 
   validates :owner, presence: true, unless: ->(n) { n.type == "Group" }
   validates :name,
@@ -61,11 +63,10 @@ class Namespace < ApplicationRecord
 
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
+  validate :validate_parent_type, if: -> { Feature.enabled?(:validate_namespace_parent_type) }
   validate :nesting_level_allowed
   validate :changing_shared_runners_enabled_is_allowed
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
-
-  validates_associated :runners
 
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
@@ -81,6 +82,8 @@ class Namespace < ApplicationRecord
   after_update :move_dir, if: :saved_change_to_path_or_parent?
   before_destroy(prepend: true) { prepare_for_destroy }
   after_destroy :rm_dir
+
+  before_save :ensure_delayed_project_removal_assigned_to_namespace_settings, if: :delayed_project_removal_changed?
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
@@ -101,6 +104,10 @@ class Namespace < ApplicationRecord
         'COALESCE(SUM(ps.uploads_size), 0) AS uploads_size'
       )
   end
+
+  # Make sure that the name is same as strong_memoize name in root_ancestor
+  # method
+  attr_writer :root_ancestor
 
   class << self
     def by_path(path)
@@ -158,6 +165,14 @@ class Namespace < ApplicationRecord
       name = host.delete_suffix(gitlab_host)
       Namespace.where(parent_id: nil).by_path(name)
     end
+
+    def top_most
+      where(parent_id: nil)
+    end
+  end
+
+  def package_settings
+    package_setting_relation || build_package_setting_relation
   end
 
   def default_branch_protection
@@ -238,50 +253,6 @@ class Namespace < ApplicationRecord
     projects.with_shared_runners.any?
   end
 
-  # Returns all ancestors, self, and descendants of the current namespace.
-  def self_and_hierarchy
-    Gitlab::ObjectHierarchy
-      .new(self.class.where(id: id))
-      .all_objects
-  end
-
-  # Returns all the ancestors of the current namespaces.
-  def ancestors
-    return self.class.none unless parent_id
-
-    Gitlab::ObjectHierarchy
-      .new(self.class.where(id: parent_id))
-      .base_and_ancestors
-  end
-
-  # returns all ancestors upto but excluding the given namespace
-  # when no namespace is given, all ancestors upto the top are returned
-  def ancestors_upto(top = nil, hierarchy_order: nil)
-    Gitlab::ObjectHierarchy.new(self.class.where(id: id))
-      .ancestors(upto: top, hierarchy_order: hierarchy_order)
-  end
-
-  def self_and_ancestors(hierarchy_order: nil)
-    return self.class.where(id: id) unless parent_id
-
-    Gitlab::ObjectHierarchy
-      .new(self.class.where(id: id))
-      .base_and_ancestors(hierarchy_order: hierarchy_order)
-  end
-
-  # Returns all the descendants of the current namespace.
-  def descendants
-    Gitlab::ObjectHierarchy
-      .new(self.class.where(parent_id: id))
-      .base_and_descendants
-  end
-
-  def self_and_descendants
-    Gitlab::ObjectHierarchy
-      .new(self.class.where(id: id))
-      .base_and_descendants
-  end
-
   def user_ids_for_project_authorizations
     [owner_id]
   end
@@ -289,12 +260,8 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    if Feature.enabled?(:recursive_approach_for_all_projects)
-      namespace = user? ? self : self_and_descendants
-      Project.where(namespace: namespace)
-    else
-      Project.inside_path(full_path)
-    end
+    namespace = user? ? self : self_and_descendants
+    Project.where(namespace: namespace)
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups
@@ -305,14 +272,6 @@ class Namespace < ApplicationRecord
 
   def has_parent?
     parent_id.present? || parent.present?
-  end
-
-  def root_ancestor
-    return self if persisted? && parent_id.nil?
-
-    strong_memoize(:root_ancestor) do
-      self_and_ancestors.reorder(nil).find_by(parent_id: nil)
-    end
   end
 
   def subgroup?
@@ -438,7 +397,22 @@ class Namespace < ApplicationRecord
     end
   end
 
+  def root?
+    !has_parent?
+  end
+
+  def recent?
+    created_at >= 90.days.ago
+  end
+
   private
+
+  def ensure_delayed_project_removal_assigned_to_namespace_settings
+    return if Feature.disabled?(:migrate_delayed_project_removal, default_enabled: true)
+
+    self.namespace_settings || build_namespace_settings
+    namespace_settings.delayed_project_removal = delayed_project_removal
+  end
 
   def all_projects_with_pages
     if all_projects.pages_metadata_not_migrated.exists?
@@ -472,6 +446,16 @@ class Namespace < ApplicationRecord
   def nesting_level_allowed
     if ancestors.count > Group::NUMBER_OF_ANCESTORS_ALLOWED
       errors.add(:parent_id, 'has too deep level of nesting')
+    end
+  end
+
+  def validate_parent_type
+    return unless has_parent?
+
+    if user?
+      errors.add(:parent_id, 'a user namespace cannot have a parent')
+    elsif group?
+      errors.add(:parent_id, 'a group cannot have a user namespace as its parent') if parent.user?
     end
   end
 

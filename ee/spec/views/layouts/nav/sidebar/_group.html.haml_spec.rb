@@ -5,10 +5,46 @@ require 'spec_helper'
 RSpec.describe 'layouts/nav/sidebar/_group' do
   before do
     assign(:group, group)
+    allow(view).to receive(:show_trial_status_widget?).and_return(false)
   end
 
   let(:group) { create(:group) }
   let(:user) { create(:user) }
+
+  describe 'trial status widget', :aggregate_failures do
+    let!(:gitlab_subscription) { create(:gitlab_subscription, :active_trial, namespace: group) }
+    let(:show_widget) { false }
+
+    before do
+      allow(view).to receive(:show_trial_status_widget?).and_return(show_widget)
+      render
+    end
+
+    subject { rendered }
+
+    context 'when the widget should not be shown' do
+      it 'does not render' do
+        is_expected.not_to have_selector '#js-trial-status-widget'
+        is_expected.not_to have_selector '#js-trial-status-popover'
+      end
+    end
+
+    context 'when the widget should be shown' do
+      let(:show_widget) { true }
+
+      it 'renders both the widget & popover component initialization elements' do
+        is_expected.to have_selector '#js-trial-status-widget'
+        is_expected.to have_selector '#js-trial-status-popover'
+      end
+
+      it 'supplies the same popover-trigger id value to both initialization elements' do
+        expected_id = 'trial-status-sidebar-widget'
+
+        is_expected.to have_selector "[data-container-id=#{expected_id}]"
+        is_expected.to have_selector "[data-target-id=#{expected_id}]"
+      end
+    end
+  end
 
   describe 'contribution analytics tab' do
     let!(:current_user) { create(:user) }
@@ -98,7 +134,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
   end
 
   describe 'security dashboard tab' do
-    let(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let(:group) { create(:group_with_plan, plan: :ultimate_plan) }
 
     before do
       enable_namespace_license_check!
@@ -185,6 +221,40 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
 
         context 'when the user does not have privileges to view Credentials' do
           it_behaves_like 'Credentials tab is not visible'
+        end
+      end
+    end
+
+    context 'when audit events feature is enabled' do
+      before do
+        stub_licensed_features(audit_events: true)
+      end
+
+      context 'when the user does not have access to Audit Events' do
+        before do
+          group.add_guest(user)
+          allow(view).to receive(:current_user).and_return(user)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_link 'Security & Compliance'
+          expect(rendered).not_to have_link 'Audit Events'
+        end
+      end
+
+      context 'when the user has access to Audit Events' do
+        before do
+          group.add_owner(user)
+          allow(view).to receive(:current_user).and_return(user)
+        end
+
+        it 'is visible' do
+          render
+
+          expect(rendered).to have_link 'Security & Compliance'
+          expect(rendered).to have_link 'Audit Events'
         end
       end
     end

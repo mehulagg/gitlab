@@ -36,7 +36,9 @@ const jsParser = extractor.createJsParser([
   }),
 ]);
 
-const vueParser = decorateJSParserWithVueSupport(jsParser);
+const vueParser = decorateJSParserWithVueSupport(jsParser, {
+  vue2TemplateCompiler: require('vue-template-compiler'),
+});
 
 function printJson() {
   const messages = extractor.getMessages().reduce((result, message) => {
@@ -45,7 +47,7 @@ function printJson() {
       text += `\u0000${message.textPlural}`;
     }
 
-    message.references.forEach(reference => {
+    message.references.forEach((reference) => {
       const filename = reference.replace(/:\d+$/, '');
 
       if (!Array.isArray(result[filename])) {

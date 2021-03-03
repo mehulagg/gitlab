@@ -1,17 +1,17 @@
 <script>
-import { isEmpty, omit, throttle } from 'lodash';
 import { GlLink, GlTooltip, GlResizeObserverDirective, GlIcon } from '@gitlab/ui';
 import { GlAreaChart, GlLineChart, GlChartSeriesLabel } from '@gitlab/ui/dist/charts';
-import { s__ } from '~/locale';
-import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
-import { panelTypes, chartHeight, lineTypes, lineWidths, legendLayoutTypes } from '../../constants';
-import { getYAxisOptions, getTimeAxisOptions, getChartGrid, getTooltipFormatter } from './options';
-import { annotationsYAxis, generateAnnotationsSeries } from './annotations';
+import { isEmpty, omit, throttle } from 'lodash';
 import { makeDataSeries } from '~/helpers/monitor_helper';
-import { graphDataValidatorForValues } from '../../utils';
+import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
+import { s__ } from '~/locale';
+import { panelTypes, chartHeight, lineTypes, lineWidths, legendLayoutTypes } from '../../constants';
 import { formatDate, timezones } from '../../format_date';
+import { graphDataValidatorForValues } from '../../utils';
+import { annotationsYAxis, generateAnnotationsSeries } from './annotations';
+import { getYAxisOptions, getTimeAxisOptions, getChartGrid, getTooltipFormatter } from './options';
 
-export const timestampToISODate = timestamp => new Date(timestamp).toISOString();
+export const timestampToISODate = (timestamp) => new Date(timestamp).toISOString();
 
 const THROTTLED_DATAZOOM_WAIT = 1000; // milliseconds
 
@@ -304,7 +304,7 @@ export default {
 
       this.tooltip.content = [];
 
-      params.seriesData.forEach(dataPoint => {
+      params.seriesData.forEach((dataPoint) => {
         if (dataPoint.value) {
           const [, yVal] = dataPoint.value;
           this.tooltip.type = dataPoint.name;
@@ -327,12 +327,12 @@ export default {
     },
     setSvg(name) {
       getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
           console.error('SVG could not be rendered correctly: ', e);
         });

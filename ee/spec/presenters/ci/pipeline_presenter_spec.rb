@@ -188,4 +188,21 @@ RSpec.describe Ci::PipelinePresenter do
       end
     end
   end
+
+  describe '#retryable?' do
+    subject { presenter.retryable? }
+
+    let!(:build) { create(:ci_build, :canceled, pipeline: pipeline) }
+
+    context 'with pipeline for merge train' do
+      let(:pipeline) { merge_request.all_pipelines.last }
+      let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
+
+      it { is_expected.to be false }
+    end
+
+    context 'with branch pipeline' do
+      it { is_expected.to be true }
+    end
+  end
 end

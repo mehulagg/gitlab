@@ -1,5 +1,5 @@
-import $ from 'jquery';
 import autosize from 'autosize';
+import $ from 'jquery';
 import GLForm from '~/gl_form';
 import '~/lib/utils/text_utility';
 import '~/lib/utils/common_utils';
@@ -8,7 +8,7 @@ describe('GLForm', () => {
   const testContext = {};
 
   describe('when instantiated', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       window.gl = window.gl || {};
 
       testContext.form = $('<form class="gfm-form"><textarea class="js-gfm-input"></form>');
@@ -28,7 +28,7 @@ describe('GLForm', () => {
     });
 
     describe('setupAutosize', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         testContext.glForm.setupAutosize();
 
         setImmediate(() => {
@@ -111,6 +111,26 @@ describe('GLForm', () => {
 
         expect(testContext.glForm.destroyAutosize()).toBeUndefined();
         expect(autosize.destroy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('autofocus', () => {
+      it('focus the textarea when autofocus is true', () => {
+        testContext.textarea.data('autofocus', true);
+        jest.spyOn($.prototype, 'focus');
+
+        testContext.glForm = new GLForm(testContext.form, false);
+
+        expect($.prototype.focus).toHaveBeenCalled();
+      });
+
+      it("doesn't focus the textarea when autofocus is false", () => {
+        testContext.textarea.data('autofocus', false);
+        jest.spyOn($.prototype, 'focus');
+
+        testContext.glForm = new GLForm(testContext.form, false);
+
+        expect($.prototype.focus).not.toHaveBeenCalled();
       });
     });
 

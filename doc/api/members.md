@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -11,6 +11,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 The access levels are defined in the `Gitlab::Access` module. Currently, these levels are recognized:
 
 - No access (`0`)
+- Minimal access (`5`) ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220203) in GitLab 13.5.)
 - Guest (`10`)
 - Reporter (`20`)
 - Developer (`30`)
@@ -283,6 +284,7 @@ Example response:
     "state": "active",
     "avatar_url": "https://www.gravatar.com/avatar/c2525a7f58ae3776070e44c106c48e15?s=80&d=identicon",
     "web_url": "http://192.168.1.8:3000/root",
+    "last_activity_on": "2021-01-27"
   },
   {
     "id": 2,
@@ -291,7 +293,8 @@ Example response:
     "state": "active",
     "avatar_url": "https://www.gravatar.com/avatar/c2525a7f58ae3776070e44c106c48e15?s=80&d=identicon",
     "web_url": "http://192.168.1.8:3000/root",
-    "email": "john@example.com"
+    "email": "john@example.com",
+    "last_activity_on": "2021-01-25"
   },
   {
     "id": 3,
@@ -299,7 +302,8 @@ Example response:
     "name": "Foo bar",
     "state": "active",
     "avatar_url": "https://www.gravatar.com/avatar/c2525a7f58ae3776070e44c106c48e15?s=80&d=identicon",
-    "web_url": "http://192.168.1.8:3000/root"
+    "web_url": "http://192.168.1.8:3000/root",
+    "last_activity_on": "2021-01-20"
   }
 ]
 ```
@@ -318,7 +322,7 @@ POST /projects/:id/members
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `user_id` | integer/string | yes | The user ID of the new member or multiple IDs separated by commas |
 | `access_level` | integer | yes | A valid access level |
-| `expires_at` | string | no | A date string in the format YEAR-MONTH-DAY |
+| `expires_at` | string | no | A date string in the format `YEAR-MONTH-DAY` |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "user_id=1&access_level=30" "https://gitlab.example.com/api/v4/groups/:id/members"
@@ -356,7 +360,7 @@ PUT /projects/:id/members/:user_id
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `user_id` | integer | yes   | The user ID of the member |
 | `access_level` | integer | yes | A valid access level |
-| `expires_at` | string | no | A date string in the format YEAR-MONTH-DAY |
+| `expires_at` | string | no | A date string in the format `YEAR-MONTH-DAY` |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/members/:user_id?access_level=40"
@@ -397,7 +401,7 @@ POST /groups/:id/members/:user_id/override
 | `user_id` | integer | yes   | The user ID of the member |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v4/groups/:id/members/:user_id/override"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/members/:user_id/override"
 ```
 
 Example response:
@@ -434,7 +438,7 @@ DELETE /groups/:id/members/:user_id/override
 | `user_id` | integer | yes   | The user ID of the member |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" "https://gitlab.example.com/api/v4/groups/:id/members/:user_id/override"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/members/:user_id/override"
 ```
 
 Example response:
@@ -467,7 +471,7 @@ DELETE /projects/:id/members/:user_id
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `user_id` | integer | yes   | The user ID of the member |
-| `unassign_issuables` | boolean | false   | Flag indicating if the removed member should be unassigned from any issues or merge requests within given group or project |
+| `unassign_issuables` | boolean | false   | Flag indicating if the removed member should be unassigned from any issues or merge requests inside a given group or project |
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/members/:user_id"

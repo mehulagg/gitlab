@@ -1,10 +1,10 @@
+import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { each } from 'lodash';
 import { trimText } from 'helpers/text_helper';
-import { shallowMount } from '@vue/test-utils';
-import { GlLink } from '@gitlab/ui';
 import { TEST_HOST } from 'spec/test_constants';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
 describe('User Avatar Link Component', () => {
   let wrapper;
@@ -20,7 +20,7 @@ describe('User Avatar Link Component', () => {
     username: 'username',
   };
 
-  const createWrapper = props => {
+  const createWrapper = (props) => {
     wrapper = shallowMount(UserAvatarLink, {
       propsData: {
         ...defaultProps,
@@ -83,7 +83,7 @@ describe('User Avatar Link Component', () => {
 
   describe('username', () => {
     it('should not render avatar image tooltip', () => {
-      expect(wrapper.find('.js-user-avatar-image-toolip').exists()).toBe(false);
+      expect(wrapper.find('.js-user-avatar-image-tooltip').exists()).toBe(false);
     });
 
     it('should render username prop in <span>', () => {

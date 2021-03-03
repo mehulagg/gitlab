@@ -7,16 +7,16 @@ module EE
 
     prepended do
       with_scope :subject
-      condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
+      condition(:auto_fix_enabled) { @subject.security_setting&.auto_fix_enabled? }
 
       with_scope :subject
-      condition(:deploy_board_disabled) { !@subject.feature_available?(:deploy_board) }
+      condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
 
       with_scope :subject
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
 
       with_scope :subject
-      condition(:requirements_available) { @subject.feature_available?(:requirements) & feature_available?(:requirements) }
+      condition(:requirements_available) { @subject.feature_available?(:requirements) & access_allowed_to?(:requirements) }
 
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 
@@ -51,8 +51,17 @@ module EE
           ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval
       end
 
+      with_scope :subject
+      condition(:dora4_analytics_available) do
+        @subject.feature_available?(:dora4_analytics)
+      end
+
       condition(:project_merge_request_analytics_available) do
         @subject.feature_available?(:project_merge_request_analytics)
+      end
+
+      condition(:custom_compliance_framework_available) do
+        ::Feature.enabled?(:ff_custom_compliance_frameworks)
       end
 
       with_scope :subject
@@ -107,8 +116,18 @@ module EE
       end
 
       with_scope :subject
+      condition(:security_orchestration_policies_enabled) do
+        @subject.feature_available?(:security_orchestration_policies)
+      end
+
+      with_scope :subject
       condition(:security_dashboard_enabled) do
         @subject.feature_available?(:security_dashboard)
+      end
+
+      with_scope :subject
+      condition(:coverage_fuzzing_enabled) do
+        @subject.feature_available?(:coverage_fuzzing)
       end
 
       with_scope :subject
@@ -134,6 +153,11 @@ module EE
       with_scope :subject
       condition(:code_review_analytics_enabled) do
         @subject.feature_available?(:code_review_analytics, @user)
+      end
+
+      with_scope :subject
+      condition(:issue_analytics_enabled) do
+        @subject.feature_available?(:issues_analytics, @user)
       end
 
       condition(:status_page_available) do
@@ -170,6 +194,12 @@ module EE
         prevent :push_code
       end
 
+      rule { analytics_disabled }.policy do
+        prevent(:read_project_merge_request_analytics)
+        prevent(:read_code_review_analytics)
+        prevent(:read_issue_analytics)
+      end
+
       rule { feature_flags_related_issues_disabled | repository_disabled }.policy do
         prevent :admin_feature_flags_issue_links
       end
@@ -179,8 +209,7 @@ module EE
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
-        enable :admin_board
-        enable :read_deploy_board
+        enable :admin_issue_board
         enable :admin_epic_issue
         enable :read_group_timelogs
       end
@@ -188,7 +217,7 @@ module EE
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
 
       rule { can?(:developer_access) }.policy do
-        enable :admin_board
+        enable :admin_issue_board
         enable :read_vulnerability_feedback
         enable :create_vulnerability_feedback
         enable :destroy_vulnerability_feedback
@@ -205,9 +234,17 @@ module EE
 
       rule { can?(:read_project) & iterations_available }.enable :read_iteration
 
+      rule { security_orchestration_policies_enabled & can?(:developer_access) }.policy do
+        enable :security_orchestration_policies
+      end
+
       rule { security_dashboard_enabled & can?(:developer_access) }.policy do
         enable :read_vulnerability
         enable :read_vulnerability_scanner
+      end
+
+      rule { coverage_fuzzing_enabled & can?(:developer_access) }.policy do
+        enable :read_coverage_fuzzing
       end
 
       rule { on_demand_scans_enabled & can?(:developer_access) }.policy do
@@ -226,6 +263,13 @@ module EE
         enable :admin_vulnerability_external_issue_link
       end
 
+      rule { security_bot & auto_fix_enabled }.policy do
+        enable :push_code
+        enable :create_merge_request_from
+        enable :create_vulnerability_feedback
+        enable :admin_merge_request
+      end
+
       rule { issues_disabled & merge_requests_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:iteration))
       end
@@ -239,8 +283,6 @@ module EE
       rule { can?(:read_licenses) }.enable :read_software_license_policy
 
       rule { repository_mirrors_enabled & ((mirror_available & can?(:admin_project)) | admin) }.enable :admin_mirror
-
-      rule { deploy_board_disabled & ~is_development }.prevent :read_deploy_board
 
       rule { can?(:maintainer_access) }.policy do
         enable :push_code_to_protected_branches
@@ -316,7 +358,7 @@ module EE
           .default_project_deletion_protection
       end
 
-      rule { needs_new_sso_session & ~admin }.policy do
+      rule { needs_new_sso_session & ~admin & ~auditor }.policy do
         prevent :guest_access
         prevent :reporter_access
         prevent :developer_access
@@ -324,7 +366,7 @@ module EE
         prevent :owner_access
       end
 
-      rule { ip_enforcement_prevents_access & ~admin }.policy do
+      rule { ip_enforcement_prevents_access & ~admin & ~auditor }.policy do
         prevent :read_project
       end
 
@@ -340,7 +382,12 @@ module EE
         prevent :modify_merge_request_committer_setting
       end
 
+      rule { issue_analytics_enabled }.enable :read_issue_analytics
+
       rule { can?(:read_merge_request) & code_review_analytics_enabled }.enable :read_code_review_analytics
+
+      rule { reporter & dora4_analytics_available }
+        .enable :read_dora4_analytics
 
       rule { reporter & project_merge_request_analytics_available }
         .enable :read_project_merge_request_analytics
@@ -353,11 +400,13 @@ module EE
         enable :admin_requirement
         enable :update_requirement
         enable :import_requirements
+        enable :export_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement
 
-      rule { compliance_framework_available & can?(:admin_project) }.enable :admin_compliance_framework
+      rule { compliance_framework_available & can?(:owner_access) }.enable :admin_compliance_framework
+      rule { compliance_framework_available & can?(:maintainer_access) & ~custom_compliance_framework_available }.enable :admin_compliance_framework
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page
@@ -375,6 +424,7 @@ module EE
     def lookup_access_level!
       return ::Gitlab::Access::NO_ACCESS if needs_new_sso_session?
       return ::Gitlab::Access::NO_ACCESS if visual_review_bot?
+      return ::Gitlab::Access::REPORTER if security_bot? && auto_fix_enabled?
 
       super
     end

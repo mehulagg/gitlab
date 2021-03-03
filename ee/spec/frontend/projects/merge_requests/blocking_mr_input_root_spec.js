@@ -6,19 +6,19 @@ describe('blocking mr input root', () => {
   let wrapper;
 
   const getInput = () => wrapper.find(RelatedIssuableInput);
-  const addTokenizedInput = input => {
+  const addTokenizedInput = (input) => {
     getInput().vm.$emit('addIssuableFormInput', {
       untouchedRawReferences: [input],
       touchedReference: '',
     });
   };
-  const addInput = input => {
+  const addInput = (input) => {
     getInput().vm.$emit('addIssuableFormInput', {
       untouchedRawReferences: [],
       touchedReference: input,
     });
   };
-  const removeRef = index => {
+  const removeRef = (index) => {
     getInput().vm.$emit('pendingIssuableRemoveRequest', index);
   };
   const createComponent = (propsData = {}) => {
@@ -71,7 +71,7 @@ describe('blocking mr input root', () => {
   });
 
   describe('hidden inputs', () => {
-    const createHiddenInputExpectation = selector => bool => {
+    const createHiddenInputExpectation = (selector) => (bool) => {
       expect(wrapper.find(selector).element.value).toBe(`${bool}`);
     };
 

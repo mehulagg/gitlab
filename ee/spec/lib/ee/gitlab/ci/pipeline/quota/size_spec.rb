@@ -4,16 +4,15 @@ require 'spec_helper'
 
 RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Size do
   let_it_be(:namespace) { create(:namespace) }
-  let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
+  let_it_be(:ultimate_plan, reload: true) { create(:ultimate_plan) }
   let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
-  let_it_be(:plan_limits) { create(:plan_limits, plan: gold_plan) }
-  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
+  let_it_be(:plan_limits) { create(:plan_limits, plan: ultimate_plan) }
+  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 
   let(:pipeline) { build_stubbed(:ci_pipeline, project: project) }
 
   let(:command) do
-    double(:command,
-      stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+    double(:command, pipeline_seed: double(:pipeline_seed, size: 2))
   end
 
   subject { described_class.new(namespace, pipeline, command) }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 scope(path: '*repository_path', format: false) do
   constraints(repository_path: Gitlab::PathRegex.repository_git_route_regex) do
     scope(module: :repositories) do
@@ -9,7 +11,7 @@ scope(path: '*repository_path', format: false) do
       end
 
       # NOTE: LFS routes are exposed on all repository types, but we still check for
-      # LFS availability on the repository container in LfsRequest#require_lfs_enabled!
+      # LFS availability on the repository container in LfsRequest#lfs_check_access!
 
       # Git LFS API (metadata)
       scope(path: 'info/lfs/objects', controller: :lfs_api) do
@@ -42,7 +44,7 @@ scope(path: '*repository_path', format: false) do
     wiki_redirect = redirect do |params, request|
       container_path = params[:repository_path].delete_suffix('.wiki.git')
       path = File.join(container_path, '-', 'wikis')
-      path << "?#{request.query_string}" unless request.query_string.blank?
+      path += "?#{request.query_string}" unless request.query_string.blank?
       path
     end
 
@@ -54,7 +56,7 @@ scope(path: '*repository_path', format: false) do
   constraints(repository_path: Gitlab::PathRegex.repository_route_regex) do
     ref_redirect = redirect do |params, request|
       path = "#{params[:repository_path]}.git/info/refs"
-      path << "?#{request.query_string}" unless request.query_string.blank?
+      path += "?#{request.query_string}" unless request.query_string.blank?
       path
     end
 

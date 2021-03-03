@@ -1,13 +1,14 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlIcon, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueRouter from 'vue-router';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import Item from '~/design_management/components/list/item.vue';
 
 const localVue = createLocalVue();
 localVue.use(VueRouter);
 const router = new VueRouter();
 
-// Referenced from: doc/api/graphql/reference/gitlab_schema.graphql:DesignVersionEvent
+// Referenced from: gitlab_schema.graphql:DesignVersionEvent
 const DESIGN_VERSION_EVENT = {
   CREATION: 'CREATION',
   DELETION: 'DELETION',
@@ -17,8 +18,11 @@ const DESIGN_VERSION_EVENT = {
 
 describe('Design management list item component', () => {
   let wrapper;
+  const imgId = 1;
+  const imgFilename = 'test';
 
-  const findDesignEvent = () => wrapper.find('[data-testid="designEvent"]');
+  const findDesignEvent = () => wrapper.findByTestId('design-event');
+  const findImgFilename = (id = imgId) => wrapper.findByTestId(`design-img-filename-${id}`);
   const findEventIcon = () => findDesignEvent().find(GlIcon);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
@@ -28,25 +32,27 @@ describe('Design management list item component', () => {
     isUploading = false,
     imageLoading = false,
   } = {}) {
-    wrapper = shallowMount(Item, {
-      localVue,
-      router,
-      propsData: {
-        id: 1,
-        filename: 'test',
-        image: 'http://via.placeholder.com/300',
-        isUploading,
-        event,
-        notesCount,
-        updatedAt: '01-01-2019',
-      },
-      data() {
-        return {
-          imageLoading,
-        };
-      },
-      stubs: ['router-link'],
-    });
+    wrapper = extendedWrapper(
+      shallowMount(Item, {
+        localVue,
+        router,
+        propsData: {
+          id: imgId,
+          filename: imgFilename,
+          image: 'http://via.placeholder.com/300',
+          isUploading,
+          event,
+          notesCount,
+          updatedAt: '01-01-2019',
+        },
+        data() {
+          return {
+            imageLoading,
+          };
+        },
+        stubs: ['router-link'],
+      }),
+    );
   }
 
   afterEach(() => {
@@ -73,6 +79,10 @@ describe('Design management list item component', () => {
 
       glIntersectionObserver.vm.$emit('appear');
       return wrapper.vm.$nextTick();
+    });
+
+    it('renders a tooltip', () => {
+      expect(findImgFilename().attributes('title')).toEqual(imgFilename);
     });
 
     describe('before image is loaded', () => {

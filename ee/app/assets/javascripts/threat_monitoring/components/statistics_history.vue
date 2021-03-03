@@ -1,8 +1,8 @@
 <script>
-import { isFunction } from 'lodash';
-import dateFormat from 'dateformat';
 import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
+import dateFormat from 'dateformat';
+import { isFunction } from 'lodash';
 
 import { COLORS, DATE_FORMATS, TIME } from './constants';
 
@@ -67,7 +67,7 @@ export default {
           name: TIME,
           type: 'time',
           axisLabel: {
-            formatter: value => dateFormat(value, DATE_FORMATS.defaultDate),
+            formatter: (value) => dateFormat(value, DATE_FORMATS.defaultDate),
           },
           min: from,
           max: to,

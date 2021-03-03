@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # GitLab Dependency Proxy administration
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/273655) to [GitLab Core](https://about.gitlab.com/pricing/) in GitLab 13.6.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/273655) to [GitLab Free](https://about.gitlab.com/pricing/) in GitLab 13.6.
 
 GitLab can be used as a dependency proxy for a variety of common package managers.
 
@@ -46,6 +46,10 @@ To enable the dependency proxy feature:
 
 Since Puma is already the default web server for installations from source as of GitLab 12.9,
 no further changes are needed.
+
+**Multi-node GitLab installations**
+
+Follow the steps for **Omnibus GitLab installation** for each Web and Sidekiq nodes.
 
 ## Changing the storage path
 
@@ -161,3 +165,22 @@ This section describes the earlier configuration format.
    ```
 
 1. [Restart GitLab](../restart_gitlab.md#installations-from-source "How to restart GitLab") for the changes to take effect.
+
+## Disabling Authentication
+
+Authentication was introduced in 13.7 as part of [enabling private groups to use the
+Dependency Proxy](https://gitlab.com/gitlab-org/gitlab/-/issues/11582). If you
+previously used the Dependency Proxy without authentication and need to disable
+this feature while you update your workflow to [authenticate with the Dependency
+Proxy](../../user/packages/dependency_proxy/index.md#authenticate-with-the-dependency-proxy),
+the following commands can be issued in a Rails console:
+
+```ruby
+# Disable the authentication
+Feature.disable(:dependency_proxy_for_private_groups)
+
+# Re-enable the authentication
+Feature.enable(:dependency_proxy_for_private_groups)
+```
+
+The ability to disable this feature will be [removed in 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/276777).

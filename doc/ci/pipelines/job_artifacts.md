@@ -150,14 +150,15 @@ in merge requests. For more information, see
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
 > - Requires GitLab Runner 11.5 and above.
 
-The `codequality` report collects [CodeQuality issues](../../user/project/merge_requests/code_quality.md)
+The `codequality` report collects [Code Quality issues](../../user/project/merge_requests/code_quality.md)
 as artifacts.
 
 The collected Code Quality report uploads to GitLab as an artifact and is summarized in merge requests.
 
-#### `artifacts:reports:sast` **(ULTIMATE)**
+#### `artifacts:reports:sast`
 
 > - Introduced in GitLab 11.5.
+> - Made [available in all tiers](https://gitlab.com/groups/gitlab-org/-/epics/2098) in GitLab 13.3.
 > - Requires GitLab Runner 11.5 and above.
 
 The `sast` report collects [SAST vulnerabilities](../../user/application_security/sast/index.md)
@@ -167,9 +168,11 @@ The collected SAST report uploads to GitLab as an artifact and is summarized
 in merge requests and the pipeline view. It's also used to provide data for security
 dashboards.
 
-#### `artifacts:reports:secret_detection` **(ULTIMATE)**
+#### `artifacts:reports:secret_detection`
 
 > - Introduced in GitLab 13.1.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/222788) in GitLab
+    13.3.
 > - Requires GitLab Runner 11.5 and above.
 
 The `secret-detection` report collects [detected secrets](../../user/application_security/secret_detection/index.md)
@@ -212,6 +215,17 @@ as artifacts.
 
 The collected DAST report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
 dashboards.
+
+#### `artifacts:reports:api_fuzzing` **(ULTIMATE)**
+
+> - Introduced in GitLab 13.4.
+> - Requires GitLab Runner 13.4 or later.
+
+The `api_fuzzing` report collects [API Fuzzing bugs](../../user/application_security/api_fuzzing/index.md)
+as artifacts.
+
+The collected API Fuzzing report uploads to GitLab as an artifact and is summarized in merge
+requests and the pipeline view. It's also used to provide data for security dashboards.
 
 #### `artifacts:reports:coverage_fuzzing` **(ULTIMATE)**
 
@@ -338,6 +352,11 @@ in the GitLab UI to do this:
 
    ![Job artifacts browser button](img/job_artifacts_browser_button.png)
 
+1. While on the details page of a merge request, you can see the download
+   icon for each job's artifacts on the right side of the merge request widget:
+
+   ![Job artifacts in Merge Request](img/job_artifacts_merge_request.png)
+
 1. And finally, when browsing an archive you can see the download button at
    the top right corner:
 
@@ -448,6 +467,29 @@ To retrieve a job artifact from a different project, you might need to use a
 private token to [authenticate and download](../../api/job_artifacts.md#get-job-artifacts)
 the artifact.
 
+## Keep artifacts from most recent successful jobs
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16267) in GitLab 13.0.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229936) in GitLab 13.4.
+> - [Made optional with a CI/CD setting](https://gitlab.com/gitlab-org/gitlab/-/issues/241026) in GitLab 13.8.
+
+By default, the latest artifacts from the most recent successful jobs are never deleted.
+If a job is configured with [`expire_in`](../yaml/README.md#artifactsexpire_in),
+its artifacts only expire if a more recent artifact exists.
+
+Keeping the latest artifacts can use a large amount of storage space in projects
+with a lot of jobs or large artifacts. If the latest artifacts are not needed in
+a project, you can disable this behavior to save space:
+
+1. Navigate to **Settings > CI/CD > Artifacts**.
+1. Uncheck **Keep artifacts from most recent successful jobs**.
+
+You can disable this behavior for all projects on a self-managed instance in the
+[instance's CI/CD settings](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines). **(CORE ONLY)**
+
+When you disable the feature, the latest artifacts do not immediately expire.
+A new pipeline must run before the latest artifacts can expire and be deleted.
+
 ## Troubleshooting
 
 ### Error message `No files to upload`
@@ -456,7 +498,7 @@ This is often preceded by other errors or warnings that specify the filename and
 generated in the first place. Please check the entire job log for such messages.
 
 If you find no helpful messages, please retry the failed job after activating
-[CI debug logging](../variables/README.md#debug-logging).
+[CI/CD debug logging](../variables/README.md#debug-logging).
 This provides useful information to investigate further.
 
 <!-- ## Troubleshooting

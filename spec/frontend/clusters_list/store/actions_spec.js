@@ -1,14 +1,14 @@
+import * as Sentry from '@sentry/browser';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import * as Sentry from '~/sentry/wrapper';
-import Poll from '~/lib/utils/poll';
+import { MAX_REQUESTS } from '~/clusters_list/constants';
+import * as actions from '~/clusters_list/store/actions';
+import * as types from '~/clusters_list/store/mutation_types';
 import { deprecatedCreateFlash as flashError } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import Poll from '~/lib/utils/poll';
 import { apiData } from '../mock_data';
-import { MAX_REQUESTS } from '~/clusters_list/constants';
-import * as types from '~/clusters_list/store/mutation_types';
-import * as actions from '~/clusters_list/store/actions';
 
 jest.mock('~/flash.js');
 
@@ -24,7 +24,7 @@ describe('Clusters store actions', () => {
       captureException.mockRestore();
     });
 
-    it('should report sentry error', done => {
+    it('should report sentry error', (done) => {
       const sentryError = new Error('New Sentry Error');
       const tag = 'sentryErrorTag';
 
@@ -62,7 +62,7 @@ describe('Clusters store actions', () => {
 
     afterEach(() => mock.restore());
 
-    it('should commit SET_CLUSTERS_DATA with received response', done => {
+    it('should commit SET_CLUSTERS_DATA with received response', (done) => {
       mock.onGet().reply(200, apiData, headers);
 
       testAction(
@@ -79,7 +79,7 @@ describe('Clusters store actions', () => {
       );
     });
 
-    it('should show flash on API error', done => {
+    it('should show flash on API error', (done) => {
       mock.onGet().reply(400, 'Not Found');
 
       testAction(
@@ -126,7 +126,7 @@ describe('Clusters store actions', () => {
         pollStop.mockRestore();
       });
 
-      it('should stop polling after MAX Requests', done => {
+      it('should stop polling after MAX Requests', (done) => {
         testAction(
           actions.fetchClusters,
           { endpoint: apiData.endpoint },
@@ -173,7 +173,7 @@ describe('Clusters store actions', () => {
         );
       });
 
-      it('should stop polling and report to Sentry when data is invalid', done => {
+      it('should stop polling and report to Sentry when data is invalid', (done) => {
         const badApiResponse = { clusters: {} };
         mock.onGet().reply(200, badApiResponse, pollHeaders);
 

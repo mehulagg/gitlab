@@ -1,32 +1,35 @@
-import { mount, createLocalVue } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 import Component from 'ee/subscriptions/new/components/checkout/billing_address.vue';
 import Step from 'ee/subscriptions/new/components/checkout/step.vue';
-import createStore from 'ee/subscriptions/new/store';
+import { getStoreConfig } from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
 
-describe('Billing Address', () => {
-  const localVue = createLocalVue();
-  localVue.use(Vuex);
+Vue.use(Vuex);
 
+describe('Billing Address', () => {
   let store;
   let wrapper;
 
-  const methodMocks = {
+  const actionMocks = {
     fetchCountries: jest.fn(),
     fetchStates: jest.fn(),
   };
 
   const createComponent = () => {
+    const { actions, ...storeConfig } = getStoreConfig();
+    store = new Vuex.Store({
+      ...storeConfig,
+      actions: { ...actions, ...actionMocks },
+    });
+
     wrapper = mount(Component, {
-      localVue,
       store,
-      methods: methodMocks,
     });
   };
 
   beforeEach(() => {
-    store = createStore();
     createComponent();
   });
 
@@ -36,7 +39,7 @@ describe('Billing Address', () => {
 
   describe('mounted', () => {
     it('should load the countries', () => {
-      expect(methodMocks.fetchCountries).toHaveBeenCalled();
+      expect(actionMocks.fetchCountries).toHaveBeenCalled();
     });
   });
 
@@ -55,12 +58,11 @@ describe('Billing Address', () => {
       expect(countrySelect().html()).toContain('<option value="NL">Netherlands</option>');
     });
 
-    it('should fetch states when selecting a country', () => {
+    it('should fetch states when selecting a country', async () => {
       countrySelect().trigger('change');
+      await nextTick();
 
-      return localVue.nextTick().then(() => {
-        expect(methodMocks.fetchStates).toHaveBeenCalled();
-      });
+      expect(actionMocks.fetchStates).toHaveBeenCalled();
     });
   });
 
@@ -78,36 +80,32 @@ describe('Billing Address', () => {
       expect(isStepValid()).toBe(true);
     });
 
-    it('should be invalid when country is undefined', () => {
+    it('should be invalid when country is undefined', async () => {
       store.commit(types.UPDATE_COUNTRY, null);
+      await nextTick();
 
-      return localVue.nextTick().then(() => {
-        expect(isStepValid()).toBe(false);
-      });
+      expect(isStepValid()).toBe(false);
     });
 
-    it('should be invalid when streetAddressLine1 is undefined', () => {
+    it('should be invalid when streetAddressLine1 is undefined', async () => {
       store.commit(types.UPDATE_STREET_ADDRESS_LINE_ONE, null);
+      await nextTick();
 
-      return localVue.nextTick().then(() => {
-        expect(isStepValid()).toBe(false);
-      });
+      expect(isStepValid()).toBe(false);
     });
 
-    it('should be invalid when city is undefined', () => {
+    it('should be invalid when city is undefined', async () => {
       store.commit(types.UPDATE_CITY, null);
+      await nextTick();
 
-      return localVue.nextTick().then(() => {
-        expect(isStepValid()).toBe(false);
-      });
+      expect(isStepValid()).toBe(false);
     });
 
-    it('should be invalid when zipCode is undefined', () => {
+    it('should be invalid when zipCode is undefined', async () => {
       store.commit(types.UPDATE_ZIP_CODE, null);
+      await nextTick();
 
-      return localVue.nextTick().then(() => {
-        expect(isStepValid()).toBe(false);
-      });
+      expect(isStepValid()).toBe(false);
     });
   });
 

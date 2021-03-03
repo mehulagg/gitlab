@@ -1,15 +1,15 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import Tracking from '~/tracking';
 import component from '~/registry/settings/components/settings_form.vue';
-import updateContainerExpirationPolicyMutation from '~/registry/settings/graphql/mutations/update_container_expiration_policy.graphql';
-import expirationPolicyQuery from '~/registry/settings/graphql/queries/get_expiration_policy.graphql';
 import {
   UPDATE_SETTINGS_ERROR_MESSAGE,
   UPDATE_SETTINGS_SUCCESS_MESSAGE,
 } from '~/registry/settings/constants';
+import updateContainerExpirationPolicyMutation from '~/registry/settings/graphql/mutations/update_container_expiration_policy.mutation.graphql';
+import expirationPolicyQuery from '~/registry/settings/graphql/queries/get_expiration_policy.query.graphql';
+import Tracking from '~/tracking';
 import { GlCard, GlLoadingIcon } from '../../shared/stubs';
 import { expirationPolicyPayload, expirationPolicyMutationPayload } from '../mock_data';
 
@@ -103,7 +103,7 @@ describe('Settings Form', () => {
       },
     });
 
-    return requestHandlers.map(resolvers => resolvers[1]);
+    return requestHandlers.map((resolvers) => resolvers[1]);
   };
 
   beforeEach(() => {

@@ -2,10 +2,10 @@
 /* eslint-disable vue/no-v-html */
 import { glEmojiTag } from '~/emoji';
 
+import { s__ } from '~/locale';
 import AddRequest from './add_request.vue';
 import DetailedMetric from './detailed_metric.vue';
 import RequestSelector from './request_selector.vue';
-import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -27,6 +27,10 @@ export default {
       required: true,
     },
     peekUrl: {
+      type: String,
+      required: true,
+    },
+    statsUrl: {
       type: String,
       required: true,
     },
@@ -62,6 +66,11 @@ export default {
       metric: 'es',
       header: s__('PerformanceBar|Elasticsearch calls'),
       keys: ['request', 'body'],
+    },
+    {
+      metric: 'external-http',
+      header: s__('PerformanceBar|External Http calls'),
+      keys: ['label', 'code', 'proxy', 'error'],
     },
     {
       metric: 'total',
@@ -120,7 +129,7 @@ export default {
   <div id="js-peek" :class="env">
     <div
       v-if="currentRequest"
-      class="d-flex container-fluid container-limited"
+      class="d-flex container-fluid container-limited justify-content-center"
       data-qa-selector="performance_bar"
     >
       <div id="peek-view-host" class="view">
@@ -147,11 +156,15 @@ export default {
         id="peek-view-trace"
         class="view"
       >
-        <a :href="currentRequest.details.tracing.tracing_url">{{ s__('PerformanceBar|trace') }}</a>
+        <a class="gl-text-blue-300" :href="currentRequest.details.tracing.tracing_url">{{
+          s__('PerformanceBar|trace')
+        }}</a>
       </div>
       <add-request v-on="$listeners" />
       <div v-if="currentRequest.details" id="peek-download" class="view">
-        <a :download="downloadName" :href="downloadPath">{{ s__('PerformanceBar|Download') }}</a>
+        <a class="gl-text-blue-300" :download="downloadName" :href="downloadPath">{{
+          s__('PerformanceBar|Download')
+        }}</a>
       </div>
       <request-selector
         v-if="currentRequest"
@@ -160,6 +173,9 @@ export default {
         class="ml-auto"
         @change-current-request="changeCurrentRequest"
       />
+      <div v-if="statsUrl" id="peek-stats" class="view">
+        <a class="gl-text-blue-300" :href="statsUrl">{{ s__('PerformanceBar|Stats') }}</a>
+      </div>
     </div>
   </div>
 </template>

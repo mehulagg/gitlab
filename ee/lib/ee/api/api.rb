@@ -12,6 +12,7 @@ module EE
 
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
+        mount ::API::ExternalApprovalRules
         mount ::API::ProjectApprovalSettings
         mount ::API::EpicIssues
         mount ::API::EpicLinks
@@ -29,6 +30,7 @@ module EE
         mount ::API::GroupPushRule
         mount ::API::MergeTrains
         mount ::API::GroupHooks
+        mount ::API::GroupMergeRequestApprovalSettings
         mount ::API::Scim
         mount ::API::ManagedLicenses
         mount ::API::ProjectApprovals
@@ -42,10 +44,13 @@ module EE
         mount ::API::VisualReviewDiscussions
         mount ::API::Analytics::CodeReviewAnalytics
         mount ::API::Analytics::GroupActivityAnalytics
+        mount ::API::Analytics::GroupDeploymentFrequency
+        mount ::API::Analytics::ProjectDeploymentFrequency
         mount ::API::ProtectedEnvironments
         mount ::API::ResourceWeightEvents
         mount ::API::ResourceIterationEvents
         mount ::API::Iterations
+        mount ::API::GroupRepositoryStorageMoves
       end
     end
   end

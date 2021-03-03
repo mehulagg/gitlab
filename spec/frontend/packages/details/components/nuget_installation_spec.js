@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { nugetPackage as packageEntity } from 'jest/packages/mock_data';
+import Vuex from 'vuex';
 import { registryUrl as nugetPath } from 'jest/packages/details/mock_data';
+import { nugetPackage as packageEntity } from 'jest/packages/mock_data';
 import NugetInstallation from '~/packages/details/components/nuget_installation.vue';
-import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
 import { TrackingActions } from '~/packages/details/constants';
+import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -49,11 +49,7 @@ describe('NugetInstallation', () => {
 
   describe('installation commands', () => {
     it('renders the correct command', () => {
-      expect(
-        findCodeInstructions()
-          .at(0)
-          .props(),
-      ).toMatchObject({
+      expect(findCodeInstructions().at(0).props()).toMatchObject({
         instruction: nugetInstallationCommandStr,
         trackingAction: TrackingActions.COPY_NUGET_INSTALL_COMMAND,
       });
@@ -62,11 +58,7 @@ describe('NugetInstallation', () => {
 
   describe('setup commands', () => {
     it('renders the correct command', () => {
-      expect(
-        findCodeInstructions()
-          .at(1)
-          .props(),
-      ).toMatchObject({
+      expect(findCodeInstructions().at(1).props()).toMatchObject({
         instruction: nugetSetupCommandStr,
         trackingAction: TrackingActions.COPY_NUGET_SETUP_COMMAND,
       });

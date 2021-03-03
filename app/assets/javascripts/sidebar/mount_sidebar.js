@@ -1,21 +1,27 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import SidebarTimeTracking from './components/time_tracking/sidebar_time_tracking.vue';
+import createFlash from '~/flash';
+import {
+  isInIssuePage,
+  isInDesignPage,
+  isInIncidentPage,
+  parseBoolean,
+} from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import { apolloProvider } from '~/sidebar/graphql';
+import Translate from '../vue_shared/translate';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
+import CopyEmailToClipboard from './components/copy_email_to_clipboard.vue';
 import SidebarLabels from './components/labels/sidebar_labels.vue';
-import SidebarReviewers from './components/reviewers/sidebar_reviewers.vue';
-import ConfidentialIssueSidebar from './components/confidential/confidential_issue_sidebar.vue';
-import SidebarMoveIssue from './lib/sidebar_move_issue';
 import IssuableLockForm from './components/lock/issuable_lock_form.vue';
 import sidebarParticipants from './components/participants/sidebar_participants.vue';
-import sidebarSubscriptions from './components/subscriptions/sidebar_subscriptions.vue';
+import SidebarReviewers from './components/reviewers/sidebar_reviewers.vue';
 import SidebarSeverity from './components/severity/sidebar_severity.vue';
-import Translate from '../vue_shared/translate';
-import createDefaultClient from '~/lib/graphql';
-import { isInIssuePage, isInIncidentPage, parseBoolean } from '~/lib/utils/common_utils';
-import createFlash from '~/flash';
-import { __ } from '~/locale';
+import sidebarSubscriptions from './components/subscriptions/sidebar_subscriptions.vue';
+import SidebarTimeTracking from './components/time_tracking/sidebar_time_tracking.vue';
+import SidebarMoveIssue from './lib/sidebar_move_issue';
 
 Vue.use(Translate);
 Vue.use(VueApollo);
@@ -24,15 +30,35 @@ function getSidebarOptions(sidebarOptEl = document.querySelector('.js-sidebar-op
   return JSON.parse(sidebarOptEl.innerHTML);
 }
 
+/**
+ * Extracts the list of assignees with availability information from a hidden input
+ * field and converts to a key:value pair for use in the sidebar assignees component.
+ * The assignee username is used as the key and their busy status is the value
+ *
+ * e.g { root: 'busy', admin: '' }
+ *
+ * @returns {Object}
+ */
+function getSidebarAssigneeAvailabilityData() {
+  const sidebarAssigneeEl = document.querySelectorAll('.js-sidebar-assignee-data input');
+  return Array.from(sidebarAssigneeEl)
+    .map((el) => el.dataset)
+    .reduce(
+      (acc, { username, availability = '' }) => ({
+        ...acc,
+        [username]: availability,
+      }),
+      {},
+    );
+}
+
 function mountAssigneesComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-assignees');
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   if (!el) return;
 
   const { iid, fullPath } = getSidebarOptions();
+  const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -40,7 +66,7 @@ function mountAssigneesComponent(mediator) {
     components: {
       SidebarAssignees,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-assignees', {
         props: {
           mediator,
@@ -48,7 +74,9 @@ function mountAssigneesComponent(mediator) {
           projectPath: fullPath,
           field: el.dataset.field,
           signedIn: el.hasAttribute('data-signed-in'),
-          issuableType: isInIssuePage() || isInIncidentPage() ? 'issue' : 'merge_request',
+          issuableType:
+            isInIssuePage() || isInIncidentPage() || isInDesignPage() ? 'issue' : 'merge_request',
+          assigneeAvailabilityStatus,
         },
       }),
   });
@@ -56,9 +84,6 @@ function mountAssigneesComponent(mediator) {
 
 function mountReviewersComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-reviewers');
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   if (!el) return;
 
@@ -70,15 +95,14 @@ function mountReviewersComponent(mediator) {
     components: {
       SidebarReviewers,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-reviewers', {
         props: {
           mediator,
           issuableIid: String(iid),
           projectPath: fullPath,
           field: el.dataset.field,
-          signedIn: el.hasAttribute('data-signed-in'),
-          issuableType: isInIssuePage() ? 'issue' : 'merge_request',
+          issuableType: isInIssuePage() || isInDesignPage() ? 'issue' : 'merge_request',
         },
       }),
   });
@@ -91,10 +115,6 @@ export function mountSidebarLabels() {
     return false;
   }
 
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
-
   return new Vue({
     el,
     apolloProvider,
@@ -105,43 +125,41 @@ export function mountSidebarLabels() {
       allowScopedLabels: parseBoolean(el.dataset.allowScopedLabels),
       initiallySelectedLabels: JSON.parse(el.dataset.selectedLabels),
     },
-    render: createElement => createElement(SidebarLabels),
+    render: (createElement) => createElement(SidebarLabels),
   });
 }
 
-function mountConfidentialComponent(mediator) {
+function mountConfidentialComponent() {
   const el = document.getElementById('js-confidential-entry-point');
+  if (!el) {
+    return;
+  }
 
   const { fullPath, iid } = getSidebarOptions();
-
-  if (!el) return;
-
   const dataNode = document.getElementById('js-confidential-issue-data');
   const initialData = JSON.parse(dataNode.innerHTML);
 
-  import(/* webpackChunkName: 'notesStore' */ '~/notes/stores')
-    .then(
-      ({ store }) =>
-        new Vue({
-          el,
-          store,
-          components: {
-            ConfidentialIssueSidebar,
-          },
-          render: createElement =>
-            createElement('confidential-issue-sidebar', {
-              props: {
-                iid: String(iid),
-                fullPath,
-                isEditable: initialData.is_editable,
-                service: mediator.service,
-              },
-            }),
-        }),
-    )
-    .catch(() => {
-      createFlash({ message: __('Failed to load sidebar confidential toggle') });
-    });
+  // eslint-disable-next-line no-new
+  new Vue({
+    el,
+    apolloProvider,
+    components: {
+      SidebarConfidentialityWidget,
+    },
+    provide: {
+      iid: String(iid),
+      fullPath,
+      canUpdate: initialData.is_editable,
+    },
+
+    render: (createElement) =>
+      createElement('sidebar-confidentiality-widget', {
+        props: {
+          issuableType:
+            isInIssuePage() || isInIncidentPage() || isInDesignPage() ? 'issue' : 'merge_request',
+        },
+      }),
+  });
 }
 
 function mountLockComponent() {
@@ -163,20 +181,20 @@ function mountLockComponent() {
     );
   } else {
     importStore = import(/* webpackChunkName: 'mrNotesStore' */ '~/mr_notes/stores').then(
-      store => store.default,
+      (store) => store.default,
     );
   }
 
   importStore
     .then(
-      store =>
+      (store) =>
         new Vue({
           el,
           store,
           provide: {
             fullPath,
           },
-          render: createElement =>
+          render: (createElement) =>
             createElement(IssuableLockForm, {
               props: {
                 isEditable: initialData.is_editable,
@@ -200,7 +218,7 @@ function mountParticipantsComponent(mediator) {
     components: {
       sidebarParticipants,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-participants', {
         props: {
           mediator,
@@ -220,7 +238,7 @@ function mountSubscriptionsComponent(mediator) {
     components: {
       sidebarSubscriptions,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-subscriptions', {
         props: {
           mediator,
@@ -240,7 +258,7 @@ function mountTimeTrackingComponent() {
     components: {
       SidebarTimeTracking,
     },
-    render: createElement => createElement('sidebar-time-tracking', {}),
+    render: (createElement) => createElement('sidebar-time-tracking', {}),
   });
 }
 
@@ -250,9 +268,6 @@ function mountSeverityComponent() {
   if (!severityContainerEl) {
     return false;
   }
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   const { fullPath, iid, severity } = getSidebarOptions();
 
@@ -262,7 +277,7 @@ function mountSeverityComponent() {
     components: {
       SidebarSeverity,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-severity', {
         props: {
           projectPath: fullPath,
@@ -273,6 +288,21 @@ function mountSeverityComponent() {
   });
 }
 
+function mountCopyEmailComponent() {
+  const el = document.getElementById('issuable-copy-email');
+
+  if (!el) return;
+
+  const { createNoteEmail } = getSidebarOptions();
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el,
+    render: (createElement) =>
+      createElement(CopyEmailToClipboard, { props: { copyText: createNoteEmail } }),
+  });
+}
+
 export function mountSidebar(mediator) {
   mountAssigneesComponent(mediator);
   mountReviewersComponent(mediator);
@@ -280,6 +310,7 @@ export function mountSidebar(mediator) {
   mountLockComponent();
   mountParticipantsComponent(mediator);
   mountSubscriptionsComponent(mediator);
+  mountCopyEmailComponent();
 
   new SidebarMoveIssue(
     mediator,

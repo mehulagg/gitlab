@@ -8,7 +8,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
   let_it_be(:project, reload: true) { create(:project, :public, group: group) }
 
   let_it_be(:board) { create(:board, project: project) }
-  let_it_be(:list) { create(:list, board: board, position: 0) }
+  let_it_be(:label) { create(:label, project: project, name: 'Label 1') }
+  let_it_be(:list) { create(:list, board: board, label: label, position: 0) }
   let_it_be(:epic1) { create(:epic, group: group) }
 
   let_it_be(:issue1, reload: true) { create(:issue, project: project) }
@@ -22,17 +23,26 @@ RSpec.describe 'epics swimlanes sidebar', :js do
 
     visit project_boards_path(project)
     wait_for_requests
+  end
 
-    page.within('.board-swimlanes-toggle-wrapper') do
-      page.find('.dropdown-toggle').click
-      page.find('.dropdown-item', text: 'Epic').click
+  context 'when closing sidebar' do
+    let(:issue_card) { first("[data-testid='board-epic-lane-issues'] [data-testid='board_card']") }
+
+    it 'unhighlights the active issue card' do
+      load_epic_swimlanes
+
+      issue_card.click
+
+      find("[data-testid='sidebar-drawer'] .gl-drawer-close-button").click
+
+      expect(issue_card[:class]).not_to include('is-active')
+      expect(issue_card[:class]).not_to include('multi-select')
     end
-
-    wait_for_all_requests
   end
 
   context 'notifications subscription' do
     it 'displays notifications toggle' do
+      load_epic_swimlanes
       click_first_issue_card
 
       page.within('[data-testid="sidebar-notifications"]') do
@@ -43,6 +53,7 @@ RSpec.describe 'epics swimlanes sidebar', :js do
     end
 
     it 'shows toggle as on then as off as user toggles to subscribe and unsubscribe' do
+      load_epic_swimlanes
       click_first_issue_card
 
       toggle = find('[data-testid="notification-subscribe-toggle"]')
@@ -59,6 +70,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
     context 'when notifications have been disabled' do
       before do
         project.update_attribute(:emails_disabled, true)
+
+        load_epic_swimlanes
       end
 
       it 'displays a message that notifications have been disabled' do
@@ -74,6 +87,7 @@ RSpec.describe 'epics swimlanes sidebar', :js do
 
   context 'time tracking' do
     it 'displays time tracking feature with default message' do
+      load_epic_swimlanes
       click_first_issue_card
 
       page.within('[data-testid="time-tracker"]') do
@@ -85,6 +99,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
     context 'when only spent time is recorded' do
       before do
         issue1.timelogs.create!(time_spent: 3600, user: user)
+
+        load_epic_swimlanes
 
         click_first_issue_card
       end
@@ -101,6 +117,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
       before do
         issue1.update!(time_estimate: 3600)
 
+        load_epic_swimlanes
+
         click_first_issue_card
       end
 
@@ -116,6 +134,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
       before do
         issue1.update!(time_estimate: 3600)
         issue1.timelogs.create!(time_spent: 1800, user: user)
+
+        load_epic_swimlanes
 
         click_first_issue_card
       end
@@ -141,6 +161,8 @@ RSpec.describe 'epics swimlanes sidebar', :js do
         # 3600+3600*24 = 1d 1h or 25h
         issue1.timelogs.create!(time_spent: 3600 + 3600 * 24, user: user)
 
+        load_epic_swimlanes
+
         click_first_issue_card
       end
 
@@ -156,5 +178,14 @@ RSpec.describe 'epics swimlanes sidebar', :js do
     page.within("[data-testid='board-epic-lane-issues']") do
       first("[data-testid='board_card']").click
     end
+  end
+
+  def load_epic_swimlanes
+    page.within('.board-swimlanes-toggle-wrapper') do
+      page.find('.dropdown-toggle').click
+      page.find('.dropdown-item', text: 'Epic').click
+    end
+
+    wait_for_all_requests
   end
 end

@@ -1,7 +1,7 @@
 import { safeDump } from 'js-yaml';
+import { EndpointMatchModeAny, DisabledByLabel, CiliumNetworkPolicyKind } from '../constants';
 import { ruleSpec } from './rules';
 import { labelSelector } from './utils';
-import { EndpointMatchModeAny, DisabledByLabel, CiliumNetworkPolicyKind } from '../constants';
 
 /*
  Return kubernetes resource specification object for a policy.
@@ -12,7 +12,7 @@ function spec({ rules, isEnabled, endpointMatchMode, endpointLabels }) {
   const policySpec = {};
 
   policySpec.endpointSelector = Object.keys(matchLabels).length > 0 ? { matchLabels } : {};
-  rules.forEach(rule => {
+  rules.forEach((rule) => {
     const { direction } = rule;
     if (!policySpec[direction]) policySpec[direction] = [];
 
@@ -33,8 +33,14 @@ function spec({ rules, isEnabled, endpointMatchMode, endpointLabels }) {
  Return yaml representation of a policy.
 */
 export default function toYaml(policy) {
-  const { name, resourceVersion, description } = policy;
+  const { annotations, name, resourceVersion, description, labels } = policy;
   const metadata = { name };
+  if (annotations) {
+    metadata.annotations = annotations;
+  }
+  if (labels) {
+    metadata.labels = labels;
+  }
   if (resourceVersion) {
     metadata.resourceVersion = resourceVersion;
   }

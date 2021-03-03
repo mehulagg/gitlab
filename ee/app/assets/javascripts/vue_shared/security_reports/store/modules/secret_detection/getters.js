@@ -1,7 +1,7 @@
-import { statusIcon, groupedReportText } from '../../utils';
 import messages from '../../messages';
+import { statusIcon, groupedReportText } from '../../utils';
 
-export const groupedSecretDetectionText = state =>
+export const groupedSecretDetectionText = (state) =>
   groupedReportText(
     state,
     messages.SECRET_SCANNING,

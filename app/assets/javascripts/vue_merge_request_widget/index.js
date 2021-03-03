@@ -1,8 +1,12 @@
+// This is a false violation of @gitlab/no-runtime-template-compiler, since it
+// creates a new Vue instance by spreading a _valid_ Vue component definition
+// into the Vue constructor.
+/* eslint-disable @gitlab/no-runtime-template-compiler */
 import Vue from 'vue';
-import MrWidgetOptions from 'ee_else_ce/vue_merge_request_widget/mr_widget_options.vue';
 import VueApollo from 'vue-apollo';
-import Translate from '../vue_shared/translate';
+import MrWidgetOptions from 'ee_else_ce/vue_merge_request_widget/mr_widget_options.vue';
 import createDefaultClient from '~/lib/graphql';
+import Translate from '../vue_shared/translate';
 import { registerExtension } from './components/extensions';
 import issueExtension from './extensions/issues';
 
@@ -26,7 +30,11 @@ export default () => {
 
   registerExtension(issueExtension);
 
-  const vm = new Vue({ ...MrWidgetOptions, apolloProvider });
+  const vm = new Vue({
+    el: '#js-vue-mr-widget',
+    ...MrWidgetOptions,
+    apolloProvider,
+  });
 
   window.gl.mrWidget = {
     checkStatus: vm.checkStatus,

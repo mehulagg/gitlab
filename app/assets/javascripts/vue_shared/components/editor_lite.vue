@@ -1,7 +1,7 @@
 <script>
 import { debounce } from 'lodash';
+import { CONTENT_UPDATE_DEBOUNCE, EDITOR_READY_EVENT } from '~/editor/constants';
 import Editor from '~/editor/editor_lite';
-import { CONTENT_UPDATE_DEBOUNCE } from '~/editor/constants';
 
 function initEditorLite({ el, ...args }) {
   const editor = new Editor({
@@ -84,7 +84,11 @@ export default {
     onFileChange() {
       this.$emit('input', this.editor.getValue());
     },
+    getEditor() {
+      return this.editor;
+    },
   },
+  readyEvent: EDITOR_READY_EVENT,
 };
 </script>
 <template>
@@ -92,7 +96,7 @@ export default {
     :id="`editor-lite-${fileGlobalId}`"
     ref="editor"
     data-editor-loading
-    @editor-ready="$emit('editor-ready')"
+    @[$options.readyEvent]="$emit($options.readyEvent)"
   >
     <pre class="editor-loading-content">{{ value }}</pre>
   </div>

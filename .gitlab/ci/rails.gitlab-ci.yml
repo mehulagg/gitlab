@@ -10,9 +10,12 @@
   # Only install knapsack after bundle install! Otherwise oddly some native
   # gems could not be found under some circumstance. No idea why, hours wasted.
   - run_timed_command "gem install knapsack --no-document"
-  - run_timed_command "scripts/gitaly-test-build"
   - run_timed_command "scripts/gitaly-test-spawn"
   - source ./scripts/rspec_helpers.sh
+
+.minimal-rspec-tests:
+  variables:
+    RSPEC_TESTS_MAPPING_ENABLED: "true"
 
 .rspec-base:
   extends: .rails-job-base
@@ -138,6 +141,7 @@
 setup-test-env:
   extends:
     - .rails-job-base
+    - .setup-test-env-cache
     - .rails:rules:default-refs-code-backstage-qa
     - .use-pg11
   stage: prepare
@@ -146,27 +150,50 @@ setup-test-env:
   script:
     - run_timed_command "bundle exec ruby -I. -e 'require \"config/environment\"; TestEnv.init'"
     - run_timed_command "scripts/gitaly-test-build"  # Do not use 'bundle exec' here
-    - rm tmp/tests/gitaly/.ruby-bundle  # This file prevents gems from being installed even if vendor/gitaly-ruby is missing
   artifacts:
     expire_in: 7d
     paths:
       - config/secrets.yml
-      - tmp/tests/gitaly
-      - tmp/tests/gitlab-elasticsearch-indexer
-      - tmp/tests/gitlab-shell
-      - tmp/tests/gitlab-test-fork
-      - tmp/tests/gitlab-test-fork_bare
-      - tmp/tests/gitlab-test
-      - tmp/tests/gitlab-workhorse
-      - tmp/tests/repositories
-      - tmp/tests/second_storage
+      - tmp/tests/gitaly/config.toml
+      - tmp/tests/gitaly/gitaly
+      - tmp/tests/gitaly/gitaly2.config.toml
+      - tmp/tests/gitaly/gitaly-git2go
+      - tmp/tests/gitaly/gitaly-hooks
+      - tmp/tests/gitaly/gitaly-lfs-smudge
+      - tmp/tests/gitaly/gitaly-ssh
+      - tmp/tests/gitaly/internal/
+      - tmp/tests/gitaly/internal_sockets/
+      - tmp/tests/gitaly/Makefile
+      - tmp/tests/gitaly/praefect
+      - tmp/tests/gitaly/praefect.config.toml
+      - tmp/tests/gitaly/ruby/
+      - tmp/tests/gitlab-elasticsearch-indexer/bin/gitlab-elasticsearch-indexer
+      - tmp/tests/gitlab-shell/
+      - tmp/tests/gitlab-test-fork/
+      - tmp/tests/gitlab-test-fork_bare/
+      - tmp/tests/gitlab-test/
+      - tmp/tests/gitlab-workhorse/gitlab-zip-metadata
+      - tmp/tests/gitlab-workhorse/gitlab-zip-cat
+      - tmp/tests/gitlab-workhorse/gitlab-workhorse
+      - tmp/tests/gitlab-workhorse/gitlab-resize-image
+      - tmp/tests/gitlab-workhorse/config.toml
+      - tmp/tests/repositories/
+      - tmp/tests/second_storage/
     when: always
 
-update-rails-cache:
+update-setup-test-env-cache:
   extends:
     - setup-test-env
     - .shared:rules:update-cache
-  artifacts: {}  # This job's purpose is only to update the cache.
+  artifacts:
+    paths: []  # This job's purpose is only to update the cache.
+  cache:
+    policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
+
+update-rails-cache:
+  extends:
+    - update-setup-test-env-cache
+    - .rails-cache
   cache:
     policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
 
@@ -240,11 +267,23 @@ rspec migration pg11:
     - .rspec-base-migration
     - .rspec-migration-parallel
 
+rspec migration pg11 minimal:
+  extends:
+    - rspec migration pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-and-foss-migration:minimal
+
 rspec unit pg11:
   extends:
     - .rspec-base-pg11
     - .rails:rules:ee-and-foss-unit
     - .rspec-unit-parallel
+
+rspec unit pg11 minimal:
+  extends:
+    - rspec unit pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-and-foss-unit:minimal
 
 rspec integration pg11:
   extends:
@@ -252,11 +291,33 @@ rspec integration pg11:
     - .rails:rules:ee-and-foss-integration
     - .rspec-integration-parallel
 
+rspec integration pg11 minimal:
+  extends:
+    - rspec integration pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-and-foss-integration:minimal
+
 rspec system pg11:
   extends:
     - .rspec-base-pg11
     - .rails:rules:ee-and-foss-system
     - .rspec-system-parallel
+
+rspec system pg11 minimal:
+  extends:
+    - rspec system pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-and-foss-system:minimal
+
+# Dedicated job to test DB library code against PG12.
+# Note that these are already tested against PG11 in the `rspec unit pg11` / `rspec-ee unit pg11` jobs.
+rspec db-library-code pg12:
+  extends:
+    - .rspec-base-pg12
+    - .rails:rules:ee-and-foss-db-library-code
+  script:
+    - *base-script
+    - rspec_db_library_code
 
 rspec fast_spec_helper:
   extends:
@@ -264,6 +325,12 @@ rspec fast_spec_helper:
     - .rails:rules:ee-and-foss-fast_spec_helper
   script:
     - bin/rspec spec/fast_spec_helper.rb
+
+rspec fast_spec_helper minimal:
+  extends:
+    - rspec fast_spec_helper
+    - .minimal-rspec-tests
+    - .rails:rules:ee-and-foss-fast_spec_helper:minimal
 
 db:migrate:reset:
   extends: .db-job-base
@@ -277,6 +344,14 @@ db:check-schema:
   script:
     - source scripts/schema_changed.sh
 
+db:check-migrations:
+  extends:
+    - .db-job-base
+    - .rails:rules:ee-and-foss-mr-with-migration
+  script:
+    - scripts/validate_migration_schema
+  allow_failure: true
+
 db:migrate-from-v12.10.0:
   extends: .db-job-base
   variables:
@@ -286,7 +361,7 @@ db:migrate-from-v12.10.0:
     - export TAG_TO_CHECKOUT="v12.10.0-ee"
     - '[[ -d "ee/" ]] || export PROJECT_TO_CHECKOUT="gitlab-foss"'
     - '[[ -d "ee/" ]] || export TAG_TO_CHECKOUT="v12.10.0"'
-    - git fetch https://gitlab.com/gitlab-org/$PROJECT_TO_CHECKOUT.git $TAG_TO_CHECKOUT
+    - retry 'git fetch https://gitlab.com/gitlab-org/$PROJECT_TO_CHECKOUT.git $TAG_TO_CHECKOUT'
     - git checkout -f FETCH_HEAD
     - sed -i -e "s/gem 'grpc', '~> 1.24.0'/gem 'grpc', '~> 1.30.2'/" Gemfile  # Update gRPC for Ruby 2.7
     - sed -i -e "s/gem 'google-protobuf', '~> 3.8.0'/gem 'google-protobuf', '~> 3.12.0'/" Gemfile
@@ -309,6 +384,17 @@ db:rollback:
   script:
     - bundle exec rake db:migrate VERSION=20181228175414
     - bundle exec rake db:migrate SKIP_SCHEMA_VERSION_CHECK=true
+
+db:gitlabcom-database-testing:
+  extends: .rails:rules:db:gitlabcom-database-testing
+  stage: test
+  image: ruby:2.7-alpine
+  needs: []
+  allow_failure: true
+  script:
+    - source scripts/utils.sh
+    - install_gitlab_gem
+    - ./scripts/trigger-build gitlab-com-database-testing
 
 gitlab:setup:
   extends: .db-job-base
@@ -341,6 +427,40 @@ db:backup_and_restore:
     - bundle exec rake gitlab:backup:restore
   rules:
     - changes: ["lib/backup/**/*"]
+
+rspec:deprecations:
+  extends:
+    - .default-retry
+    - .default-before_script
+    - .static-analysis-cache
+    - .rails:rules:deprecations
+  stage: post-test
+  allow_failure: true
+  # We cannot use needs since it would mean needing 84 jobs (since most are parallelized)
+  # so we use `dependencies` here.
+  dependencies:
+    - rspec migration pg11
+    - rspec unit pg11
+    - rspec integration pg11
+    - rspec system pg11
+    - rspec-ee migration pg11
+    - rspec-ee unit pg11
+    - rspec-ee integration pg11
+    - rspec-ee system pg11
+    - rspec-ee unit pg11 geo
+    - rspec-ee integration pg11 geo
+    - rspec-ee system pg11 geo
+  variables:
+    SETUP_DB: "false"
+  script:
+    - grep -h -R "keyword" deprecations/ | awk '{$1=$1};1' | sort | uniq -c | sort
+    - grep -R "keyword" deprecations/ | wc
+    - run_timed_command "bundle exec rubocop --only Lint/LastKeywordArgument --parallel"
+  artifacts:
+    expire_in: 31d
+    when: always
+    paths:
+      - deprecations/
 
 rspec:coverage:
   extends:
@@ -384,7 +504,6 @@ rspec:feature-flags:
     - .coverage-base
     - .rails:rules:rspec-feature-flags
   stage: post-test
-  allow_failure: true
   # We cannot use needs since it would mean needing 84 jobs (since most are parallelized)
   # so we use `dependencies` here.
   dependencies:
@@ -404,7 +523,11 @@ rspec:feature-flags:
     - memory-on-boot
   script:
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
-    - 'run_timed_command "bundle exec scripts/used-feature-flags" || (scripts/slack master-broken "☠️ \`${CI_JOB_NAME}\` failed! ☠️ See ${CI_JOB_URL}" ci_failing "GitLab Bot" && exit 1)'
+    - if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
+        run_timed_command "bundle exec scripts/used-feature-flags" || (scripts/slack master-broken "☠️ \`${CI_JOB_NAME}\` failed! ☠️ See ${CI_JOB_URL}" ci_failing "GitLab Bot" && exit 1);
+      else
+        run_timed_command "bundle exec scripts/used-feature-flags";
+      fi
 
 # EE/FOSS: default refs (MRs, master, schedules) jobs #
 #######################################################
@@ -418,11 +541,23 @@ rspec migration pg11-as-if-foss:
     - .rails:rules:as-if-foss-migration
     - .rspec-migration-parallel
 
+rspec migration pg11-as-if-foss minimal:
+  extends:
+    - rspec migration pg11-as-if-foss
+    - .minimal-rspec-tests
+    - .rails:rules:as-if-foss-migration:minimal
+
 rspec unit pg11-as-if-foss:
   extends:
     - .rspec-base-pg11-as-if-foss
     - .rails:rules:as-if-foss-unit
     - .rspec-unit-parallel
+
+rspec unit pg11-as-if-foss minimal:
+  extends:
+    - rspec unit pg11-as-if-foss
+    - .minimal-rspec-tests
+    - .rails:rules:as-if-foss-unit:minimal
 
 rspec integration pg11-as-if-foss:
   extends:
@@ -430,11 +565,23 @@ rspec integration pg11-as-if-foss:
     - .rails:rules:as-if-foss-integration
     - .rspec-integration-parallel
 
+rspec integration pg11-as-if-foss minimal:
+  extends:
+    - rspec integration pg11-as-if-foss
+    - .minimal-rspec-tests
+    - .rails:rules:as-if-foss-integration:minimal
+
 rspec system pg11-as-if-foss:
   extends:
     - .rspec-base-pg11-as-if-foss
     - .rails:rules:as-if-foss-system
     - .rspec-system-parallel
+
+rspec system pg11-as-if-foss minimal:
+  extends:
+    - rspec system pg11-as-if-foss
+    - .minimal-rspec-tests
+    - .rails:rules:as-if-foss-system:minimal
 
 rspec-ee migration pg11:
   extends:
@@ -443,11 +590,23 @@ rspec-ee migration pg11:
     - .rails:rules:ee-only-migration
     - .rspec-ee-migration-parallel
 
+rspec-ee migration pg11 minimal:
+  extends:
+    - rspec-ee migration pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-only-migration:minimal
+
 rspec-ee unit pg11:
   extends:
     - .rspec-ee-base-pg11
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-parallel
+
+rspec-ee unit pg11 minimal:
+  extends:
+    - rspec-ee unit pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-only-unit:minimal
 
 rspec-ee integration pg11:
   extends:
@@ -455,11 +614,23 @@ rspec-ee integration pg11:
     - .rails:rules:ee-only-integration
     - .rspec-ee-integration-parallel
 
+rspec-ee integration pg11 minimal:
+  extends:
+    - rspec-ee integration pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-only-integration:minimal
+
 rspec-ee system pg11:
   extends:
     - .rspec-ee-base-pg11
     - .rails:rules:ee-only-system
     - .rspec-ee-system-parallel
+
+rspec-ee system pg11 minimal:
+  extends:
+    - rspec-ee system pg11
+    - .minimal-rspec-tests
+    - .rails:rules:ee-only-system:minimal
 
 rspec-ee unit pg11 geo:
   extends:
@@ -467,15 +638,36 @@ rspec-ee unit pg11 geo:
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-geo-parallel
 
+# FIXME: Temporarily disable geo minimal rspec jobs https://gitlab.com/gitlab-org/gitlab/-/issues/294212
+#rspec-ee unit pg11 geo minimal:
+#  extends:
+#    - rspec-ee unit pg11 geo
+#    - .minimal-rspec-tests
+#    - .rails:rules:ee-only-unit:minimal
+
 rspec-ee integration pg11 geo:
   extends:
     - .rspec-ee-base-geo-pg11
     - .rails:rules:ee-only-integration
 
+# FIXME: Temporarily disable geo minimal rspec jobs https://gitlab.com/gitlab-org/gitlab/-/issues/294212
+#rspec-ee integration pg11 geo minimal:
+#  extends:
+#    - rspec-ee integration pg11 geo
+#    - .minimal-rspec-tests
+#    - .rails:rules:ee-only-integration:minimal
+
 rspec-ee system pg11 geo:
   extends:
     - .rspec-ee-base-geo-pg11
     - .rails:rules:ee-only-system
+
+# FIXME: Temporarily disable geo minimal rspec jobs https://gitlab.com/gitlab-org/gitlab/-/issues/294212
+#rspec-ee system pg11 geo minimal:
+#  extends:
+#    - rspec-ee system pg11 geo
+#    - .minimal-rspec-tests
+#    - .rails:rules:ee-only-system:minimal
 
 db:rollback geo:
   extends:

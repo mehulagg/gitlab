@@ -1,9 +1,10 @@
+import { GlSprintf } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Vuex from 'vuex';
-import { GlSprintf } from '@gitlab/ui';
 import NoteHeader from '~/notes/components/note_header.vue';
 import { AVAILABILITY_STATUS } from '~/set_status_modal/utils';
+import UserNameWithStatus from '~/sidebar/components/assignees/user_name_with_status.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -36,19 +37,17 @@ describe('NoteHeader component', () => {
     username: 'root',
     show_status: true,
     status_tooltip_html: statusHtml,
-    status: {
-      availability: '',
-    },
+    availability: '',
   };
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(NoteHeader, {
       localVue,
       store: new Vuex.Store({
         actions,
       }),
       propsData: { ...props },
-      stubs: { GlSprintf },
+      stubs: { GlSprintf, UserNameWithStatus },
     });
   };
 
@@ -110,7 +109,7 @@ describe('NoteHeader component', () => {
   });
 
   it('renders busy status if author availability is set', () => {
-    createComponent({ author: { ...author, status: { availability: AVAILABILITY_STATUS.BUSY } } });
+    createComponent({ author: { ...author, availability: AVAILABILITY_STATUS.BUSY } });
 
     expect(wrapper.find('.js-user-link').text()).toContain('(Busy)');
   });
@@ -252,7 +251,7 @@ describe('NoteHeader component', () => {
   });
 
   describe('when author username link is hovered', () => {
-    it('toggles hover specific CSS classes on author name link', done => {
+    it('toggles hover specific CSS classes on author name link', (done) => {
       createComponent({ author });
 
       const authorUsernameLink = wrapper.find({ ref: 'authorUsernameLink' });

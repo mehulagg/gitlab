@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
+import { shallowMount } from '@vue/test-utils';
 import component from '~/packages/details/components/additional_metadata.vue';
+import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
 
 import { mavenPackage, conanPackage, nugetPackage, npmPackage } from '../../mock_data';
 
@@ -11,7 +11,7 @@ describe('Package Additional Metadata', () => {
     packageEntity: { ...mavenPackage },
   };
 
-  const mountComponent = props => {
+  const mountComponent = (props) => {
     wrapper = shallowMount(component, {
       propsData: { ...defaultProps, ...props },
       stubs: {
@@ -33,7 +33,7 @@ describe('Package Additional Metadata', () => {
   const findConanRecipe = () => wrapper.find('[data-testid="conan-recipe"]');
   const findMavenApp = () => wrapper.find('[data-testid="maven-app"]');
   const findMavenGroup = () => wrapper.find('[data-testid="maven-group"]');
-  const findElementLink = container => container.find(GlLink);
+  const findElementLink = (container) => container.find(GlLink);
 
   it('has the correct title', () => {
     mountComponent();

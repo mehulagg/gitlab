@@ -1,6 +1,6 @@
 <script>
-import { SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { SEVERITY_CLASS_NAME_MAP, SEVERITY_TOOLTIP_TITLE_MAP } from './constants';
 
 export default {
@@ -22,7 +22,7 @@ export default {
       return Object.keys(SEVERITY_CLASS_NAME_MAP).includes(this.severityKey);
     },
     severityKey() {
-      return this.severity.toLowerCase();
+      return this.severity?.toLowerCase();
     },
     className() {
       return SEVERITY_CLASS_NAME_MAP[this.severityKey];

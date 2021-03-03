@@ -9,12 +9,12 @@ module Mutations
 
       field :vulnerability, Types::VulnerabilityType,
             null: true,
-            description: 'The vulnerability after revert'
+            description: 'The vulnerability after revert.'
 
       argument :id,
                ::Types::GlobalIDType[::Vulnerability],
                required: true,
-               description: 'ID of the vulnerability to be reverted'
+               description: 'ID of the vulnerability to be reverted.'
 
       def resolve(id:)
         vulnerability = authorized_find!(id: id)

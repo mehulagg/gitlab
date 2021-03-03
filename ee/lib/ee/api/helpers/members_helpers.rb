@@ -8,10 +8,8 @@ module EE
         extend ::Gitlab::Utils::Override
 
         class << self
-          include ::SortingHelper
-
           def member_sort_options
-            member_sort_options_hash.keys
+            %w(access_level_asc access_level_desc last_joined name_asc name_desc oldest_joined oldest_sign_in recent_sign_in)
           end
         end
 
@@ -82,13 +80,6 @@ module EE
             member.source,
             action: :create
           ).for_member(member).security_event
-        end
-
-        def billed_users_for(group, search_term, order_by)
-          users = ::User.id_in(group.billed_user_ids)
-          users = users.search(search_term) if search_term
-
-          users.sort_by_attribute(order_by || 'name_asc')
         end
       end
     end

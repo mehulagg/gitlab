@@ -119,11 +119,10 @@ module API
     def find_project!(id)
       project = find_project(id)
 
-      if can?(current_user, :read_project, project)
-        project
-      else
-        not_found!('Project')
-      end
+      return project if can?(current_user, :read_project, project)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Project')
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -139,11 +138,10 @@ module API
     def find_group!(id)
       group = find_group(id)
 
-      if can?(current_user, :read_group, group)
-        group
-      else
-        not_found!('Group')
-      end
+      return group if can?(current_user, :read_group, group)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Group')
     end
 
     def check_namespace_access(namespace)
@@ -220,6 +218,10 @@ module API
       user_project.builds.find(id.to_i)
     end
 
+    def find_job!(id)
+      user_project.processables.find(id.to_i)
+    end
+
     def authenticate!
       unauthorized! unless current_user
     end
@@ -275,6 +277,10 @@ module API
       authorize! :read_build_trace, build
     end
 
+    def authorize_read_job_artifacts!(build)
+      authorize! :read_job_artifacts, build
+    end
+
     def authorize_destroy_artifacts!
       authorize! :destroy_artifacts, user_project
     end
@@ -322,7 +328,7 @@ module API
     #   keys (required) - A hash consisting of keys that must be present
     def required_attributes!(keys)
       keys.each do |key|
-        bad_request!(key) unless params[key].present?
+        bad_request_missing_attribute!(key) unless params[key].present?
       end
     end
 
@@ -364,14 +370,18 @@ module API
 
     def forbidden!(reason = nil)
       message = ['403 Forbidden']
-      message << " - #{reason}" if reason
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 403)
     end
 
-    def bad_request!(attribute)
-      message = ["400 (Bad request)"]
-      message << "\"" + attribute.to_s + "\" not given" if attribute
+    def bad_request!(reason = nil)
+      message = ['400 Bad request']
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 400)
+    end
+
+    def bad_request_missing_attribute!(attribute)
+      bad_request!("\"#{attribute}\" not given")
     end
 
     def not_found!(resource = nil)
@@ -509,7 +519,7 @@ module API
       case headers['X-Sendfile-Type']
       when 'X-Sendfile'
         header['X-Sendfile'] = path
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       else
         sendfile path
       end
@@ -525,7 +535,7 @@ module API
       else
         header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
-        body ""
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
     end
 
@@ -558,7 +568,7 @@ module API
 
       return unless Feature.enabled?(feature_flag, default_enabled: true)
 
-      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
     rescue => error
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
@@ -643,6 +653,10 @@ module API
 
     def secret_token
       Gitlab::Shell.secret_token
+    end
+
+    def authenticate_non_public?
+      route_authentication_setting[:authenticate_non_public] && !current_user
     end
 
     def send_git_blob(repository, blob)

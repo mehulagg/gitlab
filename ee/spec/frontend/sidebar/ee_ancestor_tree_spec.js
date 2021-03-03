@@ -29,8 +29,8 @@ describe('AncestorsTreeContainer', () => {
   });
 
   const findTooltip = () => wrapper.find('.collapse-truncated-title');
-  const containsTimeline = () => wrapper.contains('.vertical-timeline');
-  const containsValue = () => wrapper.contains('.value');
+  const containsTimeline = () => wrapper.find('.vertical-timeline').exists();
+  const containsValue = () => wrapper.find('.value').exists();
 
   it('renders all ancestors rows', () => {
     createComponent();
@@ -67,7 +67,7 @@ describe('AncestorsTreeContainer', () => {
       isFetching: true,
     });
 
-    expect(wrapper.contains(GlLoadingIcon)).toBe(true);
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
   });
 
   it('escapes html in the tooltip', () => {

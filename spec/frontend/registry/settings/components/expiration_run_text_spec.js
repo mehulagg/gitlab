@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormInput } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup } from 'jest/registry/shared/stubs';
 import component from '~/registry/settings/components/expiration_run_text.vue';
 import { NEXT_CLEANUP_LABEL, NOT_SCHEDULED_POLICY_TEXT } from '~/registry/settings/constants';
@@ -11,7 +11,7 @@ describe('ExpirationToggle', () => {
   const findInput = () => wrapper.find(GlFormInput);
   const findFormGroup = () => wrapper.find(GlFormGroup);
 
-  const mountComponent = propsData => {
+  const mountComponent = (propsData) => {
     wrapper = shallowMount(component, {
       stubs: {
         GlFormGroup,

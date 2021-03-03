@@ -31,6 +31,7 @@ class ProjectStatistics < ApplicationRecord
   scope :for_project_ids, ->(project_ids) { where(project_id: project_ids) }
 
   scope :for_namespaces, -> (namespaces) { where(namespace: namespaces) }
+  scope :with_any_ci_minutes_used, -> { where.not(shared_runners_seconds: 0) }
 
   def total_repository_size
     repository_size + lfs_objects_size
@@ -73,8 +74,6 @@ class ProjectStatistics < ApplicationRecord
   end
 
   def update_uploads_size
-    return uploads_size unless Feature.enabled?(:count_uploads_size_in_storage_stats, project)
-
     self.uploads_size = project.uploads.sum(:size)
   end
 

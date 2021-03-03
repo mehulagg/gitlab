@@ -12,10 +12,6 @@ module Geo
       ::Gitlab::GitAccessSnippet
     end
 
-    def needs_checksum?
-      false
-    end
-
     def repository
       model_record.repository
     end

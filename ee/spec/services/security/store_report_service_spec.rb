@@ -2,19 +2,6 @@
 
 require 'spec_helper'
 
-UUID_REGEXP = Regexp.new("^([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-" \
-                         "([0-9a-f]{2})([0-9a-f]{2})-([0-9a-f]{12})$").freeze
-
-RSpec::Matchers.define :be_uuid_v5 do
-  match do |string|
-    expect(string).to be_a(String)
-
-    uuid_components = string.downcase.scan(UUID_REGEXP).first
-    time_hi_and_version = uuid_components[2].to_i(16)
-    (time_hi_and_version >> 12) == 5
-  end
-end
-
 RSpec.describe Security::StoreReportService, '#execute' do
   let_it_be(:user) { create(:user) }
   let(:artifact) { create(:ee_ci_job_artifact, trait) }
@@ -25,6 +12,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   before do
     stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
+    allow(Security::AutoFixWorker).to receive(:perform_async)
   end
 
   subject { described_class.new(pipeline, report).execute }
@@ -42,11 +30,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations) do
-      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0
-      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0
-      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1
-      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :fingerprints) do
+      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0 | 2
+      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
+      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
+      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
     end
 
     with_them do
@@ -74,14 +62,30 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
-      it 'inserts all vulnerabilties' do
+      it 'inserts all vulnerabilities' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
       end
 
-      it 'calculates UUIDv5 for all findings' do
+      it 'inserts all fingerprints' do
+        expect { subject }.to change { Vulnerabilities::FindingFingerprint.count }.by(fingerprints)
+      end
+    end
+
+    context 'when report data includes all raw_metadata' do
+      let(:trait) { :dependency_scanning_remediation }
+
+      it 'inserts top level finding data', :aggregate_failures do
         subject
-        uuids = Vulnerabilities::Finding.pluck(:uuid)
-        expect(uuids).to all(be_uuid_v5)
+
+        finding = Vulnerabilities::Finding.last
+        finding.raw_metadata = nil
+
+        expect(finding.metadata).to be_blank
+        expect(finding.cve).not_to be_nil
+        expect(finding.description).not_to be_nil
+        expect(finding.location).not_to be_nil
+        expect(finding.message).not_to be_nil
+        expect(finding.solution).not_to be_nil
       end
     end
 
@@ -111,10 +115,18 @@ RSpec.describe Security::StoreReportService, '#execute' do
   context 'with existing data from previous pipeline' do
     let(:scanner) { build(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
     let(:identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
+    let(:different_identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'fa47ee81f079e5c38ea6edb700b44eaeb62f67ee') }
     let!(:new_artifact) { create(:ee_ci_job_artifact, :sast, job: new_build) }
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
     let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
+    let(:existing_fingerprint) { create(:vulnerabilities_finding_fingerprint, finding: finding) }
+    let(:unsupported_fingerprint) do
+      create(:vulnerabilities_finding_fingerprint,
+        finding: finding,
+        algorithm_type: ::Vulnerabilities::FindingFingerprint.algorithm_types[:location])
+    end
+
     let(:trait) { :sast }
 
     let!(:finding) do
@@ -124,10 +136,32 @@ RSpec.describe Security::StoreReportService, '#execute' do
         primary_identifier: identifier,
         scanner: scanner,
         project: project,
+        uuid: "80571acf-8660-4bc8-811a-1d8dec9ab6f4",
         location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420')
     end
 
     let!(:vulnerability) { create(:vulnerability, findings: [finding], project: project) }
+
+    let(:desired_uuid) do
+      Security::VulnerabilityUUID.generate(
+        report_type: finding.report_type,
+        primary_identifier_fingerprint: finding.primary_identifier.fingerprint,
+        location_fingerprint: finding.location_fingerprint,
+        project_id: finding.project_id
+      )
+    end
+
+    let!(:finding_with_uuidv5) do
+      create(:vulnerabilities_finding,
+        pipelines: [pipeline],
+        identifiers: [different_identifier],
+        primary_identifier: different_identifier,
+        scanner: scanner,
+        project: project,
+        location_fingerprint: '34661e23abcf78ff80dfcc89d0700437612e3f88')
+    end
+
+    let!(:vulnerability_with_uuid5) { create(:vulnerability, findings: [finding_with_uuidv5], project: project) }
 
     before do
       project.add_developer(user)
@@ -135,6 +169,16 @@ RSpec.describe Security::StoreReportService, '#execute' do
     end
 
     subject { described_class.new(new_pipeline, new_report).execute }
+
+    it 'does not change existing UUIDv5' do
+      expect { subject }.not_to change(finding_with_uuidv5, :uuid)
+    end
+
+    it 'updates UUIDv4 to UUIDv5' do
+      subject
+
+      expect(finding.reload.uuid).to eq(desired_uuid)
+    end
 
     it 'inserts only new scanners and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Scanner.count }.by(2)
@@ -148,10 +192,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
       expect { subject }.to change { Vulnerabilities::Finding.count }.by(32)
     end
 
-    it 'calculates UUIDv5 for all findings' do
-      expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
-    end
-
     it 'inserts all finding pipelines (join model) for this new pipeline' do
       expect { subject }.to change { Vulnerabilities::FindingPipeline.where(pipeline: new_pipeline).count }.by(33)
     end
@@ -162,11 +202,38 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'updates existing findings with new data' do
       subject
+
       expect(finding.reload).to have_attributes(severity: 'medium', name: 'Probable insecure usage of temp file/directory.')
+    end
+
+    it 'updates fingerprints to match new values' do
+      existing_fingerprint
+      unsupported_fingerprint
+
+      expect(finding.fingerprints.count).to eq(2)
+      fingerprint_algs = finding.fingerprints.map(&:algorithm_type).sort
+      expect(fingerprint_algs).to eq(%w[hash location])
+
+      subject
+
+      finding.reload
+      existing_fingerprint.reload
+
+      # check that unsupported algorithm is not deleted
+      expect(finding.fingerprints.count).to eq(3)
+      fingerprint_algs = finding.fingerprints.sort.map(&:algorithm_type)
+      expect(fingerprint_algs).to eq(%w[hash location scope_offset])
+
+      # check that the existing hash fingerprint was updated/reused
+      expect(existing_fingerprint.id).to eq(finding.fingerprints.min.id)
+
+      # check that the unsupported fingerprint was not deleted
+      expect(::Vulnerabilities::FindingFingerprint.exists?(unsupported_fingerprint.id)).to eq(true)
     end
 
     it 'updates existing vulnerability with new data' do
       subject
+
       expect(vulnerability.reload).to have_attributes(severity: 'medium', title: 'Probable insecure usage of temp file/directory.', title_html: 'Probable insecure usage of temp file/directory.')
     end
 
@@ -174,7 +241,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       let!(:existing_vulnerability) { create(:vulnerability, report_type: report_type, project: project) }
 
       it 'marks the vulnerability as resolved on default branch' do
-        expect { subject }.to change { existing_vulnerability.reload[:resolved_on_default_branch] }.from(false).to(true)
+        expect { subject }.to change { existing_vulnerability.reload.resolved_on_default_branch }.from(false).to(true)
       end
     end
 
@@ -184,7 +251,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'marks the vulnerability as not resolved on default branch' do
-        expect { subject }.to change { vulnerability.reload[:resolved_on_default_branch] }.from(true).to(false)
+        expect { subject }.to change { vulnerability.reload.resolved_on_default_branch }.from(true).to(false)
       end
     end
 
@@ -221,6 +288,88 @@ RSpec.describe Security::StoreReportService, '#execute' do
         status: :error,
         message: "sast report already stored for this pipeline, skipping..."
       })
+    end
+  end
+
+  context 'start auto_fix' do
+    before do
+      stub_licensed_features(vulnerability_auto_fix: true)
+    end
+
+    context 'with auto fix supported report type' do
+      let(:trait) { :dependency_scanning }
+
+      context 'when auto fix enabled' do
+        it 'start auto fix worker' do
+          expect(Security::AutoFixWorker).to receive(:perform_async).with(pipeline.id)
+
+          subject
+        end
+      end
+
+      context 'when auto fix disabled' do
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(security_auto_fix: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when auto fix feature is disabled' do
+          before do
+            project.security_setting.update!(auto_fix_dependency_scanning: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when licensed feature is unavailable' do
+          before do
+            stub_licensed_features(vulnerability_auto_fix: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when security setting is not created' do
+          before do
+            project.security_setting.destroy!
+            project.reload
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+            expect(subject[:status]).to eq(:success)
+          end
+        end
+      end
+    end
+
+    context 'with auto fix not supported report type' do
+      let(:trait) { :sast }
+
+      before do
+        stub_licensed_features(vulnerability_auto_fix: true)
+      end
+
+      it 'does not start auto fix worker' do
+        expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+        subject
+      end
     end
   end
 end

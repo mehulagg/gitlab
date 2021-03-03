@@ -35,4 +35,42 @@ RSpec.describe Gitlab::Auth::GroupSaml::AuthHash do
       end
     end
   end
+
+  describe 'allowed user attributes methods' do
+    context 'when the attributes are presented as an array' do
+      let(:raw_info_attr) { { 'can_create_group' => %w(true), 'projects_limit' => %w(20) } }
+
+      it 'returns the proper can_create_groups value' do
+        expect(saml_auth_hash.can_create_group).to eq "true"
+      end
+
+      it 'returns the proper projects_limit value' do
+        expect(saml_auth_hash.projects_limit).to eq "20"
+      end
+    end
+
+    context 'when the attributes are presented as a string' do
+      let(:raw_info_attr) { { 'can_create_group' => 'false', 'projects_limit' => '20' } }
+
+      it 'returns the proper can_create_groups value' do
+        expect(saml_auth_hash.can_create_group).to eq "false"
+      end
+
+      it 'returns the proper projects_limit value' do
+        expect(saml_auth_hash.projects_limit).to eq "20"
+      end
+    end
+
+    context 'when the attributes are not present in the SAML response' do
+      let(:raw_info_attr) { {} }
+
+      it 'returns nil for can_create_group' do
+        expect(saml_auth_hash.can_create_group).to eq nil
+      end
+
+      it 'returns nil for can_create_groups' do
+        expect(saml_auth_hash.projects_limit).to eq nil
+      end
+    end
+  end
 end

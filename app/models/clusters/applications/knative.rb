@@ -2,8 +2,10 @@
 
 module Clusters
   module Applications
+    # DEPRECATED for removal in %14.0
+    # See https://gitlab.com/groups/gitlab-org/-/epics/4280
     class Knative < ApplicationRecord
-      VERSION = '0.9.0'
+      VERSION = '0.10.0'
       REPOSITORY = 'https://charts.gitlab.io'
       METRICS_CONFIG = 'https://gitlab.com/gitlab-org/charts/knative/-/raw/v0.9.0/vendor/istio-metrics.yml'
       FETCH_IP_ADDRESS_DELAY = 30.seconds

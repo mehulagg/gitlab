@@ -1,10 +1,10 @@
 <script>
 import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { __, n__, sprintf } from '~/locale';
 import createFlash from '~/flash';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { __, n__, sprintf } from '~/locale';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { statusType } from '../../epic/constants';
 import IssuesLaneList from './issues_lane_list.vue';
 
@@ -143,9 +143,7 @@ export default {
           {{ epic.title }}
         </h4>
         <gl-popover :target="() => $refs.epicTitle" triggers="hover" placement="top">
-          <template #title
-            >{{ epic.title }} &middot; {{ epic.reference }}</template
-          >
+          <template #title>{{ epic.title }} &middot; {{ epic.reference }}</template>
           <div>{{ epicTimeAgoString }}</div>
           <div class="gl-mb-2">{{ epicDateString }}</div>
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>

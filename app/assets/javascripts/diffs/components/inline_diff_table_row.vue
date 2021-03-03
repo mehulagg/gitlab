@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlTooltipDirective, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { CONTEXT_LINE_CLASS_NAME } from '../constants';
 import DiffGutterAvatars from './diff_gutter_avatars.vue';
 import {
@@ -72,7 +72,12 @@ export default {
       return this.fileLineCoverage(this.filePath, this.line.new_line);
     },
     classNameMapCell() {
-      return classNameMapCell(this.line, this.isHighlighted, this.isLoggedIn, this.isHover);
+      return classNameMapCell({
+        line: this.line,
+        hll: this.isHighlighted,
+        isLoggedIn: this.isLoggedIn,
+        isHover: this.isHover,
+      });
     },
     addCommentTooltip() {
       return addCommentTooltip(this.line);

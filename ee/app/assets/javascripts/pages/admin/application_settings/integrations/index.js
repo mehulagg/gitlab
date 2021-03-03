@@ -1,7 +1,7 @@
 import $ from 'jquery';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 import { s__ } from '~/locale';
 import PersistentUserCallout from '~/persistent_user_callout';
-import { loadCSSFile } from '~/lib/utils/css_utils';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
   $limitByNamespaces.find('.select2').select2('data', null);
@@ -27,7 +27,7 @@ const getDropdownConfig = (placeholder, url) => ({
     },
     results(data) {
       return {
-        results: data.map(entity => ({
+        results: data.map((entity) => ({
           id: entity.source_id,
           text: entity.path,
         })),
@@ -44,7 +44,7 @@ const $container = $('#js-elasticsearch-settings');
 
 $container
   .find('.js-limit-checkbox')
-  .on('change', e =>
+  .on('change', (e) =>
     onLimitCheckboxChange(
       e.currentTarget.checked,
       $container.find('.js-limit-namespaces'),

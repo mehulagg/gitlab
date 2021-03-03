@@ -5,65 +5,54 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Reference architecture: up to 2,000 users **(CORE ONLY)**
+# Reference architecture: up to 2,000 users **(FREE SELF)**
 
 This page describes GitLab reference architecture for up to 2,000 users.
 For a full list of reference architectures, see
 [Available reference architectures](index.md#available-reference-architectures).
 
 > - **Supported users (approximate):** 2,000
-> - **High Availability:** No
-> - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git: 4 RPS
+> - **High Availability:** No. For a highly-available environment, you can
+>   follow the [3K reference architecture](3k_users.md).
+> - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git (Pull): 4 RPS, Git (Push): 1 RPS
 
 | Service                                  | Nodes  | Configuration           | GCP            | AWS          | Azure   |
 |------------------------------------------|--------|-------------------------|----------------|--------------|---------|
-| Load balancer                            | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large     | F2s v2  |
-| PostgreSQL                               | 1      | 2 vCPU, 7.5 GB memory   | n1-standard-2  | m5.large     | D2s v3  |
-| Redis                                    | 1      | 1 vCPU, 3.75 GB memory  | n1-standard-1  | m5.large     | D2s v3  |
-| Gitaly                                   | 1      | 4 vCPU, 15 GB memory    | n1-standard-4  | m5.xlarge    | D4s v3  |
-| GitLab Rails                             | 2      | 8 vCPU, 7.2 GB memory   | n1-highcpu-8   | c5.2xlarge   | F8s v2  |
-| Monitoring node                          | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large     | F2s v2  |
+| Load balancer                            | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`     | F2s v2  |
+| PostgreSQL                               | 1      | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`     | D2s v3  |
+| Redis                                    | 1      | 1 vCPU, 3.75 GB memory  | n1-standard-1  | `m5.large`     | D2s v3  |
+| Gitaly                                   | 1      | 4 vCPU, 15 GB memory    | n1-standard-4  | `m5.xlarge`    | D4s v3  |
+| GitLab Rails                             | 2      | 8 vCPU, 7.2 GB memory   | n1-highcpu-8   | `c5.2xlarge`   | F8s v2  |
+| Monitoring node                          | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`     | F2s v2  |
 | Object storage                           | n/a    | n/a                     | n/a            | n/a          | n/a     |
-| NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | c5.xlarge    | F4s v2  |
+| NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | `c5.xlarge`    | F4s v2  |
 
-```mermaid
-stateDiagram-v2
-    [*] --> LoadBalancer
-    LoadBalancer --> ApplicationServer
+```plantuml
+@startuml 2k
+card "**External Load Balancer**" as elb #6a9be7
 
-    ApplicationServer --> Gitaly
-    ApplicationServer --> Redis
-    ApplicationServer --> Database
-    ApplicationServer --> ObjectStorage
+collections "**GitLab Rails** x3" as gitlab #32CD32
+card "**Prometheus + Grafana**" as monitor #7FFFD4
+card "**Gitaly**" as gitaly #FF8C00
+card "**PostgreSQL**" as postgres #4EA7FF
+card "**Redis**" as redis #FF6347
+cloud "**Object Storage**" as object_storage #white
 
-    ApplicationMonitoring -->ApplicationServer
-    ApplicationMonitoring -->Redis
-    ApplicationMonitoring -->Database
+elb -[#6a9be7]-> gitlab
+elb -[#6a9be7]--> monitor
 
+gitlab -[#32CD32]--> gitaly
+gitlab -[#32CD32]--> postgres
+gitlab -[#32CD32]-> object_storage
+gitlab -[#32CD32]--> redis
 
-    state Database {
-      "PG_Node"
-    }
-    state Redis {
-      "Redis_Node"
-    }
+monitor .[#7FFFD4]u-> gitlab
+monitor .[#7FFFD4]-> gitaly
+monitor .[#7FFFD4]-> postgres
+monitor .[#7FFFD4,norank]--> redis
+monitor .[#7FFFD4,norank]u--> elb
 
-    state Gitaly {
-      "Gitaly"
-    }
-
-    state ApplicationServer {
-      "AppServ_1..2"
-    }
-
-    state LoadBalancer {
-      "LoadBalancer"
-    }
-
-    state ApplicationMonitoring {
-      "Prometheus"
-      "Grafana"
-    }
+@enduml
 ```
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
@@ -271,7 +260,7 @@ further configuration steps.
    ```ruby
    # Disable all components except PostgreSQL
    roles ['postgres_role']
-   repmgr['enable'] = false
+   patroni['enable'] = false
    consul['enable'] = false
    prometheus['enable'] = false
    alertmanager['enable'] = false
@@ -668,6 +657,25 @@ On each node perform the following:
    gitlab_rails['monitoring_whitelist'] = ['<MONITOR NODE IP>/32', '127.0.0.0/8']
    nginx['status']['options']['allow'] = ['<MONITOR NODE IP>/32', '127.0.0.0/8']
 
+   #############################
+   ###     Object storage    ###
+   #############################
+
+   # This is an example for configuring Object Storage on GCP
+   # Replace this config with your chosen Object Storage provider as desired
+   gitlab_rails['object_store']['connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['object_store']['objects']['artifacts']['bucket'] = "<gcp-artifacts-bucket-name>"
+   gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "<gcp-external-diffs-bucket-name>"
+   gitlab_rails['object_store']['objects']['lfs']['bucket'] = "<gcp-lfs-bucket-name>"
+   gitlab_rails['object_store']['objects']['uploads']['bucket'] = "<gcp-uploads-bucket-name>"
+   gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
+   gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
+   gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
+
    ## Uncomment and edit the following options if you have set up NFS
    ##
    ## Prevent GitLab from starting if NFS data mounts are not available
@@ -788,7 +796,7 @@ running [Prometheus](../monitoring/prometheus/index.md) and
    gitlab_exporter['enable'] = false
    ```
 
-1. Prometheus also needs some scrape configs to pull all the data from the various
+1. Prometheus also needs some scrape configurations to pull all the data from the various
    nodes where we configured exporters. Assuming that your nodes' IPs are:
 
    ```plaintext
@@ -878,7 +886,7 @@ GitLab has been tested on a number of object storage providers:
 - [Google Cloud Storage](https://cloud.google.com/storage)
 - [Digital Ocean Spaces](https://www.digitalocean.com/products/spaces/)
 - [Oracle Cloud Infrastructure](https://docs.cloud.oracle.com/en-us/iaas/Content/Object/Tasks/s3compatibleapi.htm)
-- [Openstack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
+- [OpenStack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
 - [Azure Blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction)
 - On-premises hardware and appliances from various storage vendors.
 - MinIO. We have [a guide to deploying this](https://docs.gitlab.com/charts/advanced/external-object-storage/minio.html) within our Helm Chart documentation.
@@ -898,7 +906,7 @@ on what features you intend to use:
 
 |Object storage type|Supported by consolidated configuration?|
 |-------------------|----------------------------------------|
-| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
+| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage) | No |
 | [Job artifacts](../job_artifacts.md#using-object-storage) including archived job logs | Yes |
 | [LFS objects](../lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
 | [Uploads](../uploads.md#using-object-storage) | Yes |
@@ -907,23 +915,14 @@ on what features you intend to use:
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](../packages/index.md#using-object-storage) (optional feature) | Yes |
 | [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) | Yes |
-| [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
+| [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE SELF)** | No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |
 
 Using separate buckets for each data type is the recommended approach for GitLab.
-
-A limitation of our configuration is that each use of object storage is
-separately configured. We have an [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/23345)
-for improving this, which would allow for one bucket with separate folders.
-
-Using a single bucket when GitLab is deployed with the Helm chart causes
-restoring from a backup to
-[not function properly](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer).
-Although you may not be using a Helm deployment right now, if you migrate
-GitLab to a Helm deployment later, GitLab would still work, but you may not
-realize backups aren't working correctly until a critical requirement for
-functioning backups is encountered.
+This ensures there are no collisions across the various types of data GitLab stores.
+There are plans to [enable the use of a single bucket](https://gitlab.com/gitlab-org/gitlab/-/issues/292958)
+in the future.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
@@ -931,7 +930,7 @@ functioning backups is encountered.
   </a>
 </div>
 
-## Configure Advanced Search **(STARTER ONLY)**
+## Configure Advanced Search **(PREMIUM SELF)**
 
 You can leverage Elasticsearch and [enable Advanced Search](../../integration/elasticsearch.md)
 for faster, more advanced code search across your entire GitLab instance.
@@ -954,7 +953,13 @@ along with [Gitaly](#configure-gitaly), are recommended over using NFS whenever
 possible. However, if you intend to use GitLab Pages,
 [you must use NFS](troubleshooting.md#gitlab-pages-requires-nfs).
 
-For information about configuring NFS, see the [NFS documentation page](../nfs.md).
+See how to [configure NFS](../nfs.md).
+
+WARNING:
+From GitLab 13.0, using NFS for Git repositories is deprecated.
+From GitLab 14.0, technical support for NFS for Git repositories
+will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
+as soon as possible.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

@@ -116,8 +116,6 @@ RSpec.describe Gitlab::Utils do
   end
 
   describe '.ms_to_round_sec' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:original, :expected) do
       1999.8999     | 1.9999
       12384         | 12.384
@@ -169,8 +167,6 @@ RSpec.describe Gitlab::Utils do
   end
 
   describe '.remove_line_breaks' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:original, :expected) do
       "foo\nbar\nbaz"     | "foobarbaz"
       "foo\r\nbar\r\nbaz" | "foobarbaz"
@@ -281,8 +277,6 @@ RSpec.describe Gitlab::Utils do
   end
 
   describe '.append_path' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:host, :path, :result) do
       'http://test/'  | '/foo/bar'  |  'http://test/foo/bar'
       'http://test/'  | '//foo/bar' |  'http://test/foo/bar'
@@ -389,6 +383,21 @@ RSpec.describe Gitlab::Utils do
       expect(described_class.string_to_ip_object('[::ffff:a9fe:a864]')).to eq(IPAddr.new('::ffff:a9fe:a864'))
       expect(described_class.string_to_ip_object('127.0.0.0/28')).to eq(IPAddr.new('127.0.0.0/28'))
       expect(described_class.string_to_ip_object('1:0:0:0:0:0:0:0/124')).to eq(IPAddr.new('1:0:0:0:0:0:0:0/124'))
+    end
+  end
+
+  describe ".safe_downcase!" do
+    where(:str, :result) do
+      "test".freeze | "test"
+      "Test".freeze | "test"
+      "test" | "test"
+      "Test" | "test"
+    end
+
+    with_them do
+      it "downcases the string" do
+        expect(described_class.safe_downcase!(str)).to eq(result)
+      end
     end
   end
 

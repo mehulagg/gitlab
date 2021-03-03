@@ -34,16 +34,16 @@ describe('projects actions', () => {
       };
 
       beforeEach(() => {
-        mock.onGet(state.projectsEndpoint).replyOnce(config => {
+        mock.onGet(state.projectsEndpoint).replyOnce((config) => {
           const hasExpectedParams = Object.keys(expectedParams).every(
-            param => config.params[param] === expectedParams[param],
+            (param) => config.params[param] === expectedParams[param],
           );
 
           return hasExpectedParams ? [200, data] : [400];
         });
       });
 
-      it('should dispatch the request and success actions', done => {
+      it('should dispatch the request and success actions', (done) => {
         testAction(
           actions.fetchProjects,
           {},
@@ -70,7 +70,7 @@ describe('projects actions', () => {
         mock.onGet(state.projectsEndpoint, { page: '2' }).replyOnce(200, [2]);
       });
 
-      it('should dispatch the request and success actions', done => {
+      it('should dispatch the request and success actions', (done) => {
         testAction(
           actions.fetchProjects,
           {},
@@ -93,7 +93,7 @@ describe('projects actions', () => {
         mock.onGet(state.projectsEndpoint).replyOnce(404, {});
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', (done) => {
         testAction(
           actions.fetchProjects,
           {},
@@ -110,14 +110,14 @@ describe('projects actions', () => {
         state.projectsEndpoint = '';
       });
 
-      it('should not do anything', done => {
+      it('should not do anything', (done) => {
         testAction(actions.fetchProjects, {}, state, [], [], done);
       });
     });
   });
 
   describe('receiveProjectsSuccess', () => {
-    it('should commit the success mutation', done => {
+    it('should commit the success mutation', (done) => {
       const state = createState();
 
       testAction(
@@ -137,7 +137,7 @@ describe('projects actions', () => {
   });
 
   describe('receiveProjectsError', () => {
-    it('should commit the error mutation', done => {
+    it('should commit the error mutation', (done) => {
       const state = createState();
 
       testAction(
@@ -152,7 +152,7 @@ describe('projects actions', () => {
   });
 
   describe('requestProjects', () => {
-    it('should commit the request mutation', done => {
+    it('should commit the request mutation', (done) => {
       const state = createState();
 
       testAction(actions.requestProjects, {}, state, [{ type: types.REQUEST_PROJECTS }], [], done);
@@ -160,7 +160,7 @@ describe('projects actions', () => {
   });
 
   describe('setProjectsEndpoint', () => {
-    it('should commit the correct mutuation', done => {
+    it('should commit the correct mutuation', (done) => {
       const state = createState();
 
       testAction(

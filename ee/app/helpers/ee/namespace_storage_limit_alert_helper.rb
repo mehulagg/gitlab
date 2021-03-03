@@ -47,16 +47,7 @@ module EE
     end
 
     def purchase_storage_link_enabled?(namespace)
-      ::Feature.enabled?(:buy_storage_link) &&
-        namespace.additional_repo_storage_by_namespace_enabled?
-    end
-
-    def namespace_storage_usage_link(namespace)
-      if namespace.group?
-        group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')
-      else
-        profile_usage_quotas_path(anchor: 'storage-quota-tab')
-      end
+      namespace.additional_repo_storage_by_namespace_enabled?
     end
 
     def purchase_storage_url

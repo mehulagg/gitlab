@@ -11,14 +11,14 @@ import {
   GlButton,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import CanCreatePersonalSnippet from 'shared_queries/snippet/user_permissions.query.graphql';
 import CanCreateProjectSnippet from 'shared_queries/snippet/project_permissions.query.graphql';
+import CanCreatePersonalSnippet from 'shared_queries/snippet/user_permissions.query.graphql';
+import { fetchPolicies } from '~/lib/graphql';
+import { joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 import DeleteSnippetMutation from '../mutations/deleteSnippet.mutation.graphql';
-import { joinPaths } from '~/lib/utils/url_utility';
-import { fetchPolicies } from '~/lib/graphql';
 
 export default {
   components: {
@@ -69,7 +69,7 @@ export default {
   },
   computed: {
     snippetHasBinary() {
-      return Boolean(this.snippet.blobs.find(blob => blob.binary));
+      return Boolean(this.snippet.blobs.find((blob) => blob.binary));
     },
     authoredMessage() {
       return this.snippet.author
@@ -164,7 +164,7 @@ export default {
           this.closeDeleteModal();
           this.redirectToSnippets();
         })
-        .catch(err => {
+        .catch((err) => {
           this.isDeleting = false;
           this.errorMessage = err.message;
         });
@@ -200,6 +200,13 @@ export default {
               <gl-avatar :size="24" :src="snippet.author.avatarUrl" />
               <span class="bold">{{ snippet.author.name }}</span>
             </a>
+            <gl-emoji
+              v-if="snippet.author.status"
+              v-gl-tooltip
+              class="gl-vertical-align-baseline font-size-inherit gl-mr-1"
+              :title="snippet.author.status.message"
+              :data-name="snippet.author.status.emoji"
+            />
           </template>
         </gl-sprintf>
       </div>

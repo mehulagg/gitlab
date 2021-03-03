@@ -23,7 +23,6 @@ module Security
 
     private
 
-    delegate :findings, to: :report, prefix: true
     delegate :project, to: :security_scan
 
     def already_stored?
@@ -34,9 +33,11 @@ module Security
       report_findings.each_with_index { |report_finding, position| store_finding!(report_finding, position) }
     end
 
-    def store_finding!(report_finding, position)
-      return if report_finding.scanner.blank?
+    def report_findings
+      report.findings.select(&:valid?)
+    end
 
+    def store_finding!(report_finding, position)
       security_scan.findings.create!(finding_data(report_finding, position))
     end
 
@@ -44,6 +45,7 @@ module Security
       {
         severity: report_finding.severity,
         confidence: report_finding.confidence,
+        uuid: report_finding.uuid,
         project_fingerprint: report_finding.project_fingerprint,
         scanner: persisted_scanner_for(report_finding.scanner),
         position: position

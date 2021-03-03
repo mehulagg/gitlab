@@ -1,8 +1,8 @@
 <script>
 import { GlTooltipDirective, GlLink, GlButton, GlCollapse, GlIcon, GlBadge } from '@gitlab/ui';
 import { difference, get } from 'lodash';
-import { ASSET_LINK_TYPE } from '../constants';
 import { __, s__, sprintf } from '~/locale';
+import { ASSET_LINK_TYPE } from '../constants';
 
 export default {
   name: 'ReleaseBlockAssets',
@@ -47,7 +47,7 @@ export default {
     sections() {
       return [
         {
-          links: get(this.assets, 'sources', []).map(s => ({
+          links: get(this.assets, 'sources', []).map((s) => ({
             url: s.url,
             name: sprintf(__('Source code (%{fileExtension})'), { fileExtension: s.format }),
           })),
@@ -73,7 +73,7 @@ export default {
           links: this.otherLinks,
           iconName: 'link',
         },
-      ].filter(section => section.links.length > 0);
+      ].filter((section) => section.links.length > 0);
     },
   },
   methods: {
@@ -81,7 +81,7 @@ export default {
       this.isAssetsExpanded = !this.isAssetsExpanded;
     },
     linksForType(type) {
-      return this.assets.links.filter(l => l.linkType === type);
+      return this.assets.links.filter((l) => l.linkType === type);
     },
   },
   externalLinkTooltipText: __('This link points to external content'),

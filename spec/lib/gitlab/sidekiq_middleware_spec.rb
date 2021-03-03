@@ -100,7 +100,7 @@ RSpec.describe Gitlab::SidekiqMiddleware do
                   "subject",
                   "body"
                 ],
-                "_aj_symbol_keys" => ["args"]
+                ActiveJob::Arguments.const_get('RUBY2_KEYWORDS_KEY', false) => ["args"]
               }
             ],
             "executions" => 0,
@@ -177,6 +177,7 @@ RSpec.describe Gitlab::SidekiqMiddleware do
          ::Gitlab::SidekiqMiddleware::DuplicateJobs::Client,
          ::Gitlab::SidekiqStatus::ClientMiddleware,
          ::Gitlab::SidekiqMiddleware::AdminMode::Client,
+         ::Gitlab::SidekiqMiddleware::SizeLimiter::Client,
          ::Gitlab::SidekiqMiddleware::ClientMetrics
       ]
     end

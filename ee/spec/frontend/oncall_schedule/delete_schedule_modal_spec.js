@@ -1,13 +1,14 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import { GlModal, GlAlert, GlSprintf } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import waitForPromises from 'helpers/wait_for_promises';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
-import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import DeleteScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/delete_schedule_modal.vue';
+import { deleteScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
+import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import {
   getOncallSchedulesQueryResponse,
   destroyScheduleResponse,
@@ -20,8 +21,6 @@ const mutate = jest.fn();
 const mockHideModal = jest.fn();
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
-
-localVue.use(VueApollo);
 
 describe('DeleteScheduleModal', () => {
   let wrapper;
@@ -39,9 +38,6 @@ describe('DeleteScheduleModal', () => {
   }
 
   async function destroySchedule(localWrapper) {
-    await jest.runOnlyPendingTimers();
-    await localWrapper.vm.$nextTick();
-
     localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
@@ -53,6 +49,7 @@ describe('DeleteScheduleModal', () => {
         };
       },
       propsData: {
+        modalId: deleteScheduleModalId,
         schedule,
         ...props,
       },
@@ -95,6 +92,7 @@ describe('DeleteScheduleModal', () => {
       apolloProvider: fakeApollo,
       propsData: {
         schedule,
+        modalId: deleteScheduleModalId,
       },
       provide: {
         projectPath,
@@ -108,7 +106,6 @@ describe('DeleteScheduleModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders delete schedule modal layout', () => {

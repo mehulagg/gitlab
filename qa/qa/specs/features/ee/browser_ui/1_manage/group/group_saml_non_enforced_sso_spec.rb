@@ -61,8 +61,6 @@ module QA
 
           page.visit managed_group_url
 
-          EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
-
           expect(page).to have_content("Already signed in with SAML for #{@group.path}")
         end
       end

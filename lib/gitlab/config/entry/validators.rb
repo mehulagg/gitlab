@@ -134,6 +134,16 @@ module Gitlab
           end
         end
 
+        class HashOrBooleanValidator < ActiveModel::EachValidator
+          include LegacyValidationHelpers
+
+          def validate_each(record, attribute, value)
+            unless value.is_a?(Hash) || validate_boolean(value)
+              record.errors.add(attribute, 'should be a hash or a boolean value')
+            end
+          end
+        end
+
         class KeyValidator < ActiveModel::EachValidator
           include LegacyValidationHelpers
 
@@ -155,6 +165,22 @@ module Gitlab
             elsif path == '.' || path == '..'
               record.errors.add(attribute, 'cannot be "." or ".."')
             end
+          end
+        end
+
+        class ArrayOfIntegersOrIntegerValidator < ActiveModel::EachValidator
+          include LegacyValidationHelpers
+
+          def validate_each(record, attribute, value)
+            unless validate_integer(value) || validate_array_of_integers(value)
+              record.errors.add(attribute, 'should be an array of integers or an integer')
+            end
+          end
+
+          private
+
+          def validate_array_of_integers(values)
+            values.is_a?(Array) && values.all? { |value| validate_integer(value) }
           end
         end
 
@@ -242,17 +268,16 @@ module Gitlab
           end
         end
 
-        class StringOrNestedArrayOfStringsValidator < NestedArrayOfStringsValidator
+        class StringOrNestedArrayOfStringsValidator < ActiveModel::EachValidator
+          include LegacyValidationHelpers
+          include NestedArrayHelpers
+
           def validate_each(record, attribute, value)
-            unless validate_string_or_nested_array_of_strings(value)
-              record.errors.add(attribute, 'should be a string or an array containing strings and arrays of strings')
+            max_level = options.fetch(:max_level, 1)
+
+            unless validate_string(value) || validate_nested_array(value, max_level, &method(:validate_string))
+              record.errors.add(attribute, "should be a string or a nested array of strings up to #{max_level} levels deep")
             end
-          end
-
-          private
-
-          def validate_string_or_nested_array_of_strings(values)
-            validate_string(values) || validate_nested_array_of_strings(values)
           end
         end
 

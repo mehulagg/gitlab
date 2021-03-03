@@ -1,15 +1,15 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
 import { GlLoadingIcon, GlTab } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
+import Vuex from 'vuex';
 import { TEST_HOST } from 'helpers/test_constants';
 import { pipelines } from 'jest/ide/mock_data';
-import List from '~/ide/components/pipelines/list.vue';
 import JobsList from '~/ide/components/jobs/list.vue';
-import CiIcon from '~/vue_shared/components/ci_icon.vue';
+import List from '~/ide/components/pipelines/list.vue';
 import IDEServices from '~/ide/services';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 jest.mock('~/ide/services', () => ({
   pingUsage: jest.fn(),
@@ -19,7 +19,6 @@ describe('IDE pipelines list', () => {
   let wrapper;
 
   const defaultState = {
-    links: { ciHelpPagePath: TEST_HOST },
     pipelinesEmptyStateSvgPath: TEST_HOST,
   };
   const defaultPipelinesState = {
@@ -59,9 +58,6 @@ describe('IDE pipelines list', () => {
             failedStages: failedStagesGetterMock,
             pipelineFailed: () => false,
           },
-          methods: {
-            fetchLatestPipeline: jest.fn(),
-          },
         },
       },
     });
@@ -69,7 +65,6 @@ describe('IDE pipelines list', () => {
 
   const createComponent = (state = {}, pipelinesState = {}) => {
     wrapper = shallowMount(List, {
-      localVue,
       store: createStore(state, pipelinesState),
     });
   };
@@ -165,11 +160,7 @@ describe('IDE pipelines list', () => {
         const isLoadingJobs = true;
         createComponent({}, { ...withLatestPipelineState, stages, isLoadingJobs });
 
-        const jobProps = wrapper
-          .findAll(GlTab)
-          .at(0)
-          .find(JobsList)
-          .props();
+        const jobProps = wrapper.findAll(GlTab).at(0).find(JobsList).props();
         expect(jobProps.stages).toBe(stages);
         expect(jobProps.loading).toBe(isLoadingJobs);
       });
@@ -180,11 +171,7 @@ describe('IDE pipelines list', () => {
         const isLoadingJobs = true;
         createComponent({}, { ...withLatestPipelineState, isLoadingJobs });
 
-        const jobProps = wrapper
-          .findAll(GlTab)
-          .at(1)
-          .find(JobsList)
-          .props();
+        const jobProps = wrapper.findAll(GlTab).at(1).find(JobsList).props();
         expect(jobProps.stages).toBe(failedStages);
         expect(jobProps.loading).toBe(isLoadingJobs);
       });

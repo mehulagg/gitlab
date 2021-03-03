@@ -1,11 +1,9 @@
+import { GlIcon, GlSprintf, GlSkeletonLoader } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlIcon, GlSprintf } from '@gitlab/ui';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import Component from '~/registry/explorer/components/list_page/image_list_row.vue';
-import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import DeleteButton from '~/registry/explorer/components/delete_button.vue';
+import Component from '~/registry/explorer/components/list_page/image_list_row.vue';
 import {
   ROW_SCHEDULED_FOR_DELETION,
   LIST_DELETE_BUTTON_DISABLED,
@@ -15,20 +13,23 @@ import {
   IMAGE_DELETE_SCHEDULED_STATUS,
   IMAGE_FAILED_DELETED_STATUS,
 } from '~/registry/explorer/constants';
-import { RouterLink } from '../../stubs';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import { imagesListResponse } from '../../mock_data';
+import { RouterLink } from '../../stubs';
 
 describe('Image List Row', () => {
   let wrapper;
   const [item] = imagesListResponse;
 
   const findDetailsLink = () => wrapper.find('[data-testid="details-link"]');
-  const findTagsCount = () => wrapper.find('[data-testid="tagsCount"]');
+  const findTagsCount = () => wrapper.find('[data-testid="tags-count"]');
   const findDeleteBtn = () => wrapper.find(DeleteButton);
   const findClipboardButton = () => wrapper.find(ClipboardButton);
   const findWarningIcon = () => wrapper.find('[data-testid="warning-icon"]');
+  const findSkeletonLoader = () => wrapper.find(GlSkeletonLoader);
 
-  const mountComponent = props => {
+  const mountComponent = (props) => {
     wrapper = shallowMount(Component, {
       stubs: {
         RouterLink,
@@ -162,6 +163,20 @@ describe('Image List Row', () => {
       const icon = findTagsCount().find(GlIcon);
       expect(icon.exists()).toBe(true);
       expect(icon.props('name')).toBe('tag');
+    });
+
+    describe('loading state', () => {
+      it('shows a loader when metadataLoading is true', () => {
+        mountComponent({ metadataLoading: true });
+
+        expect(findSkeletonLoader().exists()).toBe(true);
+      });
+
+      it('hides the tags count while loading', () => {
+        mountComponent({ metadataLoading: true });
+
+        expect(findTagsCount().exists()).toBe(false);
+      });
     });
 
     describe('tags count text', () => {

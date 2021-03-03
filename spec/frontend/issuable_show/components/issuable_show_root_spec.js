@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 
+import IssuableBody from '~/issuable_show/components/issuable_body.vue';
+import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
 import IssuableShowRoot from '~/issuable_show/components/issuable_show_root.vue';
 
-import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
-import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
 
 import { mockIssuableShowProps, mockIssuable } from '../mock_data';
@@ -118,6 +118,27 @@ describe('IssuableShowRoot', () => {
 
         expect(wrapper.emitted('sidebar-toggle')).toBeTruthy();
       });
+
+      it.each(['keydown-title', 'keydown-description'])(
+        'component emits `%s` event with event object and issuableMeta params via issuable-body',
+        (eventName) => {
+          const eventObj = {
+            preventDefault: jest.fn(),
+            stopPropagation: jest.fn(),
+          };
+          const issuableMeta = {
+            issuableTitle: 'foo',
+            issuableDescription: 'foobar',
+          };
+
+          const issuableBody = wrapper.find(IssuableBody);
+
+          issuableBody.vm.$emit(eventName, eventObj, issuableMeta);
+
+          expect(wrapper.emitted(eventName)).toBeTruthy();
+          expect(wrapper.emitted(eventName)[0]).toMatchObject([eventObj, issuableMeta]);
+        },
+      );
     });
   });
 });

@@ -6,7 +6,7 @@ RSpec.describe GitlabSchema.types['DastScannerProfile'] do
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile) }
   let_it_be(:project) { dast_scanner_profile.project }
   let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id globalId profileName spiderTimeout targetTimeout editPath scanType useAjaxSpider showDebugMessages] }
+  let_it_be(:fields) { %i[id globalId profileName spiderTimeout targetTimeout editPath scanType useAjaxSpider showDebugMessages referencedInSecurityPolicies] }
 
   let(:response) do
     GitlabSchema.execute(
@@ -27,7 +27,7 @@ RSpec.describe GitlabSchema.types['DastScannerProfile'] do
   end
 
   specify { expect(described_class.graphql_name).to eq('DastScannerProfile') }
-  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+  specify { expect(described_class).to require_graphql_authorizations(:read_on_demand_scans) }
 
   it { expect(described_class).to have_graphql_fields(fields) }
 
@@ -50,6 +50,7 @@ RSpec.describe GitlabSchema.types['DastScannerProfile'] do
                 scanType
                 useAjaxSpider
                 showDebugMessages
+                referencedInSecurityPolicies
               }
             }
           }

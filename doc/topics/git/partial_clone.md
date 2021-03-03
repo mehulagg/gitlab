@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, howto
 ---
 
-# Partial Clone
+# Partial Clone **(FREE)**
 
 As Git repositories grow in size, they can become cumbersome to work with
 because of the large amount of history that must be downloaded, and the large
@@ -229,7 +229,7 @@ remove filtering:
    `pack-<SHA1>.promisor` file, which should be empty and should be deleted.
 
 1. Remove partial clone configuration. The partial clone-related configuration
-   variables should be removed from Git config files. Usually only the following
+   variables should be removed from Git configuration files. Usually only the following
    configuration must be removed:
    - `remote.origin.promisor`.
    - `remote.origin.partialclonefilter`.

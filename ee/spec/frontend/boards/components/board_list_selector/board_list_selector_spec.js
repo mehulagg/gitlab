@@ -51,7 +51,7 @@ describe('BoardListSelector', () => {
 
   describe('methods', () => {
     describe('loadList', () => {
-      it('calls axios.get and sets response to store.state.assignees', done => {
+      it('calls axios.get and sets response to store.state.assignees', (done) => {
         mock.onGet(dummyEndpoint).reply(200, mockAssigneesList);
         boardsStore.state.assignees = [];
 
@@ -64,7 +64,7 @@ describe('BoardListSelector', () => {
           .catch(done.fail);
       });
 
-      it('does not call axios.get when store.state.assignees is not empty', done => {
+      it('does not call axios.get when store.state.assignees is not empty', (done) => {
         jest.spyOn(axios, 'get').mockReturnValue(Promise.resolve());
         boardsStore.state.assignees = mockAssigneesList;
 
@@ -76,7 +76,7 @@ describe('BoardListSelector', () => {
           .catch(done.fail);
       });
 
-      it('calls axios.get and shows Flash error when request fails', done => {
+      it('calls axios.get and shows Flash error when request fails', (done) => {
         mock.onGet(dummyEndpoint).replyOnce(500, {});
         boardsStore.state.assignees = [];
 

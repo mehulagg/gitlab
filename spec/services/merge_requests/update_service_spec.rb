@@ -87,6 +87,38 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         expect(@merge_request.discussion_locked).to be_truthy
       end
 
+      context 'usage counters' do
+        let(:merge_request2) { create(:merge_request) }
+        let(:draft_merge_request) { create(:merge_request, :draft_merge_request)}
+
+        it 'update as expected' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_title_edit_action).once.with(user: user)
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_description_edit_action).once.with(user: user)
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request2)
+        end
+
+        it 'tracks Draft/WIP marking' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_marked_as_draft_action).once.with(user: user)
+
+          opts[:title] = "WIP: #{opts[:title]}"
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request2)
+        end
+
+        it 'tracks Draft/WIP un-marking' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_unmarked_as_draft_action).once.with(user: user)
+
+          opts[:title] = "Non-draft/wip title string"
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(draft_merge_request)
+        end
+      end
+
       context 'updating milestone' do
         RSpec.shared_examples 'updates milestone' do
           it 'sets milestone' do
@@ -142,29 +174,19 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       context 'with reviewers' do
         let(:opts) { { reviewer_ids: [user2.id] } }
 
-        context 'when merge_request_reviewers feature is disabled' do
-          before(:context) do
-            stub_feature_flags(merge_request_reviewers: false)
-          end
+        it 'creates system note about merge_request review request' do
+          note = find_note('requested review from')
 
-          it 'does not create a system note about merge_request review request' do
-            note = find_note('review requested from')
-
-            expect(note).to be_nil
-          end
+          expect(note).not_to be_nil
+          expect(note.note).to include "requested review from #{user2.to_reference}"
         end
 
-        context 'when merge_request_reviewers feature is enabled' do
-          before(:context) do
-            stub_feature_flags(merge_request_reviewers: true)
-          end
+        it 'updates the tracking' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_users_review_requested)
+            .with(users: [user])
 
-          it 'creates system note about merge_request review request' do
-            note = find_note('requested review from')
-
-            expect(note).not_to be_nil
-            expect(note.note).to include "requested review from #{user2.to_reference}"
-          end
+          update_merge_request(reviewer_ids: [user.id])
         end
       end
 
@@ -431,14 +453,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
     describe 'merge' do
       it_behaves_like 'correct merge behavior'
-
-      context 'when merge_orchestration_service feature flag is disabled' do
-        before do
-          stub_feature_flags(merge_orchestration_service: false)
-        end
-
-        it_behaves_like 'correct merge behavior'
-      end
     end
 
     context 'todos' do
@@ -528,6 +542,19 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           should_email(user2)
           should_email(user3)
+        end
+
+        it 'updates open merge request counter for reviewers', :use_clean_rails_memory_store_caching do
+          merge_request.reviewers = [user3]
+
+          # Cache them to ensure the cache gets invalidated on update
+          expect(user2.review_requested_open_merge_requests_count).to eq(0)
+          expect(user3.review_requested_open_merge_requests_count).to eq(1)
+
+          update_merge_request(reviewer_ids: [user2.id])
+
+          expect(user2.review_requested_open_merge_requests_count).to eq(1)
+          expect(user3.review_requested_open_merge_requests_count).to eq(0)
         end
       end
 
@@ -625,6 +652,48 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
         it 'marks pending todos as done' do
           expect(pending_todo.reload).to be_done
+        end
+      end
+    end
+
+    context 'when the draft status is changed' do
+      let!(:non_subscriber) { create(:user) }
+      let!(:subscriber) do
+        create(:user) { |u| merge_request.toggle_subscription(u, project) }
+      end
+
+      before do
+        project.add_developer(non_subscriber)
+        project.add_developer(subscriber)
+      end
+
+      context 'removing draft status' do
+        before do
+          merge_request.update_attribute(:title, 'Draft: New Title')
+        end
+
+        it 'sends notifications for subscribers', :sidekiq_might_not_need_inline do
+          opts = { title: 'New title' }
+
+          perform_enqueued_jobs do
+            @merge_request = described_class.new(project, user, opts).execute(merge_request)
+          end
+
+          should_email(subscriber)
+          should_not_email(non_subscriber)
+        end
+      end
+
+      context 'adding draft status' do
+        it 'does not send notifications', :sidekiq_might_not_need_inline do
+          opts = { title: 'Draft: New title' }
+
+          perform_enqueued_jobs do
+            @merge_request = described_class.new(project, user, opts).execute(merge_request)
+          end
+
+          should_not_email(subscriber)
+          should_not_email(non_subscriber)
         end
       end
     end
@@ -789,6 +858,14 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         expect(merge_request.assignee_ids).to eq([user.id])
       end
 
+      it 'updates the tracking when user ids are valid' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_users_assigned_to_mr)
+          .with(users: [user])
+
+        update_merge_request(assignee_ids: [user.id])
+      end
+
       it 'does not update assignee_id when user cannot read issue' do
         non_member = create(:user)
         original_assignees = merge_request.assignees
@@ -837,20 +914,20 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       it 'does not allow a maintainer of the target project to set `allow_collaboration`' do
         target_project.add_developer(user)
 
-        update_merge_request(allow_collaboration: true, title: 'Updated title')
+        update_merge_request(allow_collaboration: false, title: 'Updated title')
 
         expect(merge_request.title).to eq('Updated title')
-        expect(merge_request.allow_collaboration).to be_falsy
+        expect(merge_request.allow_collaboration).to be_truthy
       end
 
       it 'is allowed by a user that can push to the source and can update the merge request' do
         merge_request.update!(assignees: [user])
         source_project.add_developer(user)
 
-        update_merge_request(allow_collaboration: true, title: 'Updated title')
+        update_merge_request(allow_collaboration: false, title: 'Updated title')
 
         expect(merge_request.title).to eq('Updated title')
-        expect(merge_request.allow_collaboration).to be_truthy
+        expect(merge_request.allow_collaboration).to be_falsy
       end
     end
 
@@ -875,6 +952,33 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
         expect { update_merge_request(force_remove_source_branch: true) }
           .to change { merge_request.reload.force_remove_source_branch? }.from(nil).to(true)
+      end
+    end
+
+    context 'updating `target_branch`' do
+      let(:merge_request) do
+        create(:merge_request,
+               source_project: project,
+               source_branch: 'mr-b',
+               target_branch: 'mr-a')
+      end
+
+      it 'updates to master' do
+        expect(SystemNoteService).to receive(:change_branch).with(
+          merge_request, project, user, 'target', 'update', 'mr-a', 'master'
+        )
+
+        expect { update_merge_request(target_branch: 'master') }
+          .to change { merge_request.reload.target_branch }.from('mr-a').to('master')
+      end
+
+      it 'updates to master because of branch deletion' do
+        expect(SystemNoteService).to receive(:change_branch).with(
+          merge_request, project, user, 'target', 'delete', 'mr-a', 'master'
+        )
+
+        expect { update_merge_request(target_branch: 'master', target_branch_was_deleted: true) }
+          .to change { merge_request.reload.target_branch }.from('mr-a').to('master')
       end
     end
 

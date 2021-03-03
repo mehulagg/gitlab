@@ -1,14 +1,14 @@
 <script>
 import { GlDropdownDivider, GlSegmentedControl, GlIcon } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { removeFlash } from '../../utils';
+import { s__, sprintf } from '~/locale';
 import {
   TASKS_BY_TYPE_FILTERS,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
   TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS,
   TASKS_BY_TYPE_MAX_LABELS,
 } from '../../constants';
+import { removeFlash } from '../../utils';
 import LabelsSelector from '../labels_selector.vue';
 
 export default {
@@ -121,7 +121,7 @@ export default {
               :checked="subjectFilter"
               :options="subjectFilterOptions"
               @input="
-                value =>
+                (value) =>
                   $emit('updateFilter', { filter: $options.TASKS_BY_TYPE_FILTERS.SUBJECT, value })
               "
             />

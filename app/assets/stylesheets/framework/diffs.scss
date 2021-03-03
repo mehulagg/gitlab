@@ -588,6 +588,12 @@ table.code {
 
 // Merge request diff grid layout
 .diff-grid {
+  .diff-td {
+    // By default min-width is auto with 1fr which causes some overflow problems
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/296222
+    min-width: 0;
+  }
+
   .diff-grid-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1029,7 +1035,6 @@ table.code {
     auto;
 
   // Retina cursor
-  // scss-lint:disable DuplicateProperty
   cursor: image-set(image-url('illustrations/image_comment_light_cursor.svg') 1x,
   image-url('illustrations/image_comment_light_cursor@2x.svg') 2x) $image-comment-cursor-left-offset $image-comment-cursor-top-offset,
     auto;
@@ -1129,10 +1134,6 @@ table.code {
     .notes > .badge.badge-pill {
       display: block;
     }
-  }
-
-  .note-edit-form {
-    margin-left: $note-icon-gutter-width;
   }
 }
 

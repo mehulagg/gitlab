@@ -4,13 +4,13 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab managed Terraform State
+# GitLab managed Terraform State **(FREE)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2673) in GitLab 13.0.
 
-[Terraform remote backends](https://www.terraform.io/docs/backends/index.html)
+[Terraform remote backends](https://www.terraform.io/docs/language/settings/backends/index.html)
 enable you to store the state file in a remote, shared store. GitLab uses the
-[Terraform HTTP backend](https://www.terraform.io/docs/backends/types/http.html)
+[Terraform HTTP backend](https://www.terraform.io/docs/language/settings/backends/http.html)
 to securely store the state files in local storage (the default) or
 [the remote store of your choice](../../administration/terraform_state.md).
 
@@ -18,9 +18,13 @@ The GitLab managed Terraform state backend can store your Terraform state easily
 securely, and spares you from setting up additional remote resources like
 Amazon S3 or Google Cloud Storage. Its features include:
 
+- Versioning of Terraform state files.
 - Supporting encryption of the state file both in transit and at rest.
 - Locking and unlocking state.
 - Remote Terraform plan and apply execution.
+
+A GitLab **administrator** must [setup the Terraform state storage configuration](../../administration/terraform_state.md)
+before using this feature.
 
 ## Permissions for using Terraform
 
@@ -62,7 +66,7 @@ local machine, this is a simple way to get started:
 1. On your local machine, run `terraform init`, passing in the following options,
    replacing `<YOUR-STATE-NAME>`, `<YOUR-PROJECT-ID>`,  `<YOUR-USERNAME>` and
    `<YOUR-ACCESS-TOKEN>` with the relevant values. This command initializes your
-   Terraform state, and stores that state within your GitLab project. The name of
+   Terraform state, and stores that state in your GitLab project. The name of
    your state can contain only uppercase and lowercase letters, decimal digits,
    hyphens, and underscores. This example uses `gitlab.com`:
 
@@ -92,7 +96,7 @@ Next, [configure the backend](#configure-the-backend).
 After executing the `terraform init` command, you must configure the Terraform backend
 and the CI YAML file:
 
-1. In your Terraform project, define the [HTTP backend](https://www.terraform.io/docs/backends/types/http.html)
+1. In your Terraform project, define the [HTTP backend](https://www.terraform.io/docs/language/settings/backends/http.html)
    by adding the following code block in a `.tf` file (such as `backend.tf`) to
    define the remote backend:
 
@@ -104,7 +108,7 @@ and the CI YAML file:
    ```
 
 1. In the root directory of your project repository, configure a
-   `.gitlab-ci.yaml` file. This example uses a pre-built image which includes a
+   `.gitlab-ci.yml` file. This example uses a pre-built image which includes a
    `gitlab-terraform` helper. For supported Terraform versions, see the [GitLab
    Terraform Images project](https://gitlab.com/gitlab-org/terraform-images).
 
@@ -112,7 +116,7 @@ and the CI YAML file:
    image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
    ```
 
-1. In the `.gitlab-ci.yaml` file, define some environment variables to ease
+1. In the `.gitlab-ci.yml` file, define some CI/CD variables to ease
    development. In this example, `TF_ROOT` is the directory where the Terraform
    commands must be executed, `TF_ADDRESS` is the URL to the state on the GitLab
    instance where this pipeline runs, and the final path segment in `TF_ADDRESS`
@@ -194,21 +198,21 @@ recommends encrypting plan output or modifying the project visibility settings.
 
 ### Example project
 
-See [this reference project](https://gitlab.com/gitlab-org/configure/examples/gitlab-terraform-aws) using GitLab and Terraform to deploy a basic AWS EC2 within a custom VPC.
+See [this reference project](https://gitlab.com/gitlab-org/configure/examples/gitlab-terraform-aws) using GitLab and Terraform to deploy a basic AWS EC2 in a custom VPC.
 
 ## Using a GitLab managed Terraform state backend as a remote data source
 
 You can use a GitLab-managed Terraform state as a
-[Terraform data source](https://www.terraform.io/docs/providers/terraform/d/remote_state.html).
+[Terraform data source](https://www.terraform.io/docs/language/state/remote-state-data.html).
 To use your existing Terraform state backend as a data source, provide the following details
-as [Terraform input variables](https://www.terraform.io/docs/configuration/variables.html):
+as [Terraform input variables](https://www.terraform.io/docs/language/values/variables.html):
 
 - **address**: The URL of the remote state backend you want to use as a data source.
   For example, `https://gitlab.com/api/v4/projects/<TARGET-PROJECT-ID>/terraform/state/<TARGET-STATE-NAME>`.
 - **username**: The username to authenticate with the data source. If you are using a [Personal Access Token](../profile/personal_access_tokens.md) for
   authentication, this is your GitLab username. If you are using GitLab CI, this is `'gitlab-ci-token'`.
 - **password**: The password to authenticate with the data source. If you are using a Personal Access Token for
-  authentication, this is the token value. If you are using GitLab CI, it is the contents of the `${CI_JOB_TOKEN}` CI variable.
+  authentication, this is the token value. If you are using GitLab CI, it is the contents of the `${CI_JOB_TOKEN}` CI/CD variable.
 
 An example setup is shown below:
 
@@ -234,7 +238,7 @@ An example setup is shown below:
    }
    ```
 
-Outputs from the data source can now be referenced within your Terraform resources
+Outputs from the data source can now be referenced in your Terraform resources
 using `data.terraform_remote_state.example.outputs.<OUTPUT-NAME>`.
 
 You need at least [developer access](../permissions.md) to the target project
@@ -340,21 +344,76 @@ commands will detect it and remind you to do so if necessary.
 ```
 
 If you type `yes`, it copies your state from the old location to the new
-location. You can then go back to running it from within GitLab CI.
+location. You can then go back to running it in GitLab CI/CD.
 
 ## Managing state files
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/273592) in GitLab 13.8.
+
+Users with Developer and greater [permissions](../permissions.md) can view the
+state files attached to a project at **Operations > Terraform**. Users with
+Maintainer permissions can perform commands on the state files. The user interface
+contains these fields:
+
+![Terraform state list](img/terraform_list_view_v13_8.png)
+
+- **Name**: The name of the environment, with a locked (**{lock}**) icon if the
+  state file is locked.
+- **Pipeline**: A link to the most recent pipeline and its status.
+- **Details**: Information about when the state file was created or changed.
+- **Actions**: Actions you can take on the state file, including downloading,
+  locking, unlocking, or [removing](#remove-a-state-file) the state file and versions:
+
+  ![Terraform state list](img/terraform_list_view_actions_v13_8.png)
+
 NOTE:
-We are currently working on [providing a graphical interface for managing state files](https://gitlab.com/groups/gitlab-org/-/epics/4563).
+Additional improvements to the
+[graphical interface for managing state files](https://gitlab.com/groups/gitlab-org/-/epics/4563)
+are planned.
 
-![Terraform state list](img/terraform_list_view_v13_5.png)
+## Remove a state file
 
-The state files attached to a project can be found under Operations / Terraform.
+Users with Maintainer and greater [permissions](../permissions.md) can use the
+following options to remove a state file:
 
-## Removing a State file
+- **GitLab UI**: Go to **Operations > Terraform**. In the **Actions** column,
+  click the vertical ellipsis (**{ellipsis_v}**) button and select
+  **Remove state file and versions**.
+- **GitLab REST API**: You can remove a state file by making a request to the
+  REST API. For example:
 
-You can only remove a state file by making a request to the API, like the following example:
+  ```shell
+  curl --header "Private-Token: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/<your_project_id>/terraform/state/<your_state_name>"
+  ```
+
+- [GitLab GraphQL API](#remove-a-state-file-with-the-gitlab-graphql-api).
+
+### Remove a state file with the GitLab GraphQL API
+
+You can remove a state file by making a GraphQL API request. For example:
 
 ```shell
-curl --header "Private-Token: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/<your_project_id>/terraform/state/<your_state_name>"
+mutation deleteState {
+  terraformStateDelete(input: { id: "<global_id_for_the_state>" }) {
+    errors
+  }
+}
 ```
+
+You can obtain the `<global_id_for_the_state>` by querying the list of states:
+
+```shell
+query ProjectTerraformStates {
+  project(fullPath: "<your_project_path>") {
+    terraformStates {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+For those new to the GitLab GraphQL API, read
+[Getting started with GitLab GraphQL API](../../api/graphql/getting_started.md).

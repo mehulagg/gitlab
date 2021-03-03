@@ -2,13 +2,13 @@
 
 import $ from 'jquery';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
-import { visitUrl } from '~/lib/utils/url_utility';
-import UsersSelect from '~/users_select';
-import { isMetaClick } from '~/lib/utils/common_utils';
-import { addDelimiter } from '~/lib/utils/text_utility';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { isMetaClick } from '~/lib/utils/common_utils';
+import { addDelimiter } from '~/lib/utils/text_utility';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
+import UsersSelect from '~/users_select';
 
 export default class Todos {
   constructor() {
@@ -154,7 +154,7 @@ export default class Todos {
   goToTodoUrl(e) {
     const todoLink = this.dataset.url;
 
-    if (!todoLink || e.target.tagName === 'A' || e.target.tagName === 'IMG') {
+    if (!todoLink || e.target.closest('a')) {
       return;
     }
 

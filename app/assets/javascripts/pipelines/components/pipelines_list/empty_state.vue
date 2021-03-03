@@ -1,16 +1,20 @@
 <script>
 import { GlButton } from '@gitlab/ui';
+import { helpPagePath } from '~/helpers/help_page_helper';
+import { s__ } from '~/locale';
 
 export default {
+  i18n: {
+    infoMessage: s__(`Pipelines|GitLab CI/CD can automatically build,
+          test, and deploy your code. Let GitLab take care of time
+          consuming tasks, so you can spend more time creating.`),
+    buttonMessage: s__('Pipelines|Get started with CI/CD'),
+  },
   name: 'PipelinesEmptyState',
   components: {
     GlButton,
   },
   props: {
-    helpPagePath: {
-      type: String,
-      required: true,
-    },
     emptyStateSvgPath: {
       type: String,
       required: true,
@@ -18,6 +22,11 @@ export default {
     canSetCi: {
       type: Boolean,
       required: true,
+    },
+  },
+  computed: {
+    ciHelpPagePath() {
+      return helpPagePath('ci/quick_start/index.md');
     },
   },
 };
@@ -29,29 +38,23 @@ export default {
     </div>
 
     <div class="col-12">
-      <div class="gl-text-content">
+      <div class="text-content">
         <template v-if="canSetCi">
-          <h4 class="gl-text-center" data-testid="header-text">
+          <h4 data-testid="header-text" class="gl-text-center">
             {{ s__('Pipelines|Build with confidence') }}
           </h4>
-
           <p data-testid="info-text">
-            {{
-              s__(`Pipelines|Continuous Integration can help
-                catch bugs by running your tests automatically,
-                while Continuous Deployment can help you deliver
-                code to your product environment.`)
-            }}
+            {{ $options.i18n.infoMessage }}
           </p>
 
           <div class="gl-text-center">
             <gl-button
-              :href="helpPagePath"
+              :href="ciHelpPagePath"
               variant="info"
               category="primary"
               data-testid="get-started-pipelines"
             >
-              {{ s__('Pipelines|Get started with Pipelines') }}
+              {{ $options.i18n.buttonMessage }}
             </gl-button>
           </div>
         </template>

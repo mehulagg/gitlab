@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import '~/profile/gl_crop';
 import Profile from '~/profile/profile';
+import initSearchSettings from '~/search_settings';
 
 document.addEventListener('DOMContentLoaded', () => {
   // eslint-disable-next-line func-names
-  $(document).on('input.ssh_key', '#key_key', function() {
+  $(document).on('input.ssh_key', '#key_key', function () {
     const $title = $('#key_title');
     const comment = $(this)
       .val()
@@ -17,4 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   new Profile(); // eslint-disable-line no-new
+
+  initSearchSettings();
 });

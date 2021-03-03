@@ -1,6 +1,6 @@
-import createState from 'ee/billings/seat_usage/store/state';
 import * as types from 'ee/billings/seat_usage/store/mutation_types';
 import mutations from 'ee/billings/seat_usage/store/mutations';
+import createState from 'ee/billings/seat_usage/store/state';
 import { mockDataSeats } from 'ee_jest/billings/mock_data';
 
 describe('EE billings seats module mutations', () => {
@@ -30,6 +30,8 @@ describe('EE billings seats module mutations', () => {
     });
 
     it('sets state as expected', () => {
+      expect(state.members).toMatchObject(mockDataSeats.data);
+
       expect(state.total).toBe('3');
       expect(state.page).toBe('1');
       expect(state.perPage).toBe('1');
@@ -51,6 +53,87 @@ describe('EE billings seats module mutations', () => {
 
     it('sets hasError to true', () => {
       expect(state.hasError).toBeTruthy();
+    });
+  });
+
+  describe(types.SET_SEARCH, () => {
+    const SEARCH_STRING = 'a search string';
+
+    beforeEach(() => {
+      mutations[types.SET_SEARCH](state, SEARCH_STRING);
+    });
+
+    it('sets the search state', () => {
+      expect(state.search).toBe(SEARCH_STRING);
+    });
+  });
+
+  describe(types.RESET_MEMBERS, () => {
+    beforeEach(() => {
+      mutations[types.RECEIVE_BILLABLE_MEMBERS_SUCCESS](state, mockDataSeats);
+      mutations[types.RESET_MEMBERS](state);
+    });
+
+    it('resets members state', () => {
+      expect(state.members).toMatchObject([]);
+
+      expect(state.total).toBeNull();
+      expect(state.page).toBeNull();
+      expect(state.perPage).toBeNull();
+
+      expect(state.isLoading).toBeFalsy();
+    });
+
+    it('sets isLoading to false', () => {
+      expect(state.isLoading).toBeFalsy();
+    });
+  });
+
+  describe('member removal', () => {
+    const memberToRemove = mockDataSeats.data[0];
+
+    beforeEach(() => {
+      mutations[types.RECEIVE_BILLABLE_MEMBERS_SUCCESS](state, mockDataSeats);
+    });
+
+    describe(types.SET_MEMBER_TO_REMOVE, () => {
+      it('sets the member to remove', () => {
+        mutations[types.SET_MEMBER_TO_REMOVE](state, memberToRemove);
+
+        expect(state.memberToRemove).toMatchObject(memberToRemove);
+      });
+    });
+
+    describe(types.REMOVE_MEMBER, () => {
+      it('sets state to loading', () => {
+        mutations[types.REMOVE_MEMBER](state, memberToRemove);
+
+        expect(state).toMatchObject({ isLoading: true, hasError: false });
+      });
+    });
+
+    describe(types.REMOVE_MEMBER_SUCCESS, () => {
+      it('sets state to successfull', () => {
+        mutations[types.REMOVE_MEMBER_SUCCESS](state, memberToRemove);
+
+        expect(state).toMatchObject({
+          isLoading: false,
+          hasError: false,
+          memberToRemove: null,
+        });
+      });
+    });
+
+    describe(types.REMOVE_MEMBER_ERROR, () => {
+      it('sets state to errored', () => {
+        mutations[types.REMOVE_MEMBER_ERROR](state, memberToRemove);
+
+        expect(state).toMatchObject({
+          isLoading: false,
+          hasError: true,
+          memberToRemove: null,
+        });
+      });
     });
   });
 });

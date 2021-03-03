@@ -7,7 +7,7 @@ module Mutations
         field :integration,
               Types::AlertManagement::HttpIntegrationType,
               null: true,
-              description: "The HTTP integration"
+              description: "The HTTP integration."
 
         authorize :admin_operations
 
@@ -23,7 +23,14 @@ module Mutations
             errors: result.errors
           }
         end
+
+        # overriden in EE
+        def http_integration_params(_project, args)
+          args.slice(:name, :active)
+        end
       end
     end
   end
 end
+
+Mutations::AlertManagement::HttpIntegration::HttpIntegrationBase.prepend_if_ee('::EE::Mutations::AlertManagement::HttpIntegration::HttpIntegrationBase')

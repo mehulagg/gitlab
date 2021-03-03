@@ -1,9 +1,9 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as flashError } from '~/flash';
 import * as actions from '~/contributors/stores/actions';
 import * as types from '~/contributors/stores/mutation_types';
+import { deprecatedCreateFlash as flashError } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash.js');
 
@@ -17,7 +17,7 @@ describe('Contributors store actions', () => {
       mock = new MockAdapter(axios);
     });
 
-    it('should commit SET_CHART_DATA with received response', done => {
+    it('should commit SET_CHART_DATA with received response', (done) => {
       mock.onGet().reply(200, chartData);
 
       testAction(
@@ -37,7 +37,7 @@ describe('Contributors store actions', () => {
       );
     });
 
-    it('should show flash on API error', done => {
+    it('should show flash on API error', (done) => {
       mock.onGet().reply(400, 'Not Found');
 
       testAction(

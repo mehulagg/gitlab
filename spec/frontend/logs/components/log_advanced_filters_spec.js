@@ -1,12 +1,11 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFilteredSearch } from '@gitlab/ui';
-import { defaultTimeRange } from '~/vue_shared/constants';
+import { shallowMount } from '@vue/test-utils';
 import { convertToFixedRange } from '~/lib/utils/datetime_range';
-import { createStore } from '~/logs/stores';
-import { TOKEN_TYPE_POD_NAME } from '~/logs/constants';
-import { mockPods, mockSearch } from '../mock_data';
-
 import LogAdvancedFilters from '~/logs/components/log_advanced_filters.vue';
+import { TOKEN_TYPE_POD_NAME } from '~/logs/constants';
+import { createStore } from '~/logs/stores';
+import { defaultTimeRange } from '~/vue_shared/constants';
+import { mockPods, mockSearch } from '../mock_data';
 
 const module = 'environmentLogs';
 
@@ -18,10 +17,10 @@ describe('LogAdvancedFilters', () => {
 
   const findFilteredSearch = () => wrapper.find(GlFilteredSearch);
   const findTimeRangePicker = () => wrapper.find({ ref: 'dateTimePicker' });
-  const getSearchToken = type =>
+  const getSearchToken = (type) =>
     findFilteredSearch()
       .props('availableTokens')
-      .filter(token => token.type === type)[0];
+      .filter((token) => token.type === type)[0];
 
   const mockStateLoading = () => {
     state.timeRange.selected = defaultTimeRange;
@@ -73,6 +72,8 @@ describe('LogAdvancedFilters', () => {
   });
 
   it('displays search tokens', () => {
+    initWrapper();
+
     expect(getSearchToken(TOKEN_TYPE_POD_NAME)).toMatchObject({
       title: 'Pod name',
       unique: true,

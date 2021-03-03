@@ -15,6 +15,10 @@ module Elastic
       self.class.get_throttle_delay
     end
 
+    def pause_indexing?
+      self.class.get_pause_indexing
+    end
+
     class_methods do
       def batched!
         class_attributes[:batched] = true
@@ -22,6 +26,14 @@ module Elastic
 
       def get_batched
         class_attributes[:batched]
+      end
+
+      def pause_indexing!
+        class_attributes[:pause_indexing] = true
+      end
+
+      def get_pause_indexing
+        class_attributes[:pause_indexing]
       end
 
       def throttle_delay(value)

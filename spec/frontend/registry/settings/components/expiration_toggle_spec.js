@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlToggle, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup } from 'jest/registry/shared/stubs';
 import component from '~/registry/settings/components/expiration_toggle.vue';
 import {
@@ -13,7 +13,7 @@ describe('ExpirationToggle', () => {
   const findToggle = () => wrapper.find(GlToggle);
   const findDescription = () => wrapper.find('[data-testid="description"]');
 
-  const mountComponent = propsData => {
+  const mountComponent = (propsData) => {
     wrapper = shallowMount(component, {
       stubs: {
         GlFormGroup,

@@ -23,7 +23,7 @@ RSpec.describe 'Geo read-only message', :geo do
 
   context 'when in maintenance mode' do
     before do
-      stub_application_setting(maintenance_mode: true)
+      stub_maintenance_mode_setting(true)
     end
 
     it_behaves_like 'Read-only instance', /This GitLab instance is undergoing maintenance and is operating in read\-only mode./

@@ -5,7 +5,7 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Google Secure LDAP **(CORE ONLY)**
+# Google Secure LDAP **(FREE SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/46391) in GitLab 11.9.
 
@@ -20,7 +20,7 @@ The steps below cover:
 
 ## Configuring Google LDAP client
 
-1. Navigate to <https://admin.google.com/Dashboard> and sign in as a GSuite domain administrator.
+1. Navigate to <https://admin.google.com/Dashboard> and sign in as a Google Workspace domain administrator.
 
 1. Go to **Apps > LDAP > Add Client**.
 

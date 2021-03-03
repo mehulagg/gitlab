@@ -11,33 +11,22 @@ module Mutations
         argument :id,
                  ::Types::GlobalIDType[::ComplianceManagement::Framework],
                  required: true,
-                 description: 'The global ID of the compliance framework to update'
+                 description: 'The global ID of the compliance framework to update.'
 
-        argument :name,
-                 GraphQL::STRING_TYPE,
-                 required: false,
-                 description: 'New name for the compliance framework'
-
-        argument :description,
-                 GraphQL::STRING_TYPE,
-                 required: false,
-                 description: 'New description for the compliance framework'
-
-        argument :color,
-                 GraphQL::STRING_TYPE,
-                 required: false,
-                 description: 'New color representation of the compliance framework in hex format. e.g. #FCA121'
+        argument :params, Types::ComplianceManagement::ComplianceFrameworkInputType,
+                 required: true,
+                 description: 'Parameters to update the compliance framework with.'
 
         field :compliance_framework,
               Types::ComplianceManagement::ComplianceFrameworkType,
               null: true,
-              description: "The compliance framework after mutation"
+              description: "The compliance framework after mutation."
 
         def resolve(id:, **args)
           framework = authorized_find!(id: id)
           ::ComplianceManagement::Frameworks::UpdateService.new(framework: framework,
                                                                 current_user: current_user,
-                                                                params: args).execute
+                                                                params: args[:params].to_h).execute
           { compliance_framework: framework, errors: errors_on_object(framework) }
         end
 

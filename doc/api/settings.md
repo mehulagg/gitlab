@@ -4,7 +4,7 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Application settings API **(CORE ONLY)**
+# Application settings API **(FREE SELF)**
 
 These API calls allow you to read and modify GitLab instance
 [application settings](#list-of-settings-that-can-be-accessed-via-api-calls)
@@ -28,61 +28,65 @@ Example response:
 
 ```json
 {
-   "default_projects_limit" : 100000,
-   "signup_enabled" : true,
-   "id" : 1,
-   "default_branch_protection" : 2,
-   "restricted_visibility_levels" : [],
-   "password_authentication_enabled_for_web" : true,
-   "after_sign_out_path" : null,
-   "max_attachment_size" : 10,
-   "max_import_size": 50,
-   "user_oauth_applications" : true,
-   "updated_at" : "2016-01-04T15:44:55.176Z",
-   "session_expire_delay" : 10080,
-   "home_page_url" : null,
-   "default_snippet_visibility" : "private",
-   "outbound_local_requests_whitelist": [],
-   "domain_allowlist" : [],
-   "domain_denylist_enabled" : false,
-   "domain_denylist" : [],
-   "created_at" : "2016-01-04T15:44:55.176Z",
-   "default_ci_config_path" : null,
-   "default_project_visibility" : "private",
-   "default_group_visibility" : "private",
-   "gravatar_enabled" : true,
-   "sign_in_text" : null,
-   "container_expiration_policies_enable_historic_entries": true,
-   "container_registry_token_expire_delay": 5,
-   "repository_storages_weighted": {"default": 100},
-   "plantuml_enabled": false,
-   "plantuml_url": null,
-   "kroki_enabled": false,
-   "kroki_url": null,
-   "terminal_max_session_time": 0,
-   "polling_interval_multiplier": 1.0,
-   "rsa_key_restriction": 0,
-   "dsa_key_restriction": 0,
-   "ecdsa_key_restriction": 0,
-   "ed25519_key_restriction": 0,
-   "first_day_of_week": 0,
-   "enforce_terms": true,
-   "terms": "Hello world!",
-   "performance_bar_allowed_group_id": 42,
-   "user_show_add_ssh_key_message": true,
-   "local_markdown_version": 0,
-   "allow_local_requests_from_hooks_and_services": true,
-   "allow_local_requests_from_web_hooks_and_services": true,
-   "allow_local_requests_from_system_hooks": false,
-   "asset_proxy_enabled": true,
-   "asset_proxy_url": "https://assets.example.com",
-   "asset_proxy_whitelist": ["example.com", "*.example.com", "your-instance.com"],
-   "npm_package_requests_forwarding": true,
-   "snippet_size_limit": 52428800,
-   "issues_create_limit": 300,
-   "raw_blob_request_limit": 300,
-   "wiki_page_max_content_bytes": 52428800,
-   "require_admin_approval_after_user_signup": false
+  "default_projects_limit" : 100000,
+  "signup_enabled" : true,
+  "id" : 1,
+  "default_branch_protection" : 2,
+  "restricted_visibility_levels" : [],
+  "password_authentication_enabled_for_web" : true,
+  "after_sign_out_path" : null,
+  "max_attachment_size" : 10,
+  "max_import_size": 50,
+  "user_oauth_applications" : true,
+  "updated_at" : "2016-01-04T15:44:55.176Z",
+  "session_expire_delay" : 10080,
+  "home_page_url" : null,
+  "default_snippet_visibility" : "private",
+  "outbound_local_requests_whitelist": [],
+  "domain_allowlist" : [],
+  "domain_denylist_enabled" : false,
+  "domain_denylist" : [],
+  "created_at" : "2016-01-04T15:44:55.176Z",
+  "default_ci_config_path" : null,
+  "default_project_visibility" : "private",
+  "default_group_visibility" : "private",
+  "gravatar_enabled" : true,
+  "sign_in_text" : null,
+  "container_expiration_policies_enable_historic_entries": true,
+  "container_registry_token_expire_delay": 5,
+  "repository_storages_weighted": {"default": 100},
+  "plantuml_enabled": false,
+  "plantuml_url": null,
+  "kroki_enabled": false,
+  "kroki_url": null,
+  "terminal_max_session_time": 0,
+  "polling_interval_multiplier": 1.0,
+  "rsa_key_restriction": 0,
+  "dsa_key_restriction": 0,
+  "ecdsa_key_restriction": 0,
+  "ed25519_key_restriction": 0,
+  "first_day_of_week": 0,
+  "enforce_terms": true,
+  "terms": "Hello world!",
+  "performance_bar_allowed_group_id": 42,
+  "user_show_add_ssh_key_message": true,
+  "local_markdown_version": 0,
+  "allow_local_requests_from_hooks_and_services": true,
+  "allow_local_requests_from_web_hooks_and_services": true,
+  "allow_local_requests_from_system_hooks": false,
+  "asset_proxy_enabled": true,
+  "asset_proxy_url": "https://assets.example.com",
+  "asset_proxy_whitelist": ["example.com", "*.example.com", "your-instance.com"],
+  "asset_proxy_allowlist": ["example.com", "*.example.com", "your-instance.com"],
+  "npm_package_requests_forwarding": true,
+  "snippet_size_limit": 52428800,
+  "issues_create_limit": 300,
+  "raw_blob_request_limit": 300,
+  "wiki_page_max_content_bytes": 52428800,
+  "require_admin_approval_after_user_signup": false,
+  "personal_access_token_prefix": "GL-",
+  "rate_limiting_response_text": null,
+  "keep_latest_artifact": true
 }
 ```
 
@@ -91,12 +95,12 @@ the `file_template_project_id`, `deletion_adjourned_period`, or the `geo_node_al
 
 ```json
 {
-   "id" : 1,
-   "signup_enabled" : true,
-   "file_template_project_id": 1,
-   "geo_node_allowed_ips": "0.0.0.0/0, ::/0",
-   "deletion_adjourned_period": 7,
-   ...
+  "id" : 1,
+  "signup_enabled" : true,
+  "file_template_project_id": 1,
+  "geo_node_allowed_ips": "0.0.0.0/0, ::/0",
+  "deletion_adjourned_period": 7,
+  ...
 }
 ```
 
@@ -164,7 +168,7 @@ Example response:
   "local_markdown_version": 0,
   "asset_proxy_enabled": true,
   "asset_proxy_url": "https://assets.example.com",
-  "asset_proxy_whitelist": ["example.com", "*.example.com", "your-instance.com"],
+  "asset_proxy_allowlist": ["example.com", "*.example.com", "your-instance.com"],
   "geo_node_allowed_ips": "0.0.0.0/0, ::/0",
   "allow_local_requests_from_hooks_and_services": true,
   "allow_local_requests_from_web_hooks_and_services": true,
@@ -174,7 +178,10 @@ Example response:
   "issues_create_limit": 300,
   "raw_blob_request_limit": 300,
   "wiki_page_max_content_bytes": 52428800,
-  "require_admin_approval_after_user_signup": false
+  "require_admin_approval_after_user_signup": false,
+  "personal_access_token_prefix": "GL-",
+  "rate_limiting_response_text": null,
+  "keep_latest_artifact": true
 }
 ```
 
@@ -186,7 +193,7 @@ these parameters:
 - `geo_status_timeout`
 - `deletion_adjourned_period`
 
-Example responses: **(PREMIUM ONLY)**
+Example responses: **(PREMIUM SELF)**
 
 ```json
   "file_template_project_id": 1,
@@ -215,7 +222,8 @@ listed in the descriptions of the relevant settings.
 | `asset_proxy_enabled`                    | boolean          | no                                   | (**If enabled, requires:** `asset_proxy_url`) Enable proxying of assets. GitLab restart is required to apply changes. |
 | `asset_proxy_secret_key`                 | string           | no                                   | Shared secret with the asset proxy server. GitLab restart is required to apply changes. |
 | `asset_proxy_url`                        | string           | no                                   | URL of the asset proxy server. GitLab restart is required to apply changes. |
-| `asset_proxy_whitelist`                  | string or array of strings | no                         | Assets that match these domain(s) are **not** proxied. Wildcards allowed. Your GitLab installation URL is automatically allowlisted. GitLab restart is required to apply changes. |
+| `asset_proxy_whitelist`                  | string or array of strings | no                         | (Deprecated: Use `asset_proxy_allowlist` instead) Assets that match these domain(s) are **not** proxied. Wildcards allowed. Your GitLab installation URL is automatically allowlisted. GitLab restart is required to apply changes. |
+| `asset_proxy_allowlist`                  | string or array of strings | no                         | Assets that match these domain(s) are **not** proxied. Wildcards allowed. Your GitLab installation URL is automatically allowlisted. GitLab restart is required to apply changes. |
 | `authorized_keys_enabled`                | boolean          | no                                   | By default, we write to the `authorized_keys` file to support Git over SSH without additional configuration. GitLab can be optimized to authenticate SSH keys via the database file. Only disable this if you have configured your OpenSSH server to use the AuthorizedKeysCommand. |
 | `auto_devops_domain`                     | string           | no                                   | Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages. |
 | `auto_devops_enabled`                    | boolean          | no                                   | Enable Auto DevOps for projects by default. It automatically builds, tests, and deploys applications based on a predefined CI/CD configuration. |
@@ -231,7 +239,7 @@ listed in the descriptions of the relevant settings.
 | `default_project_visibility`             | string           | no                                   | What visibility level new projects receive. Can take `private`, `internal` and `public` as a parameter. Default is `private`. |
 | `default_projects_limit`                 | integer          | no                                   | Project limit per user. Default is `100000`. |
 | `default_snippet_visibility`             | string           | no                                   | What visibility level new snippets receive. Can take `private`, `internal` and `public` as a parameter. Default is `private`. |
-| `deletion_adjourned_period`              | integer          | no                                   | **(PREMIUM ONLY)** The number of days to wait before deleting a project or group that is marked for deletion. Value must be between 0 and 90.
+| `deletion_adjourned_period`              | integer          | no                                   | **(PREMIUM SELF)** The number of days to wait before deleting a project or group that is marked for deletion. Value must be between 0 and 90.
 | `diff_max_patch_bytes`                   | integer          | no                                   | Maximum diff patch size (Bytes). |
 | `disable_feed_token`                     | boolean          | no                                   | Disable display of RSS/Atom and calendar feed tokens ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/231493) in GitLab 13.7) |
 | `disabled_oauth_sign_in_sources`         | array of strings | no                                   | Disabled OAuth sign-in sources. |
@@ -276,6 +284,7 @@ listed in the descriptions of the relevant settings.
 | `first_day_of_week`                      | integer          | no                                   | Start day of the week for calendar views and date pickers. Valid values are `0` (default) for Sunday, `1` for Monday, and `6` for Saturday. |
 | `geo_node_allowed_ips`                   | string           | yes                                  | **(PREMIUM)** Comma-separated list of IPs and CIDRs of allowed secondary nodes. For example, `1.1.1.1, 2.2.2.0/24`. |
 | `geo_status_timeout`                     | integer          | no                                   | **(PREMIUM)** The amount of seconds after which a request to get a secondary node status times out. |
+| `git_two_factor_session_expiry`          | integer          | no                                   | **(PREMIUM)** Maximum duration (in minutes) of a session for Git operations when 2FA is enabled. |
 | `gitaly_timeout_default`                 | integer          | no                                   | Default Gitaly timeout, in seconds. This timeout is not enforced for Git fetch/push operations or Sidekiq jobs. Set to `0` to disable timeouts. |
 | `gitaly_timeout_fast`                    | integer          | no                                   | Gitaly fast operation timeout, in seconds. Some Gitaly operations are expected to be fast. If they exceed this threshold, there may be a problem with a storage shard and 'failing fast' can help maintain the stability of the GitLab instance. Set to `0` to disable timeouts. |
 | `gitaly_timeout_medium`                  | integer          | no                                   | Medium Gitaly timeout, in seconds. This should be a value between the Fast and the Default timeout. Set to `0` to disable timeouts. |
@@ -296,21 +305,24 @@ listed in the descriptions of the relevant settings.
 | `housekeeping_incremental_repack_period` | integer          | required by: `housekeeping_enabled`  | Number of Git pushes after which an incremental `git repack` is run. |
 | `html_emails_enabled`                    | boolean          | no                                   | Enable HTML emails. |
 | `import_sources`                         | array of strings | no                                   | Sources to allow project import from, possible values: `github`, `bitbucket`, `bitbucket_server`, `gitlab`, `fogbugz`, `git`, `gitlab_project`, `gitea`, `manifest`, and `phabricator`. |
+| `in_product_marketing_emails_enabled`    | boolean          | no                                   | Enable in-product marketing emails. Enabled by default. |
+| `invisible_captcha_enabled`              | boolean          | no                                   | <!-- vale gitlab.Spelling = NO --> Enable Invisible Captcha <!-- vale gitlab.Spelling = YES --> spam detection during sign-up. Disabled by default. |
 | `issues_create_limit`                    | integer          | no                                   | Max number of issue creation requests per minute per user. Disabled by default.|
+| `keep_latest_artifact`                   | boolean          | no                                   | Prevent the deletion of the artifacts from the most recent successful jobs, regardless of the expiry time. Enabled by default. |
 | `local_markdown_version`                 | integer          | no                                   | Increase this value when any cached Markdown should be invalidated. |
 | `maintenance_mode_message`               | string           | no                                   | **(PREMIUM)** Message displayed when instance is in maintenance mode |
-| `maintenance_mode`                       | boolean          | no                                   | **(PREMIUM)** When instance is in maintenance mode, non-admin users can sign in with read-only access and make read-only API requests |
+| `maintenance_mode`                       | boolean          | no                                   | **(PREMIUM)** When instance is in maintenance mode, non-administrative users can sign in with read-only access and make read-only API requests |
 | `max_artifacts_size`                     | integer          | no                                   | Maximum artifacts size in MB |
 | `max_attachment_size`                    | integer          | no                                   | Limit attachment size in MB |
-| `max_import_size`                        | integer          | no                                   | Maximum import size in MB. 0 for unlimited. Default = 50 |
+| `max_import_size`                        | integer          | no                                   | Maximum import size in MB. 0 for unlimited. Default = 0 (unlimited) [Modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to 0 in GitLab 13.8. |
 | `max_pages_size`                         | integer          | no                                   | Maximum size of pages repositories in MB |
-| `max_personal_access_token_lifetime`     | integer          | no                                   | **(ULTIMATE ONLY)** Maximum allowable lifetime for personal access tokens in days |
+| `max_personal_access_token_lifetime`     | integer          | no                                   | **(ULTIMATE SELF)** Maximum allowable lifetime for personal access tokens in days |
 | `metrics_method_call_threshold`          | integer          | no                                   | A method call is only tracked when it takes longer than the given amount of milliseconds. |
 | `mirror_available`                       | boolean          | no                                   | Allow repository mirroring to configured by project Maintainers. If disabled, only Admins can configure repository mirroring. |
 | `mirror_capacity_threshold`              | integer          | no                                   | **(PREMIUM)** Minimum capacity to be available before scheduling more mirrors preemptively |
 | `mirror_max_capacity`                    | integer          | no                                   | **(PREMIUM)** Maximum number of mirrors that can be synchronizing at the same time. |
 | `mirror_max_delay`                       | integer          | no                                   | **(PREMIUM)** Maximum time (in minutes) between updates that a mirror can have when scheduled to synchronize. |
-| `npm_package_requests_forwarding`        | boolean          | no                                   | **(PREMIUM)** Use npmjs.org as a default remote repository when the package is not found in the GitLab NPM Registry  |
+| `npm_package_requests_forwarding`        | boolean          | no                                   | **(PREMIUM)** Use npmjs.org as a default remote repository when the package is not found in the GitLab Package Registry for npm  |
 | `outbound_local_requests_whitelist`      | array of strings | no                                   | Define a list of trusted domains or IP addresses to which local requests are allowed when local requests for hooks and services are disabled.
 | `pages_domain_verification_enabled`      | boolean          | no                                   | Require users to prove ownership of custom domains. Domain verification is an essential security measure for public GitLab sites. Users are required to demonstrate they control a domain before it is enabled. |
 | `password_authentication_enabled_for_git` | boolean         | no                                   | Enable authentication for Git over HTTP(S) via a GitLab account password. Default is `true`. |
@@ -318,15 +330,17 @@ listed in the descriptions of the relevant settings.
 | `performance_bar_allowed_group_id`       | string           | no                                   | (Deprecated: Use `performance_bar_allowed_group_path` instead) Path of the group that is allowed to toggle the performance bar. |
 | `performance_bar_allowed_group_path`     | string           | no                                   | Path of the group that is allowed to toggle the performance bar. |
 | `performance_bar_enabled`                | boolean          | no                                   | (Deprecated: Pass `performance_bar_allowed_group_path: nil` instead) Allow enabling the performance bar. |
+| `personal_access_token_prefix`           | string           | no                                   | Prefix for all generated personal access tokens. |
 | `plantuml_enabled`                       | boolean          | no                                   | (**If enabled, requires:** `plantuml_url`) Enable PlantUML integration. Default is `false`. |
 | `plantuml_url`                           | string           | required by: `plantuml_enabled`      | The PlantUML instance URL for integration. |
 | `polling_interval_multiplier`            | decimal          | no                                   | Interval multiplier used by endpoints that perform polling. Set to `0` to disable polling. |
 | `project_export_enabled`                 | boolean          | no                                   | Enable project export. |
 | `prometheus_metrics_enabled`             | boolean          | no                                   | Enable Prometheus metrics. |
-| `protected_ci_variables`                 | boolean          | no                                   | Environment variables are protected by default. |
+| `protected_ci_variables`                 | boolean          | no                                   | CI/CD variables are protected by default. |
 | `pseudonymizer_enabled`                  | boolean          | no                                   | **(PREMIUM)** When enabled, GitLab runs a background job that produces pseudonymized CSVs of the GitLab database to upload to your configured object storage directory.
 | `push_event_activities_limit`            | integer          | no                                   | Number of changes (branches or tags) in a single push to determine whether individual push events or bulk push events are created. [Bulk push events are created](../user/admin_area/settings/push_event_activities_limit.md) if it surpasses that value. |
 | `push_event_hooks_limit`                 | integer          | no                                   | Number of changes (branches or tags) in a single push to determine whether webhooks and services fire or not. Webhooks and services aren't submitted if it surpasses that value. |
+| `rate_limiting_response_text`            | string           | no                                   | When rate limiting is enabled via the `throttle_*` settings, send this plain text response when a rate limit is exceeded. 'Retry later' is sent if this is blank. |
 | `raw_blob_request_limit`                 | integer          | no                                   | Max number of requests per minute for each raw path. Default: 300. To disable throttling set to 0.|
 | `recaptcha_enabled`                      | boolean          | no                                   | (**If enabled, requires:** `recaptcha_private_key` and `recaptcha_site_key`) Enable reCAPTCHA. |
 | `recaptcha_private_key`                  | string           | required by: `recaptcha_enabled`     | Private key for reCAPTCHA. |
@@ -334,7 +348,7 @@ listed in the descriptions of the relevant settings.
 | `receive_max_input_size`                 | integer          | no                                   | Maximum push size (MB). |
 | `repository_checks_enabled`              | boolean          | no                                   | GitLab periodically runs `git fsck` in all project and wiki repositories to look for silent disk corruption issues. |
 | `repository_size_limit`                  | integer          | no                                   | **(PREMIUM)** Size limit per repository (MB) |
-| `repository_storages_weighted`           | hash of strings to integers | no                        | (GitLab 13.1 and later) Hash of names of taken from `gitlab.yml` to [weights](../administration/repository_storage_paths.md#choose-where-new-repositories-are-stored). New projects are created in one of these stores, chosen by a weighted random selection. |
+| `repository_storages_weighted`           | hash of strings to integers | no                        | (GitLab 13.1 and later) Hash of names of taken from `gitlab.yml` to [weights](../administration/repository_storage_paths.md#configure-where-new-repositories-are-stored). New projects are created in one of these stores, chosen by a weighted random selection. |
 | `repository_storages`                    | array of strings | no                                   | (GitLab 13.0 and earlier) List of names of enabled storage paths, taken from `gitlab.yml`. New projects are created in one of these stores, chosen at random. |
 | `require_admin_approval_after_user_signup`      | boolean          | no                                   | When enabled, any user that signs up for an account using the registration form is placed under a **Pending approval** state and has to be explicitly [approved](../user/admin_area/approving_users.md) by an administrator. |
 | `require_two_factor_authentication`      | boolean          | no                                   | (**If enabled, requires:** `two_factor_grace_period`) Require all users to set up Two-factor authentication. |
@@ -386,3 +400,8 @@ listed in the descriptions of the relevant settings.
 | `version_check_enabled`                  | boolean          | no                                   | Let GitLab inform you when an update is available. |
 | `web_ide_clientside_preview_enabled`     | boolean          | no                                   | Live Preview (allow live previews of JavaScript projects in the Web IDE using CodeSandbox Live Preview). |
 | `wiki_page_max_content_bytes`            | integer          | no                                   | Maximum wiki page content size in **bytes**. Default: 52428800 Bytes (50 MB). The minimum value is 1024 bytes. |
+
+### Package Registry: Package file size limits
+
+The package file size limits are not part of the Application settings API.
+Instead, these settings can be accessed using the [Plan limits API](plan_limits.md).

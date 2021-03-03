@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
   include GraphqlHelpers
 
-  let_it_be(:dast_site_profile) { create(:dast_site_profile) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, :with_dast_site_validation) }
   let_it_be(:project) { dast_site_profile.project }
   let_it_be(:current_user) { create(:user) }
 

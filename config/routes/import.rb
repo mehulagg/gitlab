@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Alias import callbacks under the /users/auth endpoint so that
 # the OAuth2 callback URL can be restricted under http://example.com/users/auth
 # instead of http://example.com.
@@ -63,6 +65,7 @@ namespace :import do
   resource :bulk_imports, only: [:create] do
     post :configure
     get :status
+    get :realtime_changes
   end
 
   resource :manifest, only: [:create, :new], controller: :manifest do

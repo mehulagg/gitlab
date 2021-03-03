@@ -29,7 +29,10 @@ RSpec.describe 'Kerberos clone instructions', :js do
     it 'shows the Kerberos clone information' do
       resize_screen_xs
       visit_project
-      find('.dropdown-toggle').click
+
+      within('.js-mobile-git-clone') do
+        find('.dropdown-toggle').click
+      end
 
       expect(page).to have_content('Copy KRB5 clone URL')
     end

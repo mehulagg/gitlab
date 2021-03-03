@@ -1,10 +1,10 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
-import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
+import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
+import { n__, s__, sprintf } from '~/locale';
 import ReportSection from '~/reports/components/report_section.vue';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
-import { n__, s__, sprintf } from '~/locale';
 
 export default {
   components: {
@@ -41,6 +41,9 @@ export default {
       return this.checkReportStatus(this.isLoadingCodequality, this.loadingCodequalityFailed);
     },
   },
+  i18n: {
+    subHeading: s__('ciReport|This report contains all Code Quality issues in the source branch.'),
+  },
   methods: {
     ...mapActions(['setPage']),
     translateText(type) {
@@ -70,7 +73,9 @@ export default {
       :has-issues="hasCodequalityIssues"
       :component="$options.componentNames.CodequalityIssueBody"
       class="codequality-report"
-    />
+    >
+      <template v-if="hasCodequalityIssues" #sub-heading>{{ $options.i18n.subHeading }}</template>
+    </report-section>
     <pagination-links
       :change="setPage"
       :page-info="pageInfo"

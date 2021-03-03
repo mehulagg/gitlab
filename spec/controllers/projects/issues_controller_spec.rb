@@ -63,53 +63,20 @@ RSpec.describe Projects::IssuesController do
         end
       end
 
-      describe 'the null hypothesis experiment', :snowplow do
+      describe 'the null hypothesis experiment', :experiment do
+        before do
+          stub_experiments(null_hypothesis: :candidate)
+        end
+
         it 'defines the expected before actions' do
           expect(controller).to use_before_action(:run_null_hypothesis_experiment)
         end
 
-        context 'when rolled out to 100%' do
-          it 'assigns the candidate experience and tracks the event' do
-            get :index, params: { namespace_id: project.namespace, project_id: project }
+        it 'assigns the candidate experience and tracks the event' do
+          expect(experiment(:null_hypothesis)).to track('index').on_any_instance.for(:candidate)
+            .with_context(project: project)
 
-            expect_snowplow_event(
-              category: 'null_hypothesis',
-              action: 'index',
-              context: [{
-                schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/0-3-0',
-                data: { variant: 'candidate', experiment: 'null_hypothesis', key: anything }
-              }]
-            )
-          end
-        end
-
-        context 'when not rolled out' do
-          before do
-            stub_feature_flags(null_hypothesis: false)
-          end
-
-          it 'assigns the control experience and tracks the event' do
-            get :index, params: { namespace_id: project.namespace, project_id: project }
-
-            expect_snowplow_event(
-              category: 'null_hypothesis',
-              action: 'index',
-              context: [{
-                schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/0-3-0',
-                data: { variant: 'control', experiment: 'null_hypothesis', key: anything }
-              }]
-            )
-          end
-        end
-
-        context 'when gitlab_experiments is disabled' do
-          it 'does not run the experiment at all' do
-            stub_feature_flags(gitlab_experiments: false)
-
-            expect(controller).not_to receive(:run_null_hypothesis_experiment)
-
-            get :index, params: { namespace_id: project.namespace, project_id: project }
-          end
+          get :index, params: { namespace_id: project.namespace, project_id: project }
         end
       end
     end
@@ -224,6 +191,22 @@ RSpec.describe Projects::IssuesController do
       it_behaves_like 'unauthorized when external service denies access' do
         subject { get :index, params: { namespace_id: project.namespace, project_id: project } }
       end
+    end
+  end
+
+  describe "GET #show" do
+    before do
+      sign_in(user)
+      project.add_developer(user)
+    end
+
+    it "returns issue_email_participants" do
+      participants = create_list(:issue_email_participant, 2, issue: issue)
+
+      get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }, format: :json
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['issue_email_participants']).to contain_exactly({ "email" => participants[0].email }, { "email" => participants[1].email })
     end
   end
 
@@ -1003,7 +986,7 @@ RSpec.describe Projects::IssuesController do
             def update_verified_issue
               update_issue(
                 issue_params: { title: spammy_title },
-                additional_params: { spam_log_id: spam_logs.last.id, recaptcha_verification: true })
+                additional_params: { spam_log_id: spam_logs.last.id, 'g-recaptcha-response': true })
             end
 
             it 'returns 200 status' do
@@ -1021,7 +1004,7 @@ RSpec.describe Projects::IssuesController do
             it 'does not mark spam log as recaptcha_verified when it does not belong to current_user' do
               spam_log = create(:spam_log)
 
-              expect { update_issue(issue_params: { spam_log_id: spam_log.id, recaptcha_verification: true }) }
+              expect { update_issue(issue_params: { spam_log_id: spam_log.id, 'g-recaptcha-response': true }) }
                 .not_to change { SpamLog.last.recaptcha_verified }
             end
           end
@@ -1298,11 +1281,13 @@ RSpec.describe Projects::IssuesController do
           let!(:last_spam_log) { spam_logs.last }
 
           def post_verified_issue
-            post_new_issue({}, { spam_log_id: last_spam_log.id, recaptcha_verification: true } )
+            post_new_issue({}, { spam_log_id: last_spam_log.id, 'g-recaptcha-response': 'abc123' } )
           end
 
           before do
-            expect(controller).to receive_messages(verify_recaptcha: true)
+            expect_next_instance_of(Captcha::CaptchaVerificationService) do |instance|
+              expect(instance).to receive(:execute) { true }
+            end
           end
 
           it 'accepts an issue after reCAPTCHA is verified' do
@@ -1316,7 +1301,7 @@ RSpec.describe Projects::IssuesController do
           it 'does not mark spam log as recaptcha_verified when it does not belong to current_user' do
             spam_log = create(:spam_log)
 
-            expect { post_new_issue({}, { spam_log_id: spam_log.id, recaptcha_verification: true } ) }
+            expect { post_new_issue({}, { spam_log_id: spam_log.id, 'g-recaptcha-response': true } ) }
               .not_to change { last_spam_log.recaptcha_verified }
           end
         end

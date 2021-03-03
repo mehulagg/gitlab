@@ -41,13 +41,14 @@ RSpec.describe Vulnerabilities::DismissService do
     end
 
     context 'when the `dismiss_findings` argument is not false' do
-      it 'dismisses a vulnerability and its associated findings' do
+      it 'dismisses a vulnerability and its associated findings with correct attributes' do
         freeze_time do
           dismiss_vulnerability
 
           expect(vulnerability.reload).to(
             have_attributes(state: 'dismissed', dismissed_by: user, dismissed_at: be_like_time(Time.current)))
           expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
+          expect(vulnerability.finding.dismissal_feedback.finding_uuid).to eq(vulnerability.finding.uuid_v5)
         end
       end
     end
@@ -68,6 +69,19 @@ RSpec.describe Vulnerabilities::DismissService do
               all(have_attributes(comment: comment, comment_author: user, comment_timestamp: be_like_time(Time.current), pipeline_id: pipeline.id)))
           end
         end
+      end
+    end
+
+    context 'when the dismissal_reason is added' do
+      let(:dismissal_reason) { 'used_in_tests' }
+      let(:service) { described_class.new(user, vulnerability, nil, dismissal_reason) }
+
+      it 'dismisses a vulnerability and its associated findings with comment', :aggregate_failures do
+        dismiss_vulnerability
+
+        expect(vulnerability.reload).to have_attributes(state: 'dismissed', dismissed_by: user)
+        expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
+        expect(vulnerability.findings.map(&:dismissal_feedback)).to all(have_attributes(dismissal_reason: dismissal_reason))
       end
     end
 

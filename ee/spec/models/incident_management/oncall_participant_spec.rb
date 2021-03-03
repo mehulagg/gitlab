@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe IncidentManagement::OncallParticipant do
   let_it_be(:rotation) { create(:incident_management_oncall_rotation) }
   let_it_be(:user) { create(:user) }
+  let_it_be(:participant) { create(:incident_management_oncall_participant, rotation: rotation) }
 
   subject { build(:incident_management_oncall_participant, rotation: rotation, user: user) }
 
@@ -14,12 +15,13 @@ RSpec.describe IncidentManagement::OncallParticipant do
     rotation.project.add_developer(user)
   end
 
-  describe '.associations' do
+  describe 'associations' do
     it { is_expected.to belong_to(:rotation) }
     it { is_expected.to belong_to(:user) }
+    it { is_expected.to have_many(:shifts) }
   end
 
-  describe '.validations' do
+  describe 'validations' do
     it { is_expected.to validate_presence_of(:rotation) }
     it { is_expected.to validate_presence_of(:user) }
     it { is_expected.to validate_presence_of(:color_weight) }
@@ -35,32 +37,29 @@ RSpec.describe IncidentManagement::OncallParticipant do
         expect(subject.errors.full_messages.to_sentence).to eq('User has already been taken')
       end
     end
+  end
 
-    context 'when participant cannot read project' do
-      let_it_be(:other_user) { create(:user) }
-      subject { build(:incident_management_oncall_participant, rotation: rotation, user: other_user) }
+  describe 'scopes' do
+    let_it_be(:removed_participant) { create(:incident_management_oncall_participant, :removed, rotation: rotation) }
 
-      context 'on creation' do
-        it 'has validation errors' do
-          expect(subject).to be_invalid
-          expect(subject.errors.full_messages.to_sentence).to eq('User does not have access to the project')
-        end
-      end
+    describe '.not_removed' do
+      subject { described_class.not_removed }
 
-      context 'after creation' do
-        let(:project) { rotation.project }
+      it { is_expected.to contain_exactly(participant) }
+    end
 
-        before do
-          project.add_developer(other_user)
-        end
+    describe '.removed' do
+      subject { described_class.removed }
 
-        it 'is valid' do
-          subject.save!
-          remove_user_from_project(other_user, project)
+      it { is_expected.to contain_exactly(removed_participant) }
+    end
+  end
 
-          expect(subject).to be_valid
-        end
-      end
+  describe '#mark_as_removed' do
+    subject { participant.mark_as_removed }
+
+    it 'updates is_removed to true' do
+      expect { subject }.to change { participant.reload.is_removed }.to(true)
     end
   end
 

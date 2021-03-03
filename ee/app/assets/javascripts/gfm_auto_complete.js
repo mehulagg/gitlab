@@ -36,17 +36,18 @@ class GfmAutoCompleteEE extends GfmAutoComplete {
         return tmpl;
       },
       data: GfmAutoComplete.defaultLoadingData,
-      // eslint-disable-next-line no-template-curly-in-string
-      insertTpl: '${atwho-at}${id}',
+      insertTpl: GfmAutoComplete.Issues.insertTemplateFunction,
+      skipSpecialCharacterTest: true,
       callbacks: {
         ...defaultCallbacks,
         beforeSave(merges) {
-          return $.map(merges, m => {
+          return $.map(merges, (m) => {
             if (m.title == null) {
               return m;
             }
             return {
               id: m.iid,
+              reference: m.reference,
               title: m.title.replace(/<(?:.|\n)*?>/gm, ''),
               search: `${m.iid} ${m.title}`,
             };
@@ -75,7 +76,7 @@ class GfmAutoCompleteEE extends GfmAutoComplete {
       callbacks: {
         ...defaultCallbacks,
         beforeSave(merges) {
-          return merges.map(m => {
+          return merges.map((m) => {
             if (m.title == null) {
               return m;
             }

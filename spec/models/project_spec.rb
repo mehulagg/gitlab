@@ -8,7 +8,7 @@ RSpec.describe Project, factory_default: :keep do
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:namespace) { create_default(:namespace) }
+  let_it_be(:namespace) { create_default(:namespace).freeze }
 
   it_behaves_like 'having unique enum values'
 
@@ -21,6 +21,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:services) }
     it { is_expected.to have_many(:events) }
     it { is_expected.to have_many(:merge_requests) }
+    it { is_expected.to have_many(:merge_request_metrics).class_name('MergeRequest::Metrics') }
     it { is_expected.to have_many(:issues) }
     it { is_expected.to have_many(:milestones) }
     it { is_expected.to have_many(:iterations) }
@@ -127,6 +128,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:reviews).inverse_of(:project) }
     it { is_expected.to have_many(:packages).class_name('Packages::Package') }
     it { is_expected.to have_many(:package_files).class_name('Packages::PackageFile') }
+    it { is_expected.to have_many(:debian_distributions).class_name('Packages::Debian::ProjectDistribution').dependent(:destroy) }
     it { is_expected.to have_many(:pipeline_artifacts) }
     it { is_expected.to have_many(:terraform_states).class_name('Terraform::State').inverse_of(:project) }
 
@@ -143,8 +145,12 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it_behaves_like 'model with wiki' do
-      let_it_be(:container) { create(:project, :wiki_repo) }
+      let_it_be(:container) { create(:project, :wiki_repo, namespace: create(:group)) }
       let(:container_without_wiki) { create(:project) }
+    end
+
+    it_behaves_like 'can move repository storage' do
+      let_it_be(:container) { create(:project, :repository) }
     end
 
     it 'has an inverse relationship with merge requests' do
@@ -550,6 +556,25 @@ RSpec.describe Project, factory_default: :keep do
         expect(project.ci_pipelines).to all(have_attributes(source: 'external'))
         expect(project.ci_pipelines.size).to eq(1)
       end
+    end
+  end
+
+  describe '#default_pipeline_lock' do
+    let(:project) { build_stubbed(:project) }
+
+    subject { project.default_pipeline_lock }
+
+    where(:keep_latest_artifact_enabled, :result_pipeline_locked) do
+      false        | :unlocked
+      true         | :artifacts_locked
+    end
+
+    before do
+      allow(project).to receive(:keep_latest_artifacts_available?).and_return(keep_latest_artifact_enabled)
+    end
+
+    with_them do
+      it { expect(subject).to eq(result_pipeline_locked) }
     end
   end
 
@@ -997,101 +1022,6 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#external_issue_tracker' do
-    let(:project) { create(:project) }
-    let(:ext_project) { create(:redmine_project) }
-
-    context 'on existing projects with no value for has_external_issue_tracker' do
-      before do
-        project.update_column(:has_external_issue_tracker, nil)
-        ext_project.update_column(:has_external_issue_tracker, nil)
-      end
-
-      it 'updates the has_external_issue_tracker boolean' do
-        expect do
-          project.external_issue_tracker
-        end.to change { project.reload.has_external_issue_tracker }.to(false)
-
-        expect do
-          ext_project.external_issue_tracker
-        end.to change { ext_project.reload.has_external_issue_tracker }.to(true)
-      end
-    end
-
-    it 'returns nil and does not query services when there is no external issue tracker' do
-      expect(project).not_to receive(:services)
-
-      expect(project.external_issue_tracker).to eq(nil)
-    end
-
-    it 'retrieves external_issue_tracker querying services and cache it when there is external issue tracker' do
-      ext_project.reload # Factory returns a project with changed attributes
-      expect(ext_project).to receive(:services).once.and_call_original
-
-      2.times { expect(ext_project.external_issue_tracker).to be_a_kind_of(RedmineService) }
-    end
-  end
-
-  describe '#cache_has_external_issue_tracker' do
-    let_it_be(:project) { create(:project, has_external_issue_tracker: nil) }
-
-    it 'stores true if there is any external_issue_tracker' do
-      services = double(:service, external_issue_trackers: [RedmineService.new])
-      expect(project).to receive(:services).and_return(services)
-
-      expect do
-        project.cache_has_external_issue_tracker
-      end.to change { project.has_external_issue_tracker}.to(true)
-    end
-
-    it 'stores false if there is no external_issue_tracker' do
-      services = double(:service, external_issue_trackers: [])
-      expect(project).to receive(:services).and_return(services)
-
-      expect do
-        project.cache_has_external_issue_tracker
-      end.to change { project.has_external_issue_tracker}.to(false)
-    end
-
-    it 'does not cache data when in a read-only GitLab instance' do
-      allow(Gitlab::Database).to receive(:read_only?) { true }
-
-      expect do
-        project.cache_has_external_issue_tracker
-      end.not_to change { project.has_external_issue_tracker }
-    end
-  end
-
-  describe '#cache_has_external_wiki' do
-    let_it_be(:project) { create(:project, has_external_wiki: nil) }
-
-    it 'stores true if there is any external_wikis' do
-      services = double(:service, external_wikis: [ExternalWikiService.new])
-      expect(project).to receive(:services).and_return(services)
-
-      expect do
-        project.cache_has_external_wiki
-      end.to change { project.has_external_wiki}.to(true)
-    end
-
-    it 'stores false if there is no external_wikis' do
-      services = double(:service, external_wikis: [])
-      expect(project).to receive(:services).and_return(services)
-
-      expect do
-        project.cache_has_external_wiki
-      end.to change { project.has_external_wiki}.to(false)
-    end
-
-    it 'does not cache data when in a read-only GitLab instance' do
-      allow(Gitlab::Database).to receive(:read_only?) { true }
-
-      expect do
-        project.cache_has_external_wiki
-      end.not_to change { project.has_external_wiki }
-    end
-  end
-
   describe '#has_wiki?' do
     let(:no_wiki_project)       { create(:project, :wiki_disabled, has_external_wiki: false) }
     let(:wiki_enabled_project)  { create(:project) }
@@ -1128,54 +1058,153 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#external_issue_tracker' do
+    it 'sets Project#has_external_issue_tracker when it is nil' do
+      project_with_no_tracker = create(:project, has_external_issue_tracker: nil)
+      project_with_tracker = create(:redmine_project, has_external_issue_tracker: nil)
+
+      expect do
+        project_with_no_tracker.external_issue_tracker
+      end.to change { project_with_no_tracker.reload.has_external_issue_tracker }.from(nil).to(false)
+
+      expect do
+        project_with_tracker.external_issue_tracker
+      end.to change { project_with_tracker.reload.has_external_issue_tracker }.from(nil).to(true)
+    end
+
+    it 'returns nil and does not query services when there is no external issue tracker' do
+      project = create(:project)
+
+      expect(project).not_to receive(:services)
+      expect(project.external_issue_tracker).to eq(nil)
+    end
+
+    it 'retrieves external_issue_tracker querying services and cache it when there is external issue tracker' do
+      project = create(:redmine_project)
+
+      expect(project).to receive(:services).once.and_call_original
+      2.times { expect(project.external_issue_tracker).to be_a_kind_of(RedmineService) }
+    end
+  end
+
+  describe '#has_external_issue_tracker' do
+    let_it_be(:project) { create(:project) }
+
+    def subject
+      project.reload.has_external_issue_tracker
+    end
+
+    it 'is false when external issue tracker service is not active' do
+      create(:service, project: project, category: 'issue_tracker', active: false)
+
+      is_expected.to eq(false)
+    end
+
+    it 'is false when other service is active' do
+      create(:service, project: project, category: 'not_issue_tracker', active: true)
+
+      is_expected.to eq(false)
+    end
+
+    context 'when there is an active external issue tracker service' do
+      let!(:service) do
+        create(:service, project: project, type: 'JiraService', category: 'issue_tracker', active: true)
+      end
+
+      specify { is_expected.to eq(true) }
+
+      it 'becomes false when external issue tracker service is destroyed' do
+        expect do
+          Service.find(service.id).delete
+        end.to change { subject }.to(false)
+      end
+
+      it 'becomes false when external issue tracker service becomes inactive' do
+        expect do
+          service.update_column(:active, false)
+        end.to change { subject }.to(false)
+      end
+
+      context 'when there are two active external issue tracker services' do
+        let_it_be(:second_service) do
+          create(:service, project: project, type: 'CustomIssueTracker', category: 'issue_tracker', active: true)
+        end
+
+        it 'does not become false when external issue tracker service is destroyed' do
+          expect do
+            Service.find(service.id).delete
+          end.not_to change { subject }
+        end
+
+        it 'does not become false when external issue tracker service becomes inactive' do
+          expect do
+            service.update_column(:active, false)
+          end.not_to change { subject }
+        end
+      end
+    end
+  end
+
   describe '#external_wiki' do
     let_it_be(:project) { create(:project) }
 
-    context 'with an active external wiki' do
-      before do
+    def subject
+      project.reload.external_wiki
+    end
+
+    it 'returns an active external wiki' do
+      create(:service, project: project, type: 'ExternalWikiService', active: true)
+
+      is_expected.to be_kind_of(ExternalWikiService)
+    end
+
+    it 'does not return an inactive external wiki' do
+      create(:service, project: project, type: 'ExternalWikiService', active: false)
+
+      is_expected.to eq(nil)
+    end
+
+    it 'sets Project#has_external_wiki when it is nil' do
+      create(:service, project: project, type: 'ExternalWikiService', active: true)
+      project.update_column(:has_external_wiki, nil)
+
+      expect { subject }.to change { project.has_external_wiki }.from(nil).to(true)
+    end
+  end
+
+  describe '#has_external_wiki' do
+    let_it_be(:project) { create(:project) }
+
+    def subject
+      project.reload.has_external_wiki
+    end
+
+    specify { is_expected.to eq(false) }
+
+    context 'when there is an active external wiki service' do
+      let!(:service) do
         create(:service, project: project, type: 'ExternalWikiService', active: true)
-        project.external_wiki
       end
 
-      it 'sets :has_external_wiki as true' do
-        expect(project.has_external_wiki).to be(true)
+      specify { is_expected.to eq(true) }
+
+      it 'becomes false if the external wiki service is destroyed' do
+        expect do
+          Service.find(service.id).delete
+        end.to change { subject }.to(false)
       end
 
-      it 'sets :has_external_wiki as false if an external wiki service is destroyed later' do
-        expect(project.has_external_wiki).to be(true)
-
-        project.services.external_wikis.first.destroy
-
-        expect(project.has_external_wiki).to be(false)
+      it 'becomes false if the external wiki service becomes inactive' do
+        expect do
+          service.update_column(:active, false)
+        end.to change { subject }.to(false)
       end
     end
 
-    context 'with an inactive external wiki' do
-      before do
-        create(:service, project: project, type: 'ExternalWikiService', active: false)
-      end
+    it 'is false when external wiki service is not active' do
+      create(:service, project: project, type: 'ExternalWikiService', active: false)
 
-      it 'sets :has_external_wiki as false' do
-        expect(project.has_external_wiki).to be(false)
-      end
-    end
-
-    context 'with no external wiki' do
-      before do
-        project.external_wiki
-      end
-
-      it 'sets :has_external_wiki as false' do
-        expect(project.has_external_wiki).to be(false)
-      end
-
-      it 'sets :has_external_wiki as true if an external wiki service is created later' do
-        expect(project.has_external_wiki).to be(false)
-
-        create(:service, project: project, type: 'ExternalWikiService', active: true)
-
-        expect(project.has_external_wiki).to be(true)
-      end
+      is_expected.to eq(false)
     end
   end
 
@@ -1247,7 +1276,7 @@ RSpec.describe Project, factory_default: :keep do
 
     it 'is false if avatar is html page' do
       project.update_attribute(:avatar, 'uploads/avatar.html')
-      expect(project.avatar_type).to eq(['file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico'])
+      expect(project.avatar_type).to eq(['file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp'])
     end
   end
 
@@ -1512,63 +1541,13 @@ RSpec.describe Project, factory_default: :keep do
         allow(::Gitlab::ServiceDeskEmail).to receive(:config).and_return(config)
       end
 
-      context 'when service_desk_custom_address flag is enabled' do
-        before do
-          stub_feature_flags(service_desk_custom_address: true)
-        end
+      it 'returns custom address when project_key is set' do
+        create(:service_desk_setting, project: project, project_key: 'key1')
 
-        it 'returns custom address when project_key is set' do
-          create(:service_desk_setting, project: project, project_key: 'key1')
-
-          expect(subject).to eq("foo+#{project.full_path_slug}-key1@bar.com")
-        end
-
-        it_behaves_like 'with incoming email address'
+        expect(subject).to eq("foo+#{project.full_path_slug}-key1@bar.com")
       end
 
-      context 'when service_desk_custom_address flag is disabled' do
-        before do
-          stub_feature_flags(service_desk_custom_address: false)
-        end
-
-        it_behaves_like 'with incoming email address'
-      end
-    end
-  end
-
-  describe '.service_desk_custom_address_enabled?' do
-    let_it_be(:project) { create(:project, service_desk_enabled: true) }
-
-    subject(:address_enabled) { project.service_desk_custom_address_enabled? }
-
-    context 'when service_desk_email is enabled' do
-      before do
-        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(true)
-      end
-
-      it 'returns true' do
-        expect(address_enabled).to be_truthy
-      end
-
-      context 'when service_desk_custom_address flag is disabled' do
-        before do
-          stub_feature_flags(service_desk_custom_address: false)
-        end
-
-        it 'returns false' do
-          expect(address_enabled).to be_falsey
-        end
-      end
-    end
-
-    context 'when service_desk_email is disabled' do
-      before do
-        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(false)
-      end
-
-      it 'returns false when service_desk_email is disabled' do
-        expect(address_enabled).to be_falsey
-      end
+      it_behaves_like 'with incoming email address'
     end
   end
 
@@ -1592,10 +1571,7 @@ RSpec.describe Project, factory_default: :keep do
     let(:project) { build(:project) }
 
     it 'picks storage from ApplicationSetting' do
-      expect_next_instance_of(ApplicationSetting) do |instance|
-        expect(instance).to receive(:pick_repository_storage).and_return('picked')
-      end
-      expect(described_class).to receive(:pick_repository_storage).and_call_original
+      expect(Repository).to receive(:pick_storage_shard).and_return('picked')
 
       expect(project.repository_storage).to eq('picked')
     end
@@ -1823,7 +1799,8 @@ RSpec.describe Project, factory_default: :keep do
   describe '#default_branch_protected?' do
     using RSpec::Parameterized::TableSyntax
 
-    let_it_be(:project) { create(:project) }
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:project) { create(:project, namespace: namespace) }
 
     subject { project.default_branch_protected? }
 
@@ -2290,8 +2267,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#ci_config_path=' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build_stubbed(:project) }
 
     where(:default_ci_config_path, :project_ci_config_path, :expected_ci_config_path) do
@@ -2828,7 +2803,8 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#emails_disabled?' do
-    let(:project) { build(:project, emails_disabled: false) }
+    let_it_be(:namespace) { create(:namespace) }
+    let(:project) { build(:project, namespace: namespace, emails_disabled: false) }
 
     context 'emails disabled in group' do
       it 'returns true' do
@@ -2856,7 +2832,8 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#lfs_enabled?' do
-    let(:project) { build(:project) }
+    let(:namespace) { create(:namespace) }
+    let(:project) { build(:project, namespace: namespace) }
 
     shared_examples 'project overrides group' do
       it 'returns true when enabled in project' do
@@ -3040,100 +3017,10 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#set_repository_read_only!' do
-    let(:project) { create(:project) }
-
-    it 'makes the repository read-only' do
-      expect { project.set_repository_read_only! }
-        .to change(project, :repository_read_only?)
-        .from(false)
-        .to(true)
-    end
-
-    it 'raises an error if the project is already read-only' do
-      project.set_repository_read_only!
-
-      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /already read-only/)
-    end
-
-    it 'raises an error when there is an existing git transfer in progress' do
-      allow(project).to receive(:git_transfer_in_progress?) { true }
-
-      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
-    end
-
-    context 'skip_git_transfer_check is true' do
-      it 'makes the project read-only when git transfers are in progress' do
-        allow(project).to receive(:git_transfer_in_progress?) { true }
-
-        expect { project.set_repository_read_only!(skip_git_transfer_check: true) }
-          .to change(project, :repository_read_only?)
-          .from(false)
-          .to(true)
-      end
-    end
-  end
-
-  describe '#set_repository_writable!' do
-    it 'sets repository_read_only to false' do
-      project = create(:project, :read_only)
-
-      expect { project.set_repository_writable! }
-        .to change(project, :repository_read_only)
-        .from(true).to(false)
-    end
-  end
-
-  describe '#pushes_since_gc' do
-    let(:project) { build_stubbed(:project) }
-
-    after do
-      project.reset_pushes_since_gc
-    end
-
-    context 'without any pushes' do
-      it 'returns 0' do
-        expect(project.pushes_since_gc).to eq(0)
-      end
-    end
-
-    context 'with a number of pushes' do
-      it 'returns the number of pushes' do
-        3.times { project.increment_pushes_since_gc }
-
-        expect(project.pushes_since_gc).to eq(3)
-      end
-    end
-  end
-
-  describe '#increment_pushes_since_gc' do
-    let(:project) { build_stubbed(:project) }
-
-    after do
-      project.reset_pushes_since_gc
-    end
-
-    it 'increments the number of pushes since the last GC' do
-      3.times { project.increment_pushes_since_gc }
-
-      expect(project.pushes_since_gc).to eq(3)
-    end
-  end
-
-  describe '#reset_pushes_since_gc' do
-    let(:project) { build_stubbed(:project) }
-
-    after do
-      project.reset_pushes_since_gc
-    end
-
-    it 'resets the number of pushes since the last GC' do
-      3.times { project.increment_pushes_since_gc }
-
-      project.reset_pushes_since_gc
-
-      expect(project.pushes_since_gc).to eq(0)
-    end
+  it_behaves_like 'can housekeep repository' do
+    let(:resource) { build_stubbed(:project) }
+    let(:resource_key) { 'projects' }
+    let(:expected_worker_class) { Projects::GitGarbageCollectWorker }
   end
 
   describe '#deployment_variables' do
@@ -4080,7 +3967,6 @@ RSpec.describe Project, factory_default: :keep do
   describe '.filter_by_feature_visibility' do
     include_context 'ProjectPolicyTable context'
     include ProjectHelpers
-    using RSpec::Parameterized::TableSyntax
 
     let_it_be(:group) { create(:group) }
     let!(:project) { create(:project, project_level, namespace: group ) }
@@ -4253,7 +4139,7 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#remove_pages' do
+  describe '#legacy_remove_pages' do
     let(:project) { create(:project).tap { |project| project.mark_pages_as_deployed } }
     let(:pages_metadatum) { project.pages_metadatum }
     let(:namespace) { project.namespace }
@@ -4272,34 +4158,22 @@ RSpec.describe Project, factory_default: :keep do
       expect_any_instance_of(Gitlab::PagesTransfer).to receive(:rename_project).and_return(true)
       expect(PagesWorker).to receive(:perform_in).with(5.minutes, :remove, namespace.full_path, anything)
 
-      expect { project.remove_pages }.to change { pages_metadatum.reload.deployed }.from(true).to(false)
+      expect { project.legacy_remove_pages }.to change { pages_metadatum.reload.deployed }.from(true).to(false)
+    end
+
+    it 'does nothing if updates on legacy storage are disabled' do
+      stub_feature_flags(pages_update_legacy_storage: false)
+
+      expect(Gitlab::PagesTransfer).not_to receive(:new)
+      expect(PagesWorker).not_to receive(:perform_in)
+
+      project.legacy_remove_pages
     end
 
     it 'is run when the project is destroyed' do
-      expect(project).to receive(:remove_pages).and_call_original
+      expect(project).to receive(:legacy_remove_pages).and_call_original
 
       expect { project.destroy }.not_to raise_error
-    end
-
-    context 'when there is an old pages deployment' do
-      let!(:old_deployment_from_another_project) { create(:pages_deployment) }
-      let!(:old_deployment) { create(:pages_deployment, project: project) }
-
-      it 'schedules a destruction of pages deployments' do
-        expect(DestroyPagesDeploymentsWorker).to(
-          receive(:perform_async).with(project.id)
-        )
-
-        project.remove_pages
-      end
-
-      it 'removes pages deployments', :sidekiq_inline do
-        expect do
-          project.remove_pages
-        end.to change { PagesDeployment.count }.by(-1)
-
-        expect(PagesDeployment.find_by_id(old_deployment.id)).to be_nil
-      end
     end
   end
 
@@ -4330,8 +4204,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#git_transfer_in_progress?' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build(:project) }
 
     subject { project.git_transfer_in_progress? }
@@ -4585,6 +4457,24 @@ RSpec.describe Project, factory_default: :keep do
           expect(project).not_to have_ci
         end
       end
+    end
+  end
+
+  describe '#predefined_project_variables' do
+    let_it_be(:project) { create(:project, :repository) }
+
+    subject { project.predefined_project_variables.to_runner_variables }
+
+    specify do
+      expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false })
+    end
+
+    context 'when ci config path is overridden' do
+      before do
+        project.update!(ci_config_path: 'random.yml')
+      end
+
+      it { expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false }) }
     end
   end
 
@@ -4990,7 +4880,8 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     context 'branch protection' do
-      let(:project) { create(:project, :repository) }
+      let_it_be(:namespace) { create(:namespace) }
+      let(:project) { create(:project, :repository, namespace: namespace) }
 
       before do
         create(:import_state, :started, project: project)
@@ -5204,10 +5095,8 @@ RSpec.describe Project, factory_default: :keep do
     it 'executes services with the specified scope' do
       data = 'any data'
 
-      expect(SlackService).to receive(:allocate).and_wrap_original do |method|
-        method.call.tap do |instance|
-          expect(instance).to receive(:async_execute).with(data).once
-        end
+      expect_next_found_instance_of(SlackService) do |instance|
+        expect(instance).to receive(:async_execute).with(data).once
       end
 
       service.project.execute_services(data, :push_hooks)
@@ -5937,8 +5826,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe 'validation #changing_shared_runners_enabled_is_allowed' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:shared_runners_setting, :project_shared_runners_enabled, :valid_record) do
       'enabled'                    | true  | true
       'enabled'                    | false | true
@@ -6042,6 +5929,43 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#set_first_pages_deployment!' do
+    let(:project) { create(:project) }
+    let(:deployment) { create(:pages_deployment, project: project) }
+
+    it "creates new metadata record if none exists yet and sets deployment" do
+      project.pages_metadatum.destroy!
+      project.reload
+
+      project.set_first_pages_deployment!(deployment)
+
+      expect(project.pages_metadatum.reload.pages_deployment).to eq(deployment)
+    end
+
+    it "updates the existing metadara record with deployment" do
+      expect do
+        project.set_first_pages_deployment!(deployment)
+      end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
+    end
+
+    it 'only updates metadata for this project' do
+      other_project = create(:project)
+
+      expect do
+        project.set_first_pages_deployment!(deployment)
+      end.not_to change { other_project.pages_metadatum.reload.pages_deployment }.from(nil)
+    end
+
+    it 'does nothing if metadata already references some deployment' do
+      existing_deployment = create(:pages_deployment, project: project)
+      project.set_first_pages_deployment!(existing_deployment)
+
+      expect do
+        project.set_first_pages_deployment!(deployment)
+      end.not_to change { project.pages_metadatum.reload.pages_deployment }.from(existing_deployment)
+    end
+  end
+
   describe '#has_pool_repsitory?' do
     it 'returns false when it does not have a pool repository' do
       subject = create(:project, :repository)
@@ -6124,8 +6048,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#closest_setting' do
-    using RSpec::Parameterized::TableSyntax
-
     shared_examples_for 'fetching closest setting' do
       let!(:namespace) { create(:namespace) }
       let!(:project) { create(:project, namespace: namespace) }
@@ -6315,28 +6237,6 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#alerts_service_activated?' do
-    let!(:project) { create(:project) }
-
-    subject { project.alerts_service_activated? }
-
-    context 'when project has an activated alerts service' do
-      before do
-        create(:alerts_service, project: project)
-      end
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when project has an inactive alerts service' do
-      before do
-        create(:alerts_service, :inactive, project: project)
-      end
-
-      it { is_expected.to be_falsey }
-    end
-  end
-
   describe '#prometheus_service_active?' do
     let(:project) { create(:project) }
 
@@ -6494,6 +6394,12 @@ RSpec.describe Project, factory_default: :keep do
 
       it { is_expected.to be false }
     end
+  end
+
+  describe 'with Debian Distributions' do
+    subject { create(:project) }
+
+    it_behaves_like 'model with Debian distributions'
   end
 
   describe '#environments_for_scope' do

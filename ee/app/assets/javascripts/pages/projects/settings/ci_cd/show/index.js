@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
-import createStore from 'ee/vue_shared/license_compliance/store/index';
 import ProtectedEnvironmentCreate from 'ee/protected_environments/protected_environment_create';
 import ProtectedEnvironmentEditList from 'ee/protected_environments/protected_environment_edit_list';
+import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import createStore from 'ee/vue_shared/license_compliance/store/index';
 import showToast from '~/vue_shared/plugins/global_toast';
 import '~/pages/projects/settings/ci_cd/show/index';
 
@@ -27,7 +27,7 @@ if (el?.dataset?.apiUrl) {
   });
 }
 
-toasts.forEach(toast => showToast(toast.dataset.message));
+toasts.forEach((toast) => showToast(toast.dataset.message));
 
 // eslint-disable-next-line no-new
 new ProtectedEnvironmentCreate();

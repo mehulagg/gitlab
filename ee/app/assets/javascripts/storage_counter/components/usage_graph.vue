@@ -1,7 +1,7 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -84,7 +84,7 @@ export default {
           size: uploadsSize,
         },
       ]
-        .filter(data => data.size !== 0)
+        .filter((data) => data.size !== 0)
         .sort((a, b) => b.size - a.size);
     },
   },

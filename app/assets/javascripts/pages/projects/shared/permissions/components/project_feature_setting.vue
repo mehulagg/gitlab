@@ -1,12 +1,11 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
-import projectFeatureToggle from '~/vue_shared/components/toggle_button.vue';
+import { GlIcon, GlToggle } from '@gitlab/ui';
 import { featureAccessLevelNone } from '../constants';
 
 export default {
   components: {
     GlIcon,
-    projectFeatureToggle,
+    GlToggle,
   },
   model: {
     prop: 'value',
@@ -32,6 +31,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    showToggle: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
   computed: {
@@ -73,10 +77,11 @@ export default {
     class="project-feature-controls gl-display-flex gl-align-items-center gl-my-3 gl-mx-0"
   >
     <input v-if="name" :name="name" :value="value" type="hidden" />
-    <project-feature-toggle
-      class="gl-flex-grow-0 gl-mr-3"
+    <gl-toggle
+      v-if="showToggle"
+      class="gl-mr-3"
       :value="featureEnabled"
-      :disabled-input="disabledInput"
+      :disabled="disabledInput"
       @change="toggleFeature"
     />
     <div class="select-wrapper gl-flex-fill-1">

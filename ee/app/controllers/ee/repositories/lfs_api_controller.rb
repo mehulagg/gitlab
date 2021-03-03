@@ -19,6 +19,13 @@ module EE
         false
       end
 
+      override :upload_http_url_to_repo
+      def upload_http_url_to_repo
+        return geo_primary_http_url_to_repo(project) if ::Gitlab::Geo.primary?
+
+        super
+      end
+
       override :lfs_read_only_message
       def lfs_read_only_message
         return super unless ::Gitlab::Geo.secondary_with_primary?

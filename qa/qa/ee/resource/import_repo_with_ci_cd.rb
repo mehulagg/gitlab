@@ -8,8 +8,8 @@ module QA
           super
         end
 
-        def go_to_import_tab
-          QA::Page::Project::New.perform(&:click_ci_cd_for_external_repo)
+        def go_to_import_page
+          QA::Page::Project::New.perform(&:click_cicd_for_external_repo)
         end
       end
     end

@@ -25,7 +25,7 @@ RSpec.describe 'Profile > Usage Quota' do
 
   describe 'shared runners use' do
     where(:shared_runners_enabled, :used, :quota, :usage_class, :usage_text) do
-      false | 300  | 500 | 'success' | '300 / Unlimited minutes 0% used'
+      false | 300  | 500 | 'success' | '300 / Not supported minutes 0% used'
       true  | 300  | nil | 'success' | '300 / Unlimited minutes Unlimited'
       true  | 300  | 500 | 'success' | '300 / 500 minutes 60% used'
       true  | 1000 | 500 | 'danger'  | '1000 / 500 minutes 200% used'

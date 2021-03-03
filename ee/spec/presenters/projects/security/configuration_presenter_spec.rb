@@ -274,13 +274,11 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
   end
 
   def configuration_path(type)
-    if type === :dast_profiles
-      project_security_configuration_dast_profiles_path(project)
-    elsif type === :sast
-      project_security_configuration_sast_path(project)
-    else
-      nil
-    end
+    {
+      dast_profiles: project_security_configuration_dast_profiles_path(project),
+      sast: project_security_configuration_sast_path(project),
+      api_fuzzing: project_security_configuration_api_fuzzing_path(project)
+    }[type]
   end
 
   def scan_status(type, configured, auto_dev_ops_enabled)

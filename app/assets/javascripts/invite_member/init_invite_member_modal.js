@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import { GlToast } from '@gitlab/ui';
+import Vue from 'vue';
 import InviteMemberModal from './components/invite_member_modal.vue';
 
 Vue.use(GlToast);
@@ -16,6 +16,6 @@ export default function initInviteMembersModal() {
   return new Vue({
     el,
     provide: { membersPath },
-    render: createElement => createElement(InviteMemberModal),
+    render: (createElement) => createElement(InviteMemberModal),
   });
 }

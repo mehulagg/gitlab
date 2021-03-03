@@ -1,10 +1,11 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlModal, GlTabs, GlTab, GlSearchBoxByType, GlSprintf } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import ReviewTabContainer from '~/add_context_commits_modal/components/review_tab_container.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   findCommitIndex,
   setCommitStatus,
@@ -61,14 +62,14 @@ export default {
       },
     },
     selectedCommitsCount() {
-      return this.selectedCommits.filter(selectedCommit => selectedCommit.isSelected).length;
+      return this.selectedCommits.filter((selectedCommit) => selectedCommit.isSelected).length;
     },
     shouldPurge() {
       return this.selectedCommitsCount !== this.selectedCommits.length;
     },
     uniqueCommits() {
       return this.selectedCommits.filter(
-        selectedCommit =>
+        (selectedCommit) =>
           selectedCommit.isSelected &&
           findCommitIndex(this.contextCommits, selectedCommit.short_id) === -1,
       );
@@ -119,14 +120,14 @@ export default {
     openModal() {
       this.searchCommits();
       this.fetchContextCommits();
-      this.$root.$emit('bv::show::modal', 'add-review-item');
+      this.$root.$emit(BV_SHOW_MODAL, 'add-review-item');
     },
     handleTabChange(tabIndex) {
       if (tabIndex === 0) {
         this.focusSearch();
         if (this.shouldPurge) {
           this.setSelectedCommits(
-            [...this.commits, ...this.selectedCommits].filter(commit => commit.isSelected),
+            [...this.commits, ...this.selectedCommits].filter((commit) => commit.isSelected),
           );
         }
       }
@@ -178,7 +179,7 @@ export default {
       this.setCommits({ commits: tempCommits });
       this.setSelectedCommits([
         ...tempSelectedCommits,
-        ...tempCommits.filter(commit => commit.isSelected),
+        ...tempCommits.filter((commit) => commit.isSelected),
       ]);
     },
     handleCreateContextCommits() {
@@ -186,7 +187,7 @@ export default {
         return Promise.all([
           this.createContextCommits({ commits: this.uniqueCommits }),
           this.removeContextCommits(),
-        ]).then(values => {
+        ]).then((values) => {
           if (values[0] || values[1]) {
             window.location.reload();
           }

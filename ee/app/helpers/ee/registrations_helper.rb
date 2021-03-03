@@ -4,16 +4,6 @@ module EE
   module RegistrationsHelper
     include ::Gitlab::Utils::StrongMemoize
 
-    def visibility_level_options
-      available_visibility_levels(@group).map do |level|
-        {
-          level: level,
-          label: visibility_level_label(level),
-          description: visibility_level_description(level, @group)
-        }
-      end
-    end
-
     private
 
     def redirect_path

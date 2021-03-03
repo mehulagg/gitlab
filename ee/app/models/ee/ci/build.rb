@@ -131,10 +131,6 @@ module EE
         requirements_report
       end
 
-      def retryable?
-        !merge_train_pipeline? && super
-      end
-
       def ci_secrets_management_available?
         return false unless project
 
@@ -164,7 +160,7 @@ module EE
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
-        ::Gitlab::Ci::Parsers.fabricate!(security_report.type).parse!(blob, report_clone)
+        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone).parse!
         security_report.merge!(report_clone)
       end
 
@@ -180,7 +176,7 @@ module EE
         return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault_build_created, default_enabled: true)
         return unless ci_secrets_management_available? && secrets?
 
-        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(user_id, 'i_ci_secrets_management_vault_build_created')
+        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)
       end
     end
   end

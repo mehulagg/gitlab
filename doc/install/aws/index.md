@@ -5,10 +5,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Installing GitLab on Amazon Web Services (AWS)
+# Installing GitLab on Amazon Web Services (AWS) **(FREE SELF)**
 
 This page offers a walkthrough of a common configuration
-for GitLab on AWS. You should customize it to accommodate your needs.
+for GitLab on AWS using the official GitLab Linux package. You should customize it to accommodate your needs.
 
 NOTE:
 For organizations with 1,000 users or less, the recommended AWS installation method is to launch an EC2 single box [Omnibus Installation](https://about.gitlab.com/install/) and implement a snapshot strategy for backing up the data. See the [1,000 user reference architecture](../../administration/reference_architectures/1k_users.md) for more.
@@ -44,26 +44,25 @@ Below is a diagram of the recommended architecture.
 
 ## AWS costs
 
-Here's a list of the AWS services we will use, with links to pricing information:
+GitLab uses the following AWS services, with links to pricing information:
 
-- **EC2**: GitLab will deployed on shared hardware which means
-  [on-demand pricing](https://aws.amazon.com/ec2/pricing/on-demand/)
-  will apply. If you want to run it on a dedicated or reserved instance,
-  consult the [EC2 pricing page](https://aws.amazon.com/ec2/pricing/) for more
-  information on the cost.
-- **S3**: We will use S3 to store backups, artifacts, LFS objects, etc. See the
-  [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/).
-- **ELB**: A Classic Load Balancer will be used to route requests to the
-  GitLab instances. See the [Amazon ELB pricing](https://aws.amazon.com/elasticloadbalancing/pricing/).
-- **RDS**: An Amazon Relational Database Service using PostgreSQL will be used. See the
-  [Amazon RDS pricing](https://aws.amazon.com/rds/postgresql/pricing/).
-- **ElastiCache**: An in-memory cache environment will be used to provide a
-  Redis configuration. See the
-  [Amazon ElastiCache pricing](https://aws.amazon.com/elasticache/pricing/).
+- **EC2**: GitLab is deployed on shared hardware, for which
+  [on-demand pricing](https://aws.amazon.com/ec2/pricing/on-demand/) applies.
+  If you want to run GitLab on a dedicated or reserved instance, see the
+  [EC2 pricing page](https://aws.amazon.com/ec2/pricing/) for information about
+  its cost.
+- **S3**: GitLab uses S3 ([pricing page](https://aws.amazon.com/s3/pricing/)) to
+  store backups, artifacts, and LFS objects.
+- **ELB**: A Classic Load Balancer ([pricing page](https://aws.amazon.com/elasticloadbalancing/pricing/)),
+  used to route requests to the GitLab instances.
+- **RDS**: An Amazon Relational Database Service using PostgreSQL
+  ([pricing page](https://aws.amazon.com/rds/postgresql/pricing/)).
+- **ElastiCache**: An in-memory cache environment ([pricing page](https://aws.amazon.com/elasticache/pricing/)),
+  used to provide a Redis configuration.
 
 ## Create an IAM EC2 instance role and profile
 
-As we'll be using [Amazon S3 object storage](#amazon-s3-object-storage), our EC2 instances need to have read, write, and list permissions for our S3 buckets. To avoid embedding AWS keys in our GitLab config, we'll make use of an [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) to allow our GitLab instance with this access. We'll need to create an IAM policy to attach to our IAM role:
+As we'll be using [Amazon S3 object storage](#amazon-s3-object-storage), our EC2 instances need to have read, write, and list permissions for our S3 buckets. To avoid embedding AWS keys in our GitLab configuration, we'll make use of an [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) to allow our GitLab instance with this access. We'll need to create an IAM policy to attach to our IAM role:
 
 ### Create an IAM Policy
 
@@ -123,7 +122,7 @@ Internet Gateway.
 
 We'll now create a VPC, a virtual networking environment that you'll control:
 
-1. Navigate to <https://console.aws.amazon.com/vpc/home>.
+1. Sign in to [Amazon Web Services](https://console.aws.amazon.com/vpc/home).
 1. Select **Your VPCs** from the left menu and then click **Create VPC**.
    At the "Name tag" enter `gitlab-vpc` and at the "IPv4 CIDR block" enter
    `10.0.0.0/16`. If you don't require dedicated hardware, you can leave
@@ -278,7 +277,7 @@ On the Route 53 dashboard, click **Hosted zones** in the left navigation bar:
     1. Click **Create**.
 1. If you registered your domain through Route 53, you're done. If you used a different domain registrar, you need to update your DNS records with your domain registrar. You'll need to:
    1. Click on **Hosted zones** and select the domain you added above.
-   1. You'll see a list of `NS` records. From your domain registrar's admin panel, add each of these as `NS` records to your domain's DNS records. These steps may vary between domain registrars. If you're stuck, Google **"name of your registrar" add dns records** and you should find a help article specific to your domain registrar.
+   1. You'll see a list of `NS` records. From your domain registrar's admin panel, add each of these as `NS` records to your domain's DNS records. These steps may vary between domain registrars. If you're stuck, Google **"name of your registrar" add DNS records** and you should find a help article specific to your domain registrar.
 
 The steps for doing this vary depending on which registrar you use and is beyond the scope of this guide.
 
@@ -450,9 +449,8 @@ We will need a preconfigured, custom GitLab AMI to use in our launch configurati
 
 From the EC2 dashboard:
 
-1. Click **Launch Instance** and select **Community AMIs** from the left menu.
-1. In the search bar, search for `GitLab EE <version>` where `<version>` is the latest version as seen on the [releases page](https://about.gitlab.com/releases/). Select the latest patch release, for example `GitLab EE 12.9.2`.
-1. Select an instance type based on your workload. Consult the [hardware requirements](../../install/requirements.md#hardware-requirements) to choose one that fits your needs (at least `c5.xlarge`, which is sufficient to accommodate 100 users).
+1. Use the section below titled "[Find official GitLab-created AMI IDs on AWS](#find-official-gitlab-created-ami-ids-on-aws)" to find the correct AMI to launch.
+1. After clicking **Launch** on the desired AMI, select an instance type based on your workload. Consult the [hardware requirements](../../install/requirements.md#hardware-requirements) to choose one that fits your needs (at least `c5.xlarge`, which is sufficient to accommodate 100 users).
 1. Click **Configure Instance Details**:
    1. In the **Network** dropdown, select `gitlab-vpc`, the VPC we created earlier.
    1. In the **Subnet** dropdown, select `gitlab-private-10.0.1.0` from the list of subnets we created earlier.
@@ -470,7 +468,7 @@ Connect to your GitLab instance via **Bastion Host A** using [SSH Agent Forwardi
 
 #### Disable Let's Encrypt
 
-Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain in GitLab 10.7 and later, so we need to explicitly disable it:
+Since we're adding our SSL certificate at the load balancer, we do not need the GitLab built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain in GitLab 10.7 and later, so we need to explicitly disable it:
 
 1. Open `/etc/gitlab/gitlab.rb` and disable it:
 
@@ -569,7 +567,7 @@ Let's create an EC2 instance where we'll install Gitaly:
 
 1. From the EC2 dashboard, click **Launch instance**.
 1. Choose an AMI. In this example, we'll select the **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**.
-1. Choose an instance type. We'll pick a **c5.xlarge**.
+1. Choose an instance type. We'll pick a `c5.xlarge`.
 1. Click **Configure Instance Details**.
    1. In the **Network** dropdown, select `gitlab-vpc`, the VPC we created earlier.
    1. In the **Subnet** dropdown, select `gitlab-private-10.0.1.0` from the list of subnets we created earlier.
@@ -586,7 +584,7 @@ Let's create an EC2 instance where we'll install Gitaly:
 1. Finally, acknowledge that you have access to the selected private key file or create a new one. Click **Launch Instances**.
 
 NOTE:
-Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact GitLab’s performance. You can review the [relevant documentation](../../administration/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
+Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact the performance of GitLab. You can review the [relevant documentation](../../administration/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
 
 Now that we have our EC2 instance ready, follow the [documentation to install GitLab and set up Gitaly on its own server](../../administration/gitaly/index.md#run-gitaly-on-its-own-server). Perform the client setup steps from that document on the [GitLab instance we created](#install-gitlab) above.
 
@@ -789,6 +787,24 @@ For GitLab 12.1 and earlier, use `gitlab-rake gitlab:backup:create`.
    ```
 
 After a few minutes, the new version should be up and running.
+
+## Find official GitLab-created AMI IDs on AWS
+
+To find the AMIs generated by GitLab:
+
+1. Login to AWS Web Console, so that clicking the links below will take you directly to the AMI list.
+1. Pick the edition you want:
+
+    - [GitLab Enterprise Edition](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=782774275127;search=GitLab%20EE;sort=desc:name): If you want to unlock the enterprise features, a license is needed. Recommended for this guide.
+    - [GitLab Community Edition](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=782774275127;search=GitLab%20CE;sort=desc:name): The open source version of GitLab.
+    - [GitLab Premium or Ultimate Marketplace (Prelicensed)](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;source=Marketplace;search=GitLab%20EE;sort=desc:name): 5 user license built into per-minute billing.
+1. AMI IDs are unique per region, so once you've loaded one of the above, select the desired target region in the upper right of the console to see the appropriate AMIs.
+1. Once the console is loaded, you can add additional search criteria to narrow further. For instance, `13.` to find only 13.x versions.
+1. To launch an EC2 Machine with one of the listed AMIs, check the box at the start of the relevant row, and select the "Launch" button near the top of left of the page.
+
+NOTE:
+If you are trying to restore from an older version of GitLab while moving to AWS, find the
+[Enterprise and Community Editions Before 11.10.3](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:visibility=public-images;ownerAlias=855262394183;sort=desc:name).
 
 ## Conclusion
 

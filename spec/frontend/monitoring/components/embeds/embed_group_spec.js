@@ -1,6 +1,6 @@
+import { GlButton, GlCard } from '@gitlab/ui';
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton, GlCard } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import EmbedGroup from '~/monitoring/components/embeds/embed_group.vue';
 import MetricEmbed from '~/monitoring/components/embeds/metric_embed.vue';
@@ -76,7 +76,7 @@ describe('Embed Group', () => {
       expect(wrapper.find('.gl-card-body').classes()).not.toContain('d-none');
     });
 
-    it('collapses when clicked', done => {
+    it('collapses when clicked', (done) => {
       metricsWithDataGetter.mockReturnValue([1]);
       mountComponent({ shallow: false, stubs: { MetricEmbed: true } });
 
@@ -134,7 +134,7 @@ describe('Embed Group', () => {
     });
 
     it('passes the correct props to the Embed components', () => {
-      expect(wrapper.findAll(MetricEmbed).wrappers.map(item => item.props())).toEqual(
+      expect(wrapper.findAll(MetricEmbed).wrappers.map((item) => item.props())).toEqual(
         multipleEmbedProps(),
       );
     });

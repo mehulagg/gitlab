@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file contains environment settings for gitaly when it's running
 # as part of the gitlab-ce/ee test suite.
 #
@@ -41,7 +43,7 @@ module GitalyTest
       'HOME' => File.expand_path('tmp/tests'),
       'GEM_PATH' => Gem.path.join(':'),
       'BUNDLE_APP_CONFIG' => File.join(File.dirname(gemfile), '.bundle/config'),
-      'BUNDLE_FLAGS' => "--jobs=4 --retry=3 --quiet",
+      'BUNDLE_FLAGS' => "--jobs=4 --retry=3",
       'BUNDLE_INSTALL_FLAGS' => nil,
       'BUNDLE_GEMFILE' => gemfile,
       'RUBYOPT' => nil,
@@ -52,7 +54,7 @@ module GitalyTest
 
     if ENV['CI']
       bundle_path = File.expand_path('../vendor/gitaly-ruby', __dir__)
-      env_hash['BUNDLE_FLAGS'] << " --path=#{bundle_path}"
+      env_hash['BUNDLE_FLAGS'] += " --path=#{bundle_path}"
     end
 
     env_hash
@@ -62,13 +64,36 @@ module GitalyTest
     case service
     when :gitaly
       File.join(tmp_tests_gitaly_dir, 'config.toml')
+    when :gitaly2
+      File.join(tmp_tests_gitaly_dir, 'gitaly2.config.toml')
     when :praefect
       File.join(tmp_tests_gitaly_dir, 'praefect.config.toml')
     end
   end
 
+  def service_binary(service)
+    case service
+    when :gitaly, :gitaly2
+      'gitaly'
+    when :praefect
+      'praefect'
+    end
+  end
+
+  def install_gitaly_gems
+    system(env, "make #{tmp_tests_gitaly_dir}/.ruby-bundle", chdir: tmp_tests_gitaly_dir) # rubocop:disable GitlabSecurity/SystemCommandInjection
+  end
+
+  def build_gitaly
+    system(env, 'make', chdir: tmp_tests_gitaly_dir) # rubocop:disable GitlabSecurity/SystemCommandInjection
+  end
+
   def start_gitaly
     start(:gitaly)
+  end
+
+  def start_gitaly2
+    start(:gitaly2)
   end
 
   def start_praefect
@@ -76,7 +101,7 @@ module GitalyTest
   end
 
   def start(service)
-    args = ["#{tmp_tests_gitaly_dir}/#{service}"]
+    args = ["#{tmp_tests_gitaly_dir}/#{service_binary(service)}"]
     args.push("-config") if service == :praefect
     args.push(config_path(service))
     pid = spawn(env, *args, [:out, :err] => "log/#{service}-test.log")

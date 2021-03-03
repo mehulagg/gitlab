@@ -1,11 +1,11 @@
-import { GlDeprecatedButton, GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
 import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
 import stubChildren from 'helpers/stub_children';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
-const testSuggestedApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));
+const testSuggestedApprovers = () => Array.from({ length: 11 }, (_, i) => i).map((id) => ({ id }));
 const testApprovalRules = () => [{ name: 'Lorem' }, { name: 'Ipsum' }];
 
 describe('EE MRWidget approvals footer', () => {
@@ -28,8 +28,8 @@ describe('EE MRWidget approvals footer', () => {
   const findToggle = () => wrapper.find(GlButton);
   const findToggleIcon = () => findToggle().find(GlIcon);
   const findToggleLoadingIcon = () => findToggle().find(GlLoadingIcon);
-  const findExpandButton = () => wrapper.find(GlDeprecatedButton);
-  const findCollapseButton = () => wrapper.find(GlDeprecatedButton);
+  const findExpandButton = () => wrapper.find('[data-testid="approvers-expand-button"]');
+  const findCollapseButton = () => wrapper.find('[data-testid="approvers-collapse-button"]');
   const findList = () => wrapper.find(ApprovalsList);
   const findAvatars = () => wrapper.find(UserAvatarList);
 
@@ -184,7 +184,7 @@ describe('EE MRWidget approvals footer', () => {
         expect(button.text()).toBe('View eligible approvers');
       });
 
-      it('expands when clicked', done => {
+      it('expands when clicked', (done) => {
         expect(wrapper.props('value')).toBe(false);
 
         button.vm.$emit('click');

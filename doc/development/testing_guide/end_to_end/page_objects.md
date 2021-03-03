@@ -22,7 +22,7 @@ fields.
 ## Why do we need that?
 
 We need page objects because we need to reduce duplication and avoid problems
-whenever someone changes some selectors in GitLab's source code.
+whenever someone changes some selectors in the GitLab source code.
 
 Imagine that we have a hundred specs in GitLab QA, and we need to sign into
 GitLab each time, before we make assertions. Without a page object, one would
@@ -145,7 +145,7 @@ for each element defined.
 
 In our case, `data-qa-selector="login_field"`, `data-qa-selector="password_field"` and `data-qa-selector="sign_in_button"`
 
-**app/views/my/view.html.haml**
+`app/views/my/view.html.haml`
 
 ```haml
 = f.text_field :login, class: "form-control top", autofocus: "autofocus", autocapitalize: "off", autocorrect: "off", required: true, title: "This field is required.", data: { qa_selector: 'login_field' }

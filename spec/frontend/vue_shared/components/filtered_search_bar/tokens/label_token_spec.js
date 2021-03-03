@@ -1,19 +1,19 @@
-import { mount } from '@vue/test-utils';
 import {
   GlFilteredSearchToken,
   GlFilteredSearchSuggestion,
   GlFilteredSearchTokenSegment,
   GlDropdownDivider,
 } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   mockRegularLabel,
   mockLabels,
 } from 'jest/vue_shared/components/sidebar/labels_select_vue/mock_data';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   DEFAULT_LABELS,
   DEFAULT_LABEL_NONE,
@@ -181,12 +181,9 @@ describe('LabelToken', () => {
 
       expect(tokenSegments).toHaveLength(3); // Label, =, "Foo Label"
       expect(tokenSegments.at(2).text()).toBe(`~${mockRegularLabel.title}`); // "Foo Label"
-      expect(
-        tokenSegments
-          .at(2)
-          .find('.gl-token')
-          .attributes('style'),
-      ).toBe('background-color: rgb(186, 218, 85); color: rgb(255, 255, 255);');
+      expect(tokenSegments.at(2).find('.gl-token').attributes('style')).toBe(
+        'background-color: rgb(186, 218, 85); color: rgb(255, 255, 255);',
+      );
     });
 
     it('renders provided defaultLabels as suggestions', async () => {
@@ -219,8 +216,8 @@ describe('LabelToken', () => {
       suggestionsSegment.vm.$emit('activate');
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.contains(GlFilteredSearchSuggestion)).toBe(false);
-      expect(wrapper.contains(GlDropdownDivider)).toBe(false);
+      expect(wrapper.find(GlFilteredSearchSuggestion).exists()).toBe(false);
+      expect(wrapper.find(GlDropdownDivider).exists()).toBe(false);
     });
 
     it('renders `DEFAULT_LABELS` as default suggestions', async () => {

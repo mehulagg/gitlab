@@ -12,25 +12,26 @@ module Mutations
       field :custom_emoji,
             Types::CustomEmojiType,
             null: true,
-            description: 'The new custom emoji'
+            description: 'The new custom emoji.'
 
       argument :group_path, GraphQL::ID_TYPE,
                required: true,
-               description: 'Namespace full path the emoji is associated with'
+               description: 'Namespace full path the emoji is associated with.'
 
       argument :name, GraphQL::STRING_TYPE,
                required: true,
-               description: 'Name of the emoji'
+               description: 'Name of the emoji.'
 
       argument :url, GraphQL::STRING_TYPE,
                required: true,
                as: :file,
-               description: 'Location of the emoji file'
+               description: 'Location of the emoji file.'
 
       def resolve(group_path:, **args)
         group = authorized_find!(group_path: group_path)
         # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37911#note_444682238
         args[:external] = true
+        args[:creator] = current_user
 
         custom_emoji = group.custom_emoji.create(args)
 

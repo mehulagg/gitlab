@@ -16,7 +16,7 @@ RSpec.describe Projects::UpdatePagesService do
   subject { described_class.new(project, build) }
 
   before do
-    project.remove_pages
+    project.legacy_remove_pages
   end
 
   context '::TMP_EXTRACT_PATH' do
@@ -55,6 +55,15 @@ RSpec.describe Projects::UpdatePagesService do
         end
       end
 
+      it "doesn't deploy to legacy storage if it's disabled" do
+        stub_feature_flags(pages_update_legacy_storage: false)
+
+        expect(execute).to eq(:success)
+        expect(project.pages_deployed?).to be_truthy
+
+        expect(File.exist?(File.join(project.pages_path, 'public', 'index.html'))).to eq(false)
+      end
+
       it 'creates pages_deployment and saves it in the metadata' do
         expect do
           expect(execute).to eq(:success)
@@ -77,6 +86,19 @@ RSpec.describe Projects::UpdatePagesService do
 
           expect(GenericCommitStatus.last.description).to eq("Failed to deploy pages - other deployment is in progress")
         end
+      end
+
+      it 'fails if sha on branch was updated before deployment was uploaded' do
+        expect(subject).to receive(:create_pages_deployment).and_wrap_original do |m, *args|
+          build.update!(ref: 'feature')
+          m.call(*args)
+        end
+
+        expect(execute).not_to eq(:success)
+        expect(project.pages_metadatum).not_to be_deployed
+
+        expect(deploy_status).to be_failed
+        expect(deploy_status.description).to eq('build SHA is outdated for this ref')
       end
 
       it 'does not fail if pages_metadata is absent' do

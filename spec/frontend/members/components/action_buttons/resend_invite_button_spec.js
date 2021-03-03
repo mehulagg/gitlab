@@ -1,6 +1,6 @@
+import { GlButton } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton } from '@gitlab/ui';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import ResendInviteButton from '~/members/components/action_buttons/resend_invite_button.vue';
 
@@ -57,10 +57,8 @@ describe('ResendInviteButton', () => {
 
   it('displays form with correct action and inputs', () => {
     expect(findForm().attributes('action')).toBe('/groups/foo-bar/-/group_members/1/resend_invite');
-    expect(
-      findForm()
-        .find('input[name="authenticity_token"]')
-        .attributes('value'),
-    ).toBe('mock-csrf-token');
+    expect(findForm().find('input[name="authenticity_token"]').attributes('value')).toBe(
+      'mock-csrf-token',
+    );
   });
 });

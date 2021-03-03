@@ -6,7 +6,7 @@ module API
     include APIGuard
     include Helpers::CustomAttributes
 
-    allow_access_with_scope :read_user, if: -> (request) { request.get? }
+    allow_access_with_scope :read_user, if: -> (request) { request.get? || request.head? }
 
     feature_category :users, ['/users/:id/custom_attributes', '/users/:id/custom_attributes/:key']
 
@@ -58,6 +58,7 @@ module API
           optional :color_scheme_id, type: Integer, desc: 'The color scheme for the file viewer'
           optional :private_profile, type: Boolean, desc: 'Flag indicating the user has a private profile'
           optional :note, type: String, desc: 'Admin note for this user'
+          optional :view_diffs_file_by_file, type: Boolean, desc: 'Flag indicating the user sees only one file diff per page'
           all_or_none_of :extern_uid, :provider
 
           use :optional_params_ee
@@ -82,11 +83,13 @@ module API
         optional :search, type: String, desc: 'Search for a username'
         optional :active, type: Boolean, default: false, desc: 'Filters only active users'
         optional :external, type: Boolean, default: false, desc: 'Filters only external users'
+        optional :exclude_external, as: :non_external, type: Boolean, default: false, desc: 'Filters only non external users'
         optional :blocked, type: Boolean, default: false, desc: 'Filters only blocked users'
         optional :created_after, type: DateTime, desc: 'Return users created after the specified time'
         optional :created_before, type: DateTime, desc: 'Return users created before the specified time'
         optional :without_projects, type: Boolean, default: false, desc: 'Filters only users without projects'
         optional :exclude_internal, as: :non_internal, type: Boolean, default: false, desc: 'Filters only non internal users'
+        optional :admins, type: Boolean, default: false, desc: 'Filters only admin users'
         all_or_none_of :extern_uid, :provider
 
         use :sort_params
@@ -96,7 +99,7 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       get feature_category: :users do
-        authenticated_as_admin! if params[:external].present? || (params[:extern_uid].present? && params[:provider].present?)
+        authenticated_as_admin! if params[:extern_uid].present? && params[:provider].present?
 
         unless current_user&.admin?
           params.except!(:created_after, :created_before, :order_by, :sort, :two_factor, :without_projects)
@@ -156,6 +159,68 @@ module API
         not_found!('User') unless user && can?(current_user, :read_user, user)
 
         present user.status || {}, with: Entities::UserStatus
+      end
+
+      desc 'Follow a user' do
+        success Entities::User
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+      end
+      post ':id/follow', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user
+
+        if current_user.follow(user)
+          present user, with: Entities::UserBasic
+        else
+          not_modified!
+        end
+      end
+
+      desc 'Unfollow a user' do
+        success Entities::User
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+      end
+      post ':id/unfollow', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user
+
+        if current_user.unfollow(user)
+          present user, with: Entities::UserBasic
+        else
+          not_modified!
+        end
+      end
+
+      desc 'Get the users who follow a user' do
+        success Entities::UserBasic
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+        use :pagination
+      end
+      get ':id/following', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user && can?(current_user, :read_user_profile, user)
+
+        present paginate(user.followees), with: Entities::UserBasic
+      end
+
+      desc 'Get the followers of a user' do
+        success Entities::UserBasic
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+        use :pagination
+      end
+      get ':id/followers', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user && can?(current_user, :read_user_profile, user)
+
+        present paginate(user.followers), with: Entities::UserBasic
       end
 
       desc 'Create a user. Available only for admins.' do
@@ -745,8 +810,6 @@ module API
             optional :expires_at, type: Date, desc: 'The expiration date in the format YEAR-MONTH-DAY of the personal access token'
           end
           post feature_category: :authentication_and_authorization do
-            not_found! unless Feature.enabled?(:pat_creation_api_for_admin)
-
             response = ::PersonalAccessTokens::CreateService.new(
               current_user: current_user, target_user: target_user, params: declared_params(include_missing: false)
             ).execute
@@ -1005,6 +1068,7 @@ module API
         optional :emoji, type: String, desc: "The emoji to set on the status"
         optional :message, type: String, desc: "The status message to set"
         optional :availability, type: String, desc: "The availability of user to set"
+        optional :clear_status_after, type: String, desc: "Automatically clear emoji, message and availability fields after a certain time", values: UserStatus::CLEAR_STATUS_QUICK_OPTIONS.keys
       end
       put "status", feature_category: :users do
         forbidden! unless can?(current_user, :update_user_status, current_user)

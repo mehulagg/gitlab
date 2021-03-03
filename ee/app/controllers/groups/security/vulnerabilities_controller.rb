@@ -5,6 +5,10 @@ module Groups
     class VulnerabilitiesController < Groups::ApplicationController
       layout 'group'
 
+      before_action do
+        push_frontend_feature_flag(:custom_security_scanners, current_user)
+      end
+
       feature_category :vulnerability_management
 
       def index

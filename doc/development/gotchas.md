@@ -270,7 +270,7 @@ This problem disappears as soon as we upgrade to Rails 6 and use the Zeitwerk au
 ### Further reading
 
 - Rails Guides: [Autoloading and Reloading Constants (Classic Mode)](https://guides.rubyonrails.org/autoloading_and_reloading_constants_classic_mode.html)
-- Ruby Constant lookup: [Everything you ever wanted to know about constant lookup in Ruby](http://cirw.in/blog/constant-lookup)
+- Ruby Constant lookup: [Everything you ever wanted to know about constant lookup in Ruby](https://cirw.in/blog/constant-lookup)
 - Rails 6 and Zeitwerk autoloader: [Understanding Zeitwerk in Rails 6](https://medium.com/cedarcode/understanding-zeitwerk-in-rails-6-f168a9f09a1f)
 
 ## Storing assets that do not require pre-compiling
@@ -292,7 +292,7 @@ While the code above works in local environments, it errors out in production in
 
 ### Solution
 
-The alternative is the `lib/assets` folder. Use it if you need to add assets (like images) to the repo that meet the following conditions:
+The alternative is the `lib/assets` folder. Use it if you need to add assets (like images) to the repository that meet the following conditions:
 
 - The assets do not need to be directly served to the user (and hence need not be pre-compiled).
 - The assets do need to be accessed via application code.

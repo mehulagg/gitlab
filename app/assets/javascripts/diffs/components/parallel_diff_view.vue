@@ -1,11 +1,11 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
-import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
-import parallelDiffTableRow from './parallel_diff_table_row.vue';
+import draftCommentsMixin from '~/diffs/mixins/draft_comments';
+import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 import DiffCommentCell from './diff_comment_cell.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
-import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
+import parallelDiffTableRow from './parallel_diff_table_row.vue';
 
 export default {
   components: {
@@ -57,11 +57,11 @@ export default {
     class="code diff-wrap-lines js-syntax-highlight text-file"
   >
     <colgroup>
-      <col style="width: 50px;" />
-      <col style="width: 8px;" />
+      <col style="width: 50px" />
+      <col style="width: 8px" />
       <col />
-      <col style="width: 50px;" />
-      <col style="width: 8px;" />
+      <col style="width: 50px" />
+      <col style="width: 8px" />
       <col />
     </colgroup>
     <tbody>

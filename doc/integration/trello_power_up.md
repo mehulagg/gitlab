@@ -4,9 +4,9 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Trello Power-Up
+# Trello Power-Up **(FREE)**
 
-GitLab's Trello Power-Up enables you to seamlessly attach
+The GitLab Trello Power-Up enables you to seamlessly attach
 GitLab **merge requests** to Trello cards.
 
 ![GitLab Trello PowerUp - Trello card](img/trello_card_with_gitlab_powerup.png)
@@ -35,11 +35,14 @@ If your instance's URL is `https://example.com`, your API URL is `https://exampl
 
 ## What is my Personal Access Token?
 
-Your GitLab's personal access token enables your GitLab account to be accessed
+Your GitLab personal access token enables your GitLab account to be accessed
 from Trello.
 
-> Find it in GitLab by clicking on your avatar (upright corner), from which you access
-your user **Settings** > **Access Tokens**.
+To find it in GitLab:
+
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Access Tokens**.
 
 Learn more about generating a personal access token in the
 [Personal Access Token Documentation](../user/profile/personal_access_tokens.md).

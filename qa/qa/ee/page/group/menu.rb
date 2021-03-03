@@ -33,7 +33,6 @@ module QA
 
               view 'ee/app/views/groups/ee/_settings_nav.html.haml' do
                 element :ldap_synchronization_link
-                element :audit_events_settings_link
               end
               view 'ee/app/views/layouts/nav/ee/_epic_link.html.haml' do
                 element :group_epics_link
@@ -44,6 +43,7 @@ module QA
                 element :group_secure_submenu
                 element :security_dashboard_link
                 element :vulnerability_report_link
+                element :audit_events_settings_link
               end
 
               view 'ee/app/views/layouts/nav/_group_insights_link.html.haml' do
@@ -53,12 +53,18 @@ module QA
               view 'ee/app/views/layouts/nav/sidebar/_group_iterations_link.html.haml' do
                 element :group_iterations_link
               end
+
+              view 'ee/app/views/groups/sidebar/_packages.html.haml' do
+                element :group_packages_item
+                element :group_packages_link
+                element :group_packages_submenu
+              end
             end
           end
 
           def go_to_audit_events_settings
-            hover_element(:group_settings_item) do
-              within_submenu(:group_sidebar_submenu) do
+            hover_element(:security_compliance_link) do
+              within_submenu(:group_secure_submenu) do
                 click_element(:audit_events_settings_link)
               end
             end
@@ -136,6 +142,14 @@ module QA
             hover_element(:security_compliance_link) do
               within_submenu(:group_secure_submenu) do
                 click_element(:vulnerability_report_link)
+              end
+            end
+          end
+
+          def go_to_group_packages
+            hover_element(:group_packages_item) do
+              within_submenu(:group_packages_submenu) do
+                click_element(:group_packages_link)
               end
             end
           end

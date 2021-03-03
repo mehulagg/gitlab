@@ -24,7 +24,7 @@ $white-gd-bg: #fdd;
 $white-gd-x: $black;
 $white-gd-x-bg: #faa;
 $white-gr: #a00;
-$white-gh: #999;
+$white-gh: #800080;
 $white-gi: $black;
 $white-gi-bg: #dfd;
 $white-gi-x: $black;
@@ -81,6 +81,17 @@ $white-gc-bg: #eaf2f5;
 .line-numbers,
 .diff-line-num {
   background-color: $gray-light;
+
+  &.conflict_marker,
+  &.conflict_our {
+    background-color: map-get($conflict-colors, 'white-header-head-neutral');
+    border-color: map-get($conflict-colors, 'white-header-head-neutral');
+  }
+
+  &.conflict_their {
+    background-color: map-get($conflict-colors, 'white-header-origin-neutral');
+    border-color: map-get($conflict-colors, 'white-header-origin-neutral');
+  }
 }
 
 .diff-line-num,
@@ -115,7 +126,7 @@ pre.code,
 
   .diff-grid-left:hover,
   .diff-grid-right:hover {
-    .diff-line-num:not(.empty-cell) {
+    .diff-line-num:not(.empty-cell):not(.conflict_marker_their):not(.conflict_marker_our) {
       @include line-number-hover($white-over-bg);
     }
   }
@@ -203,7 +214,7 @@ pre.code,
   }
 
   .line-coverage {
-    @include line-coverage-border-color($green-500, $orange-500);
+    @include line-coverage-border-color($green-400, $red-400);
 
     &.old {
       background-color: $line-removed;
@@ -269,7 +280,9 @@ span.highlight_word {
 
 .ge { font-style: italic; }
 .gr { color: $white-gr; }
-.gh { color: $white-gh; }
+
+.gh { color: $white-gh;
+  font-weight: $gl-font-weight-bold; }
 
 .gi {
   color: $white-gi;

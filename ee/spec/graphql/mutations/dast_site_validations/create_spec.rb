@@ -7,7 +7,8 @@ RSpec.describe Mutations::DastSiteValidations::Create do
   let(:project) { dast_site_token.project }
   let(:user) { create(:user) }
   let(:full_path) { project.full_path }
-  let(:dast_site_token) { create(:dast_site_token, project: create(:project, group: group)) }
+  let(:dast_site) { create(:dast_site, project: create(:project, group: group)) }
+  let(:dast_site_token) { create(:dast_site_token, project: dast_site.project, url: dast_site.url) }
   let(:dast_site_validation) { DastSiteValidation.find_by!(url_path: validation_path) }
   let(:validation_path) { SecureRandom.hex }
 
@@ -49,14 +50,6 @@ RSpec.describe Mutations::DastSiteValidations::Create do
 
         it 'returns the dast_site_validation status' do
           expect(subject[:status]).to eq(dast_site_validation.state)
-        end
-
-        context 'when on demand scan site validations feature is not enabled' do
-          it 'raises an exception' do
-            stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
         end
       end
     end

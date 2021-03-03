@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { createLocalVue, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import DeployFreezeTable from '~/deploy_freeze/components/deploy_freeze_table.vue';
 import createStore from '~/deploy_freeze/store';
 import { freezePeriodsFixture, timezoneDataFixture } from '../helpers';
@@ -18,7 +18,7 @@ describe('Deploy freeze table', () => {
     });
     jest.spyOn(store, 'dispatch').mockImplementation();
     wrapper = mount(DeployFreezeTable, {
-      attachToDocument: true,
+      attachTo: document.body,
       localVue,
       store,
     });

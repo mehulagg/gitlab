@@ -178,6 +178,8 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       >
           
         <policy-action-picker-stub />
+         
+        <!---->
       </dim-disable-container-stub>
     </div>
      
@@ -195,6 +197,8 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
 kind: CiliumNetworkPolicy
 metadata:
   name: ''
+  labels:
+    app.gitlab.com/proj: '21'
 spec:
   endpointSelector:
     matchLabels:
@@ -245,6 +249,7 @@ spec:
   <gl-modal-stub
     actioncancel="[object Object]"
     actionsecondary="[object Object]"
+    dismisslabel="Close"
     modalclass=""
     modalid="delete-modal"
     size="md"

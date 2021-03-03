@@ -6,9 +6,9 @@ description: 'Learn how to install a GitLab instance on Google Cloud Platform.'
 type: howto
 ---
 
-# Installing GitLab on Google Cloud Platform
+# Installing GitLab on Google Cloud Platform **(FREE SELF)**
 
-This guide will help you install GitLab on a [Google Cloud Platform (GCP)](https://cloud.google.com/) instance.
+This guide will help you install GitLab on a [Google Cloud Platform (GCP)](https://cloud.google.com/) using the official GitLab Linux package. You should customize it to accommodate your needs.
 
 NOTE:
 Google provides a whitepaper for [deploying production-ready GitLab on
@@ -36,7 +36,7 @@ To deploy GitLab on GCP you first need to create a virtual machine:
    ![Search for GitLab](img/launch_vm.png)
 
 1. On the next page, you can select the type of VM as well as the
-   estimated costs. Provide the name of the instance, desired datacenter, and machine type.
+   estimated costs. Provide the name of the instance, desired data center, and machine type.
    Note our [hardware requirements for different user base sizes](../requirements.md#hardware-requirements).
 
    ![Launch on Compute Engine](img/vm_details.png)
@@ -91,7 +91,7 @@ here's how you configure GitLab to be aware of the change:
    In the future you might want to set up [connecting with an SSH key](https://cloud.google.com/compute/docs/instances/connecting-to-instance)
    instead.
 
-1. Edit the config file of Omnibus GitLab using your favorite text editor:
+1. Edit the configuration file of Omnibus GitLab using your favorite text editor:
 
    ```shell
    sudo vim /etc/gitlab/gitlab.rb

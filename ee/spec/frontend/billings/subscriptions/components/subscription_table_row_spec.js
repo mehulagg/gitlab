@@ -1,10 +1,10 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlIcon } from '@gitlab/ui';
 import SubscriptionTableRow from 'ee/billings/subscriptions/components/subscription_table_row.vue';
 import initialStore from 'ee/billings/subscriptions/store';
-import Popover from '~/vue_shared/components/help_popover.vue';
 import { dateInWords } from '~/lib/utils/datetime_utility';
+import Popover from '~/vue_shared/components/help_popover.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -39,7 +39,11 @@ describe('subscription table row', () => {
 
   const defaultProps = { header: HEADER, columns: COLUMNS };
 
-  const createComponent = ({ props = {}, billableSeatsHref = BILLABLE_SEATS_URL } = {}) => {
+  const createComponent = ({
+    props = {},
+    billableSeatsHref = BILLABLE_SEATS_URL,
+    isGroup = true,
+  } = {}) => {
     if (wrapper) {
       throw new Error('wrapper already exists!');
     }
@@ -51,6 +55,7 @@ describe('subscription table row', () => {
       },
       provide: {
         billableSeatsHref,
+        isGroup,
       },
       store,
       localVue,
@@ -71,7 +76,7 @@ describe('subscription table row', () => {
   const findContentCells = () => wrapper.findAll('[data-testid="content-cell"]');
   const findHeaderIcon = () => findHeaderCell().find(GlIcon);
 
-  const findColumnLabelAndTitle = columnWrapper => {
+  const findColumnLabelAndTitle = (columnWrapper) => {
     const label = columnWrapper.find('[data-testid="property-label"]');
     const value = columnWrapper.find('[data-testid="property-value"]');
 
@@ -81,18 +86,23 @@ describe('subscription table row', () => {
     });
   };
 
-  const findUsageButton = () =>
-    findContentCells()
-      .at(0)
-      .find('[data-testid="seats-usage-button"]');
+  const findUsageButton = () => findContentCells().at(0).find('[data-testid="seats-usage-button"]');
+
+  describe('dispatched actions', () => {
+    it('dispatches action when created if namespace is group', () => {
+      createComponent();
+      expect(store.dispatch).toHaveBeenCalledWith('fetchHasBillableGroupMembers');
+    });
+
+    it('does not dispatch action when created if namespace is not group', () => {
+      createComponent({ isGroup: false });
+      expect(store.dispatch).not.toHaveBeenCalledWith('fetchHasBillableGroupMembers');
+    });
+  });
 
   describe('default', () => {
     beforeEach(() => {
       createComponent();
-    });
-
-    it('dispatches correct actions when created', () => {
-      expect(store.dispatch).toHaveBeenCalledWith('fetchHasBillableGroupMembers');
     });
 
     it(`should render one header cell and ${COLUMNS.length} visible columns in total`, () => {
@@ -101,7 +111,7 @@ describe('subscription table row', () => {
     });
 
     it(`should not render a hidden column`, () => {
-      const hiddenColIdx = COLUMNS.find(c => !c.display);
+      const hiddenColIdx = COLUMNS.find((c) => !c.display);
       const hiddenCol = findContentCells().at(hiddenColIdx);
 
       expect(hiddenCol).toBe(undefined);
@@ -137,6 +147,21 @@ describe('subscription table row', () => {
     });
   });
 
+  describe('with free plan', () => {
+    const dateColumn = {
+      id: 'a',
+      label: 'Column A',
+      value: 0,
+      colClass: 'number',
+    };
+
+    it('renders a dash when the value is zero', () => {
+      createComponent({ props: { columns: [dateColumn] } });
+
+      expect(wrapper.find('[data-testid="property-value"]').text()).toBe('-');
+    });
+  });
+
   describe('date column', () => {
     const dateColumn = {
       id: 'c',
@@ -156,7 +181,6 @@ describe('subscription table row', () => {
       const outputDate = dateInWords(new Date(d[0], d[1] - 1, d[2]));
 
       expect(currentCol.find('[data-testid="property-label"]').text()).toMatch(dateColumn.label);
-
       expect(currentCol.find('[data-testid="property-value"]').text()).toMatch(outputDate);
     });
   });

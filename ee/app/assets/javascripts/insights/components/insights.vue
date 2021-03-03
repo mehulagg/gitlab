@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlAlert, GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import { EMPTY_STATE_TITLE, EMPTY_STATE_DESCRIPTION, EMPTY_STATE_SVG_PATH } from '../constants';
 import InsightsPage from './insights_page.vue';
 
@@ -44,11 +44,11 @@ export default {
       };
     },
     hasAllChartsLoaded() {
-      const requestedChartKeys = this.activePage?.charts?.map(chart => chart.title) || [];
-      return requestedChartKeys.every(key => this.chartData[key]?.loaded);
+      const requestedChartKeys = this.activePage?.charts?.map((chart) => chart.title) || [];
+      return requestedChartKeys.every((key) => this.chartData[key]?.loaded);
     },
     hasChartsError() {
-      return Object.values(this.chartData).some(data => data.error);
+      return Object.values(this.chartData).some((data) => data.error);
     },
     pageLoading() {
       return !this.hasChartsError && !this.hasAllChartsLoaded;
@@ -71,7 +71,7 @@ export default {
         }
       }
 
-      return Object.keys(configData).map(key => ({
+      return Object.keys(configData).map((key) => ({
         name: configData[key].title,
         scope: key,
         isActive: this.activeTab === key,

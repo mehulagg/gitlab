@@ -1,5 +1,5 @@
-import AWS from 'aws-sdk/global';
 import EC2 from 'aws-sdk/clients/ec2';
+import AWS from 'aws-sdk/global';
 import {
   setAWSConfig,
   fetchRoles,
@@ -101,7 +101,10 @@ describe('awsServicesFacade', () => {
     let vpcsOutput;
 
     beforeEach(() => {
-      vpcs = [{ VpcId: 'vpc-1', Tags: [] }, { VpcId: 'vpc-2', Tags: [] }];
+      vpcs = [
+        { VpcId: 'vpc-1', Tags: [] },
+        { VpcId: 'vpc-2', Tags: [] },
+      ];
       vpcsOutput = vpcs.map(({ VpcId: vpcId }) => ({ name: vpcId, value: vpcId }));
 
       mockDescribeVpcsPromise.mockResolvedValueOnce({ Vpcs: vpcs });

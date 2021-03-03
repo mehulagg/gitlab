@@ -44,17 +44,17 @@ export const MOVE_DESIGN_ERROR = __(
   'Something went wrong when reordering designs. Please try again',
 );
 
-export const CREATE_DESIGN_TODO_ERROR = __('Failed to create To-Do for the design.');
+export const CREATE_DESIGN_TODO_ERROR = __('Failed to create a to-do item for the design.');
 
-export const CREATE_DESIGN_TODO_EXISTS_ERROR = __('There is already a To-Do for this design.');
+export const CREATE_DESIGN_TODO_EXISTS_ERROR = __('There is already a to-do item for this design.');
 
-export const DELETE_DESIGN_TODO_ERROR = __('Failed to remove To-Do for the design.');
+export const DELETE_DESIGN_TODO_ERROR = __('Failed to remove a to-do item for the design.');
 
-export const TOGGLE_TODO_ERROR = __('Failed to toggle To-Do for the design.');
+export const TOGGLE_TODO_ERROR = __('Failed to toggle the to-do status for the design.');
 
 const MAX_SKIPPED_FILES_LISTINGS = 5;
 
-const oneDesignSkippedMessage = filename =>
+const oneDesignSkippedMessage = (filename) =>
   `${DESIGN_UPLOAD_SKIPPED_MESSAGE} ${sprintf(s__('DesignManagement|%{filename} did not change.'), {
     filename,
   })}`;
@@ -64,7 +64,7 @@ const oneDesignSkippedMessage = filename =>
  * files were skipped.
  * @param {Array<{ filename }>} skippedFiles
  */
-const someDesignsSkippedMessage = skippedFiles => {
+const someDesignsSkippedMessage = (skippedFiles) => {
   const designsSkippedMessage = `${DESIGN_UPLOAD_SKIPPED_MESSAGE} ${s__(
     'Some of the designs you tried uploading did not change:',
   )}`;

@@ -6,7 +6,7 @@ disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/schedules.
 type: reference, howto
 ---
 
-# Pipeline schedules
+# Pipeline schedules **(FREE)**
 
 > - Introduced in GitLab 9.1 as [Trigger Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10533).
 > - [Renamed to Pipeline Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10853) in GitLab 9.2.
@@ -67,7 +67,7 @@ To configure a job to be executed only when the pipeline has been
 scheduled (or the opposite), use
 [only and except](../yaml/README.md#onlyexcept-basic) configuration keywords.
 
-For example:
+In the example below `make world` runs in scheduled pipelines, and `make build` runs in pipelines that are not scheduled:
 
 ```yaml
 job:on-schedule:
@@ -83,7 +83,7 @@ job:
     - make build
 ```
 
-### Advanced configuration
+### Advanced configuration **(FREE SELF)**
 
 The pipelines are not executed exactly on schedule because schedules are handled by
 Sidekiq, which runs according to its interval.

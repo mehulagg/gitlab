@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
-import { getTimeago } from '~/lib/utils/datetime_utility';
 import Component from '~/diffs/components/commit_item.vue';
+import { getTimeago } from '~/lib/utils/datetime_utility';
 import CommitPipelineStatus from '~/projects/tree/components/commit_pipeline_status_component.vue';
 import getDiffWithCommit from '../mock_data/diff_with_commit';
 
@@ -37,17 +37,11 @@ describe('diffs/components/commit_item', () => {
   const getPrevCommitNavElement = () =>
     getCommitNavButtonsElement().find('.btn-group > *:first-child');
 
-  const mountComponent = (propsData, featureFlags = {}) => {
+  const mountComponent = (propsData) => {
     wrapper = mount(Component, {
       propsData: {
         commit,
         ...propsData,
-      },
-      provide: {
-        glFeatures: {
-          mrCommitNeighborNav: true,
-          ...featureFlags,
-        },
       },
       stubs: {
         CommitPipelineStatus: true,
@@ -222,12 +216,6 @@ describe('diffs/components/commit_item', () => {
         commit: { ...mrCommit, prev_commit_id: null },
       });
       expect(getCommitNavButtonsElement().exists()).toEqual(true);
-    });
-
-    it('does not render the commit navigation buttons if the `mrCommitNeighborNav` feature flag is disabled', () => {
-      mountComponent({ commit: mrCommit }, { mrCommitNeighborNav: false });
-
-      expect(getCommitNavButtonsElement().exists()).toEqual(false);
     });
 
     describe('prev commit', () => {

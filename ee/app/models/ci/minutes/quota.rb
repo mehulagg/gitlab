@@ -13,18 +13,17 @@ module Ci
         @namespace = namespace
       end
 
+      def enabled?
+        namespace_eligible? && total_minutes.nonzero?
+      end
+
       # Status of the monthly allowance being used.
       def monthly_minutes_report
-        if namespace.shared_runners_minutes_limit_enabled? # TODO: try to refactor this
-          status = monthly_minutes_used_up? ? :over_quota : :under_quota
-          Report.new(monthly_minutes_used, monthly_minutes, status)
-        else
-          Report.new(monthly_minutes_used, 'Unlimited', :disabled)
-        end
+        Report.new(monthly_minutes_used, minutes_limit, report_status)
       end
 
       def monthly_percent_used
-        return 0 unless namespace.shared_runners_minutes_limit_enabled?
+        return 0 unless enabled?
         return 0 if monthly_minutes == 0
 
         100 * monthly_minutes_used.to_i / monthly_minutes
@@ -37,15 +36,14 @@ module Ci
       end
 
       def purchased_percent_used
-        return 0 unless namespace.shared_runners_minutes_limit_enabled?
+        return 0 unless enabled?
         return 0 if purchased_minutes == 0
 
         100 * purchased_minutes_used.to_i / purchased_minutes
       end
 
       def minutes_used_up?
-        namespace.shared_runners_minutes_limit_enabled? &&
-          total_minutes_used >= total_minutes
+        enabled? && total_minutes_used >= total_minutes
       end
 
       def total_minutes
@@ -62,21 +60,42 @@ module Ci
         100 * total_minutes_remaining.to_i / total_minutes
       end
 
+      def namespace_eligible?
+        namespace.root? && namespace.any_project_with_shared_runners_enabled?
+      end
+
       private
+
+      def minutes_limit
+        return monthly_minutes if enabled?
+
+        if namespace_eligible?
+          _('Unlimited')
+        else
+          _('Not supported')
+        end
+      end
+
+      def report_status
+        return :disabled unless enabled?
+
+        monthly_minutes_used_up? ? :over_quota : :under_quota
+      end
 
       def total_minutes_remaining
         [total_minutes.to_i - total_minutes_used, 0].max
       end
 
       def monthly_minutes_used_up?
-        namespace.shared_runners_minutes_limit_enabled? &&
-          monthly_minutes_used >= monthly_minutes
+        return false unless enabled?
+
+        monthly_minutes_used >= monthly_minutes
       end
 
       def purchased_minutes_used_up?
-        namespace.shared_runners_minutes_limit_enabled? &&
-          any_minutes_purchased? &&
-          purchased_minutes_used >= purchased_minutes
+        return false unless enabled?
+
+        any_minutes_purchased? && purchased_minutes_used >= purchased_minutes
       end
 
       def monthly_minutes_used

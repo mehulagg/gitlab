@@ -11,15 +11,15 @@ export default class MRWidgetService extends CEWidgetService {
   approveMergeRequestWithAuth(approvalPassword) {
     return axios
       .post(this.apiApprovePath, { approval_password: approvalPassword })
-      .then(res => res.data);
+      .then((res) => res.data);
   }
 
   fetchApprovalSettings() {
-    return axios.get(this.apiApprovalSettingsPath).then(res => res.data);
+    return axios.get(this.apiApprovalSettingsPath).then((res) => res.data);
   }
 
   // eslint-disable-next-line class-methods-use-this
   fetchReport(endpoint) {
-    return axios.get(endpoint).then(res => res.data);
+    return axios.get(endpoint).then((res) => res.data);
   }
 }

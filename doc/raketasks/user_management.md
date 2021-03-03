@@ -1,10 +1,10 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# User management **(CORE ONLY)**
+# User management **(FREE SELF)**
 
 GitLab provides Rake tasks for user management.
 
@@ -86,7 +86,7 @@ block_auto_created_users: false
 ## Disable two-factor authentication for all users
 
 This task disables two-factor authentication (2FA) for all users that have it enabled. This can be
-useful if GitLab's `config/secrets.yml` file has been lost and users are unable
+useful if the GitLab `config/secrets.yml` file has been lost and users are unable
 to log in, for example.
 
 To disable two-factor authentication for all users, run:

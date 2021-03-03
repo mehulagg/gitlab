@@ -23,6 +23,7 @@ module Quality
         dependencies
         elastic
         elastic_integration
+        experiments
         factories
         finders
         frontend
@@ -42,6 +43,7 @@ module Quality
         serializers
         services
         sidekiq
+        spam
         support_specs
         tasks
         uploaders

@@ -159,13 +159,17 @@ RSpec.describe 'Git HTTP requests' do
 
     context "POST git-upload-pack" do
       it "fails to find a route" do
-        expect { clone_post(repository_path) }.to raise_error(ActionController::RoutingError)
+        clone_post(repository_path) do |response|
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
       end
     end
 
     context "POST git-receive-pack" do
       it "fails to find a route" do
-        expect { push_post(repository_path) }.to raise_error(ActionController::RoutingError)
+        push_post(repository_path) do |response|
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
       end
     end
   end
@@ -378,6 +382,14 @@ RSpec.describe 'Git HTTP requests' do
                 end
               end
             end
+
+            context 'but the service parameter is missing' do
+              it 'rejects clones with 403 Forbidden' do
+                get("/#{path}/info/refs", headers: auth_env(*env.values_at(:user, :password), nil))
+
+                expect(response).to have_gitlab_http_status(:forbidden)
+              end
+            end
           end
 
           context 'and not a member of the team' do
@@ -404,6 +416,14 @@ RSpec.describe 'Git HTTP requests' do
               end
 
               it_behaves_like 'pushes are allowed'
+            end
+
+            context 'but the service parameter is missing' do
+              it 'rejects clones with 401 Unauthorized' do
+                get("/#{path}/info/refs")
+
+                expect(response).to have_gitlab_http_status(:unauthorized)
+              end
             end
           end
         end

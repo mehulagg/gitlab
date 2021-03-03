@@ -1,15 +1,16 @@
-import { nextTick } from 'vue';
+import { GlDropdown } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
-import MockAdapter from 'axios-mock-adapter';
 import Autosize from 'autosize';
+import MockAdapter from 'axios-mock-adapter';
+import { nextTick } from 'vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import createStore from '~/notes/stores';
 import CommentForm from '~/notes/components/comment_form.vue';
 import * as constants from '~/notes/constants';
 import eventHub from '~/notes/event_hub';
-import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import createStore from '~/notes/stores';
 import { loggedOutnoteableData, notesDataMock, userDataMock, noteableDataMock } from '../mock_data';
 
 jest.mock('autosize');
@@ -22,11 +23,26 @@ describe('issue_comment_form component', () => {
   let wrapper;
   let axiosMock;
 
-  const findCloseReopenButton = () => wrapper.find('[data-testid="close-reopen-button"]');
+  const findCloseReopenButton = () => wrapper.findByTestId('close-reopen-button');
+  const findTextArea = () => wrapper.findByTestId('comment-field');
+  const findConfidentialNoteCheckbox = () => wrapper.findByTestId('confidential-note-checkbox');
+  const findCommentGlDropdown = () => wrapper.find(GlDropdown);
+  const findCommentButton = () => findCommentGlDropdown().find('button');
 
-  const findCommentButton = () => wrapper.find('[data-testid="comment-button"]');
+  const createNotableDataMock = (data = {}) => {
+    return {
+      ...noteableDataMock,
+      ...data,
+    };
+  };
 
-  const findTextArea = () => wrapper.find('[data-testid="comment-field"]');
+  const notableDataMockCanUpdateIssuable = createNotableDataMock({
+    current_user: { can_update: true, can_create_note: true },
+  });
+
+  const notableDataMockCannotUpdateIssuable = createNotableDataMock({
+    current_user: { can_update: false, can_create_note: true },
+  });
 
   const mountComponent = ({
     initialData = {},
@@ -34,23 +50,29 @@ describe('issue_comment_form component', () => {
     noteableData = noteableDataMock,
     notesData = notesDataMock,
     userData = userDataMock,
+    features = {},
     mountFunction = shallowMount,
   } = {}) => {
     store.dispatch('setNoteableData', noteableData);
     store.dispatch('setNotesData', notesData);
     store.dispatch('setUserData', userData);
 
-    wrapper = mountFunction(CommentForm, {
-      propsData: {
-        noteableType,
-      },
-      data() {
-        return {
-          ...initialData,
-        };
-      },
-      store,
-    });
+    wrapper = extendedWrapper(
+      mountFunction(CommentForm, {
+        propsData: {
+          noteableType,
+        },
+        data() {
+          return {
+            ...initialData,
+          };
+        },
+        store,
+        provide: {
+          glFeatures: features,
+        },
+      }),
+    );
   };
 
   beforeEach(() => {
@@ -64,14 +86,6 @@ describe('issue_comment_form component', () => {
   });
 
   describe('user is logged in', () => {
-    describe('avatar', () => {
-      it('should render user avatar with link', () => {
-        mountComponent({ mountFunction: mount });
-
-        expect(wrapper.find(UserAvatarLink).attributes('href')).toBe(userDataMock.path);
-      });
-    });
-
     describe('handleSave', () => {
       it('should request to save note when note is entered', () => {
         mountComponent({ mountFunction: mount, initialData: { note: 'hello world' } });
@@ -181,7 +195,7 @@ describe('issue_comment_form component', () => {
 
       describe('edit mode', () => {
         beforeEach(() => {
-          mountComponent();
+          mountComponent({ mountFunction: mount });
         });
 
         it('should enter edit mode when arrow up is pressed', () => {
@@ -200,7 +214,7 @@ describe('issue_comment_form component', () => {
 
       describe('event enter', () => {
         beforeEach(() => {
-          mountComponent();
+          mountComponent({ mountFunction: mount });
         });
 
         it('should save note when cmd+enter is pressed', () => {
@@ -231,7 +245,7 @@ describe('issue_comment_form component', () => {
       it('should render comment button as disabled', () => {
         mountComponent();
 
-        expect(findCommentButton().props('disabled')).toBe(true);
+        expect(findCommentGlDropdown().props('disabled')).toBe(true);
       });
 
       it('should enable comment button if it has note', async () => {
@@ -239,7 +253,7 @@ describe('issue_comment_form component', () => {
 
         await wrapper.setData({ note: 'Foo' });
 
-        expect(findCommentButton().props('disabled')).toBe(false);
+        expect(findCommentGlDropdown().props('disabled')).toBe(false);
       });
 
       it('should update buttons texts when it has note', () => {
@@ -369,14 +383,80 @@ describe('issue_comment_form component', () => {
       });
     });
 
-    describe('issue is confidential', () => {
-      it('shows information warning', () => {
-        mountComponent({
-          noteableData: { ...noteableDataMock, confidential: true },
-          mountFunction: mount,
+    describe('confidential notes checkbox', () => {
+      describe('when confidentialNotes feature flag is `false`', () => {
+        const features = { confidentialNotes: false };
+
+        it('should not render checkbox', () => {
+          mountComponent({
+            mountFunction: mount,
+            initialData: { note: 'confidential note' },
+            noteableData: { ...notableDataMockCanUpdateIssuable },
+            features,
+          });
+
+          const checkbox = findConfidentialNoteCheckbox();
+          expect(checkbox.exists()).toBe(false);
+        });
+      });
+
+      describe('when confidentialNotes feature flag is `true`', () => {
+        const features = { confidentialNotes: true };
+
+        it('should render checkbox as unchecked by default', () => {
+          mountComponent({
+            mountFunction: mount,
+            initialData: { note: 'confidential note' },
+            noteableData: { ...notableDataMockCanUpdateIssuable },
+            features,
+          });
+
+          const checkbox = findConfidentialNoteCheckbox();
+          expect(checkbox.exists()).toBe(true);
+          expect(checkbox.element.checked).toBe(false);
         });
 
-        expect(wrapper.find('[data-testid="confidential-warning"]').exists()).toBe(true);
+        describe.each`
+          shouldCheckboxBeChecked
+          ${true}
+          ${false}
+        `('when checkbox value is `$shouldCheckboxBeChecked`', ({ shouldCheckboxBeChecked }) => {
+          it(`sets \`confidential\` to \`${shouldCheckboxBeChecked}\``, async () => {
+            mountComponent({
+              mountFunction: mount,
+              initialData: { note: 'confidential note' },
+              noteableData: { ...notableDataMockCanUpdateIssuable },
+              features,
+            });
+
+            jest.spyOn(wrapper.vm, 'saveNote').mockResolvedValue({});
+
+            const checkbox = findConfidentialNoteCheckbox();
+
+            // check checkbox
+            checkbox.element.checked = shouldCheckboxBeChecked;
+            checkbox.trigger('change');
+            await wrapper.vm.$nextTick();
+
+            // submit comment
+            findCommentButton().trigger('click');
+
+            const [providedData] = wrapper.vm.saveNote.mock.calls[0];
+            expect(providedData.data.note.confidential).toBe(shouldCheckboxBeChecked);
+          });
+        });
+
+        describe('when user cannot update issuable', () => {
+          it('should not render checkbox', () => {
+            mountComponent({
+              mountFunction: mount,
+              noteableData: { ...notableDataMockCannotUpdateIssuable },
+              features,
+            });
+
+            expect(findConfidentialNoteCheckbox().exists()).toBe(false);
+          });
+        });
       });
     });
   });

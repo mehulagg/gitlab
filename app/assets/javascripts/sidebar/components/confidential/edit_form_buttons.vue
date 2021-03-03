@@ -1,9 +1,9 @@
 <script>
-import $ from 'jquery';
 import { GlButton } from '@gitlab/ui';
+import $ from 'jquery';
 import { mapActions } from 'vuex';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import { __ } from '~/locale';
 import eventHub from '../../event_hub';
 
 export default {
@@ -48,7 +48,7 @@ export default {
         .then(() => {
           eventHub.$emit('updateIssuableConfidentiality', confidential);
         })
-        .catch(err => {
+        .catch((err) => {
           Flash(
             err || __('Something went wrong trying to change the confidentiality of this issue'),
           );

@@ -1,12 +1,12 @@
 import Api from '~/api';
 import createFlash from '~/flash';
-import { s__ } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 
-import projectTestCase from '../queries/project_test_case.query.graphql';
-import updateTestCase from '../queries/update_test_case.mutation.graphql';
 import markTestCaseTodoDone from '../queries/mark_test_case_todo_done.mutation.graphql';
 import moveTestCase from '../queries/move_test_case.mutation.graphql';
+import projectTestCase from '../queries/project_test_case.query.graphql';
+import updateTestCase from '../queries/update_test_case.mutation.graphql';
 
 export default {
   apollo: {
@@ -63,7 +63,7 @@ export default {
           }
           return data.updateIssue?.issue;
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash({
             message: errorMessage,
             captureError: true,
@@ -81,7 +81,7 @@ export default {
         .then(() => {
           this.$apollo.queries.testCase.refetch();
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash({
             message: s__('TestCases|Something went wrong while adding test case to Todo.'),
             captureError: true,
@@ -110,7 +110,7 @@ export default {
           }
           this.$apollo.queries.testCase.refetch();
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash({
             message: s__('TestCases|Something went wrong while marking test case todo as done.'),
             captureError: true,
@@ -143,7 +143,7 @@ export default {
           }
           visitUrl(data.issueMove?.issue.webUrl);
         })
-        .catch(error => {
+        .catch((error) => {
           this.testCaseMoveInProgress = false;
           createFlash({
             message: s__('TestCases|Something went wrong while moving test case.'),

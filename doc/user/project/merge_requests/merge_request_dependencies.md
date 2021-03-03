@@ -1,6 +1,6 @@
 ---
 stage: Create
-group: Source Code
+group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, concepts
 ---
@@ -17,7 +17,7 @@ then it cannot be merged until its dependency is itself merged.
 
 NOTE:
 Merge requests dependencies are a **PREMIUM** feature, but this restriction is
-only enforced for the dependent merge request. A merge request in a **CORE** or
+only enforced for the dependent merge request. A merge request in a **FREE** or
 **STARTER** project can be a dependency of a **PREMIUM** merge request, but not
 vice-versa.
 
@@ -40,8 +40,7 @@ require changes to `awesome-lib`, and so necessitate two merge requests. Merging
 the `awesome-project` merge request before the `awesome-lib` one would
 break the `master`branch.
 
-The `awesome-project` merge request could be [marked as
-**Draft**](work_in_progress_merge_requests.md),
+The `awesome-project` merge request could be [marked as **Draft**](drafts.md),
 and the reason for the draft stated included in the comments. However, this
 requires the state of the `awesome-lib` merge request to be manually
 tracked, and doesn't scale well if the `awesome-project` merge request

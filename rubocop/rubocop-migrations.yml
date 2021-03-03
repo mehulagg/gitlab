@@ -27,6 +27,7 @@ Migration/UpdateLargeTable:
     - :project_ci_cd_settings
     - :project_settings
     - :project_features
+    - :protected_branches
     - :push_event_payloads
     - :resource_label_events
     - :routes
@@ -38,6 +39,7 @@ Migration/UpdateLargeTable:
     - :users
     - :user_preferences
     - :user_details
+    - :vulnerability_occurrences
     - :web_hook_logs
   DeniedMethods:
     - :change_column_type_concurrently

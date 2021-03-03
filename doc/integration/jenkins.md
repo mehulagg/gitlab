@@ -4,15 +4,15 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Jenkins CI service **(CORE)**
+# Jenkins CI service **(FREE)**
 
-> [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/246756) to Core in GitLab 13.7.
+> [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/246756) to GitLab Free in 13.7.
 
 From GitLab, you can trigger a Jenkins build when you push code to a repository, or when a merge
 request is created. In return, the Jenkins pipeline status is shown on merge requests widgets and
 on the GitLab project's home page.
 
-To better understand GitLab's Jenkins integration, watch the following video:
+To better understand the GitLab Jenkins integration, watch the following video:
 
 - [GitLab workflow with Jira issues and Jenkins pipelines](https://youtu.be/Jn-_fyra7xQ)
 
@@ -31,12 +31,13 @@ the ['GitLab vs. Jenkins' comparison page](https://about.gitlab.com/devops-tools
 
 NOTE:
 This documentation focuses only on how to **configure** a Jenkins *integration* with
-GitLab. Learn how to **migrate** from Jenkins to GitLab CI/CD in our
+GitLab. Learn how to set up Jenkins [on your local machine](../development/integrations/jenkins.md)
+in our developer documentation, and how to **migrate** from Jenkins to GitLab CI/CD in our
 [Migrating from Jenkins](../ci/migration/jenkins.md) documentation.
 
 ## Configure GitLab integration with Jenkins
 
-GitLab's Jenkins integration requires installation and configuration in both GitLab and Jenkins.
+The GitLab Jenkins integration requires installation and configuration in both GitLab and Jenkins.
 In GitLab, you need to grant Jenkins access to the relevant projects. In Jenkins, you need to
 install and configure several plugins.
 
@@ -64,15 +65,16 @@ Grant a GitLab user access to the select GitLab projects.
 1. Grant the user permission to the GitLab projects.
 
    If you're integrating Jenkins with many GitLab projects, consider granting the user global
-   Admin permission. Otherwise, add the user to each project, and grant Developer permission.
+   Administrator permission. Otherwise, add the user to each project, and grant Developer permission.
 
 ## Configure GitLab API access
 
 Create a personal access token to authorize Jenkins' access to GitLab.
 
-1. Log in to GitLab as the user to be used with Jenkins.
-1. Click your avatar, then **Settings**.
-1. Click **Access Tokens** in the sidebar.
+1. Sign in to GitLab as the user to be used with Jenkins.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Access Tokens**.
 1. Create a personal access token with the **API** scope checkbox checked. For more details, see
    [Personal access tokens](../user/profile/personal_access_tokens.md).
 1. Record the personal access token's value, because it's required in [Configure the Jenkins server](#configure-the-jenkins-server) section.
@@ -137,9 +139,11 @@ Set up the Jenkins project you intend to run your build on.
 
 ## Configure the GitLab project
 
-Configure the GitLab integration with Jenkins.
+Configure the GitLab integration with Jenkins in one of the following ways.
 
-### Option 1: Jenkins integration (recommended)
+### Recommended Jenkins integration
+
+GitLab recommends this approach for Jenkins integrations.
 
 1. Create a new GitLab project or choose an existing one.
 1. Go to **Settings > Integrations**, then select **Jenkins CI**.
@@ -158,7 +162,7 @@ Configure the GitLab integration with Jenkins.
    authentication.
 1. Click **Test settings and save changes**. GitLab tests the connection to Jenkins.
 
-### Option 2: Webhook
+### Webhook integration
 
 If you are unable to provide GitLab with your Jenkins server login, you can use this option
 to integrate GitLab and Jenkins.
@@ -166,7 +170,8 @@ to integrate GitLab and Jenkins.
 1. In the configuration of your Jenkins job, in the GitLab configuration section, click **Advanced**.
 1. Click the **Generate** button under the **Secret Token** field.
 1. Copy the resulting token, and save the job configuration.
-1. In GitLab, create a webhook for your project, enter the trigger URL (e.g. `https://JENKINS_URL/project/YOUR_JOB`) and paste the token in the **Secret Token** field.
+1. In GitLab, create a webhook for your project, enter the trigger URL
+   (such as `https://JENKINS_URL/project/YOUR_JOB`) and paste the token in the **Secret Token** field.
 1. After you add the webhook, click the **Test** button, and it should succeed.
 
 ## Troubleshooting
@@ -203,10 +208,10 @@ If those are present, the request is exceeding the
 which is set to 10 seconds by default.
 
 To fix this the `gitlab_rails['webhook_timeout']` value must be increased
-in the `gitlab.rb` config file, followed by the [`gitlab-ctl reconfigure` command](../administration/restart_gitlab.md).
+in the `gitlab.rb` configuration file, followed by the [`gitlab-ctl reconfigure` command](../administration/restart_gitlab.md).
 
-If you don't find the errors above, but do find *duplicate* entries like below (in `/var/log/gitlab/gitlab-rail`), this
-could also indicate that [webhook requests are timing out](../user/project/integrations/webhooks.md#webhook-fails-or-multiple-webhook-requests-are-triggered):
+If you don't find the errors above, but do find *duplicate* entries like below (in `/var/log/gitlab/gitlab-rail`),
+[webhook requests may be timing out](../user/project/integrations/webhooks.md#webhook-fails-or-multiple-webhook-requests-are-triggered):
 
 ```plaintext
 2019-10-25_04:22:41.25630 2019-10-25T04:22:41.256Z 1584 TID-ovowh4tek WebHookWorker JID-941fb7f40b69dff3d833c99b INFO: start

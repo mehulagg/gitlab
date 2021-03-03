@@ -15,6 +15,7 @@ To send an invitation, you must have access to the project or group you are send
 levels are defined in the `Gitlab::Access` module. Currently, these levels are valid:
 
 - No access (`0`)
+- Minimal access (`5`) ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220203) in GitLab 13.5.)
 - Guest (`10`)
 - Reporter (`20`)
 - Developer (`30`)
@@ -37,7 +38,7 @@ POST /projects/:id/invitations
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `email` | integer/string | yes | The email of the new member or multiple emails separated by commas |
+| `email` | string | yes | The email of the new member or multiple emails separated by commas |
 | `access_level` | integer | yes | A valid access level |
 | `expires_at` | string | no | A date string in the format YEAR-MONTH-DAY |
 
@@ -105,3 +106,27 @@ Example response:
    },
 ]
 ```
+
+## Delete an invitation to a group or project
+
+Deletes a pending invitation by email address.
+
+```plaintext
+DELETE /groups/:id/invitations/:email
+DELETE /projects/:id/invitations/:email
+```
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `email`   | string | yes    | The email address to which the invitation was previously sent |
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/55/invitations/email@example.org"
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/55/invitations/email@example.org"
+```
+
+- Returns `204` and no content on success.
+- Returns `403` forbidden if unauthorized to delete the invitation.
+- Returns `404` not found if authorized and no invitation is found for that email address.
+- Returns `409` if the request was valid but the invitation could not be deleted.

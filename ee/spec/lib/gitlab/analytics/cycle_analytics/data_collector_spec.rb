@@ -22,38 +22,62 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
     let(:params) { { from: Time.new(2019), to: Time.new(2020), current_user: user } }
     let(:data_collector) { described_class.new(stage: stage, params: params) }
 
-    before do
+    let!(:resource1) do
       # takes 10 days
-      resource1 = travel_to(Time.new(2019, 3, 5)) do
+      resource = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
       travel_to(Time.new(2019, 3, 15)) do
-        create_data_for_end_event(resource1, self)
+        create_data_for_end_event(resource, self)
       end
 
+      resource
+    end
+
+    let!(:resource2) do
       # takes 5 days
-      resource2 = travel_to(Time.new(2019, 3, 5)) do
+      resource = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
       travel_to(Time.new(2019, 3, 10)) do
-        create_data_for_end_event(resource2, self)
+        create_data_for_end_event(resource, self)
       end
 
+      resource
+    end
+
+    let!(:resource3) do
       # takes 15 days
-      resource3 = travel_to(Time.new(2019, 3, 5)) do
+      resource = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
       travel_to(Time.new(2019, 3, 20)) do
-        create_data_for_end_event(resource3, self)
+        create_data_for_end_event(resource, self)
       end
+
+      resource
     end
 
     it 'loads serialized records' do
       items = data_collector.serialized_records
       expect(items.size).to eq(3)
+    end
+
+    context 'when sorting by duration' do
+      before do
+        params[:sort] = :duration
+        params[:direction] = :desc
+      end
+
+      it 'returns serialized records sorted by duration DESC' do
+        expected_ordered_iids = [resource3.iid, resource1.iid, resource2.iid]
+
+        iids = data_collector.serialized_records.map { |record| record[:iid].to_i }
+        expect(iids).to eq(expected_ordered_iids)
+      end
     end
 
     it 'calculates median' do

@@ -9,6 +9,7 @@ fragment BaseEpic on Epic {
   dueDate
   hasChildren
   hasParent
+  confidential
   descendantWeightSum {
     closedIssues
     openedIssues

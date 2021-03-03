@@ -1,8 +1,8 @@
 <script>
 import { GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import DynamicFields from './dynamic_fields.vue';
-import { isValidAnalyzerEntity } from './utils';
+import DynamicFields from '../../components/dynamic_fields.vue';
+import { isValidAnalyzerEntity } from '../../components/utils';
 
 export default {
   components: {

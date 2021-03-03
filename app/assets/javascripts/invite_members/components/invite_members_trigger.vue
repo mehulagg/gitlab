@@ -19,17 +19,22 @@ export default {
       required: false,
       default: '',
     },
+    classes: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   methods: {
     openModal() {
-      eventHub.$emit('openModal');
+      eventHub.$emit('openModal', { inviteeType: 'members' });
     },
   },
 };
 </script>
 
 <template>
-  <gl-link @click="openModal">
+  <gl-link :class="classes" data-qa-selector="invite_members_button" @click="openModal">
     <div v-if="icon" class="nav-icon-container">
       <gl-icon :size="16" :name="icon" />
     </div>

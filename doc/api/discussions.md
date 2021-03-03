@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, api
 ---
 
-# Discussions API
+# Discussions API **(FREE)**
 
 Discussions are a set of related notes on:
 
@@ -156,7 +156,7 @@ Parameters:
 | `id`            | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `issue_iid`     | integer        | yes      | The IID of an issue |
 | `body`          | string         | yes      | The content of the thread |
-| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/discussions?body=comment"
@@ -182,7 +182,7 @@ Parameters:
 | `discussion_id` | integer        | yes      | The ID of a thread |
 | `note_id`       | integer        | yes      | The ID of a thread note |
 | `body`          | string         | yes      | The content of the note/reply |
-| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/discussions/6a9c1750b37d513a43987b574953fceb50b03ce7/notes?body=comment"
@@ -365,7 +365,7 @@ Parameters:
 | `id`            | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `snippet_id`    | integer        | yes      | The ID of an snippet |
 | `body`          | string         | yes      | The content of a discussion |
-| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippets/11/discussions?body=comment"
@@ -388,7 +388,7 @@ Parameters:
 | `discussion_id` | integer        | yes      | The ID of a thread |
 | `note_id`       | integer        | yes      | The ID of a thread note |
 | `body`          | string         | yes      | The content of the note/reply |
-| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippets/11/discussions/6a9c1750b37d513a43987b574953fceb50b03ce7/notes?body=comment"
@@ -572,7 +572,7 @@ Parameters:
 | `id`            | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
 | `epic_id`       | integer        | yes      | The ID of an epic |
 | `body`          | string         | yes      | The content of the thread |
-| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/epics/11/discussions?body=comment"
@@ -596,7 +596,7 @@ Parameters:
 | `discussion_id` | integer        | yes      | The ID of a thread |
 | `note_id`       | integer        | yes      | The ID of a thread note |
 | `body`          | string         | yes      | The content of the note/reply |
-| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`    | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/epics/11/discussions/6a9c1750b37d513a43987b574953fceb50b03ce7/notes?body=comment"
@@ -687,7 +687,8 @@ GET /projects/:id/merge_requests/:merge_request_iid/discussions
         "noteable_iid": null,
         "resolved": false,
         "resolvable": true,
-        "resolved_by": null
+        "resolved_by": null,
+        "resolved_at": null
       },
       {
         "id": 1129,
@@ -773,6 +774,7 @@ Diff comments also contain position:
         "noteable_id": 3,
         "noteable_type": "Merge request",
         "noteable_iid": null,
+        "commit_id": "4803c71e6b1833ca72b8b26ef2ecd5adc8a38031",
         "position": {
           "base_sha": "b5d6e7b1613fca24d250fa8e5bc7bcc3dd6002ef",
           "start_sha": "7c9c2ead8a320fb7ba0b4e234bd9529a2614e306",
@@ -828,6 +830,8 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 
 ### Create new merge request thread
 
+> The `commit id` entry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47130) in GitLab 13.7.
+
 Creates a new thread to a single project merge request. This is similar to creating
 a note but other comments (replies) can be added to it later.
 
@@ -842,7 +846,8 @@ Parameters:
 | `id`                                     | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `merge_request_iid`                      | integer        | yes      | The IID of a merge request |
 | `body`                                   | string         | yes      | The content of the thread |
-| `created_at`                             | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `commit_id`                              | string         | no       | SHA referencing commit to start this thread on |
+| `created_at`                             | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 | `position`                               | hash           | no       | Position when creating a diff note |
 | `position[base_sha]`                     | string         | yes      | Base commit SHA in the source branch |
 | `position[start_sha]`                    | string         | yes      | SHA referencing commit in target branch |
@@ -907,7 +912,7 @@ Parameters:
 | `discussion_id`     | integer        | yes      | The ID of a thread |
 | `note_id`           | integer        | yes      | The ID of a thread note |
 | `body`              | string         | yes      | The content of the note/reply |
-| `created_at`        | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`        | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/merge_requests/11/discussions/6a9c1750b37d513a43987b574953fceb50b03ce7/notes?body=comment"
@@ -1142,7 +1147,7 @@ Parameters:
 | `id`                      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `commit_id`               | integer        | yes      | The ID of a commit |
 | `body`                    | string         | yes      | The content of the thread |
-| `created_at`              | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`              | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 | `position`                | hash           | no       | Position when creating a diff note |
 | `position[base_sha]`      | string         | yes      | Base commit SHA in the source branch |
 | `position[start_sha]`     | string         | yes      | SHA referencing commit in target branch |
@@ -1178,7 +1183,7 @@ Parameters:
 | `discussion_id`     | integer        | yes      | The ID of a thread |
 | `note_id`           | integer        | yes      | The ID of a thread note |
 | `body`              | string         | yes      | The content of the note/reply |
-| `created_at`        | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights) |
+| `created_at`        | string         | no       | Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires administrator or project/group owner rights) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/commits/11/discussions/6a9c1750b37d513a43987b574953fceb50b03ce7/notes?body=comment

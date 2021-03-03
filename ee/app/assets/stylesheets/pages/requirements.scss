@@ -21,10 +21,42 @@
     }
   }
 
-  .requirement-form-drawer.zen-mode {
-    // We need to override `z-index` provided to GlDrawer
-    // in Zen mode to enable full-screen editing.
-    z-index: auto !important;
+  .requirement-form-drawer {
+    &.zen-mode {
+      // We need to override `z-index` provided to GlDrawer
+      // in Zen mode to enable full-screen editing.
+      z-index: auto !important;
+    }
+
+    // Following overrides are done to
+    // elements within `issuable_body.vue`
+    // and are specific to requirements.
+    .title-container {
+      @include gl-border-b-solid;
+      @include gl-border-b-gray-100;
+      @include gl-border-b-1;
+
+      &,
+      .title {
+        @include gl-mb-3;
+      }
+
+      .title {
+        @include gl-font-size-markdown-h2;
+      }
+    }
+
+    .issuable-details {
+      @include gl-py-0;
+
+      li.md-header-toolbar {
+        @include gl-py-3;
+      }
+
+      .detail-page-description {
+        @include gl-border-none;
+      }
+    }
   }
 }
 
@@ -91,6 +123,7 @@
     border-left: 1px solid $gray-100;
 
     @include media-breakpoint-down(sm) {
+      min-width: unset;
       width: 100%;
     }
 
@@ -108,5 +141,43 @@
 .requirement-status-tooltip {
   .tooltip-inner {
     max-width: 100%;
+  }
+}
+
+#export-requirements {
+  .scrollbox {
+    border: 1px solid $gray-200;
+    border-radius: $border-radius-default;
+    position: relative;
+
+    .scrollbox-header {
+      border-bottom: 1px solid $gray-200;
+    }
+
+    .scrollbox-body {
+      max-height: 200px;
+      overflow: auto;
+    }
+
+    .scrollbox-fade {
+      position: absolute;
+      bottom: 0;
+      height: 20px;
+      width: 100%;
+      background-image: linear-gradient(180deg, transparent 0%, $white 100%);
+      z-index: 1;
+      border-radius: $border-radius-default;
+    }
+  }
+
+  .modal-content {
+    align-self: flex-start;
+    margin-top: $gl-spacing-scale-11;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    .modal-dialog {
+      margin-top: $gl-spacing-scale-11;
+    }
   }
 }

@@ -32,6 +32,7 @@ class MergeRequestDiff < ApplicationRecord
   has_many :merge_request_diff_commits, -> { order(:merge_request_diff_id, :relative_order) }
 
   validates :base_commit_sha, :head_commit_sha, :start_commit_sha, sha: true
+  validates :merge_request_id, uniqueness: { scope: :diff_type }, if: :merge_head?
 
   state_machine :state, initial: :empty do
     event :clean do
@@ -49,6 +50,11 @@ class MergeRequestDiff < ApplicationRecord
     state :overflow_diff_files_limit
     state :overflow_diff_lines_limit
   end
+
+  enum diff_type: {
+    regular: 1,
+    merge_head: 2
+  }
 
   scope :with_files, -> { without_states(:without_files, :empty) }
   scope :viewable, -> { without_state(:empty) }
@@ -72,6 +78,7 @@ class MergeRequestDiff < ApplicationRecord
 
     join_condition = merge_requests[:id].eq(mr_diffs[:merge_request_id])
       .and(mr_diffs[:id].not_eq(merge_requests[:latest_merge_request_diff_id]))
+      .and(mr_diffs[:diff_type].eq(diff_types[:regular]))
 
     arel_join = mr_diffs.join(merge_requests).on(join_condition)
     joins(arel_join.join_sources)
@@ -196,6 +203,10 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def set_as_latest_diff
+    # Don't set merge_head diff as latest so it won't get considered as the
+    # MergeRequest#merge_request_diff.
+    return if merge_head?
+
     MergeRequest
       .where('id = ? AND COALESCE(latest_merge_request_diff_id, 0) < ?', self.merge_request_id, self.id)
       .update_all(latest_merge_request_diff_id: self.id)
@@ -203,8 +214,16 @@ class MergeRequestDiff < ApplicationRecord
 
   def ensure_commit_shas
     self.start_commit_sha ||= merge_request.target_branch_sha
-    self.head_commit_sha  ||= merge_request.source_branch_sha
-    self.base_commit_sha  ||= find_base_sha
+
+    if merge_head? && merge_request.merge_ref_head.present?
+      diff_refs = merge_request.merge_ref_head.diff_refs
+
+      self.head_commit_sha  ||= diff_refs.head_sha
+      self.base_commit_sha  ||= diff_refs.base_sha
+    else
+      self.head_commit_sha  ||= merge_request.source_branch_sha
+      self.base_commit_sha  ||= find_base_sha
+    end
   end
 
   # Override head_commit_sha to keep compatibility with merge request diff
@@ -358,6 +377,7 @@ class MergeRequestDiff < ApplicationRecord
       if comparison
         comparison.diffs_in_batch(batch_page, batch_size, diff_options: diff_options)
       else
+        reorder_diff_files!
         diffs_in_batch_collection(batch_page, batch_size, diff_options: diff_options)
       end
     end
@@ -371,6 +391,7 @@ class MergeRequestDiff < ApplicationRecord
       if comparison
         comparison.diffs(diff_options)
       else
+        reorder_diff_files!
         diffs_collection(diff_options)
       end
     end
@@ -565,7 +586,7 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def build_merge_request_diff_files(diffs)
-    diffs.map.with_index do |diff, index|
+    sort_diffs(diffs).map.with_index do |diff, index|
       diff_hash = diff.to_hash.merge(
         binary: false,
         merge_request_diff_id: self.id,
@@ -678,6 +699,7 @@ class MergeRequestDiff < ApplicationRecord
 
         rows = build_merge_request_diff_files(diff_collection)
         create_merge_request_diff_files(rows)
+        new_attributes[:sorted] = true
         self.class.uncached { merge_request_diff_files.reset }
       end
 
@@ -718,6 +740,35 @@ class MergeRequestDiff < ApplicationRecord
     [repository, merge_request.source_project.repository].uniq.each do |repo|
       repo.keep_around(start_commit_sha, head_commit_sha, base_commit_sha)
     end
+  end
+
+  def reorder_diff_files!
+    return unless sort_diffs?
+    return if sorted? || merge_request_diff_files.empty?
+
+    diff_files = sort_diffs(merge_request_diff_files)
+
+    diff_files.each_with_index do |diff_file, index|
+      diff_file.relative_order = index
+    end
+
+    transaction do
+      # The `merge_request_diff_files` table doesn't have an `id` column so
+      # we cannot use `Gitlab::Database::BulkUpdate`.
+      MergeRequestDiffFile.where(merge_request_diff_id: id).delete_all
+      MergeRequestDiffFile.bulk_insert!(diff_files)
+      update_column(:sorted, true)
+    end
+  end
+
+  def sort_diffs(diffs)
+    return diffs unless sort_diffs?
+
+    Gitlab::Diff::FileCollectionSorter.new(diffs).sort
+  end
+
+  def sort_diffs?
+    Feature.enabled?(:sort_diffs, project, default_enabled: :yaml)
   end
 end
 

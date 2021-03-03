@@ -126,14 +126,14 @@ describe('lineCode', () => {
 
 describe('classNameMapCell', () => {
   it.each`
-    line               | hll      | loggedIn | hovered  | expectation
-    ${undefined}       | ${true}  | ${true}  | ${true}  | ${[]}
-    ${{ type: 'new' }} | ${false} | ${false} | ${false} | ${['new', { hll: false, 'is-over': false }]}
-    ${{ type: 'new' }} | ${true}  | ${true}  | ${false} | ${['new', { hll: true, 'is-over': false }]}
-    ${{ type: 'new' }} | ${true}  | ${false} | ${true}  | ${['new', { hll: true, 'is-over': false }]}
-    ${{ type: 'new' }} | ${true}  | ${true}  | ${true}  | ${['new', { hll: true, 'is-over': true }]}
-  `('should return $expectation', ({ line, hll, loggedIn, hovered, expectation }) => {
-    const classes = utils.classNameMapCell(line, hll, loggedIn, hovered);
+    line               | hll      | isLoggedIn | isHover  | expectation
+    ${undefined}       | ${true}  | ${true}    | ${true}  | ${[]}
+    ${{ type: 'new' }} | ${false} | ${false}   | ${false} | ${['new', { hll: false, 'is-over': false, new_line: true, old_line: false }]}
+    ${{ type: 'new' }} | ${true}  | ${true}    | ${false} | ${['new', { hll: true, 'is-over': false, new_line: true, old_line: false }]}
+    ${{ type: 'new' }} | ${true}  | ${false}   | ${true}  | ${['new', { hll: true, 'is-over': false, new_line: true, old_line: false }]}
+    ${{ type: 'new' }} | ${true}  | ${true}    | ${true}  | ${['new', { hll: true, 'is-over': true, new_line: true, old_line: false }]}
+  `('should return $expectation', ({ line, hll, isLoggedIn, isHover, expectation }) => {
+    const classes = utils.classNameMapCell({ line, hll, isLoggedIn, isHover });
     expect(classes).toEqual(expectation);
   });
 });
@@ -143,8 +143,19 @@ describe('addCommentTooltip', () => {
     'Commenting on symbolic links that replace or are replaced by files is currently not supported.';
   const brokenRealTooltip =
     'Commenting on files that replace or are replaced by symbolic links is currently not supported.';
+  const commentTooltip = 'Add a comment to this line';
+  const dragTooltip = 'Add a comment to this line or drag for multiple lines';
+
   it('should return default tooltip', () => {
     expect(utils.addCommentTooltip()).toBeUndefined();
+  });
+
+  it('should return comment tooltip', () => {
+    expect(utils.addCommentTooltip({})).toEqual(commentTooltip);
+  });
+
+  it('should return drag comment tooltip when dragging is enabled', () => {
+    expect(utils.addCommentTooltip({}, true)).toEqual(dragTooltip);
   });
 
   it('should return broken symlink tooltip', () => {

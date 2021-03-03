@@ -7,9 +7,9 @@ export default {
     seedPatchRequest(issue, req) {
       /* eslint-disable no-param-reassign */
       const board = boardsStore.state.currentBoard;
-      const boardLabelIds = board.labels.map(label => label.id);
+      const boardLabelIds = board.labels.map((label) => label.id);
 
-      req.label_ids = req.label_ids.filter(id => !boardLabelIds.includes(id));
+      req.label_ids = req.label_ids.filter((id) => !boardLabelIds.includes(id));
 
       if (board.milestone_id) {
         req.milestone_id = -1;
@@ -21,8 +21,8 @@ export default {
 
       const boardAssignee = board.assignee ? board.assignee.id : null;
       const assigneeIds = issue.assignees
-        .map(assignee => assignee.id)
-        .filter(id => id !== boardAssignee);
+        .map((assignee) => assignee.id)
+        .filter((id) => id !== boardAssignee);
 
       return {
         ...req,

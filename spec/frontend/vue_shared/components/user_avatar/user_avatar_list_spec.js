@@ -1,21 +1,21 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'spec/test_constants';
-import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
 const TEST_IMAGE_SIZE = 7;
 const TEST_BREAKPOINT = 5;
 const TEST_EMPTY_MESSAGE = 'Lorem ipsum empty';
 const DEFAULT_EMPTY_MESSAGE = 'None';
 
-const createUser = id => ({
+const createUser = (id) => ({
   id,
   name: 'Lorem',
   web_url: `${TEST_HOST}/${id}`,
   avatar_url: `${TEST_HOST}/${id}/avatar`,
 });
-const createList = n =>
+const createList = (n) =>
   Array(n)
     .fill(1)
     .map((x, id) => createUser(id));
@@ -79,10 +79,10 @@ describe('UserAvatarList', () => {
       factory({ propsData: { items } });
 
       const links = wrapper.findAll(UserAvatarLink);
-      const linkProps = links.wrappers.map(x => x.props());
+      const linkProps = links.wrappers.map((x) => x.props());
 
       expect(linkProps).toEqual(
-        items.map(x =>
+        items.map((x) =>
           expect.objectContaining({
             linkHref: x.web_url,
             imgSrc: x.avatar_url,

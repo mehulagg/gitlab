@@ -37,11 +37,14 @@ class BulkImports::Entity < ApplicationRecord
 
   validates :project, absence: true, if: :group
   validates :group, absence: true, if: :project
-  validates :source_type, :source_full_path, :destination_name,
-            :destination_namespace, presence: true
+  validates :source_type, :source_full_path, :destination_name, presence: true
+  validates :destination_namespace, exclusion: [nil], if: :group
+  validates :destination_namespace, presence: true, if: :project
 
   validate :validate_parent_is_a_group, if: :parent
   validate :validate_imported_entity_type
+
+  validate :validate_destination_namespace_ascendency, if: :group_entity?
 
   enum source_type: { group_entity: 0, project_entity: 1 }
 
@@ -62,6 +65,16 @@ class BulkImports::Entity < ApplicationRecord
 
     event :fail_op do
       transition any => :failed
+    end
+
+    after_transition any => [:finished, :failed] do |entity|
+      Gitlab::Redis::Cache.with do |redis|
+        pattern = "bulk_import:#{entity.bulk_import.id}:entity:#{entity.id}:*"
+
+        redis.scan_each(match: pattern).each do |key|
+          redis.del(key)
+        end
+      end
     end
   end
 
@@ -104,6 +117,19 @@ class BulkImports::Entity < ApplicationRecord
       errors.add(
         :project,
         s_('BulkImport|expected an associated Group but has an associated Project')
+      )
+    end
+  end
+
+  def validate_destination_namespace_ascendency
+    source = Group.find_by_full_path(source_full_path)
+
+    return unless source
+
+    if source.self_and_descendants.any? { |namespace| namespace.full_path == destination_namespace }
+      errors.add(
+        :base,
+        s_('BulkImport|Import failed: Destination cannot be a subgroup of the source group. Change the destination and try again.')
       )
     end
   end

@@ -1,13 +1,15 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlTab } from '@gitlab/ui';
-import INVALID_URL from '~/lib/utils/invalid_url';
-import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
-import { descriptionProps } from '../../mock_data';
+import { shallowMount } from '@vue/test-utils';
+import merge from 'lodash/merge';
+import waitForPromises from 'helpers/wait_for_promises';
+import { trackIncidentDetailsViewsOptions } from '~/incidents/constants';
 import DescriptionComponent from '~/issue_show/components/description.vue';
 import HighlightBar from '~/issue_show/components/incidents/highlight_bar.vue';
-import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
+import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
+import INVALID_URL from '~/lib/utils/invalid_url';
 import Tracking from '~/tracking';
-import { trackIncidentDetailsViewsOptions } from '~/incidents/constants';
+import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
+import { descriptionProps } from '../../mock_data';
 
 const mockAlert = {
   __typename: 'AlertManagementAlert',
@@ -18,36 +20,45 @@ const mockAlert = {
 describe('Incident Tabs component', () => {
   let wrapper;
 
-  const mountComponent = (data = {}) => {
-    wrapper = shallowMount(IncidentTabs, {
-      propsData: {
-        ...descriptionProps,
-      },
-      stubs: {
-        DescriptionComponent: true,
-      },
-      provide: {
-        fullPath: '',
-        iid: '',
-      },
-      data() {
-        return { alert: mockAlert, ...data };
-      },
-      mocks: {
-        $apollo: {
-          queries: {
-            alert: {
-              loading: true,
+  const mountComponent = (data = {}, options = {}) => {
+    wrapper = shallowMount(
+      IncidentTabs,
+      merge(
+        {
+          propsData: {
+            ...descriptionProps,
+          },
+          stubs: {
+            DescriptionComponent: true,
+            MetricsTab: true,
+          },
+          provide: {
+            fullPath: '',
+            iid: '',
+            uploadMetricsFeatureAvailable: true,
+          },
+          data() {
+            return { alert: mockAlert, ...data };
+          },
+          mocks: {
+            $apollo: {
+              queries: {
+                alert: {
+                  loading: true,
+                },
+              },
             },
           },
         },
-      },
-    });
+        options,
+      ),
+    );
   };
 
   const findTabs = () => wrapper.findAll(GlTab);
   const findSummaryTab = () => findTabs().at(0);
-  const findAlertDetailsTab = () => findTabs().at(1);
+  const findMetricsTab = () => wrapper.find('[data-testid="metrics-tab"]');
+  const findAlertDetailsTab = () => wrapper.find('[data-testid="alert-details-tab"]');
   const findAlertDetailsComponent = () => wrapper.find(AlertDetailsTable);
   const findDescriptionComponent = () => wrapper.find(DescriptionComponent);
   const findHighlightBarComponent = () => wrapper.find(HighlightBar);
@@ -97,6 +108,24 @@ describe('Incident Tabs component', () => {
 
     it('passes all props to the description component', () => {
       expect(findDescriptionComponent().props()).toMatchObject(descriptionProps);
+    });
+  });
+
+  describe('upload metrics feature available', () => {
+    it('shows the metric tab when metrics are available', async () => {
+      mountComponent({}, { provide: { uploadMetricsFeatureAvailable: true } });
+
+      await waitForPromises();
+
+      expect(findMetricsTab().exists()).toBe(true);
+    });
+
+    it('hides the tab when metrics are not available', async () => {
+      mountComponent({}, { provide: { uploadMetricsFeatureAvailable: false } });
+
+      await waitForPromises();
+
+      expect(findMetricsTab().exists()).toBe(false);
     });
   });
 

@@ -21,11 +21,12 @@ module Gitlab
             # rubocop: disable CodeReuse/ActiveRecord
             def deployments_count
               @deployments_count ||= begin
-                                       deployments = Deployment.joins(:project).merge(Project.inside_path(group.full_path))
-                                       deployments = deployments.where(projects: { id: options[:projects] }) if options[:projects].present?
-                                       deployments = deployments.where("deployments.created_at > ?", options[:from])
-                                       deployments = deployments.where("deployments.created_at < ?", options[:to]) if options[:to]
-                                       deployments.success.count
+                                       deployments = DeploymentsFinder
+                                         .new(group: group, finished_after: options[:from], finished_before: options[:to], status: :success)
+                                         .execute
+
+                                       deployments = deployments.where(project_id: options[:projects]) if options[:projects].present?
+                                       deployments.count
                                      end
             end
             # rubocop: enable CodeReuse/ActiveRecord

@@ -1,5 +1,5 @@
-import Editor from '~/editor/editor_lite';
 import * as utils from '~/blob/utils';
+import Editor from '~/editor/editor_lite';
 
 jest.mock('~/editor/editor_lite');
 
@@ -26,7 +26,7 @@ describe('Blob utilities', () => {
 
       it.each([[{}], [{ blobPath, blobContent, blobGlobalId }]])(
         'creates the instance with the passed parameters %s',
-        extraParams => {
+        (extraParams) => {
           const params = {
             el: editorEl,
             ...extraParams,

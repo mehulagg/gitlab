@@ -8,7 +8,7 @@ RSpec.describe 'epics swimlanes', :js do
   let_it_be(:project) { create(:project, :public, group: group) }
 
   let_it_be(:board) { create(:board, project: project) }
-  let_it_be(:label) { create(:label, project: project, name: 'Label 1') }
+  let_it_be(:label) { create(:label, project: project, name: 'Label1') }
   let_it_be(:list) { create(:list, board: board, label: label, position: 0) }
 
   let_it_be(:issue1) { create(:issue, project: project, labels: [label]) }
@@ -40,6 +40,18 @@ RSpec.describe 'epics swimlanes', :js do
         expect(page.find('span[data-testid="issues-lane-issue-count"]')).to have_content('1')
       end
     end
+
+    it 'displays default lists and a label list' do
+      lists = %w[Open Label1 Closed]
+
+      wait_for_requests
+
+      expect(page).to have_selector('.board-header', count: 3)
+
+      page.all('.board-header').each_with_index do |list, i|
+        expect(list.find('.board-title')).to have_content(lists[i])
+      end
+    end
   end
 
   before do
@@ -61,6 +73,28 @@ RSpec.describe 'epics swimlanes', :js do
       page.within('.board-lane-unassigned-issues-title') do
         expect(page.find('span[data-testid="issues-lane-issue-count"]')).to have_content('1')
       end
+    end
+  end
+
+  context 'issue cards' do
+    let(:issue_card) { first("[data-testid='board-epic-lane-issues'] [data-testid='board_card']") }
+
+    before do
+      wait_for_all_requests
+
+      issue_card.click
+    end
+
+    it 'highlights an issue card on click' do
+      expect(issue_card[:class]).to include('is-active')
+      expect(issue_card[:class]).not_to include('multi-select')
+    end
+
+    it 'unhighlights a selected issue card on click' do
+      issue_card.click
+
+      expect(issue_card[:class]).not_to include('is-active')
+      expect(issue_card[:class]).not_to include('multi-select')
     end
   end
 

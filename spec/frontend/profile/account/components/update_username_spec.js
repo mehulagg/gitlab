@@ -1,10 +1,13 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'helpers/test_constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 import UpdateUsername from '~/profile/account/components/update_username.vue';
+
+jest.mock('~/flash');
 
 describe('UpdateUsername component', () => {
   const rootUrl = TEST_HOST;
@@ -84,7 +87,7 @@ describe('UpdateUsername component', () => {
     it('confirmation modal contains proper header and body', async () => {
       const { modal } = findElements();
 
-      expect(modal.attributes('title')).toBe('Change username?');
+      expect(modal.props('title')).toBe('Change username?');
       expect(modal.text()).toContain(
         `You are going to change the username ${defaultProps.initialUsername} to ${newUsername}`,
       );
@@ -105,7 +108,8 @@ describe('UpdateUsername component', () => {
 
       axiosMock.onPut(actionUrl).replyOnce(() => {
         expect(input.attributes('disabled')).toBe('disabled');
-        expect(openModalBtn.props('disabled')).toBe(true);
+        expect(openModalBtn.props('disabled')).toBe(false);
+        expect(openModalBtn.props('loading')).toBe(true);
 
         return [200, { message: 'Username changed' }];
       });
@@ -115,6 +119,7 @@ describe('UpdateUsername component', () => {
 
       expect(input.attributes('disabled')).toBe(undefined);
       expect(openModalBtn.props('disabled')).toBe(true);
+      expect(openModalBtn.props('loading')).toBe(false);
     });
 
     it('does not set the username after a erroneous update', async () => {
@@ -122,7 +127,8 @@ describe('UpdateUsername component', () => {
 
       axiosMock.onPut(actionUrl).replyOnce(() => {
         expect(input.attributes('disabled')).toBe('disabled');
-        expect(openModalBtn.props('disabled')).toBe(true);
+        expect(openModalBtn.props('disabled')).toBe(false);
+        expect(openModalBtn.props('loading')).toBe(true);
 
         return [400, { message: 'Invalid username' }];
       });
@@ -130,6 +136,29 @@ describe('UpdateUsername component', () => {
       await expect(wrapper.vm.onConfirm()).rejects.toThrow();
       expect(input.attributes('disabled')).toBe(undefined);
       expect(openModalBtn.props('disabled')).toBe(false);
+      expect(openModalBtn.props('loading')).toBe(false);
+    });
+
+    it('shows an error message if the error response has a `message` property', async () => {
+      axiosMock.onPut(actionUrl).replyOnce(() => {
+        return [400, { message: 'Invalid username' }];
+      });
+
+      await expect(wrapper.vm.onConfirm()).rejects.toThrow();
+
+      expect(createFlash).toBeCalledWith('Invalid username');
+    });
+
+    it("shows a fallback error message if the error response doesn't have a `message` property", async () => {
+      axiosMock.onPut(actionUrl).replyOnce(() => {
+        return [400];
+      });
+
+      await expect(wrapper.vm.onConfirm()).rejects.toThrow();
+
+      expect(createFlash).toBeCalledWith(
+        'An error occurred while updating your username, please try again.',
+      );
     });
   });
 });

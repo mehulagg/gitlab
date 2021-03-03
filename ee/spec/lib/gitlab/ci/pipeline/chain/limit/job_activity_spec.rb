@@ -21,9 +21,9 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::JobActivity do
 
   context 'when active jobs limit is exceeded' do
     before do
-      gold_plan = create(:gold_plan)
-      create(:plan_limits, plan: gold_plan, ci_active_jobs: 2)
-      create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+      ultimate_plan = create(:ultimate_plan)
+      create(:plan_limits, plan: ultimate_plan, ci_active_jobs: 2)
+      create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
 
       pipeline = create(:ci_pipeline, project: project, status: 'running', created_at: Time.now)
       create(:ci_build, pipeline: pipeline)
@@ -67,9 +67,9 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::JobActivity do
 
   context 'when job activity limit is not exceeded' do
     before do
-      gold_plan = create(:gold_plan)
-      create(:plan_limits, plan: gold_plan, ci_active_jobs: 100)
-      create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+      ultimate_plan = create(:ultimate_plan)
+      create(:plan_limits, plan: ultimate_plan, ci_active_jobs: 100)
+      create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
     end
 
     it 'does not break the chain' do

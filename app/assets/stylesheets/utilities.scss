@@ -110,7 +110,7 @@
 
 // This utility is used to force the z-index to match that of dropdown menu's
 .gl-z-dropdown-menu\! {
-  z-index: 300 !important;
+  z-index: $zindex-dropdown-menu !important;
 }
 
 .gl-flex-basis-quarter {
@@ -144,15 +144,30 @@
   }
 }
 
-// These will be moved to @gitlab/ui in https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1091
-.gl-w-10p {
-  width: 10%;
+// Will be moved to @gitlab/ui in https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1165
+.gl-xs-mb-4 {
+  @media (max-width: $breakpoint-sm) {
+    margin-bottom: $gl-spacing-scale-4;
+  }
 }
 
-.gl-w-20p {
-  width: 20%;
+// Same as above
+.gl-xs-mb-4\! {
+  @media (max-width: $breakpoint-sm) {
+    margin-bottom: $gl-spacing-scale-4 !important;
+  }
 }
 
-.gl-w-40p {
-  width: 40%;
+// Will be moved to @gitlab/ui in https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1168
+.gl-sm-pr-3 {
+  @media (min-width: $breakpoint-sm) {
+    padding-right: $gl-spacing-scale-3;
+  }
+}
+
+// Will be moved to @gitlab/ui in https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1168
+.gl-sm-w-half {
+  @media (min-width: $breakpoint-sm) {
+    width: 50%;
+  }
 }

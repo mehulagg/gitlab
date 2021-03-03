@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlSkeletonLoader } from '@gitlab/ui';
+import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { MOCK_GROUPS, MOCK_GROUP, MOCK_QUERY } from 'jest/search/mock_data';
 import SearchableDropdown from '~/search/topbar/components/searchable_dropdown.vue';
 import { ANY_OPTION, GROUP_DATA } from '~/search/topbar/constants';
@@ -47,7 +47,7 @@ describe('Global Search Searchable Dropdown', () => {
   const findGlDropdownSearch = () => findGlDropdown().find(GlSearchBoxByType);
   const findDropdownText = () => findGlDropdown().find('.dropdown-toggle-text');
   const findDropdownItems = () => findGlDropdown().findAll(GlDropdownItem);
-  const findDropdownItemsText = () => findDropdownItems().wrappers.map(w => w.text());
+  const findDropdownItemsText = () => findDropdownItems().wrappers.map((w) => w.text());
   const findAnyDropdownItem = () => findDropdownItems().at(0);
   const findFirstGroupDropdownItem = () => findDropdownItems().at(1);
   const findLoader = () => wrapper.find(GlSkeletonLoader);
@@ -94,7 +94,7 @@ describe('Global Search Searchable Dropdown', () => {
         });
 
         it('renders an instance for each namespace', () => {
-          const resultsIncludeAny = ['Any'].concat(MOCK_GROUPS.map(n => n.full_name));
+          const resultsIncludeAny = ['Any'].concat(MOCK_GROUPS.map((n) => n.full_name));
           expect(findDropdownItemsText()).toStrictEqual(resultsIncludeAny);
         });
       });

@@ -63,7 +63,7 @@ export default {
         class="author-link suggestion-help-hover"
       />
       <gl-popover :target="() => $refs.helpIcon.$el" placement="top" triggers="hover focus">
-        <template #title>{{ __('Who can be an approver?') }}</template>
+        <template #title>{{ __('Who can approve?') }}</template>
         <p>{{ description }}</p>
         <gl-link v-if="linkPath" :href="linkPath" class="gl-font-sm" target="_blank">{{
           __('More information')

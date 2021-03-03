@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'CI Lint', :js do
+RSpec.describe 'CI Lint', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297782' do
   include Spec::Support::Helpers::Features::EditorLiteSpecHelpers
 
   let(:project) { create(:project, :repository) }
@@ -34,7 +34,7 @@ RSpec.describe 'CI Lint', :js do
         end
 
         it 'parses Yaml and displays the jobs' do
-          expect(page).to have_content('Status: syntax is correct')
+          expect(page).to have_content('Status: Syntax is correct')
 
           within "table" do
             aggregate_failures do
@@ -51,7 +51,7 @@ RSpec.describe 'CI Lint', :js do
         let(:yaml_content) { 'value: cannot have :' }
 
         it 'displays information about an error' do
-          expect(page).to have_content('Status: syntax is incorrect')
+          expect(page).to have_content('Status: Syntax is incorrect')
           expect(page).to have_selector(content_selector, text: yaml_content)
         end
       end

@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlFormGroup,
   GlFormSelect,
@@ -12,24 +11,28 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
-import { s__, __, sprintf } from '~/locale';
+import { mapState, mapActions } from 'vuex';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { s__, __, sprintf } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import EnvironmentPicker from '../environment_picker.vue';
 import NetworkPolicyEditor from '../network_policy_editor.vue';
-import PolicyRuleBuilder from './policy_rule_builder.vue';
-import PolicyPreview from './policy_preview.vue';
-import PolicyActionPicker from './policy_action_picker.vue';
-import DimDisableContainer from './dim_disable_container.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
   EndpointMatchModeAny,
   RuleTypeEndpoint,
+  ProjectIdLabel,
 } from './constants';
-import toYaml from './lib/to_yaml';
+import DimDisableContainer from './dim_disable_container.vue';
 import fromYaml from './lib/from_yaml';
-import { buildRule } from './lib/rules';
 import humanizeNetworkPolicy from './lib/humanize';
+import { buildRule } from './lib/rules';
+import toYaml from './lib/to_yaml';
+import PolicyActionPicker from './policy_action_picker.vue';
+import PolicyAlertPicker from './policy_alert_picker.vue';
+import PolicyPreview from './policy_preview.vue';
+import PolicyRuleBuilder from './policy_rule_builder.vue';
 
 export default {
   components: {
@@ -47,9 +50,11 @@ export default {
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
+    PolicyAlertPicker,
     DimDisableContainer,
   },
   directives: { GlModal: GlModalDirective },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     threatMonitoringPath: {
       type: String,
@@ -59,6 +64,10 @@ export default {
       type: Object,
       required: false,
       default: null,
+    },
+    projectId: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -71,8 +80,10 @@ export default {
           endpointMatchMode: EndpointMatchModeAny,
           endpointLabels: '',
           rules: [],
+          annotations: '',
+          labels: '',
         };
-
+    policy.labels = { [ProjectIdLabel]: this.projectId };
     return {
       editorMode: EditorModeRule,
       yamlEditorValue: '',
@@ -83,6 +94,9 @@ export default {
   computed: {
     humanizedPolicy() {
       return humanizeNetworkPolicy(this.policy);
+    },
+    policyAlert() {
+      return Boolean(this.policy.annotations);
     },
     policyYaml() {
       return toYaml(this.policy);
@@ -111,6 +125,9 @@ export default {
         ? s__('NetworkPolicies|Save changes')
         : s__('NetworkPolicies|Create policy');
     },
+    showAlertsPicker() {
+      return this.glFeatures.threatMonitoringAlerts;
+    },
     deleteModalTitle() {
       return sprintf(s__('NetworkPolicies|Delete policy: %{policy}'), { policy: this.policy.name });
     },
@@ -123,6 +140,9 @@ export default {
     ...mapActions('networkPolicies', ['createPolicy', 'updatePolicy', 'deletePolicy']),
     addRule() {
       this.policy.rules.push(buildRule(RuleTypeEndpoint));
+    },
+    handleAlertUpdate(includeAlert) {
+      this.policy.annotations = includeAlert ? { 'app.gitlab.com/alert': 'true' } : '';
     },
     updateEndpointMatchMode(mode) {
       this.policy.endpointMatchMode = mode;
@@ -156,7 +176,9 @@ export default {
     },
     savePolicy() {
       const saveFn = this.isEditing ? this.updatePolicy : this.createPolicy;
-      const policy = { manifest: toYaml(this.policy) };
+      const policy = {
+        manifest: this.editorMode === EditorModeYAML ? this.yamlEditorValue : toYaml(this.policy),
+      };
       if (this.isEditing) {
         policy.name = this.existingPolicy.name;
       }
@@ -308,6 +330,11 @@ export default {
           </template>
 
           <policy-action-picker />
+          <policy-alert-picker
+            v-if="showAlertsPicker"
+            :policy-alert="policyAlert"
+            @update-alert="handleAlertUpdate"
+          />
         </dim-disable-container>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-5 col-xl-4">

@@ -81,10 +81,12 @@ becomes available automatically.
 To deploy your site, GitLab uses its built-in tool called [GitLab CI/CD](../../../ci/README.md)
 to build your site and publish it to the GitLab Pages server. The sequence of
 scripts that GitLab CI/CD runs to accomplish this task is created from a file named
-`.gitlab-ci.yml`, which you can [create and modify](getting_started/pages_from_scratch.md) at will. A specific `job` called `pages` in the configuration file will make GitLab aware that you are deploying a GitLab Pages website.
+`.gitlab-ci.yml`, which you can [create and modify](getting_started/pages_from_scratch.md).
+A specific `job` called `pages` in the configuration file makes GitLab aware that you're deploying a
+GitLab Pages website.
 
-You can either use GitLab's [default domain for GitLab Pages websites](getting_started_part_one.md#gitlab-pages-default-domain-names),
-`*.gitlab.io`, or your own domain (`example.com`). In that case, you'll
+You can either use the GitLab [default domain for GitLab Pages websites](getting_started_part_one.md#gitlab-pages-default-domain-names),
+`*.gitlab.io`, or your own domain (`example.com`). In that case, you
 need administrator access to your domain's registrar (or control panel) to set it up with Pages.
 
 The following diagrams show the workflows you might follow to get started with Pages.
@@ -94,15 +96,15 @@ The following diagrams show the workflows you might follow to get started with P
 ## Access to your Pages site
 
 If you're using GitLab Pages default domain (`.gitlab.io`),
-your website will be automatically secure and available under
+your website is automatically secure and available under
 HTTPS. If you're using your own custom domain, you can
 optionally secure it with SSL/TLS certificates.
 
-If you're using GitLab.com, your website will be publicly available to the internet.
+If you're using GitLab.com, your website is publicly available to the internet.
 To restrict access to your website, enable [GitLab Pages Access Control](pages_access_control.md).
 
-If you're using a self-managed instance (Core, Starter, Premium, or Ultimate),
-your websites will be published on your own server, according to the
+If you're using a self-managed instance (Free, Premium, or Ultimate),
+your websites are published on your own server, according to the
 [Pages settings](../../../administration/pages/index.md) chosen by your sysadmin,
 who can make them public or internal.
 
@@ -114,7 +116,7 @@ to use and adapt to your own needs:
 
 - [Posting to your GitLab Pages blog from iOS](https://about.gitlab.com/blog/2016/08/19/posting-to-your-gitlab-pages-blog-from-ios/).
 - [GitLab CI: Run jobs sequentially, in parallel, or build a custom pipeline](https://about.gitlab.com/blog/2016/07/29/the-basics-of-gitlab-ci/).
-- [GitLab CI: Deployment & environments](https://about.gitlab.com/blog/2016/08/26/ci-deployment-and-environments/).
+- [GitLab CI: Deployment & environments](https://about.gitlab.com/blog/2021/02/05/ci-deployment-and-environments/).
 - [Building a new GitLab docs site with Nanoc, GitLab CI, and GitLab Pages](https://about.gitlab.com/blog/2016/12/07/building-a-new-gitlab-docs-site-with-nanoc-gitlab-ci-and-gitlab-pages/).
 - [Publish code coverage reports with GitLab Pages](https://about.gitlab.com/blog/2016/11/03/publish-code-coverage-report-with-gitlab-pages/).
 

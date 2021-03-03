@@ -12,7 +12,7 @@ exports[`Vulnerability Report error states has unavailable pages 1`] = `
         class="svg-250 svg-content"
       >
         <img
-          alt="Oops, something doesn't seem right."
+          alt=""
           class="gl-max-w-full"
           src="/test/empty_state.svg"
         />

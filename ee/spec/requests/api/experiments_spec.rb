@@ -20,6 +20,8 @@ RSpec.describe API::Experiments do
       end
 
       before do
+        skip_feature_flags_yaml_validation
+        skip_default_enabled_yaml_check
         stub_const('Gitlab::Experimentation::EXPERIMENTS', experiments)
         Feature.enable_percentage_of_time('experiment_1_experiment_percentage', 10)
         Feature.disable('experiment_2_experiment_percentage')

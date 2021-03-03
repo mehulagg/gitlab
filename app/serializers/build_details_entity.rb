@@ -9,7 +9,7 @@ class BuildDetailsEntity < JobEntity
   expose :user, using: UserEntity
   expose :runner, using: RunnerEntity
   expose :metadata, using: BuildMetadataEntity
-  expose :pipeline, using: PipelineEntity
+  expose :pipeline, using: Ci::PipelineEntity
 
   expose :deployment_status, if: -> (*) { build.starts_environment? } do
     expose :deployment_status, as: :status
@@ -26,7 +26,7 @@ class BuildDetailsEntity < JobEntity
     DeploymentClusterEntity.represent(build.deployment, options)
   end
 
-  expose :artifact, if: -> (*) { can?(current_user, :read_build, build) } do
+  expose :artifact, if: -> (*) { can?(current_user, :read_job_artifacts, build) } do
     expose :download_path, if: -> (*) { build.locked_artifacts? || build.artifacts? } do |build|
       download_project_job_artifacts_path(project, build)
     end

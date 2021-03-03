@@ -27,10 +27,7 @@ describe('StageTableNav', () => {
   });
 
   function selectStage(index) {
-    wrapper
-      .findAll(StageNavItem)
-      .at(index)
-      .trigger('click');
+    wrapper.findAll(StageNavItem).at(index).trigger('click');
   }
 
   describe('when a stage is clicked', () => {

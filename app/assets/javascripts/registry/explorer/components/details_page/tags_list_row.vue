@@ -1,13 +1,12 @@
 <script>
 import { GlFormCheckbox, GlTooltipDirective, GlSprintf, GlIcon } from '@gitlab/ui';
+import { formatDate } from '~/lib/utils/datetime_utility';
+import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { n__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import { formatDate } from '~/lib/utils/datetime_utility';
-import ListItem from '~/vue_shared/components/registry/list_item.vue';
-import DeleteButton from '../delete_button.vue';
 import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
+import ListItem from '~/vue_shared/components/registry/list_item.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import {
   REMOVE_TAG_BUTTON_TITLE,
   DIGEST_LABEL,
@@ -20,6 +19,7 @@ import {
   NOT_AVAILABLE_TEXT,
   NOT_AVAILABLE_SIZE,
 } from '../../constants/index';
+import DeleteButton from '../delete_button.vue';
 
 export default {
   components: {
@@ -63,7 +63,9 @@ export default {
   },
   computed: {
     formattedSize() {
-      return this.tag.totalSize ? numberToHumanSize(this.tag.totalSize) : NOT_AVAILABLE_SIZE;
+      return this.tag.totalSize
+        ? numberToHumanSize(Number(this.tag.totalSize))
+        : NOT_AVAILABLE_SIZE;
     },
     layers() {
       return this.tag.layers ? n__('%d layer', '%d layers', this.tag.layers) : '';
@@ -138,9 +140,7 @@ export default {
     <template #left-secondary>
       <span data-testid="size">
         {{ formattedSize }}
-        <template v-if="formattedSize && layers"
-          >&middot;</template
-        >
+        <template v-if="formattedSize && layers">&middot;</template>
         {{ layers }}
       </span>
     </template>
@@ -166,6 +166,7 @@ export default {
         :title="$options.i18n.REMOVE_TAG_BUTTON_TITLE"
         :tooltip-title="$options.i18n.REMOVE_TAG_BUTTON_DISABLE_TOOLTIP"
         :tooltip-disabled="tag.canDelete"
+        data-qa-selector="tag_delete_button"
         data-testid="single-delete-button"
         @delete="$emit('delete')"
       />

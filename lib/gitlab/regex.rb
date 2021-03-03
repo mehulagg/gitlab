@@ -27,7 +27,18 @@ module Gitlab
       end
 
       def package_name_regex
-        @package_name_regex ||= %r{\A\@?(([\w\-\.\+]*)\/)*([\w\-\.]+)@?(([\w\-\.\+]*)\/)*([\w\-\.]*)\z}.freeze
+        @package_name_regex ||=
+          %r{
+              \A\@?
+              (?> # atomic group to prevent backtracking
+                (([\w\-\.\+]*)\/)*([\w\-\.]+)
+              )
+              @?
+              (?> # atomic group to prevent backtracking
+                (([\w\-\.\+]*)\/)*([\w\-\.]*)
+              )
+              \z
+            }x.freeze
       end
 
       def maven_file_name_regex
@@ -48,6 +59,10 @@ module Gitlab
 
       def maven_app_group_regex
         maven_app_name_regex
+      end
+
+      def npm_package_name_regex
+        @npm_package_name_regex ||= %r{\A(?:@(#{Gitlab::PathRegex::NAMESPACE_FORMAT_REGEX})/)?[-+\.\_a-zA-Z0-9]+\z}
       end
 
       def nuget_package_name_regex

@@ -1,21 +1,25 @@
 import $ from 'jquery';
 import '~/lib/utils/jquery_at_who';
 import { escape, template } from 'lodash';
-import { s__ } from '~/locale';
-import SidebarMediator from '~/sidebar/sidebar_mediator';
-import { isUserBusy } from '~/set_status_modal/utils';
-import glRegexp from './lib/utils/regexp';
-import AjaxCache from './lib/utils/ajax_cache';
-import axios from '~/lib/utils/axios_utils';
-import { spriteIcon } from './lib/utils/common_utils';
 import * as Emoji from '~/emoji';
+import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
+import SidebarMediator from '~/sidebar/sidebar_mediator';
+import AjaxCache from './lib/utils/ajax_cache';
+import { spriteIcon } from './lib/utils/common_utils';
+import glRegexp from './lib/utils/regexp';
 
 function sanitize(str) {
   return str.replace(/<(?:.|\n)*?>/gm, '');
 }
 
+function createMemberSearchString(member) {
+  return `${member.name.replace(/ /g, '')} ${member.username}`;
+}
+
 export function membersBeforeSave(members) {
-  return members.map(member => {
+  return members.map((member) => {
     const GROUP_TYPE = 'Group';
 
     let title = '';
@@ -40,7 +44,7 @@ export function membersBeforeSave(members) {
       username: member.username,
       avatarTag: autoCompleteAvatar.length === 1 ? txtAvatar : imgAvatar,
       title: sanitize(title),
-      search: sanitize(`${member.username} ${member.name}`),
+      search: sanitize(createMemberSearchString(member)),
       icon: avatarIcon,
       availability: member?.availability,
     };
@@ -103,6 +107,7 @@ class GfmAutoComplete {
       at: '/',
       alias: 'commands',
       searchKey: 'search',
+      limit: 100,
       skipSpecialCharacterTest: true,
       skipMarkdownCharacterTest: true,
       data: GfmAutoComplete.defaultLoadingData,
@@ -156,7 +161,7 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave(commands) {
           if (GfmAutoComplete.isLoading(commands)) return commands;
-          return $.map(commands, c => {
+          return $.map(commands, (c) => {
             let search = c.name;
             if (c.aliases.length > 0) {
               search = `${search} ${c.aliases.join(' ')}`;
@@ -185,59 +190,43 @@ class GfmAutoComplete {
   }
 
   setupEmoji($input) {
-    const self = this;
-    const { filter, ...defaults } = this.getDefaultCallbacks();
+    const fetchData = this.fetchData.bind(this);
 
     // Emoji
     $input.atwho({
       at: ':',
-      displayTpl(value) {
-        let tmpl = GfmAutoComplete.Loading.template;
-        if (value && value.name) {
-          tmpl = GfmAutoComplete.Emoji.templateFunction(value.name);
-        }
-        return tmpl;
-      },
+      displayTpl: GfmAutoComplete.Emoji.templateFunction,
       insertTpl: GfmAutoComplete.Emoji.insertTemplateFunction,
       skipSpecialCharacterTest: true,
       data: GfmAutoComplete.defaultLoadingData,
       callbacks: {
-        ...defaults,
+        ...this.getDefaultCallbacks(),
         matcher(flag, subtext) {
           const regexp = new RegExp(`(?:[^${glRegexp.unicodeLetters}0-9:]|\n|^):([^:]*)$`, 'gi');
           const match = regexp.exec(subtext);
 
           return match && match.length ? match[1] : null;
         },
-        filter(query, items, searchKey) {
-          const filtered = filter.call(this, query, items, searchKey);
-          if (query.length === 0 || GfmAutoComplete.isLoading(items)) {
-            return filtered;
+        filter(query, items) {
+          if (GfmAutoComplete.isLoading(items)) {
+            fetchData(this.$inputor, this.at);
+            return items;
           }
 
-          // map from value to "<value> is <field> of <emoji>", arranged by emoji
-          const emojis = {};
-          filtered.forEach(({ name: value }) => {
-            self.emojiLookup[value].forEach(({ emoji: { name }, kind }) => {
-              let entry = emojis[name];
-              if (!entry) {
-                entry = {};
-                emojis[name] = entry;
-              }
-              if (!(kind in entry) || value.localeCompare(entry[kind]) < 0) {
-                entry[kind] = value;
-              }
-            });
-          });
+          return GfmAutoComplete.Emoji.filter(query);
+        },
+        sorter(query, items) {
+          this.setting.highlightFirst = this.setting.alwaysHighlightFirst || query.length > 0;
+          if (GfmAutoComplete.isLoading(items)) {
+            this.setting.highlightFirst = false;
+            return items;
+          }
 
-          // collate results to list, prefering name > unicode > alias > description
-          const results = [];
-          Object.values(emojis).forEach(({ name, unicode, alias, description }) => {
-            results.push(name || unicode || alias || description);
-          });
+          if (query.length === 0) {
+            return items;
+          }
 
-          // return to the form atwho wants
-          return results.map(name => ({ name }));
+          return GfmAutoComplete.Emoji.sorter(items);
         },
       },
     });
@@ -277,6 +266,7 @@ class GfmAutoComplete {
       },
       // eslint-disable-next-line no-template-curly-in-string
       insertTpl: '${atwho-at}${username}',
+      limit: 10,
       searchKey: 'search',
       alwaysHighlightFirst: true,
       skipSpecialCharacterTest: true,
@@ -285,13 +275,10 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave: membersBeforeSave,
         matcher(flag, subtext) {
-          const subtextNodes = subtext
-            .split(/\n+/g)
-            .pop()
-            .split(GfmAutoComplete.regexSubtext);
+          const subtextNodes = subtext.split(/\n+/g).pop().split(GfmAutoComplete.regexSubtext);
 
           // Check if @ is followed by '/assign', '/reassign', '/unassign' or '/cc' commands.
-          command = subtextNodes.find(node => {
+          command = subtextNodes.find((node) => {
             if (Object.values(MEMBER_COMMAND).includes(node)) {
               return node;
             }
@@ -300,9 +287,7 @@ class GfmAutoComplete {
 
           // Cache assignees list for easier filtering later
           assignees =
-            SidebarMediator.singleton?.store?.assignees?.map(
-              assignee => `${assignee.username} ${assignee.name}`,
-            ) || [];
+            SidebarMediator.singleton?.store?.assignees?.map(createMemberSearchString) || [];
 
           const match = GfmAutoComplete.defaultMatcher(flag, subtext, this.app.controllers);
           return match && match.length ? match[1] : null;
@@ -319,13 +304,45 @@ class GfmAutoComplete {
 
           if (command === MEMBER_COMMAND.ASSIGN) {
             // Only include members which are not assigned to Issuable currently
-            return data.filter(member => !assignees.includes(member.search));
+            return data.filter((member) => !assignees.includes(member.search));
           } else if (command === MEMBER_COMMAND.UNASSIGN) {
             // Only include members which are assigned to Issuable currently
-            return data.filter(member => assignees.includes(member.search));
+            return data.filter((member) => assignees.includes(member.search));
           }
 
           return data;
+        },
+        sorter(query, items) {
+          // Disable auto-selecting the loading icon
+          this.setting.highlightFirst = this.setting.alwaysHighlightFirst;
+          if (GfmAutoComplete.isLoading(items)) {
+            this.setting.highlightFirst = false;
+            return items;
+          }
+
+          if (!query) {
+            return items;
+          }
+
+          const lowercaseQuery = query.toLowerCase();
+          const members = items.slice();
+          const { nameOrUsernameStartsWith, nameOrUsernameIncludes } = GfmAutoComplete.Members;
+
+          return members.sort((a, b) => {
+            if (nameOrUsernameStartsWith(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
+              return 1;
+            }
+            if (nameOrUsernameIncludes(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (nameOrUsernameIncludes(b, lowercaseQuery)) {
+              return 1;
+            }
+            return 0;
+          });
         },
       },
     });
@@ -349,7 +366,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(issues) {
-          return $.map(issues, i => {
+          return $.map(issues, (i) => {
             if (i.title == null) {
               return i;
             }
@@ -383,7 +400,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(milestones) {
-          return $.map(milestones, m => {
+          return $.map(milestones, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -416,7 +433,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(merges) {
-          return $.map(merges, m => {
+          return $.map(merges, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -457,7 +474,7 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave(merges) {
           if (GfmAutoComplete.isLoading(merges)) return merges;
-          return $.map(merges, m => ({
+          return $.map(merges, (m) => ({
             title: sanitize(m.title),
             color: m.color,
             search: m.title,
@@ -465,13 +482,10 @@ class GfmAutoComplete {
           }));
         },
         matcher(flag, subtext) {
-          const subtextNodes = subtext
-            .split(/\n+/g)
-            .pop()
-            .split(GfmAutoComplete.regexSubtext);
+          const subtextNodes = subtext.split(/\n+/g).pop().split(GfmAutoComplete.regexSubtext);
 
           // Check if ~ is followed by '/label', '/relabel' or '/unlabel' commands.
-          command = subtextNodes.find(node => {
+          command = subtextNodes.find((node) => {
             if (
               node === LABEL_COMMAND.LABEL ||
               node === LABEL_COMMAND.RELABEL ||
@@ -492,7 +506,7 @@ class GfmAutoComplete {
               return null;
             }
             const lastCandidate = subtext.split(flag).pop();
-            if (labels.find(label => label.title.startsWith(lastCandidate))) {
+            if (labels.find((label) => label.title.startsWith(lastCandidate))) {
               return lastCandidate;
             }
           } else {
@@ -519,10 +533,10 @@ class GfmAutoComplete {
           // because we want to return all the labels (unfiltered) for that command.
           if (command === LABEL_COMMAND.LABEL) {
             // Return labels with set: undefined.
-            return data.filter(label => !label.set);
+            return data.filter((label) => !label.set);
           } else if (command === LABEL_COMMAND.UNLABEL) {
             // Return labels with set: true.
-            return data.filter(label => label.set);
+            return data.filter((label) => label.set);
           }
 
           return data;
@@ -549,7 +563,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(snippets) {
-          return $.map(snippets, m => {
+          return $.map(snippets, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -654,7 +668,7 @@ class GfmAutoComplete {
       this.loadEmojiData($input, at).catch(() => {});
     } else if (dataSource) {
       AjaxCache.retrieve(dataSource, true)
-        .then(data => {
+        .then((data) => {
           this.loadData($input, at, data);
         })
         .catch(() => {
@@ -677,32 +691,7 @@ class GfmAutoComplete {
   async loadEmojiData($input, at) {
     await Emoji.initEmojiMap();
 
-    // All the emoji
-    const emojis = Emoji.getAllEmoji();
-
-    // Add all of the fields to atwho's database
-    this.loadData($input, at, [
-      ...Object.keys(emojis), // Names
-      ...Object.values(emojis).flatMap(({ aliases }) => aliases), // Aliases
-      ...Object.values(emojis).map(({ e }) => e), // Unicode values
-      ...Object.values(emojis).map(({ d }) => d), // Descriptions
-    ]);
-
-    // Construct a lookup that can correlate a value to "<value> is the <field> of <emoji>"
-    const lookup = {};
-    const add = (key, kind, emoji) => {
-      if (!(key in lookup)) {
-        lookup[key] = [];
-      }
-      lookup[key].push({ kind, emoji });
-    };
-    Object.values(emojis).forEach(emoji => {
-      add(emoji.name, 'name', emoji);
-      add(emoji.d, 'description', emoji);
-      add(emoji.e, 'unicode', emoji);
-      emoji.aliases.forEach(a => add(a, 'alias', emoji));
-    });
-    this.emojiLookup = lookup;
+    this.loadData($input, at, ['loaded']);
 
     GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
   }
@@ -772,39 +761,41 @@ GfmAutoComplete.atTypeMap = {
 };
 
 GfmAutoComplete.typesWithBackendFiltering = ['vulnerabilities'];
-GfmAutoComplete.isTypeWithBackendFiltering = type =>
+GfmAutoComplete.isTypeWithBackendFiltering = (type) =>
   GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[type]);
-
-function findEmoji(name) {
-  return Emoji.searchEmoji(name, { match: 'contains', raw: true }).sort((a, b) => {
-    if (a.index !== b.index) {
-      return a.index - b.index;
-    }
-    return a.field.localeCompare(b.field);
-  });
-}
 
 // Emoji
 GfmAutoComplete.glEmojiTag = null;
 GfmAutoComplete.Emoji = {
   insertTemplateFunction(value) {
-    const results = findEmoji(value.name);
-    if (results.length) {
-      return `:${results[0].emoji.name}:`;
-    }
-    return `:${value.name}:`;
+    return `:${value.emoji.name}:`;
   },
-  templateFunction(name) {
-    // glEmojiTag helper is loaded on-demand in fetchData()
-    if (!GfmAutoComplete.glEmojiTag) return `<li>${name}</li>`;
-
-    const results = findEmoji(name);
-    if (!results.length) {
-      return `<li>${name} ${GfmAutoComplete.glEmojiTag(name)}</li>`;
+  templateFunction(item) {
+    if (GfmAutoComplete.isLoading(item)) {
+      return GfmAutoComplete.Loading.template;
     }
 
-    const { field, emoji } = results[0];
-    return `<li>${field} ${GfmAutoComplete.glEmojiTag(emoji.name)}</li>`;
+    const escapedFieldValue = escape(item.fieldValue);
+    if (!GfmAutoComplete.glEmojiTag) {
+      return `<li>${escapedFieldValue}</li>`;
+    }
+
+    return `<li>${escapedFieldValue} ${GfmAutoComplete.glEmojiTag(item.emoji.name)}</li>`;
+  },
+  filter(query) {
+    if (query.length === 0) {
+      return Object.values(Emoji.getAllEmoji())
+        .map((emoji) => ({
+          emoji,
+          fieldValue: emoji.name,
+        }))
+        .slice(0, 20);
+    }
+
+    return Emoji.searchEmoji(query);
+  },
+  sorter(items) {
+    return Emoji.sortEmoji(items);
   },
 };
 // Team Members
@@ -813,6 +804,14 @@ GfmAutoComplete.Members = {
     return `<li>${avatarTag} ${username} <small>${escape(
       title,
     )}${availabilityStatus}</small> ${icon}</li>`;
+  },
+  nameOrUsernameStartsWith(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.split(' ').some((name) => name.toLowerCase().startsWith(query));
+  },
+  nameOrUsernameIncludes(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.toLowerCase().includes(query);
   },
 };
 GfmAutoComplete.Labels = {

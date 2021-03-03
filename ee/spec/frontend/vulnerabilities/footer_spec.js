@@ -6,6 +6,7 @@ import SolutionCard from 'ee/vue_shared/security_reports/components/solution_car
 import VulnerabilityFooter from 'ee/vulnerabilities/components/footer.vue';
 import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
+import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -33,9 +34,10 @@ describe('Vulnerability Footer', () => {
     pipeline: {},
   };
 
-  const createWrapper = (properties = {}) => {
+  const createWrapper = (properties = {}, mountOptions = {}) => {
     wrapper = shallowMount(VulnerabilityFooter, {
       propsData: { vulnerability: { ...vulnerability, ...properties } },
+      ...mountOptions,
     });
   };
 
@@ -110,7 +112,10 @@ describe('Vulnerability Footer', () => {
     it('renders the history list if there are history items', () => {
       // The shape of this object doesn't matter for this test, we just need to verify that it's passed to the history
       // entry.
-      const historyItems = [{ id: 1, note: 'some note' }, { id: 2, note: 'another note' }];
+      const historyItems = [
+        { id: 1, note: 'some note' },
+        { id: 2, note: 'another note' },
+      ];
       mockAxios.onGet(discussionUrl).replyOnce(200, historyItems, { date: Date.now() });
       createWrapper();
 
@@ -275,19 +280,54 @@ describe('Vulnerability Footer', () => {
     });
   });
 
+  describe('related jira issues', () => {
+    const relatedJiraIssues = () => wrapper.find(RelatedJiraIssues);
+
+    describe('with `createJiraIssueUrl` not provided', () => {
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('does not show related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(false);
+      });
+    });
+
+    describe('with `createJiraIssueUrl` provided', () => {
+      beforeEach(() => {
+        createWrapper(
+          {},
+          {
+            provide: {
+              createJiraIssueUrl: 'http://foo',
+              glFeatures: { jiraForVulnerabilities: true },
+            },
+          },
+        );
+      });
+
+      it('shows related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(true);
+      });
+    });
+  });
+
   describe('detection note', () => {
     const detectionNote = () => wrapper.find('[data-testid="detection-note"]');
     const statusDescription = () => wrapper.find(StatusDescription);
     const vulnerabilityStates = Object.keys(VULNERABILITY_STATES);
 
-    it.each(vulnerabilityStates)(`shows detection note when vulnerability state is '%s'`, state => {
-      createWrapper({ state });
+    it.each(vulnerabilityStates)(
+      `shows detection note when vulnerability state is '%s'`,
+      (state) => {
+        createWrapper({ state });
 
-      expect(detectionNote().exists()).toBe(true);
-      expect(statusDescription().props('vulnerability')).toEqual({
-        state: 'detected',
-        pipeline: vulnerability.pipeline,
-      });
-    });
+        expect(detectionNote().exists()).toBe(true);
+        expect(statusDescription().props('vulnerability')).toEqual({
+          state: 'detected',
+          pipeline: vulnerability.pipeline,
+        });
+      },
+    );
   });
 });

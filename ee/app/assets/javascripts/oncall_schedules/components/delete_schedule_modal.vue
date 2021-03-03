@@ -1,9 +1,9 @@
 <script>
 import { GlSprintf, GlModal, GlAlert } from '@gitlab/ui';
+import { s__, __ } from '~/locale';
 import destroyOncallScheduleMutation from '../graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreAfterScheduleDelete } from '../utils/cache_updates';
-import { s__, __ } from '~/locale';
 
 export const i18n = {
   deleteSchedule: s__('OnCallSchedules|Delete schedule'),
@@ -23,6 +23,10 @@ export default {
   props: {
     schedule: {
       type: Object,
+      required: true,
+    },
+    modalId: {
+      type: String,
       required: true,
     },
   },
@@ -71,7 +75,7 @@ export default {
           }
           this.$refs.deleteScheduleModal.hide();
         })
-        .catch(error => {
+        .catch((error) => {
           this.error = error;
         })
         .finally(() => {
@@ -88,7 +92,7 @@ export default {
 <template>
   <gl-modal
     ref="deleteScheduleModal"
-    modal-id="deleteScheduleModal"
+    :modal-id="modalId"
     size="sm"
     :data-testid="`delete-schedule-modal-${schedule.iid}`"
     :title="$options.i18n.deleteSchedule"

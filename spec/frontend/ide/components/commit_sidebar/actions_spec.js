@@ -1,9 +1,12 @@
 import Vue from 'vue';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { projectData, branches } from 'jest/ide/mock_data';
-import { createStore } from '~/ide/stores';
 import commitActions from '~/ide/components/commit_sidebar/actions.vue';
-import consts from '~/ide/stores/modules/commit/constants';
+import { createStore } from '~/ide/stores';
+import {
+  COMMIT_TO_NEW_BRANCH,
+  COMMIT_TO_CURRENT_BRANCH,
+} from '~/ide/stores/modules/commit/constants';
 
 const ACTION_UPDATE_COMMIT_ACTION = 'commit/updateCommitAction';
 
@@ -30,7 +33,7 @@ describe('IDE commit sidebar actions', () => {
     vm.$store.state.currentProjectId = 'abcproject';
 
     const proj = { ...projectData };
-    proj.branches[currentBranchId] = branches.find(branch => branch.name === currentBranchId);
+    proj.branches[currentBranchId] = branches.find((branch) => branch.name === currentBranchId);
     proj.empty_repo = emptyRepo;
 
     Vue.set(vm.$store.state.projects, 'abcproject', proj);
@@ -72,7 +75,7 @@ describe('IDE commit sidebar actions', () => {
     expect(findText()).toContain('Commit to master branch');
   });
 
-  it('hides merge request option when project merge requests are disabled', done => {
+  it('hides merge request option when project merge requests are disabled', (done) => {
     createComponent({ hasMR: false });
 
     vm.$nextTick(() => {
@@ -106,7 +109,7 @@ describe('IDE commit sidebar actions', () => {
       expect(vm.$store.dispatch).not.toHaveBeenCalled();
     });
 
-    it('calls again after staged changes', done => {
+    it('calls again after staged changes', (done) => {
       createComponent({ currentBranchId: null });
 
       vm.$store.state.currentBranchId = 'master';
@@ -126,16 +129,16 @@ describe('IDE commit sidebar actions', () => {
 
     it.each`
       input                                                            | expectedOption
-      ${{ currentBranchId: BRANCH_DEFAULT }}                           | ${consts.COMMIT_TO_NEW_BRANCH}
-      ${{ currentBranchId: BRANCH_DEFAULT, emptyRepo: true }}          | ${consts.COMMIT_TO_CURRENT_BRANCH}
-      ${{ currentBranchId: BRANCH_PROTECTED, hasMR: true }}            | ${consts.COMMIT_TO_CURRENT_BRANCH}
-      ${{ currentBranchId: BRANCH_PROTECTED, hasMR: false }}           | ${consts.COMMIT_TO_CURRENT_BRANCH}
-      ${{ currentBranchId: BRANCH_PROTECTED_NO_ACCESS, hasMR: true }}  | ${consts.COMMIT_TO_NEW_BRANCH}
-      ${{ currentBranchId: BRANCH_PROTECTED_NO_ACCESS, hasMR: false }} | ${consts.COMMIT_TO_NEW_BRANCH}
-      ${{ currentBranchId: BRANCH_REGULAR, hasMR: true }}              | ${consts.COMMIT_TO_CURRENT_BRANCH}
-      ${{ currentBranchId: BRANCH_REGULAR, hasMR: false }}             | ${consts.COMMIT_TO_CURRENT_BRANCH}
-      ${{ currentBranchId: BRANCH_REGULAR_NO_ACCESS, hasMR: true }}    | ${consts.COMMIT_TO_NEW_BRANCH}
-      ${{ currentBranchId: BRANCH_REGULAR_NO_ACCESS, hasMR: false }}   | ${consts.COMMIT_TO_NEW_BRANCH}
+      ${{ currentBranchId: BRANCH_DEFAULT }}                           | ${COMMIT_TO_NEW_BRANCH}
+      ${{ currentBranchId: BRANCH_DEFAULT, emptyRepo: true }}          | ${COMMIT_TO_CURRENT_BRANCH}
+      ${{ currentBranchId: BRANCH_PROTECTED, hasMR: true }}            | ${COMMIT_TO_CURRENT_BRANCH}
+      ${{ currentBranchId: BRANCH_PROTECTED, hasMR: false }}           | ${COMMIT_TO_CURRENT_BRANCH}
+      ${{ currentBranchId: BRANCH_PROTECTED_NO_ACCESS, hasMR: true }}  | ${COMMIT_TO_NEW_BRANCH}
+      ${{ currentBranchId: BRANCH_PROTECTED_NO_ACCESS, hasMR: false }} | ${COMMIT_TO_NEW_BRANCH}
+      ${{ currentBranchId: BRANCH_REGULAR, hasMR: true }}              | ${COMMIT_TO_CURRENT_BRANCH}
+      ${{ currentBranchId: BRANCH_REGULAR, hasMR: false }}             | ${COMMIT_TO_CURRENT_BRANCH}
+      ${{ currentBranchId: BRANCH_REGULAR_NO_ACCESS, hasMR: true }}    | ${COMMIT_TO_NEW_BRANCH}
+      ${{ currentBranchId: BRANCH_REGULAR_NO_ACCESS, hasMR: false }}   | ${COMMIT_TO_NEW_BRANCH}
     `(
       'with $input, it dispatches update commit action with $expectedOption',
       ({ input, expectedOption }) => {

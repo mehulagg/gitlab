@@ -6,11 +6,13 @@ import StateTooltip from 'ee/related_items_tree/components/state_tooltip.vue';
 // Ensure that mock dates dynamically computed from today
 // so that test doesn't fail at any point in time.
 const currentDate = new Date();
-const mockCreatedAt = `${currentDate.getFullYear() - 2}-${currentDate.getMonth() +
-  1}-${currentDate.getDate()}`;
+const mockCreatedAt = `${currentDate.getFullYear() - 2}-${
+  currentDate.getMonth() + 1
+}-${currentDate.getDate()}`;
 const mockCreatedAtYear = currentDate.getFullYear() - 2;
-const mockClosedAt = `${currentDate.getFullYear() - 1}-${currentDate.getMonth() +
-  1}-${currentDate.getDate()}`;
+const mockClosedAt = `${currentDate.getFullYear() - 1}-${
+  currentDate.getMonth() + 1
+}-${currentDate.getDate()}`;
 const mockClosedAtYear = currentDate.getFullYear() - 1;
 
 const createComponent = ({
@@ -156,21 +158,11 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders path in bold', () => {
-        expect(
-          wrapper
-            .find({ ref: 'statePath' })
-            .text()
-            .trim(),
-        ).toBe('/foo/bar#1');
+        expect(wrapper.find({ ref: 'statePath' }).text().trim()).toBe('/foo/bar#1');
       });
 
       it('renders stateText in bold', () => {
-        expect(
-          wrapper
-            .find({ ref: 'stateText' })
-            .text()
-            .trim(),
-        ).toBe('Closed');
+        expect(wrapper.find({ ref: 'stateText' }).text().trim()).toBe('Closed');
       });
 
       it('renders stateTimeInWords', () => {
@@ -178,12 +170,7 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders stateTimestamp in muted', () => {
-        expect(
-          wrapper
-            .find({ ref: 'stateTimestamp' })
-            .text()
-            .trim(),
-        ).toContain(mockClosedAtYear);
+        expect(wrapper.find({ ref: 'stateTimestamp' }).text().trim()).toContain(mockClosedAtYear);
       });
     });
   });

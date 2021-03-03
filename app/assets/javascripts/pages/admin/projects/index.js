@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import ProjectsList from '~/projects_list';
 import NamespaceSelect from '~/namespace_select';
+import ProjectsList from '~/projects_list';
 import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
 
 function mountRemoveMemberModal() {
@@ -24,5 +24,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document
     .querySelectorAll('.js-namespace-select')
-    .forEach(dropdown => new NamespaceSelect({ dropdown }));
+    .forEach((dropdown) => new NamespaceSelect({ dropdown }));
 });

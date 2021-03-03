@@ -1,26 +1,29 @@
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import EditorLite from '~/vue_shared/components/editor_lite.vue';
+import { EDITOR_READY_EVENT } from '~/editor/constants';
 import Editor from '~/editor/editor_lite';
+import EditorLite from '~/vue_shared/components/editor_lite.vue';
 
 jest.mock('~/editor/editor_lite');
 
 describe('Editor Lite component', () => {
   let wrapper;
-  const onDidChangeModelContent = jest.fn();
-  const updateModelLanguage = jest.fn();
-  const getValue = jest.fn();
-  const setValue = jest.fn();
+  let mockInstance;
+
   const value = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
   const fileName = 'lorem.txt';
   const fileGlobalId = 'snippet_777';
-  const createInstanceMock = jest.fn().mockImplementation(() => ({
-    onDidChangeModelContent,
-    updateModelLanguage,
-    getValue,
-    setValue,
-    dispose: jest.fn(),
-  }));
+  const createInstanceMock = jest.fn().mockImplementation(() => {
+    mockInstance = {
+      onDidChangeModelContent: jest.fn(),
+      updateModelLanguage: jest.fn(),
+      getValue: jest.fn(),
+      setValue: jest.fn(),
+      dispose: jest.fn(),
+    };
+    return mockInstance;
+  });
+
   Editor.mockImplementation(() => {
     return {
       createInstance: createInstanceMock,
@@ -45,9 +48,9 @@ describe('Editor Lite component', () => {
     wrapper.destroy();
   });
 
-  const triggerChangeContent = val => {
-    getValue.mockReturnValue(val);
-    const [cb] = onDidChangeModelContent.mock.calls[0];
+  const triggerChangeContent = (val) => {
+    mockInstance.getValue.mockReturnValue(val);
+    const [cb] = mockInstance.onDidChangeModelContent.mock.calls[0];
 
     cb();
 
@@ -92,12 +95,12 @@ describe('Editor Lite component', () => {
       });
 
       return nextTick().then(() => {
-        expect(updateModelLanguage).toHaveBeenCalledWith(newFileName);
+        expect(mockInstance.updateModelLanguage).toHaveBeenCalledWith(newFileName);
       });
     });
 
     it('registers callback with editor onChangeContent', () => {
-      expect(onDidChangeModelContent).toHaveBeenCalledWith(expect.any(Function));
+      expect(mockInstance.onDidChangeModelContent).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('emits input event when the blob content is changed', () => {
@@ -108,13 +111,17 @@ describe('Editor Lite component', () => {
       expect(wrapper.emitted().input).toEqual([[value]]);
     });
 
-    it('emits editor-ready event when the Editor Lite is ready', async () => {
+    it('emits EDITOR_READY_EVENT event when the Editor Lite is ready', async () => {
       const el = wrapper.find({ ref: 'editor' }).element;
-      expect(wrapper.emitted()['editor-ready']).toBeUndefined();
+      expect(wrapper.emitted()[EDITOR_READY_EVENT]).toBeUndefined();
 
-      await el.dispatchEvent(new Event('editor-ready'));
+      await el.dispatchEvent(new Event(EDITOR_READY_EVENT));
 
-      expect(wrapper.emitted()['editor-ready']).toBeDefined();
+      expect(wrapper.emitted()[EDITOR_READY_EVENT]).toBeDefined();
+    });
+
+    it('component API `getEditor()` returns the editor instance', () => {
+      expect(wrapper.vm.getEditor()).toBe(mockInstance);
     });
 
     describe('reaction to the value update', () => {
@@ -126,7 +133,7 @@ describe('Editor Lite component', () => {
         });
 
         await nextTick();
-        expect(setValue).toHaveBeenCalledWith(newValue);
+        expect(mockInstance.setValue).toHaveBeenCalledWith(newValue);
       });
 
       it("does not update value if the passed one is exactly the same as the editor's content", async () => {
@@ -137,7 +144,7 @@ describe('Editor Lite component', () => {
         });
 
         await nextTick();
-        expect(setValue).not.toHaveBeenCalled();
+        expect(mockInstance.setValue).not.toHaveBeenCalled();
       });
     });
   });

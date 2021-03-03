@@ -48,7 +48,7 @@ class GlobalPolicy < BasePolicy
     prevent :use_slash_commands
   end
 
-  rule { blocked | (internal & ~migration_bot) }.policy do
+  rule { blocked | (internal & ~migration_bot & ~security_bot) }.policy do
     prevent :access_git
   end
 
@@ -100,6 +100,7 @@ class GlobalPolicy < BasePolicy
     enable :update_custom_attribute
     enable :approve_user
     enable :reject_user
+    enable :read_usage_trends_measurement
   end
 
   # We can't use `read_statistics` because the user may have different permissions for different projects

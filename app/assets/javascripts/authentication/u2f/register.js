@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { template as lodashTemplate } from 'lodash';
 import { __ } from '~/locale';
-import importU2FLibrary from './util';
 import U2FError from './error';
+import importU2FLibrary from './util';
 
 // Register U2F (universal 2nd factor) devices for users to authenticate with.
 //
@@ -34,7 +34,7 @@ export default class U2FRegister {
 
   start() {
     return importU2FLibrary()
-      .then(utils => {
+      .then((utils) => {
         this.u2fUtils = utils;
         this.renderSetup();
       })
@@ -46,7 +46,7 @@ export default class U2FRegister {
       this.appId,
       this.registerRequests,
       this.signRequests,
-      response => {
+      (response) => {
         if (response.errorCode) {
           const error = new U2FError(response.errorCode, 'register');
           return this.renderError(error);

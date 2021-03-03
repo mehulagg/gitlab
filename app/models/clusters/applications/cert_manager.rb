@@ -2,6 +2,8 @@
 
 module Clusters
   module Applications
+    # DEPRECATED for removal in %14.0
+    # See https://gitlab.com/groups/gitlab-org/-/epics/4280
     class CertManager < ApplicationRecord
       VERSION = 'v0.10.1'
       CRD_VERSION = '0.10'
@@ -65,7 +67,7 @@ module Clusters
       end
 
       def retry_command(command)
-        "for i in $(seq 1 90); do #{command} && s=0 && break || s=$?; sleep 1s; echo \"Retrying ($i)...\"; done; (exit $s)"
+        Gitlab::Kubernetes::PodCmd.retry_command(command, times: 90)
       end
 
       def post_delete_script

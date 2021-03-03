@@ -1,17 +1,17 @@
 import Vue from 'vue';
-import { escapeFileUrl } from '../lib/utils/url_utility';
-import createRouter from './router';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import { escapeFileUrl } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
+import initWebIdeLink from '~/pages/projects/shared/web_ide_link';
 import App from './components/app.vue';
 import Breadcrumbs from './components/breadcrumbs.vue';
+import DirectoryDownloadLinks from './components/directory_download_links.vue';
 import LastCommit from './components/last_commit.vue';
 import TreeActionLink from './components/tree_action_link.vue';
-import initWebIdeLink from '~/pages/projects/shared/web_ide_link';
-import DirectoryDownloadLinks from './components/directory_download_links.vue';
 import apolloProvider from './graphql';
-import { setTitle } from './utils/title';
+import createRouter from './router';
 import { updateFormAction } from './utils/dom';
-import { parseBoolean } from '../lib/utils/common_utils';
-import { __ } from '../locale';
+import { setTitle } from './utils/title';
 
 export default function setupVueRepositoryList() {
   const el = document.getElementById('js-tree-list');
@@ -55,6 +55,8 @@ export default function setupVueRepositoryList() {
     const {
       canCollaborate,
       canEditTree,
+      canPushCode,
+      selectedBranch,
       newBranchPath,
       newTagPath,
       newBlobPath,
@@ -65,8 +67,7 @@ export default function setupVueRepositoryList() {
       newDirPath,
     } = breadcrumbEl.dataset;
 
-    router.afterEach(({ params: { path = '/' } }) => {
-      updateFormAction('.js-upload-blob-form', uploadPath, path);
+    router.afterEach(({ params: { path } }) => {
       updateFormAction('.js-create-dir-form', newDirPath, path);
     });
 
@@ -81,12 +82,16 @@ export default function setupVueRepositoryList() {
             currentPath: this.$route.params.path,
             canCollaborate: parseBoolean(canCollaborate),
             canEditTree: parseBoolean(canEditTree),
+            canPushCode: parseBoolean(canPushCode),
+            origionalBranch: ref,
+            selectedBranch,
             newBranchPath,
             newTagPath,
             newBlobPath,
             forkNewBlobPath,
             forkNewDirectoryPath,
             forkUploadBlobPath,
+            uploadPath,
           },
         });
       },

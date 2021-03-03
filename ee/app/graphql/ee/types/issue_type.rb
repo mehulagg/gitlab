@@ -21,8 +21,12 @@ module EE
         field :blocked_by_count, GraphQL::INT_TYPE, null: true,
               description: 'Count of issues blocking this issue.'
 
+        field :blocked_by_issues, ::Types::IssueType.connection_type, null: true,
+              description: 'Issues blocking this issue.',
+              complexity: 5
+
         field :health_status, ::Types::HealthStatusEnum, null: true,
-              description: 'Current health status. Returns null if `save_issuable_health_status` feature flag is disabled.'
+              description: 'Current health status.'
 
         field :status_page_published_incident, GraphQL::BOOLEAN_TYPE, null: true,
               description: 'Indicates whether an issue is published to the status page.'
@@ -51,6 +55,10 @@ module EE
           ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(context, object.id) do |count|
             count || 0
           end
+        end
+
+        def blocked_by_issues
+          object.blocked_by_issues_for(current_user)
         end
 
         def health_status

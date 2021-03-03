@@ -1,18 +1,32 @@
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
-import { createStore } from '~/ide/stores';
+import { range } from 'lodash';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { leftSidebarViews, PERMISSION_READ_MR, MAX_MR_FILES_AUTO_OPEN } from '~/ide/constants';
+import service from '~/ide/services';
+import { createStore } from '~/ide/stores';
 import {
   getMergeRequestData,
   getMergeRequestChanges,
   getMergeRequestVersions,
+  openMergeRequestChanges,
   openMergeRequest,
 } from '~/ide/stores/actions/merge_request';
-import service from '~/ide/services';
-import { leftSidebarViews, PERMISSION_READ_MR } from '~/ide/constants';
+import * as types from '~/ide/stores/mutation_types';
+import axios from '~/lib/utils/axios_utils';
 
 const TEST_PROJECT = 'abcproject';
 const TEST_PROJECT_ID = 17;
+
+const createMergeRequestChange = (path) => ({
+  new_path: path,
+  path,
+});
+const createMergeRequestChangesCount = (n) =>
+  range(n).map((i) => createMergeRequestChange(`loremispum_${i}.md`));
+
+const testGetUrlForPath = (path) => `${TEST_HOST}/test/${path}`;
 
 jest.mock('~/flash');
 
@@ -49,7 +63,7 @@ describe('IDE store merge request actions', () => {
           mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests/).reply(200, mockData);
         });
 
-        it('calls getProjectMergeRequests service method', done => {
+        it('calls getProjectMergeRequests service method', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
             .then(() => {
@@ -66,19 +80,19 @@ describe('IDE store merge request actions', () => {
             .catch(done.fail);
         });
 
-        it('sets the "Merge Request" Object', done => {
+        it('sets the "Merge Request" Object', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
             .then(() => {
               expect(store.state.projects.abcproject.mergeRequests).toEqual({
-                '2': expect.objectContaining(mrData),
+                2: expect.objectContaining(mrData),
               });
               done();
             })
             .catch(done.fail);
         });
 
-        it('sets "Current Merge Request" object to the most recent MR', done => {
+        it('sets "Current Merge Request" object to the most recent MR', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
             .then(() => {
@@ -88,7 +102,7 @@ describe('IDE store merge request actions', () => {
             .catch(done.fail);
         });
 
-        it('does nothing if user cannot read MRs', done => {
+        it('does nothing if user cannot read MRs', (done) => {
           store.state.projects[TEST_PROJECT].userPermissions[PERMISSION_READ_MR] = false;
 
           store
@@ -108,7 +122,7 @@ describe('IDE store merge request actions', () => {
           mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests/).reply(200, []);
         });
 
-        it('does not fail if there are no merge requests for current branch', done => {
+        it('does not fail if there are no merge requests for current branch', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'foo' })
             .then(() => {
@@ -126,7 +140,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests/).networkError();
       });
 
-      it('flashes message, if error', done => {
+      it('flashes message, if error', (done) => {
         store
           .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
           .catch(() => {
@@ -149,7 +163,7 @@ describe('IDE store merge request actions', () => {
           .reply(200, { title: 'mergerequest' });
       });
 
-      it('calls getProjectMergeRequestData service method', done => {
+      it('calls getProjectMergeRequestData service method', (done) => {
         store
           .dispatch('getMergeRequestData', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -160,7 +174,7 @@ describe('IDE store merge request actions', () => {
           .catch(done.fail);
       });
 
-      it('sets the Merge Request Object', done => {
+      it('sets the Merge Request Object', (done) => {
         store
           .dispatch('getMergeRequestData', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -180,7 +194,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests\/1/).networkError();
       });
 
-      it('dispatches error action', done => {
+      it('dispatches error action', (done) => {
         const dispatch = jest.fn();
 
         getMergeRequestData(
@@ -224,7 +238,7 @@ describe('IDE store merge request actions', () => {
           .reply(200, { title: 'mergerequest' });
       });
 
-      it('calls getProjectMergeRequestChanges service method', done => {
+      it('calls getProjectMergeRequestChanges service method', (done) => {
         store
           .dispatch('getMergeRequestChanges', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -235,7 +249,7 @@ describe('IDE store merge request actions', () => {
           .catch(done.fail);
       });
 
-      it('sets the Merge Request Changes Object', done => {
+      it('sets the Merge Request Changes Object', (done) => {
         store
           .dispatch('getMergeRequestChanges', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -253,7 +267,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests\/1\/changes/).networkError();
       });
 
-      it('dispatches error action', done => {
+      it('dispatches error action', (done) => {
         const dispatch = jest.fn();
 
         getMergeRequestChanges(
@@ -296,7 +310,7 @@ describe('IDE store merge request actions', () => {
         jest.spyOn(service, 'getProjectMergeRequestVersions');
       });
 
-      it('calls getProjectMergeRequestVersions service method', done => {
+      it('calls getProjectMergeRequestVersions service method', (done) => {
         store
           .dispatch('getMergeRequestVersions', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -307,7 +321,7 @@ describe('IDE store merge request actions', () => {
           .catch(done.fail);
       });
 
-      it('sets the Merge Request Versions Object', done => {
+      it('sets the Merge Request Versions Object', (done) => {
         store
           .dispatch('getMergeRequestVersions', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -323,7 +337,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests\/1\/versions/).networkError();
       });
 
-      it('dispatches error action', done => {
+      it('dispatches error action', (done) => {
         const dispatch = jest.fn();
 
         getMergeRequestVersions(
@@ -349,6 +363,72 @@ describe('IDE store merge request actions', () => {
 
             done();
           });
+      });
+    });
+  });
+
+  describe('openMergeRequestChanges', () => {
+    it.each`
+      desc                                   | changes                     | entries
+      ${'with empty changes'}                | ${[]}                       | ${{}}
+      ${'with changes not matching entries'} | ${[{ new_path: '123.md' }]} | ${{ '456.md': {} }}
+    `('$desc, does nothing', ({ changes, entries }) => {
+      const state = { entries };
+
+      return testAction({
+        action: openMergeRequestChanges,
+        state,
+        payload: changes,
+        expectedActions: [],
+        expectedMutations: [],
+      });
+    });
+
+    it('updates views and opens mr changes', () => {
+      // This is the payload sent to the action
+      const changesPayload = createMergeRequestChangesCount(15);
+
+      // Remove some items from the payload to use for entries
+      const changes = changesPayload.slice(1, 14);
+
+      const entries = changes.reduce(
+        (acc, { path }) => Object.assign(acc, { [path]: path, type: 'blob' }),
+        {},
+      );
+      const pathsToOpen = changes.slice(0, MAX_MR_FILES_AUTO_OPEN).map((x) => x.new_path);
+
+      return testAction({
+        action: openMergeRequestChanges,
+        state: { entries, getUrlForPath: testGetUrlForPath },
+        payload: changesPayload,
+        expectedActions: [
+          { type: 'updateActivityBarView', payload: leftSidebarViews.review.name },
+          // Only activates first file
+          { type: 'router/push', payload: testGetUrlForPath(pathsToOpen[0]) },
+          { type: 'setFileActive', payload: pathsToOpen[0] },
+          // Fetches data for other files
+          ...pathsToOpen.slice(1).map((path) => ({
+            type: 'getFileData',
+            payload: { path, makeFileActive: false },
+          })),
+          ...pathsToOpen.slice(1).map((path) => ({
+            type: 'getRawFileData',
+            payload: { path },
+          })),
+        ],
+        expectedMutations: [
+          ...changes.map((change) => ({
+            type: types.SET_FILE_MERGE_REQUEST_CHANGE,
+            payload: {
+              file: entries[change.new_path],
+              mrChange: change,
+            },
+          })),
+          ...pathsToOpen.map((path) => ({
+            type: types.TOGGLE_FILE_OPEN,
+            payload: path,
+          })),
+        ],
       });
     });
   });
@@ -409,7 +489,6 @@ describe('IDE store merge request actions', () => {
           case 'getFiles':
           case 'getMergeRequestVersions':
           case 'getBranchData':
-          case 'setFileMrChange':
             return Promise.resolve();
           default:
             return originalDispatch(type, payload);
@@ -422,7 +501,7 @@ describe('IDE store merge request actions', () => {
       );
     });
 
-    it('dispatches actions for merge request data', done => {
+    it('dispatches actions for merge request data', (done) => {
       openMergeRequest({ state: store.state, dispatch: store.dispatch, getters: mockGetters }, mr)
         .then(() => {
           expect(store.dispatch.mock.calls).toEqual([
@@ -445,18 +524,21 @@ describe('IDE store merge request actions', () => {
             ],
             ['getMergeRequestVersions', mr],
             ['getMergeRequestChanges', mr],
+            ['openMergeRequestChanges', testMergeRequestChanges.changes],
           ]);
         })
         .then(done)
         .catch(done.fail);
     });
 
-    it('updates activity bar view and gets file data, if changes are found', done => {
+    it('updates activity bar view and gets file data, if changes are found', (done) => {
       store.state.entries.foo = {
         type: 'blob',
+        path: 'foo',
       };
       store.state.entries.bar = {
         type: 'blob',
+        path: 'bar',
       };
 
       testMergeRequestChanges.changes = [
@@ -467,30 +549,15 @@ describe('IDE store merge request actions', () => {
       openMergeRequest({ state: store.state, dispatch: store.dispatch, getters: mockGetters }, mr)
         .then(() => {
           expect(store.dispatch).toHaveBeenCalledWith(
-            'updateActivityBarView',
-            leftSidebarViews.review.name,
+            'openMergeRequestChanges',
+            testMergeRequestChanges.changes,
           );
-
-          testMergeRequestChanges.changes.forEach((change, i) => {
-            expect(store.dispatch).toHaveBeenCalledWith('setFileMrChange', {
-              file: store.state.entries[change.new_path],
-              mrChange: change,
-            });
-
-            expect(store.dispatch).toHaveBeenCalledWith('getFileData', {
-              path: change.new_path,
-              makeFileActive: i === 0,
-              openFile: true,
-            });
-          });
-
-          expect(store.state.openFiles.length).toBe(testMergeRequestChanges.changes.length);
         })
         .then(done)
         .catch(done.fail);
     });
 
-    it('flashes message, if error', done => {
+    it('flashes message, if error', (done) => {
       store.dispatch.mockRejectedValue();
 
       openMergeRequest(store, mr)

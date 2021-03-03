@@ -26,6 +26,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
   end
 
   before do
+    stub_feature_flags(new_pipelines_table: false)
     stub_application_setting(auto_devops_enabled: false)
     stub_ci_pipeline_yaml_file(YAML.dump(config))
     project.add_maintainer(user)
@@ -62,7 +63,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
     it 'sees branch pipelines and detached merge request pipelines in correct order' do
       page.within('.ci-table') do
         expect(page).to have_selector('.ci-pending', count: 2)
-        expect(first('.js-pipeline-url-link')).to have_content("##{detached_merge_request_pipeline.id}")
+        expect(first('[data-testid="pipeline-url-link"]')).to have_content("##{detached_merge_request_pipeline.id}")
       end
     end
 
@@ -97,16 +98,16 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
         page.within('.ci-table') do
           expect(page).to have_selector('.ci-pending', count: 4)
 
-          expect(all('.js-pipeline-url-link')[0])
+          expect(all('[data-testid="pipeline-url-link"]')[0])
             .to have_content("##{detached_merge_request_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[1])
+          expect(all('[data-testid="pipeline-url-link"]')[1])
             .to have_content("##{detached_merge_request_pipeline.id}")
 
-          expect(all('.js-pipeline-url-link')[2])
+          expect(all('[data-testid="pipeline-url-link"]')[2])
             .to have_content("##{push_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[3])
+          expect(all('[data-testid="pipeline-url-link"]')[3])
             .to have_content("##{push_pipeline.id}")
         end
       end
@@ -160,7 +161,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
 
         it 'merges the merge request' do
           expect(page).to have_content('Merged by')
-          expect(page).to have_link('Revert')
+          expect(page).to have_button('Revert')
         end
       end
 
@@ -197,7 +198,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
       it 'sees a branch pipeline in pipeline tab' do
         page.within('.ci-table') do
           expect(page).to have_selector('.ci-pending', count: 1)
-          expect(first('.js-pipeline-url-link')).to have_content("##{push_pipeline.id}")
+          expect(first('[data-testid="pipeline-url-link"]')).to have_content("##{push_pipeline.id}")
         end
       end
 
@@ -246,7 +247,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
     it 'sees branch pipelines and detached merge request pipelines in correct order' do
       page.within('.ci-table') do
         expect(page).to have_selector('.ci-pending', count: 2)
-        expect(first('.js-pipeline-url-link')).to have_content("##{detached_merge_request_pipeline.id}")
+        expect(first('[data-testid="pipeline-url-link"]')).to have_content("##{detached_merge_request_pipeline.id}")
       end
     end
 
@@ -287,16 +288,16 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
         page.within('.ci-table') do
           expect(page).to have_selector('.ci-pending', count: 4)
 
-          expect(all('.js-pipeline-url-link')[0])
+          expect(all('[data-testid="pipeline-url-link"]')[0])
             .to have_content("##{detached_merge_request_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[1])
+          expect(all('[data-testid="pipeline-url-link"]')[1])
             .to have_content("##{detached_merge_request_pipeline.id}")
 
-          expect(all('.js-pipeline-url-link')[2])
+          expect(all('[data-testid="pipeline-url-link"]')[2])
             .to have_content("##{push_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[3])
+          expect(all('[data-testid="pipeline-url-link"]')[3])
             .to have_content("##{push_pipeline.id}")
         end
       end
@@ -357,7 +358,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
 
         it 'merges the merge request' do
           expect(page).to have_content('Merged by')
-          expect(page).to have_link('Revert')
+          expect(page).to have_button('Revert')
         end
       end
 

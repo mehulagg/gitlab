@@ -1,8 +1,8 @@
 import $ from 'jquery';
-import axios from './lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from './flash';
-import { mouseenter, debouncedMouseleave, togglePopover } from './shared/popover';
+import axios from './lib/utils/axios_utils';
 import { __ } from './locale';
+import { mouseenter, debouncedMouseleave, togglePopover } from './shared/popover';
 
 export default class Milestone {
   constructor() {
@@ -11,7 +11,7 @@ export default class Milestone {
   }
 
   bindTabsSwitching() {
-    return $('a[data-toggle="tab"]').on('show.bs.tab', e => {
+    return $('a[data-toggle="tab"]').on('show.bs.tab', (e) => {
       const $target = $(e.target);
 
       window.location.hash = $target.attr('href');

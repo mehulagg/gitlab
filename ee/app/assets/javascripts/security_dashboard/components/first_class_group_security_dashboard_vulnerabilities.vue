@@ -1,10 +1,10 @@
 <script>
-import produce from 'immer';
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
-import VulnerabilityList from './vulnerability_list.vue';
-import vulnerabilitiesQuery from '../graphql/group_vulnerabilities.graphql';
-import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import produce from 'immer';
+import vulnerabilitiesQuery from '../graphql/queries/group_vulnerabilities.query.graphql';
 import { preparePageInfo } from '../helpers';
+import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import VulnerabilityList from './vulnerability_list.vue';
 
 export default {
   components: {
@@ -64,6 +64,16 @@ export default {
       return `${this.sortBy}_${this.sortDirection}`;
     },
   },
+  watch: {
+    filters() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+    sort() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+  },
   methods: {
     onErrorDismiss() {
       this.errorLoadingVulnerabilities = false;
@@ -73,14 +83,13 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, draftData => {
+            return produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.group.vulnerabilities.nodes = [
                 ...previousResult.group.vulnerabilities.nodes,
                 ...draftData.group.vulnerabilities.nodes,
               ];
             });
-            return results;
           },
         });
       }

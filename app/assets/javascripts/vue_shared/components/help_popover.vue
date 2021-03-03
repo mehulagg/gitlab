@@ -1,8 +1,5 @@
 <script>
-import $ from 'jquery';
-import { GlIcon } from '@gitlab/ui';
-import { inserted } from '~/feature_highlight/feature_highlight_helper';
-import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
+import { GlButton, GlPopover } from '@gitlab/ui';
 
 /**
  * Render a button with a question mark icon
@@ -11,7 +8,8 @@ import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover
 export default {
   name: 'HelpPopover',
   components: {
-    GlIcon,
+    GlButton,
+    GlPopover,
   },
   props: {
     options: {
@@ -20,30 +18,20 @@ export default {
       default: () => ({}),
     },
   },
-  mounted() {
-    const $el = $(this.$el);
-
-    $el
-      .popover({
-        html: true,
-        trigger: 'focus',
-        container: 'body',
-        placement: 'top',
-        template:
-          '<div class="popover" role="tooltip"><div class="arrow"></div><p class="popover-header"></p><div class="popover-body"></div></div>',
-        ...this.options,
-      })
-      .on('mouseenter', mouseenter)
-      .on('mouseleave', debouncedMouseleave(300))
-      .on('inserted.bs.popover', inserted)
-      .on('show.bs.popover', () => {
-        window.addEventListener('scroll', togglePopover.bind($el, false), { once: true });
-      });
-  },
 };
 </script>
 <template>
-  <button type="button" class="btn btn-blank btn-transparent btn-help" tabindex="0">
-    <gl-icon name="question" />
-  </button>
+  <span>
+    <gl-button ref="popoverTrigger" variant="link" icon="question" tabindex="0" />
+    <gl-popover triggers="hover focus" :target="() => $refs.popoverTrigger.$el" v-bind="options">
+      <template #title>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <span v-html="options.title"></span>
+      </template>
+      <template #default>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div v-html="options.content"></div>
+      </template>
+    </gl-popover>
+  </span>
 </template>

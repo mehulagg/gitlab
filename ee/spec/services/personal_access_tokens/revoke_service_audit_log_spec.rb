@@ -10,7 +10,7 @@ RSpec.describe PersonalAccessTokens::RevokeService do
     let(:token) { create(:personal_access_token, user: user) }
     let(:service) { described_class.new(user, token: token) }
 
-    it 'creates audit logs' do
+    it 'creates audit events' do
       expect(::AuditEventService)
         .to receive(:new)
         .with(user, user, action: :custom, custom_message: "Revoked personal access token with id #{token.id}")

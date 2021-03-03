@@ -11,7 +11,7 @@ describe('Pipeline status badge', () => {
   const findGlBadge = () => wrapper.find(GlBadge);
   const findGlIcon = () => wrapper.find(GlIcon);
 
-  const createProps = securityBuildsFailedCount => ({ pipeline: { securityBuildsFailedCount } });
+  const createProps = (securityBuildsFailedCount) => ({ pipeline: { securityBuildsFailedCount } });
 
   const createWrapper = (props = {}) => {
     wrapper = shallowMount(PipelineStatusBadge, {

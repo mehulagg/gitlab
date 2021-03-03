@@ -1,6 +1,6 @@
+import { GlDrawer, GlInfiniteScroll, GlTabs } from '@gitlab/ui';
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlDrawer, GlInfiniteScroll, GlTabs } from '@gitlab/ui';
 import { mockTracking, unmockTracking, triggerEvent } from 'helpers/tracking_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import App from '~/whats_new/components/app.vue';
@@ -103,7 +103,7 @@ describe('App', () => {
       expect(actions.closeDrawer).toHaveBeenCalled();
     });
 
-    it.each([true, false])('passes open property', async openState => {
+    it.each([true, false])('passes open property', async (openState) => {
       wrapper.vm.$store.state.open = openState;
 
       await wrapper.vm.$nextTick();
@@ -183,7 +183,7 @@ describe('App', () => {
     const clickSecondTab = async () => {
       const secondTab = wrapper.findAll('.nav-link').at(1);
       await secondTab.trigger('click');
-      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise((resolve) => requestAnimationFrame(resolve));
     };
 
     beforeEach(() => {

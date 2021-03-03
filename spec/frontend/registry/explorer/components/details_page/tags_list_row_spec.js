@@ -1,12 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormCheckbox, GlSprintf, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import component from '~/registry/explorer/components/details_page/tags_list_row.vue';
 import DeleteButton from '~/registry/explorer/components/delete_button.vue';
-import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
+import component from '~/registry/explorer/components/details_page/tags_list_row.vue';
 import {
   REMOVE_TAG_BUTTON_TITLE,
   REMOVE_TAG_BUTTON_DISABLE_TOOLTIP,
@@ -14,13 +11,16 @@ import {
   NOT_AVAILABLE_TEXT,
   NOT_AVAILABLE_SIZE,
 } from '~/registry/explorer/constants/index';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
-import { tagsListResponse } from '../../mock_data';
+import { tagsMock } from '../../mock_data';
 import { ListItem } from '../../stubs';
 
 describe('tags list row', () => {
   let wrapper;
-  const [tag] = [...tagsListResponse];
+  const [tag] = [...tagsMock];
 
   const defaultProps = { tag, isMobile: false, index: 0 };
 
@@ -172,25 +172,31 @@ describe('tags list row', () => {
     });
 
     it('contains the totalSize and layers', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 1024 } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '1024', layers: 10 } });
 
       expect(findSize().text()).toMatchInterpolatedText('1.00 KiB · 10 layers');
     });
 
+    it('when totalSize is giantic', () => {
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '1099511627776', layers: 2 } });
+
+      expect(findSize().text()).toMatchInterpolatedText('1024.00 GiB · 2 layers');
+    });
+
     it('when totalSize is missing', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 0 } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '0', layers: 10 } });
 
       expect(findSize().text()).toMatchInterpolatedText(`${NOT_AVAILABLE_SIZE} · 10 layers`);
     });
 
     it('when layers are missing', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 1024, layers: null } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '1024' } });
 
       expect(findSize().text()).toMatchInterpolatedText('1.00 KiB');
     });
 
     it('when there is 1 layer', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 0, layers: 1 } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '0', layers: 1 } });
 
       expect(findSize().text()).toMatchInterpolatedText(`${NOT_AVAILABLE_SIZE} · 1 layer`);
     });
@@ -232,7 +238,7 @@ describe('tags list row', () => {
     it('has the correct text', () => {
       mountComponent();
 
-      expect(findShortRevision().text()).toMatchInterpolatedText('Digest: 9d72ae1');
+      expect(findShortRevision().text()).toMatchInterpolatedText('Digest: 2cf3d2f');
     });
 
     it(`displays ${NOT_AVAILABLE_TEXT} when digest is missing`, () => {
@@ -294,8 +300,8 @@ describe('tags list row', () => {
       describe.each`
         name                       | finderFunction             | text                                                                                                      | icon            | clipboard
         ${'published date detail'} | ${findPublishedDateDetail} | ${'Published to the gitlab-org/gitlab-test/rails-12009 image repository at 01:29 GMT+0000 on 2020-11-03'} | ${'clock'}      | ${false}
-        ${'manifest detail'}       | ${findManifestDetail}      | ${'Manifest digest: sha256:9d72ae1db47404e44e1760eb1ca4cb427b84be8c511f05dfe2089e1b9f741dd7'}             | ${'log'}        | ${true}
-        ${'configuration detail'}  | ${findConfigurationDetail} | ${'Configuration digest: sha256:5183b5d133fa864dca2de602f874b0d1bffe0f204ad894e3660432a487935139'}        | ${'cloud-gear'} | ${true}
+        ${'manifest detail'}       | ${findManifestDetail}      | ${'Manifest digest: sha256:2cf3d2fdac1b04a14301d47d51cb88dcd26714c74f91440eeee99ce399089062'}             | ${'log'}        | ${true}
+        ${'configuration detail'}  | ${findConfigurationDetail} | ${'Configuration digest: sha256:c2613843ab33aabf847965442b13a8b55a56ae28837ce182627c0716eb08c02b'}        | ${'cloud-gear'} | ${true}
       `('$name details row', ({ finderFunction, text, icon, clipboard }) => {
         it(`has ${text} as text`, () => {
           expect(finderFunction().text()).toMatchInterpolatedText(text);
@@ -306,11 +312,7 @@ describe('tags list row', () => {
         });
 
         it(`is ${clipboard} that clipboard button exist`, () => {
-          expect(
-            finderFunction()
-              .find(ClipboardButton)
-              .exists(),
-          ).toBe(clipboard);
+          expect(finderFunction().find(ClipboardButton).exists()).toBe(clipboard);
         });
       });
     });

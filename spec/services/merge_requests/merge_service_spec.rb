@@ -37,6 +37,10 @@ RSpec.describe MergeRequests::MergeService do
         expect(merge_request.in_progress_merge_commit_sha).to be_nil
       end
 
+      it 'does not update squash_commit_sha if it is not a squash' do
+        expect(merge_request.squash_commit_sha).to be_nil
+      end
+
       it 'sends email to user2 about merge of new merge_request' do
         email = ActionMailer::Base.deliveries.last
         expect(email.to.first).to eq(user2.email)
@@ -75,6 +79,12 @@ RSpec.describe MergeRequests::MergeService do
 
           expect(merge_commit.message).to eq('Merge commit message')
           expect(squash_commit.message).to eq("Squash commit message\n")
+        end
+
+        it 'persists squash_commit_sha' do
+          squash_commit = merge_request.merge_commit.parents.last
+
+          expect(merge_request.squash_commit_sha).to eq(squash_commit.id)
         end
       end
     end
@@ -151,7 +161,7 @@ RSpec.describe MergeRequests::MergeService do
           commit = double('commit', safe_message: "Fixes #{jira_issue.to_reference}")
           allow(merge_request).to receive(:commits).and_return([commit])
 
-          expect_any_instance_of(JiraService).to receive(:close_issue).with(merge_request, jira_issue).once
+          expect_any_instance_of(JiraService).to receive(:close_issue).with(merge_request, jira_issue, user).once
 
           service.execute(merge_request)
         end
@@ -248,9 +258,8 @@ RSpec.describe MergeRequests::MergeService do
           end
 
           it 'removes the source branch using the author user' do
-            expect(::Branches::DeleteService).to receive(:new)
-              .with(merge_request.source_project, merge_request.author)
-              .and_call_original
+            expect(::MergeRequests::DeleteSourceBranchWorker).to receive(:perform_async).with(merge_request.id, merge_request.source_branch_sha, merge_request.author.id)
+
             service.execute(merge_request)
           end
 
@@ -258,7 +267,8 @@ RSpec.describe MergeRequests::MergeService do
             let(:service) { described_class.new(project, user, merge_params.merge('should_remove_source_branch' => false)) }
 
             it 'does not delete the source branch' do
-              expect(::Branches::DeleteService).not_to receive(:new)
+              expect(::MergeRequests::DeleteSourceBranchWorker).not_to receive(:perform_async)
+
               service.execute(merge_request)
             end
           end
@@ -270,9 +280,8 @@ RSpec.describe MergeRequests::MergeService do
           end
 
           it 'removes the source branch using the current user' do
-            expect(::Branches::DeleteService).to receive(:new)
-              .with(merge_request.source_project, user)
-              .and_call_original
+            expect(::MergeRequests::DeleteSourceBranchWorker).to receive(:perform_async).with(merge_request.id, merge_request.source_branch_sha, user.id)
+
             service.execute(merge_request)
           end
         end
@@ -300,12 +309,12 @@ RSpec.describe MergeRequests::MergeService do
       it 'logs and saves error if there is an exception' do
         error_message = 'error message'
 
-        allow(service).to receive(:repository).and_raise('error message')
+        allow(service).to receive(:repository).and_raise(error_message)
         allow(service).to receive(:execute_hooks)
 
         service.execute(merge_request)
 
-        expect(merge_request.merge_error).to include('Something went wrong during merge')
+        expect(merge_request.merge_error).to eq(described_class::GENERIC_ERROR_MESSAGE)
         expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
       end
 
@@ -333,9 +342,7 @@ RSpec.describe MergeRequests::MergeService do
         expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
       end
 
-      it 'logs and saves error if there is a merge conflict' do
-        error_message = 'Conflicts detected during merge'
-
+      it 'logs and saves error if commit is not created' do
         allow_any_instance_of(Repository).to receive(:merge).and_return(false)
         allow(service).to receive(:execute_hooks)
 
@@ -343,8 +350,8 @@ RSpec.describe MergeRequests::MergeService do
 
         expect(merge_request).to be_open
         expect(merge_request.merge_commit_sha).to be_nil
-        expect(merge_request.merge_error).to include(error_message)
-        expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
+        expect(merge_request.merge_error).to include(described_class::GENERIC_ERROR_MESSAGE)
+        expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(described_class::GENERIC_ERROR_MESSAGE))
       end
 
       context 'when squashing is required' do
@@ -361,6 +368,7 @@ RSpec.describe MergeRequests::MergeService do
           expect(merge_request).to be_open
 
           expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
           expect(merge_request.merge_error).to include(error_message)
           expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
         end
@@ -381,6 +389,7 @@ RSpec.describe MergeRequests::MergeService do
 
           expect(merge_request).to be_open
           expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
           expect(merge_request.merge_error).to include(error_message)
           expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
         end
@@ -395,7 +404,24 @@ RSpec.describe MergeRequests::MergeService do
 
           expect(merge_request).to be_open
           expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
           expect(merge_request.merge_error).to include(error_message)
+          expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
+        end
+
+        it 'logs and saves error if there is an PreReceiveError exception' do
+          error_message = 'error message'
+
+          allow(service).to receive(:repository).and_raise(Gitlab::Git::PreReceiveError, "GitLab: #{error_message}")
+          allow(service).to receive(:execute_hooks)
+          merge_request.update!(squash: true)
+
+          service.execute(merge_request)
+
+          expect(merge_request).to be_open
+          expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
+          expect(merge_request.merge_error).to include('Something went wrong during merge pre-receive hook')
           expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
         end
 
@@ -415,6 +441,7 @@ RSpec.describe MergeRequests::MergeService do
 
               expect(merge_request).to be_open
               expect(merge_request.merge_commit_sha).to be_nil
+              expect(merge_request.squash_commit_sha).to be_nil
               expect(merge_request.merge_error).to include(error_message)
               expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
             end

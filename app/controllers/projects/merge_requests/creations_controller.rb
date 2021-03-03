@@ -12,7 +12,6 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
   before_action :build_merge_request, except: [:create]
 
   before_action do
-    push_frontend_feature_flag(:merge_request_reviewers, @project)
     push_frontend_feature_flag(:mr_collapsed_approval_rules, @project)
   end
 
