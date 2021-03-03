@@ -77,6 +77,24 @@ module EE
 
             present users, with: ::EE::API::Entities::BillableMember, current_user: current_user
           end
+
+          desc 'Removes a billable member from a group or project.'
+          params do
+            requires :user_id, type: Integer, desc: 'The user ID of the member'
+          end
+          # rubocop: disable CodeReuse/ActiveRecord
+          delete ":id/billable_members/:user_id" do
+            group = find_group!(params[:id])
+
+            bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
+
+            member = ::Member.in_hierarchy(group).find_by!(user_id: params[:user_id])
+
+            destroy_conditionally!(member) do
+              ::Members::DestroyService.new(current_user).execute(member)
+            end
+          end
+          # rubocop: enable CodeReuse/ActiveRecord
         end
       end
     end

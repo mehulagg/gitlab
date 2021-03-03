@@ -3,7 +3,7 @@ import { buildApiUrl } from './api_utils';
 import { DEFAULT_PER_PAGE } from './constants';
 
 const GROUPS_PATH = '/api/:version/groups.json';
-const GROUPS_MEMBERS_SINGLE_PATH = '/api/:version/groups/:group_id/members/:id';
+const GROUPS_MEMBERS_SINGLE_PATH = '/api/:version/groups/:group_id/billable_members/:id';
 
 export function getGroups(query, options, callback = () => {}) {
   const url = buildApiUrl(GROUPS_PATH);
