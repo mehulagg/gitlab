@@ -582,7 +582,10 @@ To fix it, make sure that both `agentk` and KAS use the same versions.
 {"level":"error","time":"2021-02-25T07:22:37.158Z","msg":"Reverse tunnel","mod_name":"reverse_tunnel","error":"Connect(): rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://GitLabhost.tld:443/-/kubernetes-agent/\\\": x509: certificate signed by unknown authority\""}
 ```
 
-This error is shown if your GitLab instance is using a certificate signed by an internal CA that is unknown to the agent. One approach to fixing it is to present the CA certificate file to the agent via a Kubernetes `configmap` and mount the file in the agent `/etc/ssl/certs` directory from where it will be picked up automatically.
+This error is shown if your GitLab instance is using a certificate signed by an internal CA that
+is unknown to the agent. One approach to fixing it is to present the CA certificate file to the agent
+via a Kubernetes `configmap` and mount the file in the agent `/etc/ssl/certs` directory from where it
+will be picked up automatically.
 
 For example, if your internal CA certifciate is `myCA.pem`:
 
