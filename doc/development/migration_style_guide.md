@@ -1038,24 +1038,17 @@ the below metrics and comparing to the current high-traffic table.
 
 ### Check write traffic ON pg_stat_user_tables
 
-This requires access to the primary database
+This requires access to the primary database.
 
 ```sql
 gitlabhq_production=# select relname, n_tup_upd, n_tup_del, n_tup_ins from pg_stat_user_tables order by n_tup_upd + n_tup_del + n_tup_ins desc limit 10;
           relname           | n_tup_upd | n_tup_del | n_tup_ins 
 ----------------------------+-----------+-----------+-----------
- project_mirror_data        | 159714131 |      6644 |     32324
- ci_builds                  |  97658456 |   4881342 |  17297879
- ci_build_trace_sections    |         0 |  17372152 |  87745345
- merge_request_diff_commits |         0 |   2871777 |  78061674
- merge_request_diff_files   |         0 |  24295732 |  53545740
- project_daily_statistics   |  71784522 |     80458 |   2200662
- ci_job_artifacts           |  19110012 |   4873891 |  19108603
- ci_stages                  |  22489886 |   2506181 |   8470501
- project_statistics         |  32416950 |     62680 |    227363
 ```
 
 ### Check Average monthly updates
+
+This can be checked on the replica.
 
 ```sql
 SELECT avg(count) FROM
