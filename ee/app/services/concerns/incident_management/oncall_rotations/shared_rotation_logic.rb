@@ -4,6 +4,17 @@ module IncidentManagement
   module OncallRotations
     module SharedRotationLogic
       MAXIMUM_PARTICIPANTS = 100
+      RotationModificationError = Class.new(StandardError) do
+        def initialize(service_response_error)
+          @service_response_error = service_response_error
+        end
+
+        attr_reader :service_response_error
+
+        def message
+          service_response_error.message
+        end
+      end
 
       def participants_for(rotation, participants_params)
         participants_params.map do |participant|
@@ -56,6 +67,10 @@ module IncidentManagement
 
       def error_duplicate_participants
         error(_('A user can only participate in a rotation once'))
+      end
+
+      def error_in_validation(object)
+        error(object.errors.full_messages.to_sentence)
       end
     end
   end

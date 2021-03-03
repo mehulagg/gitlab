@@ -81,6 +81,24 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
       it_behaves_like 'error response', 'A user can only participate in a rotation once'
     end
 
+    context 'when adding a user that do not have permissions' do
+      let(:another_user_with_permission) do
+        new_user = create(:user)
+        project.add_maintainer(new_user)
+        new_user
+      end
+
+      let(:participant_to_add) { build(:incident_management_oncall_participant, rotation: oncall_rotation, user: another_user_with_permission) }
+      let(:participant_without_permissions_to_add) { build(:incident_management_oncall_participant, rotation: oncall_rotation, user: user_without_permissions) }
+      let(:params) { rotation_params(participants: oncall_rotation.participants.to_a.push(participant_to_add, participant_without_permissions_to_add)) }
+
+      it_behaves_like 'error response', 'A participant has insufficient permissions to access the project'
+
+      it 'does not modify the rotation' do
+        expect { subject }.not_to change { oncall_rotation.participants.reload }
+      end
+    end
+
     context 'removing one participant' do
       let(:participant_to_keep) { oncall_rotation.participants.first }
       let(:participant_to_remove) { oncall_rotation.participants.last }

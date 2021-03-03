@@ -4,8 +4,6 @@ module IncidentManagement
   module OncallRotations
     class EditService < OncallRotations::BaseService
       include IncidentManagement::OncallRotations::SharedRotationLogic
-      MAXIMUM_PARTICIPANTS = 100
-
       # @param rotation [IncidentManagement::OncallRotation]
       # @param user [User]
       # @param params [Hash<Symbol,Any>]
@@ -35,6 +33,9 @@ module IncidentManagement
         IncidentManagement::OncallRotations::PersistShiftsJob.new.perform(oncall_rotation.id)
 
         update_and_remove_participants unless participants_params.nil?
+
+      rescue RotationModificationError => err
+        err.service_response_error
       end
 
       private
@@ -44,8 +45,8 @@ module IncidentManagement
       def update_and_remove_participants
         existing_participants = oncall_rotation.participants
 
-        remove_participants(existing_participants)
         add_participants(existing_participants)
+        remove_participants(existing_participants)
       end
 
       def remove_participants(existing_participants)
@@ -64,8 +65,14 @@ module IncidentManagement
 
         return unless participant_params_to_add.any?
 
-        participant_objects = participants_for(oncall_rotation, participant_params_to_add)
-        insert_participants(participant_objects)
+        participants = participants_for(oncall_rotation, participant_params_to_add)
+
+        raise RotationModificationError.new(error_participant_has_no_permission) if participants.nil?
+
+        first_invalid_participant = participants.find(&:invalid?)
+        return RotationModificationError.new(error_in_validation(first_invalid_participant)) if first_invalid_participant
+
+        insert_participants(participants)
       end
 
       def error_no_permissions
