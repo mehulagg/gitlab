@@ -10,6 +10,7 @@ export const SHIFT_WIDTHS = {
   xs: 40,
 };
 
+// Vertically and horizontally centers children
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
 
 export default {
