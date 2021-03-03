@@ -18,11 +18,11 @@ module Gitlab
               @package_version = package_version
             end
 
-            private
-
             def fingerprint_data
               "#{docker_image_name_without_tag}:#{package_name}"
             end
+
+            private
 
             def docker_image_name_without_tag
               base_name, version = image.split(':')

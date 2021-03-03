@@ -18,6 +18,12 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingSignature do
         expect(subject.algorithm_type).to eq(params[:algorithm_type])
         expect(subject.signature_value).to eq(params[:signature_value])
       end
+
+      describe '#valid?' do
+        it 'returns true' do
+          expect(subject.valid?).to eq(true)
+        end
+      end
     end
   end
 
@@ -48,6 +54,15 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingSignature do
       it 'is not valid' do
         expect(subject.valid?).to eq(false)
       end
+    end
+  end
+
+  describe '#to_hash' do
+    it 'returns a hash representation of the fingerprint' do
+      expect(subject.to_hash).to eq(
+        algorithm_type: params[:algorithm_type],
+        fingerprint_sha256: Digest::SHA1.digest(params[:fingerprint_value])
+      )
     end
   end
 end

@@ -75,7 +75,7 @@ module Security
     def normalize_report_findings(report_findings, vulnerabilities)
       report_findings.map do |report_finding|
         finding_hash = report_finding.to_hash
-          .except(:compare_key, :identifiers, :location, :scanner, :links)
+          .except(:compare_key, :identifiers, :location, :scanner, :links, :fingerprints)
 
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
@@ -84,11 +84,15 @@ module Security
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
+        # finding.location = report_finding.location_json
         finding.finding_links = report_finding.links.map do |link|
           Vulnerabilities::FindingLink.new(link.to_hash)
         end
         finding.identifiers = report_finding.identifiers.map do |identifier|
           Vulnerabilities::Identifier.new(identifier.to_hash)
+        end
+        finding.fingerprints = report_finding.fingerprints.map do |fingerprint|
+          Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
         end
 
         finding
@@ -111,6 +115,25 @@ module Security
     end
 
     def dismissal_feedback?(finding)
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints) && !finding.fingerprints.empty?
+        dismissal_feedback_by_finding_fingerprints(finding)
+      else
+        dismissal_feedback_by_project_fingerprint(finding)
+      end
+    end
+
+    def dismissal_feedback_by_finding_fingerprints(finding)
+      all_dismissals = strong_memoize(:all_dismissal_feedbacks) do
+        pipeline.project
+                .vulnerability_feedback
+                .for_dismissal
+      end
+
+      potential_uuids = Set.new([*finding.fingerprint_uuids, finding.uuid].compact)
+      all_dismissals.any? { |dismissal| potential_uuids.include?(dismissal.finding_uuid) }
+    end
+
+    def dismissal_feedback_by_project_fingerprint(finding)
       dismissal_feedback_by_fingerprint[finding.project_fingerprint]
     end
 
