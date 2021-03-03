@@ -240,6 +240,10 @@ module EE
       feature_available?(:group_project_templates)
     end
 
+    def scoped_variables_available?
+      ::Feature.enabled?(:scoped_group_variables, self) && feature_available?(:group_scoped_ci_variables)
+    end
+
     def actual_size_limit
       return ::Gitlab::CurrentSettings.repository_size_limit if repository_size_limit.nil?
 

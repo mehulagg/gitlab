@@ -2,16 +2,16 @@
 
 module Ci
   class VariablesFinder
-    attr_reader :project, :params
+    attr_reader :owner, :params
 
-    def initialize(project, params)
-      @project, @params = project, params
+    def initialize(owner, params)
+      @owner, @params = owner, params
 
       raise ArgumentError, 'Please provide params[:key]' if params[:key].blank?
     end
 
     def execute
-      variables = project.variables
+      variables = owner.variables
       variables = by_key(variables)
       variables = by_environment_scope(variables)
       variables

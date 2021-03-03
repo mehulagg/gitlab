@@ -676,6 +676,30 @@ RSpec.describe Group do
     end
   end
 
+  describe '#scoped_variables_available?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:group) { create(:group) }
+
+    subject { group.scoped_variables_available? }
+
+    where(:feature_enabled, :feature_available, :scoped_variables_available) do
+      true  | true  | true
+      false | true  | false
+      true  | false | false
+      false | false | false
+    end
+
+    with_them do
+      before do
+        stub_feature_flags(scoped_group_variables: feature_enabled)
+        stub_licensed_features(group_scoped_ci_variables: feature_available)
+      end
+
+      it { is_expected.to eq(scoped_variables_available) }
+    end
+  end
+
   describe '#minimal_access_role_allowed?' do
     subject { group.minimal_access_role_allowed? }
 
