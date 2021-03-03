@@ -1035,7 +1035,6 @@ different features of GitLab with different usage patterns, thus making assumpti
 on GitLab.com is not enough. You may suggest a new high-traffic table by using one or more of 
 the below metrics and comparing to the current high-traffic table.
 
-
 ### Check write traffic ON pg_stat_user_tables
 
 This requires access to the primary database.
@@ -1046,7 +1045,7 @@ gitlabhq_production=# select relname, n_tup_upd, n_tup_del, n_tup_ins from pg_st
 ----------------------------+-----------+-----------+-----------
 ```
 
-### Check Average monthly updates
+### Check average monthly updates
 
 This can be checked on the replica.
 
