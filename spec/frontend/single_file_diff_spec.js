@@ -37,7 +37,7 @@ describe('SingleFileDiff', () => {
     </div>
 `);
 
-    // Unopened is the default state
+    // Collapsed is the default state
     const diff = new SingleFileDiff(document.querySelector('.diff-file'));
     expect(diff.isOpen).toBe(false);
     expect(diff.content).toBeNull();
@@ -48,7 +48,7 @@ describe('SingleFileDiff', () => {
     expect(diff.isOpen).toBe(true);
     expect(diff.content).not.toBeNull();
 
-    // Closing again
+    // Collapsing again
     await diff.toggleDiff($(document.querySelector('.js-file-title')));
     expect(diff.isOpen).toBe(false);
     expect(diff.content).not.toBeNull();
@@ -87,7 +87,7 @@ describe('SingleFileDiff', () => {
     expect(diff.isOpen).toBe(false);
     expect(diff.content).not.toBeNull();
 
-    // Closing again
+    // Opening again
     await diff.toggleDiff($(document.querySelector('.js-file-title')));
     expect(diff.isOpen).toBe(true);
 
