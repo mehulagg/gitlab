@@ -8,12 +8,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4544) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.10.
 
-On-call Schedule management allows yu to create schedules for responders to rotate on-call responsibilities. Maintain the availabity of your software services by putting your teams on-call. When things go wrong, your team will be notified immediately so that they can quickly respond to service outages and disruptions.
+On-call Schedule management allows you to create schedules for responders to rotate on-call responsibilities. Maintain the availabity of your software services by putting your teams on-call. When things go wrong, your team will be notified immediately so that they can quickly respond to service outages and disruptions.
 
 If you have at least Maintainer [permissions](../../user/permissions.md), to create an
 schedule, you have one option to do this manually.
 
-## Schedule Creation
+## Schedules
+
+Set-up an on-call schedule for your team to add rotations to.
+
+### Create a schedule
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230857) in GitLab 13.10.
 
@@ -29,7 +33,7 @@ schedule, you have one option to do this manually.
 
    ![Schedule Empty Grid](img/oncall_schedule_empty_grid_v13_10.png)
 
-### Schedule Update
+### Update a schedule
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262849) in GitLab 13.10.
 
@@ -39,7 +43,7 @@ schedule, you have one option to do this manually.
 
    ![Schedule Edit](img/oncall_schedule_edit_schedule_v13_10.png)
 
-### Schedule Deletion
+### Delete a schedule
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262850) in GitLab 13.10.
 
@@ -48,7 +52,11 @@ schedule, you have one option to do this manually.
 
    ![Schedule Delete](img/oncall_schedule_delete_schedule_v13_10.png)
 
-## Rotation Creation
+## Rotations
+
+Add rotations to an existing schedule to put your team members on-call.
+
+### Create a rotation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262857) in GitLab 13.10.
 
@@ -68,7 +76,7 @@ schedule, you have one option to do this manually.
 | Starts on date | The start date of the rotation | `Date` |
 | Starts on time | The start time for each shift within the rotation | `Time` |
 
-### Rotation Start/End Date
+#### Rotation Start/End Date
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262858) in GitLab 13.10.
 
@@ -77,7 +85,7 @@ schedule, you have one option to do this manually.
 
   ![Schedule Rotation Start/End Date](img/oncall_schedule_start_end_date_v13_10.png)
 
-### Rotation Time Intervals
+#### Rotation Time Intervals
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262859) in GitLab 13.10.
 
@@ -86,7 +94,23 @@ schedule, you have one option to do this manually.
 
   ![Schedule Rotation Time Interval](img/oncall_schedule_time_interval_v13_10.png)
 
-## Schedule Rotation Views(Daily, Hourly)
+### Rotation Edit
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262862) in GitLab 13.10.
+
+1. Go to **Operations > On-call Schedules**, and select **Pencil** icon on the right of the rotation title that you want to update.
+1. In the **Edit Rotation** modal, click the **Edit rotation** button.
+
+### Rotation Deletion
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262863) in GitLab 13.10.
+
+1. Go to **Operations > On-call Schedules**, and select **Trash Can** icon on the right of the rotation title that you want to delete.
+1. In the **Delete Rotation** modal, click the **Delete rotation** button to save your changes and remove the currently selected rotation.
+
+   ![Schedule Rotation Delete](img/oncall_schedule_delete_rotation_v13_10.png)
+
+### Schedule Rotation Views(Daily, Hourly)
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262860) in GitLab 13.10.
 
