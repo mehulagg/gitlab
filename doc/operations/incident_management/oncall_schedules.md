@@ -78,14 +78,14 @@ Add rotations to an existing schedule to put your team members on-call.
 1. Go to **Operations > On-call Schedules**, and click the **Add a rotation** button on the top right of the current schedule.
 1. In the **Add a rotation** modal toggle the **Restrict to time intervals** option and then select a start/end time for each rotation shift to be restricted to.
 
-### Rotation Edit
+### Edit a rotation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262862) in GitLab 13.10.
 
 1. Go to **Operations > On-call Schedules**, and select **Pencil** icon on the right of the rotation title that you want to update.
 1. In the **Edit Rotation** modal, click the **Edit rotation** button.
 
-### Rotation Deletion
+### Delete a rotation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262863) in GitLab 13.10.
 
@@ -103,16 +103,6 @@ Add rotations to an existing schedule to put your team members on-call.
 
    ![1 Day Grid View](img/oncall_schedule_day_grid_v13_10.png)
 
-### Rotation Edit
+### Paging an on-call responder
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262862) in GitLab 13.10.
-
-1. Go to **Operations > On-call Schedules**, and select **Pencil** icon on the right of the rotation title that you want to update.
-1. In the **Edit Rotation** modal, click the **Edit rotation** button.
-
-### Rotation Deletion
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262863) in GitLab 13.10.
-
-1. Go to **Operations > On-call Schedules**, and select **Trash Can** icon on the right of the rotation title that you want to delete.
-1. In the **Delete Rotation** modal, click the **Delete rotation** button to save your changes and remove the currently selected rotation.
+When an alert is created in a project, GitLab will send an email to the on-call responder(s) in the on-call schedule for that project. If there is no schedule or there is no one on-call in that schedule at the time the alert is triggered, no email will be sent.
