@@ -46,6 +46,9 @@ module IncidentManagement
 
           insert_participants(participants)
 
+          reset_result = OncallShifts::ResetRotationService.new(oncall_rotation, user).execute
+          break reset_result if reset_result.error?
+
           success(oncall_rotation)
         end
       end
