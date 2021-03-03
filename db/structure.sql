@@ -12267,6 +12267,26 @@ CREATE SEQUENCE elastic_index_settings_id_seq
 
 ALTER SEQUENCE elastic_index_settings_id_seq OWNED BY elastic_index_settings.id;
 
+CREATE TABLE elastic_reindexing_slices (
+    id bigint NOT NULL,
+    elastic_reindexing_subtask_id bigint NOT NULL,
+    elastic_task text NOT NULL,
+    elastic_slice integer,
+    retry_attempt integer DEFAULT 0 NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_ca30e1396e CHECK ((char_length(elastic_task) <= 255))
+);
+
+CREATE SEQUENCE elastic_reindexing_slices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE elastic_reindexing_slices_id_seq OWNED BY elastic_reindexing_slices.id;
+
 CREATE TABLE elastic_reindexing_subtasks (
     id bigint NOT NULL,
     elastic_reindexing_task_id bigint NOT NULL,
@@ -12278,6 +12298,7 @@ CREATE TABLE elastic_reindexing_subtasks (
     documents_count integer,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    elastic_max_slice integer,
     CONSTRAINT check_4910adc798 CHECK ((char_length(elastic_task) <= 255)),
     CONSTRAINT check_88f56216a4 CHECK ((char_length(alias_name) <= 255)),
     CONSTRAINT check_a1fbd9faa9 CHECK ((char_length(index_name_from) <= 255)),
@@ -19327,6 +19348,8 @@ ALTER TABLE ONLY draft_notes ALTER COLUMN id SET DEFAULT nextval('draft_notes_id
 
 ALTER TABLE ONLY elastic_index_settings ALTER COLUMN id SET DEFAULT nextval('elastic_index_settings_id_seq'::regclass);
 
+ALTER TABLE ONLY elastic_reindexing_slices ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_slices_id_seq'::regclass);
+
 ALTER TABLE ONLY elastic_reindexing_subtasks ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_subtasks_id_seq'::regclass);
 
 ALTER TABLE ONLY elastic_reindexing_tasks ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_tasks_id_seq'::regclass);
@@ -20566,6 +20589,9 @@ ALTER TABLE ONLY draft_notes
 ALTER TABLE ONLY elastic_index_settings
     ADD CONSTRAINT elastic_index_settings_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY elastic_reindexing_slices
+    ADD CONSTRAINT elastic_reindexing_slices_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY elastic_reindexing_subtasks
     ADD CONSTRAINT elastic_reindexing_subtasks_pkey PRIMARY KEY (id);
 
@@ -21728,6 +21754,8 @@ CREATE INDEX idx_container_repositories_on_exp_cleanup_status_and_start_date ON 
 CREATE INDEX idx_deployment_clusters_on_cluster_id_and_kubernetes_namespace ON deployment_clusters USING btree (cluster_id, kubernetes_namespace);
 
 CREATE INDEX idx_eaprpb_external_approval_rule_id ON external_approval_rules_protected_branches USING btree (external_approval_rule_id);
+
+CREATE INDEX idx_elastic_reindexing_slices_on_elastic_reindexing_subtask_id ON elastic_reindexing_slices USING btree (elastic_reindexing_subtask_id);
 
 CREATE UNIQUE INDEX idx_environment_merge_requests_unique_index ON deployment_merge_requests USING btree (environment_id, merge_request_id);
 
@@ -26346,6 +26374,9 @@ ALTER TABLE ONLY resource_milestone_events
 
 ALTER TABLE ONLY namespace_root_storage_statistics
     ADD CONSTRAINT fk_rails_a0702c430b FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY elastic_reindexing_slices
+    ADD CONSTRAINT fk_rails_a17d86aeb9 FOREIGN KEY (elastic_reindexing_subtask_id) REFERENCES elastic_reindexing_subtasks(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_aliases
     ADD CONSTRAINT fk_rails_a1804f74a7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

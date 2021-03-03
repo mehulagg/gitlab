@@ -7,5 +7,6 @@ FactoryBot.define do
     sequence(:index_name_to) { |n| "new_index_name_#{n}" }
     sequence(:elastic_task) { |n| "elastic_task_#{n}" }
     sequence(:alias_name) { |n| "alias_name_#{n}" }
+    elastic_max_slice { 5 }
   end
 end
