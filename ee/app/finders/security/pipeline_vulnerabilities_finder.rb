@@ -62,6 +62,7 @@ module Security
           project: pipeline.project,
           report_type: report_type,
           project_fingerprints: report.findings.map(&:project_fingerprint))
+       .eager_load(:vulnerability)
        .each_with_object({}) do |finding, hash|
         hash[finding.project_fingerprint] = finding.vulnerability
       end
