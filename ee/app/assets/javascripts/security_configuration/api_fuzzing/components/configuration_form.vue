@@ -57,7 +57,7 @@ export default {
       showError: false,
       targetUrl: {
         field: 'targetUrl',
-        label: s__('APIFuzzing|Target URL'),
+        label: s__('APIFuzzing|Target URL TEST'),
         description: s__('APIFuzzing|Base URL of API fuzzing target.'),
         placeholder: __('Ex: Example.com'),
         value: '',
