@@ -1,10 +1,14 @@
 <script>
 import GeoNodeCoreDetails from './geo_node_core_details.vue';
+import GeoNodePrimaryOtherInfo from './primary_node/geo_node_primary_other_info.vue';
+import GeoNodeVerificationInfo from './primary_node/geo_node_verification_info.vue';
 
 export default {
   name: 'GeoNodeDetails',
   components: {
     GeoNodeCoreDetails,
+    GeoNodePrimaryOtherInfo,
+    GeoNodeVerificationInfo,
   },
   props: {
     node: {
@@ -23,7 +27,11 @@ export default {
         v-if="node.primary"
         class="gl-display-flex gl-sm-flex-direction-column gl-align-items-flex-start gl-h-full gl-w-full"
       >
-        <p data-testid="primaryNodeDetails">{{ s__('Geo|Primary Details') }}</p>
+        <geo-node-verification-info
+          class="gl-flex-fill-1 gl-mb-5 gl-md-mb-0 gl-md-mr-5 gl-h-full gl-w-full"
+          :node="node"
+        />
+        <geo-node-primary-other-info class="gl-flex-fill-1 gl-h-full gl-w-full" :node="node" />
       </div>
       <div v-else class="gl-display-flex gl-flex-direction-column gl-h-full gl-w-full">
         <p data-testid="secondaryNodeDetails">{{ s__('Geo|Secondary Details') }}</p>

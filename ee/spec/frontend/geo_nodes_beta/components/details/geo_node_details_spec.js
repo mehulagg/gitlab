@@ -2,6 +2,8 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GeoNodeCoreDetails from 'ee/geo_nodes_beta/components/details/geo_node_core_details.vue';
 import GeoNodeDetails from 'ee/geo_nodes_beta/components/details/geo_node_details.vue';
+import GeoNodePrimaryOtherInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_primary_other_info.vue';
+import GeoNodeVerificationInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_verification_info.vue';
 import {
   MOCK_PRIMARY_VERSION,
   MOCK_REPLICABLE_TYPES,
@@ -44,7 +46,8 @@ describe('GeoNodeDetails', () => {
   });
 
   const findGeoNodeCoreDetails = () => wrapper.find(GeoNodeCoreDetails);
-  const findGeoNodePrimaryDetails = () => wrapper.find('[data-testid="primaryNodeDetails"]');
+  const findGeoNodePrimaryOtherInfo = () => wrapper.find(GeoNodePrimaryOtherInfo);
+  const findGeoNodeVerificationInfo = () => wrapper.find(GeoNodeVerificationInfo);
   const findGeoNodeSecondaryDetails = () => wrapper.find('[data-testid="secondaryNodeDetails"]');
 
   describe('template', () => {
@@ -59,23 +62,32 @@ describe('GeoNodeDetails', () => {
     });
 
     describe.each`
-      node             | showPrimaryDetails | showSecondaryDetails
-      ${MOCK_NODES[0]} | ${true}            | ${false}
-      ${MOCK_NODES[1]} | ${false}           | ${true}
-    `(`conditionally`, ({ node, showPrimaryDetails, showSecondaryDetails }) => {
-      beforeEach(() => {
-        createComponent(null, { node });
-      });
-
-      describe(`when primary is ${node.primary}`, () => {
-        it(`does ${!showPrimaryDetails ? 'not ' : ''}render GeoNodePrimaryDetails`, () => {
-          expect(findGeoNodePrimaryDetails().exists()).toBe(showPrimaryDetails);
+      node             | showPrimaryOtherInfo | showPrimaryVerificationInfo | showSecondaryDetails
+      ${MOCK_NODES[0]} | ${true}              | ${true}                     | ${false}
+      ${MOCK_NODES[1]} | ${false}             | ${false}                    | ${true}
+    `(
+      `conditionally`,
+      ({ node, showPrimaryOtherInfo, showPrimaryVerificationInfo, showSecondaryDetails }) => {
+        beforeEach(() => {
+          createComponent(null, { node });
         });
 
-        it(`does ${!showSecondaryDetails ? 'not ' : ''}render GeoNodeSecondaryDetails`, () => {
-          expect(findGeoNodeSecondaryDetails().exists()).toBe(showSecondaryDetails);
+        describe(`when primary is ${node.primary}`, () => {
+          it(`does ${!showPrimaryOtherInfo ? 'not ' : ''}render GeoNodePrimaryInfo`, () => {
+            expect(findGeoNodePrimaryOtherInfo().exists()).toBe(showPrimaryOtherInfo);
+          });
+
+          it(`does ${
+            !showPrimaryVerificationInfo ? 'not ' : ''
+          }render GeoNodeVerificationInfo`, () => {
+            expect(findGeoNodeVerificationInfo().exists()).toBe(showPrimaryVerificationInfo);
+          });
+
+          it(`does ${!showSecondaryDetails ? 'not ' : ''}render GeoNodeSecondaryDetails`, () => {
+            expect(findGeoNodeSecondaryDetails().exists()).toBe(showSecondaryDetails);
+          });
         });
-      });
-    });
+      },
+    );
   });
 });

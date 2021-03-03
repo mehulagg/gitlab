@@ -10,6 +10,9 @@ export const HELP_NODE_HEALTH_URL =
 export const GEO_TROUBLESHOOTING_URL =
   'https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html';
 
+export const HELP_INFO_URL =
+  'https://docs.gitlab.com/ee/administration/geo/disaster_recovery/background_verification.html#repository-verification';
+
 export const HEALTH_STATUS_UI = {
   healthy: {
     icon: 'status_success',
