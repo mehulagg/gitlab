@@ -17,10 +17,10 @@ gitlab:
     resources:
       requests:
         cpu: 1200m
-        memory: 245M
+        memory: 500M
       limits:
         cpu: 1800m
-        memory: 367M
+        memory: 750M
     persistence:
       size: 10G
   gitlab-exporter:
