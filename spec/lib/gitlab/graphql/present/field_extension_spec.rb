@@ -76,7 +76,17 @@ RSpec.describe Gitlab::Graphql::Present::FieldExtension do
     end
   end
 
+  shared_examples 'calling the presenter method' do
+    it 'calls the presenter method' do
+      expect(resolve_value).to eq presenter.new(object, current_user: user).send(field_name)
+    end
+  end
+
   context 'when the object declares a presenter' do
+    before do
+      owner.present_using(presenter)
+    end
+
     context 'when the presenter overrides the original method' do
       def twice
         Class.new(base_presenter) do
@@ -86,15 +96,26 @@ RSpec.describe Gitlab::Graphql::Present::FieldExtension do
         end
       end
 
-      before do
-        owner.present_using(twice)
+      let(:presenter) { twice }
+
+      it_behaves_like 'calling the presenter method'
+    end
+
+    # This is exercised here using an explicit `resolve:` proc, but
+    # @resolver_proc values are used in field instrumentation as well.
+    context 'when the field uses a resolve proc' do
+      let(:presenter) { base_presenter }
+      let(:field) do
+        ::Types::BaseField.new(
+          name: field_name,
+          type: GraphQL::STRING_TYPE,
+          null: true,
+          owner: owner,
+          resolve: ->(obj, args, ctx) { 'Hello from a proc' }
+        )
       end
 
-      it 'applies the extension, and uses the presenter method' do
-        expect(described_class).to receive(:new).and_call_original
-
-        expect(resolve_value).to eq 'foofoo'
-      end
+      specify { expect(resolve_value).to eq 'Hello from a proc' }
     end
 
     context 'when the presenter provides a new method' do
@@ -106,10 +127,6 @@ RSpec.describe Gitlab::Graphql::Present::FieldExtension do
         end
       end
 
-      before do
-        owner.present_using(presenter)
-      end
-
       context 'when we select the original field' do
         it 'is unaffected' do
           expect(resolve_value).to eq 'foo'
@@ -119,9 +136,7 @@ RSpec.describe Gitlab::Graphql::Present::FieldExtension do
       context 'when we select the new field' do
         let(:field_name) { 'current_username' }
 
-        it 'resolves to the presented value' do
-          expect(resolve_value).to eq "Hello #{user.username} from the presenter!"
-        end
+        it_behaves_like 'calling the presenter method'
       end
     end
   end
