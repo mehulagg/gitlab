@@ -47,8 +47,8 @@ export default {
   trackingActions: { ...TrackingActions },
   TrackingLabels,
   installOptions: [
-    { value: 'maven', label: s__('PackageRegistry|Show Gradle commands') },
-    { value: 'gradle', label: s__('PackageRegistry|Show Maven commands') },
+    { value: 'maven', label: s__('PackageRegistry|Show Maven commands') },
+    { value: 'groovy', label: s__('PackageRegistry|Show Gradle Groovy DSL commands') },
   ],
 };
 </script>
@@ -110,16 +110,16 @@ export default {
     <template v-else>
       <code-instruction
         class="gl-mb-5"
-        :label="s__('PackageRegistry|Gradle install command')"
+        :label="s__('PackageRegistry|Gradle Groovy DSL install command')"
         :instruction="gradleInstalCommand"
-        :copy-text="s__('PackageRegistry|Copy Gradle install command')"
+        :copy-text="s__('PackageRegistry|Copy Gradle Groovy DSL install command')"
         :tracking-action="$options.trackingActions.COPY_GRADLE_INSTALL_COMMAND"
         :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
       />
       <code-instruction
-        :label="s__('PackageRegistry|Add Gradle repository command')"
+        :label="s__('PackageRegistry|Add Gradle Groovy DSL repository command')"
         :instruction="gradleAddSourceCommand"
-        :copy-text="s__('PackageRegistry|Copy add Gradle repository command')"
+        :copy-text="s__('PackageRegistry|Copy add Gradle Groovy DSL repository command')"
         :tracking-action="$options.trackingActions.COPY_GRADLE_ADD_TO_SOURCE_COMMAND"
         :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
         multiline

@@ -59,8 +59,8 @@ describe('MavenInstallation', () => {
       expect(findInstallationTitle().props()).toMatchObject({
         storageKey: 'package_maven_installation_instructions',
         options: [
-          { value: 'maven', label: 'Show Gradle commands' },
-          { value: 'gradle', label: 'Show Maven commands' },
+          { value: 'maven', label: 'Show Maven commands' },
+          { value: 'groovy', label: 'Show Gradle Groovy DSL commands' },
         ],
       });
     });
