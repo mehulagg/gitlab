@@ -84,7 +84,7 @@ export default {
       </div>
     </template>
     <template #sticky>
-      <filters v-if="shouldShowDashboard" :projects="projects" @filterChange="handleFilterChange" />
+      <filters v-if="shouldShowDashboard" @filterChange="handleFilterChange" />
     </template>
     <instance-security-vulnerabilities v-if="shouldShowDashboard" :filters="filters" />
   </security-dashboard-layout>

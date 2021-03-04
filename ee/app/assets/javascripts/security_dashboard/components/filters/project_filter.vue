@@ -2,8 +2,8 @@
 import { GlDropdownDivider, GlSkeletonLoader, GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
 import { PROJECT_ID_PREFIX } from '../../constants';
-import projectsFromIds from '../../graphql/queries/projects_from_ids.query.graphql';
 import projectsSearch from '../../graphql/queries/group_projects_search.query.graphql';
+import projectsFromIds from '../../graphql/queries/projects_from_ids.query.graphql';
 import { mapProjects } from '../../helpers';
 import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
@@ -18,13 +18,10 @@ export default {
     GlLoadingIcon,
   },
   extends: StandardFilter,
-  props: {
-    fullPath: { type: String, required: true },
-  },
+  inject: ['groupFullPath'],
   data: () => ({
     preselectedProjects: [],
     projects: [],
-    endCursor: undefined,
     hasDropdownBeenOpened: false,
   }),
   computed: {
