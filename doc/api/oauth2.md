@@ -354,3 +354,13 @@ These are aliases for `scope` and `expires_in` respectively, and have been inclu
 prevent breaking changes introduced in [doorkeeper 5.0.2](https://github.com/doorkeeper-gem/doorkeeper/wiki/Migration-from-old-versions#from-4x-to-5x).
 
 Don't rely on these fields as they will be removed in a later release.
+
+## OAuth2 tokens and GitLab registries
+
+Standard OAuth2 tokens support different degrees of access to GitLab registries, as they:
+
+- Do not allow users to authenticate to the GitLab
+  [Docker registry](../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
+- Allow users to get, list, and delete registries through
+  the [Container registry](container_registry.md)
+- Can not be used for the [npm registry](../user/packages/npm_registry/index.md#authenticate-to-the-package-registry).
