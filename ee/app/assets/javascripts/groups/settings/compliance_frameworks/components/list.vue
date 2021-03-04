@@ -98,6 +98,9 @@ export default {
     },
   },
   methods: {
+    dismissAlertMessage() {
+      this.message = null;
+    },
     markForDeletion(framework) {
       this.markedForDeletion = framework;
       this.$refs.modal.show();
@@ -140,6 +143,7 @@ export default {
       class="gl-mt-5"
       :variant="alertVariant"
       :dismissible="alertDismissible"
+      @dismiss="dismissAlertMessage"
     >
       {{ alertMessage }}
     </gl-alert>

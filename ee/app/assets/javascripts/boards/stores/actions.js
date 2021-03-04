@@ -587,7 +587,7 @@ export default {
       })
       .then(({ data }) => {
         if (data?.epicBoardListCreate?.errors.length) {
-          commit(types.CREATE_LIST_FAILURE);
+          commit(types.CREATE_LIST_FAILURE, data.epicBoardListCreate.errors[0]);
         } else {
           const list = data.epicBoardListCreate?.list;
           dispatch('addList', list);

@@ -1031,9 +1031,6 @@ msgstr ""
 msgid "(deleted)"
 msgstr ""
 
-msgid "(line: %{startLine})"
-msgstr ""
-
 msgid "(max size 15 MB)"
 msgstr ""
 
@@ -1330,7 +1327,7 @@ msgstr ""
 msgid "A job artifact is an archive of files and directories saved by a job when it finishes."
 msgstr ""
 
-msgid "A label list displays all issues with the selected label."
+msgid "A label list displays issues with the selected label."
 msgstr ""
 
 msgid "A limit of %{ci_project_subscriptions_limit} subscriptions to or from a project applies."
@@ -3467,6 +3464,9 @@ msgstr ""
 msgid "An error occurred while loading project creation UI"
 msgstr ""
 
+msgid "An error occurred while loading the access tokens form, please try again."
+msgstr ""
+
 msgid "An error occurred while loading the data. Please try again."
 msgstr ""
 
@@ -5197,6 +5197,9 @@ msgid "Business metrics (Custom)"
 msgstr ""
 
 msgid "Busy"
+msgstr ""
+
+msgid "Buy CI Minutes"
 msgstr ""
 
 msgid "Buy License"
@@ -9763,6 +9766,9 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
+msgid "Delete %{issuableType}"
+msgstr ""
+
 msgid "Delete %{name}"
 msgstr ""
 
@@ -9818,6 +9824,9 @@ msgid "Delete subscription"
 msgstr ""
 
 msgid "Delete this attachment"
+msgstr ""
+
+msgid "Delete this epic and all descendants?"
 msgstr ""
 
 msgid "Delete user list"
@@ -12042,6 +12051,9 @@ msgid "Error updating the snippet"
 msgstr ""
 
 msgid "Error uploading file"
+msgstr ""
+
+msgid "Error uploading file. Please try again."
 msgstr ""
 
 msgid "Error uploading file: %{stripped}"
@@ -16534,9 +16546,6 @@ msgstr ""
 msgid "Invite members"
 msgstr ""
 
-msgid "Invite team members"
-msgstr ""
-
 msgid "Invite your team"
 msgstr ""
 
@@ -20289,7 +20298,7 @@ msgstr ""
 msgid "New label"
 msgstr ""
 
-msgid "New label list"
+msgid "New list"
 msgstr ""
 
 msgid "New merge request"
@@ -20509,9 +20518,6 @@ msgid "No jobs to show"
 msgstr ""
 
 msgid "No label"
-msgstr ""
-
-msgid "No label selected"
 msgstr ""
 
 msgid "No labels with such name or description"
@@ -22022,9 +22028,6 @@ msgstr ""
 msgid "Pipeline Schedules"
 msgstr ""
 
-msgid "Pipeline cannot be run."
-msgstr ""
-
 msgid "Pipeline minutes quota"
 msgstr ""
 
@@ -22283,6 +22286,9 @@ msgstr ""
 msgid "Pipeline|Branch name"
 msgstr ""
 
+msgid "Pipeline|Branches or tags could not be loaded."
+msgstr ""
+
 msgid "Pipeline|Canceled"
 msgstr ""
 
@@ -22341,6 +22347,9 @@ msgid "Pipeline|Pipeline"
 msgstr ""
 
 msgid "Pipeline|Pipeline %{idStart}#%{idEnd} %{statusStart}%{statusEnd} for %{commitStart}%{commitEnd}"
+msgstr ""
+
+msgid "Pipeline|Pipeline cannot be run."
 msgstr ""
 
 msgid "Pipeline|Pipelines"
@@ -25012,6 +25021,9 @@ msgid "Remove description history"
 msgstr ""
 
 msgid "Remove due date"
+msgstr ""
+
+msgid "Remove file"
 msgstr ""
 
 msgid "Remove fork relationship"
@@ -28375,6 +28387,9 @@ msgid "Start a new discussion…"
 msgstr ""
 
 msgid "Start a new merge request"
+msgstr ""
+
+msgid "Start a new merge request with these changes"
 msgstr ""
 
 msgid "Start a review"

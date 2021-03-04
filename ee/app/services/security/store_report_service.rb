@@ -107,7 +107,7 @@ module Security
         return by_find_params if by_find_params
 
         Gitlab::ErrorTracking.track_and_raise_exception(e, find_params: find_params, uuid: finding.uuid)
-      rescue ActiveRecord::RecordInvalid => e
+      rescue ActiveRecord::ActiveRecordError => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
     end
