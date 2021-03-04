@@ -263,10 +263,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       "type" => type.to_s,
       "configured" => configured,
       "status" => status_str,
-      "description" => described_class.localized_scan_descriptions[type],
-      "link" => help_page_path(described_class::SCAN_DOCS[type]),
-      "configuration_path" => configuration_path,
-      "name" => described_class.localized_scan_names[type]
+      "configuration_path" => configuration_path
     }
   end
 
