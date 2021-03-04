@@ -235,7 +235,7 @@ To enable Code Owner's approval to branches already protected:
 1. Navigate to your project's **Settings > Repository** and expand **Protected branches**.
 1. Scroll down to **Protected branch** and toggle the **Code owner approval** slider for the chosen branch.
 
-![Code Owners approval - branch already protected](img/code_owners_approval_protected_branch_v13.10.png)
+![Code Owners approval - branch already protected](img/code_owners_approval_protected_branch_v13_10.png)
 
 When enabled, all merge requests targeting these branches require approval
 by a Code Owner per matched rule before they can be merged.
