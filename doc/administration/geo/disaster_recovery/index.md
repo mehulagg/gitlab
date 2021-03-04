@@ -63,20 +63,20 @@ must disable the **primary** node.
    started if the machine reboots isn't available (see [Omnibus GitLab issue #3058](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3058)).
    It may be safest to uninstall the GitLab package completely:
 
-   ```shell
-   yum remove gitlab-ee
-   ```
+      ```shell
+      yum remove gitlab-ee
+      ```
 
    NOTE:
    (**Ubuntu 14.04 LTS**) If you are using an older version of Ubuntu
    or any other distribution based on the Upstart init system, you can prevent GitLab
    from starting if the machine reboots by doing the following:
 
-   ```shell
-   initctl stop gitlab-runsvvdir
-   echo 'manual' > /etc/init/gitlab-runsvdir.override
-   initctl reload-configuration
-   ```
+      ```shell
+      initctl stop gitlab-runsvvdir
+      echo 'manual' > /etc/init/gitlab-runsvdir.override
+      initctl reload-configuration
+      ```
 
    If you do not have SSH access to the **primary** node, take the machine offline and
    prevent it from rebooting by any means at your disposal.
@@ -174,6 +174,7 @@ Note the following when promoting a secondary:
 1. Verify you can connect to the newly promoted **primary** node using the URL used
    previously for the **secondary** node.
 1. If successful, the **secondary** node has now been promoted to the **primary** node.
+1. 
 
 #### Promoting a **secondary** node with multiple servers
 
