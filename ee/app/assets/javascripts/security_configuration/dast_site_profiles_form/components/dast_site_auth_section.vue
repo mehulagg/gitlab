@@ -61,7 +61,7 @@ export default {
       return this.showValidation || this.isEditMode;
     },
     sensitiveFieldPlaceholder() {
-      return this.isEditMode ? __('[Unchanged]') : '';
+      return this.isEditMode ? __('[Redacted]') : '';
     },
   },
   watch: {
