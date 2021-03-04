@@ -36,7 +36,8 @@ module Mutations
 
       argument :authentication, ::Types::Dast::ProfileAuthenticationInputType,
                required: false,
-               description: 'Parameters for authentication.'
+               description: 'Parameters for authentication. Will be ignored ' \
+                            'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
 
       authorize :create_on_demand_dast_scan
 
