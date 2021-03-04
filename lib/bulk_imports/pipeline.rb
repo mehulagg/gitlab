@@ -9,8 +9,6 @@ module BulkImports
 
     NotAllowedError = Class.new(StandardError)
 
-    CACHE_KEY_EXPIRATION = 2.hours
-
     def initialize(context)
       @context = context
     end
