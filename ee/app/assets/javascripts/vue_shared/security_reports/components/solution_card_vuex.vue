@@ -49,7 +49,7 @@ export default {
         :class="{ 'col-md-2': !isStandaloneVulnerability }"
       >
         <div class="circle-icon-container pr-3" aria-hidden="true"><gl-icon name="bulb" /></div>
-        <strong class="text-right flex-grow-1">{{ s__('ciReport|Solution') }}:</strong>
+        <strong class="text-right">{{ s__('ciReport|Solution') }}:</strong>
       </div>
       <span class="flex-shrink-1 pl-0" :class="{ 'col-md-10': !isStandaloneVulnerability }">{{
         solutionText
