@@ -173,6 +173,11 @@ msgid_plural "%d days"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%d epic"
+msgid_plural "%d epics"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d error"
 msgid_plural "%d errors"
 msgstr[0] ""
@@ -505,6 +510,9 @@ msgstr ""
 msgid "%{edit_in_new_fork_notice} Try to upload a file again."
 msgstr ""
 
+msgid "%{emailPrefix}@company.com"
+msgstr ""
+
 msgid "%{extra} more downstream pipelines"
 msgstr ""
 
@@ -554,6 +562,9 @@ msgid "%{issuesCount} issues with a limit of %{maxIssueCount}"
 msgstr ""
 
 msgid "%{issuesSize} with a limit of %{maxIssueCount}"
+msgstr ""
+
+msgid "%{itemsCount} issues with a limit of %{maxIssueCount}"
 msgstr ""
 
 msgid "%{labelStart}Actual response:%{labelEnd} %{headers}"
@@ -2820,21 +2831,6 @@ msgstr ""
 msgid "AlertMappingBuilder|Title is a required field for alerts in GitLab. Should the payload field you specified not be available, specifiy which field we should use instead. "
 msgstr ""
 
-msgid "AlertSettings|1. Select integration type"
-msgstr ""
-
-msgid "AlertSettings|2. Name integration"
-msgstr ""
-
-msgid "AlertSettings|3. Set up webhook"
-msgstr ""
-
-msgid "AlertSettings|4. Sample alert payload (optional)"
-msgstr ""
-
-msgid "AlertSettings|5. Map fields (optional)"
-msgstr ""
-
 msgid "AlertSettings|API URL"
 msgstr ""
 
@@ -2844,7 +2840,7 @@ msgstr ""
 msgid "AlertSettings|Add URL and auth key to your Prometheus config file"
 msgstr ""
 
-msgid "AlertSettings|Add new integrations"
+msgid "AlertSettings|Add new integration"
 msgstr ""
 
 msgid "AlertSettings|Alert test payload"
@@ -2854,6 +2850,9 @@ msgid "AlertSettings|Authorization key"
 msgstr ""
 
 msgid "AlertSettings|Authorization key has been successfully reset. Please save your changes now."
+msgstr ""
+
+msgid "AlertSettings|Configure details"
 msgstr ""
 
 msgid "AlertSettings|Copy"
@@ -2892,19 +2891,25 @@ msgstr ""
 msgid "AlertSettings|Learn more about our our upcoming %{linkStart}integrations%{linkEnd}"
 msgstr ""
 
-msgid "AlertSettings|Proceed with editing"
+msgid "AlertSettings|Map fields (optional)"
 msgstr ""
 
-msgid "AlertSettings|Prometheus"
+msgid "AlertSettings|Name integration"
+msgstr ""
+
+msgid "AlertSettings|Parse payload for custom mapping"
+msgstr ""
+
+msgid "AlertSettings|Proceed with editing"
 msgstr ""
 
 msgid "AlertSettings|Prometheus API base URL"
 msgstr ""
 
-msgid "AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with. This payload can be used to create a custom mapping (optional), or to test the integration (also optional)."
+msgid "AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with. This payload can be used to create a custom mapping (optional)."
 msgstr ""
 
-msgid "AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with. This payload can be used to test the integration (optional)."
+msgid "AlertSettings|Provide an example payload from the monitoring tool you intend to integrate with. This will allow you to send an alert to an active GitLab alerting point."
 msgstr ""
 
 msgid "AlertSettings|Reset Key"
@@ -2922,10 +2927,10 @@ msgstr ""
 msgid "AlertSettings|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
 msgstr ""
 
-msgid "AlertSettings|Sample payload has been parsed. You can now map the fields."
+msgid "AlertSettings|Sample alert payload (optional)"
 msgstr ""
 
-msgid "AlertSettings|Save and test payload"
+msgid "AlertSettings|Sample payload has been parsed. You can now map the fields."
 msgstr ""
 
 msgid "AlertSettings|Save integration"
@@ -2934,7 +2939,10 @@ msgstr ""
 msgid "AlertSettings|Select integration type"
 msgstr ""
 
-msgid "AlertSettings|Submit payload"
+msgid "AlertSettings|Send"
+msgstr ""
+
+msgid "AlertSettings|Send test alert"
 msgstr ""
 
 msgid "AlertSettings|Test alert payload"
@@ -2959,6 +2967,9 @@ msgid "AlertSettings|Utilize the URL and authorization key below to authorize Pr
 msgstr ""
 
 msgid "AlertSettings|Utilize the URL and authorization key below to authorize an external service to send alerts to GitLab. Review your external service's documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
+msgstr ""
+
+msgid "AlertSettings|View credentials"
 msgstr ""
 
 msgid "AlertSettings|Webhook URL"
@@ -2991,7 +3002,7 @@ msgstr ""
 msgid "AlertsIntegrations|Integration Name"
 msgstr ""
 
-msgid "AlertsIntegrations|Integration payload is invalid. You can still save your changes."
+msgid "AlertsIntegrations|Integration payload is invalid."
 msgstr ""
 
 msgid "AlertsIntegrations|No integrations have been added yet"
@@ -3457,6 +3468,9 @@ msgid "An error occurred while loading merge requests."
 msgstr ""
 
 msgid "An error occurred while loading project creation UI"
+msgstr ""
+
+msgid "An error occurred while loading the access tokens form, please try again."
 msgstr ""
 
 msgid "An error occurred while loading the data. Please try again."
@@ -5416,6 +5430,9 @@ msgid "CanaryIngress|You are changing the ratio of the canary rollout for %{envi
 msgstr ""
 
 msgid "Cancel"
+msgstr ""
+
+msgid "Cancel and close"
 msgstr ""
 
 msgid "Cancel index deletion"
@@ -8593,6 +8610,9 @@ msgstr ""
 msgid "Create and provide your GitHub %{link_start}Personal Access Token%{link_end}. You will need to select the %{code_open}repo%{code_close} scope, so we can display a list of your public and private repositories which are available to import."
 msgstr ""
 
+msgid "Create blank project"
+msgstr ""
+
 msgid "Create branch"
 msgstr ""
 
@@ -8618,6 +8638,9 @@ msgid "Create file"
 msgstr ""
 
 msgid "Create from"
+msgstr ""
+
+msgid "Create from template"
 msgstr ""
 
 msgid "Create group"
@@ -10226,6 +10249,11 @@ msgstr ""
 msgid "Deployments"
 msgstr ""
 
+msgid "Deployments|%{deployments} environment impacted."
+msgid_plural "Deployments|%{deployments} environments impacted."
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Deployment|API"
 msgstr ""
 
@@ -10560,6 +10588,9 @@ msgid "DevopsReport|DevOps"
 msgstr ""
 
 msgid "DevopsReport|DevOps Score"
+msgstr ""
+
+msgid "DevopsReport|DevOps score metrics are based on usage over the last 30 days. Last updated: %{timestamp}."
 msgstr ""
 
 msgid "DevopsReport|Score"
@@ -12019,9 +12050,6 @@ msgstr ""
 msgid "Error uploading file"
 msgstr ""
 
-msgid "Error uploading file. Please try again."
-msgstr ""
-
 msgid "Error uploading file: %{stripped}"
 msgstr ""
 
@@ -13182,6 +13210,9 @@ msgstr ""
 msgid "Follow"
 msgstr ""
 
+msgid "Followed Users' Activity"
+msgstr ""
+
 msgid "Followed users"
 msgstr ""
 
@@ -13246,6 +13277,42 @@ msgid "Fork project"
 msgstr ""
 
 msgid "Fork project?"
+msgstr ""
+
+msgid "ForkProject|Cancel"
+msgstr ""
+
+msgid "ForkProject|Create a group"
+msgstr ""
+
+msgid "ForkProject|Fork project"
+msgstr ""
+
+msgid "ForkProject|Internal"
+msgstr ""
+
+msgid "ForkProject|Private"
+msgstr ""
+
+msgid "ForkProject|Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group."
+msgstr ""
+
+msgid "ForkProject|Public"
+msgstr ""
+
+msgid "ForkProject|Select a namespace"
+msgstr ""
+
+msgid "ForkProject|The project can be accessed by any logged in user."
+msgstr ""
+
+msgid "ForkProject|The project can be accessed without any authentication."
+msgstr ""
+
+msgid "ForkProject|Visibility level"
+msgstr ""
+
+msgid "ForkProject|Want to house several dependent projects under the same namespace?"
 msgstr ""
 
 msgid "ForkedFromProjectPath|Forked from"
@@ -13354,9 +13421,6 @@ msgid "Geo"
 msgstr ""
 
 msgid "Geo Nodes"
-msgstr ""
-
-msgid "Geo Nodes Beta"
 msgstr ""
 
 msgid "Geo Nodes|Cannot remove a primary node if there is a secondary node"
@@ -13521,6 +13585,9 @@ msgstr ""
 msgid "Geo|%{name} is scheduled for re-verify"
 msgstr ""
 
+msgid "Geo|Add site"
+msgstr ""
+
 msgid "Geo|Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information."
 msgstr ""
 
@@ -13560,6 +13627,9 @@ msgstr ""
 msgid "Geo|Could not remove tracking entry for an existing upload."
 msgstr ""
 
+msgid "Geo|Discover GitLab Geo"
+msgstr ""
+
 msgid "Geo|Failed"
 msgstr ""
 
@@ -13567,6 +13637,9 @@ msgid "Geo|Filter by status"
 msgstr ""
 
 msgid "Geo|Geo Status"
+msgstr ""
+
+msgid "Geo|Geo sites"
 msgstr ""
 
 msgid "Geo|Go to the primary site"
@@ -13591,6 +13664,12 @@ msgid "Geo|Last sync attempt"
 msgstr ""
 
 msgid "Geo|Last time verified"
+msgstr ""
+
+msgid "Geo|Learn more about Geo"
+msgstr ""
+
+msgid "Geo|Make everyone on your team more productive regardless of their location. GitLab Geo creates read-only mirrors of your GitLab instance so you can reduce the time it takes to clone and fetch large repos."
 msgstr ""
 
 msgid "Geo|Never"
@@ -13618,6 +13697,9 @@ msgid "Geo|Please refer to Geo Troubleshooting."
 msgstr ""
 
 msgid "Geo|Primary node"
+msgstr ""
+
+msgid "Geo|Primary site"
 msgstr ""
 
 msgid "Geo|Project"
@@ -13663,6 +13745,9 @@ msgid "Geo|Review replication status, and resynchronize and reverify items with 
 msgstr ""
 
 msgid "Geo|Secondary node"
+msgstr ""
+
+msgid "Geo|Secondary site"
 msgstr ""
 
 msgid "Geo|Status"
@@ -13714,6 +13799,9 @@ msgid "Geo|Verification failed - %{error}"
 msgstr ""
 
 msgid "Geo|Waiting for scheduler"
+msgstr ""
+
+msgid "Geo|With GitLab Geo, you can install a special read-only and replicated instance anywhere."
 msgstr ""
 
 msgid "Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node."
@@ -15329,6 +15417,9 @@ msgstr ""
 msgid "Import from Jira"
 msgstr ""
 
+msgid "Import group"
+msgstr ""
+
 msgid "Import group from file"
 msgstr ""
 
@@ -16581,16 +16672,31 @@ msgstr ""
 msgid "InviteMember|Add members to this project and start collaborating with your team."
 msgstr ""
 
+msgid "InviteMember|Don't worry, you can always invite teammates later"
+msgstr ""
+
 msgid "InviteMember|Invite Members (optional)"
 msgstr ""
 
 msgid "InviteMember|Invite another member"
 msgstr ""
 
+msgid "InviteMember|Invite another teammate"
+msgstr ""
+
 msgid "InviteMember|Invite members"
 msgstr ""
 
+msgid "InviteMember|Invite teammates to your GitLab group"
+msgstr ""
+
+msgid "InviteMember|Invite users to your group %{group_name} so you can collaborate on your projects"
+msgstr ""
+
 msgid "InviteMember|Invite your team"
+msgstr ""
+
+msgid "InviteMember|Invite your teammates"
 msgstr ""
 
 msgid "InviteMember|Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later."
@@ -16600,6 +16706,12 @@ msgid "InviteMember|Oops, this feature isn't ready yet"
 msgstr ""
 
 msgid "InviteMember|See who can invite members for you"
+msgstr ""
+
+msgid "InviteMember|Send invitations"
+msgstr ""
+
+msgid "InviteMember|Skip this for now"
 msgstr ""
 
 msgid "InviteMember|Until then, ask an owner to invite new project members for you"
@@ -20936,6 +21048,9 @@ msgstr ""
 msgid "OnCallSchedules|Restrict to time intervals"
 msgstr ""
 
+msgid "OnCallSchedules|Rotation end date/time must come after start date/time"
+msgstr ""
+
 msgid "OnCallSchedules|Rotation length"
 msgstr ""
 
@@ -22619,6 +22734,9 @@ msgid "Preferences|Show whitespace changes in diffs"
 msgstr ""
 
 msgid "Preferences|Sourcegraph"
+msgstr ""
+
+msgid "Preferences|Surround text selection when typing quotes or brackets"
 msgstr ""
 
 msgid "Preferences|Syntax highlighting theme"
@@ -24903,9 +25021,6 @@ msgid "Remove description history"
 msgstr ""
 
 msgid "Remove due date"
-msgstr ""
-
-msgid "Remove file"
 msgstr ""
 
 msgid "Remove fork relationship"
@@ -28269,9 +28384,6 @@ msgid "Start a new discussion…"
 msgstr ""
 
 msgid "Start a new merge request"
-msgstr ""
-
-msgid "Start a new merge request with these changes"
 msgstr ""
 
 msgid "Start a review"
@@ -32841,6 +32953,9 @@ msgstr ""
 msgid "View alert details."
 msgstr ""
 
+msgid "View all environments."
+msgstr ""
+
 msgid "View all issues"
 msgstr ""
 
@@ -33536,6 +33651,9 @@ msgid "What are you searching for?"
 msgstr ""
 
 msgid "What describes you best?"
+msgstr ""
+
+msgid "What does this command do?"
 msgstr ""
 
 msgid "What is squashing?"
@@ -35471,9 +35589,6 @@ msgid "math|The math in this entry is taking too long to render and may not be d
 msgstr ""
 
 msgid "math|There was an error rendering this math block"
-msgstr ""
-
-msgid "member%{number}@company.com"
 msgstr ""
 
 msgid "merge request"

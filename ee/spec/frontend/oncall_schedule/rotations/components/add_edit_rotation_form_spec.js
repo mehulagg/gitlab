@@ -40,7 +40,7 @@ describe('AddEditRotationForm', () => {
             date: null,
             time: 0,
           },
-          endsOn: {
+          endsAt: {
             date: null,
             time: 0,
           },
@@ -112,11 +112,12 @@ describe('AddEditRotationForm', () => {
     });
 
     it('should emit an event with selected value on time selection', async () => {
-      findStartsOnTimeOptions().at(3).vm.$emit('click');
+      const option = 3;
+      findStartsOnTimeOptions().at(option).vm.$emit('click');
       await wrapper.vm.$nextTick();
       const emittedEvent = wrapper.emitted('update-rotation-form');
       expect(emittedEvent).toHaveLength(1);
-      expect(emittedEvent[0][0]).toEqual({ type: 'startsAt.time', value: 4 });
+      expect(emittedEvent[0][0]).toEqual({ type: 'startsAt.time', value: option });
     });
 
     it('should add a checkmark to a selected start time', async () => {
@@ -133,11 +134,7 @@ describe('AddEditRotationForm', () => {
         },
       });
       await wrapper.vm.$nextTick();
-      expect(
-        findStartsOnTimeOptions()
-          .at(time - 1)
-          .props('isChecked'),
-      ).toBe(true);
+      expect(findStartsOnTimeOptions().at(time).props('isChecked')).toBe(true);
     });
   });
 
@@ -160,7 +157,7 @@ describe('AddEditRotationForm', () => {
       await wrapper.vm.$nextTick();
       const emittedEvent = wrapper.emitted('update-rotation-form');
       expect(emittedEvent).toHaveLength(1);
-      expect(emittedEvent[0][0]).toEqual({ type: 'endsOn.time', value: option + 1 });
+      expect(emittedEvent[0][0]).toEqual({ type: 'endsAt.time', value: option });
     });
 
     it('should add a checkmark to a selected end time', async () => {
@@ -168,7 +165,7 @@ describe('AddEditRotationForm', () => {
       const time = 5;
       wrapper.setProps({
         form: {
-          endsOn: {
+          endsAt: {
             time,
           },
           startsAt: {
@@ -181,11 +178,7 @@ describe('AddEditRotationForm', () => {
         },
       });
       await wrapper.vm.$nextTick();
-      expect(
-        findEndsOnTimeOptions()
-          .at(time - 1)
-          .props('isChecked'),
-      ).toBe(true);
+      expect(findEndsOnTimeOptions().at(time).props('isChecked')).toBe(true);
     });
   });
 
@@ -221,7 +214,7 @@ describe('AddEditRotationForm', () => {
 
       wrapper.setProps({
         form: {
-          endsOn: {
+          endsAt: {
             time: 0,
           },
           startsAt: {

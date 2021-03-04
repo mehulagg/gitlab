@@ -107,12 +107,14 @@ module Projects
 
         # Return the informational message to the user
         def render_integration_error(exception)
+          log_exception(exception)
+
           render json: { errors: [exception.message] }, status: :bad_request
         end
 
         # Log the specific request error details and return generic message
         def render_request_error(exception)
-          Gitlab::AppLogger.error(exception)
+          log_exception(exception)
 
           render json: { errors: [_('An error occurred while requesting data from the Jira service')] }, status: :bad_request
         end

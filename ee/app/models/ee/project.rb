@@ -130,6 +130,10 @@ module EE
           .limit(limit)
       end
 
+      scope :with_code_coverage, -> do
+        joins(:daily_build_group_report_results).merge(::Ci::DailyBuildGroupReportResult.with_coverage.with_default_branch).group(:id)
+      end
+
       scope :including_project, ->(project) { where(id: project) }
       scope :with_wiki_enabled, -> { with_feature_enabled(:wiki) }
       scope :within_shards, -> (shard_names) { where(repository_storage: Array(shard_names)) }

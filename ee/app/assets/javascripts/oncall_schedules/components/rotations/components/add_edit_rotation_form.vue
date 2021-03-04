@@ -40,9 +40,10 @@ export const i18n = {
       title: __('Starts on'),
       error: s__('OnCallSchedules|Rotation start date cannot be empty'),
     },
-    endsOn: {
+    endsAt: {
       enableToggle: s__('OnCallSchedules|Enable end date'),
       title: __('Ends on'),
+      error: s__('OnCallSchedules|Rotation end date/time must come after start date/time'),
     },
     restrictToTime: {
       enableToggle: s__('OnCallSchedules|Restrict to time intervals'),
@@ -218,7 +219,7 @@ export default {
             class="gl-px-3"
           >
             <gl-dropdown-item
-              v-for="time in $options.HOURS_IN_DAY"
+              v-for="(_, time) in $options.HOURS_IN_DAY"
               :key="time"
               :is-checked="form.startsAt.time === time"
               is-check-item
@@ -234,7 +235,7 @@ export default {
     <div class="gl-display-inline-block">
       <gl-toggle
         v-model="endDateEnabled"
-        :label="$options.i18n.fields.endsOn.enableToggle"
+        :label="$options.i18n.fields.endsAt.enableToggle"
         label-position="left"
         class="gl-mb-5"
       />
@@ -245,28 +246,43 @@ export default {
         class="gl-border-gray-400 gl-bg-gray-10"
       >
         <gl-form-group
-          :label="$options.i18n.fields.endsOn.title"
+          :label="$options.i18n.fields.endsAt.title"
           label-size="sm"
-          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :state="validationState.endsAt"
+          :invalid-feedback="$options.i18n.fields.endsAt.error"
           class="gl-mb-0"
         >
           <div class="gl-display-flex gl-align-items-center">
             <gl-datepicker
               class="gl-mr-3"
-              @input="$emit('update-rotation-form', { type: 'endsOn.date', value: $event })"
-            />
+              @input="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
+            >
+              <template #default="{ formattedDate }">
+                <gl-form-input
+                  class="gl-w-full"
+                  :value="formattedDate"
+                  :placeholder="__(`YYYY-MM-DD`)"
+                  @blur="
+                    $emit('update-rotation-form', {
+                      type: 'endsAt.date',
+                      value: $event.target.value,
+                    })
+                  "
+                />
+              </template>
+            </gl-datepicker>
             <span> {{ __('at') }} </span>
             <gl-dropdown
               data-testid="rotation-end-time"
-              :text="format24HourTimeStringFromInt(form.endsOn.time)"
+              :text="format24HourTimeStringFromInt(form.endsAt.time)"
               class="gl-px-3"
             >
               <gl-dropdown-item
-                v-for="time in $options.HOURS_IN_DAY"
+                v-for="(_, time) in $options.HOURS_IN_DAY"
                 :key="time"
-                :is-checked="form.endsOn.time === time"
+                :is-checked="form.endsAt.time === time"
                 is-check-item
-                @click="$emit('update-rotation-form', { type: 'endsOn.time', value: time })"
+                @click="$emit('update-rotation-form', { type: 'endsAt.time', value: time })"
               >
                 <span class="gl-white-space-nowrap">
                   {{ format24HourTimeStringFromInt(time) }}</span
@@ -294,7 +310,7 @@ export default {
         <gl-form-group
           :label="$options.i18n.fields.restrictToTime.title"
           label-size="sm"
-          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :invalid-feedback="$options.i18n.fields.endsAt.error"
           class="gl-mb-0"
         >
           <div class="gl-display-flex gl-align-items-center">

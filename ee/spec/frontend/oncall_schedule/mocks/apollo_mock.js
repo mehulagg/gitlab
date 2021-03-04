@@ -138,7 +138,8 @@ export const createRotationResponse = {
       oncallRotation: {
         id: '44',
         name: 'Test',
-        startsAt: '2020-12-17T12:00:00Z',
+        startsAt: '2020-12-20T12:00:00Z',
+        endsAt: '2021-03-17T12:00:00Z',
         length: 5,
         lengthUnit: 'WEEKS',
         participants: {
@@ -171,7 +172,8 @@ export const createRotationResponseWithErrors = {
       oncallRotation: {
         id: '44',
         name: 'Test',
-        startsAt: '2020-12-17T12:00:00Z',
+        startsAt: '2020-12-20T12:00:00Z',
+        endsAt: '2021-03-17T12:00:00Z',
         length: 5,
         lengthUnit: 'WEEKS',
         participants: {

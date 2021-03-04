@@ -20,6 +20,7 @@ import {
   REMOVE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import RemoveMemberModal from './remove_member_modal.vue';
 
 export default {
@@ -37,6 +38,7 @@ export default {
     GlSearchBoxByType,
     GlTable,
     RemoveMemberModal,
+    TimeAgoTooltip,
   },
   data() {
     return {
@@ -151,7 +153,6 @@ export default {
       :show-empty="true"
       data-testid="table"
       :empty-text="emptyText"
-      thead-class="gl-display-none"
     >
       <template #cell(user)="data">
         <div class="gl-display-flex">
@@ -178,6 +179,17 @@ export default {
             {{ s__('Billing|Private') }}
           </span>
         </div>
+      </template>
+
+      <template #cell(lastActivityTime)="data">
+        <time-ago-tooltip
+          v-if="data.item.user.last_activity_on"
+          :time="data.item.user.last_activity_on"
+          tooltip-placement="bottom"
+        />
+        <span v-else>
+          {{ __('Never') }}
+        </span>
       </template>
 
       <template #cell(actions)="data">

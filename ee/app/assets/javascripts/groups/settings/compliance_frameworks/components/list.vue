@@ -39,7 +39,7 @@ export default {
   data() {
     return {
       markedForDeletion: {},
-      deletingFramework: null,
+      deletingFrameworksIds: [],
       complianceFrameworks: [],
       error: '',
       message: '',
@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.$apollo.loading && !this.deletingFramework;
+      return this.$apollo.loading && this.deletingFrameworksIds.length === 0;
     },
     hasLoaded() {
       return !this.isLoading && !this.error;
@@ -105,15 +105,18 @@ export default {
     onError() {
       this.error = this.$options.i18n.deleteError;
     },
-    onDelete() {
+    onDelete(id) {
       this.message = this.$options.i18n.deleteMessage;
-      this.deletingFramework = null;
+      const idx = this.deletingFrameworksIds.indexOf(id);
+      if (idx > -1) {
+        this.deletingFrameworksIds.splice(idx, 1);
+      }
     },
     onDeleting() {
-      this.deletingFramework = this.markedForDeletion;
+      this.deletingFrameworksIds.push(this.markedForDeletion.id);
     },
-    isDeleting(framework) {
-      return this.deletingFramework === framework;
+    isDeleting(id) {
+      return this.deletingFrameworksIds.includes(id);
     },
   },
   i18n: {
@@ -153,7 +156,7 @@ export default {
           v-for="framework in complianceFrameworks"
           :key="framework.parsedId"
           :framework="framework"
-          :loading="isDeleting(framework)"
+          :loading="isDeleting(framework.id)"
           @delete="markForDeletion"
         />
       </gl-tab>

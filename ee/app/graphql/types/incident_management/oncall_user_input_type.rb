@@ -2,7 +2,6 @@
 
 module Types
   module IncidentManagement
-    # rubocop: disable Graphql/AuthorizeTypes
     class OncallUserInputType < BaseInputObject
       graphql_name 'OncallUserInputType'
       description 'The rotation user and color palette'
@@ -19,6 +18,5 @@ module Types
                 required: false,
                 description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user.'
     end
-    # rubocop: enable Graphql/AuthorizeTypes
   end
 end

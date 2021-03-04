@@ -166,6 +166,8 @@
   - 1
 - - groups_update_repository_storage
   - 1
+- - groups_update_statistics
+  - 1
 - - hashed_storage
   - 1
 - - import_issues_csv
@@ -203,6 +205,8 @@
 - - merge_request_mergeability_check
   - 1
 - - merge_request_reset_approvals
+  - 1
+- - merge_requests_delete_source_branch
   - 1
 - - metrics_dashboard_prune_old_annotations
   - 1
