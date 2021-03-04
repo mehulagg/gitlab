@@ -2,20 +2,16 @@
 import { GlLink, GlSprintf } from '@gitlab/ui';
 import { mapGetters, mapState } from 'vuex';
 import { s__ } from '~/locale';
+import InstallationTitle from '~/packages/details/components/installation_title.vue';
 import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
-import PersistedDropdownSelection from '~/vue_shared/components/registry/persisted_dropdown_selection.vue';
-import {
-  TrackingActions,
-  TrackingLabels,
-  SHOW_GRADLE_COMMANDS,
-  SHOW_MAVEN_COMMANDS,
-} from '../constants';
+
+import { TrackingActions, TrackingLabels } from '../constants';
 
 export default {
   name: 'MavenInstallation',
   components: {
+    InstallationTitle,
     CodeInstruction,
-    PersistedDropdownSelection,
     GlLink,
     GlSprintf,
   },
@@ -51,24 +47,19 @@ export default {
   trackingActions: { ...TrackingActions },
   TrackingLabels,
   installOptions: [
-    { value: 'maven', label: SHOW_MAVEN_COMMANDS },
-    { value: 'gradle', label: SHOW_GRADLE_COMMANDS },
+    { value: 'maven', label: s__('PackageRegistry|Show Gradle commands') },
+    { value: 'gradle', label: s__('PackageRegistry|Show Maven commands') },
   ],
 };
 </script>
 
 <template>
   <div>
-    <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
-      <h3 class="gl-font-lg">{{ __('Installation') }}</h3>
-      <div>
-        <persisted-dropdown-selection
-          storage-key="package_maven_installation_instructions"
-          :options="$options.installOptions"
-          @change="instructionType = $event"
-        />
-      </div>
-    </div>
+    <installation-title
+      storage-key="package_maven_installation_instructions"
+      :options="$options.installOptions"
+      @change="instructionType = $event"
+    />
 
     <template v-if="showMaven">
       <p>

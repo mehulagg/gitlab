@@ -2,22 +2,10 @@
 
 exports[`MavenInstallation gradle renders all the messages 1`] = `
 <div>
-  <div
-    class="gl-display-flex gl-justify-content-space-between gl-align-items-center"
-  >
-    <h3
-      class="gl-font-lg"
-    >
-      Installation
-    </h3>
-     
-    <div>
-      <persisted-dropdown-selection-stub
-        options="[object Object],[object Object]"
-        storagekey="package_maven_installation_instructions"
-      />
-    </div>
-  </div>
+  <installation-title-stub
+    options="[object Object],[object Object]"
+    storagekey="package_maven_installation_instructions"
+  />
    
   <code-instruction-stub
     class="gl-mb-5"
@@ -41,22 +29,10 @@ exports[`MavenInstallation gradle renders all the messages 1`] = `
 
 exports[`MavenInstallation maven renders all the messages 1`] = `
 <div>
-  <div
-    class="gl-display-flex gl-justify-content-space-between gl-align-items-center"
-  >
-    <h3
-      class="gl-font-lg"
-    >
-      Installation
-    </h3>
-     
-    <div>
-      <persisted-dropdown-selection-stub
-        options="[object Object],[object Object]"
-        storagekey="package_maven_installation_instructions"
-      />
-    </div>
-  </div>
+  <installation-title-stub
+    options="[object Object],[object Object]"
+    storagekey="package_maven_installation_instructions"
+  />
    
   <p>
     <gl-sprintf-stub

@@ -3,14 +3,10 @@ import { nextTick } from 'vue';
 import Vuex from 'vuex';
 import { registryUrl as mavenPath } from 'jest/packages/details/mock_data';
 import { mavenPackage as packageEntity } from 'jest/packages/mock_data';
+import InstallationTitle from '~/packages/details/components/installation_title.vue';
 import MavenInstallation from '~/packages/details/components/maven_installation.vue';
-import {
-  TrackingActions,
-  SHOW_GRADLE_COMMANDS,
-  SHOW_MAVEN_COMMANDS,
-} from '~/packages/details/constants';
+import { TrackingActions } from '~/packages/details/constants';
 import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
-import PersistedDropdownSelection from '~/vue_shared/components/registry/persisted_dropdown_selection.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -39,7 +35,7 @@ describe('MavenInstallation', () => {
   });
 
   const findCodeInstructions = () => wrapper.findAll(CodeInstructions);
-  const findPersistedDropdownSelection = () => wrapper.findComponent(PersistedDropdownSelection);
+  const findInstallationTitle = () => wrapper.findComponent(InstallationTitle);
 
   function createComponent({ data = {} } = {}) {
     wrapper = shallowMount(MavenInstallation, {
@@ -56,15 +52,15 @@ describe('MavenInstallation', () => {
   });
 
   describe('install command switch', () => {
-    it('has the persisted dropdown component', () => {
+    it('has the installation title component', () => {
       createComponent();
 
-      expect(findPersistedDropdownSelection().exists()).toBe(true);
-      expect(findPersistedDropdownSelection().props()).toMatchObject({
+      expect(findInstallationTitle().exists()).toBe(true);
+      expect(findInstallationTitle().props()).toMatchObject({
         storageKey: 'package_maven_installation_instructions',
         options: [
-          { value: 'maven', label: SHOW_MAVEN_COMMANDS },
-          { value: 'gradle', label: SHOW_GRADLE_COMMANDS },
+          { value: 'maven', label: 'Show Gradle commands' },
+          { value: 'gradle', label: 'Show Maven commands' },
         ],
       });
     });
@@ -73,7 +69,7 @@ describe('MavenInstallation', () => {
       createComponent();
 
       expect(findCodeInstructions().at(0).props('instruction')).toBe(xmlCodeBlock);
-      findPersistedDropdownSelection().vm.$emit('change', 'gradle');
+      findInstallationTitle().vm.$emit('change', 'gradle');
 
       await nextTick();
 
