@@ -11,7 +11,6 @@ import { ListType } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import { __ } from '~/locale';
 
 export default {
   components: {
@@ -32,35 +31,14 @@ export default {
   computed: {
     ...mapState(['labels', 'labelsLoading', 'isEpicBoard']),
     ...mapGetters(['getListByLabelId', 'shouldUseGraphQL']),
-
     selectedLabel() {
-      return this.labels.find(({ id }) => id === this.selectedId);
-    },
-    selectedItem() {
       if (!this.selectedId) {
         return null;
       }
-      return this.selectedLabel;
+      return this.labels.find(({ id }) => id === this.selectedId);
     },
-
     columnForSelected() {
       return this.getListByLabelId(this.selectedId);
-    },
-
-    loading() {
-      return this.labelsLoading;
-    },
-
-    formDescription() {
-      return __('A label list displays issues with the selected label.');
-    },
-
-    searchLabel() {
-      return __('Select label');
-    },
-
-    searchPlaceholder() {
-      return __('Search labels');
     },
   },
   created() {
@@ -80,7 +58,7 @@ export default {
       }
     },
     addList() {
-      if (!this.selectedItem) {
+      if (!this.selectedLabel) {
         return;
       }
 
@@ -97,7 +75,7 @@ export default {
       } else {
         const listObj = {
           labelId: getIdFromGraphQLId(this.selectedId),
-          title: this.selectedItem.title,
+          title: this.selectedLabel.title,
           position: boardsStore.state.lists.length - 2,
           list_type: ListType.label,
           label: this.selectedLabel,
@@ -120,10 +98,10 @@ export default {
 
 <template>
   <board-add-new-column-form
-    :loading="loading"
-    :form-description="formDescription"
-    :search-label="searchLabel"
-    :search-placeholder="searchPlaceholder"
+    :loading="labelsLoading"
+    :form-description="__('A label list displays issues with the selected label.')"
+    :search-label="__('Select label')"
+    :search-placeholder="__('Search labels')"
     :selected-id="selectedId"
     @filter-items="filterItems"
     @add-list="addList"
