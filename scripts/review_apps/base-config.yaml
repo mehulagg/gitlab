@@ -38,10 +38,10 @@ gitlab:
     resources:
       requests:
         cpu: 500m
-        memory: 50M
+        memory: 100M
       limits:
         cpu: 750m
-        memory: 75M
+        memory: 150M
     maxReplicas: 3
     hpa:
       targetAverageValue: 500m
