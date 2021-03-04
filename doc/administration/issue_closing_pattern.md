@@ -12,7 +12,7 @@ This is the administration documentation. There is a separate [user documentatio
 on issue closing pattern.
 
 When a commit or merge request resolves one or more issues, it is possible to
-automatically have these issues closed when the commit or merge request lands
+automatically close these issues when the commit or merge request lands
 in the project's default branch.
 
 ## Change the issue closing pattern
