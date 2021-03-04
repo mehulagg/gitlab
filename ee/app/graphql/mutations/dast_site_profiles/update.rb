@@ -27,6 +27,11 @@ module Mutations
                required: false,
                description: 'The URL of the target to be scanned.'
 
+      argument :excluded_urls, GraphQL::STRING_TYPE,
+               required: false,
+               description: 'The URLs to skip during an authenticated scan. Will be ignored ' \
+                            'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
       argument :request_headers, GraphQL::STRING_TYPE,
                required: false,
                description: 'Comma-separated list of request header names and values to be ' \
