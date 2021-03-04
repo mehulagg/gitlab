@@ -17,10 +17,10 @@ gitlab:
     resources:
       requests:
         cpu: 1200m
-        memory: 500M
+        memory: 1000M
       limits:
         cpu: 1800m
-        memory: 750M
+        memory: 1500M
     persistence:
       size: 10G
   gitlab-exporter:
@@ -138,10 +138,10 @@ postgresql:
   resources:
     requests:
       cpu: 550m
-      memory: 500M
+      memory: 1000M
     limits:
       cpu: 825m
-      memory: 750M
+      memory: 1500M
 prometheus:
   install: false
 redis:
