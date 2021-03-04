@@ -34,6 +34,10 @@ module Mutations
                             'added to every request made by DAST. Will be ignored ' \
                             'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
 
+      argument :authentication, ::Types::Dast::ProfileAuthenticationInputType,
+               required: false,
+               description: 'Parameters for authentication.'
+
       authorize :create_on_demand_dast_scan
 
       def resolve(full_path:, profile_name:, target_url: nil, excluded_urls: nil, request_headers: nil)
