@@ -10,6 +10,59 @@ const addMulti = (mainPipelineProjectPath, linkedPipeline) => {
   };
 };
 
+/* eslint-disable @gitlab/require-i18n-strings */
+const getQueryHeaders = (etagResource) => {
+  return {
+    fetchOptions: {
+      method: 'GET',
+    },
+    headers: {
+      'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
+      'X-GITLAB-GRAPHQL-RESOURCE-ETAG': etagResource,
+      'X-REQUESTED_WITH': 'XMLHttpRequest',
+    },
+  };
+};
+
+const reportToSentry = (component, failureType) => {
+  Sentry.withScope((scope) => {
+    scope.setTag('component', component);
+    Sentry.captureException(failureType);
+  });
+};
+
+const serializeGqlErr = (gqlError) => {
+  if (!gqlError) {
+    return 'gqlError data not available.';
+  }
+
+  const { locations, message, path } = gqlError;
+
+  return `
+    ${message}.
+    Locations: ${locations
+      .flatMap((loc) => Object.entries(loc))
+      .flat(2)
+      .join(' ')}.
+    Path: ${path.join(', ')}.
+  `;
+};
+
+/* eslint-enable @gitlab/require-i18n-strings */
+
+const toggleQueryPollingByVisibility = (queryRef, interval = 10000) => {
+  const stopStartQuery = (query) => {
+    if (!Visibility.hidden()) {
+      query.startPolling(interval);
+    } else {
+      query.stopPolling();
+    }
+  };
+
+  stopStartQuery(queryRef);
+  Visibility.change(stopStartQuery.bind(null, queryRef));
+};
+
 const transformId = (linkedPipeline) => {
   return { ...linkedPipeline, id: getIdFromGraphQLId(linkedPipeline.id) };
 };
@@ -42,24 +95,13 @@ const unwrapPipelineData = (mainPipelineProjectPath, data) => {
   };
 };
 
-const toggleQueryPollingByVisibility = (queryRef, interval = 10000) => {
-  const stopStartQuery = (query) => {
-    if (!Visibility.hidden()) {
-      query.startPolling(interval);
-    } else {
-      query.stopPolling();
-    }
-  };
+const validateConfigPaths = (value) => value.graphqlResourceEtag?.length > 0;
 
-  stopStartQuery(queryRef);
-  Visibility.change(stopStartQuery.bind(null, queryRef));
-};
-
-export { unwrapPipelineData, toggleQueryPollingByVisibility };
-
-export const reportToSentry = (component, failureType) => {
-  Sentry.withScope((scope) => {
-    scope.setTag('component', component);
-    Sentry.captureException(failureType);
-  });
+export {
+  getQueryHeaders,
+  reportToSentry,
+  serializeGqlErr,
+  toggleQueryPollingByVisibility,
+  unwrapPipelineData,
+  validateConfigPaths,
 };

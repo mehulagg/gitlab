@@ -48,10 +48,9 @@ export default {
       return (listId) => this.getUnassignedIssues(listId);
     },
     unassignedIssuesCount() {
-      return this.lists.reduce(
-        (total, list) => total + this.listsFlags[list.id]?.unassignedIssuesCount || 0,
-        0,
-      );
+      return this.lists.reduce((total, list) => {
+        return total + (this.listsFlags[list.id]?.unassignedIssuesCount || 0);
+      }, 0);
     },
     unassignedIssuesCountTooltipText() {
       return n__(`%d unassigned issue`, `%d unassigned issues`, this.unassignedIssuesCount);

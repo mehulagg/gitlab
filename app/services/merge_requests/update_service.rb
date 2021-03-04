@@ -31,6 +31,7 @@ module MergeRequests
       old_mentioned_users = old_associations.fetch(:mentioned_users, [])
       old_assignees = old_associations.fetch(:assignees, [])
       old_reviewers = old_associations.fetch(:reviewers, [])
+      old_timelogs = old_associations.fetch(:timelogs, [])
       changed_fields = merge_request.previous_changes.keys
 
       resolve_todos(merge_request, old_labels, old_assignees, old_reviewers)
@@ -47,6 +48,8 @@ module MergeRequests
       handle_draft_status_change(merge_request, changed_fields)
 
       track_title_and_desc_edits(changed_fields)
+      track_discussion_lock_toggle(merge_request, changed_fields)
+      track_time_estimate_and_spend_edits(merge_request, old_timelogs, changed_fields)
 
       notify_if_labels_added(merge_request, old_labels)
       notify_if_mentions_added(merge_request, old_mentioned_users)
@@ -93,6 +96,21 @@ module MergeRequests
         merge_request_activity_counter
           .public_send("track_#{action}_edit_action".to_sym, user: current_user) # rubocop:disable GitlabSecurity/PublicSend
       end
+    end
+
+    def track_discussion_lock_toggle(merge_request, changed_fields)
+      return unless changed_fields.include?('discussion_locked')
+
+      if merge_request.discussion_locked
+        merge_request_activity_counter.track_discussion_locked_action(user: current_user)
+      else
+        merge_request_activity_counter.track_discussion_unlocked_action(user: current_user)
+      end
+    end
+
+    def track_time_estimate_and_spend_edits(merge_request, old_timelogs, changed_fields)
+      merge_request_activity_counter.track_time_estimate_changed_action(user: current_user) if changed_fields.include?('time_estimate')
+      merge_request_activity_counter.track_time_spent_changed_action(user: current_user) if old_timelogs != merge_request.timelogs
     end
 
     def notify_if_labels_added(merge_request, old_labels)
@@ -154,9 +172,18 @@ module MergeRequests
       elsif old_title_wip && !new_title_wip
         # Unmarked as Draft/WIP
         #
+        notify_draft_status_changed(merge_request)
+
         merge_request_activity_counter
           .track_unmarked_as_draft_action(user: current_user)
       end
+    end
+
+    def notify_draft_status_changed(merge_request)
+      notification_service.async.change_in_merge_request_draft_status(
+        merge_request,
+        current_user
+      )
     end
 
     def handle_milestone_change(merge_request)
@@ -178,6 +205,7 @@ module MergeRequests
 
       new_assignees = merge_request.assignees - old_assignees
       merge_request_activity_counter.track_users_assigned_to_mr(users: new_assignees)
+      merge_request_activity_counter.track_assignees_changed_action(user: current_user)
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)
@@ -189,6 +217,7 @@ module MergeRequests
 
       new_reviewers = merge_request.reviewers - old_reviewers
       merge_request_activity_counter.track_users_review_requested(users: new_reviewers)
+      merge_request_activity_counter.track_reviewers_changed_action(user: current_user)
     end
 
     def create_branch_change_note(issuable, branch_type, event_type, old_branch, new_branch)

@@ -4,7 +4,13 @@ import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.qu
 import { __ } from '~/locale';
 import { DEFAULT, DRAW_FAILURE, LOAD_FAILURE } from '../../constants';
 import PipelineGraph from './graph_component.vue';
-import { unwrapPipelineData, toggleQueryPollingByVisibility, reportToSentry } from './utils';
+import {
+  getQueryHeaders,
+  reportToSentry,
+  serializeGqlErr,
+  toggleQueryPollingByVisibility,
+  unwrapPipelineData,
+} from './utils';
 
 export default {
   name: 'PipelineGraphWrapper',
@@ -14,6 +20,9 @@ export default {
     PipelineGraph,
   },
   inject: {
+    graphqlResourceEtag: {
+      default: '',
+    },
     metricsPath: {
       default: '',
     },
@@ -38,6 +47,9 @@ export default {
   },
   apollo: {
     pipeline: {
+      context() {
+        return getQueryHeaders(this.graphqlResourceEtag);
+      },
       query: getPipelineDetails,
       pollInterval: 10000,
       variables() {
@@ -49,8 +61,8 @@ export default {
       update(data) {
         return unwrapPipelineData(this.pipelineProjectPath, data);
       },
-      error() {
-        this.reportFailure(LOAD_FAILURE);
+      error({ gqlError }) {
+        this.reportFailure(LOAD_FAILURE, serializeGqlErr(gqlError));
       },
     },
   },
@@ -74,6 +86,12 @@ export default {
           };
       }
     },
+    configPaths() {
+      return {
+        graphqlResourceEtag: this.graphqlResourceEtag,
+        metricsPath: this.metricsPath,
+      };
+    },
     showLoadingIcon() {
       /*
         Shows the icon only when the graph is empty, not when it is is
@@ -95,10 +113,10 @@ export default {
     refreshPipelineGraph() {
       this.$apollo.queries.pipeline.refetch();
     },
-    reportFailure(type) {
+    reportFailure(type, err = '') {
       this.showAlert = true;
       this.alertType = type;
-      reportToSentry(this.$options.name, this.alertType);
+      reportToSentry(this.$options.name, `type: ${this.alertType}, info: ${err}`);
     },
   },
 };
@@ -111,7 +129,7 @@ export default {
     <gl-loading-icon v-if="showLoadingIcon" class="gl-mx-auto gl-my-4" size="lg" />
     <pipeline-graph
       v-if="pipeline"
-      :metrics-path="metricsPath"
+      :config-paths="configPaths"
       :pipeline="pipeline"
       @error="reportFailure"
       @refreshPipelineGraph="refreshPipelineGraph"

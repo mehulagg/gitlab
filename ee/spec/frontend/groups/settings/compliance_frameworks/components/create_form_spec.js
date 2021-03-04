@@ -67,6 +67,16 @@ describe('CreateForm', () => {
     wrapper.destroy();
   });
 
+  describe('initialized', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('sets the submit button text on the form', () => {
+      expect(findForm().props('submitButtonText')).toBe('Add framework');
+    });
+  });
+
   describe('loading', () => {
     beforeEach(() => {
       wrapper = createComponent();
@@ -120,13 +130,13 @@ describe('CreateForm', () => {
       expect(captureExceptionSpy).toHaveBeenCalledWith(sentrySaveError);
     });
 
-    it('saves inputted values and redirects', async () => {
+    it('saves inputted values, redirects and continues to show loading while redirecting', async () => {
       wrapper = createComponent([[createComplianceFrameworkMutation, create]]);
 
       await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(create).toHaveBeenCalledWith(creationProps);
-      expect(findFormStatus().props('loading')).toBe(false);
+      expect(findFormStatus().props('loading')).toBe(true);
       expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
     });
   });

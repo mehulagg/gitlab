@@ -45,8 +45,8 @@ class GroupWiki < Wiki
 
   override :after_post_receive
   def after_post_receive
-    # TODO: Update group wiki storage
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/230465
+    # Update group wiki storage statistics
+    Groups::UpdateStatisticsWorker.perform_async(group.id, [:wiki_size])
   end
 
   override :git_garbage_collect_worker_klass

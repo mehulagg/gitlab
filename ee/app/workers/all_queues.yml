@@ -308,7 +308,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:update_max_seats_used_for_gitlab_com_subscriptions
-  :feature_category: :license_compliance
+  :feature_category: :license
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
@@ -793,6 +793,14 @@
   :feature_category: :gitaly
   :has_external_dependencies:
   :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: groups_update_statistics
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true

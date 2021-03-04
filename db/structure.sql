@@ -9394,12 +9394,12 @@ CREATE TABLE application_settings (
     invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
-    asset_proxy_allowlist text,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
     notes_create_limit integer DEFAULT 300 NOT NULL,
     notes_create_limit_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
     kroki_formats jsonb DEFAULT '{}'::jsonb NOT NULL,
     in_product_marketing_emails_enabled boolean DEFAULT true NOT NULL,
+    asset_proxy_whitelist text,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
@@ -11029,6 +11029,8 @@ CREATE TABLE cluster_agent_tokens (
     token_encrypted text NOT NULL,
     created_by_user_id bigint,
     description text,
+    name text,
+    CONSTRAINT check_2b79dbb315 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_4e4ec5070a CHECK ((char_length(description) <= 1024)),
     CONSTRAINT check_c60daed227 CHECK ((char_length(token_encrypted) <= 255))
 );
@@ -13233,7 +13235,8 @@ CREATE TABLE incident_management_oncall_participants (
     oncall_rotation_id bigint NOT NULL,
     user_id bigint NOT NULL,
     color_palette smallint NOT NULL,
-    color_weight smallint NOT NULL
+    color_weight smallint NOT NULL,
+    is_removed boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE incident_management_oncall_participants_id_seq
@@ -17926,7 +17929,8 @@ CREATE TABLE user_preferences (
     tab_width smallint,
     experience_level smallint,
     view_diffs_file_by_file boolean DEFAULT false NOT NULL,
-    gitpod_enabled boolean DEFAULT false NOT NULL
+    gitpod_enabled boolean DEFAULT false NOT NULL,
+    markdown_surround_selection boolean DEFAULT true NOT NULL
 );
 
 CREATE SEQUENCE user_preferences_id_seq
@@ -18255,7 +18259,7 @@ CREATE TABLE vulnerability_finding_fingerprints (
     finding_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    algorithm_type integer NOT NULL,
+    algorithm_type smallint NOT NULL,
     fingerprint_sha256 bytea NOT NULL
 );
 
@@ -22447,11 +22451,11 @@ CREATE INDEX index_import_failures_on_project_id_not_null ON import_failures USI
 
 CREATE INDEX index_imported_projects_on_import_type_creator_id_created_at ON projects USING btree (import_type, creator_id, created_at) WHERE (import_type IS NOT NULL);
 
-CREATE INDEX index_inc_mgmnt_oncall_participants_on_oncall_rotation_id ON incident_management_oncall_participants USING btree (oncall_rotation_id);
-
 CREATE INDEX index_inc_mgmnt_oncall_participants_on_oncall_user_id ON incident_management_oncall_participants USING btree (user_id);
 
 CREATE UNIQUE INDEX index_inc_mgmnt_oncall_participants_on_user_id_and_rotation_id ON incident_management_oncall_participants USING btree (user_id, oncall_rotation_id);
+
+CREATE INDEX index_inc_mgmnt_oncall_pcpnt_on_oncall_rotation_id_is_removed ON incident_management_oncall_participants USING btree (oncall_rotation_id, is_removed);
 
 CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_id ON incident_management_oncall_rotations USING btree (oncall_schedule_id, id);
 

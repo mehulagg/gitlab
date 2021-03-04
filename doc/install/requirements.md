@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Requirements
+# Requirements **(FREE SELF)**
 
 This page includes useful information on the supported Operating Systems as well
 as the hardware requirements that are needed to install and use GitLab.
@@ -80,7 +80,7 @@ From GitLab 13.1:
 Beginning in GitLab 12.9, we only support Node.js 10.13.0 or higher, and we have dropped
 support for Node.js 8. (Node.js 6 support was dropped in GitLab 11.8)
 
-We recommend Node 12.x, as it's faster.
+We recommend Node 14.x, as it's faster.
 
 GitLab uses [webpack](https://webpack.js.org/) to compile frontend assets, which requires a minimum
 version of Node.js 10.13.0.

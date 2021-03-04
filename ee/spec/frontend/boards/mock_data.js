@@ -36,6 +36,35 @@ export const mockLists = [
     milestone: null,
     preset: false,
   },
+  {
+    id: 'gid://gitlab/List/3',
+    title: 'Assignee list',
+    position: 0,
+    listType: 'assignee',
+    collapsed: false,
+    label: null,
+    maxIssueCount: 0,
+    assignee: {
+      id: 'gid://gitlab/',
+    },
+    milestone: null,
+    preset: false,
+  },
+  {
+    id: 'gid://gitlab/List/4',
+    title: 'Milestone list',
+    position: 0,
+    listType: 'milestone',
+    collapsed: false,
+    label: null,
+    maxIssueCount: 0,
+    assignee: null,
+    milestone: {
+      id: 'gid://gitlab/Milestone/1',
+      title: 'A milestone',
+    },
+    preset: false,
+  },
 ];
 
 export const mockListsWithModel = mockLists.map((listMock) =>
@@ -54,6 +83,17 @@ const assignees = [
     name: 'Bernardina Bosco',
     avatar: 'https://www.gravatar.com/avatar/eb7b664b13a30ad9f9ba4b61d7075470?s=80&d=identicon',
     webUrl: 'http://127.0.0.1:3000/angelina.herman',
+  },
+];
+
+export const mockMilestones = [
+  {
+    id: 'gid://gitlab/Milestone/1',
+    title: 'Milestone 1',
+  },
+  {
+    id: 'gid://gitlab/Milestone/2',
+    title: 'Milestone 2',
   },
 ];
 
