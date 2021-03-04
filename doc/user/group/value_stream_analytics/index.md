@@ -307,9 +307,9 @@ To create a value stream:
 #### Creating a value stream with stages
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55572) in GitLab 13.10.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../administration/feature_flags.md). **(FREE SELF)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
 
 A default value stream template is available, additional stages can be added to this template or alternatively we can start from a blank template.
 
@@ -337,7 +337,7 @@ To delete a custom value stream:
 1. Click the **Delete (name of value stream)**.
 1. Click the **Delete** button to confirm.
 
-![Delete value stream](img/delete_value_stream_v13.4.png "Deleting a custom value stream")
+![Delete value stream](img/delete_value_stream_v13_4.png "Deleting a custom value stream")
 
 ## Days to completion chart
 

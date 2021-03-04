@@ -8909,13 +8909,13 @@ CREATE TABLE analytics_cycle_analytics_group_stages (
     relative_position integer,
     start_event_identifier integer NOT NULL,
     end_event_identifier integer NOT NULL,
-    group_id bigint NOT NULL,
+    group_id bigint,
     start_event_label_id bigint,
     end_event_label_id bigint,
     hidden boolean DEFAULT false NOT NULL,
     custom boolean DEFAULT true NOT NULL,
     name character varying(255) NOT NULL,
-    group_value_stream_id bigint NOT NULL
+    group_value_stream_id bigint
 );
 
 CREATE SEQUENCE analytics_cycle_analytics_group_stages_id_seq
@@ -8929,11 +8929,10 @@ ALTER SEQUENCE analytics_cycle_analytics_group_stages_id_seq OWNED BY analytics_
 
 CREATE TABLE analytics_cycle_analytics_group_value_streams (
     id bigint NOT NULL,
+    name character varying(255) NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    group_id bigint NOT NULL,
-    name text NOT NULL,
-    CONSTRAINT check_bc1ed5f1f7 CHECK ((char_length(name) <= 100))
+    group_id bigint NOT NULL
 );
 
 CREATE SEQUENCE analytics_cycle_analytics_group_value_streams_id_seq
@@ -9359,16 +9358,16 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
+    elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
-    elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     abuse_notification_email character varying,
     require_admin_approval_after_user_signup boolean DEFAULT true NOT NULL,
     help_page_documentation_base_url text,
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
-    container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
+    container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
     secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
@@ -9394,12 +9393,12 @@ CREATE TABLE application_settings (
     invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
-    asset_proxy_allowlist text,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
     notes_create_limit integer DEFAULT 300 NOT NULL,
     notes_create_limit_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
     kroki_formats jsonb DEFAULT '{}'::jsonb NOT NULL,
     in_product_marketing_emails_enabled boolean DEFAULT true NOT NULL,
+    asset_proxy_whitelist text,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
@@ -15605,8 +15604,8 @@ CREATE TABLE plan_limits (
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
-    daily_invites integer DEFAULT 0 NOT NULL,
-    rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL
+    rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
+    daily_invites integer DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -18581,8 +18580,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL,
     subgroup_events boolean DEFAULT false NOT NULL
 );
@@ -21501,6 +21500,8 @@ CREATE INDEX index_analytics_ca_group_stages_on_end_event_label_id ON analytics_
 
 CREATE INDEX index_analytics_ca_group_stages_on_group_id ON analytics_cycle_analytics_group_stages USING btree (group_id);
 
+CREATE UNIQUE INDEX index_analytics_ca_group_stages_on_group_id_vs_id_and_name ON analytics_cycle_analytics_group_stages USING btree (group_id, group_value_stream_id, name);
+
 CREATE INDEX index_analytics_ca_group_stages_on_relative_position ON analytics_cycle_analytics_group_stages USING btree (relative_position);
 
 CREATE INDEX index_analytics_ca_group_stages_on_start_event_label_id ON analytics_cycle_analytics_group_stages USING btree (start_event_label_id);
@@ -22420,8 +22421,6 @@ CREATE INDEX index_group_import_states_on_group_id ON group_import_states USING 
 CREATE INDEX index_group_import_states_on_user_id ON group_import_states USING btree (user_id) WHERE (user_id IS NOT NULL);
 
 CREATE INDEX index_group_repository_storage_moves_on_group_id ON group_repository_storage_moves USING btree (group_id);
-
-CREATE UNIQUE INDEX index_group_stages_on_group_id_group_value_stream_id_and_name ON analytics_cycle_analytics_group_stages USING btree (group_id, group_value_stream_id, name);
 
 CREATE UNIQUE INDEX index_group_wiki_repositories_on_disk_path ON group_wiki_repositories USING btree (disk_path);
 
@@ -23893,8 +23892,6 @@ CREATE UNIQUE INDEX issue_user_mentions_on_issue_id_index ON issue_user_mentions
 
 CREATE UNIQUE INDEX kubernetes_namespaces_cluster_and_namespace ON clusters_kubernetes_namespaces USING btree (cluster_id, namespace);
 
-CREATE INDEX merge_request_mentions_temp_index ON merge_requests USING btree (id) WHERE ((description ~~ '%@%'::text) OR ((title)::text ~~ '%@%'::text));
-
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_and_note_id_index ON merge_request_user_mentions USING btree (merge_request_id, note_id);
 
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_index ON merge_request_user_mentions USING btree (merge_request_id) WHERE (note_id IS NULL);
@@ -24682,7 +24679,7 @@ ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_ae440388cc FOREIGN KEY (latest_closed_by_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY analytics_cycle_analytics_group_stages
-    ADD CONSTRAINT fk_analytics_cycle_analytics_group_stages_group_value_stream_id FOREIGN KEY (group_value_stream_id) REFERENCES analytics_cycle_analytics_group_value_streams(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_analytics_cycle_analytics_group_stages_group_value_stream_id FOREIGN KEY (group_value_stream_id) REFERENCES analytics_cycle_analytics_group_value_streams(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY fork_network_members
     ADD CONSTRAINT fk_b01280dae4 FOREIGN KEY (forked_from_project_id) REFERENCES projects(id) ON DELETE SET NULL;
