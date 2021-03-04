@@ -17,23 +17,10 @@ RSpec.describe Banzai::Filter::CustomEmojiFilter do
     expect(doc.css('gl-emoji img').size).to eq 1
   end
 
-  it 'ignores non existent custom emoji' do
-    exp = '<p>:foo:</p>'
-    doc = filter(exp)
-
-    expect(doc.to_html).to eq(exp)
-  end
-
   it 'correctly uses the custom emoji URL' do
     doc = filter('<p>:tanuki:</p>')
 
     expect(doc.css('img').first.attributes['src'].value).to eq(custom_emoji.file)
-  end
-
-  it 'matches with adjacent text' do
-    doc = filter('tanuki (:tanuki:)')
-
-    expect(doc.css('img').size).to eq 1
   end
 
   it 'matches multiple same custom emoji' do
@@ -54,18 +41,6 @@ RSpec.describe Banzai::Filter::CustomEmojiFilter do
     expect(doc.css('img').size).to be 0
   end
 
-  it 'keeps whitespace intact' do
-    doc = filter('This deserves a :tanuki:, big time.')
-
-    expect(doc.to_html).to match(/^This deserves a <gl-emoji.+>, big time\.\z/)
-  end
-
-  it 'does not match emoji in a string' do
-    doc = filter("'2a00:tanuki:100::1'")
-
-    expect(doc.css('gl-emoji').size).to eq 0
-  end
-
   it 'does not do N+1 query' do
     create(:custom_emoji, name: 'party-parrot', group: group)
 
@@ -82,5 +57,11 @@ RSpec.describe Banzai::Filter::CustomEmojiFilter do
     let(:emoji_name) { ':tanuki:' }
 
     it_behaves_like 'ignored ancestor tags'
+  end
+
+  context 'shared examples' do
+    let(:emoji_name) { ':tanuki:' }
+
+    it_behaves_like 'emoji shared examples'
   end
 end
