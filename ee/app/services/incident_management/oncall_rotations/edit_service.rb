@@ -43,36 +43,13 @@ module IncidentManagement
       attr_reader :oncall_rotation, :user, :project, :params, :participants_params
 
       def update_and_remove_participants
-        existing_participants = oncall_rotation.participants
-
-        add_participants(existing_participants)
-        remove_participants(existing_participants)
-      end
-
-      def remove_participants(existing_participants)
-        # Get list of participants that existed, but no longer do
-        removed_participants = participant_users.any? ? existing_participants.excluding_users(participant_users) : existing_participants
-        removed_participants.mark_as_removed
-
-        removed_participants
-      end
-
-      def add_participants(existing_participants)
-        retained_users = existing_participants.including_users(participant_users).map(&:user)
-
-        # Find the new participants (participants that are not saved already)
-        participant_params_to_add = participants_params.reject { |participant| retained_users.include?(participant[:user]) }
-
-        return unless participant_params_to_add.any?
-
-        participants = participants_for(oncall_rotation, participant_params_to_add)
-
+        participants = participants_for(oncall_rotation)
         raise RotationModificationError.new(error_participant_has_no_permission) if participants.nil?
 
         first_invalid_participant = participants.find(&:invalid?)
-        return RotationModificationError.new(error_in_validation(first_invalid_participant)) if first_invalid_participant
+        raise RotationModificationError.new(error_in_validation(first_invalid_participant)) if first_invalid_participant
 
-        insert_participants(participants)
+        upsert_participants(participants)
       end
 
       def error_no_permissions

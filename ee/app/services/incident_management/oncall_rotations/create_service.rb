@@ -35,16 +35,16 @@ module IncidentManagement
         return error_duplicate_participants if duplicated_users?
 
         OncallRotation.transaction do
-          oncall_rotation = schedule.rotations.create(rotation_params)
+          @oncall_rotation = schedule.rotations.create(rotation_params)
           break error_in_validation(oncall_rotation) unless oncall_rotation.persisted?
 
-          participants = participants_for(oncall_rotation, participants_params)
+          participants = participants_for(oncall_rotation)
           break error_participant_has_no_permission if participants.nil?
 
           first_invalid_participant = participants.find(&:invalid?)
           break error_in_validation(first_invalid_participant) if first_invalid_participant
 
-          insert_participants(participants)
+          upsert_participants(participants)
 
           success(oncall_rotation)
         end
@@ -52,7 +52,7 @@ module IncidentManagement
 
       private
 
-      attr_reader :schedule, :project, :user, :rotation_params, :participants_params
+      attr_reader :schedule, :project, :user, :rotation_params, :participants_params, :oncall_rotation
 
       def error_no_permissions
         error(_('You have insufficient permissions to create an on-call rotation for this project'))

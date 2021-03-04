@@ -61,6 +61,13 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
 
         expect(oncall_rotation.participants.not_removed).to include(an_object_having_attributes(attributes_to_match))
       end
+
+      context 'new participant has a validation error' do
+        # Participant with nil color palette
+        let(:participant_to_add) { build(:incident_management_oncall_participant, rotation: oncall_rotation, user: user_with_permissions, color_palette: nil) }
+
+        it_behaves_like 'error response', "Color palette can't be blank"
+      end
     end
 
     context 'adding too many participants' do
