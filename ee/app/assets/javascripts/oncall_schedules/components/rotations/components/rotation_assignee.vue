@@ -4,6 +4,7 @@ import { uniqueId } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
+import { selectedTimezoneFormattedOffset } from '../../schedule/utils';
 
 export const SHIFT_WIDTHS = {
   md: 140,
@@ -20,6 +21,7 @@ export default {
     GlAvatar,
     GlPopover,
   },
+  inject: ['selectedTimezone'],
   props: {
     assignee: {
       type: Object,
@@ -41,10 +43,6 @@ export default {
       type: Number,
       required: true,
     },
-    selectedTimezone: {
-      type: Object,
-      required: true,
-    },
   },
   computed: {
     assigneeName() {
@@ -60,7 +58,7 @@ export default {
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
         endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)} ${
-          this.selectedTimezone.identifier
+          this.timezoneOffset
         }`,
       });
     },
@@ -73,9 +71,12 @@ export default {
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
         startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)} ${
-          this.selectedTimezone.identifier
+          this.timezoneOffset
         }`,
       });
+    },
+    timezoneOffset() {
+      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
   },
 };
@@ -102,14 +103,12 @@ export default {
       triggers="hover"
       placement="top"
     >
-      <div class="gl-ml-n2">
-        <p class="gl-m-0 gl-white-space-nowrap" data-testid="rotation-assignee-starts-at">
-          {{ startsAt }}
-        </p>
-        <p class="gl-m-0 gl-white-space-nowrap" data-testid="rotation-assignee-ends-at">
-          {{ endsAt }}
-        </p>
-      </div>
+      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">
+        {{ startsAt }}
+      </p>
+      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">
+        {{ endsAt }}
+      </p>
     </gl-popover>
   </div>
 </template>

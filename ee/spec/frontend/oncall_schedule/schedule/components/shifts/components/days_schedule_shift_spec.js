@@ -3,7 +3,7 @@ import RotationsAssignee from 'ee/oncall_schedules/components/rotations/componen
 import DaysScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/days_schedule_shift.vue';
 import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import { nDaysAfter } from '~/lib/utils/datetime_utility';
-import mockTimezones from '../../../../mocks/mockTimezones.json';
+import mockTimezones from '../../../../mocks/mock_timezones.json';
 
 const shift = {
   participant: {

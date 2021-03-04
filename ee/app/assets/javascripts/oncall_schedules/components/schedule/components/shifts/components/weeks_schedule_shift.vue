@@ -37,10 +37,6 @@ export default {
       type: Object,
       required: true,
     },
-    selectedTimezone: {
-      type: Object,
-      required: true,
-    },
   },
   computed: {
     currentTimeFrameEnd() {
@@ -124,6 +120,5 @@ export default {
     :rotation-assignee-starts-at="shift.startsAt"
     :rotation-assignee-ends-at="shift.endsAt"
     :shift-width="shiftStyles.width"
-    :selected-timezone="selectedTimezone"
   />
 </template>

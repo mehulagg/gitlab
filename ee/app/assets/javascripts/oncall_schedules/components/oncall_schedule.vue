@@ -16,7 +16,7 @@ import {
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
-import { s__, __ } from '~/locale';
+import { s__ } from '~/locale';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
@@ -24,7 +24,7 @@ import DeleteScheduleModal from './delete_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
-import { getTimeframeForWeeksView } from './schedule/utils';
+import { getTimeframeForWeeksView, selectedTimezoneFormattedOffset } from './schedule/utils';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
@@ -63,6 +63,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: ['projectPath', 'timezones'],
+  provide() {
+    return {
+      selectedTimezone: this.selectedTimezone,
+    };
+  },
   props: {
     schedule: {
       type: Object,
@@ -73,7 +78,7 @@ export default {
     rotations: {
       query: getShiftsForRotations,
       variables() {
-        this.timeframeStartDate.setHours(1, 0, 0, 0);
+        this.timeframeStartDate.setHours(0, 0, 0, 0);
         const startsAt = this.timeframeStartDate;
         const endsAt = nWeeksAfter(startsAt, 2);
 
@@ -105,7 +110,7 @@ export default {
       return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
     },
     offset() {
-      return __(`(UTC ${this.selectedTimezone.formatted_offset})`);
+      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
     timeframe() {
       return getTimeframeForWeeksView(this.timeframeStartDate);
@@ -256,7 +261,6 @@ export default {
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
             :loading="loading"
-            :selected-timezone="selectedTimezone"
           />
         </div>
       </gl-card>
