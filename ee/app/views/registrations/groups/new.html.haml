@@ -44,7 +44,7 @@
         - if !in_trial_onboarding_flow? && experiment_enabled?(:trial_during_signup)
           = render partial: 'shared/groups/trial_form'
         - else
-          - experiment(:registrations_group_invite, actor: :user) do |experiment_instance|
+          - experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|
             - experiment_instance.use do
               = render partial: 'shared/groups/invite_members'
             - experiment_instance.try(:invite_page) {}

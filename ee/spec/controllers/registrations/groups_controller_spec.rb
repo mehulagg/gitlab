@@ -259,7 +259,7 @@ RSpec.describe Registrations::GroupsController do
                     expect(experiment(:registrations_group_invite))
                       .to track(:created, { property: group.id.to_s })
                             .on_any_instance
-                            .with_context(actor: :user)
+                            .with_context(actor: user)
 
                     subject
                   end
@@ -325,7 +325,7 @@ RSpec.describe Registrations::GroupsController do
                   expect(experiment(:registrations_group_invite))
                     .to track(:created, { property: group.id.to_s })
                           .on_any_instance
-                          .with_context(actor: :user)
+                          .with_context(actor: user)
 
                   subject
                 end
@@ -361,7 +361,7 @@ RSpec.describe Registrations::GroupsController do
               expect(experiment(:registrations_group_invite))
                 .to track(:created, { property: group.id.to_s })
                       .on_any_instance
-                      .with_context(actor: :user)
+                      .with_context(actor: user)
 
               subject
             end
