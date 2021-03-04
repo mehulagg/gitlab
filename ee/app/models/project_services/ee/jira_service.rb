@@ -12,10 +12,7 @@ module EE
     end
 
     def jira_vulnerabilities_integration_available?
-      feature_enabled = ::Feature.enabled?(:jira_for_vulnerabilities, parent, default_enabled: :yaml)
-      feature_available = parent.present? ? parent&.feature_available?(:jira_vulnerabilities_integration) : License.feature_available?(:jira_vulnerabilities_integration)
-
-      feature_enabled && feature_available
+      parent.present? ? parent&.feature_available?(:jira_vulnerabilities_integration) : License.feature_available?(:jira_vulnerabilities_integration)
     end
 
     def jira_vulnerabilities_integration_enabled?
