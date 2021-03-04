@@ -109,7 +109,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                   data-testid="rotation-assignee-starts-at"
                 >
                   
-        Starts: January 12, 2021, 10:04 Etc/GMT+12
+        Starts: January 12, 2021, 10:04 -12
       
                 </p>
                  
@@ -118,7 +118,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                   data-testid="rotation-assignee-ends-at"
                 >
                   
-        Ends: January 15, 2021, 10:04 Etc/GMT+12
+        Ends: January 15, 2021, 10:04 -12
       
                 </p>
               </div>
@@ -157,7 +157,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                   data-testid="rotation-assignee-starts-at"
                 >
                   
-        Starts: January 16, 2021, 10:04 Etc/GMT+12
+        Starts: January 16, 2021, 10:04 -12
       
                 </p>
                  
@@ -166,7 +166,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                   data-testid="rotation-assignee-ends-at"
                 >
                   
-        Ends: January 18, 2021, 10:04 Etc/GMT+12
+        Ends: January 18, 2021, 10:04 -12
       
                 </p>
               </div>
