@@ -62,6 +62,10 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
         expect(oncall_rotation.participants.not_removed).to include(an_object_having_attributes(attributes_to_match))
       end
 
+      it 'updates the rotation updated_at' do
+        expect { subject }.to change { oncall_rotation.updated_at }
+      end
+
       context 'new participant has a validation error' do
         # Participant with nil color palette
         let(:participant_to_add) { build(:incident_management_oncall_participant, rotation: oncall_rotation, user: user_with_permissions, color_palette: nil) }
@@ -138,6 +142,28 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
 
         expect(oncall_rotation.participants.not_removed).to eq(oncall_rotation.participants)
         expect(oncall_rotation.participants.removed).to be_empty
+      end
+    end
+
+    context 'editing rotation attributes' do
+      let(:params) { { name: 'Changed rotation', length: 7, length_unit: 'days', starts_at: 1.week.from_now, ends_at: 1.month.from_now } }
+
+      it 'updates the rotation to match the params' do
+        subject
+
+        expect(oncall_rotation.reload).to have_attributes(params)
+      end
+
+      context 'with a validation error' do
+        let(:params) { { name: '', starts_at: 1.week.from_now } }
+
+        it_behaves_like 'error response', "Name can't be blank"
+
+        it 'updates the rotation to match the params' do
+          subject
+
+          expect(oncall_rotation.reload).not_to have_attributes(params)
+        end
       end
     end
   end

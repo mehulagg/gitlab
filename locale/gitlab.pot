@@ -34324,6 +34324,9 @@ msgstr ""
 msgid "You have insufficient permissions to create an on-call schedule for this project"
 msgstr ""
 
+msgid "You have insufficient permissions to edit an on-call rotation in this project"
+msgstr ""
+
 msgid "You have insufficient permissions to remove an on-call rotation from this project"
 msgstr ""
 
