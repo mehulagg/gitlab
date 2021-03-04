@@ -405,6 +405,7 @@
     - <<: *if-security-merge-request
       changes: *code-backstage-patterns
     - <<: *if-merge-request-title-as-if-foss
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -445,6 +446,8 @@
 
 .frontend:rules:bundle-size-review:
   rules:
+    - <<: *if-not-canonical-namespace
+      when: never
     - if: '$DANGER_GITLAB_API_TOKEN && $CI_MERGE_REQUEST_IID && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main")'
       changes: *frontend-patterns
       allow_failure: true
@@ -483,6 +486,7 @@
     - <<: *if-security-merge-request
       changes: *code-qa-patterns
     - <<: *if-merge-request-title-as-if-foss
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -700,6 +704,7 @@
       changes: *db-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *db-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -716,6 +721,7 @@
       changes: *db-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *db-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:as-if-foss-unit:
   rules:
@@ -725,6 +731,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -741,6 +748,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:as-if-foss-integration:
   rules:
@@ -750,6 +758,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -766,6 +775,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:as-if-foss-system:
   rules:
@@ -775,6 +785,7 @@
       changes: *code-backstage-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *code-backstage-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -791,6 +802,7 @@
       changes: *code-backstage-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *code-backstage-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-and-foss-db-library-code:
   rules:

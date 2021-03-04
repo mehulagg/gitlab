@@ -9,12 +9,24 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
     let(:location) { ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(file_path: 'yarn/yarn.lock', package_version: 'v2', package_name: 'saml2') }
+    let(:tracking_data) do
+      {
+        'type' => 'source',
+        'items' => [
+          'fingerprints' => [
+            { 'algorithm' => 'hash', 'value' => 'hash_value' },
+            { 'algorithm' => 'location', 'value' => 'location_value' },
+            { 'algorithm' => 'scope_offset', 'value' => 'scope_offset_value' }
+          ]
+        ]
+      }
+    end
 
     before do
       allow_next_instance_of(described_class) do |parser|
         allow(parser).to receive(:create_location).and_return(location)
+        allow(parser).to receive(:tracking_data).and_return(tracking_data)
       end
-
       artifact.each_blob { |blob| described_class.parse!(blob, report) }
     end
 
@@ -185,6 +197,37 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
       it 'sets the UUIDv5 for findings', :aggregate_failures do
         expect(finding_uuids).to match_array(expected_uuids)
+      end
+    end
+
+    describe 'parsing tracking' do
+      context 'with valid tracking information' do
+        it 'creates fingerprints for each algorithm' do
+          finding = report.findings.first
+          expect(finding.fingerprints.size).to eq(3)
+          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location', 'scope_offset'])
+        end
+      end
+
+      context 'with invalid tracking information' do
+        let(:tracking_data) do
+          {
+            'type' => 'source',
+            'items' => [
+              'fingerprints' => [
+                { 'algorithm' => 'hash', 'value' => 'hash_value' },
+                { 'algorithm' => 'location', 'value' => 'location_value' },
+                { 'algorithm' => 'INVALID', 'value' => 'scope_offset_value' }
+              ]
+            ]
+          }
+        end
+
+        it 'ignores invalid algorithm types' do
+          finding = report.findings.first
+          expect(finding.fingerprints.size).to eq(2)
+          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
+        end
       end
     end
   end

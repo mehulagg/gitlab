@@ -6,12 +6,12 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        value 'WEIGHT_ASC', 'Weight by ascending order', value: 'weight_asc'
-        value 'WEIGHT_DESC', 'Weight by descending order', value: 'weight_desc'
-        value 'PUBLISHED_ASC', 'Published issues shown last', value: :published_asc
-        value 'PUBLISHED_DESC', 'Published issues shown first', value: :published_desc
-        value 'SLA_DUE_AT_ASC', 'Issues with earliest SLA due time shown first', value: :sla_due_at_asc
-        value 'SLA_DUE_AT_DESC', 'Issues with latest SLA due time shown first', value: :sla_due_at_desc
+        value 'WEIGHT_ASC', 'Weight by ascending order.', value: 'weight_asc'
+        value 'WEIGHT_DESC', 'Weight by descending order.', value: 'weight_desc'
+        value 'PUBLISHED_ASC', 'Published issues shown last.', value: :published_asc
+        value 'PUBLISHED_DESC', 'Published issues shown first.', value: :published_desc
+        value 'SLA_DUE_AT_ASC', 'Issues with earliest SLA due time shown first.', value: :sla_due_at_asc
+        value 'SLA_DUE_AT_DESC', 'Issues with latest SLA due time shown first.', value: :sla_due_at_desc
       end
     end
   end

@@ -9,7 +9,11 @@ module Ci
 
       belongs_to :project
 
-      scope :current_month, -> { where(date: Time.current.beginning_of_month) }
+      scope :current_month, -> { where(date: beginning_of_month) }
+
+      def self.beginning_of_month(time = Time.current)
+        time.utc.beginning_of_month
+      end
 
       # We should pretty much always use this method to access data for the current month
       # since this will lazily create an entry if it doesn't exist.

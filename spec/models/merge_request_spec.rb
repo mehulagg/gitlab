@@ -2885,6 +2885,11 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#mergeable?' do
     subject { build_stubbed(:merge_request) }
 
+    it 'returns false if still preparing' do
+      expect(subject).to receive(:preparing?) { true }
+      expect(subject.mergeable?).to be_falsey
+    end
+
     it 'returns false if #mergeable_state? is false' do
       expect(subject).to receive(:mergeable_state?) { false }
 
@@ -3075,6 +3080,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     subject { build(:merge_request, merge_status: status) }
 
     where(:status, :public_status) do
+      'preparing' | 'checking'
       'cannot_be_merged_rechecking' | 'checking'
       'checking'                    | 'checking'
       'cannot_be_merged'            | 'cannot_be_merged'
@@ -4096,6 +4102,72 @@ RSpec.describe MergeRequest, factory_default: :keep do
         subject.reload
         expect(subject.head_pipeline).to eq(pipeline)
         expect(subject.merge_jid).to be_nil
+      end
+    end
+
+    describe '#mark_as_unchecked' do
+      subject { create(:merge_request, source_project: project, merge_status: merge_status) }
+
+      shared_examples 'for an invalid state transition' do
+        it 'is not a valid state transition' do
+          expect { subject.mark_as_unchecked! }.to raise_error(StateMachines::InvalidTransition)
+        end
+      end
+
+      shared_examples 'for an valid state transition' do
+        it 'is a valid state transition' do
+          expect { subject.mark_as_unchecked! }
+            .to change { subject.merge_status }
+            .from(merge_status.to_s)
+            .to(expected_merge_status)
+        end
+      end
+
+      context 'when the status is unchecked' do
+        let(:merge_status) { :unchecked }
+
+        include_examples 'for an invalid state transition'
+      end
+
+      context 'when the status is checking' do
+        let(:merge_status) { :checking }
+        let(:expected_merge_status) { 'unchecked' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is preparing' do
+        let(:merge_status) { :preparing }
+        let(:expected_merge_status) { 'unchecked' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is can_be_merged' do
+        let(:merge_status) { :can_be_merged }
+        let(:expected_merge_status) { 'unchecked' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is cannot_be_merged_recheck' do
+        let(:merge_status) { :cannot_be_merged_recheck }
+
+        include_examples 'for an invalid state transition'
+      end
+
+      context 'when the status is cannot_be_merged' do
+        let(:merge_status) { :cannot_be_merged }
+        let(:expected_merge_status) { 'cannot_be_merged_recheck' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is cannot_be_merged' do
+        let(:merge_status) { :cannot_be_merged }
+        let(:expected_merge_status) { 'cannot_be_merged_recheck' }
+
+        include_examples 'for an valid state transition'
       end
     end
 

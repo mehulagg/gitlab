@@ -12,5 +12,9 @@ FactoryBot.define do
         participant.rotation.project.add_developer(participant.user)
       end
     end
+
+    trait :removed do
+      is_removed { true }
+    end
   end
 end

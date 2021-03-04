@@ -47,6 +47,10 @@ export default {
       required: false,
       default: null,
     },
+    submitButtonText: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -141,7 +145,6 @@ export default {
       'ComplianceFrameworks|Could not find this configuration location, please try a different location',
     ),
     colorInputLabel: __('Background color'),
-    submitBtnText: __('Save changes'),
     cancelBtnText: __('Cancel'),
   },
 };
@@ -223,7 +226,7 @@ export default {
         class="js-no-auto-disable"
         data-testid="submit-btn"
         :disabled="disableSubmitBtn"
-        >{{ $options.i18n.submitBtnText }}</gl-button
+        >{{ submitButtonText }}</gl-button
       >
       <gl-button :href="groupEditPath" data-testid="cancel-btn">{{
         $options.i18n.cancelBtnText

@@ -78,7 +78,7 @@ export default {
           date: null,
           time: 0,
         },
-        endsOn: {
+        endsAt: {
           date: null,
           time: 0,
         },
@@ -92,6 +92,7 @@ export default {
         name: true,
         participants: true,
         startsAt: true,
+        endsAt: true,
       },
     };
   },
@@ -129,7 +130,8 @@ export default {
         name,
         rotationLength,
         participants,
-        startsAt: { date, time },
+        startsAt: { date: startDate, time: startTime },
+        endsAt: { date: endDate, time: endTime },
       } = this.form;
 
       return {
@@ -137,9 +139,15 @@ export default {
         scheduleIid: this.schedule.iid,
         name,
         startsAt: {
-          date: formatDate(date, 'yyyy-mm-dd'),
-          time: format24HourTimeStringFromInt(time),
+          date: formatDate(startDate, 'yyyy-mm-dd'),
+          time: format24HourTimeStringFromInt(startTime),
         },
+        endsAt: endDate
+          ? {
+              date: formatDate(endDate, 'yyyy-mm-dd'),
+              time: format24HourTimeStringFromInt(endTime),
+            }
+          : null,
         rotationLength: {
           ...rotationLength,
           length: parseInt(rotationLength.length, 10),
@@ -149,6 +157,20 @@ export default {
     },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
+    },
+    isEndDateValid() {
+      const startsAt = this.form.startsAt.date?.getTime();
+      const endsAt = this.form.endsAt.date?.getTime();
+
+      if (!startsAt || !endsAt) {
+        // If start or end is not present, we consider the end date valid
+        return true;
+      } else if (startsAt < endsAt) {
+        return true;
+      } else if (startsAt === endsAt) {
+        return this.form.startsAt.time < this.form.endsAt.time;
+      }
+      return false;
     },
   },
   methods: {
@@ -244,8 +266,11 @@ export default {
         this.validationState.name = isNameFieldValid(this.form.name);
       } else if (key === 'participants') {
         this.validationState.participants = this.form.participants.length > 0;
-      } else if (key === 'startsAt.date') {
+      } else if (key === 'startsAt.date' || key === 'startsAt.time') {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
+        this.validationState.endsAt = this.isEndDateValid;
+      } else if (key === 'endsAt.date' || key === 'endsAt.time') {
+        this.validationState.endsAt = this.isEndDateValid;
       }
     },
   },

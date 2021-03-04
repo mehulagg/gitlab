@@ -59,7 +59,7 @@ module Gitlab
                 rescue => error
                   # Any exceptions that might occur should be reported to
                   # Sentry, instead of silently terminating this thread.
-                  Raven.capture_exception(error)
+                  Gitlab::ErrorTracking.track_exception(error)
 
                   Gitlab::AppLogger.error(
                     "Service discovery encountered an error: #{error.message}"

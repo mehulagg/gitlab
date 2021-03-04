@@ -34,7 +34,7 @@ RSpec.describe ProjectPolicy do
 
     let(:auditor_permissions) do
       %i[
-        download_code download_wiki_code read_project read_board read_list
+        download_code download_wiki_code read_project read_issue_board read_issue_board_list
         read_project_for_iids read_issue_iid read_merge_request_iid read_wiki
         read_issue read_label read_issue_link read_milestone read_iteration
         read_snippet read_project_member read_note read_cycle_analytics
@@ -190,7 +190,7 @@ RSpec.describe ProjectPolicy do
       end
 
       it 'disables boards permissions' do
-        expect_disallowed :admin_board
+        expect_disallowed :admin_issue_board
       end
     end
   end
@@ -438,6 +438,12 @@ RSpec.describe ProjectPolicy do
 
           context 'with admin disabled' do
             it { is_expected.to be_disallowed(:read_project) }
+          end
+
+          context 'with auditor' do
+            let(:current_user) { create(:user, :auditor) }
+
+            it { is_expected.to be_allowed(:read_project) }
           end
         end
       end
@@ -1635,7 +1641,8 @@ RSpec.describe ProjectPolicy do
       # These are abilities that are not explicitly allowed by policies because most of them are not
       # real abilities.  They are prevented due to the use of create_update_admin helper method.
       let(:abilities_not_currently_enabled) do
-        %i[create_merge_request create_list update_list create_label update_label create_milestone
+        %i[create_merge_request create_issue_board_list create_issue_board update_issue_board
+           update_issue_board_list create_label update_label create_milestone
            update_milestone update_wiki update_design admin_design update_note
            update_pipeline_schedule admin_pipeline_schedule create_trigger update_trigger
            admin_trigger create_pages admin_release request_access create_board update_board

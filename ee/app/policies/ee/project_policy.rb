@@ -209,7 +209,7 @@ module EE
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
-        enable :admin_board
+        enable :admin_issue_board
         enable :admin_epic_issue
         enable :read_group_timelogs
       end
@@ -217,7 +217,7 @@ module EE
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
 
       rule { can?(:developer_access) }.policy do
-        enable :admin_board
+        enable :admin_issue_board
         enable :read_vulnerability_feedback
         enable :create_vulnerability_feedback
         enable :destroy_vulnerability_feedback
@@ -366,7 +366,7 @@ module EE
         prevent :owner_access
       end
 
-      rule { ip_enforcement_prevents_access & ~admin }.policy do
+      rule { ip_enforcement_prevents_access & ~admin & ~auditor }.policy do
         prevent :read_project
       end
 

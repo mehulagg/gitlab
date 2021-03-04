@@ -1,6 +1,7 @@
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
+import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import AddEditRotationModal, {
   i18n,
 } from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_modal.vue';
@@ -129,8 +130,9 @@ describe('AddEditRotationModal', () => {
     wrapper = null;
   });
 
-  const findModal = () => wrapper.find(GlModal);
-  const findAlert = () => wrapper.find(GlAlert);
+  const findModal = () => wrapper.findComponent(GlModal);
+  const findAlert = () => wrapper.findComponent(GlAlert);
+  const findForm = () => wrapper.findComponent(AddEditRotationForm);
 
   it('renders rotation modal layout', () => {
     expect(wrapper.element).toMatchSnapshot();
@@ -154,6 +156,149 @@ describe('AddEditRotationModal', () => {
       expect(mockHideModal).not.toHaveBeenCalled();
       expect(findAlert().exists()).toBe(true);
       expect(findAlert().text()).toContain(error);
+    });
+
+    describe('Validation', () => {
+      describe('name', () => {
+        it('is valid when name is NOT empty', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', { type: 'name', value: '' });
+          expect(form.props('validationState').name).toBe(false);
+        });
+
+        it('is NOT valid when name is empty', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', { type: 'name', value: 'Some value' });
+          expect(form.props('validationState').name).toBe(true);
+        });
+      });
+
+      describe('participants', () => {
+        it('is valid when participants array is NOT empty', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', {
+            type: 'participants',
+            value: ['user1', 'user2'],
+          });
+          expect(form.props('validationState').participants).toBe(true);
+        });
+
+        it('is NOT valid when participants array is empty', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', { type: 'participants', value: [] });
+          expect(form.props('validationState').participants).toBe(false);
+        });
+      });
+
+      describe('startsAt date', () => {
+        it('is valid when date is NOT empty', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', {
+            type: 'startsAt.date',
+            value: new Date('10/12/2021'),
+          });
+          expect(form.props('validationState').startsAt).toBe(true);
+        });
+
+        it('is NOT valid when date is empty', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', { type: 'startsAt.time', value: null });
+          expect(form.props('validationState').startsAt).toBe(false);
+        });
+      });
+
+      describe('endsAt date', () => {
+        it('is valid when date is empty', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', { type: 'endsAt.date', value: null });
+          expect(form.props('validationState').endsAt).toBe(true);
+        });
+
+        it('is valid when start date is smaller then end date', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', {
+            type: 'startsAt.date',
+            value: new Date('9/11/2021'),
+          });
+          form.vm.$emit('update-rotation-form', {
+            type: 'endsAt.date',
+            value: new Date('10/11/2021'),
+          });
+          expect(form.props('validationState').endsAt).toBe(true);
+        });
+
+        it('is invalid when start date is larger then end date', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', {
+            type: 'startsAt.date',
+            value: new Date('11/11/2021'),
+          });
+          form.vm.$emit('update-rotation-form', {
+            type: 'endsAt.date',
+            value: new Date('10/11/2021'),
+          });
+          expect(form.props('validationState').endsAt).toBe(false);
+        });
+
+        it('is valid when start and end dates are equal but time is smaller on start date', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', {
+            type: 'startsAt.date',
+            value: new Date('11/11/2021'),
+          });
+          form.vm.$emit('update-rotation-form', { type: 'startsAt.time', value: 10 });
+          form.vm.$emit('update-rotation-form', {
+            type: 'endsAt.date',
+            value: new Date('11/11/2021'),
+          });
+          form.vm.$emit('update-rotation-form', { type: 'endsAt.time', value: 22 });
+          expect(form.props('validationState').endsAt).toBe(true);
+        });
+
+        it('is invalid when start and end dates are equal but time is larger on start date', () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', {
+            type: 'startsAt.date',
+            value: new Date('11/11/2021'),
+          });
+          form.vm.$emit('update-rotation-form', { type: 'startsAt.time', value: 10 });
+          form.vm.$emit('update-rotation-form', {
+            type: 'endsAt.date',
+            value: new Date('11/11/2021'),
+          });
+          form.vm.$emit('update-rotation-form', { type: 'endsAt.time', value: 8 });
+          expect(form.props('validationState').endsAt).toBe(false);
+        });
+      });
+
+      describe('Toggle primary button state', () => {
+        it('should disable primary button when any of the fields is invalid', async () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', { type: 'name', value: 'lalal' });
+          await wrapper.vm.$nextTick();
+          expect(findModal().props('actionPrimary').attributes).toEqual(
+            expect.arrayContaining([{ disabled: true }]),
+          );
+        });
+
+        it('should enable primary button when all fields are valid', async () => {
+          const form = findForm();
+          form.vm.$emit('update-rotation-form', { type: 'name', value: 'Value' });
+          form.vm.$emit('update-rotation-form', { type: 'participants', value: [1, 2, 3] });
+          form.vm.$emit('update-rotation-form', {
+            type: 'startsAt.date',
+            value: new Date('11/10/2021'),
+          });
+          form.vm.$emit('update-rotation-form', {
+            type: 'endsAt.date',
+            value: new Date('12/10/2021'),
+          });
+          await wrapper.vm.$nextTick();
+          expect(findModal().props('actionPrimary').attributes).toEqual(
+            expect.arrayContaining([{ disabled: false }]),
+          );
+        });
+      });
     });
   });
 

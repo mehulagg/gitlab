@@ -51,6 +51,16 @@ export default {
     ]),
     ...mapGetters(['getListByTypeId', 'shouldUseGraphQL']),
 
+    items() {
+      if (this.labelTypeSelected) {
+        return this.labels;
+      }
+      if (this.milestoneTypeSelected) {
+        return this.milestones;
+      }
+      return [];
+    },
+
     labelTypeSelected() {
       return this.columnType === ListType.label;
     },
@@ -286,14 +296,15 @@ export default {
     </template>
 
     <template slot="selected">
-      <gl-label
-        v-if="selectedLabel"
-        v-gl-tooltip
-        :title="selectedLabel.title"
-        :description="selectedLabel.description"
-        :background-color="selectedLabel.color"
-        :scoped="showScopedLabels(selectedLabel)"
-      />
+      <div v-if="selectedLabel">
+        <gl-label
+          v-gl-tooltip
+          :title="selectedLabel.title"
+          :description="selectedLabel.description"
+          :background-color="selectedLabel.color"
+          :scoped="showScopedLabels(selectedLabel)"
+        />
+      </div>
       <div v-else-if="selectedMilestone" class="gl-text-truncate">
         {{ selectedMilestone.title }}
       </div>
@@ -304,42 +315,21 @@ export default {
 
     <template slot="items">
       <gl-form-radio-group v-model="selectedId" class="gl-overflow-y-auto gl-px-5 gl-pt-3">
-        <template v-if="labelTypeSelected">
-          <label
-            v-for="label in labels"
-            :key="label.id"
-            class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
-          >
-            <gl-form-radio :value="label.id" class="gl-mb-0 gl-mr-3" />
-            <span
-              class="dropdown-label-box gl-top-0"
-              :style="{
-                backgroundColor: label.color,
-              }"
-            ></span>
-            <span>{{ label.title }}</span>
-          </label>
-        </template>
-        <template v-if="milestoneTypeSelected">
-          <label
-            v-for="milestone in milestones"
-            :key="milestone.id"
-            class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
-          >
-            <gl-form-radio :value="milestone.id" class="gl-mb-0 gl-mr-3" />
-            <span>{{ milestone.title }}</span>
-          </label>
-        </template>
-        <template v-if="iterationTypeSelected">
-          <label
-            v-for="iteration in iterations"
-            :key="iteration.id"
-            class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
-          >
-            <gl-form-radio :value="iteration.id" class="gl-mb-0 gl-mr-3" />
-            <span>{{ iteration.title }}</span>
-          </label>
-        </template>
+        <label
+          v-for="item in items"
+          :key="item.id"
+          class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
+        >
+          <gl-form-radio :value="item.id" class="gl-mb-0 gl-mr-3" />
+          <span
+            v-if="labelTypeSelected"
+            class="dropdown-label-box gl-top-0"
+            :style="{
+              backgroundColor: item.color,
+            }"
+          ></span>
+          <span>{{ item.title }}</span>
+        </label>
       </gl-form-radio-group>
     </template>
   </board-add-new-column-form>

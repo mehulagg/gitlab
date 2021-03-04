@@ -582,6 +582,26 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
+    context 'parent_epic command' do
+      let(:epic) { create(:epic, group: group) }
+      let(:epic2) { create(:epic, group: group) }
+      let(:referenced_epic) { create(:epic, group: epic.group) }
+
+      before do
+        group.add_developer(current_user)
+        stub_licensed_features(epics: true, subepics: true)
+      end
+
+      it_behaves_like 'adds quick action parameter', :quick_action_assign_to_parent_epic, :parent_epic
+
+      context 'when target epic is not persisted yet' do
+        let(:epic) { build(:epic, group: group) }
+        let(:referenced_epic) { epic2 }
+
+        it_behaves_like 'adds quick action parameter', :quick_action_assign_to_parent_epic, :parent_epic
+      end
+    end
+
     context 'child_epic command' do
       let(:subgroup) { create(:group, parent: group) }
       let(:another_group) { create(:group) }
@@ -1259,7 +1279,6 @@ RSpec.describe QuickActions::InterpretService do
       context 'parent_epic command' do
         let(:referenced_epic) { epic2 }
 
-        it_behaves_like 'adds quick action parameter', :quick_action_assign_to_parent_epic, :parent_epic
         it_behaves_like 'returns execution messages', :parent
 
         context 'when epic is already a parent epic' do
@@ -1286,13 +1305,6 @@ RSpec.describe QuickActions::InterpretService do
           let(:content) { "/parent_epic none" }
 
           it_behaves_like 'target epic does not exist', :parent
-        end
-
-        context 'when target epic is not persisted yet' do
-          let(:epic) { build(:epic, group: group) }
-          let(:referenced_epic) { epic2 }
-
-          it_behaves_like 'adds quick action parameter', :quick_action_assign_to_parent_epic, :parent_epic
         end
 
         context 'when user has no permission to read epic' do

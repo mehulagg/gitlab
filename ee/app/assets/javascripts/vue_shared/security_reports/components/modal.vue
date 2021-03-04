@@ -196,6 +196,7 @@ export default {
     ref="modal"
     :modal-id="$options.VULNERABILITY_MODAL_ID"
     :title="modal.title"
+    size="lg"
     data-qa-selector="vulnerability_modal_content"
     class="modal-security-report-dast"
     v-bind="$attrs"

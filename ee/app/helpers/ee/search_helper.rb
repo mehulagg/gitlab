@@ -88,7 +88,7 @@ module EE
 
       tags = {}
       tags[:doc_link_start], tags[:doc_link_end] = tag.a(PLACEHOLDER,
-                                                         href: help_page_path('user/search/advanced_search_syntax.md'),
+                                                         href: help_page_path('user/search/advanced_search'),
                                                          rel: :noopener,
                                                          target: '_blank')
                                                      .split(PLACEHOLDER)
