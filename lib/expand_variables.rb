@@ -19,7 +19,8 @@ module ExpandVariables
     # expand_variables_collection expands a Gitlab::Ci::Variables::Collection, ignoring unknown variable references.
     # If a circular variable reference is found, the original Collection is returned
     def expand_variables_collection(variables, project)
-      return variables if Feature.disabled?(:variable_inside_variable, project)
+      return Gitlab::Ci::Variables::Collection.new(variables) if
+        Feature.disabled?(:variable_inside_variable, project)
 
       sorted_variables = variables.sorted_collection(project)
       return sorted_variables if sorted_variables.errors
@@ -77,10 +78,11 @@ module ExpandVariables
     def expand_sorted_variables_collection(sorted_variables)
       expanded_vars = {}
 
-      sorted_variables.map do |item|
+      sorted_variables.each_with_object(Gitlab::Ci::Variables::Collection.new) do |item, collection|
         item = item.merge(value: expand_existing(item.value, expanded_vars)) if item.depends_on
 
         expanded_vars.store(item[:key], item)
+        collection.append(item)
       end
     end
   end

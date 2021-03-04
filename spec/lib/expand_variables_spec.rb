@@ -325,6 +325,10 @@ RSpec.describe ExpandVariables do
         with_them do
           subject { ExpandVariables.expand_variables_collection(variables, project_with_flag_disabled) }
 
+          it 'returns Collection' do
+            is_expected.to be_an_instance_of(Gitlab::Ci::Variables::Collection)
+          end
+
           it 'does not expand variables' do
             is_expected.to eq(variables)
           end
@@ -475,6 +479,10 @@ RSpec.describe ExpandVariables do
 
           subject! do
             ExpandVariables.expand_variables_collection(collection, project_with_flag_enabled)
+          end
+
+          it 'returns Collection' do
+            is_expected.to be_an_instance_of(Gitlab::Ci::Variables::Collection)
           end
 
           it 'expands variables' do
