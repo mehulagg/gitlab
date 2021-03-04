@@ -20,11 +20,14 @@ module Types
 
       super(**kwargs, &block)
 
-      # We want to avoid the overhead of this in prod, or if
-      # this field has announced it will call gitaly
-      unless Rails.env.production? || @constant_complexity || @calls_gitaly
+      # We want to avoid the overhead of this in prod
+      unless Rails.env.production?
         extension ::Gitlab::Graphql::CallsGitaly::FieldExtension
       end
+    end
+
+    def may_call_gitaly?
+      @constant_complexity || @calls_gitaly
     end
 
     def requires_argument?
