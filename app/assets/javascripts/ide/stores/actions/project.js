@@ -4,35 +4,26 @@ import { __, sprintf } from '~/locale';
 import api from '../../../api';
 import service from '../../services';
 import * as types from '../mutation_types';
+import { query } from '~/ide/services/gql';
+import getUserPermissions from '~/ide/queries/getUserPermissions.query';
 
-export const getProjectData = ({ commit, state }, { namespace, projectId, force = false } = {}) =>
-  new Promise((resolve, reject) => {
-    if (!state.projects[`${namespace}/${projectId}`] || force) {
-      commit(types.TOGGLE_LOADING, { entry: state });
-      service
-        .getProjectData(namespace, projectId)
-        .then((res) => res.data)
-        .then((data) => {
-          commit(types.TOGGLE_LOADING, { entry: state });
-          commit(types.SET_PROJECT, { projectPath: `${namespace}/${projectId}`, project: data });
-          commit(types.SET_CURRENT_PROJECT, `${namespace}/${projectId}`);
-          resolve(data);
-        })
-        .catch(() => {
-          flash(
-            __('Error loading project data. Please try again.'),
-            'alert',
-            document,
-            null,
-            false,
-            true,
-          );
-          reject(new Error(`Project not loaded ${namespace}/${projectId}`));
-        });
-    } else {
-      resolve(state.projects[`${namespace}/${projectId}`]);
-    }
-  });
+const fetchProjectPermissionsData = (projectPath) =>
+  query({
+    query: getUserPermissions,
+    variables: { projectPath },
+  }).then(({ data }) => data.project);
+
+const errorFetchingData = () => {
+  flash(__('Error loading project data. Please try again.'), 'alert', document, null, false, true);
+};
+
+export const initProject = ({ commit }, { projectPath = '' }) => {
+  fetchProjectPermissionsData(projectPath)
+    .then((permissions) => {
+      commit(types.UPDATE_PROJECT, { projectPath, props: permissions });
+    })
+    .catch(() => errorFetchingData());
+};
 
 export const refreshLastCommitData = ({ commit }, { projectId, branchId } = {}) =>
   service

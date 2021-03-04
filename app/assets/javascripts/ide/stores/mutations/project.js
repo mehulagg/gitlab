@@ -24,4 +24,7 @@ export default {
       empty_repo: value,
     });
   },
+  [types.UPDATE_PROJECT](state, { projectPath, props }) {
+    Object.assign(state.projects[projectPath], props);
+  },
 };
