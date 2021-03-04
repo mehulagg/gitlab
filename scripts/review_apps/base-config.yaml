@@ -38,10 +38,10 @@ gitlab:
     resources:
       requests:
         cpu: 500m
-        memory: 25M
+        memory: 50M
       limits:
         cpu: 750m
-        memory: 37.5M
+        memory: 75M
     maxReplicas: 3
     hpa:
       targetAverageValue: 500m
@@ -138,10 +138,10 @@ postgresql:
   resources:
     requests:
       cpu: 550m
-      memory: 250M
+      memory: 500M
     limits:
       cpu: 825m
-      memory: 375M
+      memory: 750M
 prometheus:
   install: false
 redis:
