@@ -3,12 +3,19 @@ import { GlLink, GlSprintf } from '@gitlab/ui';
 import { mapGetters, mapState } from 'vuex';
 import { s__ } from '~/locale';
 import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
-import { TrackingActions, TrackingLabels } from '../constants';
+import PersistedDropdownSelection from '~/vue_shared/components/registry/persisted_dropdown_selection.vue';
+import {
+  TrackingActions,
+  TrackingLabels,
+  SHOW_GRADLE_COMMANDS,
+  SHOW_MAVEN_COMMANDS,
+} from '../constants';
 
 export default {
   name: 'MavenInstallation',
   components: {
     CodeInstruction,
+    PersistedDropdownSelection,
     GlLink,
     GlSprintf,
   },
@@ -19,7 +26,13 @@ export default {
   },
   computed: {
     ...mapState(['mavenHelpPath']),
-    ...mapGetters(['mavenInstallationXml', 'mavenInstallationCommand', 'mavenSetupXml']),
+    ...mapGetters([
+      'mavenInstallationXml',
+      'mavenInstallationCommand',
+      'mavenSetupXml',
+      'gradleInstalCommand',
+      'gradleAddSourceCommand',
+    ]),
     showMaven() {
       return this.instructionType === 'maven';
     },
@@ -37,12 +50,25 @@ export default {
   },
   trackingActions: { ...TrackingActions },
   TrackingLabels,
+  installOptions: [
+    { value: 'maven', label: SHOW_MAVEN_COMMANDS },
+    { value: 'gradle', label: SHOW_GRADLE_COMMANDS },
+  ],
 };
 </script>
 
 <template>
   <div>
-    <h3 class="gl-font-lg">{{ __('Installation') }}</h3>
+    <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+      <h3 class="gl-font-lg">{{ __('Installation') }}</h3>
+      <div>
+        <persisted-dropdown-selection
+          storage-key="package_maven_installation_instructions"
+          :options="$options.installOptions"
+          @change="instructionType = $event"
+        />
+      </div>
+    </div>
 
     <template v-if="showMaven">
       <p>
@@ -89,6 +115,24 @@ export default {
           <gl-link :href="mavenHelpPath" target="_blank">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
+    </template>
+    <template v-else>
+      <code-instruction
+        class="gl-mb-5"
+        :label="s__('PackageRegistry|Gradle install command')"
+        :instruction="gradleInstalCommand"
+        :copy-text="s__('PackageRegistry|Copy Gradle install command')"
+        :tracking-action="$options.trackingActions.COPY_GRADLE_INSTALL_COMMAND"
+        :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+      />
+      <code-instruction
+        :label="s__('PackageRegistry|Add Gradle repository command')"
+        :instruction="gradleAddSourceCommand"
+        :copy-text="s__('PackageRegistry|Copy add Gradle repository command')"
+        :tracking-action="$options.trackingActions.COPY_GRADLE_ADD_TO_SOURCE_COMMAND"
+        :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+        multiline
+      />
     </template>
   </div>
 </template>
