@@ -49,7 +49,4 @@ export const FETCH_PACKAGE_VERSIONS_ERROR = s__(
   'PackageRegistry|Unable to fetch package version information.',
 );
 
-export const SHOW_GRADLE_COMMANDS = s__('PackageRegistry|Show Gradle commands');
-export const SHOW_MAVEN_COMMANDS = s__('PackageRegistry|Show Maven commands');
-
 export const HISTORY_PIPELINES_LIMIT = 5;
