@@ -269,3 +269,42 @@ You might choose to do this if you are using an appliance like a <!-- vale gitla
 GitLab can't verify LFS objects. Pushes then fail if you have GitLab LFS support enabled.
 
 To stop push failure, LFS support can be disabled in the [Project settings](../../../user/project/settings/index.md), which also disables GitLab LFS value-adds (Verifying LFS objects, UI integration for LFS).
+
+### Missing LFS objects
+
+An error about a missing LFS object may occur:
+
+- When migrating LFS objects from disk to object storage
+
+```plaintext
+ERROR -- : Failed to transfer LFS object 006622269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7 with error: No such file or directory @ rb_sysopen - /var/opt/gitlab/gitlab-rails/shared/lfs-objects/00/66/22269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+```
+
+- When running the [integrity check for LFS objects](../../../administration/raketasks/check.md#uploaded-files-integrity) with the `VERBOSE=1` parameter
+
+This indicates that the database refers to an LFS object that's not on disk. It [may also not be possible to push a new copy of this object](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49241).
+
+As it's missing, the only workaround is to remove it from the database. It will then be possible to push a new copy of the object from a Git client.
+
+- Log into the GitLab server with two sessions, and in one
+[start a rails console](../../../administration/operations/rails_console.md).
+- Please read the warnings on that page: this procedure will permanently delete database records.
+- In the rails console, query the path to the object that's reported as missing:
+
+```ruby
+lfs_object = LfsObject.find_by(oid: '006622269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7')
+lfs_object.file.path
+```
+
+- This will output the path to the file. Check in your other session whether it exists.
+
+```shell
+ls -al /var/opt/gitlab/gitlab-rails/shared/lfs-objects/00/66/22269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+```
+
+- Do not proceed if the file exists.
+- To remove the database record for a missing file, run this in the Rails console:
+
+```ruby
+lfs_object.destroy
+```
