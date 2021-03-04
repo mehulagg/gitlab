@@ -111,7 +111,8 @@ export default {
             autocomplete="off"
             name="username"
             type="text"
-            required
+            :placeholder="sensitiveFieldPlaceholder"
+            :required="isSensitiveFieldRequired"
             :state="form.fields.username.state"
           />
         </gl-form-group>
