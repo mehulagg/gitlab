@@ -1032,13 +1032,11 @@ Here's a list of current [high-traffic tables](https://gitlab.com/gitlab-org/git
 
 Determining what tables are high-traffic can be difficult. Self-managed instances might use
 different features of GitLab with different usage patterns, thus making assumptions based 
-on GitLab.com is not enough. Currently, to identify a high-traffic table for GitLab.com the following measures are considered
+on GitLab.com is not enough. Currently, to identify a high-traffic table for GitLab.com 
+the following measures are considered.
 
-- Size in GB (>= 10 GB)
-- Number of records
-- [Top 500 per read operations](link to thanos)
-in comparison to the existing ones.
-
-[The Thanos dashboard which lists top 500 per read operations](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_seq_tup_read%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_scan%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_tup_fetch%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1) may help with identifying a high-traffic table.
+- [Read operations](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_seq_tup_read%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_scan%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_tup_fetch%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1)
+- [Number of records](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_n_live_tup%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1)
+- [Size](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_total_relation_size_bytes%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1) is greater than 10 GB
 
 Any table which has some high read operation compared to current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L4) might be a good candidate.
