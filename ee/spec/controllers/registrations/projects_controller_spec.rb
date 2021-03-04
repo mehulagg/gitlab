@@ -79,7 +79,7 @@ RSpec.describe Registrations::ProjectsController do
         expect(namespace.projects.find_by_name(s_('Learn GitLab'))).to be_import_finished
       end
 
-      it 'tracks experiment as expected', :experiment do
+      it 'tracks the registrations_group_invite experiment as expected', :experiment do
         expect(experiment(:registrations_group_invite))
           .to track(:signup_successful, { property: namespace.id.to_s })
                 .on_any_instance
