@@ -35,7 +35,7 @@ See the [Changelog](#changelog) section for changes over time.
 ## Configuring protected branches
 
 To protect a branch, you need to have at least Maintainer permission level.
-The `master` branch is protected by default.
+The default branch for your repository is protected by default.
 
 1. In your project, go to **Settings > Repository**.
 1. Scroll to find the **Protected branches** section.
