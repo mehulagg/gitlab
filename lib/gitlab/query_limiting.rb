@@ -6,7 +6,7 @@ module Gitlab
     #
     # This is only enabled in development and test to ensure we don't produce
     # any errors that users of other environments can't do anything about themselves.
-    def self.enable?
+    def self.enabled_for_env?
       Rails.env.development? || Rails.env.test?
     end
 
@@ -16,9 +16,9 @@ module Gitlab
     # reduce the number of queries.
     #
     # The issue URL is only meant to push developers into creating an issue
-    # instead of blindly whitelisting offending blocks of code.
-    def self.whitelist(issue_url)
-      return unless enable?
+    # instead of blindly disabling for offending blocks of code.
+    def self.disable(issue_url)
+      return unless enabled_for_env?
 
       unless issue_url.start_with?('https://')
         raise(
@@ -27,7 +27,7 @@ module Gitlab
         )
       end
 
-      Transaction&.current&.whitelisted = true
+      Transaction&.current&.disable!
     end
   end
 end

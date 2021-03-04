@@ -30,15 +30,15 @@ RSpec.describe Gitlab::QueryLimiting do
     end
   end
 
-  describe '.whitelist' do
+  describe '.disable' do
     it 'raises ArgumentError when an invalid issue URL is given' do
-      expect { described_class.whitelist('foo') }
+      expect { described_class.disable('foo') }
         .to raise_error(ArgumentError)
     end
 
     context 'without a transaction' do
       it 'does nothing' do
-        expect { described_class.whitelist('https://example.com') }
+        expect { described_class.disable('https://example.com') }
           .not_to raise_error
       end
     end
@@ -55,7 +55,7 @@ RSpec.describe Gitlab::QueryLimiting do
       it 'does not increment the number of SQL queries executed in the block' do
         before = transaction.count
 
-        described_class.whitelist('https://example.com')
+        described_class.disable('https://example.com')
 
         2.times do
           User.count
@@ -64,18 +64,18 @@ RSpec.describe Gitlab::QueryLimiting do
         expect(transaction.count).to eq(before)
       end
 
-      it 'whitelists when enabled' do
-        described_class.whitelist('https://example.com')
+      it 'disables the transaction' do
+        described_class.disable('https://example.com')
 
-        expect(transaction.whitelisted).to eq(true)
+        expect(transaction).to be_disabled
       end
 
-      it 'does not whitelist when disabled' do
-        allow(described_class).to receive(:enable?).and_return(false)
+      it 'does not disable the transaction when enabled_for_env?' do
+        allow(described_class).to receive(:enabled_for_env?).and_return(false)
 
-        described_class.whitelist('https://example.com')
+        described_class.disable('https://example.com')
 
-        expect(transaction.whitelisted).to eq(false)
+        expect(transaction).not_to be_disabled
       end
     end
   end

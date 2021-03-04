@@ -5,7 +5,7 @@ module Gitlab
     class Transaction
       THREAD_KEY = :__gitlab_query_counts_transaction
 
-      attr_accessor :count, :whitelisted
+      attr_accessor :count
 
       # The name of the action (e.g. `UsersController#show`) that is being
       # executed.
@@ -44,7 +44,7 @@ module Gitlab
       def initialize
         @action = nil
         @count = 0
-        @whitelisted = false
+        @disabled = false
       end
 
       # Sends a notification based on the number of executed SQL queries.
@@ -57,7 +57,15 @@ module Gitlab
       end
 
       def increment
-        @count += 1 unless whitelisted
+        @count += 1 unless disabled?
+      end
+
+      def disabled?
+        @disabled
+      end
+
+      def disable!
+        @disabled = true
       end
 
       def raise_error?

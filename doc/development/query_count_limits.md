@@ -34,11 +34,11 @@ controller or endpoint and include the appropriate labels (`database`,
 After the issue has been created you can whitelist the code in question. For
 Rails controllers it's best to create a `before_action` hook that runs as early
 as possible. The called method in turn should call
-`Gitlab::QueryLimiting.whitelist('issue URL here')`. For example:
+`Gitlab::QueryLimiting.disable('issue URL here')`. For example:
 
 ```ruby
 class MyController < ApplicationController
-  before_action :whitelist_query_limiting, only: [:show]
+  before_action :disable_query_limiting, only: [:show]
 
   def index
     # ...
@@ -48,8 +48,8 @@ class MyController < ApplicationController
     # ...
   end
 
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/...')
+  def disable_query_limiting
+    Gitlab::QueryLimiting.disable('https://gitlab.com/gitlab-org/...')
   end
 end
 ```
@@ -63,7 +63,7 @@ call directly into the endpoint like so:
 
 ```ruby
 get '/projects/:id/foo' do
-  Gitlab::QueryLimiting.whitelist('...')
+  Gitlab::QueryLimiting.disable('...')
 
   # ...
 end
