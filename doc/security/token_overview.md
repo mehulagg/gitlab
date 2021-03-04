@@ -91,17 +91,18 @@ The job token is secured by its short life-time and limited scope. It could poss
 
 This table shows available scopes per token. Scopes can be limited further on token creation.
 
-|                             | API Access | Registry Access | Repository Access |
+|                             | API access | Registry access | Repository access |
 |-----------------------------|------------|-----------------|-------------------|
-| Personal Access Token       | ✅          | ✅               | ✅                 |
-| OAuth2 Token                | ✅          | 🚫               | ✅                 |
-| Impersonation Token         | ✅          | ✅               | ✅                 |
-| Project Access Token        | ✅(1)       | ✅(1)            | ✅(1)              |
-| Deploy Token                | 🚫          | ✅               | ✅                 |
-| Deploy Key                  | 🚫          | 🚫               | ✅                 |
-| Runner Registration Token   | 🚫          | 🚫               | 🚫                 |
-| Runner Authentication Token | 🚫          | 🚫               | 🚫                 |
-| Job Token                   | ✴️(2)       | 🚫               | 🚫                 |
+| Personal access token       | ✅          | ✅               | ✅                 |
+| OAuth2 token                | ✅          | 🚫               | ✅                 |
+| Impersonation token         | ✅          | ✅               | ✅                 |
+| Project access token        | ✅(1)       | ✅(1)            | ✅(1)              |
+| Deploy token                | 🚫          | ✅               | ✅                 |
+| Deploy key                  | 🚫          | 🚫               | ✅                 |
+| Runner registration token   | 🚫          | 🚫               | ✴️(2)                 |
+| Runner authentication token | 🚫          | 🚫               | ✴️(2)                 |
+| Job token                   | ✴️(3)       | 🚫               | ✅                 |
 
 1. Limited to the one project.
+1. Runner registration and authentication token don't provide direct access to repositories, but can be used to register and authenticate a new runner that may execute jobs which do have access to the repository
 1. Limited to certain [endpoints](../api/README.md#gitlab-ci-job-token).
