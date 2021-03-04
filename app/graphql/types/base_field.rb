@@ -19,6 +19,12 @@ module Types
       kwargs = gitlab_deprecation(kwargs)
 
       super(**kwargs, &block)
+
+      # We want to avoid the overhead of this in prod, or if
+      # this field has announced it will call gitaly
+      unless Rails.env.production? || @constant_complexity || @calls_gitaly
+        extension ::Gitlab::Graphql::CallsGitaly::FieldExtension
+      end
     end
 
     def requires_argument?
