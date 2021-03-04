@@ -1,6 +1,7 @@
 const NS_PER_SEC = 1e9;
 const NS_PER_MS = 1e6;
-const IS_DEBUGGING = process.execArgv.join(' ').includes('--inspect-brk');
+// const IS_DEBUGGING = process.execArgv.join(' ').includes('--inspect-brk');
+const IS_DEBUGGING = 1;
 
 let testTimeoutNS;
 
