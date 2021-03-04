@@ -35,13 +35,18 @@ module Security
     # rubocop: disable CodeReuse/ActiveRecord
     def create_all_vulnerabilities!
       # Look for existing Findings using UUID
-      finding_uuids = @report.findings.map(&:uuid)
+      valid_findings = @report.findings.filter do |finding|
+        finding.valid?.tap { |valid| put_warning_for(finding) unless valid }
+      end
+
+      finding_uuids = valid_findings.map(&:uuid)
       vulnerability_findings_by_uuid = project.vulnerability_findings
         .where(uuid: finding_uuids)
         .to_h { |vf| [vf.uuid, vf] }
-      remediations_by_checksum = find_existing_remediations_for(@report.findings)
 
-      vulnerabilities_findings = @report.findings.map do |finding|
+      remediations_by_checksum = find_existing_remediations_for(valid_findings)
+
+      vulnerabilities_findings = valid_findings.map do |finding|
         find_or_create_vulnerability_finding(
           vulnerability_findings_by_uuid,
           remediations_by_checksum,
@@ -50,11 +55,11 @@ module Security
       end
       ActiveRecord::Associations::Preloader.new.preload(vulnerabilities_findings, :remediations)
 
-      vulnerabilities = @report.findings.zip(vulnerabilities_findings).map do |finding, vulnerability_finding|
+      vulnerabilities = valid_findings.zip(vulnerabilities_findings).map do |finding, vulnerability_finding|
         create_updated_vulnerability(finding, vulnerability_finding, remediations_by_checksum)
       end
 
-      vulnerabilities.compact.map(&:id).uniq
+      vulnerabilities.map(&:id).uniq
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -72,11 +77,6 @@ module Security
     end
 
     def find_or_create_vulnerability_finding(vulnerability_findings_by_uuid, remediations_by_checksum, finding)
-      unless finding.valid?
-        put_warning_for(finding)
-        return
-      end
-
       vulnerability_params = vulnerability_params_for(finding)
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
       vulnerability_findings_by_uuid[finding.uuid] || create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
