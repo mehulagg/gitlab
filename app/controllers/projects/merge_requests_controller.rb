@@ -281,6 +281,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
     return access_check_result if access_check_result
 
+    jira_issue_enforcement_check
+
     status = merge!
 
     if @merge_request.merge_error
@@ -458,6 +460,13 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   def merge_access_check
     access_denied! unless @merge_request.can_be_merged_by?(current_user)
+  end
+
+  def jira_issue_enforcement_check
+    return unless @merge_request.project.jira_issue_association_required_to_merge_enabled?
+    return unless @merge_request.project.project_setting.prevent_merge_without_jira_issue
+
+    return render_403 unless Atlassian::JiraIssueKeyExtractor.has_keys?(@merge_request.title, @merge_request.description)
   end
 
   def whitelist_query_limiting
