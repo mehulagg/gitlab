@@ -207,7 +207,7 @@ To enable force pushes on branches already protected:
 
 1. Navigate to your project's **Settings > Repository**.
 1. Expand **Protected branches** and scroll to **Protected branch**.
-   ![Code Owners approval - branch already protected](img/code_owners_approval_protected_branch_v13.10.png)
+   ![Code Owners approval - branch already protected](img/code_owners_approval_protected_branch_v13_10.png)
 1. Toggle the **Allow force push** slider for the chosen branch.
 
 When enabled, members who are allowed to push to this branch can also force push.
