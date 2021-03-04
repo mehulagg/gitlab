@@ -29,29 +29,6 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
     end
   end
 
-  describe '.for_batch_configuration' do
-    let(:job_class_name) { 'TestClass' }
-    let(:table_name) { :issues }
-    let(:column_name) { :project_id }
-
-    let!(:migration1) { create(:batched_background_migration, job_class_name: job_class_name, table_name: table_name) }
-    let!(:migration2) { create(:batched_background_migration, job_class_name: job_class_name, column_name: column_name) }
-    let!(:migration3) { create(:batched_background_migration, job_class_name: job_class_name, table_name: table_name, column_name: column_name) }
-    let!(:migration4) { create(:batched_background_migration, table_name: table_name, column_name: column_name) }
-
-    it 'returns records matching the migration configuration' do
-      relation = described_class.for_batch_configuration(job_class_name, table_name, column_name)
-
-      expect(relation.all).to eq([migration3])
-    end
-
-    it 'normalizes the job class name' do
-      relation = described_class.for_batch_configuration("::#{job_class_name}", table_name, column_name)
-
-      expect(relation.all).to eq([migration3])
-    end
-  end
-
   describe '#interval_elapsed?' do
     context 'when the migration has no last_job' do
       let(:batched_migration) { build(:batched_background_migration) }

@@ -12,11 +12,6 @@ module Gitlab
           foreign_key: :batched_background_migration_id
 
         scope :queue_order, -> { order(created_at: :asc) }
-        scope :for_batch_configuration, -> (job_class_name, table_name, column_name) do
-          where(job_class_name: remove_toplevel_prefix(job_class_name),
-                table_name: table_name,
-                column_name: column_name)
-        end
 
         enum status: {
           paused: 0,
