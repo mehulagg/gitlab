@@ -372,30 +372,30 @@ RSpec.describe API::Members do
       let(:url) { "/groups/#{group.id}/billable_members" }
       let(:params) { {} }
 
-      subject do
+      subject(:get_billable_members) do
         get api(url, owner), params: params
         json_response
       end
 
       context 'with sub group and projects' do
-        let!(:project_user) { create(:user) }
-        let!(:project) do
+        let_it_be(:project_user) { create(:user) }
+        let_it_be(:project) do
           create(:project, :public, group: nested_group) do |project|
             project.add_developer(project_user)
           end
         end
 
-        let!(:linked_group_user) { create(:user, name: 'Scott McNeil') }
-        let!(:linked_group) do
+        let_it_be(:linked_group_user) { create(:user, name: 'Scott McNeil') }
+        let_it_be(:linked_group) do
           create(:group) do |linked_group|
             linked_group.add_developer(linked_group_user)
           end
         end
 
-        let!(:project_group_link) { create(:project_group_link, project: project, group: linked_group) }
+        let_it_be(:project_group_link) { create(:project_group_link, project: project, group: linked_group) }
 
         it 'returns paginated billable users' do
-          subject
+          get_billable_members
 
           expect_paginated_array_response(*[owner, maintainer, nested_user, project_user, linked_group_user].map(&:id))
         end
@@ -414,7 +414,7 @@ RSpec.describe API::Members do
           let(:params) { { search: nested_user.name } }
 
           it 'returns the relevant billable users' do
-            subject
+            get_billable_members
 
             expect_paginated_array_response([nested_user.id])
           end
@@ -442,7 +442,7 @@ RSpec.describe API::Members do
             let(:params) { { search: 'Scott', sort: 'name_desc' } }
 
             it 'returns the relevant billable users' do
-              subject
+              get_billable_members
 
               expect_paginated_array_response(*[linked_group_user, nested_user].map(&:id))
             end
@@ -474,7 +474,7 @@ RSpec.describe API::Members do
         let(:url) { "/groups/#{child_group.id}/billable_members" }
 
         it 'returns error' do
-          subject
+          get_billable_members
 
           expect(response).to have_gitlab_http_status(:bad_request)
         end
@@ -516,6 +516,8 @@ RSpec.describe API::Members do
 
       shared_examples 'successful deletion' do
         it 'deletes the member' do
+          expect(group.member?(user)).to be is_group_member
+
           expect do
             delete api("/groups/#{group.id}/billable_members/#{user.id}", owner)
 
@@ -527,26 +529,20 @@ RSpec.describe API::Members do
       context 'when authenticated as an owner' do
         context 'with a user that is a GroupMember' do
           let(:user) { maintainer }
+          let(:is_group_member) { true }
           let(:source) { group }
-
-          before do
-            expect(group.member?(maintainer)).to be true
-          end
 
           it_behaves_like 'successful deletion'
         end
 
         context 'with a user that is only a ProjectMember' do
           let(:user) { create(:user) }
+          let(:is_group_member) { false }
           let(:source) { project }
           let(:project) do
             create(:project, group: group) do |project|
               project.add_developer(user)
             end
-          end
-
-          before do
-            expect(group.member?(user)).to be false
           end
 
           it_behaves_like 'successful deletion'
