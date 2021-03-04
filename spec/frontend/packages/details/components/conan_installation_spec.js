@@ -41,7 +41,7 @@ describe('ConanInstallation', () => {
   });
 
   afterEach(() => {
-    if (wrapper) wrapper.destroy();
+    wrapper.destroy();
   });
 
   it('renders all the messages', () => {
@@ -50,8 +50,6 @@ describe('ConanInstallation', () => {
 
   describe('install command switch', () => {
     it('has the installation title component', () => {
-      createComponent();
-
       expect(findInstallationTitle().exists()).toBe(true);
       expect(findInstallationTitle().props()).toMatchObject({
         storageKey: 'package_conan_installation_instructions',
