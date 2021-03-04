@@ -4,7 +4,12 @@ module Gitlab
   module Geo
     module Replication
       class BlobDownloader
-        TEMP_PREFIX = 'tmp_'.freeze
+        TEMP_PREFIX = 'tmp_'
+        DOWNLOAD_TIMEOUT = {
+          connect: 60,
+          write: 60,
+          read: 60
+        }.freeze
 
         attr_reader :replicator
 
@@ -143,7 +148,14 @@ module Gitlab
           file_size = -1
 
           # Make the request
-          response = ::HTTP.follow.get(url, headers: req_headers)
+          response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(url, headers: req_headers)
+
+          if response.status.redirect?
+            # ::HTTP.follow does not follow the redirects properly when the
+            # primary uses object storage with direct download.
+            # https://gitlab.com/gitlab-org/gitlab/-/issues/323495
+            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(response['Location'])
+          end
 
           # Check for failures
           unless response.status.success?
