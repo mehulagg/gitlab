@@ -9,7 +9,7 @@ module Types
 
     DEFAULT_COMPLEXITY = 1
 
-    def initialize(*args, **kwargs, &block)
+    def initialize(**kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
       @constant_complexity = !!kwargs[:complexity]
       @requires_argument = !!kwargs.delete(:requires_argument)
@@ -18,7 +18,7 @@ module Types
       kwargs = check_feature_flag(kwargs)
       kwargs = gitlab_deprecation(kwargs)
 
-      super(*args, **kwargs, &block)
+      super(**kwargs, &block)
     end
 
     def requires_argument?
