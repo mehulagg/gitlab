@@ -11,7 +11,6 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
 import { s__, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import HistoryEntry from './history_entry.vue';
 import RelatedIssues from './related_issues.vue';
 import RelatedJiraIssues from './related_jira_issues.vue';
@@ -28,7 +27,6 @@ export default {
     GlIcon,
     StatusDescription,
   },
-  mixins: [glFeatureFlagMixin()],
   inject: {
     createJiraIssueUrl: {
       default: '',
@@ -220,10 +218,7 @@ export default {
       />
     </div>
 
-    <related-jira-issues
-      v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl"
-      class="gl-mt-6"
-    />
+    <related-jira-issues v-if="createJiraIssueUrl" class="gl-mt-6" />
     <related-issues
       v-else
       :endpoint="issueLinksEndpoint"

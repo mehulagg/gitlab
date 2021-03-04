@@ -8,7 +8,6 @@ import {
   GlButton,
   GlCard,
 } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../event_hub';
 
 export default {
@@ -24,7 +23,6 @@ export default {
     JiraIssueCreationVulnerabilities: () =>
       import('ee_component/integrations/edit/components/jira_issue_creation_vulnerabilities.vue'),
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     showJiraIssuesIntegration: {
       type: Boolean,
@@ -84,11 +82,7 @@ export default {
       return !this.enableJiraIssues || Boolean(this.projectKey) || !this.validated;
     },
     showJiraVulnerabilitiesOptions() {
-      return (
-        this.enableJiraIssues &&
-        this.showJiraVulnerabilitiesIntegration &&
-        this.glFeatures.jiraForVulnerabilities
-      );
+      return this.enableJiraIssues && this.showJiraVulnerabilitiesIntegration;
     },
   },
   created() {

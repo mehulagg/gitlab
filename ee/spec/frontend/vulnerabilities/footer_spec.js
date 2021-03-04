@@ -300,7 +300,6 @@ describe('Vulnerability Footer', () => {
           {
             provide: {
               createJiraIssueUrl: 'http://foo',
-              glFeatures: { jiraForVulnerabilities: true },
             },
           },
         );
