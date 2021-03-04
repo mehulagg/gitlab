@@ -32,22 +32,31 @@ module Security
       pipeline.vulnerability_findings.report_type(@report.type).any?
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def create_all_vulnerabilities!
       # Look for existing Findings using UUID
       finding_uuids = @report.findings.map(&:uuid)
       vulnerability_findings_by_uuid = project.vulnerability_findings
-        .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
+        .where(uuid: finding_uuids)
         .to_h { |vf| [vf.uuid, vf] }
       remediations_by_checksum = find_existing_remediations_for(@report.findings)
 
-      @report.findings.map do |finding|
-        create_vulnerability_finding(
+      vulnerabilities_findings = @report.findings.map do |finding|
+        find_or_create_vulnerability_finding(
           vulnerability_findings_by_uuid,
           remediations_by_checksum,
           finding
-        )&.id
-      end.compact.uniq
+        )
+      end
+      ActiveRecord::Associations::Preloader.new.preload(vulnerabilities_findings, :remediations)
+
+      vulnerabilities = @report.findings.zip(vulnerabilities_findings).map do |finding, vulnerability_finding|
+        create_updated_vulnerability(finding, vulnerability_finding, remediations_by_checksum)
+      end
+
+      vulnerabilities.compact.map(&:id).uniq
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def find_existing_remediations_for(findings)
       checksums = findings.flat_map { |f| f.remediations.map(&:checksum) }
@@ -62,22 +71,22 @@ module Security
              .update_all(resolved_on_default_branch: true)
     end
 
-    def create_vulnerability_finding(vulnerability_findings_by_uuid, remediations_by_checksum, finding)
+    def find_or_create_vulnerability_finding(vulnerability_findings_by_uuid, remediations_by_checksum, finding)
       unless finding.valid?
         put_warning_for(finding)
         return
       end
 
-      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
+      vulnerability_params = vulnerability_params_for(finding)
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
-      # Vulnerabilities::Finding (`vulnerability_occurrences`)
-      vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
-        create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
+      vulnerability_findings_by_uuid[finding.uuid] || create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
+    end
 
+    def create_updated_vulnerability(finding, vulnerability_finding, remediations_by_checksum)
       update_vulnerability_scanner(finding)
 
-      update_vulnerability_finding(vulnerability_finding, vulnerability_params)
-      reset_remediations_for(finding, vulnerability_finding, remediations_by_checksum)
+      vulnerability_finding.remediations = all_remediations_for(finding, remediations_by_checksum)
+      vulnerability_finding.update!(vulnerability_params_for(finding))
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
@@ -90,6 +99,10 @@ module Security
       create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
 
       create_vulnerability(vulnerability_finding, pipeline)
+    end
+
+    def vulnerability_params_for(finding)
+      finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -131,10 +144,6 @@ module Security
       scanner.update!(finding.scanner.to_hash)
     end
 
-    def update_vulnerability_finding(vulnerability_finding, update_params)
-      vulnerability_finding.update!(update_params)
-    end
-
     def create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       identifier_object = identifiers_objects[identifier.key]
       vulnerability_finding.finding_identifiers.find_or_create_by!(identifier: identifier_object)
@@ -151,12 +160,11 @@ module Security
     rescue ActiveRecord::RecordNotUnique
     end
 
-    def reset_remediations_for(finding, vulnerability_finding, remediations_by_checksum)
+    def all_remediations_for(finding, remediations_by_checksum)
       existing_remediations = remediations_by_checksum.values
       existing_remediation_checksums = remediations_by_checksum.keys
       new_remediations = build_new_remediations_for(finding.remediations, existing_remediation_checksums)
-
-      vulnerability_finding.remediations = existing_remediations + new_remediations
+      existing_remediations + new_remediations
     end
 
     def build_new_remediations_for(current_remediations, existing_remediation_checksums)
@@ -167,7 +175,7 @@ module Security
     end
 
     def build_vulnerability_remediation(remediation)
-      @project.vulnerability_remediations.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
+      project.vulnerability_remediations.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
     end
 
     def create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
