@@ -17,6 +17,8 @@ import {
   composerRegistryInclude,
   composerPackageInclude,
   groupExists,
+  gradleInstalCommand,
+  gradleAddSourceCommand,
 } from '~/packages/details/store/getters';
 import {
   conanPackage,
@@ -232,6 +234,26 @@ describe('Getters PackageDetails Store', () => {
       setupState();
 
       expect(composerPackageInclude(state)).toBe(composerPackageIncludeStr);
+    });
+  });
+
+  describe('gradle string getters', () => {
+    it('gets the correct gradleInstalCommand', () => {
+      setupState();
+
+      expect(gradleInstalCommand(state)).toMatchInlineSnapshot(
+        `"implementation 'com.test.app:test-app:1.0-SNAPSHOT'"`,
+      );
+    });
+
+    it('gets the correct gradleAddSourceCommand', () => {
+      setupState();
+
+      expect(gradleAddSourceCommand(state)).toMatchInlineSnapshot(`
+        "gitlab {
+          url \\"foo/registry\\"
+        }"
+      `);
     });
   });
 
