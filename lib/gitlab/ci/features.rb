@@ -67,6 +67,10 @@ module Gitlab
       def self.display_codequality_backend_comparison?(project)
         ::Feature.enabled?(:codequality_backend_comparison, project, default_enabled: :yaml)
       end
+
+      def self.remove_duplicate_artifact_exposure_paths?(project)
+        ::Feature.enabled?(:remove_duplicate_artifact_exposure_paths, project, default_enabled: :yaml)
+      end
     end
   end
 end
