@@ -5,9 +5,11 @@ module CreatesCommit
   include Gitlab::Utils::StrongMemoize
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
-  def create_commit(service, success_path:, failure_path:, failure_view: nil, success_notice: nil)
-    if user_access(@project).can_push_to_branch?(branch_name_or_ref)
-      @project_to_commit_into = @project
+  def create_commit(service, success_path:, failure_path:, failure_view: nil, success_notice: nil, target_project: nil)
+    target_project ||= @project
+
+    if user_access(target_project).can_push_to_branch?(branch_name_or_ref)
+      @project_to_commit_into = target_project
       @branch_name ||= @ref
     else
       @project_to_commit_into = current_user.fork_of(@project)
@@ -17,7 +19,7 @@ module CreatesCommit
     @start_branch ||= @ref || @branch_name
 
     commit_params = @commit_params.merge(
-      start_project: @project,
+      start_project: @project_to_commit_into,
       start_branch: @start_branch,
       branch_name: @branch_name
     )

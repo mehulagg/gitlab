@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Projects::CommitController do
+  include ProjectForksHelper
+
   let_it_be(:project)  { create(:project, :repository) }
   let_it_be(:user)     { create(:user) }
 
@@ -278,6 +280,27 @@ RSpec.describe Projects::CommitController do
 
         expect(response).to redirect_to project_commit_path(project, master_pickable_commit.id)
         expect(flash[:alert]).to match('Sorry, we cannot cherry-pick this commit automatically.')
+      end
+    end
+
+    context 'when a project has a fork' do
+      let(:forked_project) { fork_project(project, user, repository: true) }
+
+      it 'successfully cherry picks a commit from fork to upstream' do
+        forked_project.add_maintainer(user)
+
+        post(:cherry_pick,
+            params: {
+              namespace_id: forked_project.namespace,
+              project_id: forked_project,
+              target_project_id: project.id,
+              start_branch: 'feature',
+              id: forked_project.commit.id
+            })
+
+        expect(response).to redirect_to project_commits_path(forked_project, 'feature')
+        expect(flash[:notice]).to eq('The commit has been successfully cherry-picked into feature.')
+        expect(project.commit('feature').message).to include(forked_project.commit.id)
       end
     end
   end

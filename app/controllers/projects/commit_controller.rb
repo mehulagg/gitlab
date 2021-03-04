@@ -119,7 +119,7 @@ class Projects::CommitController < Projects::ApplicationController
     @branch_name = create_new_branch? ? @commit.cherry_pick_branch_name : @start_branch
 
     create_commit(Commits::CherryPickService, success_notice: "The #{@commit.change_type_title(current_user)} has been successfully cherry-picked into #{@branch_name}.",
-                                              success_path: -> { successful_change_path }, failure_path: failed_change_path)
+                                              success_path: -> { successful_change_path }, failure_path: failed_change_path, target_project: cherry_pick_target_project)
   end
 
   private
@@ -199,5 +199,11 @@ class Projects::CommitController < Projects::ApplicationController
   def assign_change_commit_vars
     @start_branch = params[:start_branch]
     @commit_params = { commit: @commit }
+  end
+
+  def cherry_pick_target_project
+    return if params[:target_project_id].blank?
+
+    Project.find_by(id: params[:target_project_id])
   end
 end
