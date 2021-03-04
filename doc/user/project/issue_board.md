@@ -485,7 +485,7 @@ the list by filtering by the following:
 
 ### Remove an issue from a list
 
-> The **Remove from board** button [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/229507) in GitLab 13.10.
+> The **Remove from board** button was [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229507) in GitLab 13.10.
 
 When an issue should no longer belong to a list, you can remove it.
 
