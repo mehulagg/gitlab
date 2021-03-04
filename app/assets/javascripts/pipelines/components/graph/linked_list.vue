@@ -169,7 +169,9 @@ export default {
 
 <template>
   <div>
-    <h3 class="gl-mt-11"> {{ columnTitle }} </h3>
+    <h3 class="gl-mt-11">
+      {{ columnTitle }}
+    </h3>
     <hr />
     <div v-for="pipeline in linkedPipelines">
       <h4> {{ getHeadline(pipeline) }}

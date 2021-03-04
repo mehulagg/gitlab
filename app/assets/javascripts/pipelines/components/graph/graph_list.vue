@@ -1,20 +1,16 @@
 <script>
-import { GlButton, GlTable } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
-import ciIcon from '../../../vue_shared/components/ci_icon.vue';
-import ActionComponent from './action_component.vue';
+import StageList from './stage_list.vue';
 import LinkedList from './linked_list.vue'
 import { DOWNSTREAM, MAIN, UPSTREAM, ONE_COL_WIDTH } from './constants';
 
 export default {
   name: 'PipelineList',
   components: {
-    // LinkedPipeline,
-    ActionComponent,
-    ciIcon,
-    GlTable,
     GlButton,
     LinkedList,
+    StageList
   },
   props: {
     pipeline: {
@@ -37,28 +33,6 @@ export default {
       showMain: true,
     }
   },
-  fields: [
-    {
-      key: 'status',
-      label: __('Status'),
-      thClass: 'gl-w-10p',
-    },
-    {
-      key: 'name',
-      label: __('Name'),
-      thClass: 'gl-w-40p',
-    },
-    {
-      key: 'needs',
-      label: __('Needs'),
-      thClass: 'gl-w-40p',
-    },
-    {
-      key: 'action',
-      label: '',
-      thClass: 'gl-w-10p',
-    },
-  ],
   pipelineTypeConstants: {
     DOWNSTREAM,
     MAIN,
@@ -91,14 +65,8 @@ export default {
     },
   },
   methods: {
-    getFlatJobs(groups) {
-      return groups.flatMap(({ jobs }) => jobs);
-    },
     onError(err) {
       console.log(err);
-    },
-    pipelineActionRequestComplete() {
-      this.$emit('pipelineActionRequestComplete');
     },
     toggleMain() {
       this.showMain = !this.showMain;
@@ -118,31 +86,13 @@ export default {
         @click="toggleMain"
       />
     </h3>
-    <div
-      v-if="showMain"
-      v-for="stage in graph">
-      <h4 class="gl-mt-5">
-        {{ stage.name }}
-      </h4>
-      <gl-table :items="getFlatJobs(stage.groups)" :fields="$options.fields">
-        <template #cell(status)="data">
-          <ci-icon :size="16" :status="data.item.status" class="gl-line-height-0" />
-        </template>
-        <template #cell(action)="data">
-          <div class="gl-relative">
-            <action-component
-              v-if="data.item.status.action"
-              :tooltip-text="data.item.status.action.title"
-              :link="data.item.status.action.path"
-              :action-icon="data.item.status.action.icon"
-              @pipelineActionRequestComplete="pipelineActionRequestComplete"
-              />
-            </div>
-        </template>
-        <template #cell(needs)="data">
-          <span>{{ data.item.needs.join(', ') }}</span>
-        </template>
-      </gl-table>
+    <div>
+      <stage-list
+        v-if="showMain"
+        v-for="stage in graph"
+        :stage="stage"
+        :key="stage.name"
+      />
     </div>
     <linked-list
       v-if="hasUpstreamPipelines"
