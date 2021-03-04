@@ -112,7 +112,7 @@ export default {
   <section>
     <h2>{{ agentName }}</h2>
 
-    <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
+    <gl-loading-icon v-if="isLoading && clusterAgent == null" size="lg" class="gl-m-3" />
 
     <div v-else-if="clusterAgent">
       <p data-testid="cluster-agent-create-info">
@@ -139,7 +139,9 @@ export default {
             </span>
           </template>
 
-          <div>
+          <gl-loading-icon v-if="isLoading" size="md" class="gl-m-3" />
+
+          <div v-else>
             <TokenTable :tokens="tokens" />
 
             <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
