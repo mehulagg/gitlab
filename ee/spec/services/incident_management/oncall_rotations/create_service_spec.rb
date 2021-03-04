@@ -134,7 +134,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
           expect(oncall_rotation.length).to eq(1)
           expect(oncall_rotation.length_unit).to eq('days')
 
-          expect(oncall_rotation.participants.length).to eq(1)
+          expect(oncall_rotation.participants.reload.length).to eq(1)
           expect(oncall_rotation.participants.first).to have_attributes(
             **participants.first,
             rotation: oncall_rotation,
