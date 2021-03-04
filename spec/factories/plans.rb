@@ -5,7 +5,7 @@ FactoryBot.define do
     Plan.all_plans.each do |plan|
       factory :"#{plan}_plan" do
         name { plan }
-        title { name.titleize }
+        title { plan.title || name.titleize }
         initialize_with { Plan.find_or_create_by!(name: plan) }
       end
     end
