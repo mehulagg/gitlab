@@ -3,7 +3,7 @@ import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
 export default {
-  name: 'MavenInstallation',
+  name: 'PersistedDropdownSelection',
   components: {
     GlDropdown,
     GlDropdownItem,
