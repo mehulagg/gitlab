@@ -1032,8 +1032,10 @@ Here's a list of current [high-traffic tables](https://gitlab.com/gitlab-org/git
 
 Determining what tables are high-traffic can be difficult. Self-managed instances might use
 different features of GitLab with different usage patterns, thus making assumptions based 
-on GitLab.com is not enough. Currently, to identify a high-traffic table for GitLab.com 
-the following measures are considered.
+on GitLab.com is not enough.
+
+Currently, to identify a high-traffic table for GitLab.com the following measures are considered.
+Please note the metrics linked here are GitLab internal only.
 
 - [Read operations](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_seq_tup_read%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_scan%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_tup_fetch%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1)
 - [Number of records](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_n_live_tup%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1)
