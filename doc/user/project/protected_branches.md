@@ -177,6 +177,57 @@ Deleting a protected branch is allowed only by using the web interface; not from
 This means that you can't accidentally delete a protected branch from your
 command line or a Git client application.
 
+## Allow force push on protected branches **(FREE)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15611) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-allow-force-push-on-protected-branches). **(FREE)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+It is possible to allow force push to protected branches. 
+You can either set Allow force push at the time you protect a new branch, or set it to a branch that is
+already protected, as described below.
+
+To protect a new branch and enable Force push:
+
+1. Navigate to your project's **Settings > Repository** and expand **Protected branches**.
+1. Scroll down to **Protect a branch**, select a **Branch** or wildcard you'd like to protect, select who's **Allowed to merge** and **Allowed to push**, and toggle the **Allow force push** slider.
+1. Click **Protect**.
+
+![Code Owners approval - new protected branch](img/code_owners_approval_new_protected_branch_v13_10.png)
+
+To enable Force push on branches already protected:
+
+1. Navigate to your project's **Settings > Repository** and expand **Protected branches**.
+1. Scroll down to **Protected branch** and toggle the **Allow force push** slider for the chosen branch.
+
+![Code Owners approval - branch already protected](img/code_owners_approval_protected_branch_v13.10.png)
+
+When enabled, members who are allowed to push to this branch can also force push.
+
+### Enable or disable allow force push on protected branches **(FREE)**
+
+Allow force push on protected branches is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:allow_force_push_to_protected_branches)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:allow_force_push_to_protected_branches)
+```
+
 ## Protected branches approval by Code Owners **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13251) in GitLab Premium 12.4.
@@ -193,14 +244,14 @@ To protect a new branch and enable Code Owner's approval:
 1. Scroll down to **Protect a branch**, select a **Branch** or wildcard you'd like to protect, select who's **Allowed to merge** and **Allowed to push**, and toggle the **Require approval from code owners** slider.
 1. Click **Protect**.
 
-![Code Owners approval - new protected branch](img/code_owners_approval_new_protected_branch_v12_4.png)
+![Code Owners approval - new protected branch](img/code_owners_approval_new_protected_branch_v13_10.png)
 
 To enable Code Owner's approval to branches already protected:
 
 1. Navigate to your project's **Settings > Repository** and expand **Protected branches**.
 1. Scroll down to **Protected branch** and toggle the **Code owner approval** slider for the chosen branch.
 
-![Code Owners approval - branch already protected](img/code_owners_approval_protected_branch_v12_4.png)
+![Code Owners approval - branch already protected](img/code_owners_approval_protected_branch_v13.10.png)
 
 When enabled, all merge requests targeting these branches require approval
 by a Code Owner per matched rule before they can be merged.
