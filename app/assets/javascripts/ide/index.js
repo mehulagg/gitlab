@@ -9,6 +9,7 @@ import ide from './components/ide.vue';
 import { createRouter } from './ide_router';
 import { DEFAULT_THEME } from './lib/themes';
 import { createStore } from './stores';
+import * as types from '~/ide/stores/mutation_types';
 
 Vue.use(Translate);
 
@@ -37,8 +38,17 @@ export function initIde(el, options = {}) {
   if (!el) return null;
 
   const { rootComponent = ide, extendStore = identity } = options;
+  const { project: projectDataStr } = el.dataset;
   const store = createStore();
   const router = createRouter(store);
+  let project;
+
+  if (projectDataStr) {
+    project = JSON.parse(projectDataStr);
+    const projectPath = project.path_with_namespace;
+    store.commit(types.SET_PROJECT, { projectPath, project });
+    store.commit(types.SET_CURRENT_PROJECT, projectPath);
+  }
 
   return new Vue({
     el,
@@ -61,13 +71,16 @@ export function initIde(el, options = {}) {
         editorTheme: window.gon?.user_color_scheme || DEFAULT_THEME,
         codesandboxBundlerUrl: el.dataset.codesandboxBundlerUrl,
       });
+      if (projectDataStr) {
+        this.initProject({ projectPath: project.path_with_namespace });
+      }
     },
     beforeDestroy() {
       // This helps tests do Singleton cleanups which we don't really have responsibility to know about here.
       this.$emit('destroy');
     },
     methods: {
-      ...mapActions(['setEmptyStateSvgs', 'setLinks', 'setInitialData']),
+      ...mapActions(['setEmptyStateSvgs', 'setLinks', 'setInitialData', 'initProject']),
     },
     render(createElement) {
       return createElement(rootComponent);
