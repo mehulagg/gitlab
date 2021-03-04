@@ -153,7 +153,7 @@ export default {
             v-if="showPopover"
             :target="() => $refs.popover"
             placement="top"
-            triggers="hover"
+            triggers="hover focus"
           >
             <template #title>
               <div class="gl-font-weight-normal gl-font-base">
