@@ -18,10 +18,6 @@ RSpec.describe GitlabSchema do
     expect(field_instrumenters).to include(instance_of(::Gitlab::Graphql::Authorize::Instrumentation))
   end
 
-  it 'enables using presenters' do
-    expect(field_instrumenters).to include(instance_of(::Gitlab::Graphql::Present::Instrumentation))
-  end
-
   it 'has the base mutation' do
     expect(described_class.mutation).to eq(::Types::MutationType)
   end
