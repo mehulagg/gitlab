@@ -5,7 +5,7 @@ class DastSiteProfile < ApplicationRecord
   belongs_to :dast_site
 
   validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
-  validates :excluded_urls, :request_headers, length: { maximum: 1024 }
+  validates :excluded_urls, length: { maximum: 1024 }
   validates :project_id, :dast_site_id, presence: true
   validate :dast_site_project_id_fk
 

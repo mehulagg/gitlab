@@ -16,7 +16,8 @@ RSpec.describe 'Creating a DAST Site Profile' do
       full_path: full_path,
       profile_name: profile_name,
       target_url: target_url,
-      excluded_urls: "#{target_url}/signout"
+      excluded_urls: "#{target_url}/signout",
+      request_headers: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0'
     )
   end
 

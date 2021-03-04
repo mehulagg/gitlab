@@ -74,8 +74,8 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           end
         end
 
-        context "when excluded_urls is supplied as a param" do
-          context 'when the feature flag dast_branch_selection is disabled' do
+        context 'when excluded_urls is supplied as a param' do
+          context 'when the feature flag security_dast_site_profiles_additional_fields is disabled' do
             it 'does not set the branch_name' do
               stub_feature_flags(security_dast_site_profiles_additional_fields: false)
 
@@ -85,7 +85,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
             end
           end
 
-          context 'when the feature flag dast_branch_selection is enabled' do
+          context 'when the feature flag security_dast_site_profiles_additional_fields is enabled' do
             it 'sets the excluded_urls' do
               subject
 

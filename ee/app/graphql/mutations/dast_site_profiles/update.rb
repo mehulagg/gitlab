@@ -40,20 +40,33 @@ module Mutations
 
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, id:, request_headers: nil, **service_args)
-        # TODO: remove explicit coercion once compatibility layer has been removed
-        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
-        service_args[:id] = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(id).model_id
+      def resolve(full_path:, id:, profile_name:, target_url: nil, excluded_urls: nil, request_headers: nil)
         project = authorized_find!(full_path)
 
-        service = ::DastSiteProfiles::UpdateService.new(project, current_user)
-        result = service.execute(**service_args)
+        # TODO: remove explicit coercion once compatibility layer has been removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        params = {
+          id: ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(id).model_id,
+          name: profile_name,
+          target_url: target_url,
+          excluded_urls: feature_flagged_excluded_urls(project, excluded_urls)
+        }.compact
+
+        result = ::DastSiteProfiles::UpdateService.new(project, current_user).execute(**params)
 
         if result.success?
           { id: result.payload.to_global_id, errors: [] }
         else
           { errors: result.errors }
         end
+      end
+
+      private
+
+      def feature_flagged_excluded_urls(project, excluded_urls)
+        return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
+
+        excluded_urls
       end
     end
   end

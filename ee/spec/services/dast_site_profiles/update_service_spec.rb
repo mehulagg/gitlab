@@ -9,6 +9,7 @@ RSpec.describe DastSiteProfiles::UpdateService do
 
   let(:new_profile_name) { SecureRandom.hex }
   let(:new_target_url) { generate(:url) }
+  let(:new_excluded_urls) { "#{new_target_url}/signout" }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -18,8 +19,9 @@ RSpec.describe DastSiteProfiles::UpdateService do
     subject do
       described_class.new(project, user).execute(
         id: dast_profile.id,
-        profile_name: new_profile_name,
-        target_url: new_target_url
+        name: new_profile_name,
+        target_url: new_target_url,
+        excluded_urls: new_excluded_urls
       )
     end
 
@@ -47,13 +49,12 @@ RSpec.describe DastSiteProfiles::UpdateService do
         expect(status).to eq(:success)
       end
 
-      it 'updates the dast_site_profile' do
+      it 'updates the dast_site_profile', :aggregate_failures do
         updated_dast_site_profile = payload.reload
 
-        aggregate_failures do
-          expect(updated_dast_site_profile.name).to eq(new_profile_name)
-          expect(updated_dast_site_profile.dast_site.url).to eq(new_target_url)
-        end
+        expect(updated_dast_site_profile.name).to eq(new_profile_name)
+        expect(updated_dast_site_profile.dast_site.url).to eq(new_target_url)
+        expect(updated_dast_site_profile.excluded_urls).to eq(new_excluded_urls)
       end
 
       it 'returns a dast_site_profile payload' do

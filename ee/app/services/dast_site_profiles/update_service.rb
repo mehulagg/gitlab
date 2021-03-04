@@ -2,7 +2,7 @@
 
 module DastSiteProfiles
   class UpdateService < BaseService
-    def execute(id:, profile_name:, target_url:)
+    def execute(id:, target_url:, **params)
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
       dast_site_profile = find_dast_site_profile!(id)
@@ -10,10 +10,8 @@ module DastSiteProfiles
       return ServiceResponse.error(message: "Cannot modify #{dast_site_profile.name} referenced in security policy") if referenced_in_security_policy?(dast_site_profile)
 
       ActiveRecord::Base.transaction do
-        service = DastSites::FindOrCreateService.new(project, current_user)
-        dast_site = service.execute!(url: target_url)
-
-        dast_site_profile.update!(name: profile_name, dast_site: dast_site)
+        dast_site = DastSites::FindOrCreateService.new(project, current_user).execute!(url: target_url)
+        dast_site_profile.update!(params.merge!(dast_site: dast_site))
 
         ServiceResponse.success(payload: dast_site_profile)
       end

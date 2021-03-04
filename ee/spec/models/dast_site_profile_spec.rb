@@ -14,7 +14,6 @@ RSpec.describe DastSiteProfile, type: :model do
     it { is_expected.to be_valid }
     it { is_expected.to validate_length_of(:name).is_at_most(255) }
     it { is_expected.to validate_length_of(:excluded_urls).is_at_most(1024) }
-    it { is_expected.to validate_length_of(:request_headers).is_at_most(1024) }
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:dast_site_id) }
