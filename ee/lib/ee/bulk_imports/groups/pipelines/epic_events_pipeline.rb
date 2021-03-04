@@ -22,6 +22,12 @@ module EE
             set_next_epic
           end
 
+          def run
+            return if @epic_iids.blank?
+
+            super
+          end
+
           def transform(context, data)
             # Only create 'reopened' & 'closed' events.
             # 'created' event get created when epic is persisted.

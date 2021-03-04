@@ -19,10 +19,15 @@ module EE
           def initialize(context)
             super
 
-            @group = context.group
-            @epic_iids = @group.epics.order(iid: :desc).pluck(:iid)
+            @epic_iids = context.group.epics.order(iid: :desc).pluck(:iid)
 
             set_next_epic
+          end
+
+          def run
+            return if @epic_iids.blank?
+
+            super
           end
 
           def after_run(extracted_data)
