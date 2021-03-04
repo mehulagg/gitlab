@@ -52,7 +52,7 @@ must disable the **primary** node.
    sudo gitlab-ctl stop
    ```
 
-   Prevent GitLab from starting up again if the server unexpectedly reboots:
+2. Prevent GitLab from starting up again if the server unexpectedly reboots:
 
    ```shell
    sudo systemctl disable gitlab-runsvdir
@@ -78,7 +78,7 @@ must disable the **primary** node.
    initctl reload-configuration
    ```
 
-1. If you do not have SSH access to the **primary** node, take the machine offline and
+   If you do not have SSH access to the **primary** node, take the machine offline and
    prevent it from rebooting by any means at your disposal.
    Since there are many ways you may prefer to accomplish this, we will avoid a
    single recommendation. You may need to:
@@ -91,7 +91,7 @@ must disable the **primary** node.
    - Revoke object storage permissions from the **primary** node.
    - Physically disconnect a machine.
 
-1. If you plan to [update the primary domain DNS record](#step-4-optional-updating-the-primary-domain-dns-record),
+   If you plan to [update the primary domain DNS record](#step-4-optional-updating-the-primary-domain-dns-record),
    you may wish to lower the TTL now to speed up propagation.
 
 ### Step 3. Promoting a **secondary** node
@@ -119,7 +119,8 @@ Note the following when promoting a secondary:
 
 1. Edit `/etc/gitlab/gitlab.rb` to reflect its new status as **primary** by
    removing any lines that enabled the `geo_secondary_role`:
-
+   
+   NOTE:
    Users of GitLab 13.5 or later can skip this step, due to the appropriate
    roles being enabled or disabled during the promotion in the following
    step.
