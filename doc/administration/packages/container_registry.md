@@ -906,7 +906,6 @@ that you have backed up all registry data.
 
 When the command is used without the `-m` flag, the Container Registry only removes layers that are not referenced by any manifest, tagged or not.
 
-
 ### Performing garbage collection without downtime
 
 > [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/764) in GitLab 8.8.
