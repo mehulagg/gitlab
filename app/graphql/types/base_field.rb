@@ -24,6 +24,8 @@ module Types
       unless Rails.env.production?
         extension ::Gitlab::Graphql::CallsGitaly::FieldExtension
       end
+
+      extension ::Gitlab::Graphql::Present::FieldExtension if owner.try(:presenter_class)
     end
 
     def may_call_gitaly?
