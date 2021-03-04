@@ -46,7 +46,7 @@ module IncidentManagement
 
           upsert_participants(participants)
 
-          success(oncall_rotation)
+          success(oncall_rotation.reload)
         end
       end
 

@@ -21,7 +21,7 @@ module IncidentManagement
         @user = user
         @project = oncall_rotation.project
         @params = params
-        @participants_params = params[:participants]
+        @participants_params = params.delete(:participants)
       end
 
       def execute
@@ -32,8 +32,17 @@ module IncidentManagement
 
         IncidentManagement::OncallRotations::PersistShiftsJob.new.perform(oncall_rotation.id)
 
-        update_and_remove_participants unless participants_params.nil?
+        unless participants_params.nil?
+          update_and_remove_participants
+          oncall_rotation.touch
+        end
 
+        # TODO Recalculate rotation with new params
+        # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55570
+
+        return error_in_validation(oncall_rotation) unless oncall_rotation.update(params)
+
+        success(oncall_rotation.reload)
       rescue RotationModificationError => err
         err.service_response_error
       end
