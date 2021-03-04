@@ -16,10 +16,10 @@ gitlab:
   gitaly:
     resources:
       requests:
-        cpu: 1200m
+        cpu: 2400m
         memory: 1000M
       limits:
-        cpu: 1800m
+        cpu: 3600m
         memory: 1500M
     persistence:
       size: 10G
