@@ -129,10 +129,8 @@ describe('Board card layout', () => {
 
       mountComponent(props);
 
-      expect(findSearchLabel().attributes()).toMatchObject({
-        label: props.searchLabel,
-        placeholder: props.searchPlaceholder,
-      });
+      expect(findSearchLabel().attributes('label')).toEqual(props.searchLabel);
+      expect(findSearchInput().attributes('placeholder')).toEqual(props.searchPlaceholder);
     });
 
     it('emits filter event on input', () => {
