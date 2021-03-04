@@ -1,0 +1,3 @@
+query getEditorStatus {
+  status @client
+}

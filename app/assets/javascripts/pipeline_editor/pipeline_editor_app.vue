@@ -6,9 +6,17 @@ import { __, s__ } from '~/locale';
 import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 import ConfirmUnsavedChangesDialog from './components/ui/confirm_unsaved_changes_dialog.vue';
 import PipelineEditorEmptyState from './components/ui/pipeline_editor_empty_state.vue';
-import { COMMIT_FAILURE, COMMIT_SUCCESS, DEFAULT_FAILURE, LOAD_FAILURE_UNKNOWN } from './constants';
+import {
+  CI_CONFIG_STATUS_EMPTY,
+  CI_CONFIG_STATUS_ERROR,
+  COMMIT_FAILURE,
+  COMMIT_SUCCESS,
+  DEFAULT_FAILURE,
+  LOAD_FAILURE_UNKNOWN,
+} from './constants';
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
+import getEditorStatus from './graphql/queries/client/editor_status.graphql';
 import PipelineEditorHome from './pipeline_editor_home.vue';
 
 export default {
@@ -33,7 +41,6 @@ export default {
   data() {
     return {
       ciConfigData: {},
-      // Success and failure state
       failureType: null,
       failureReasons: [],
       showStartScreen: false,
@@ -43,6 +50,7 @@ export default {
       currentCiFileContent: '',
       showFailureAlert: false,
       showSuccessAlert: false,
+      status: '',
       successType: null,
     };
   },
@@ -76,10 +84,6 @@ export default {
     },
     ciConfigData: {
       query: getCiConfigData,
-      // If content is not loaded, we can't lint the data
-      skip: ({ currentCiFileContent }) => {
-        return !currentCiFileContent;
-      },
       variables() {
         return {
           projectPath: this.projectFullPath,
@@ -93,9 +97,16 @@ export default {
 
         return { ...ciConfig, stages };
       },
+      result({ data }) {
+        this.setAppStatus(data?.ciConfig?.status || CI_CONFIG_STATUS_ERROR);
+      },
       error() {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
+        this.setAppStatus(CI_CONFIG_STATUS_ERROR);
       },
+    },
+    status: {
+      query: getEditorStatus,
     },
   },
   computed: {
@@ -152,6 +163,11 @@ export default {
   successTexts: {
     [COMMIT_SUCCESS]: __('Your changes have been successfully committed.'),
   },
+  watch: {
+    status(newStatus) {
+      console.log(newStatus);
+    },
+  },
   methods: {
     handleBlobContentError(error = {}) {
       const { networkError } = error;
@@ -163,8 +179,10 @@ export default {
         response?.status === httpStatusCodes.NOT_FOUND ||
         response?.status === httpStatusCodes.BAD_REQUEST
       ) {
+        this.setAppStatus(CI_CONFIG_STATUS_EMPTY);
         this.showStartScreen = true;
       } else {
+        this.setAppStatus(CI_CONFIG_STATUS_ERROR);
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       }
     },
@@ -188,6 +206,9 @@ export default {
     },
     resetContent() {
       this.currentCiFileContent = this.lastCommittedContent;
+    },
+    setAppStatus(status) {
+      this.$apollo.getClient().writeQuery({ query: getEditorStatus, data: { status } });
     },
     setNewEmptyCiConfigFile() {
       this.showStartScreen = false;

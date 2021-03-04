@@ -3,6 +3,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
+import { CI_CONFIG_STATUS_LOADING } from './constants';
 import { resolvers } from './graphql/resolvers';
 import typeDefs from './graphql/typedefs.graphql';
 import PipelineEditorApp from './pipeline_editor_app.vue';
@@ -43,6 +44,7 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
   apolloProvider.clients.defaultClient.cache.writeData({
     data: {
       commitSha,
+      status: CI_CONFIG_STATUS_LOADING,
     },
   });
 
