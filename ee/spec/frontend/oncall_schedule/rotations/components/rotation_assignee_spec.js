@@ -16,7 +16,7 @@ jest.mock('lodash/uniqueId', () => (prefix) => `${prefix}fakeUniqueId`);
 describe('RotationAssignee', () => {
   let wrapper;
 
-  const shiftWidth = 100;
+  const shiftWidth = 150;
   const assignee = mockRotations[0].shifts.nodes[0];
   const findToken = () => wrapper.findByTestId('rotation-assignee');
   const findAvatar = () => wrapper.findComponent(GlAvatar);
@@ -62,13 +62,18 @@ describe('RotationAssignee', () => {
     });
 
     it('truncate the rotation name on small screens', () => {
-      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.sm } });
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.md } });
       expect(findName().text()).toBe(truncate(assignee.participant.user.username, 3));
     });
 
-    it('hide the rotation name on mobile screens', () => {
-      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.xs } });
+    it('hides the rotation name on mobile screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.sm } });
       expect(findName().exists()).toBe(false);
+    });
+
+    it('hides the avatar on the smallest screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.xs } });
+      expect(findAvatar().exists()).toBe(false);
     });
 
     it('should render an assignee color based on the chevron skipping color pallette', () => {
