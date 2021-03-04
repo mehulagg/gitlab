@@ -46,7 +46,7 @@ export default {
         };
       }
 
-      const left = 100 / DAYS_IN_WEEK / 2 + hours / 24;
+      const left = 100 / DAYS_IN_WEEK / 2 + hours / HOURS_IN_DAY;
       return {
         left: `${left}%`,
       };
