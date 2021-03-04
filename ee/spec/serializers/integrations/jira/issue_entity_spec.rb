@@ -130,7 +130,7 @@ RSpec.describe Integrations::Jira::IssueEntity do
     end
   end
 
-  context 'feature flag "jira_issues_show_integration" is disabled' do
+  context 'when feature flag "jira_issues_show_integration" is disabled' do
     before do
       stub_feature_flags(jira_issues_show_integration: false)
     end
