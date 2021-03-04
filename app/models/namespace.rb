@@ -105,6 +105,11 @@ class Namespace < ApplicationRecord
       )
   end
 
+  scope :without_last_ci_minutes_notification, -> do
+    where.not(last_ci_minutes_notification_at: nil)
+      .where.not(last_ci_minutes_usage_notification_level: nil)
+  end
+
   # Make sure that the name is same as strong_memoize name in root_ancestor
   # method
   attr_writer :root_ancestor
