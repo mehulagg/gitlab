@@ -236,9 +236,9 @@ export const weekDisplayShiftWidth = (
   shiftTimeUnitWidth,
 ) => {
   if (shiftUnitIsHour) {
+    const SPACER = shiftRangeOverlap.hoursOverlap === 1 ? 1 : ASSIGNEE_SPACER;
     return (
-      Math.floor((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) -
-      ASSIGNEE_SPACER
+      Math.floor((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) - SPACER
     );
   }
 

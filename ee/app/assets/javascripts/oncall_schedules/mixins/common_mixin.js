@@ -34,10 +34,11 @@ export default {
   },
   methods: {
     getIndicatorStyles(presetType = PRESET_TYPES.WEEKS) {
+      const currentDate = new Date();
+      const base = 100 / HOURS_IN_DAY;
+      const hours = base * currentDate.getHours();
+
       if (presetType === PRESET_TYPES.DAYS) {
-        const currentDate = new Date();
-        const base = 100 / HOURS_IN_DAY;
-        const hours = base * currentDate.getHours();
         const minutes = base * (currentDate.getMinutes() / 60) - 2.25;
 
         return {
@@ -45,7 +46,7 @@ export default {
         };
       }
 
-      const left = 100 / DAYS_IN_WEEK / 2;
+      const left = 100 / DAYS_IN_WEEK / 2 + hours / 24;
       return {
         left: `${left}%`,
       };
