@@ -594,14 +594,6 @@ export default {
           throw new Error(errors[0]);
         }
 
-        // todo: check, but I think we in fact do not want to do this after all
-        // if (!getters.shouldUseGraphQL) {
-        //   labels = labels.map((label) => ({
-        //     ...label,
-        //     id: getIdFromGraphQLId(label.id),
-        //   }));
-        // }
-
         commit(types.RECEIVE_MILESTONES_SUCCESS, milestones);
       })
       .catch((e) => {

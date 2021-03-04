@@ -34,16 +34,6 @@ export default {
     return null;
   },
 
-  getColumnByMilestoneId: (state) => (milestoneId) => {
-    if (!milestoneId) {
-      return null;
-    }
-    return find(
-      state.boardLists,
-      (l) => l.listType === ListType.milestone && l.milestone?.id === milestoneId,
-    );
-  },
-
   getIssuesByEpic: (state, getters) => (listId, epicId) => {
     return getters
       .getBoardItemsByList(listId)
