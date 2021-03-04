@@ -10,7 +10,7 @@ module Gitlab
         class Environment < ::Gitlab::Config::Entry::Node
           include ::Gitlab::Config::Entry::Configurable
 
-          ALLOWED_KEYS = %i[name url action on_stop auto_stop_in kubernetes].freeze
+          ALLOWED_KEYS = %i[name url action on_stop auto_stop_in kubernetes tier].freeze
 
           entry :kubernetes, Entry::Kubernetes, description: 'Kubernetes deployment configuration.'
 
@@ -20,6 +20,8 @@ module Gitlab
                 errors.add(:config, 'should be a hash or a string')
               end
             end
+
+            validate :eligible_tier, if: :tier_specified?
 
             validates :name, presence: true
             validates :name,
@@ -50,6 +52,7 @@ module Gitlab
               validates :on_stop, type: String, allow_nil: true
               validates :kubernetes, type: Hash, allow_nil: true
               validates :auto_stop_in, duration: true, allow_nil: true
+              validates :tier, type: String, allow_nil: true
             end
           end
 
@@ -59,6 +62,10 @@ module Gitlab
 
           def string?
             @config.is_a?(String)
+          end
+
+          def tier_specified?
+            value[:tier].present?
           end
 
           def name
@@ -83,6 +90,12 @@ module Gitlab
 
           def auto_stop_in
             value[:auto_stop_in]
+          end
+
+          def eligible_tier
+            unless Environment.tiers.has_key?(value[:tier])
+              errors.add(:config, 'should be a hash or a string')
+            end
           end
 
           def value
