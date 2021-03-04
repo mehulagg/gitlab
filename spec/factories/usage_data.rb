@@ -57,6 +57,7 @@ FactoryBot.define do
       create(:alert_management_http_integration, project: projects[0], name: 'DataDog')
       create(:alert_management_http_integration, project: projects[0], name: 'DataCat')
       create(:alert_management_http_integration, :inactive, project: projects[1], name: 'DataFox')
+      create(:alert_management_http_integration, project: projects[2], name: 'DataBird')
 
       # Tracing
       create(:project_tracing_setting, project: projects[0])

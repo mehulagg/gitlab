@@ -54,6 +54,12 @@ module Gitlab
         FALLBACK
       end
 
+      def histogram(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
+        count(relation, column, batch: batch, batch_size: batch_size, start: start, finish: finish)
+          .values
+          .tally
+      end
+
       def distinct_count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
         if batch
           Gitlab::Database::BatchCount.batch_distinct_count(relation, column, batch_size: batch_size, start: start, finish: finish)

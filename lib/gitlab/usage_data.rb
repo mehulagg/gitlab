@@ -166,6 +166,7 @@ module Gitlab
             projects_with_alerts_service_enabled: count(Service.active.where(type: 'AlertsService')),
             projects_with_alerts_created: distinct_count(::AlertManagement::Alert, :project_id),
             projects_with_enabled_alert_integrations: distinct_count(::AlertManagement::HttpIntegration.active, :project_id),
+            projects_with_enabled_alert_integrations_histogram: histogram(::AlertManagement::HttpIntegration.active.group(:project_id)),
             projects_with_prometheus_alerts: distinct_count(PrometheusAlert, :project_id),
             projects_with_terraform_reports: distinct_count(::Ci::JobArtifact.terraform_reports, :project_id),
             projects_with_terraform_states: distinct_count(::Terraform::State, :project_id),
