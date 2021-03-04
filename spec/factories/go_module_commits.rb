@@ -7,7 +7,7 @@ FactoryBot.define do
     transient do
       files { { 'foo.txt' => 'content' } }
       message { 'Message' }
-      project { create(:project, :repository) }
+      project { association(:project, :repository) }
 
       service do
         Files::MultiService.new(
@@ -44,14 +44,13 @@ FactoryBot.define do
 
     trait :files do
       transient do
-        files { raise ArgumentError.new("files is required") }
         message { 'Add files' }
       end
     end
 
     trait :package do
       transient do
-        path { raise ArgumentError.new("path is required") }
+        path { 'pkg' }
         message { 'Add package' }
         files { { "#{path}/b.go" => "package b\nfunc Bye() { println(\"Goodbye world!\") }\n" } }
       end
@@ -64,7 +63,7 @@ FactoryBot.define do
         host_prefix { "#{::Gitlab.config.gitlab.host}/#{project.path_with_namespace}" }
 
         url { name ? "#{host_prefix}/#{name}" : host_prefix }
-        path { name.to_s + '/' }
+        path { "#{name}/" }
 
         files do
           {

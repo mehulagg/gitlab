@@ -18,9 +18,6 @@ RSpec.describe 'factories' do
       [:ci_job_artifact, :gzip],
       [:ci_job_artifact, :correct_checksum],
       [:environment, :non_playable],
-      [:go_module_commit, :files],
-      [:go_module_commit, :package],
-      [:go_module_version, :pseudo],
       [:composer_cache_file, :object_storage],
       [:debian_project_component_file, :object_storage],
       [:debian_project_distribution, :object_storage],
@@ -69,6 +66,7 @@ RSpec.describe 'factories' do
   # is being mutated.
   skip_factory_defaults = %i[
     fork_network_member
+    go_module_commit
     group_member
     import_state
     namespace
