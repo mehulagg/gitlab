@@ -9,14 +9,11 @@ module Gitlab
 
           return unless active_migration&.interval_elapsed?
 
-          next_batched_job = create_next_batched_job!(active_migration)
-
-          if next_batched_job.nil?
+          if next_batched_job = create_next_batched_job!(active_migration)
+            migration_wrapper.perform(next_batched_job)
+          else
             finish_active_migration(active_migration)
-            return
           end
-
-          migration_wrapper.perform(next_batched_job)
         end
 
         private

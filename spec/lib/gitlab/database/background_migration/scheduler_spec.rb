@@ -137,9 +137,9 @@ RSpec.describe Gitlab::Database::BackgroundMigration::Scheduler, '#perform' do
       end
 
       context 'when the bounds of the next batch exceed the migration maximum value' do
-        let!(:event1) { create(:event) }
-        let!(:event2) { create(:event) }
-        let!(:event3) { create(:event) }
+        let!(:events) { create_list(:event, 3) }
+        let(:event1) { events[0] }
+        let(:event2) { events[1] }
 
         context 'when the batch maximum exceeds the migration maximum' do
           it 'clamps the batch maximum to the migration maximum' do

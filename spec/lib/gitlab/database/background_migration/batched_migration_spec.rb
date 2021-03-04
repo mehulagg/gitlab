@@ -56,7 +56,7 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
     context 'when the migration has no last_job' do
       let(:batched_migration) { build(:batched_background_migration) }
 
-      it 'returns false' do
+      it 'returns true' do
         expect(batched_migration.interval_elapsed?).to eq(true)
       end
     end
