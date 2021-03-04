@@ -41,8 +41,7 @@
     "webpack": "NODE_OPTIONS=\"--max-old-space-size=3584\" webpack --config config/webpack.config.js",
     "webpack-vendor": "NODE_OPTIONS=\"--max-old-space-size=3584\" webpack --config config/webpack.vendor.config.js",
     "webpack-prod": "NODE_OPTIONS=\"--max-old-space-size=3584\" NODE_ENV=production webpack --config config/webpack.config.js",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "storybook": "yarn --cwd ./storybook start"
   },
   "dependencies": {
     "@babel/core": "^7.10.1",
@@ -194,10 +193,6 @@
     "@babel/plugin-transform-modules-commonjs": "^7.10.1",
     "@gitlab/eslint-plugin": "8.4.0",
     "@gitlab/stylelint-config": "2.3.0",
-    "@storybook/addon-links": "^6.1.20",
-    "@storybook/addon-controls": "^6.1.20",
-    "@storybook/addon-essentials": "^6.1.20",
-    "@storybook/vue": "^6.1.20",
     "@testing-library/dom": "^7.16.2",
     "@vue/test-utils": "1.1.2",
     "acorn": "^6.3.0",
