@@ -1,7 +1,6 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
-import { s__ } from '~/locale';
 import projectsQuery from '../graphql/queries/get_instance_security_dashboard_projects.query.graphql';
 import vulnerabilityGradesQuery from '../graphql/queries/instance_vulnerability_grades.query.graphql';
 import vulnerabilityHistoryQuery from '../graphql/queries/instance_vulnerability_history.query.graphql';
@@ -48,25 +47,20 @@ export default {
       return !this.isLoadingProjects && !this.projects.length;
     },
   },
-  i18n: {
-    noProjectsMessage: s__(
-      'SecurityReports|The security dashboard displays the latest security findings for projects you wish to monitor. Select "Settings" to add and remove projects.',
-    ),
-  },
 };
 </script>
 
 <template>
   <security-charts-layout>
     <template v-if="shouldShowEmptyState" #empty-state>
-      <no-instance-projects :message="$options.i18n.noProjectsMessage" />
+      <no-instance-projects />
     </template>
     <template v-else-if="shouldShowCharts" #default>
       <vulnerability-chart :query="vulnerabilityHistoryQuery" />
       <vulnerability-severities :query="vulnerabilityGradesQuery" />
     </template>
     <template v-else #loading>
-      <gl-loading-icon slot="loading" size="lg" class="gl-mt-6" />
+      <gl-loading-icon size="lg" class="gl-mt-6" />
     </template>
   </security-charts-layout>
 </template>

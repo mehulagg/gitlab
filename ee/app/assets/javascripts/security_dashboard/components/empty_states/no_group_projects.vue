@@ -1,5 +1,6 @@
 <script>
 import { GlEmptyState, GlLink } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -7,11 +8,10 @@ export default {
     GlLink,
   },
   inject: ['dashboardDocumentation', 'emptyStateSvgPath'],
-  props: {
-    message: {
-      type: String,
-      required: true,
-    },
+  i18n: {
+    description: s__(
+      'SecurityReports|The latest security findings for your projects are displayed here. Add projects to your group to view their vulnerabilities here.',
+    ),
   },
 };
 </script>
@@ -22,7 +22,7 @@ export default {
     :svg-path="emptyStateSvgPath"
   >
     <template #description>
-      {{ message }}
+      {{ $options.i18n.description }}
       <gl-link :href="dashboardDocumentation">{{ __('More information') }}</gl-link>
     </template>
   </gl-empty-state>

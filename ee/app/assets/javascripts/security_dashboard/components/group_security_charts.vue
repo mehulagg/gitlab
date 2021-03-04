@@ -1,7 +1,6 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
-import { s__ } from '~/locale';
 import vulnerabilityGradesQuery from '../graphql/queries/group_vulnerability_grades.query.graphql';
 import vulnerabilityHistoryQuery from '../graphql/queries/group_vulnerability_history.query.graphql';
 import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
@@ -57,18 +56,13 @@ export default {
       return !this.isLoadingProjects && !this.projects.length;
     },
   },
-  i18n: {
-    noProjectsMessage: s__(
-      'SecurityReports|The security dashboard displays the latest security findings for projects you wish to monitor. Add projects to your group to view their vulnerabilities here.',
-    ),
-  },
 };
 </script>
 
 <template>
   <security-charts-layout>
     <template v-if="shouldShowEmptyState" #empty-state>
-      <no-group-projects :message="$options.i18n.noProjectsMessage" />
+      <no-group-projects />
     </template>
     <template v-else-if="shouldShowCharts" #default>
       <vulnerability-chart :query="vulnerabilityHistoryQuery" :group-full-path="groupFullPath" />

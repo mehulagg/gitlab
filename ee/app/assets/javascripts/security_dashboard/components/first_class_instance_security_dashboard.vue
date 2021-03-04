@@ -3,7 +3,6 @@ import Filters from 'ee/security_dashboard/components/first_class_vulnerability_
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
 import createFlash from '~/flash';
-import { s__ } from '~/locale';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import { createProjectLoadingError } from '../helpers';
 import CsvExportButton from './csv_export_button.vue';
@@ -62,11 +61,6 @@ export default {
       this.filters = filters;
     },
   },
-  i18n: {
-    noProjectsMessage: s__(
-      'SecurityReports|The vulnerability report displays the latest security findings for projects you wish to monitor. Select "Settings" to add and remove projects.',
-    ),
-  },
   vulnerabilitiesSeverityCountScopes,
 };
 </script>
@@ -95,9 +89,6 @@ export default {
       :projects="projects"
       :filters="filters"
     />
-    <no-instance-projects
-      v-else-if="shouldShowEmptyState"
-      :message="$options.i18n.noProjectsMessage"
-    />
+    <no-instance-projects v-else-if="shouldShowEmptyState" />
   </security-dashboard-layout>
 </template>

@@ -1,5 +1,6 @@
 <script>
 import { GlEmptyState, GlLink } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -7,11 +8,10 @@ export default {
     GlLink,
   },
   inject: ['dashboardDocumentation', 'emptyStateSvgPath', 'instanceDashboardSettingsPath'],
-  props: {
-    message: {
-      type: String,
-      required: true,
-    },
+  i18n: {
+    description: s__(
+      'SecurityReports|The latest security findings for projects you wish to monitor are displayed here. Select "Settings" to add and remove projects.',
+    ),
   },
 };
 </script>
@@ -24,7 +24,7 @@ export default {
     :primary-button-link="instanceDashboardSettingsPath"
   >
     <template #description>
-      {{ message }}
+      {{ $options.i18n.description }}
       <gl-link :href="dashboardDocumentation">{{ __('More information') }}</gl-link>
     </template>
   </gl-empty-state>
