@@ -2,11 +2,10 @@
 
 exports[`PypiInstallation renders all the messages 1`] = `
 <div>
-  <h3
-    class="gl-font-lg"
-  >
-    Installation
-  </h3>
+  <installation-title-stub
+    options="[object Object]"
+    storagekey="package_pypi_installation_instructions"
+  />
    
   <code-instruction-stub
     copytext="Copy Pip command"
