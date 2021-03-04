@@ -3,13 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::DastSiteProfiles::Create do
-  let(:group) { create(:group) }
-  let(:project) { create(:project, group: group) }
-  let(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:user) { create(:user) }
+
   let(:full_path) { project.full_path }
   let(:profile_name) { SecureRandom.hex }
   let(:target_url) { generate(:url) }
   let(:excluded_urls) { "#{target_url}/signout" }
+
   let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
