@@ -224,6 +224,16 @@ RSpec.describe Gitlab::CustomFileTemplates do
   end
 
   describe '#all_template_names' do
+    RSpec.shared_examples 'does not list an empty category' do
+      it 'misses subgroup category' do
+        expect(template_categories).to eq(["Group #{group.full_name}", "Instance"])
+      end
+
+      it 'misses subgroup templates' do
+        expect(template_file_names).to eq(["group_#{type}", "instance_#{type}"])
+      end
+    end
+
     where(:template_finder, :type) do
       Gitlab::Template::CustomDockerfileTemplate  | :dockerfile
       Gitlab::Template::CustomGitignoreTemplate   | :gitignore
@@ -281,6 +291,24 @@ RSpec.describe Gitlab::CustomFileTemplates do
 
           it 'orders results from most specific to least specific' do
             expect(template_file_names).to eq(["subgroup_#{type}", "group_#{type}", "instance_#{type}"])
+          end
+
+          context 'when templates are missing for a category' do
+            context 'when the subgroup configured template project that has no templates' do
+              before do
+                subgroup.update_columns(file_template_project_id: subproject.id)
+              end
+
+              it_behaves_like 'does not list an empty category'
+            end
+
+            context 'when the subgroup does not have a template project configured' do
+              before do
+                subgroup.update_columns(file_template_project_id: nil)
+              end
+
+              it_behaves_like 'does not list an empty category'
+            end
           end
         end
       end
