@@ -90,8 +90,20 @@ export default {
     },
   },
   methods: {
-    nextPage() {},
-    prevPage() {},
+    nextPage() {
+      this.cursor = {
+        first: MAX_LIST_COUNT,
+        last: null,
+        afterToken: this.tokenPageInfo.endCursor,
+      };
+    },
+    prevPage() {
+      this.cursor = {
+        first: null,
+        last: MAX_LIST_COUNT,
+        beforeToken: this.tokenPageInfo.startCursor,
+      };
+    },
   },
 };
 </script>
