@@ -17,6 +17,7 @@ RSpec.describe 'Creating a DAST Profile' do
       mutation_name,
       full_path: full_path,
       name: name,
+      branch_name: project.default_branch,
       dast_site_profile_id: global_id_of(dast_site_profile),
       dast_scanner_profile_id: global_id_of(dast_scanner_profile),
       run_after_create: true

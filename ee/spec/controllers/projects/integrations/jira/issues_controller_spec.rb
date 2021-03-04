@@ -81,6 +81,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'renders bad request for IntegrationError' do
         expect_any_instance_of(Projects::Integrations::Jira::IssuesFinder).to receive(:execute)
           .and_raise(Projects::Integrations::Jira::IssuesFinder::IntegrationError, 'Integration error')
+        expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
         get :index, params: { namespace_id: project.namespace, project_id: project }, format: :json
 
@@ -91,6 +92,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'renders bad request for RequestError' do
         expect_any_instance_of(Projects::Integrations::Jira::IssuesFinder).to receive(:execute)
           .and_raise(Projects::Integrations::Jira::IssuesFinder::RequestError, 'Request error')
+        expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
         get :index, params: { namespace_id: project.namespace, project_id: project }, format: :json
 

@@ -130,23 +130,29 @@ export const issuableQueryResponse = {
 
 export const searchQueryResponse = {
   data: {
-    users: {
-      nodes: [
-        {
-          id: '1',
-          avatarUrl: '/avatar',
-          name: 'root',
-          username: 'root',
-          webUrl: 'root',
-        },
-        {
-          id: '3',
-          avatarUrl: '/avatar',
-          name: 'rookie',
-          username: 'rookie',
-          webUrl: 'rookie',
-        },
-      ],
+    issuable: {
+      users: {
+        nodes: [
+          {
+            user: {
+              id: '1',
+              avatarUrl: '/avatar',
+              name: 'root',
+              username: 'root',
+              webUrl: 'root',
+            },
+          },
+          {
+            user: {
+              id: '3',
+              avatarUrl: '/avatar',
+              name: 'rookie',
+              username: 'rookie',
+              webUrl: 'rookie',
+            },
+          },
+        ],
+      },
     },
   },
 };

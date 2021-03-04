@@ -139,7 +139,7 @@ export default {
       <gl-tab data-testid="licensesTab">
         <template #title>
           <span data-testid="licensesTabTitle">{{ s__('Licenses|Detected in Project') }}</span>
-          <gl-badge>{{ licenseCount }}</gl-badge>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ licenseCount }}</gl-badge>
         </template>
 
         <detected-licenses-table />
@@ -150,7 +150,7 @@ export default {
           <span data-qa-selector="policies_tab" data-testid="policiesTabTitle">{{
             s__('Licenses|Policies')
           }}</span>
-          <gl-badge>{{ policyCount }}</gl-badge>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ policyCount }}</gl-badge>
         </template>
 
         <license-management />

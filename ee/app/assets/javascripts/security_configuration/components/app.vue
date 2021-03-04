@@ -171,7 +171,13 @@ export default {
       </gl-sprintf>
     </gl-alert>
 
-    <gl-table ref="securityControlTable" :items="features" :fields="fields" stacked="md">
+    <gl-table
+      ref="securityControlTable"
+      :items="features"
+      :fields="fields"
+      stacked="md"
+      :tbody-tr-attr="{ 'data-testid': 'security-scanner-row' }"
+    >
       <template #cell(feature)="{ item }">
         <div class="gl-text-gray-900">{{ item.name }}</div>
         <div>

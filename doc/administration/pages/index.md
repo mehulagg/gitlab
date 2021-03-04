@@ -247,6 +247,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `log_directory`                         | Absolute path to a log directory. |
 | `log_format`                            | The log output format: `text` or `json`. |
 | `log_verbose`                           | Verbose logging, true/false. |
+| `propagate_correlation_id`              | Set to true (false by default) to re-use existing Correlation ID from the incoming request header `X-Request-ID` if present. If a reverse proxy sets this header, the value will be propagated in the request chain. |
 | `max_connections`                       | Limit on the number of concurrent connections to the HTTP, HTTPS or proxy listeners. |
 | `metrics_address`                       | The address to listen on for metrics requests. |
 | `redirect_http`                         | Redirect pages from HTTP to HTTPS, true/false. |
@@ -522,6 +523,25 @@ Follow the steps below to configure verbose logging of GitLab Pages daemon.
 
    ```ruby
    gitlab_pages['log_verbose'] = true
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
+## Propagating the correlation ID
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/merge_requests/438) in GitLab 13.10.
+
+Setting the `propagate_correlation_id` to true will allow installations behind a reverse proxy generate
+and set a correlation ID to requests sent to GitLab Pages. When a reverse proxy sets the header value `X-Request-ID`,
+the value will be propagated in the request chain.
+Users [can find the correlation ID in the logs](../troubleshooting/tracing_correlation_id.md#identify-the-correlation-id-for-a-request).
+
+To enable the propagation of the correlation ID:
+
+1. Set the parameter to true in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['propagate_correlation_id'] = true
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -842,7 +862,7 @@ In installations from source:
        remote_directory: "pages" # The bucket name
        connection:
          provider: AWS # Only AWS supported at the moment
-         aws_access_key_id: AWS_ACESS_KEY_ID
+         aws_access_key_id: AWS_ACCESS_KEY_ID
          aws_secret_access_key: AWS_SECRET_ACCESS_KEY
          region: eu-central-1
    ```
@@ -949,14 +969,15 @@ to define the explicit address that the GitLab Pages daemon should listen on:
 gitlab_pages['listen_proxy'] = '127.0.0.1:8090'
 ```
 
-### 404 error after transferring project to a different group or user
+### 404 error after transferring the project to a different group or user, or changing project path
 
 If you encounter a `404 Not Found` error a Pages site after transferring a project to
-another group or user, you must trigger a domain configuration update for Pages. To do
-so, write something in the `.update` file. The Pages daemon monitors for changes to this
-file, and reloads the configuration when changes occur.
+another group or user, or changing project path, you must trigger a domain configuration
+update for Pages. To do so, write something in the `.update` file. The Pages daemon
+monitors for changes to this file, and reloads the configuration when changes occur.
 
-Use this example to fix a `404 Not Found` error after transferring a project with Pages:
+Use this example to fix a `404 Not Found` error after transferring a project or changing
+a project path with Pages:
 
 ```shell
 date > /var/opt/gitlab/gitlab-rails/shared/pages/.update

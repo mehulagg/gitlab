@@ -16,7 +16,7 @@ RSpec.describe Ci::Minutes::NamespaceMonthlyUsage do
     end
 
     it 'does not raise exception if unique index is not violated' do
-      expect { create(:ci_namespace_monthly_usage, namespace: namespace, date: 1.month.ago.utc.beginning_of_month) }
+      expect { create(:ci_namespace_monthly_usage, namespace: namespace, date: described_class.beginning_of_month(1.month.ago)) }
         .to change { described_class.count }.by(1)
     end
   end
@@ -31,7 +31,7 @@ RSpec.describe Ci::Minutes::NamespaceMonthlyUsage do
 
           expect(subject.amount_used).to eq(0)
           expect(subject.namespace).to eq(namespace)
-          expect(subject.date).to eq(Time.current.beginning_of_month)
+          expect(subject.date).to eq(described_class.beginning_of_month)
         end
       end
     end
@@ -42,7 +42,7 @@ RSpec.describe Ci::Minutes::NamespaceMonthlyUsage do
 
     context 'when namespace usage exists for previous months' do
       before do
-        create(:ci_namespace_monthly_usage, namespace: namespace, date: 2.months.ago.utc.beginning_of_month)
+        create(:ci_namespace_monthly_usage, namespace: namespace, date: described_class.beginning_of_month(2.months.ago))
       end
 
       it_behaves_like 'creates usage record'

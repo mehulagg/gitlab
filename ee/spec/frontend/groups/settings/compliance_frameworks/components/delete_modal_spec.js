@@ -117,7 +117,7 @@ describe('DeleteModal', () => {
 
       await waitForPromises();
 
-      expect(wrapper.emitted('delete')).toHaveLength(1);
+      expect(wrapper.emitted('delete')[0]).toEqual([frameworkFoundResponse.id]);
     });
 
     it('emits "error" event and reports to Sentry when there is a network error', async () => {

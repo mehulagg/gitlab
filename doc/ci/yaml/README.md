@@ -2322,7 +2322,7 @@ started by a user. You might want to use manual jobs for things like deploying t
 
 To make a job manual, add `when: manual` to its configuration.
 
-Manual jobs can be started from the pipeline, job, [environment](../environments/index.md#configuring-manual-deployments),
+Manual jobs can be started from the pipeline, job, [environment](../environments/index.md#configure-manual-deployments),
 and deployment views.
 
 Manual jobs can be either optional or blocking:
@@ -2428,10 +2428,7 @@ Soon GitLab Runner picks up and starts the job.
 ### `environment`
 
 Use `environment` to define the [environment](../environments/index.md) that a job deploys to.
-If `environment` is specified and no environment under that name exists, a new
-one is created automatically.
-
-In its simplest form, the `environment` keyword can be defined like:
+For example:
 
 ```yaml
 deploy to production:
@@ -2440,34 +2437,20 @@ deploy to production:
   environment: production
 ```
 
-In the above example, the `deploy to production` job is marked as doing a
-deployment to the `production` environment.
+You can assign a value to the `environment` keyword by using:
 
-#### `environment:name`
-
-The `environment: name` keyword can use any of the defined CI/CD [variables](#variables),
-including predefined, secure, or variables defined in the `.gitlab-ci.yml` file.
+- Plain text, like `production`.
+- Variables, including CI/CD variables, predefined, secure, or variables
+  defined in the `.gitlab-ci.yml` file.
 
 You can't use variables defined in a `script` section.
 
-The `environment` name can contain:
+If you specify an `environment` and no environment with that name exists,
+an environment is created.
 
-- letters
-- digits
-- spaces
-- `-`
-- `_`
-- `/`
-- `$`
-- `{`
-- `}`
+#### `environment:name`
 
-Common names are `qa`, `staging`, and `production`, but you can use whatever
-name works with your workflow.
-
-Instead of defining the name of the environment right after the `environment`
-keyword, it's also possible to define it as a separate value. For that, use
-the `name` keyword under `environment`:
+Set a name for an [environment](../environments/index.md). For example:
 
 ```yaml
 deploy to production:
@@ -2477,18 +2460,32 @@ deploy to production:
     name: production
 ```
 
-#### `environment:url`
+Common environment names are `qa`, `staging`, and `production`, but you can use any
+name you want.
 
-The `environment:url` keyword can use any of the defined CI/CD [variables](#variables),
-including predefined, secure, or variables defined in the `.gitlab-ci.yml` file.
+You can assign a value to the `name` keyword by using:
+
+- Plain text, like `staging`.
+- Variables, including CI/CD variables, predefined, secure, or variables
+  defined in the `.gitlab-ci.yml` file.
 
 You can't use variables defined in a `script` section.
 
-This optional value exposes buttons that take you to the defined URL
+The environment `name` can contain:
 
-In this example, if the job finishes successfully, it creates buttons
-in the merge requests and in the environments/deployments pages that point
-to `https://prod.example.com`.
+- Letters
+- Digits
+- Spaces
+- `-`
+- `_`
+- `/`
+- `$`
+- `{`
+- `}`
+
+#### `environment:url`
+
+Set a URL for an [environment](../environments/index.md). For example:
 
 ```yaml
 deploy to production:
@@ -2498,6 +2495,17 @@ deploy to production:
     name: production
     url: https://prod.example.com
 ```
+
+After the job completes, you can access the URL by using a button in the merge request,
+environment, or deployment pages.
+
+You can assign a value to the `url` keyword by using:
+
+- Plain text, like `https://prod.example.com`.
+- Variables, including CI/CD variables, predefined, secure, or variables
+  defined in the `.gitlab-ci.yml` file.
+
+You can't use variables defined in a `script` section.
 
 #### `environment:on_stop`
 
@@ -2554,7 +2562,7 @@ it is set to `manual`, so it needs a [manual action](#whenmanual) from
 the GitLab UI to run.
 
 Also in the example, `GIT_STRATEGY` is set to `none`. If the
-`stop_review_app` job is [automatically triggered](../environments/index.md#automatically-stopping-an-environment),
+`stop_review_app` job is [automatically triggered](../environments/index.md#stopping-an-environment),
 the runner won’t try to check out the code after the branch is deleted.
 
 The example also overwrites global variables. If your `stop` `environment` job depends
@@ -2600,7 +2608,7 @@ When the environment for `review_app` is created, the environment's lifetime is 
 Every time the review app is deployed, that lifetime is also reset to `1 day`.
 
 For more information, see
-[the environments auto-stop documentation](../environments/index.md#environments-auto-stop)
+[the environments auto-stop documentation](../environments/index.md#stop-an-environment-after-a-certain-time-period)
 
 #### `environment:kubernetes`
 
@@ -2626,7 +2634,7 @@ environment, using the `production`
 [Kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
 
 For more information, see
-[Available settings for `kubernetes`](../environments/index.md#configuring-kubernetes-deployments).
+[Available settings for `kubernetes`](../environments/index.md#configure-kubernetes-deployments).
 
 NOTE:
 Kubernetes configuration is not supported for Kubernetes clusters

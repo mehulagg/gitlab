@@ -567,6 +567,12 @@ RSpec.describe GroupPolicy do
 
           it { is_expected.to be_allowed(:read_group) }
         end
+
+        context 'as auditor' do
+          let(:current_user) { create(:user, :auditor) }
+
+          it { is_expected.to be_allowed(:read_group) }
+        end
       end
     end
   end
@@ -1261,7 +1267,7 @@ RSpec.describe GroupPolicy do
     let(:current_user) { owner }
     let(:policies) do
       %i[create_projects create_epic update_epic admin_milestone upload_file admin_label
-         admin_list admin_issue admin_pipeline add_cluster create_cluster update_cluster
+         admin_issue_board_list admin_issue admin_pipeline add_cluster create_cluster update_cluster
          admin_cluster admin_group_member create_deploy_token create_subgroup]
     end
 

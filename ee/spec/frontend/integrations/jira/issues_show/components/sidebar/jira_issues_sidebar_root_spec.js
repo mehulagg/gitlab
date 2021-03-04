@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import Assignee from 'ee/integrations/jira/issues_show/components/sidebar/assignee.vue';
+import IssueDueDate from 'ee/integrations/jira/issues_show/components/sidebar/issue_due_date.vue';
 import IssueReference from 'ee/integrations/jira/issues_show/components/sidebar/issue_reference.vue';
 import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -31,21 +32,27 @@ describe('JiraIssuesSidebar', () => {
 
   const findLabelsSelect = () => wrapper.findComponent(LabelsSelect);
   const findAssignee = () => wrapper.findComponent(Assignee);
+  const findIssueDueDate = () => wrapper.findComponent(IssueDueDate);
   const findIssueReference = () => wrapper.findComponent(IssueReference);
 
-  it('renders Labels block', async () => {
+  it('renders Labels block', () => {
     createComponent();
 
-    expect(findLabelsSelect().exists()).toBe(true);
-    expect(findLabelsSelect().props('selectedLabels')).toEqual(mockJiraIssue.labels);
+    expect(findLabelsSelect().props('selectedLabels')).toBe(mockJiraIssue.labels);
   });
 
-  it('renders Assignee block', async () => {
+  it('renders Assignee block', () => {
     createComponent();
     const assignee = findAssignee();
 
-    expect(assignee.exists()).toBe(true);
-    expect(assignee.props('assignee')).toEqual(mockJiraIssue.assignees[0]);
+    expect(assignee.props('assignee')).toBe(mockJiraIssue.assignees[0]);
+  });
+
+  it('renders IssueDueDate', () => {
+    createComponent();
+    const dueDate = findIssueDueDate();
+
+    expect(dueDate.props('dueDate')).toBe(mockJiraIssue.dueDate);
   });
 
   describe('when references.relative is null', () => {
