@@ -11,6 +11,7 @@ module Ci
     include Importable
     include Ci::HasRef
     include IgnorableColumns
+    include FastDestroyAll::Helpers
 
     BuildArchivedError = Class.new(StandardError)
 

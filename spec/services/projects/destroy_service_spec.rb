@@ -33,27 +33,41 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
   shared_examples 'deleting the project with pipeline and build' do
     context 'with pipeline and build related records', :sidekiq_inline do # which has optimistic locking
       let!(:pipeline) { create(:ci_pipeline, project: project) }
-      let!(:build) { create(:ci_build, :artifacts, :with_runner_session, pipeline: pipeline) }
-      let!(:trace_chunks) { create(:ci_build_trace_chunk, build: build) }
+      # let!(:deployment) { create(:deployment, project: project ) }
+      let!(:build) { create(:ci_build, :artifacts, :with_runner_session, pipeline: pipeline, project: project) }
+      let!(:trace_chunks) { create(:ci_build_trace_chunk, :redis_with_data, build: build) }
       let!(:job_variables) { create(:ci_job_variable, job: build) }
       let!(:report_result) { create(:ci_build_report_result, build: build) }
       let!(:pending_state) { create(:ci_build_pending_state, build: build) }
-      
+
       before do
         build.job_artifacts.first.update!(project: project)
       end
-      
-      it 'deletes build related records' do
+
+      it 'deletes build related records and objects' do
         expect { destroy_project(project, user, {}) }.to change { Ci::Build.count }.by(-1)
           .and change { Ci::BuildTraceChunk.count }.by(-1)
           .and change { Ci::JobArtifact.count }.by(-2)
+          .and change { Ci::DeletedObject.count }.by(2)
           .and change { Ci::JobVariable.count }.by(-1)
           .and change { Ci::BuildPendingState.count }.by(-1)
           .and change { Ci::BuildReportResult.count }.by(-1)
           .and change { Ci::BuildRunnerSession.count }.by(-1)
       end
 
-      it 'avoids N+1 queries' do#, skip: 'skipped until fixed in https://gitlab.com/gitlab-org/gitlab/-/issues/24644' do
+      it 'executes fast destroy callbacks' do
+        Gitlab::Redis::SharedState.with do |redis|
+          expect(redis.scan_each(match: "gitlab:ci:trace:*:chunks:*").to_a.size).to eq(1)
+        end
+
+        destroy_project(project, user, {})
+
+        Gitlab::Redis::SharedState.with do |redis|
+          expect(redis.scan_each(match: "gitlab:ci:trace:*:chunks:*").to_a.size).to eq(0)
+        end
+      end
+
+      it 'avoids N+1 queries' do # , skip: 'skipped until fixed in https://gitlab.com/gitlab-org/gitlab/-/issues/24644' do
         recorder = ActiveRecord::QueryRecorder.new { destroy_project(project, user, {}) }
 
         project = create(:project, :repository, namespace: user.namespace)

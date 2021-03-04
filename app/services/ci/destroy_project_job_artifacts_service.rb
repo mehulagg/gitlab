@@ -4,7 +4,6 @@ module Ci
   class DestroyProjectJobArtifactsService
     def initialize(project)
       @project = project
-      @removed_artifacts_count = 0
     end
 
     ##

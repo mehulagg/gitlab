@@ -302,7 +302,7 @@ class Project < ApplicationRecord
   has_many :stages, class_name: 'Ci::Stage', inverse_of: :project
   has_many :ci_refs, class_name: 'Ci::Ref', inverse_of: :project
 
-  has_many :builds, class_name: 'Ci::Build', inverse_of: :project 
+  has_many :builds, class_name: 'Ci::Build', inverse_of: :project
   has_many :processables, class_name: 'Ci::Processable', inverse_of: :project
   has_many :build_trace_section_names, class_name: 'Ci::BuildTraceSectionName'
   has_many :build_trace_chunks, class_name: 'Ci::BuildTraceChunk', through: :builds, source: :trace_chunks

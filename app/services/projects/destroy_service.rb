@@ -121,6 +121,7 @@ module Projects
       trash_project_repositories!
 
       Ci::DestroyProjectJobArtifactsService.new(project).execute
+      project.build_trace_chunks.fast_destroy_all
       # Rails attempts to load all related records into memory before
       # destroying: https://github.com/rails/rails/issues/22510
       # This ensures we delete records in batches.
