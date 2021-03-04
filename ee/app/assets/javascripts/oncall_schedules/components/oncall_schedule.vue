@@ -63,6 +63,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: ['projectPath', 'timezones'],
+  provide() {
+    return {
+      selectedTimezone: this.selectedTimezone,
+    };
+  },
   props: {
     schedule: {
       type: Object,
@@ -256,7 +261,6 @@ export default {
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
             :loading="loading"
-            :selected-timezone="selectedTimezone"
           />
         </div>
       </gl-card>

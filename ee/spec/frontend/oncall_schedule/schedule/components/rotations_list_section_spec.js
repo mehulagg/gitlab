@@ -7,8 +7,8 @@ import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedul
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import { useFakeDate } from 'helpers/fake_date';
 import { scheduleIid } from '../../mocks/apollo_mock';
-import mockTimezones from '../../mocks/mockTimezones.json';
 import mockRotations from '../../mocks/mock_rotation.json';
+import mockTimezones from '../../mocks/mock_timezones.json';
 
 describe('RotationsListSectionComponent', () => {
   let wrapper;
@@ -26,10 +26,10 @@ describe('RotationsListSectionComponent', () => {
         timeframe,
         scheduleIid,
         rotations: [mockRotations[0]],
-        selectedTimezone: mockTimezones[0],
       },
       provide: {
         projectPath,
+        selectedTimezone: mockTimezones[0],
       },
       stubs: {
         GlCard,

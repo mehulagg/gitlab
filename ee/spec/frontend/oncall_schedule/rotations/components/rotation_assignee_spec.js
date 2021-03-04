@@ -7,8 +7,8 @@ import RotationAssignee, {
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
-import mockTimezones from '../../mocks/mockTimezones.json';
 import mockRotations from '../../mocks/mock_rotation.json';
+import mockTimezones from '../../mocks/mock_timezones.json';
 
 jest.mock('lodash/uniqueId', () => (prefix) => `${prefix}fakeUniqueId`);
 
@@ -31,12 +31,14 @@ describe('RotationAssignee', () => {
   function createComponent({ props = {} } = {}) {
     wrapper = extendedWrapper(
       shallowMount(RotationAssignee, {
+        provide: {
+          selectedTimezone: mockTimezones[0],
+        },
         propsData: {
           assignee: { ...assignee.participant },
           rotationAssigneeStartsAt: assignee.startsAt,
           rotationAssigneeEndsAt: assignee.endsAt,
           rotationAssigneeStyle: { left: '0px', width: `${shiftWidth}px` },
-          selectedTimezone: mockTimezones[0],
           shiftWidth,
           ...props,
         },
@@ -76,7 +78,7 @@ describe('RotationAssignee', () => {
     });
 
     it('should render an assignee schedule and rotation information in a popover', () => {
-      const timezone = wrapper.vm.selectedTimezone.identifier;
+      const timezone = wrapper.vm.selectedTimezone.abbr;
       expect(findPopOver().attributes('target')).toBe('rotation-assignee-fakeUniqueId');
       expect(findStartsAt().text()).toContain(`${formattedDate(assignee.startsAt)} ${timezone}`);
       expect(findEndsAt().text()).toContain(`${formattedDate(assignee.endsAt)} ${timezone}`);

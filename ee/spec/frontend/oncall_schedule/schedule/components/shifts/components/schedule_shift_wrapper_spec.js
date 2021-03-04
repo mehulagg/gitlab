@@ -4,7 +4,6 @@ import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/compon
 import WeeksScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/weeks_schedule_shift.vue';
 import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import { nDaysAfter } from '~/lib/utils/datetime_utility';
-import mockTimezones from '../../../../mocks/mockTimezones.json';
 import mockRotations from '../../../../mocks/mock_rotation.json';
 
 const timeframeItem = new Date(2021, 0, 13);
@@ -20,7 +19,6 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
         timeframeItem,
         timeframe,
         rotation: mockRotations[0],
-        selectedTimezone: mockTimezones[0],
         ...props,
       },
       data() {

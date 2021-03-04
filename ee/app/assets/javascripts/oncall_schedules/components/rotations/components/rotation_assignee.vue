@@ -20,6 +20,7 @@ export default {
     GlAvatar,
     GlPopover,
   },
+  inject: ['selectedTimezone'],
   props: {
     assignee: {
       type: Object,
@@ -41,10 +42,6 @@ export default {
       type: Number,
       required: true,
     },
-    selectedTimezone: {
-      type: Object,
-      required: true,
-    },
   },
   computed: {
     assigneeName() {
@@ -60,7 +57,7 @@ export default {
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
         endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)} ${
-          this.selectedTimezone.identifier
+          this.selectedTimezone.abbr
         }`,
       });
     },
@@ -73,7 +70,7 @@ export default {
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
         startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)} ${
-          this.selectedTimezone.identifier
+          this.selectedTimezone.abbr
         }`,
       });
     },

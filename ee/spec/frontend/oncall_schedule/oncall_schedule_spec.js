@@ -8,7 +8,7 @@ import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import * as dateTimeUtility from '~/lib/utils/datetime_utility';
-import mockTimezones from './mocks/mockTimezones.json';
+import mockTimezones from './mocks/mock_timezones.json';
 
 describe('On-call schedule', () => {
   let wrapper;
@@ -120,7 +120,6 @@ describe('On-call schedule', () => {
       rotations: expect.any(Array),
       scheduleIid: mockSchedule.iid,
       loading: wrapper.vm.$apollo.queries.rotations.loading,
-      selectedTimezone: lastTz,
     });
   });
 

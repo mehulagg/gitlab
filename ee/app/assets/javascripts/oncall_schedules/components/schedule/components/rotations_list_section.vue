@@ -57,10 +57,6 @@ export default {
       type: String,
       required: true,
     },
-    selectedTimezone: {
-      type: Object,
-      required: true,
-    },
     timeframe: {
       type: Array,
       required: true,
@@ -167,7 +163,6 @@ export default {
             :timeframe-item="timeframeItem"
             :timeframe="timeframe"
             :rotation="rotation"
-            :selected-timezone="selectedTimezone"
           />
         </span>
       </div>
