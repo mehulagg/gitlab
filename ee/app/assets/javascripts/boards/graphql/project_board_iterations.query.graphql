@@ -1,6 +1,6 @@
-query BoardMilestones($fullPath: ID!) {
+query ProjectBoardIterations($fullPath: ID!, $title: String) {
   project(fullPath: $fullPath) {
-    iterations(includeAncestors: true) {
+    iterations(includeAncestors: true, title: $title) {
       nodes {
         id
         title

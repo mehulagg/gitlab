@@ -1,6 +1,6 @@
-query BoardIteartions($fullPath: ID!) {
+query GroupBoardIterations($fullPath: ID!, $title: String) {
   group(fullPath: $fullPath) {
-    iterations {
+    iterations(includeAncestors: true, title: $title) {
       nodes {
         id
         title

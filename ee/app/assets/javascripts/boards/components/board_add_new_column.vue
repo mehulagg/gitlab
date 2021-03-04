@@ -58,6 +58,9 @@ export default {
       if (this.milestoneTypeSelected) {
         return this.milestones;
       }
+      if (this.iterationTypeSelected) {
+        return this.iterations;
+      }
       return [];
     },
 
