@@ -2,6 +2,7 @@
 import { GlAlert, GlBadge, GlLoadingIcon, GlSprintf, GlTab, GlTabs } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import { MAX_LIST_COUNT } from '../constants';
 import getClusterAgentQuery from '../graphql/queries/get_cluster_agent.query.graphql';
 import TokenTable from './token_table.vue';
 
@@ -19,6 +20,7 @@ export default {
         return {
           agentName: this.agentName,
           projectPath: this.projectPath,
+          ...this.cursor,
         };
       },
       update: (data) => data?.project?.clusterAgent,
@@ -46,6 +48,14 @@ export default {
       required: true,
       type: String,
     },
+  },
+  data() {
+    return {
+      cursor: {
+        first: MAX_LIST_COUNT,
+        last: null,
+      },
+    };
   },
   computed: {
     createdAt() {
