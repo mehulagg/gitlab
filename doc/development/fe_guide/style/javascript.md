@@ -294,3 +294,20 @@ Strive to write many small pure functions and minimize where mutations occur
 
   var c = pureFunction(values.foo);
   ```
+
+## Exporting constants as primitive strings
+
+Prefer exporting constant primitive strings with a common namespace over exporting objects. This allows for better compile-time reference checkings and helps to avoid accidential `undefined`s at runtime. In addition, it helps in reducing bundle sizes.
+
+  ```javascript
+  // bad
+  export const VARIANT = {
+    WARNING: 'warning',
+    ERROR: 'error',
+  };
+
+  // good
+  export const VARIANT_WARNING = 'warning';
+  export const VARIANT_ERROR = 'error';
+  ```
+  
