@@ -25,7 +25,7 @@ module Types
         extension ::Gitlab::Graphql::CallsGitaly::FieldExtension
       end
 
-      extension ::Gitlab::Graphql::Present::FieldExtension if owner.try(:presenter_class)
+      extension ::Gitlab::Graphql::Present::FieldExtension
     end
 
     def may_call_gitaly?
