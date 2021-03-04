@@ -131,16 +131,15 @@ Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/se
 
 Depending on the complexity of the target application, there are a few options as to how to deploy and configure
 the DAST template. A set of example applications with their configurations have been made available in our 
-[demos](https://gitlab.com/gitlab-org/security-products/demos/dast/) project.
+[DAST demonstrations](https://gitlab.com/gitlab-org/security-products/demos/dast/) project.
 
 ### Review Apps
 
-Review Apps are the most involved method of deploying your DAST target application. 
-The [Configuration](#configuration) section references an example using Kubernetes. 
-
-An example of a Review App deployment using GKE is in our [Review Apps - GKE](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke)
-along with detailed instructions in the [README.md](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke/-/blob/master/README.md) 
-on how to fully configure Review Apps for DAST.
+Review Apps are the most involved method of deploying your DAST target application. To assist in the process,
+we created a Review App deployment using Google Kubernetes Engine (GKE). This example can be found in our 
+[Review Apps - GKE](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke) project along with detailed 
+instructions in the [README.md](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke/-/blob/master/README.md) 
+on how to configure Review Apps for DAST.
 
 ### Docker Services
 
@@ -148,7 +147,7 @@ If your application utilizes Docker containers you have another option for deplo
 After your Docker build job completes and your image is added to your container registry, you can utilize the image as a 
 [service](../../../ci/docker/using_docker_images.md#what-is-a-service). 
 
-By using service definitions in your `gitlab-ci.yml`, it is possible to scan services with the DAST analyzer.
+By using service definitions in your `gitlab-ci.yml`, you can scan services with the DAST analyzer.
 
 ```yaml
 stages:
@@ -181,9 +180,8 @@ variables:
   DAST_ZAP_USE_AJAX_SPIDER: "true" # use the ajax spider
 ```
 
-Most applications utilize multiple services such as databases or caching services that the
-target application depends on. By default, services defined in the services fields can not communicate
-with one another. To enable this, the [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) `FF_NETWORK_PER_BUILD` must be enabled.
+Most applications depend on multiple services such as databases or caching services. By default, services defined in the services fields cannot communicate
+with each another. To allow communication between services, enable the `FF_NETWORK_PER_BUILD` [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags).
 
 ```yaml
 variables:
