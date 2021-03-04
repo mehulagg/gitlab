@@ -23,10 +23,13 @@ you never miss a page.
 
 ## Email notifications
 
-Email notifications are available in projects for triggered alerts. Project members with the **Owner** or **Maintainer** roles have the option of receiving a single email notification for new alerts.
+Email notifications are available in projects for triggered alerts. Project
+members with the **Owner** or **Maintainer** roles have the option to receive
+a single email notification for new alerts.
 
 1. Navigate to **Settings > Operations**.
 1. Expand the **Incidents** section.
-1. In the **Alert Integration** tab, select the **Send a single email notification to Owners and Maintainers for new alerts**
+1. In the **Alert Integration** tab, select the
+   **Send a single email notification to Owners and Maintainers for new alerts**
    check box.
 1. Select **Save changes**.
