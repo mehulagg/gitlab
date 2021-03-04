@@ -1,5 +1,13 @@
 <script>
-import { GlAlert, GlBadge, GlLoadingIcon, GlSprintf, GlTab, GlTabs } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlBadge,
+  GlKeysetPagination,
+  GlLoadingIcon,
+  GlSprintf,
+  GlTab,
+  GlTabs,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { MAX_LIST_COUNT } from '../constants';
@@ -32,6 +40,7 @@ export default {
   components: {
     GlAlert,
     GlBadge,
+    GlKeysetPagination,
     GlLoadingIcon,
     GlSprintf,
     GlTab,
@@ -67,12 +76,22 @@ export default {
     isLoading() {
       return this.$apollo.queries.clusterAgent.loading;
     },
+    showPagination() {
+      return this.tokenPageInfo.hasPreviousPage || this.tokenPageInfo.hasNextPage;
+    },
     tokenCount() {
       return this.clusterAgent?.tokens?.count;
+    },
+    tokenPageInfo() {
+      return this.clusterAgent?.tokens?.pageInfo || {};
     },
     tokens() {
       return this.clusterAgent?.tokens?.nodes || [];
     },
+  },
+  methods: {
+    nextPage() {},
+    prevPage() {},
   },
 };
 </script>
@@ -108,7 +127,13 @@ export default {
             </span>
           </template>
 
-          <TokenTable :tokens="tokens" />
+          <div>
+            <TokenTable :tokens="tokens" />
+
+            <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
+              <gl-keyset-pagination v-bind="tokenPageInfo" @prev="prevPage" @next="nextPage" />
+            </div>
+          </div>
         </gl-tab>
       </gl-tabs>
     </div>
