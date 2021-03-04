@@ -488,13 +488,11 @@ the list by filtering by the following:
 > The **Remove from board** button was [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229507) in GitLab 13.10.
 
 When an issue should no longer belong to a list, you can remove it.
-
 The steps depend on the scope of the list:
 
-1. Select the issue card. The right sidebar appears.
+1. To open the right sidebar, select the issue card.
 1. Remove what's keeping the issue in the list.
-
-   For example, if it's a label list, remove the label, or if it's an [assignee list](#assignee-lists), unassign the user.
+   If it's a label list, remove the label. If it's an [assignee list](#assignee-lists), unassign the user.
 
 ### Filter issues
 
