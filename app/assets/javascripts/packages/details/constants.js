@@ -35,6 +35,9 @@ export const TrackingActions = {
 
   COPY_COMPOSER_REGISTRY_INCLUDE_COMMAND: 'copy_composer_registry_include_command',
   COPY_COMPOSER_PACKAGE_INCLUDE_COMMAND: 'copy_composer_package_include_command',
+
+  COPY_GRADLE_INSTALL_COMMAND: 'copy_gradle_install_command',
+  COPY_GRADLE_ADD_TO_SOURCE_COMMAND: 'copy_gradle_add_to_source_command',
 };
 
 export const NpmManager = {
@@ -45,5 +48,8 @@ export const NpmManager = {
 export const FETCH_PACKAGE_VERSIONS_ERROR = s__(
   'PackageRegistry|Unable to fetch package version information.',
 );
+
+export const SHOW_GRADLE_COMMANDS = s__('PackageRegistry|Show Gradle commands');
+export const SHOW_MAVEN_COMMANDS = s__('PackageRegistry|Show Maven commands');
 
 export const HISTORY_PIPELINES_LIMIT = 5;
