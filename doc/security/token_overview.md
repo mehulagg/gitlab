@@ -28,9 +28,11 @@ You can limit the scope and lifetime of your OAuth2 tokens.
 
 ## Impersonation tokens
 
-[Impersonation tokens](../api/README.md#impersonation-tokens) are a type of personal access token that can be created only by an administrator for a specific user. They can be useful if you want to build applications or scripts that authenticate with the GitLab API, repositories and the GitLab registry as a specific user.
+An [Impersonation token](../api/README.md#impersonation-tokens) is a special type of personal access
+token. It can be created only by an administrator for a specific user. Impersonation tokens can
+help you build applications or scripts that authenticate with the GitLab API, repositories, and the GitLab registry as a specific user.
 
-Impersonation tokens can be limited in scope and expiration time. They inherit their permissions from the user they were created for.
+You can limit the scope and set an expiration date for an impersonation token.
 
 ## Project access tokens
 
@@ -61,19 +63,17 @@ Project maintainers and owners can add or enable a deploy key for a project repo
 
 ## Runner registration tokens
 
-Runner registration tokens are used to [register](https://docs.gitlab.com/runner/register/) a [runner](https://docs.gitlab.com/runner/) with GitLab. Group or project owners or instance admins can obtain them through GitLab interfaces. The registration token is limited to runner registration and has no further scope.
+Runner registration tokens are used to [register](https://docs.gitlab.com/runner/register/) a [runner](https://docs.gitlab.com/runner/) with GitLab. Group or project owners or instance admins can obtain them through the GitLab user interface. The registration token is limited to runner registration and has no further scope.
 
-Because it can be used to add new runners that may execute jobs in a project or group and thus have access to the project’s code, careful consideration should be given as to who has project or group owner-level permissions.
-
-We are [actively working on security improvements](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/25351) to the runner API.
+You can use the runner registration token to add runners that execute jobs in a project or group. The runner has access to the project’s code, so be careful when assigning project and group-level permissions.
 
 ## Runner authentication tokens (also called runner tokens)
 
-After registration, the runner will receive an authentication token used to authenticate with GitLab when picking up jobs from the job queue. The authentication token is stored locally in the Runner's [`config.toml`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html) file.
+After registration, the runner receives an authentication token, which it uses to authenticate with GitLab when picking up jobs from the job queue. The authentication token is stored locally in the runner's [`config.toml`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html) file.
 
-After authentication with GitLab, the Runner will receive a [job token](../user/project/new_ci_build_permissions_model.md#job-token) to execute the job.
+After authentication with GitLab, the runner receives a [job token](../user/project/new_ci_build_permissions_model.md#job-token), which it uses to execute the job.
 
-In case of Docker Machine/Kubernetes/VirtualBox/Parallels/SSH executors, the execution environment has no access to the runner authentication token as it stays on the runner machine. They have only access to the job token, which is needed to execute the job.
+In case of Docker Machine/Kubernetes/VirtualBox/Parallels/SSH executors, the execution environment has no access to the runner authentication token, because it stays on the runner machine. They have access to the job token only, which is needed to execute the job.
 
 Malicious access to a runner's file system may expose the `config.toml` file and thus the authentication token, allowing an attacker to [clone the runner](https://docs.gitlab.com/runner/security/#cloning-a-runner).
 
