@@ -21597,9 +21597,6 @@ msgstr ""
 msgid "PackageRegistry|Maven Command"
 msgstr ""
 
-msgid "PackageRegistry|Maven XML"
-msgstr ""
-
 msgid "PackageRegistry|NuGet"
 msgstr ""
 
