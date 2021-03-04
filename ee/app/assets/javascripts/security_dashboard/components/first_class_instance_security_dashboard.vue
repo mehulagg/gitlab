@@ -1,7 +1,8 @@
 <script>
+import { GlLoadingIcon } from '@gitlab/ui';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
-import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
+import projectsSearch from 'ee/security_dashboard/graphql/queries/instance_projects_search.query.graphql';
 import createFlash from '~/flash';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import { createProjectLoadingError } from '../helpers';
@@ -18,6 +19,7 @@ export default {
     Filters,
     NoInstanceProjects,
     VulnerabilitiesCountList,
+    GlLoadingIcon,
   },
   props: {
     vulnerabilitiesExportEndpoint: {
@@ -27,7 +29,10 @@ export default {
   },
   apollo: {
     projects: {
-      query: projectsQuery,
+      query: projectsSearch,
+      variables() {
+        return { pageSize: 1 };
+      },
       update(data) {
         return data.instanceSecurityDashboard.projects.nodes;
       },
@@ -46,14 +51,8 @@ export default {
     isLoadingProjects() {
       return this.$apollo.queries.projects.loading;
     },
-    hasProjectsData() {
-      return !this.isLoadingProjects && this.projects.length > 0;
-    },
     shouldShowDashboard() {
-      return this.hasProjectsData;
-    },
-    shouldShowEmptyState() {
-      return !this.isLoadingProjects && this.projects.length === 0;
+      return this.projects.length;
     },
   },
   methods: {
@@ -67,6 +66,9 @@ export default {
 
 <template>
   <security-dashboard-layout>
+    <gl-loading-icon v-if="isLoadingProjects" size="lg" class="gl-mt-6" />
+    <no-instance-projects v-else-if="!shouldShowDashboard" />
+
     <template #header>
       <div v-if="shouldShowDashboard">
         <header class="gl-my-6 gl-display-flex gl-align-items-center">
@@ -84,11 +86,6 @@ export default {
     <template #sticky>
       <filters v-if="shouldShowDashboard" :projects="projects" @filterChange="handleFilterChange" />
     </template>
-    <instance-security-vulnerabilities
-      v-if="shouldShowDashboard"
-      :projects="projects"
-      :filters="filters"
-    />
-    <no-instance-projects v-else-if="shouldShowEmptyState" />
+    <instance-security-vulnerabilities v-if="shouldShowDashboard" :filters="filters" />
   </security-dashboard-layout>
 </template>

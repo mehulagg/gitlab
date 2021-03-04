@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
-import projectsQuery from '../graphql/queries/get_instance_security_dashboard_projects.query.graphql';
+import projectsSearch from '../graphql/queries/instance_projects_search.query.graphql';
 import vulnerabilityGradesQuery from '../graphql/queries/instance_vulnerability_grades.query.graphql';
 import vulnerabilityHistoryQuery from '../graphql/queries/instance_vulnerability_history.query.graphql';
 import { createProjectLoadingError } from '../helpers';
@@ -20,7 +20,10 @@ export default {
   },
   apollo: {
     projects: {
-      query: projectsQuery,
+      query: projectsSearch,
+      variables() {
+        return { pageSize: 1 };
+      },
       update(data) {
         return data?.instanceSecurityDashboard?.projects?.nodes ?? [];
       },
@@ -40,27 +43,21 @@ export default {
     isLoadingProjects() {
       return this.$apollo.queries.projects.loading;
     },
-    shouldShowCharts() {
-      return Boolean(!this.isLoadingProjects && this.projects.length);
-    },
-    shouldShowEmptyState() {
-      return !this.isLoadingProjects && !this.projects.length;
-    },
   },
 };
 </script>
 
 <template>
   <security-charts-layout>
-    <template v-if="shouldShowEmptyState" #empty-state>
+    <template v-if="isLoadingProjects" #loading>
+      <gl-loading-icon size="lg" class="gl-mt-6" />
+    </template>
+    <template v-else-if="!projects.length" #empty-state>
       <no-instance-projects />
     </template>
-    <template v-else-if="shouldShowCharts" #default>
+    <template v-else>
       <vulnerability-chart :query="vulnerabilityHistoryQuery" />
       <vulnerability-severities :query="vulnerabilityGradesQuery" />
-    </template>
-    <template v-else #loading>
-      <gl-loading-icon size="lg" class="gl-mt-6" />
     </template>
   </security-charts-layout>
 </template>

@@ -1,0 +1,10 @@
+query projectsSearch($pageSize: Int = 20) {
+  instanceSecurityDashboard {
+    projects(first: $pageSize) {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+}

@@ -1,15 +1,9 @@
 <script>
-import {
-  GlDropdownDivider,
-  GlSkeletonLoader,
-  GlIntersectionObserver,
-  GlLoadingIcon,
-} from '@gitlab/ui';
-import produce from 'immer';
+import { GlDropdownDivider, GlSkeletonLoader, GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
 import { PROJECT_ID_PREFIX } from '../../constants';
 import projectsFromIds from '../../graphql/queries/projects_from_ids.query.graphql';
-import projectsSearch from '../../graphql/queries/vulnerable_projects_search.query.graphql';
+import projectsSearch from '../../graphql/queries/group_projects_search.query.graphql';
 import { mapProjects } from '../../helpers';
 import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
@@ -21,7 +15,6 @@ export default {
     FilterItem,
     GlDropdownDivider,
     GlSkeletonLoader,
-    GlIntersectionObserver,
     GlLoadingIcon,
   },
   extends: StandardFilter,
@@ -73,7 +66,6 @@ export default {
         return {
           fullPath: this.fullPath,
           search: this.searchTerm,
-          pageSize: 6,
         };
       },
       skip() {
@@ -91,25 +83,6 @@ export default {
     setDropdownOpened() {
       console.log('dropdown opened', this.endCursor);
       this.hasDropdownBeenOpened = true;
-    },
-    fetchNextPage() {
-      console.log('fetch next page', this.endCursor);
-
-      this.$apollo.queries.projects.fetchMore({
-        variables: { endCursor: this.endCursor },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          console.log('fetchMoreResult', fetchMoreResult);
-          this.projects.concat(mapProjects(fetchMoreResult.group?.projects.nodes));
-          this.endCursor = fetchMoreResult.group?.projects.pageInfo.endCursor;
-          // return produce(fetchMoreResult, (draftData) => {
-          //   // eslint-disable-next-line no-param-reassign
-          //   draftData.group.projects.nodes = [
-          //     ...previousResult.group.projects.nodes,
-          //     ...draftData.group.projects.nodes,
-          //   ];
-          // });
-        },
-      });
     },
   },
 };
@@ -158,6 +131,5 @@ export default {
     </div>
 
     <gl-loading-icon v-if="isLoadingProjects" size="md" />
-    <gl-intersection-observer v-if="endCursor" class="gl-text-center" @appear="fetchNextPage" />
   </filter-body>
 </template>

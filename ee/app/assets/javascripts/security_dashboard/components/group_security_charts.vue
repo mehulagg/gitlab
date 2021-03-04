@@ -1,9 +1,9 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
+import groupProjectsSearch from '../graphql/queries/group_projects_search.query.graphql';
 import vulnerabilityGradesQuery from '../graphql/queries/group_vulnerability_grades.query.graphql';
 import vulnerabilityHistoryQuery from '../graphql/queries/group_vulnerability_history.query.graphql';
-import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
 import { createProjectLoadingError } from '../helpers';
 import NoGroupProjects from './empty_states/no_group_projects.vue';
 import VulnerabilityChart from './first_class_vulnerability_chart.vue';
@@ -26,9 +26,12 @@ export default {
   },
   apollo: {
     projects: {
-      query: vulnerableProjectsQuery,
+      query: groupProjectsSearch,
       variables() {
-        return { fullPath: this.groupFullPath };
+        return {
+          fullPath: this.groupFullPath,
+          pageSize: 1,
+        };
       },
       update(data) {
         return data?.group?.projects?.nodes ?? [];
@@ -49,30 +52,24 @@ export default {
     isLoadingProjects() {
       return this.$apollo.queries.projects.loading;
     },
-    shouldShowCharts() {
-      return Boolean(!this.isLoadingProjects && this.projects.length);
-    },
-    shouldShowEmptyState() {
-      return !this.isLoadingProjects && !this.projects.length;
-    },
   },
 };
 </script>
 
 <template>
   <security-charts-layout>
-    <template v-if="shouldShowEmptyState" #empty-state>
+    <template v-if="isLoadingProjects" #loading>
+      <gl-loading-icon size="lg" class="gl-mt-6" />
+    </template>
+    <template v-else-if="!projects.length" #empty-state>
       <no-group-projects />
     </template>
-    <template v-else-if="shouldShowCharts" #default>
+    <template v-else #default>
       <vulnerability-chart :query="vulnerabilityHistoryQuery" :group-full-path="groupFullPath" />
       <vulnerability-severities
         :query="vulnerabilityGradesQuery"
         :group-full-path="groupFullPath"
       />
-    </template>
-    <template v-else #loading>
-      <gl-loading-icon size="lg" class="gl-mt-6" />
     </template>
   </security-charts-layout>
 </template>

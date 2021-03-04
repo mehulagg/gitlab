@@ -1,0 +1,10 @@
+query projectsSearch($fullPath: ID!, $search: String, $pageSize: Int = 20) {
+  group(fullPath: $fullPath) {
+    projects(search: $search, first: $pageSize, includeSubgroups: true) {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+}
