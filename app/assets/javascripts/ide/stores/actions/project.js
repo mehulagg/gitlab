@@ -123,17 +123,18 @@ export const loadBranch = ({ dispatch, getters, state }, { projectId, branchId }
     branchId,
   })
     .then(() => {
-      dispatch('getMergeRequestsForBranch', {
-        projectId,
-        branchId,
-      });
-
       const branch = getters.findBranch(projectId, branchId);
 
       return dispatch('getFiles', {
         projectId,
         branchId,
         ref: branch.commit.id,
+      });
+    })
+    .then(() => {
+      dispatch('getMergeRequestsForBranch', {
+        projectId,
+        branchId,
       });
     })
     .catch((err) => {
