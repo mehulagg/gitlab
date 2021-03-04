@@ -1031,9 +1031,6 @@ msgstr ""
 msgid "(deleted)"
 msgstr ""
 
-msgid "(line: %{startLine})"
-msgstr ""
-
 msgid "(max size 15 MB)"
 msgstr ""
 
@@ -5203,6 +5200,9 @@ msgid "Business metrics (Custom)"
 msgstr ""
 
 msgid "Busy"
+msgstr ""
+
+msgid "Buy CI Minutes"
 msgstr ""
 
 msgid "Buy License"
@@ -9769,6 +9769,9 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
+msgid "Delete %{issuableType}"
+msgstr ""
+
 msgid "Delete %{name}"
 msgstr ""
 
@@ -9824,6 +9827,9 @@ msgid "Delete subscription"
 msgstr ""
 
 msgid "Delete this attachment"
+msgstr ""
+
+msgid "Delete this epic and all descendants?"
 msgstr ""
 
 msgid "Delete user list"
@@ -12048,6 +12054,9 @@ msgid "Error updating the snippet"
 msgstr ""
 
 msgid "Error uploading file"
+msgstr ""
+
+msgid "Error uploading file. Please try again."
 msgstr ""
 
 msgid "Error uploading file: %{stripped}"
@@ -16541,9 +16550,6 @@ msgid "Invite member"
 msgstr ""
 
 msgid "Invite members"
-msgstr ""
-
-msgid "Invite team members"
 msgstr ""
 
 msgid "Invite your team"
@@ -22031,9 +22037,6 @@ msgstr ""
 msgid "Pipeline Schedules"
 msgstr ""
 
-msgid "Pipeline cannot be run."
-msgstr ""
-
 msgid "Pipeline minutes quota"
 msgstr ""
 
@@ -22292,6 +22295,9 @@ msgstr ""
 msgid "Pipeline|Branch name"
 msgstr ""
 
+msgid "Pipeline|Branches or tags could not be loaded."
+msgstr ""
+
 msgid "Pipeline|Canceled"
 msgstr ""
 
@@ -22350,6 +22356,9 @@ msgid "Pipeline|Pipeline"
 msgstr ""
 
 msgid "Pipeline|Pipeline %{idStart}#%{idEnd} %{statusStart}%{statusEnd} for %{commitStart}%{commitEnd}"
+msgstr ""
+
+msgid "Pipeline|Pipeline cannot be run."
 msgstr ""
 
 msgid "Pipeline|Pipelines"
@@ -25021,6 +25030,9 @@ msgid "Remove description history"
 msgstr ""
 
 msgid "Remove due date"
+msgstr ""
+
+msgid "Remove file"
 msgstr ""
 
 msgid "Remove fork relationship"
@@ -28384,6 +28396,9 @@ msgid "Start a new discussion…"
 msgstr ""
 
 msgid "Start a new merge request"
+msgstr ""
+
+msgid "Start a new merge request with these changes"
 msgstr ""
 
 msgid "Start a review"

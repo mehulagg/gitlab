@@ -1,6 +1,7 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 
 import DeleteModal from 'ee/groups/settings/compliance_frameworks/components/delete_modal.vue';
@@ -255,6 +256,14 @@ describe('List', () => {
             expect(findAlert().props('dismissible')).toBe(true);
             expect(findAlert().props('variant')).toBe('info');
             expect(findAlert().text()).toBe('Compliance framework deleted successfully');
+          });
+
+          it('can dismiss the alert message', async () => {
+            findAlert().vm.$emit('dismiss');
+
+            await nextTick();
+
+            expect(findAlert().exists()).toBe(false);
           });
         });
       });

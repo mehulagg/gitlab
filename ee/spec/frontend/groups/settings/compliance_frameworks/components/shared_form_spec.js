@@ -10,7 +10,11 @@ import { GlFormGroup, GlFormInput } from '../stubs';
 
 describe('SharedForm', () => {
   let wrapper;
-  const defaultPropsData = { groupEditPath: 'group-1', pipelineConfigurationFullPathEnabled: true };
+  const defaultPropsData = {
+    groupEditPath: 'group-1',
+    pipelineConfigurationFullPathEnabled: true,
+    submitButtonText: 'Save changes',
+  };
 
   const findForm = () => wrapper.findComponent(GlForm);
   const findNameGroup = () => wrapper.find('[data-testid="name-input-group"]');
@@ -63,6 +67,12 @@ describe('SharedForm', () => {
       wrapper = createComponent();
 
       expect(findNameGroup().text()).toContain('Use :: to create a scoped set (eg. SOX::AWS)');
+    });
+
+    it('sets the submit button text from the property', () => {
+      wrapper = createComponent();
+
+      expect(findSubmitBtn().text()).toBe(defaultPropsData.submitButtonText);
     });
 
     it.each([true, false])(

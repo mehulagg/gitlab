@@ -1,6 +1,7 @@
 <script>
 import * as Sentry from '@sentry/browser';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 import { SAVE_ERROR } from '../constants';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
 import { initialiseFormData } from '../utils';
@@ -41,6 +42,7 @@ export default {
   },
   methods: {
     setError(error, userFriendlyText) {
+      this.saving = false;
       this.errorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
@@ -70,15 +72,15 @@ export default {
         if (error) {
           this.setError(new Error(error), error);
         } else {
-          this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
         this.setError(e, SAVE_ERROR);
       }
-
-      this.saving = false;
     },
+  },
+  i18n: {
+    submitButtonText: s__('ComplianceFrameworks|Add framework'),
   },
 };
 </script>
@@ -91,6 +93,7 @@ export default {
       :description.sync="formData.description"
       :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
+      :submit-button-text="$options.i18n.submitButtonText"
       @submit="onSubmit"
     />
   </form-status>

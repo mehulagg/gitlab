@@ -146,7 +146,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     end
 
     it 'returns false when running inside a Rake task' do
-      expect(described_class).to receive(:program_name).and_return('rake')
+      allow(Gitlab::Runtime).to receive(:rake?).and_return(true)
 
       expect(described_class.enable?).to eq(false)
     end

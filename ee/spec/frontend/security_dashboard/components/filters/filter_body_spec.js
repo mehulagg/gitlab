@@ -10,15 +10,16 @@ describe('Filter Body component', () => {
     selectedOptions: [],
   };
 
-  const createComponent = (props, slotContent = '') => {
+  const createComponent = (props, options) => {
     wrapper = mount(FilterBody, {
       propsData: { ...defaultProps, ...props },
-      slots: { default: slotContent },
+      ...options,
     });
   };
 
+  const dropdown = () => wrapper.findComponent(GlDropdown);
   const dropdownButton = () => wrapper.find('.dropdown-toggle');
-  const searchBox = () => wrapper.find(GlSearchBoxByType);
+  const searchBox = () => wrapper.findComponent(GlSearchBoxByType);
 
   afterEach(() => {
     wrapper.destroy();
@@ -28,7 +29,21 @@ describe('Filter Body component', () => {
     createComponent();
 
     expect(wrapper.find('[data-testid="name"]').text()).toBe(defaultProps.name);
-    expect(wrapper.find(GlDropdown).props('headerText')).toBe(defaultProps.name);
+    expect(dropdown().props('headerText')).toBe(defaultProps.name);
+  });
+
+  it('emits dropdown-show event when dropdown is shown', () => {
+    createComponent();
+    dropdown().vm.$emit('show');
+
+    expect(wrapper.emitted('dropdown-show')).toHaveLength(1);
+  });
+
+  it('emits dropdown-hide event when dropdown is hidden', () => {
+    createComponent();
+    dropdown().vm.$emit('hide');
+
+    expect(wrapper.emitted('dropdown-hide')).toHaveLength(1);
   });
 
   describe('dropdown button', () => {
@@ -56,6 +71,15 @@ describe('Filter Body component', () => {
       expect(searchBox().exists()).toBe(show);
     });
 
+    it('is focused when the dropdown is opened', async () => {
+      createComponent({ showSearchBox: true }, { attachTo: document.body });
+      const spy = jest.spyOn(searchBox().vm, 'focusInput');
+      dropdown().vm.$emit('show');
+      await wrapper.vm.$nextTick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
     it('emits input event on component when search box input is changed', () => {
       const text = 'abc';
       createComponent({ showSearchBox: true });
@@ -68,7 +92,7 @@ describe('Filter Body component', () => {
   describe('dropdown body', () => {
     it('shows slot content', () => {
       const slotContent = 'some slot content';
-      createComponent({}, slotContent);
+      createComponent({}, { slots: { default: slotContent } });
 
       expect(wrapper.text()).toContain(slotContent);
     });
