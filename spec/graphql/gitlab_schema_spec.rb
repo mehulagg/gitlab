@@ -22,10 +22,6 @@ RSpec.describe GitlabSchema do
     expect(field_instrumenters).to include(instance_of(::Gitlab::Graphql::Present::Instrumentation))
   end
 
-  it 'enables using gitaly call checker' do
-    expect(field_instrumenters).to include(instance_of(::Gitlab::Graphql::CallsGitaly::Instrumentation))
-  end
-
   it 'has the base mutation' do
     expect(described_class.mutation).to eq(::Types::MutationType)
   end
