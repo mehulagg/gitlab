@@ -7,6 +7,7 @@ module Elastic
     # There is no onward scheduling and this cron handles work from across the
     # application, so there's no useful context to add.
     include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
+    include ActionView::Helpers::NumberHelper
 
     feature_category :global_search
     idempotent!
@@ -37,7 +38,7 @@ module Elastic
         end
 
         if migration.space_requirements? && helper.cluster_free_size_bytes < migration.space_required_bytes
-          logger.warn "MigrationWorker: migration[#{migration.name}] You should have at least #{migration.space_required_bytes} bytes of free space in the cluster to run this migration. Please increase the storage in your Elasticsearch cluster."
+          logger.warn "MigrationWorker: migration[#{migration.name}] You should have at least #{number_to_human_size(migration.space_required_bytes)} of free space in the cluster to run this migration. Please increase the storage in your Elasticsearch cluster."
           logger.info "MigrationWorker: migration[#{migration.name}] updating with halted: true"
           migration.save_state!(halted: true)
 
