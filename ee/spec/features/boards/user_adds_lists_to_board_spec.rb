@@ -63,6 +63,27 @@ RSpec.describe 'User adds milestone lists', :js do
       expect(page).to have_selector('.board', text: milestone.title)
       expect(find('.board:nth-child(2) .board-card')).to have_content(issue.title)
     end
+
+    it 'creates assignee column' do
+      click_button button_text
+      wait_for_all_requests
+
+      select('Assignee', from: 'List type')
+
+      add_assignee_list(user)
+
+      wait_for_all_requests
+
+      expect(page).to have_selector('.board', text: milestone.title)
+      expect(find('.board:nth-child(2) .board-card')).to have_content(issue.title)
+    end
+  end
+
+  def add_assignee_list(user)
+    page.within('.board-add-new-list') do
+      find('label', text: user.name).click
+      click_button 'Add'
+    end
   end
 
   def add_milestone_list(milestone)

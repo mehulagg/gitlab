@@ -211,6 +211,6 @@ export default {
 
   [mutationTypes.RECEIVE_ASSIGNEES_FAILURE](state) {
     state.assigneesLoading = false;
-    state.error = __('Failed to load ASSIGNEES.');
+    state.error = __('Failed to load assignees.');
   },
 };

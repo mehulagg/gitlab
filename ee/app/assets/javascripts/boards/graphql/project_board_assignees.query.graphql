@@ -1,0 +1,13 @@
+#import "~/graphql_shared/fragments/user.fragment.graphql"
+
+query GroupBoardAssignees($fullPath: ID!, $search: String) {
+  project(fullPath: $fullPath) {
+    projectMembers(search: $search) {
+      nodes {
+        user {
+          ...User
+        }
+      }
+    }
+  }
+}

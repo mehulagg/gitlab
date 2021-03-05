@@ -247,6 +247,9 @@ export default {
         case ListType.milestone:
           this.fetchMilestones(searchTerm);
           break;
+        case ListType.assignee:
+          this.fetchAssignees(searchTerm);
+          break;
         case ListType.label:
         default:
           this.fetchLabels(searchTerm);
