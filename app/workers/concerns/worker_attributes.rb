@@ -11,6 +11,8 @@ module WorkerAttributes
   # Urgencies that workers can declare through the `urgencies` attribute
   VALID_URGENCIES = [:high, :low, :throttled].freeze
 
+  VALID_DATA_CONSISTENCIES = [:always, :sticky ,:delayed].freeze
+
   NAMESPACE_WEIGHTS = {
     auto_devops: 2,
     auto_merge: 3,
@@ -69,6 +71,23 @@ module WorkerAttributes
       class_attributes[:urgency] || :low
     end
 
+    def data_consistency (data_consistency)
+      raise "Invalid data consistency: #{data_consistency}" unless VALID_DATA_CONSISTENCIES.include?(data_consistency)
+
+      class_attributes[:data_consistency] = data_consistency
+    end
+
+    VALID_DATA_CONSISTENCIES.each do |data_consistency|
+      client_method_name = "#{data_consistency}?".to_sym
+
+      define_singleton_method(client_method_name) do
+        class_attributes[:data_consistency] == data_consistency
+      end
+    end
+
+    def get_data_consistency
+      class_attributes[:data_consistency] || :always
+    end
     # Set this attribute on a job when it will call to services outside of the
     # application, such as 3rd party applications, other k8s clusters etc See
     # doc/development/sidekiq_style_guide.md#jobs-with-external-dependencies for

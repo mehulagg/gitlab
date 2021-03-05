@@ -84,10 +84,14 @@ module Gitlab
 
       # Returns true if load balancing is to be enabled.
       def self.enable?
-        return false if program_name == 'rake' || Gitlab::Runtime.sidekiq?
+        return false if program_name == 'rake' || disabled_for_sidekiq?
         return false unless self.configured?
 
         true
+      end
+
+      def self.disabled_for_sidekiq?
+         Gitlab::Runtime.sidekiq? && ::Feature.disabled?(:load_balancer_for_sidekiq)
       end
 
       # Returns true if load balancing has been configured. Since
