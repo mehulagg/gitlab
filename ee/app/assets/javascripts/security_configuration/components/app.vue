@@ -67,11 +67,6 @@ export default {
       required: false,
       default: false,
     },
-    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/241377
-    createSastMergeRequestPath: {
-      type: String,
-      required: true,
-    },
   },
   data: () => ({
     autoDevopsAlertDismissed: 'false',
@@ -202,11 +197,7 @@ export default {
       </template>
 
       <template #cell(manage)="{ item }">
-        <manage-feature
-          :feature="item"
-          :auto-devops-enabled="autoDevopsEnabled"
-          :create-sast-merge-request-path="createSastMergeRequestPath"
-        />
+        <manage-feature :feature="item" :auto-devops-enabled="autoDevopsEnabled" />
       </template>
     </gl-table>
     <auto-fix-settings v-if="glFeatures.securityAutoFix" v-bind="autoFixSettingsProps" />

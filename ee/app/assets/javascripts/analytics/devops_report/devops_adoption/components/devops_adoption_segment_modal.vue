@@ -120,6 +120,7 @@ export default {
     resetForm() {
       this.selectedGroupId = null;
       this.filter = '';
+      this.$emit('trackModalOpenState', false);
     },
   },
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
@@ -137,6 +138,7 @@ export default {
     @primary.prevent="primaryOptions.callback"
     @canceled="cancelOptions.callback"
     @hide="resetForm"
+    @show="$emit('trackModalOpenState', true)"
   >
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
       {{ displayError }}

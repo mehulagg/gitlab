@@ -96,6 +96,8 @@ export default {
     :action-primary="primaryOptions"
     :action-cancel="cancelOptions"
     @primary.prevent="deleteSegment"
+    @hide="$emit('trackModalOpenState', false)"
+    @show="$emit('trackModalOpenState', true)"
   >
     <template #modal-title>{{ $options.i18n.title }}</template>
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">

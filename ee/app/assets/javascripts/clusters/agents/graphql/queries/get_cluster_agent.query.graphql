@@ -1,0 +1,22 @@
+#import "../fragments/cluster_agent_token.fragment.graphql"
+
+query getClusterAgent($projectPath: ID!, $agentName: String!) {
+  project(fullPath: $projectPath) {
+    clusterAgent(name: $agentName) {
+      id
+      createdAt
+
+      createdByUser {
+        name
+      }
+
+      tokens {
+        count
+
+        nodes {
+          ...Token
+        }
+      }
+    }
+  }
+}

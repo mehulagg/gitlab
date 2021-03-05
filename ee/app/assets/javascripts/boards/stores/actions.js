@@ -148,7 +148,7 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
-  performSearch({ dispatch, getters, state }) {
+  performSearch({ dispatch, getters }) {
     dispatch(
       'setFilters',
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
@@ -158,7 +158,7 @@ export default {
       dispatch('resetEpics');
       dispatch('resetIssues');
       dispatch('fetchEpicsSwimlanes', {});
-    } else if (gon.features.graphqlBoardLists || state.isEpicBoard) {
+    } else if (gon.features.graphqlBoardLists || getters.isEpicBoard) {
       dispatch('fetchLists');
       dispatch('resetIssues');
     }
@@ -300,7 +300,10 @@ export default {
     notImplemented();
   },
 
-  fetchItemsForList: ({ state, commit }, { listId, fetchNext = false, noEpicIssues = false }) => {
+  fetchItemsForList: (
+    { state, commit, getters },
+    { listId, fetchNext = false, noEpicIssues = false },
+  ) => {
     commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { epicId, ...filterParams } = state.filterParams;
@@ -317,7 +320,7 @@ export default {
       first: 20,
     };
 
-    if (state.isEpicBoard) {
+    if (getters.isEpicBoard) {
       return fetchAndFormatListEpics(state, variables)
         .then(({ listItems, listPageInfo }) => {
           commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
@@ -525,10 +528,8 @@ export default {
       );
   },
 
-  fetchLists: ({ state, dispatch }) => {
-    const { isEpicBoard } = state;
-
-    if (!isEpicBoard) {
+  fetchLists: ({ getters, dispatch }) => {
+    if (!getters.isEpicBoard) {
       dispatch('fetchIssueLists');
     } else {
       dispatch('fetchEpicLists');
@@ -556,10 +557,8 @@ export default {
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 
-  createList: ({ state, dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
-    const { isEpicBoard } = state;
-
-    if (!isEpicBoard) {
+  createList: ({ getters, dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
+    if (!getters.isEpicBoard) {
       dispatch('createIssueList', { backlog, labelId, milestoneId, assigneeId });
     } else {
       dispatch('createEpicList', { backlog, labelId });

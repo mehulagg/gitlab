@@ -5,12 +5,17 @@ require 'spec_helper'
 RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
   let(:pool_spec) { ActiveRecord::Base.connection_pool.spec }
   let(:pool) { ActiveRecord::ConnectionAdapters::ConnectionPool.new(pool_spec) }
+  let(:conflict_error) { Class.new(RuntimeError) }
 
   let(:lb) { described_class.new(%w(localhost localhost)) }
 
   before do
     allow(Gitlab::Database).to receive(:create_connection_pool)
       .and_return(pool)
+    stub_const(
+      'Gitlab::Database::LoadBalancing::LoadBalancer::PG::TRSerializationFailure',
+      conflict_error
+    )
   end
 
   def raise_and_wrap(wrapper, original)
@@ -36,15 +41,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
   end
 
   describe '#read' do
-    let(:conflict_error) { Class.new(RuntimeError) }
-
-    before do
-      stub_const(
-        'Gitlab::Database::LoadBalancing::LoadBalancer::PG::TRSerializationFailure',
-        conflict_error
-      )
-    end
-
     it 'yields a connection for a read' do
       connection = double(:connection)
       host = double(:host)
@@ -136,6 +132,78 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       expect(lb).to receive(:retry_with_backoff).and_yield
 
       lb.read_write { 10 }
+    end
+  end
+
+  describe '#db_role_for_connection' do
+    context 'when the load balancer creates the connection with #read' do
+      it 'returns :replica' do
+        role = nil
+        lb.read do |connection|
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:replica)
+      end
+    end
+
+    context 'when the load balancer creates the connection with #read_write' do
+      it 'returns :primary' do
+        role = nil
+        lb.read_write do |connection|
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:primary)
+      end
+    end
+
+    context 'when the load balancer falls back the connection creation to primary' do
+      it 'returns :primary' do
+        allow(lb).to receive(:serialization_failure?).and_return(true)
+
+        role = nil
+        raised = 7 # 2 hosts = 6 retries
+
+        lb.read do |connection|
+          if raised > 0
+            raised -= 1
+            raise
+          end
+
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:primary)
+      end
+    end
+
+    context 'when the load balancer uses replica after recovery from a failure' do
+      it 'returns :replica' do
+        allow(lb).to receive(:connection_error?).and_return(true)
+
+        role = nil
+        raised = false
+
+        lb.read do |connection|
+          unless raised
+            raised = true
+            raise
+          end
+
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:replica)
+      end
+    end
+
+    context 'when the connection does not come from the load balancer' do
+      it 'returns nil' do
+        connection = double(:connection)
+
+        expect(lb.db_role_for_connection(connection)).to be(nil)
+      end
     end
   end
 

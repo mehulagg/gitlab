@@ -25,10 +25,6 @@ export default {
     GlSprintf,
   },
   inject: {
-    createSastMergeRequestPath: {
-      from: 'createSastMergeRequestPath',
-      default: '',
-    },
     sastAnalyzersDocumentationPath: {
       from: 'sastAnalyzersDocumentationPath',
       default: '',
