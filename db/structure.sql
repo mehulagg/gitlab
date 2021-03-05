@@ -24462,6 +24462,9 @@ ALTER TABLE ONLY path_locks
 ALTER TABLE ONLY clusters_applications_prometheus
     ADD CONSTRAINT fk_557e773639 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY terraform_states
+    ADD CONSTRAINT fk_558901b030 FOREIGN KEY (locked_by_user_id) REFERENCES users(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_56067dcb44 FOREIGN KEY (target_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -25487,9 +25490,6 @@ ALTER TABLE ONLY geo_node_namespace_links
 
 ALTER TABLE ONLY clusters_applications_knative
     ADD CONSTRAINT fk_rails_54fc91e0a0 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY terraform_states
-    ADD CONSTRAINT fk_rails_558901b030 FOREIGN KEY (locked_by_user_id) REFERENCES users(id);
 
 ALTER TABLE ONLY issuable_metric_images
     ADD CONSTRAINT fk_rails_56417a5a7f FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
