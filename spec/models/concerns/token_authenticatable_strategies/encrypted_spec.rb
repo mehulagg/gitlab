@@ -7,7 +7,7 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
   let(:instance) { double(:instance) }
 
   let(:encrypted) do
-    Gitlab::CryptoHelper.aes256_gcm_encrypt('my-value')
+    form_encrypted_token('my-value')
   end
 
   subject do
@@ -67,10 +67,6 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
   describe '#get_token' do
     context 'when using optional strategy' do
       let(:options) { { encrypted: :optional } }
-
-      before do
-        stub_feature_flags(dynamic_nonce_creation: false)
-      end
 
       it 'returns decrypted token when an encrypted token is present' do
         allow(instance).to receive(:read_attribute)
@@ -148,5 +144,11 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
         expect(subject.set_token(instance, 'my-value')).to eq 'my-value'
       end
     end
+  end
+
+  def form_encrypted_token(token)
+    iv = ::Digest::SHA256.hexdigest(token).bytes.take(12).pack('c*')
+    token = Gitlab::CryptoHelper.aes256_gcm_encrypt(token, nonce: iv)
+    "#{described_class::DYNAMIC_NONCE_IDENTIFIER}#{token}#{iv}"
   end
 end
