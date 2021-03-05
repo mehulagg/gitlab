@@ -3,12 +3,10 @@
 class GraphqlChannel < ApplicationCable::Channel # rubocop:disable Gitlab/NamespacedClass
   def subscribed
     @subscription_ids = []
-  end
 
-  def execute(data)
-    query = data['query']
-    variables = Gitlab::Graphql::Variables.new(data['variables']).to_h
-    operation_name = data['operationName']
+    query = params['query']
+    variables = Gitlab::Graphql::Variables.new(params['variables']).to_h
+    operation_name = params['operationName']
 
     # You may want to keep this in sync with GraphqlController#context so that we
     # have the same context when executing queries, mutations, and subscriptions

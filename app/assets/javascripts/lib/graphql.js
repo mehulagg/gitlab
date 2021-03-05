@@ -4,8 +4,7 @@ import { ApolloLink } from 'apollo-link';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import { createHttpLink } from 'apollo-link-http';
 import { createUploadLink } from 'apollo-upload-client';
-import ActionCableLink from 'graphql-ruby-client/dist/subscriptions/ActionCableLink';
-import cable from '~/actioncable_consumer';
+import ActionCableLink from '~/actioncable_link';
 import { StartupJSLink } from '~/lib/utils/apollo_startup_js_link';
 import csrf from '~/lib/utils/csrf';
 import PerformanceBarService from '~/performance_bar/services/performance_bar_service';
@@ -82,7 +81,7 @@ export default (resolvers = {}, config = {}) => {
 
   const appLink = ApolloLink.split(
     hasSubscriptionOperation,
-    new ActionCableLink({ cable }),
+    new ActionCableLink(),
     ApolloLink.from([requestCounterLink, performanceBarLink, new StartupJSLink(), uploadsLink]),
   );
 
