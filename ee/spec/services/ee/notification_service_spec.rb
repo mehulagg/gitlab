@@ -653,8 +653,10 @@ RSpec.describe EE::NotificationService, :mailer do
 
       include_examples 'epic notifications'
 
-      shared_examples 'no epic notifications' do
-        it 'does not send notification' do
+      shared_examples 'is not able to send notifications' do
+        it 'does not send any notification' do
+          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: epic.class, object_id: epic.id)
+
           execute
 
           should_not_email(watcher)
@@ -666,13 +668,13 @@ RSpec.describe EE::NotificationService, :mailer do
       context 'when author is blocked' do
         let(:current_user) { create(:user, :blocked) }
 
-        include_examples 'no epic notifications'
+        include_examples 'is not able to send notifications'
       end
 
       context 'when author is a ghost' do
         let(:current_user) { create(:user, :ghost) }
 
-        include_examples 'no epic notifications'
+        include_examples 'is not able to send notifications'
       end
     end
   end
