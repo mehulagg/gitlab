@@ -1,0 +1,6 @@
+---
+title: Update button spacing and use confirm variant instead of the deprecated success
+  variant
+merge_request: 55819
+author:
+type: other
