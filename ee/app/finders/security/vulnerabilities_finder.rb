@@ -31,6 +31,7 @@ module Security
       filter_by_severities
       filter_by_states
       filter_by_scanners
+      filter_by_scanner
       filter_by_resolution
       filter_by_issues
 
@@ -66,8 +67,14 @@ module Security
     end
 
     def filter_by_scanners
+      if params[:scanners].present?
+        @vulnerabilities = vulnerabilities.with_scanners(params[:scanners])
+      end
+    end
+
+    def filter_by_scanner
       if params[:scanner].present?
-        @vulnerabilities = vulnerabilities.with_scanners(params[:scanner])
+        @vulnerabilities = vulnerabilities.with_scanner_ids(params[:scanner])
       end
     end
 

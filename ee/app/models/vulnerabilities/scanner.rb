@@ -15,6 +15,7 @@ module Vulnerabilities
     validates :vendor, length: { maximum: 255, allow_nil: false }
 
     scope :with_external_id, -> (external_ids) { where(external_id: external_ids) }
+    scope :with_vendor, -> (vendors) { where(vendor: vendors) }
 
     scope :for_projects, -> (project_ids) { where(project_id: project_ids) }
     scope :with_report_type, -> do

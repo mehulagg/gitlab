@@ -67,7 +67,7 @@ module Vulnerabilities
     validates :solution, length: { maximum: 7000 }
     validates :cve, length: { maximum: 48400 }
 
-    delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
+    delegate :name, :external_id, :vendor, to: :scanner, prefix: true, allow_nil: true
 
     scope :report_type, -> (type) { where(report_type: report_types[type]) }
     scope :ordered, -> { order(severity: :desc, confidence: :desc, id: :asc) }

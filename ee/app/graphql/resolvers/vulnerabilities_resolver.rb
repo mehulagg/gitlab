@@ -26,6 +26,10 @@ module Resolvers
              required: false,
              description: 'Filter vulnerabilities by VulnerabilityScanner.externalId.'
 
+    argument :scanners, [Types::VulnerabilityScannerInputType],
+             required: false,
+             description: 'Filter vulnerabilities by scanner properties.'
+
     argument :sort, Types::VulnerabilitySortEnum,
              required: false,
              default_value: 'severity_desc',
