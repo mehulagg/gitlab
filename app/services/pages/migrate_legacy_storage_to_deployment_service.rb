@@ -30,7 +30,7 @@ module Pages
       zip_result = ::Pages::ZipDirectoryService.new(project.pages_path, ignore_invalid_entries: @ignore_invalid_entries).execute
 
       if zip_result[:status] == :error
-        if zip_result[:invalid_public] && Feature.enabled?(:pages_migration_mark_as_not_deployed, project)
+        if zip_result[:invalid_public] && @ignore_invalid_entries
 
           unless project.pages_metadatum&.reload&.pages_deployment
             project.mark_pages_as_not_deployed

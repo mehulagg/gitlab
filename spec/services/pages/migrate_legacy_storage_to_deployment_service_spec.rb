@@ -14,34 +14,36 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
     expect(described_class.new(project, ignore_invalid_entries: true).execute[:status]).to eq(:success)
   end
 
-  it 'marks pages as not deployed if public directory is absent' do
-    project.mark_pages_as_deployed
+  context 'when invalid entries are ignored' do
+    let(:service) { described_class.new(project, ignore_invalid_entries: true) }
 
-    expect(project.pages_metadatum.reload.deployed).to eq(true)
+    it 'marks pages as not deployed if public directory is absent and invalid entries are ignored' do
+      project.mark_pages_as_deployed
 
-    expect(service.execute).to(
-      eq(status: :success,
-         message: "Invalid or missing public directory at #{project.pages_path}. Corrected project to be not deployed")
-    )
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
 
-    expect(project.pages_metadatum.reload.deployed).to eq(false)
+      expect(service.execute).to(
+        eq(status: :success,
+           message: "Invalid or missing public directory at #{project.pages_path}. Corrected project to be not deployed")
+      )
+
+      expect(project.pages_metadatum.reload.deployed).to eq(false)
+    end
+
+    it 'does not mark pages as not deployed if public directory is absent but pages_deployment exists' do
+      deployment = create(:pages_deployment, project: project)
+      project.update_pages_deployment!(deployment)
+      project.mark_pages_as_deployed
+
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
+
+      expect(service.execute).to eq(status: :success)
+
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
+    end
   end
 
-  it 'does not mark pages as not deployed if public directory is absent but pages_deployment exists' do
-    deployment = create(:pages_deployment, project: project)
-    project.update_pages_deployment!(deployment)
-    project.mark_pages_as_deployed
-
-    expect(project.pages_metadatum.reload.deployed).to eq(true)
-
-    expect(service.execute).to eq(status: :success)
-
-    expect(project.pages_metadatum.reload.deployed).to eq(true)
-  end
-
-  it 'does not mark pages as not deployed if public directory is absent but feature is disabled' do
-    stub_feature_flags(pages_migration_mark_as_not_deployed: false)
-
+  it 'does not mark pages as not deployed if public directory is absent but invalid entries are not ignored' do
     project.mark_pages_as_deployed
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)

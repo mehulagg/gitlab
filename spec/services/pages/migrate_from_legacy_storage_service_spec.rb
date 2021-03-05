@@ -48,12 +48,20 @@ RSpec.describe Pages::MigrateFromLegacyStorageService do
     end
 
     context 'when pages directory does not exist' do
-      it 'counts project as migrated' do
-        expect_next_instance_of(::Pages::MigrateLegacyStorageToDeploymentService, project, ignore_invalid_entries: false) do |service|
+      it 'counts project as migrated if invalid errors are ignored' do
+        expect_next_instance_of(::Pages::MigrateLegacyStorageToDeploymentService, project, ignore_invalid_entries: true) do |service|
           expect(service).to receive(:execute).and_call_original
         end
 
         expect(service.execute).to eq(migrated: 1, errored: 0)
+      end
+
+      it 'counts project as errored if invalid errors are not ignored' do
+        expect_next_instance_of(::Pages::MigrateLegacyStorageToDeploymentService, project, ignore_invalid_entries: false) do |service|
+          expect(service).to receive(:execute).and_call_original
+        end
+
+        expect(service.execute).to eq(migrated: 0, errored: 1)
       end
     end
 
