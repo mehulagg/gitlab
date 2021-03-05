@@ -218,8 +218,9 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           expect(subject[:gitlab_ci_present]).to eq(true)
         end
 
-        it 'expects the gitlab_ci_presence to be false if the file is absent' do
-          allow_any_instance_of(described_class).to receive(:latest_pipeline).and_return(nil)
+        it 'expects the gitlab_ci_presence to be false if the file is customized' do
+          allow(project).to receive(:ci_config_path).and_return('.other-gitlab-ci.yml')
+
           expect(subject[:gitlab_ci_present]).to eq(false)
         end
       end

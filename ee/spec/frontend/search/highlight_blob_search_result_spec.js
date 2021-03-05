@@ -5,8 +5,6 @@ const ceFixture = 'search/blob_search_result.html';
 const searchKeyword = 'Send'; // spec/frontend/fixtures/search.rb#79
 
 describe('ee/search/highlight_blob_search_result', () => {
-  preloadFixtures(fixture, ceFixture);
-
   // Basic search support
   it('highlights lines with search term occurrence', () => {
     loadFixtures(ceFixture);

@@ -162,52 +162,23 @@ RSpec.describe TrialsController do
   end
 
   describe '#select' do
-    def get_select
-      get :select
-    end
-
     subject do
-      get_select
+      get :select
       response
     end
 
     it_behaves_like 'an authenticated endpoint'
     it_behaves_like 'a dot-com only feature'
-
-    context 'when the group-only trials experiment is active' do
-      before do
-        stub_experiment(group_only_trials: true)
-        stub_experiment_for_subject(group_only_trials: user_is_in_experiment?)
-      end
-
-      def expected_group_type
-        user_is_in_experiment? ? 'experimental' : 'control'
-      end
-
-      where(user_is_in_experiment?: [true, false])
-
-      with_them do
-        it 'records the user as being part of the experiment' do
-          expect { get_select }.to change { ExperimentUser.count }.by(1)
-          expect(ExperimentUser.last.group_type).to eq(expected_group_type)
-        end
-      end
-    end
-
-    context 'when the group-only trials experiment is not active' do
-      it 'does not record the user as being part of the experiment' do
-        expect { get_select }.not_to change { ExperimentUser.count }
-      end
-    end
   end
 
   describe '#apply' do
-    let_it_be(:namespace) { create(:namespace, owner_id: user.id, path: 'namespace-test') }
+    let_it_be(:namespace) { create(:group, path: 'namespace-test') }
 
     let(:apply_trial_result) { nil }
     let(:post_params) { { namespace_id: namespace.id } }
 
     before do
+      namespace.add_owner(user)
       allow_any_instance_of(GitlabSubscriptions::ApplyTrialService).to receive(:execute) do
         { success: apply_trial_result }
       end
@@ -240,7 +211,7 @@ RSpec.describe TrialsController do
         let(:post_params) { { new_group_name: 'GitLab' } }
 
         it 'creates the Group' do
-          expect { subject }.to change { Group.count }.to(1)
+          expect { subject }.to change { Group.count }.by(1)
         end
       end
     end
@@ -262,7 +233,7 @@ RSpec.describe TrialsController do
         it { is_expected.to render_template(:select) }
 
         it 'does not create the Group' do
-          expect { subject }.not_to change { Group.count }.from(0)
+          expect { subject }.not_to change { Group.count }
         end
       end
     end

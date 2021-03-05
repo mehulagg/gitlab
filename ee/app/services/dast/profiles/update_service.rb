@@ -49,6 +49,7 @@ module Dast
 
       def create_scan(dast_profile)
         params = {
+          branch: dast_profile.branch_name,
           dast_site_profile: dast_profile.dast_site_profile,
           dast_scanner_profile: dast_profile.dast_scanner_profile
         }

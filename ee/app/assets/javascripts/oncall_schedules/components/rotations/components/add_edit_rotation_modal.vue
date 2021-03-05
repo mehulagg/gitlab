@@ -1,6 +1,6 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
@@ -21,9 +21,30 @@ export const i18n = {
   cancel: __('Cancel'),
 };
 
+export const formEmptyState = {
+  name: '',
+  participants: [],
+  rotationLength: {
+    length: 1,
+    unit: LENGTH_ENUM.days,
+  },
+  startsAt: {
+    date: null,
+    time: 0,
+  },
+  endsAt: {
+    date: null,
+    time: 0,
+  },
+  isRestrictedToTime: false,
+  restrictedTo: {
+    startTime: 0,
+    endTime: 0,
+  },
+};
+
 export default {
   i18n,
-  LENGTH_ENUM,
   components: {
     GlModal,
     GlAlert,
@@ -67,26 +88,7 @@ export default {
       participants: [],
       loading: false,
       ptSearchTerm: '',
-      form: {
-        name: '',
-        participants: [],
-        rotationLength: {
-          length: 1,
-          unit: this.$options.LENGTH_ENUM.days,
-        },
-        startsAt: {
-          date: null,
-          time: 0,
-        },
-        endsAt: {
-          date: null,
-          time: 0,
-        },
-        restrictedTo: {
-          from: 0,
-          to: 0,
-        },
-      },
+      form: cloneDeep(formEmptyState),
       error: '',
       validationState: {
         name: true,
@@ -134,7 +136,7 @@ export default {
         endsAt: { date: endDate, time: endTime },
       } = this.form;
 
-      return {
+      const variables = {
         projectPath: this.projectPath,
         scheduleIid: this.schedule.iid,
         name,
@@ -154,6 +156,13 @@ export default {
         },
         participants: getParticipantsForSave(participants),
       };
+      if (this.form.isRestrictedToTime) {
+        variables.activePeriod = {
+          startTime: format24HourTimeStringFromInt(this.form.restrictedTo.startTime),
+          endTime: format24HourTimeStringFromInt(this.form.restrictedTo.endTime),
+        };
+      }
+      return variables;
     },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
@@ -273,6 +282,9 @@ export default {
         this.validationState.endsAt = this.isEndDateValid;
       }
     },
+    afterCloseModal() {
+      this.form = cloneDeep(formEmptyState);
+    },
   },
 };
 </script>
@@ -286,6 +298,7 @@ export default {
     :action-cancel="actionsProps.cancel"
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
+    @hide="afterCloseModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}
