@@ -117,13 +117,13 @@ export default {
       return null;
     },
 
-    searchLabel() {
+    noneSelected() {
       if (this.labelTypeSelected) {
-        return __('Select label');
+        return __('No label selected');
       }
 
       if (this.milestoneTypeSelected) {
-        return __('Select milestone');
+        return __('No milestone selected');
       }
 
       return null;
@@ -230,7 +230,7 @@ export default {
   <board-add-new-column-form
     :loading="loading"
     :form-description="formDescription"
-    :search-label="searchLabel"
+    :none-selected="noneSelected"
     :search-placeholder="searchPlaceholder"
     :selected-id="selectedId"
     @filter-items="filterItems"
@@ -272,7 +272,7 @@ export default {
         <label
           v-for="item in items"
           :key="item.id"
-          class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
+          class="gl-display-flex gl-flex-align-items-center gl-mb-3 gl-font-weight-normal"
         >
           <gl-form-radio :value="item.id" class="gl-mb-0 gl-mr-3" />
           <span

@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlFormGroup, GlSearchBoxByType, GlSkeletonLoader } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlIcon, GlSearchBoxByType, GlSkeletonLoader } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { __ } from '~/locale';
 
@@ -8,12 +8,12 @@ export default {
     add: __('Add'),
     cancel: __('Cancel'),
     newList: __('New list'),
-    noneSelected: __('None'),
     selected: __('Selected'),
   },
   components: {
     GlButton,
-    GlFormGroup,
+    GlDropdown,
+    GlIcon,
     GlSearchBoxByType,
     GlSkeletonLoader,
   },
@@ -26,7 +26,7 @@ export default {
       type: String,
       required: true,
     },
-    searchLabel: {
+    noneSelected: {
       type: String,
       required: true,
     },
@@ -42,6 +42,9 @@ export default {
   },
   methods: {
     ...mapActions(['setAddColumnFormVisibility']),
+    setFocus() {
+      this.$refs.searchBox.focusInput();
+    },
   },
 };
 </script>
@@ -62,42 +65,41 @@ export default {
         {{ $options.i18n.newList }}
       </h3>
 
-      <div class="gl-display-flex gl-flex-direction-column gl-h-full gl-overflow-hidden">
+      <div
+        class="gl-display-flex gl-flex-direction-column gl-h-full gl-overflow-hidden gl-align-items-flex-start"
+      >
         <slot name="select-list-type">
           <div class="gl-mb-5"></div>
         </slot>
 
         <p class="gl-px-5">{{ formDescription }}</p>
 
-        <div class="gl-px-5 gl-pb-4">
-          <label class="gl-mb-2">{{ $options.i18n.selected }}</label>
-          <slot name="selected">
-            <div class="gl-text-gray-500">{{ $options.i18n.noneSelected }}</div>
-          </slot>
-        </div>
+        <gl-dropdown class="gl-px-5" no-flip @shown="setFocus">
+          <template #button-content>
+            <slot name="selected">
+              <div class="gl-text-gray-500">{{ noneSelected }}</div>
+            </slot>
+            <gl-icon class="dropdown-chevron" name="chevron-down" />
+          </template>
 
-        <gl-form-group
-          class="gl-mx-5 gl-mb-3"
-          :label="searchLabel"
-          label-for="board-available-column-entities"
-        >
           <gl-search-box-by-type
             id="board-available-column-entities"
+            ref="searchBox"
             debounce="250"
             :placeholder="searchPlaceholder"
             @input="$emit('filter-items', $event)"
           />
-        </gl-form-group>
 
-        <div v-if="loading" class="gl-px-5">
-          <gl-skeleton-loader :width="500" :height="172">
-            <rect width="480" height="20" x="10" y="15" rx="4" />
-            <rect width="380" height="20" x="10" y="50" rx="4" />
-            <rect width="430" height="20" x="10" y="85" rx="4" />
-          </gl-skeleton-loader>
-        </div>
+          <div v-if="loading" class="gl-px-5">
+            <gl-skeleton-loader :width="400" :height="172">
+              <rect width="380" height="20" x="10" y="15" rx="4" />
+              <rect width="280" height="20" x="10" y="50" rx="4" />
+              <rect width="330" height="20" x="10" y="85" rx="4" />
+            </gl-skeleton-loader>
+          </div>
 
-        <slot v-else name="items"></slot>
+          <slot v-else name="items"></slot>
+        </gl-dropdown>
       </div>
       <div
         class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-10"
