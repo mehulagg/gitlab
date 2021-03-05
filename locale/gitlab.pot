@@ -430,18 +430,8 @@ msgstr ""
 msgid "%{count} files touched"
 msgstr ""
 
-msgid "%{count} issue selected"
-msgid_plural "%{count} issues selected"
-msgstr[0] ""
-msgstr[1] ""
-
 msgid "%{count} items per page"
 msgstr ""
-
-msgid "%{count} merge request selected"
-msgid_plural "%{count} merge requests selected"
-msgstr[0] ""
-msgstr[1] ""
 
 msgid "%{count} more"
 msgstr ""
@@ -12393,12 +12383,6 @@ msgstr ""
 msgid "Export group"
 msgstr ""
 
-msgid "Export issues"
-msgstr ""
-
-msgid "Export merge requests"
-msgstr ""
-
 msgid "Export project"
 msgstr ""
 
@@ -15515,9 +15499,6 @@ msgid "Import timed out. Import took longer than %{import_jobs_expiration} secon
 msgstr ""
 
 msgid "Import/Export Rate Limits"
-msgstr ""
-
-msgid "Import/Export illustration"
 msgstr ""
 
 msgid "ImportButtons|Connect repositories from"
@@ -29557,9 +29538,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "The Advanced Search in GitLab is a powerful search service that saves you time. Instead of creating duplicate code and wasting time, you can now search for code within other teams that can help your own project."
-msgstr ""
-
-msgid "The CSV export will be created in the background. Once finished, it will be sent to %{strong_open}%{email}%{strong_close} in an attachment."
 msgstr ""
 
 msgid "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group."
