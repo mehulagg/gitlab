@@ -2,6 +2,8 @@
 
 module IncidentManagement
   class OncallRotation < ApplicationRecord
+    include EachBatch
+
     ActivePeriod = Struct.new(:start_time, :end_time) do
       def present?
         start_time && end_time
@@ -47,7 +49,12 @@ module IncidentManagement
     validate :active_period_end_after_start, if: :active_period_start
     validate :no_active_period_for_hourly_shifts, if: :hours?
 
-    scope :in_progress, -> { where('starts_at < :time AND (ends_at > :time OR ends_at IS NULL)', time: Time.current) }
+    # scope :started_and_not_yet_ended, -> { where('starts_at < :time AND ends_at > :time)', time: Time.current) }
+    # scope :started_and_unending, -> { where('starts_at < ? AND ends_at IS NULL', Time.current) }
+    scope :started, -> (time) { where('starts_at < ?', time) }
+    scope :unended, -> (time) { where('ends_at > ?', time) }
+    scope :unending, -> { where('ends_at IS NULL') }
+
     scope :except_ids, -> (ids) { where.not(id: ids) }
     scope :with_shift_generation_associations, -> do
       joins(:active_participants, :schedule)
