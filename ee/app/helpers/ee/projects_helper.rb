@@ -223,7 +223,7 @@ module EE
 
     override :learn_more_link
     def learn_more_link
-      link_to(s_('Learn more.'), help_page_path('user/admin_area/settings/account_and_limit_settings'), target: '_blank', rel: 'noopener noreferrer', aria-label: _(Learn more about repository size limits)
+      link_to(s_('Learn more.'), help_page_path('user/admin_area/settings/account_and_limit_settings'), target: '_blank', rel: 'noopener noreferrer', 'aria-label': _('Learn more about repository size limits'))
     end
 
     override :membership_locked?
