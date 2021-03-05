@@ -85,7 +85,6 @@ export default {
         v-gl-tooltip.body
         :title="s__('Job|Show complete raw')"
         :href="rawPath"
-        class="controllers-buttons"
         data-testid="job-raw-link-controller"
         icon="doc-text"
       />
@@ -96,7 +95,7 @@ export default {
         :title="s__('Job|Erase job log')"
         :href="erasePath"
         :data-confirm="__('Are you sure you want to erase this build?')"
-        class="controllers-buttons"
+        class="gl-ml-3"
         data-testid="job-log-erase-link"
         data-method="post"
         icon="remove"
@@ -104,7 +103,7 @@ export default {
       <!-- eo links -->
 
       <!-- scroll buttons -->
-      <div v-gl-tooltip :title="s__('Job|Scroll to top')" class="controllers-buttons">
+      <div v-gl-tooltip :title="s__('Job|Scroll to top')" class="gl-ml-3">
         <gl-button
           :disabled="isScrollTopDisabled"
           class="btn-scroll"
@@ -114,7 +113,7 @@ export default {
         />
       </div>
 
-      <div v-gl-tooltip :title="s__('Job|Scroll to bottom')" class="controllers-buttons">
+      <div v-gl-tooltip :title="s__('Job|Scroll to bottom')" class="gl-ml-3">
         <gl-button
           :disabled="isScrollBottomDisabled"
           class="js-scroll-bottom btn-scroll"

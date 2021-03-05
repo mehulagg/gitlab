@@ -293,8 +293,16 @@
     flex-grow: $flex-grow-size;
   }
 
+  svg {
+    width: 15px;
+    height: 15px;
+    display: $svg-display;
+    top: $svg-top;
+  }
+
   .controllers-buttons {
-    margin: 0 $gl-spacing-scale-2;
+    color: $gl-text-color;
+    margin: 0 $grid-size;
 
     &:last-child {
       margin-right: 0;
