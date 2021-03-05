@@ -856,7 +856,7 @@ class NotificationService
   end
 
   def warn_skipping_notifications(user, object)
-    Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{user.id}' (class:#{object.class}, id:#{object.id})")
+    Gitlab::AppLogger.warn(message: "Skipping sending notifications", user: user.id, klass: object.class, object_id: object.id)
   end
 end
 
