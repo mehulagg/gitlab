@@ -17,7 +17,7 @@ module QA
             end
 
             def enable_confidential_epic
-              find_element(:confidential_epic_checkbox, visible: false).click
+              check_element(:confidential_epic_checkbox)
             end
 
             def set_title(title)

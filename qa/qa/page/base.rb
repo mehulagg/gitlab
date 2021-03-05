@@ -133,9 +133,17 @@ module QA
       end
 
       def check_element(name)
+        checkbox = find_element(name, visible: false)
+
+        if checkbox.checked?
+          QA::Runtime::Logger.debug("#{name} is already checked")
+
+          return
+        end
+
         retry_until(sleep_interval: 1) do
-          find_element(name).set(true)
-          checked = find_element(name).checked?
+          page.driver.browser.action.move_to(find_element(name, visible: false).native).click.perform
+          checked = checkbox.checked?
 
           QA::Runtime::Logger.debug(checked ? "#{name} was checked" : "#{name} was not checked")
 
@@ -144,10 +152,21 @@ module QA
       end
 
       def uncheck_element(name)
-        retry_until(sleep_interval: 1) do
-          find_element(name).set(false)
+        checkbox = find_element(name visible: false)
 
-          !find_element(name).checked?
+        if !checkbox.checked?
+          QA::Runtime::Logger.debug("#{name} is not already checked")
+
+          return
+        end
+
+        retry_until(sleep_interval: 1) do
+          page.driver.browser.action.move_to(find_element(name, visible: false).native).click.perform
+          checked = checkbox.checked?
+
+          QA::Runtime::Logger.debug(!checked ? "#{name} was unchecked" : "#{name} was not unchecked")
+
+          !checked
         end
       end
 
