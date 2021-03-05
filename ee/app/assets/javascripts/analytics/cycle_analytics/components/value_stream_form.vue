@@ -255,13 +255,7 @@ export default {
       Vue.set(this, 'stages', [...this.stages, { ...defaultCustomStageFields }]);
       Vue.set(this, 'stageErrors', [...this.stageErrors, {}]);
       // Scroll to the new stage we have added
-      setTimeout(
-        () =>
-          this.lastStage().scrollIntoView({
-            behavior: 'smooth',
-          }),
-        125,
-      );
+      setTimeout(() => this.lastStage().scrollIntoView({ behavior: 'smooth' }), 125);
     },
     onFieldInput(activeStageIndex, { field, value }) {
       const updatedStage = { ...this.stages[activeStageIndex], [field]: value };

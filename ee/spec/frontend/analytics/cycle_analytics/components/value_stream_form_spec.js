@@ -12,6 +12,9 @@ import {
 } from '~/lib/utils/common_utils';
 import { customStageEvents as formEvents, defaultStageConfig, rawCustomStage } from '../mock_data';
 
+const scrollIntoViewMock = jest.fn();
+HTMLElement.prototype.scrollIntoView = scrollIntoViewMock;
+
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
@@ -144,22 +147,33 @@ describe('ValueStreamForm', () => {
     });
 
     describe('Add stage button', () => {
+      beforeEach(() => {
+        wrapper = createComponent({
+          props: { hasExtendedFormFields: true },
+          stubs: {
+            CustomStageFields,
+          },
+        });
+      });
+
       it('has the add stage button', () => {
         expect(findBtn('actionSecondary')).toMatchObject({ text: 'Add another stage' });
       });
 
-      it('adds a blank custom stage when clicked', () => {
+      it('adds a blank custom stage when clicked', async () => {
         expect(wrapper.vm.stages.length).toBe(defaultStageConfig.length);
 
-        clickAddStage();
+        await clickAddStage();
+        jest.runAllTimers();
 
         expect(wrapper.vm.stages.length).toBe(defaultStageConfig.length + 1);
       });
 
-      it('validates existing fields when clicked', () => {
+      it('validates existing fields when clicked', async () => {
         expect(wrapper.vm.nameError).toEqual([]);
 
-        clickAddStage();
+        await clickAddStage();
+        jest.runAllTimers();
 
         expect(wrapper.vm.nameError).toEqual(['Name is required']);
       });
@@ -225,24 +239,40 @@ describe('ValueStreamForm', () => {
       });
 
       describe('Add stage button', () => {
+        beforeEach(() => {
+          wrapper = createComponent({
+            props: {
+              initialPreset,
+              initialData,
+              isEditing: true,
+              hasExtendedFormFields: true,
+            },
+            stubs: {
+              CustomStageFields,
+            },
+          });
+        });
+
         it('has the add stage button', () => {
           expect(findBtn('actionSecondary')).toMatchObject({ text: 'Add another stage' });
         });
 
-        it('adds a blank custom stage when clicked', () => {
+        it('adds a blank custom stage when clicked', async () => {
           expect(wrapper.vm.stages.length).toBe(stageCount);
 
-          clickAddStage();
+          await clickAddStage();
+          jest.runAllTimers();
 
           expect(wrapper.vm.stages.length).toBe(stageCount + 1);
         });
 
-        it('validates existing fields when clicked', () => {
+        it('validates existing fields when clicked', async () => {
           expect(wrapper.vm.nameError).toEqual([]);
 
           wrapper.findByTestId('create-value-stream-name').find(GlFormInput).vm.$emit('input', '');
 
-          clickAddStage();
+          await clickAddStage();
+          jest.runAllTimers();
 
           expect(wrapper.vm.nameError).toEqual(['Name is required']);
         });
