@@ -180,11 +180,13 @@ export default {
         // eslint-disable-next-line @gitlab/require-i18n-strings
         this.createList({ [`${this.columnType}Id`]: this.selectedId });
       } else {
+        const { length } = boardsStore.state.lists;
+        const position = this.hideClosed ? length - 1 : length - 2;
         const listObj = {
           // eslint-disable-next-line @gitlab/require-i18n-strings
           [`${this.columnType}Id`]: getIdFromGraphQLId(this.selectedId),
           title: this.selectedItem.title,
-          position: boardsStore.state.lists.length - 2,
+          position,
           list_type: this.columnType,
         };
 

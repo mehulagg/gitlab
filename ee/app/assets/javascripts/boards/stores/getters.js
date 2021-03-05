@@ -1,6 +1,5 @@
 import { find } from 'lodash';
-import { ListType } from '~/boards/constants';
-import { issuableTypes } from '~/boards/constants';
+import { issuableTypes, ListType } from '~/boards/constants';
 import gettersCE from '~/boards/stores/getters';
 
 export default {
