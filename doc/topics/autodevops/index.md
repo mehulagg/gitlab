@@ -34,7 +34,7 @@ For an introduction to Auto DevOps, watch [AutoDevOps in GitLab 11.0](https://yo
 
 For requirements, read [Requirements for Auto DevOps](requirements.md) for more information.
 
-For a developer's guide, read [Auto DevOps development guide](../../development/auto_devops.md).
+For GitLab contributors, see the [Auto DevOps development guide](../../development/auto_devops.md).
 
 ## Enable or disable Auto DevOps
 
