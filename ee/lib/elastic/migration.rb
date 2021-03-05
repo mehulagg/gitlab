@@ -20,7 +20,7 @@ module Elastic
     end
 
     def space_required_bytes
-      raise NotImplementedError, 'Please extend Elastic::Migration' if space_requirements?
+      raise NotImplementedError, 'Please extend Elastic::Migration'
     end
 
     private
