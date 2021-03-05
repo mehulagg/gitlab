@@ -65,6 +65,3 @@
           = _("The Issue Tracker is the place to add things that need to be improved or solved in a project. You can register or sign in to create issues for this project.")
         .text-center
           = link_to _('Register / Sign In'), new_user_session_path, class: 'gl-button btn btn-confirm'
-
-- if show_import_button
-  = render 'projects/issues/import_csv/modal'
