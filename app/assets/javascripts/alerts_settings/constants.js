@@ -1,6 +1,5 @@
 import { s__, __ } from '~/locale';
 
-/* eslint-disable @gitlab/require-i18n-strings */
 export const i18n = {
   integrationTabs: {
     configureDetails: s__('AlertSettings|Configure details'),
@@ -74,12 +73,29 @@ export const i18n = {
 };
 
 export const integrationSteps = {
-  selectType: 'SELECT TYPE',
-  nameIntegration: 'NAME INTEGRATION',
+  selectType: 'SELECT_TYPE',
+  nameIntegration: 'NAME_INTEGRATION',
   setPrometheusApiUrl: 'SET_PROMETHEUS_API_URL',
   setSamplePayload: 'SET_SAMPLE_PAYLOAD',
   customizeMapping: 'CUSTOMIZE_MAPPING',
 };
+
+export const createStepNumbers = {
+  [integrationSteps.selectType]: 1,
+  [integrationSteps.nameIntegration]: 2,
+  [integrationSteps.setPrometheusApiUrl]: 2,
+  [integrationSteps.setSamplePayload]: 3,
+  [integrationSteps.customizeMapping]: 4,
+};
+
+export const editStepNumbers = {
+  [integrationSteps.selectType]: 1,
+  [integrationSteps.nameIntegration]: 1,
+  [integrationSteps.setPrometheusApiUrl]: null,
+  [integrationSteps.setSamplePayload]: 2,
+  [integrationSteps.customizeMapping]: 3,
+};
+
 export const integrationTypes = {
   none: { value: '', text: s__('AlertSettings|Select integration type') },
   http: { value: 'HTTP', text: s__('AlertSettings|HTTP Endpoint') },
@@ -97,12 +113,11 @@ export const JSON_VALIDATE_DELAY = 250;
 
 export const targetPrometheusUrlPlaceholder = 'http://prometheus.example.com/';
 
-export const sectionHash = 'js-alert-management-settings';
-
 /**
  * Tracks snowplow event when user views alerts integration list
  */
 export const trackAlertIntegrationsViewsOptions = {
+  /* eslint-disable-next-line @gitlab/require-i18n-strings */
   category: 'Alert Integrations',
   action: 'view_alert_integrations_list',
 };
@@ -111,3 +126,5 @@ export const mappingFields = {
   mapping: 'mapping',
   fallback: 'fallback',
 };
+
+export const viewCredentialsTabIndex = 1;

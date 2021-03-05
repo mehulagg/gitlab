@@ -20,17 +20,18 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   integrationTypes,
   integrationSteps,
+  createStepNumbers,
+  editStepNumbers,
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
   typeSet,
+  viewCredentialsTabIndex,
   i18n,
 } from '../constants';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 import parseSamplePayloadQuery from '../graphql/queries/parse_sample_payload.query.graphql';
 import MappingBuilder from './alert_mapping_builder.vue';
 import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
-
-const viewCredentialsTabIndex = 1;
 
 export default {
   placeholders: {
@@ -187,6 +188,11 @@ export default {
     isSelectDisabled() {
       return this.currentIntegration !== null || !this.canAddIntegration;
     },
+    viewCredentialsHelpMsg() {
+      return this.isPrometheus
+        ? i18n.integrationFormSteps.setupCredentials.prometheusHelp
+        : i18n.integrationFormSteps.setupCredentials.help;
+    },
   },
   watch: {
     currentIntegration(val) {
@@ -326,27 +332,12 @@ export default {
       this.updateMapping([]);
     },
     getLabelWithStepNumber(step, label) {
-      let stepNumber;
+      let stepNumber = editStepNumbers[step];
 
-      switch (step) {
-        case integrationSteps.selectType:
-          stepNumber = 1;
-          break;
-        case integrationSteps.nameIntegration:
-          stepNumber = this.isCreating ? 2 : 1;
-          break;
-        case integrationSteps.setPrometheusApiUrl:
-          stepNumber = this.isCreating ? 2 : null;
-          break;
-        case integrationSteps.setSamplePayload:
-          stepNumber = this.isCreating ? 3 : 2;
-          break;
-        case integrationSteps.customizeMapping:
-          stepNumber = this.isCreating ? 4 : 3;
-          break;
-        default:
-          break;
+      if (this.isCreating) {
+        stepNumber = createStepNumbers[step];
       }
+
       return stepNumber ? `${stepNumber}.${label}` : label;
     },
   },
@@ -534,11 +525,7 @@ export default {
 
       <gl-tab :title="$options.i18n.integrationTabs.viewCredentials" :disabled="isCreating">
         <alert-settings-form-help-block
-          :message="
-            isPrometheus
-              ? $options.i18n.integrationFormSteps.setupCredentials.prometheusHelp
-              : $options.i18n.integrationFormSteps.setupCredentials.help
-          "
+          :message="viewCredentialsHelpMsg"
           link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
         />
 
