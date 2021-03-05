@@ -5,21 +5,29 @@ module Ci
     include BaseServiceUtility
     include ::Gitlab::Utils::StrongMemoize
 
-    # Adds a batch of job artifacts to the ci_deleted_objects table
-    # for asyncronous destruction of the objects in ObjectStorage via Ci::DeleteObjectsService
-    # and then deletes the batch of related ci_job_artifacts records.
+    MAX_JOB_ARTIFACT_BATCH_SIZE = 10_000
+
+    # Adds the passed batch of job artifacts to the `ci_deleted_objects` table
+    # for asyncronous destruction of the objects in Object Storage via the `Ci::DeleteObjectsService`
+    # and then deletes the batch of related `ci_job_artifacts` records.
     # Params:
-    # +job_artifacts+:: A relation of job artifacts to destroy
+    # +job_artifacts+:: A relation of job artifacts to destroy (fewer than MAX_JOB_ARTIFACT_BATCH_SIZE)
     # +pick_up_at+:: When to pick up for deletion of files
     # Returns:
-    # +Hash+:: A hash with status and size keys
+    # +Hash+:: A hash with status and destroyed_artifacts_count keys
     def initialize(job_artifacts, pick_up_at: nil)
+      @artifacts_count = job_artifacts.count
+
+      raise ArgumentError if @artifacts_count > MAX_JOB_ARTIFACT_BATCH_SIZE
+
       @job_artifacts = job_artifacts.with_destroy_preloads.to_a
       @pick_up_at = pick_up_at
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
     def execute
+      return success(destroyed_artifacts_count: @artifacts_count) if @job_artifacts.empty?
+
       Ci::DeletedObject.transaction do
         Ci::DeletedObject.bulk_import(@job_artifacts, @pick_up_at)
         Ci::JobArtifact.id_in(@job_artifacts.map(&:id)).delete_all
@@ -28,11 +36,13 @@ module Ci
 
       # This is executed outside of the transaction because it depends on Redis
       update_project_statistics
-      increment_monitoring_statistics(@job_artifacts.size)
+      increment_monitoring_statistics(@artifacts_count)
 
-      success(size: @job_artifacts.size)
+      success(destroyed_artifacts_count: @artifacts_count)
     end
     # rubocop: enable CodeReuse/ActiveRecord
+
+    private
 
     # This method is implemented in EE and it must do only database work
     def destroy_related_records(artifacts); end

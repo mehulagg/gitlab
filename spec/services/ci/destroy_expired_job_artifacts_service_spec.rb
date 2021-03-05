@@ -236,5 +236,17 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
         expect { subject }.to change { Ci::JobArtifact.count }.by(-1)
       end
     end
+
+    context 'when all artifacts are locked' do
+      before do
+        pipeline = create(:ci_pipeline, locked: :artifacts_locked)
+        job = create(:ci_build, pipeline: pipeline)
+        artifact.update!(job: job)
+      end
+
+      it 'destroys no artifacts' do
+        expect { subject }.to change { Ci::JobArtifact.count }.by(0)
+      end
+    end
   end
 end

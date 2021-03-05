@@ -33,15 +33,19 @@ module Ci
 
     def destroy_job_artifacts_with_slow_iteration(start_at)
       Ci::JobArtifact.expired_before(start_at).each_batch(of: BATCH_SIZE, column: :expire_at, order: :desc) do |relation, index|
+        # For performance reasons, join with ci_pipelines after the batch is queried.
+        # See: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47496
         artifacts = relation.unlocked
 
-        @removed_artifacts_count += parallel_destroy_batch(artifacts)[:size] if artifacts.any?
+        service_response = destroy_batch_async(artifacts)
+        @removed_artifacts_count += service_response[:destroyed_artifacts_count]
+
         break if loop_timeout?(start_at)
         break if index >= LOOP_LIMIT
       end
     end
 
-    def parallel_destroy_batch(artifacts)
+    def destroy_batch_async(artifacts)
       Ci::JobArtifactsDestroyAsyncService.new(artifacts).execute
     end
 
