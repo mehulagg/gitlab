@@ -98,7 +98,7 @@ To enable or disable Auto DevOps at the group level:
 1. Select the **Default to Auto DevOps pipeline** checkbox to enable it.
 1. Click **Save changes** for the changes to take effect.
 
-### At the instance level (Administrators only)
+### At the instance level **(FREE SELF)**
 
 Even when disabled at the instance level, group owners and project maintainers can still enable
 Auto DevOps at the group and project level, respectively.
