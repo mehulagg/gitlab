@@ -633,21 +633,12 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const errors = data[boardType]?.errors;
-        const assignees = data[boardType]?.assignees.nodes;
+        const { errors } = data;
+        const assignees = data.users.nodes;
 
         if (errors?.[0]) {
           throw new Error(errors[0]);
         }
-
-        // todo: check, but I think we in fact do not want to do this after all
-        // if (!getters.shouldUseGraphQL) {
-        //   labels = labels.map((label) => ({
-        //     ...label,
-        //     id: getIdFromGraphQLId(label.id),
-        //   }));
-        // }
-
         commit(types.RECEIVE_ASSIGNEES_SUCCESS, assignees);
       })
       .catch((e) => {

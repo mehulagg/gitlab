@@ -1,0 +1,9 @@
+#import "~/graphql_shared/fragments/user.fragment.graphql"
+
+query ProjectBoardAssignees($search: String) {
+  users(search: $search) {
+    nodes {
+      ...User
+    }
+  }
+}
