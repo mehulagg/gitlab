@@ -1,5 +1,5 @@
 <script>
-import { GlLabel, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlLabel, GlTooltipDirective, GlIcon, GlLink, GlPopover } from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import { mapActions, mapState } from 'vuex';
 import boardCardInner from 'ee_else_ce/boards/mixins/board_card_inner';
@@ -17,11 +17,14 @@ export default {
   components: {
     GlLabel,
     GlIcon,
+    GlPopover,
+    GlLink,
     UserAvatarLink,
     TooltipOnTruncate,
     IssueDueDate,
     IssueTimeEstimate,
     IssueCardWeight: () => import('ee_component/boards/components/issue_card_weight.vue'),
+    BoardBlockedPopover: () => import('./board_blocked_popover.vue'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -163,15 +166,7 @@ export default {
   <div>
     <div class="gl-display-flex" dir="auto">
       <h4 class="board-card-title gl-mb-0 gl-mt-0">
-        <gl-icon
-          v-if="item.blocked"
-          v-gl-tooltip
-          name="issue-block"
-          :title="blockedLabel"
-          class="issue-blocked-icon gl-mr-2"
-          :aria-label="blockedLabel"
-          data-testid="issue-blocked-icon"
-        />
+        <board-blocked-popover v-if="item.blocked" :item="item" />
         <gl-icon
           v-if="item.confidential"
           v-gl-tooltip

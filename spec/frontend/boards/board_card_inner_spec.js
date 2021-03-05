@@ -304,6 +304,7 @@ describe('Board card component', () => {
     });
   });
 
+  // TODO
   describe('blocked', () => {
     beforeEach(() => {
       wrapper.setProps({
