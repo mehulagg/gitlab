@@ -31,7 +31,7 @@ create [rotations](#rotations) for your schedule.
 
 ![Schedule Empty Grid](img/oncall_schedule_empty_grid_v13_10.png)
 
-## Update a schedule
+### Update a schedule
 
 Follow these steps to update a schedule:
 
@@ -40,7 +40,7 @@ Follow these steps to update a schedule:
 1. In the **Edit schedule** form, edit the information you wish to update.
 1. Click the **Edit schedule** button to save your changes.
 
-## Delete a schedule
+### Delete a schedule
 
 Follow these steps to delete a schedule:
 
