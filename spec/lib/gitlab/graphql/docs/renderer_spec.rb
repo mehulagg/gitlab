@@ -15,11 +15,22 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
         end
       end
 
-      GraphQL::Schema.define(query: query_type)
+      GraphQL::Schema.define(
+        query: query_type,
+        resolve_type: ->(obj, ctx) { raise 'Not a real schema' }
+      )
     end
 
-    let_it_be(:template) { Rails.root.join('lib/gitlab/graphql/docs/templates/', 'default.md.haml') }
+    let_it_be(:template) { Rails.root.join('lib/gitlab/graphql/docs/templates/default.md.haml') }
     let(:field_description) { 'List of objects.' }
+
+    let(:type) do
+      Class.new(::Types::BaseObject) do
+        graphql_name 'Foo'
+        description 'A foo.'
+        field :id, GraphQL::INT_TYPE, null: true
+      end
+    end
 
     subject(:contents) do
       described_class.new(
@@ -29,7 +40,19 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       ).contents
     end
 
-    context 'A type with a field with a [Array] return type' do
+    it 'contains the expected sections' do
+      expect(contents.lines.map(&:chomp)).to include(
+        '## `Query` type',
+        '## Object types',
+        '## Enumeration types',
+        '## Scalar types',
+        '## Abstract types',
+        '### Unions',
+        '### Interfaces'
+      )
+    end
+
+    context 'with a field that has a [Array] return type' do
       let(:type) do
         Class.new(Types::BaseObject) do
           graphql_name 'ArrayTest'
@@ -39,29 +62,33 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       end
 
       specify do
+        type_name = '[String!]!'
+        inner_type = 'string'
         expectation = <<~DOC
           ### `ArrayTest`
 
           | Field | Type | Description |
           | ----- | ---- | ----------- |
-          | `foo` | String! => Array | A description. |
+          | `foo` | [`#{type_name}`](##{inner_type}) | A description. |
         DOC
 
         is_expected.to include(expectation)
       end
 
-      context 'query generation' do
+      context 'when generating queries section' do
         let(:expectation) do
           <<~DOC
             ### `foo`
 
             List of objects.
 
+            Returns [`ArrayTest`](#arraytest)
+
             #### Arguments
 
             | Name | Type | Description |
             | ---- | ---- | ----------- |
-            | `id` | ID | ID of the object. |
+            | `id` | [`ID`](#id) | ID of the object. |
           DOC
         end
 
@@ -79,7 +106,7 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       end
     end
 
-    context 'A type with fields defined in reverse alphabetical order' do
+    context 'with type with fields defined in reverse alphabetical order' do
       let(:type) do
         Class.new(Types::BaseObject) do
           graphql_name 'OrderingTest'
@@ -95,20 +122,24 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
 
           | Field | Type | Description |
           | ----- | ---- | ----------- |
-          | `bar` | String! | A description of bar field. |
-          | `foo` | String! | A description of foo field. |
+          | `bar` | [`String!`](#string) | A description of bar field. |
+          | `foo` | [`String!`](#string) | A description of foo field. |
         DOC
 
         is_expected.to include(expectation)
       end
     end
 
-    context 'A type with a deprecated field' do
+    context 'with a type with a deprecated field' do
       let(:type) do
         Class.new(Types::BaseObject) do
           graphql_name 'DeprecatedTest'
 
-          field :foo, GraphQL::STRING_TYPE, null: false, deprecated: { reason: 'This is deprecated', milestone: '1.10' }, description: 'A description.'
+          field :foo,
+                type: GraphQL::STRING_TYPE,
+                null: false,
+                deprecated: { reason: 'This is deprecated', milestone: '1.10' },
+                description: 'A description.'
         end
       end
 
@@ -118,20 +149,23 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
 
           | Field | Type | Description |
           | ----- | ---- | ----------- |
-          | `foo` **{warning-solid}** | String! | **Deprecated:** This is deprecated. Deprecated in 1.10. |
+          | `foo` **{warning-solid}** | [`String!`](#string) | **Deprecated:** This is deprecated. Deprecated in 1.10. |
         DOC
 
         is_expected.to include(expectation)
       end
     end
 
-    context 'A type with an emum field' do
+    context 'with a type with an emum field' do
       let(:type) do
         enum_type = Class.new(Types::BaseEnum) do
           graphql_name 'MyEnum'
 
-          value 'BAZ', description: 'A description of BAZ.'
-          value 'BAR', description: 'A description of BAR.', deprecated: { reason: 'This is deprecated', milestone: '1.10' }
+          value 'BAZ',
+                description: 'A description of BAZ.'
+          value 'BAR',
+                description: 'A description of BAR.',
+                deprecated: { reason: 'This is deprecated', milestone: '1.10' }
         end
 
         Class.new(Types::BaseObject) do
@@ -152,6 +186,129 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
         DOC
 
         is_expected.to include(expectation)
+      end
+    end
+
+    context 'with a type that has a GlobalID typed field' do
+      let(:type) do
+        Class.new(Types::BaseObject) do
+          graphql_name 'IDTest'
+          description 'A test for rendering IDs.'
+
+          field :foo, ::Types::GlobalIDType[::User], null: true, description: 'A user foo.'
+        end
+      end
+
+      specify do
+        type_section = <<~DOC
+          ### `IDTest`
+
+          A test for rendering IDs.
+
+          | Field | Type | Description |
+          | ----- | ---- | ----------- |
+          | `foo` | [`UserID`](#userid) | A user foo. |
+        DOC
+
+        id_section = <<~DOC
+          ### `UserID`
+
+          Identifier of `User` objects. See GlobalID.
+        DOC
+
+        is_expected.to include(type_section)
+        is_expected.to include(id_section)
+      end
+    end
+
+    context 'when there is an interace and a union' do
+      let(:type) do
+        user = Class.new(::Types::BaseObject)
+        user.graphql_name 'User'
+        user.field :user_field, ::GraphQL::STRING_TYPE, null: true
+        group = Class.new(::Types::BaseObject)
+        group.graphql_name 'Group'
+        group.field :group_field, ::GraphQL::STRING_TYPE, null: true
+
+        union = Class.new(::Types::BaseUnion)
+        union.graphql_name 'UserOrGroup'
+        union.description 'Either a user or a group.'
+        union.possible_types user, group
+
+        interface = Module.new
+        interface.include(::Types::BaseInterface)
+        interface.graphql_name 'Flying'
+        interface.description 'Something that can fly.'
+        interface.field :flight_speed, GraphQL::INT_TYPE, null: true, description: 'Speed in mph.'
+
+        african_swallow = Class.new(::Types::BaseObject)
+        african_swallow.graphql_name 'AfricanSwallow'
+        african_swallow.description 'A swallow from Africa.'
+        african_swallow.implements interface
+        interface.orphan_types african_swallow
+
+        Class.new(::Types::BaseObject) do
+          graphql_name 'AbstactTypeTest'
+          description 'A test for abstract types.'
+
+          field :foo, union, null: true, description: 'The foo.'
+          field :flying, interface, null: true, description: 'A flying thing.'
+        end
+      end
+
+      specify do
+        type_section = <<~DOC
+          ### `AbstactTypeTest`
+
+          A test for abstract types.
+
+          | Field | Type | Description |
+          | ----- | ---- | ----------- |
+          | `flying` | [`Flying`](#flying) | A flying thing. |
+          | `foo` | [`UserOrGroup`](#userorgroup) | The foo. |
+        DOC
+
+        union_section = <<~DOC
+          #### `UserOrGroup`
+
+          Either a user or a group.
+
+          One of:
+
+          - [`Group`](#group)
+          - [`User`](#user)
+        DOC
+
+        interface_section = <<~DOC
+          #### `Flying`
+
+          Something that can fly.
+
+          Implementations:
+
+          - [`AfricanSwallow`](#africanswallow)
+
+          | Field | Type | Description |
+          | ----- | ---- | ----------- |
+          | `flightSpeed` | [`Int`](#int) | Speed in mph. |
+        DOC
+
+        implementation_section = <<~DOC
+          ### `AfricanSwallow`
+
+          A swallow from Africa.
+
+          | Field | Type | Description |
+          | ----- | ---- | ----------- |
+          | `flightSpeed` | [`Int`](#int) | Speed in mph. |
+        DOC
+
+        is_expected.to include(
+          type_section,
+          union_section,
+          interface_section,
+          implementation_section
+        )
       end
     end
   end

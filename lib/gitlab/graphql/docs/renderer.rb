@@ -16,6 +16,8 @@ module Gitlab
       class Renderer
         include Gitlab::Graphql::Docs::Helper
 
+        attr_reader :parsed_schema
+
         def initialize(schema, output_dir:, template:)
           @output_dir = output_dir
           @template = template

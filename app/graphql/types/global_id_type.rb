@@ -19,7 +19,14 @@ end
 module Types
   class GlobalIDType < BaseScalar
     graphql_name 'GlobalID'
-    description 'A global identifier'
+    description <<~DESC
+      A global identifier.
+
+      A global identifier represents an object uniquely across the application.
+      An example of such an identifier is "gid://gitlab/User/1".
+
+      Global identifiers are encoded as strings.
+    DESC
 
     # @param value [GID]
     # @return [String]
@@ -46,7 +53,7 @@ module Types
 
       @id_types[model_class] ||= Class.new(self) do
         graphql_name "#{model_class.name.gsub(/::/, '')}ID"
-        description "Identifier of #{model_class.name}."
+        description "Identifier of `#{model_class.name}` objects. See GlobalID."
 
         self.define_singleton_method(:to_s) do
           graphql_name

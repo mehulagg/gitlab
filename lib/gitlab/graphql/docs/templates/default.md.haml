@@ -28,6 +28,7 @@
 
 - sorted_by_name(queries).each do |query|
   = render_name_and_description(query)
+  = render_return_type(query)
   - unless query[:arguments].empty?
     ~ "#### Arguments\n"
     ~ "| Name | Type | Description |"
@@ -77,3 +78,57 @@
     - sorted_by_name(enum[:values]).each do |value|
       = render_enum_value(value)
     \
+
+:plain
+  ## Scalar types
+
+  Scalar values are simple atomic values, and do not have fields of their own.
+  Basic scalars include strings, boolean values and numbers, but this schema also
+  defines some custom scalar values.
+
+  This schema uses custom scalar types for identifiers, with a specific type for
+  each kind of object.
+
+  For more information, read about [Scalar Types](https://graphql.org/learn/schema/#scalar-types) on `graphql.org`.
+\
+
+- graphql_scalar_types.each do |type|
+  = render_name_and_description(type)
+
+:plain
+  ## Abstract types
+
+  Abstract types (unions and interfaces) represent ways the schema can represent
+  values that may be one of several concrete types (a union of those types), or
+  values that may share some, but not all of their fields (such types are said to
+  implement an interface).
+\
+
+:plain
+  ### Unions
+\
+
+- graphql_union_types.each do |type|
+  = render_name_and_description(type, 4)
+  One of:
+  \
+  - type[:possible_types].each do |type_name|
+    ~ "- [`#{type_name}`](##{type_name.downcase})"
+  \
+
+:plain
+  ### Interfaces
+\
+
+- graphql_interface_types.each do |type|
+  = render_name_and_description(type, 4)
+  Implementations:
+  \
+  - type[:implemented_by].each do |type_name|
+    ~ "- [`#{type_name}`](##{type_name.downcase})"
+  \
+  ~ "| Field | Type | Description |"
+  ~ "| ----- | ---- | ----------- |"
+  - sorted_by_name(type[:fields] + type[:connections]).each do |field|
+    = render_field(field)
+  \
