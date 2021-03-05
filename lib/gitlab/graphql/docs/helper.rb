@@ -48,7 +48,7 @@ module Gitlab
         def render_field(field)
           '| %s | %s | %s |' % [
             render_name(field),
-            render_field_type(field[:type][:info]),
+            render_field_type(field[:type]),
             render_description(field)
             ]
         end
@@ -79,13 +79,11 @@ module Gitlab
         # This makes GitLab docs renderer thinks they are links so here
         # we change them to be rendered as: String! => Array.
         def render_field_type(type)
-          array_type = type[/\[(.+)\]/, 1]
+          "[`#{type[:info]}`](##{type[:name]})"
+        end
 
-          if array_type
-            "#{array_type} => Array"
-          else
-            type
-          end
+        def render_return_type(query)
+          "Returns #{render_field_type(query[:type])}\n"
         end
 
         # We are ignoring connections and built in types for now,

@@ -28,6 +28,7 @@
 
 - sorted_by_name(queries).each do |query|
   = render_name_and_description(query)
+  = render_return_type(query)
   - unless query[:arguments].empty?
     ~ "#### Arguments\n"
     ~ "| Name | Type | Description |"
@@ -77,3 +78,19 @@
     - sorted_by_name(enum[:values]).each do |value|
       = render_enum_value(value)
     \
+
+:plain
+  ## Scalar Types
+
+  Scalar values are simple atomic values, and do not have fields of their own.
+  Basic scalars include strings, boolean values and numbers, but this schema also
+  defines some custom scalar values.
+
+  This schema uses custom scalar types for identifiers, with a specific type for
+  each kind of object.
+
+  For more information, read about [Scalar Types](https://graphql.org/learn/schema/#scalar-types) on `graphql.org`.
+\
+
+- graphql_scalar_types.each do |type|
+  = render_name_and_description(type)

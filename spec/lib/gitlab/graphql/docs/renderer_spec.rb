@@ -18,7 +18,7 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       GraphQL::Schema.define(query: query_type)
     end
 
-    let_it_be(:template) { Rails.root.join('lib/gitlab/graphql/docs/templates/', 'default.md.haml') }
+    let_it_be(:template) { Rails.root.join('lib/gitlab/graphql/docs/templates/default.md.haml') }
     let(:field_description) { 'List of objects.' }
 
     subject(:contents) do
@@ -29,7 +29,7 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       ).contents
     end
 
-    context 'A type with a field with a [Array] return type' do
+    context 'with a field that has a [Array] return type' do
       let(:type) do
         Class.new(Types::BaseObject) do
           graphql_name 'ArrayTest'
@@ -39,29 +39,33 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       end
 
       specify do
+        type_name = '[String!]!'
+        inner_type = 'String'
         expectation = <<~DOC
           ### `ArrayTest`
 
           | Field | Type | Description |
           | ----- | ---- | ----------- |
-          | `foo` | String! => Array | A description. |
+          | `foo` | [`#{type_name}`](##{inner_type}) | A description. |
         DOC
 
         is_expected.to include(expectation)
       end
 
-      context 'query generation' do
+      context 'when generating queries section' do
         let(:expectation) do
           <<~DOC
             ### `foo`
 
             List of objects.
 
+            Returns [`ArrayTest`](#ArrayTest)
+
             #### Arguments
 
             | Name | Type | Description |
             | ---- | ---- | ----------- |
-            | `id` | ID | ID of the object. |
+            | `id` | [`ID`](#ID) | ID of the object. |
           DOC
         end
 
@@ -79,7 +83,7 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       end
     end
 
-    context 'A type with fields defined in reverse alphabetical order' do
+    context 'with type with fields defined in reverse alphabetical order' do
       let(:type) do
         Class.new(Types::BaseObject) do
           graphql_name 'OrderingTest'
@@ -95,20 +99,24 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
 
           | Field | Type | Description |
           | ----- | ---- | ----------- |
-          | `bar` | String! | A description of bar field. |
-          | `foo` | String! | A description of foo field. |
+          | `bar` | [`String!`](#String) | A description of bar field. |
+          | `foo` | [`String!`](#String) | A description of foo field. |
         DOC
 
         is_expected.to include(expectation)
       end
     end
 
-    context 'A type with a deprecated field' do
+    context 'with a type with a deprecated field' do
       let(:type) do
         Class.new(Types::BaseObject) do
           graphql_name 'DeprecatedTest'
 
-          field :foo, GraphQL::STRING_TYPE, null: false, deprecated: { reason: 'This is deprecated', milestone: '1.10' }, description: 'A description.'
+          field :foo,
+                type: GraphQL::STRING_TYPE,
+                null: false,
+                deprecated: { reason: 'This is deprecated', milestone: '1.10' },
+                description: 'A description.'
         end
       end
 
@@ -118,20 +126,23 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
 
           | Field | Type | Description |
           | ----- | ---- | ----------- |
-          | `foo` **{warning-solid}** | String! | **Deprecated:** This is deprecated. Deprecated in 1.10. |
+          | `foo` **{warning-solid}** | [`String!`](#String) | **Deprecated:** This is deprecated. Deprecated in 1.10. |
         DOC
 
         is_expected.to include(expectation)
       end
     end
 
-    context 'A type with an emum field' do
+    context 'with a type with an emum field' do
       let(:type) do
         enum_type = Class.new(Types::BaseEnum) do
           graphql_name 'MyEnum'
 
-          value 'BAZ', description: 'A description of BAZ.'
-          value 'BAR', description: 'A description of BAR.', deprecated: { reason: 'This is deprecated', milestone: '1.10' }
+          value 'BAZ',
+                description: 'A description of BAZ.'
+          value 'BAR',
+                description: 'A description of BAR.',
+                deprecated: { reason: 'This is deprecated', milestone: '1.10' }
         end
 
         Class.new(Types::BaseObject) do
@@ -152,6 +163,38 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
         DOC
 
         is_expected.to include(expectation)
+      end
+    end
+
+    context 'with a type that has a GlobalID typed field' do
+      let(:type) do
+        Class.new(Types::BaseObject) do
+          graphql_name 'IDTest'
+          description 'A test for rendering IDs.'
+
+          field :foo, ::Types::GlobalIDType[::User], null: true, description: 'A user foo.'
+        end
+      end
+
+      specify do
+        type_section = <<~DOC
+          ### `IDTest`
+
+          A test for rendering IDs.
+
+          | Field | Type | Description |
+          | ----- | ---- | ----------- |
+          | `foo` | [`UserID`](#UserID) | A user foo. |
+        DOC
+
+        id_section = <<~DOC
+          ### `UserID`
+
+          Identifier of `User` objects. See GlobalID.
+        DOC
+
+        is_expected.to include(type_section)
+        is_expected.to include(id_section)
       end
     end
   end
