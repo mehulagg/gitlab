@@ -20,6 +20,7 @@ export default {
   i18n: {
     ...JOB_SIDEBAR,
   },
+  borderTopClass: ['gl-border-t-solid', 'gl-border-t-1', 'gl-border-t-gray-100'],
   forwardDeploymentFailureModalId,
   components: {
     ArtifactsBlock,
@@ -76,7 +77,7 @@ export default {
   <aside class="right-sidebar build-sidebar" data-offset-top="101" data-spy="affix">
     <div class="sidebar-container">
       <div class="blocks-container">
-        <div class="block d-flex flex-nowrap align-items-center">
+        <div class="gl-py-5 gl-display-flex gl-align-items-center">
           <tooltip-on-truncate :title="job.name" truncate-target="child"
             ><h4 class="my-0 mr-2 gl-text-truncate">
               {{ job.name }}
@@ -111,18 +112,22 @@ export default {
           />
         </div>
 
-        <div v-if="job.terminal_path || job.new_issue_path" class="block retry-link">
+        <div
+          v-if="job.terminal_path || job.new_issue_path"
+          class="gl-py-5"
+          :class="$options.borderTopClass"
+        >
           <gl-link
             v-if="job.new_issue_path"
             :href="job.new_issue_path"
-            class="btn gl-button btn-success-secondary float-left mr-2 gl-text-decoration-none!"
+            class="btn gl-button btn-success-secondary mr-2 gl-text-decoration-none!"
             data-testid="job-new-issue"
             >{{ $options.i18n.newIssue }}
           </gl-link>
           <gl-link
             v-if="job.terminal_path"
             :href="job.terminal_path"
-            class="btn btn-primary btn-inverted visible-md-block visible-lg-block float-left"
+            class="btn btn-primary btn-inverted"
             target="_blank"
             data-testid="terminal-link"
           >
@@ -130,17 +135,35 @@ export default {
             <gl-icon :size="14" name="external-link" />
           </gl-link>
         </div>
-        <job-sidebar-details-container />
-        <artifacts-block v-if="hasArtifact" :artifact="job.artifact" :help-url="artifactHelpUrl" />
-        <trigger-block v-if="hasTriggers" :trigger="job.trigger" />
+
+        <job-sidebar-details-container :class="$options.borderTopClass" />
+
+        <artifacts-block
+          v-if="hasArtifact"
+          class="gl-py-5"
+          :class="$options.borderTopClass"
+          :artifact="job.artifact"
+          :help-url="artifactHelpUrl"
+        />
+
+        <trigger-block
+          v-if="hasTriggers"
+          class="gl-py-5"
+          :class="$options.borderTopClass"
+          :trigger="job.trigger"
+        />
+
         <commit-block
           :commit="commit"
-          :is-last-block="hasStages"
+          class="gl-py-5"
+          :class="$options.borderTopClass"
           :merge-request="job.merge_request"
         />
 
         <stages-dropdown
           v-if="job.pipeline"
+          class="gl-py-5"
+          :class="$options.borderTopClass"
           :pipeline="job.pipeline"
           :selected-stage="selectedStage"
           :stages="stages"
