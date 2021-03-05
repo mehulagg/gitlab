@@ -9,6 +9,7 @@ query instance(
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
   $state: [VulnerabilityState!]
+  $scanners: [VulnerabilityScannerInputType!]
   $sort: VulnerabilitySort
   $hasIssues: Boolean
   $hasResolution: Boolean
@@ -21,6 +22,7 @@ query instance(
     state: $state
     projectId: $projectId
     scanner: $scanner
+    scanners: $scanners
     sort: $sort
     hasIssues: $hasIssues
     hasResolution: $hasResolution
