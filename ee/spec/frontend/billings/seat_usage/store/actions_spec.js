@@ -157,7 +157,7 @@ describe('seats actions', () => {
 
     describe('on success', () => {
       beforeEach(() => {
-        mock.onDelete('/api/v4/groups/1/billable_members/2').reply(httpStatusCodes.OK);
+        mock.onDelete('/api/v4/groups/1/members/2').reply(httpStatusCodes.OK);
       });
 
       it('dispatches the removeMemberSuccess action', async () => {
@@ -173,9 +173,7 @@ describe('seats actions', () => {
 
     describe('on error', () => {
       beforeEach(() => {
-        mock
-          .onDelete('/api/v4/groups/1/billable_members/2')
-          .reply(httpStatusCodes.UNPROCESSABLE_ENTITY);
+        mock.onDelete('/api/v4/groups/1/members/2').reply(httpStatusCodes.UNPROCESSABLE_ENTITY);
       });
 
       it('dispatches the removeMemberError action', async () => {
