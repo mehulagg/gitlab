@@ -26909,10 +26909,16 @@ msgstr ""
 msgid "Select an existing Kubernetes cluster or create a new one."
 msgstr ""
 
+msgid "Select appropriate regulatory standard."
+msgstr ""
+
 msgid "Select assignee"
 msgstr ""
 
 msgid "Select branch"
+msgstr ""
+
+msgid "Select desired regulatory standard."
 msgstr ""
 
 msgid "Select due date"
@@ -26961,9 +26967,6 @@ msgid "Select project to choose zone"
 msgstr ""
 
 msgid "Select projects"
-msgstr ""
-
-msgid "Select required regulatory standard."
 msgstr ""
 
 msgid "Select reviewer(s)"
