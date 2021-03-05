@@ -11,7 +11,7 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
       expect(zip_service).to receive(:execute).and_call_original
     end
 
-    expect(described_class.new(project, ignore_invalid_entries: true).execute[:status]).to eq(:error)
+    expect(described_class.new(project, ignore_invalid_entries: true).execute[:status]).to eq(:success)
   end
 
   it 'marks pages as not deployed if public directory is absent' do
@@ -20,8 +20,8 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
     expect(project.pages_metadatum.reload.deployed).to eq(true)
 
     expect(service.execute).to(
-      eq(status: :error,
-         message: "Can't create zip archive: Can not find valid public dir in #{project.pages_path}")
+      eq(status: :success,
+         message: "Invalid or missing public directory at #{project.pages_path}. Corrected project to be not deployed")
     )
 
     expect(project.pages_metadatum.reload.deployed).to eq(false)
@@ -34,10 +34,7 @@ RSpec.describe Pages::MigrateLegacyStorageToDeploymentService do
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)
 
-    expect(service.execute).to(
-      eq(status: :error,
-         message: "Can't create zip archive: Can not find valid public dir in #{project.pages_path}")
-    )
+    expect(service.execute).to eq(status: :success)
 
     expect(project.pages_metadatum.reload.deployed).to eq(true)
   end

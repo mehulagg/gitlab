@@ -30,9 +30,15 @@ module Pages
       zip_result = ::Pages::ZipDirectoryService.new(project.pages_path, ignore_invalid_entries: @ignore_invalid_entries).execute
 
       if zip_result[:status] == :error
-        if !project.pages_metadatum&.reload&.pages_deployment &&
-           Feature.enabled?(:pages_migration_mark_as_not_deployed, project)
-          project.mark_pages_as_not_deployed
+        if zip_result[:invalid_public] && Feature.enabled?(:pages_migration_mark_as_not_deployed, project)
+
+          unless project.pages_metadatum&.reload&.pages_deployment
+            project.mark_pages_as_not_deployed
+
+            return success(message: "Invalid or missing public directory at #{project.pages_path}. Corrected project to be not deployed")
+          end
+
+          return success # we can consider project successfully migrated if we have deployment
         end
 
         return error("Can't create zip archive: #{zip_result[:message]}")

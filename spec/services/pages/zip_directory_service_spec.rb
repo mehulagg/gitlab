@@ -30,7 +30,7 @@ RSpec.describe Pages::ZipDirectoryService do
 
     expect(
       described_class.new("/tmp/not/existing/dir").execute
-    ).to eq(status: :error, message: "Can not find valid public dir in /tmp/not/existing/dir")
+    ).to eq(status: :error, message: "Can not find valid public dir in /tmp/not/existing/dir", invalid_public: true)
   end
 
   it 'returns nils if there is no public directory and does not leave archive' do
@@ -38,6 +38,7 @@ RSpec.describe Pages::ZipDirectoryService do
     expect(message).to eq("Can not find valid public dir in #{@work_dir}")
     expect(archive).to eq(nil)
     expect(entries_count).to eq(nil)
+    expect(result[:invalid_public]).to eq(true)
 
     expect(File.exist?(File.join(@work_dir, '@migrated.zip'))).to eq(false)
   end
@@ -51,6 +52,7 @@ RSpec.describe Pages::ZipDirectoryService do
     expect(message).to eq("Can not find valid public dir in #{@work_dir}")
     expect(archive).to eq(nil)
     expect(entries_count).to eq(nil)
+    expect(result[:invalid_public]).to eq(true)
   end
 
   context 'when there is a public directory' do
