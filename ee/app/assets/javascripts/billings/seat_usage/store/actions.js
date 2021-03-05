@@ -28,17 +28,17 @@ export const resetMembers = ({ commit }) => {
   commit(types.RESET_MEMBERS);
 };
 
-export const setMemberToRemove = ({ commit }, member) => {
-  commit(types.SET_MEMBER_TO_REMOVE, member);
+export const setBillableMemberToRemove = ({ commit }, member) => {
+  commit(types.SET_BILLABLE_MEMBER_TO_REMOVE, member);
 };
 
-export const removeMember = ({ dispatch, state }) => {
-  return GroupsApi.removeMemberFromGroup(state.namespaceId, state.memberToRemove.id)
-    .then(() => dispatch('removeMemberSuccess'))
-    .catch(() => dispatch('removeMemberError'));
+export const removeBillableMember = ({ dispatch, state }) => {
+  return GroupsApi.removeBillableMemberFromGroup(state.namespaceId, state.memberToRemove.id)
+    .then(() => dispatch('removeBillableMemberSuccess'))
+    .catch(() => dispatch('removeBillableMemberError'));
 };
 
-export const removeMemberSuccess = ({ dispatch, commit }) => {
+export const removeBillableMemberSuccess = ({ dispatch, commit }) => {
   dispatch('fetchBillableMembersList');
 
   createFlash({
@@ -49,7 +49,7 @@ export const removeMemberSuccess = ({ dispatch, commit }) => {
   commit(types.REMOVE_MEMBER_SUCCESS);
 };
 
-export const removeMemberError = ({ commit }) => {
+export const removeBillableMemberError = ({ commit }) => {
   createFlash({
     message: s__('Billing|An error occurred while removing a billable member'),
   });

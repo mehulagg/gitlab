@@ -8,8 +8,8 @@ import {
 } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import {
-  REMOVE_MEMBER_MODAL_ID,
-  REMOVE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE,
+  REMOVE_BILLABLE_MEMBER_MODAL_ID,
+  REMOVE_BILLABLE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE,
 } from 'ee/billings/seat_usage/constants';
 import csrf from '~/lib/utils/csrf';
 import { __, s__, sprintf } from '~/locale';
@@ -42,7 +42,7 @@ export default {
       return this.enteredMemberUsername === this.memberToRemove.username;
     },
     modalText() {
-      return REMOVE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE;
+      return REMOVE_BILLABLE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE;
     },
     actionPrimaryProps() {
       return {
@@ -67,9 +67,9 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['removeMember', 'setMemberToRemove']),
+    ...mapActions(['removeBillableMember', 'setBillableMemberToRemove']),
   },
-  modalId: REMOVE_MEMBER_MODAL_ID,
+  modalId: REMOVE_BILLABLE_MEMBER_MODAL_ID,
   i18n: {
     inputLabel: s__('Billing|Type %{username} to confirm'),
   },
@@ -86,8 +86,8 @@ export default {
     :title="modalTitle"
     data-qa-selector="remove_member_modal"
     :ok-disabled="!canSubmit"
-    @primary="removeMember"
-    @canceled="setMemberToRemove(null)"
+    @primary="removeBillableMember"
+    @canceled="setBillableMemberToRemove(null)"
   >
     <p>
       <gl-sprintf :message="modalText">

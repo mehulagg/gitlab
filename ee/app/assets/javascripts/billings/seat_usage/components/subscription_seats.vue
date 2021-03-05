@@ -17,7 +17,7 @@ import {
   FIELDS,
   AVATAR_SIZE,
   SEARCH_DEBOUNCE_MS,
-  REMOVE_MEMBER_MODAL_ID,
+  REMOVE_BILLABLE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
@@ -95,7 +95,7 @@ export default {
     this.fetchBillableMembersList();
   },
   methods: {
-    ...mapActions(['fetchBillableMembersList', 'resetMembers', 'setMemberToRemove']),
+    ...mapActions(['fetchBillableMembersList', 'resetMembers', 'setBillableMemberToRemove']),
     onSearchEnter() {
       this.debouncedSearch.cancel();
       this.executeQuery();
@@ -118,7 +118,7 @@ export default {
   },
   avatarSize: AVATAR_SIZE,
   fields: FIELDS,
-  removeMemberModalId: REMOVE_MEMBER_MODAL_ID,
+  removeBillableMemberModalId: REMOVE_BILLABLE_MEMBER_MODAL_ID,
 };
 </script>
 
@@ -195,8 +195,8 @@ export default {
       <template #cell(actions)="data">
         <gl-dropdown icon="ellipsis_h" right data-testid="user-actions">
           <gl-dropdown-item
-            v-gl-modal="$options.removeMemberModalId"
-            @click="setMemberToRemove(data.item.user)"
+            v-gl-modal="$options.removeBillableMemberModalId"
+            @click="setBillableMemberToRemove(data.item.user)"
           >
             {{ __('Remove user') }}
           </gl-dropdown-item>
@@ -213,6 +213,6 @@ export default {
       class="gl-mt-5"
     />
 
-    <remove-member-modal v-if="memberToRemove" :modal-id="$options.removeMemberModalId" />
+    <remove-member-modal v-if="memberToRemove" :modal-id="$options.removeBillableMemberModalId" />
   </section>
 </template>

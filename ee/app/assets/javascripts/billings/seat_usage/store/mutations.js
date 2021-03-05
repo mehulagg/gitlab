@@ -41,7 +41,7 @@ export default {
     state.isLoading = false;
   },
 
-  [types.SET_MEMBER_TO_REMOVE](state, memberToRemove) {
+  [types.SET_BILLABLE_MEMBER_TO_REMOVE](state, memberToRemove) {
     if (!memberToRemove) {
       state.memberToRemove = null;
     } else {
