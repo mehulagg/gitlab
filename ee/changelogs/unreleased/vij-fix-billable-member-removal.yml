@@ -1,5 +1,5 @@
 ---
-title: Fix Billable Member removal with a new API endpoint
+title: Add remove Billable Member API endpoint
 merge_request: 55645
 author:
-type: fixed
+type: added
