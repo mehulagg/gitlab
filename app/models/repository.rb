@@ -895,7 +895,7 @@ class Repository
   end
 
   def root_ref_sha
-    @root_ref_sha ||= commit(root_ref).sha
+    @root_ref_sha ||= commit(root_ref)&.sha
   end
 
   # If this method is not provided a set of branch names to check merge status,
