@@ -100,6 +100,10 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       end
 
       it_behaves_like 'error response', 'A participant has insufficient permissions to access the project'
+
+      it 'does not save the rotation' do
+        expect { execute }.not_to change(IncidentManagement::OncallRotation, :count)
+      end
     end
 
     context 'participant is included multiple times' do

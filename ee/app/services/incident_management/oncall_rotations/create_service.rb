@@ -36,18 +36,21 @@ module IncidentManagement
 
         OncallRotation.transaction do
           @oncall_rotation = schedule.rotations.create(rotation_params)
-          break error_in_validation(oncall_rotation) unless oncall_rotation.persisted?
+          raise RotationModificationError.new(error_in_validation(oncall_rotation)) unless oncall_rotation.persisted?
 
           participants = participants_for(oncall_rotation)
-          break error_participant_has_no_permission if participants.nil?
+          raise RotationModificationError.new(error_participant_has_no_permission) if participants.nil?
 
           first_invalid_participant = participants.find(&:invalid?)
-          break error_in_validation(first_invalid_participant) if first_invalid_participant
+          raise RotationModificationError.new(error_in_validation(first_invalid_participant)) if first_invalid_participant
 
           upsert_participants(participants)
 
           success(oncall_rotation.reload)
         end
+
+      rescue RotationModificationError => err
+        err.service_response_error
       end
 
       private
