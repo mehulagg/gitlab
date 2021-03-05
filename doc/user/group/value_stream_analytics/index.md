@@ -299,7 +299,7 @@ To create a value stream:
 1. Navigate to your group's **Analytics > Value Stream**.
 1. Click the Value stream dropdown and select **Create new Value Stream**
 1. Fill in a name for the new Value Stream
-   - We can [customize the stages](#creating-a-value-stream-with-stages) with the `value_stream_analytics_extended_form` feature flag enabled
+   - You can [customize the stages](#creating-a-value-stream-with-stages) as the `value_stream_analytics_extended_form` feature flag is enabled.
 1. Click the **Create Value Stream** button.
 
 ![New value stream](img/new_value_stream_v13_3.png "Creating a new value stream")
@@ -311,12 +311,17 @@ To create a value stream:
 > - It's enabled on GitLab.com.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
 
-A default value stream template is available, additional stages can be added to this template or alternatively we can start from a blank template.
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can create value streams with stages, starting with a default or a blank template. You can
+add stages as desired.
 
 To create a value stream with stages:
 
-1. A default configuration is selected by default, alternatively we can select 'Create from no template' to create a value stream from scratch
-![VSA template](img/vsa_template_v13_10.png "VSA template")
+1. Navigate to your group's **Analytics > Value Stream**.
+1. Find and select the Value Stream dropdown. Select **Create new Value Stream**.
+1. Select either **Create from default template** or **Create from no template**.
    - Default stages in the value stream can be hidden or re-ordered
 ![Default stage actions](img/vsa_default_stage_v13_10.png "Default stage actions")
    - New stages can be added by clicking the 'Add another stage' button
@@ -325,6 +330,27 @@ To create a value stream with stages:
 1. Click the **Create Value Stream** button to save the value stream.
 
 ![Extended create value stream form](img/extended_value_stream_form_v13_10.png "Extended create value stream form")
+
+#### Enable or disable value stream with stages
+
+Value streams with stages is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:value_stream_analytics_extended_form)
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:value_stream_analytics_extended_form)
+```
 
 ### Deleting a value stream
 
