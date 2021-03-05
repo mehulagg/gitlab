@@ -49,7 +49,7 @@ Without mirroring, to work locally you must use `git pull` to update your local 
 with the upstream project, then push the changes back to your fork to update it.
 
 WARNING:
-With mirroring, before approving a merge request, you are asked to sync; hence automating it is recommended.
+With mirroring, before approving a merge request, you are asked to sync. Because of this, automating it is recommended.
 
 Read more about [How to keep your fork up to date with its origin](https://about.gitlab.com/blog/2016/12/01/how-to-keep-your-fork-up-to-date-with-its-origin/).
 
