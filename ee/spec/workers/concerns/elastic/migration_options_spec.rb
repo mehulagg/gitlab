@@ -10,33 +10,29 @@ RSpec.describe Elastic::MigrationOptions do
   end
 
   shared_examples_for 'a boolean option' do |option|
+    subject { migration_class.new.public_send("#{option}?") }
+
     it 'defaults to false' do
       expect(subject).to be_falsey
     end
 
     it "respects when #{option} is set for the class" do
-      migration_class.public_send(option)
+      migration_class.public_send("#{option}!")
 
       expect(subject).to be_truthy
     end
   end
 
   describe '#batched?' do
-    subject { migration_class.new.batched? }
-
-    it_behaves_like 'a boolean option', :batched!
+    it_behaves_like 'a boolean option', :batched
   end
 
   describe '#pause_indexing?' do
-    subject { migration_class.new.pause_indexing? }
-
-    it_behaves_like 'a boolean option', :pause_indexing!
+    it_behaves_like 'a boolean option', :pause_indexing
   end
 
   describe '#space_requirements?' do
-    subject { migration_class.new.space_requirements? }
-
-    it_behaves_like 'a boolean option', :space_requirements!
+    it_behaves_like 'a boolean option', :space_requirements
   end
 
   describe '#throttle_delay' do
