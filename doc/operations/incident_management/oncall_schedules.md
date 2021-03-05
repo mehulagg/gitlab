@@ -16,7 +16,7 @@ respond to service outages and disruptions.
 To use on-call schedules, you must do the following:
 
 1. [Create a schedule](#schedules).
-2. [Add a rotation to the schedule](#rotations).
+1. [Add a rotation to the schedule](#rotations).
 
 If you have at least Maintainer [permissions](../../user/permissions.md)
 to create a schedule, you can do this manually.
