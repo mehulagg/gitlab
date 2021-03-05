@@ -1,5 +1,6 @@
 import { GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import JobsContainer from '~/jobs/components/jobs_container.vue';
 
 describe('Jobs List block', () => {
@@ -51,26 +52,27 @@ describe('Jobs List block', () => {
     tooltip: 'build - passed',
   };
 
-  const findJob = () => wrapper.findComponent(GlLink);
-  const findAllJobs = () => wrapper.findAll(GlLink);
+  const findAllJobs = () => wrapper.findAllComponents(GlLink);
+  const findJob = () => findAllJobs().at(0);
 
-  const findArrowIcon = () => wrapper.find('[data-testid="arrow-right-icon"]');
-  const findRetryIcon = () => wrapper.find('[data-testid="retry-icon"]');
+  const findArrowIcon = () => wrapper.findByTestId('arrow-right-icon');
+  const findRetryIcon = () => wrapper.findByTestId('retry-icon');
 
   const createComponent = (props) => {
-    wrapper = mount(JobsContainer, {
-      propsData: {
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      mount(JobsContainer, {
+        propsData: {
+          ...props,
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
-  it('renders list of jobs', () => {
+  it('renders a list of jobs', () => {
     createComponent({
       jobs: [job, retried, active],
       jobId: 12313,
@@ -79,7 +81,7 @@ describe('Jobs List block', () => {
     expect(findAllJobs()).toHaveLength(3);
   });
 
-  it('renders arrow right when job id matches `jobId`', () => {
+  it('renders the arrow right icon when job id matches `jobId`', () => {
     createComponent({
       jobs: [active],
       jobId: active.id,
@@ -88,7 +90,7 @@ describe('Jobs List block', () => {
     expect(findArrowIcon().exists()).toBe(true);
   });
 
-  it('does not render arrow right when job is not active', () => {
+  it('does not render the arrow right icon when the job is not active', () => {
     createComponent({
       jobs: [job],
       jobId: active.id,
@@ -97,13 +99,13 @@ describe('Jobs List block', () => {
     expect(findArrowIcon().exists()).toBe(false);
   });
 
-  it('renders job name when present', () => {
+  it('renders the job name when present', () => {
     createComponent({
       jobs: [job],
       jobId: active.id,
     });
 
-    expect(findJob().text()).toContain(job.name);
+    expect(findJob().text()).toBe(job.name);
     expect(findJob().text()).not.toContain(job.id);
   });
 
@@ -113,7 +115,7 @@ describe('Jobs List block', () => {
       jobId: active.id,
     });
 
-    expect(findJob().text()).toContain(retried.id);
+    expect(findJob().text()).toBe(retried.id.toString());
   });
 
   it('links to the job page', () => {
