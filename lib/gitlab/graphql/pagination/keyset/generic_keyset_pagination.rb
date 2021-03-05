@@ -40,6 +40,19 @@ module Gitlab
             sliced = slice_nodes(sliced, after, :after) if after.present?
             sliced
           end
+
+          def items
+            original_items = super
+            return original_items if Gitlab::Pagination::Keyset::Order.keyset_aware?(original_items)
+
+            rebuilt_items_with_keyset_order = Gitlab::Pagination::Keyset::SimpleOrderBuilder.build(original_items)
+
+            if rebuilt_items_with_keyset_order == :unable_to_order
+              original_items
+            else
+              rebuilt_items_with_keyset_order
+            end
+          end
         end
       end
     end
