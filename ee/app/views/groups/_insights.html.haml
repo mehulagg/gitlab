@@ -20,7 +20,7 @@
             = insight_form.label :project_id, class: 'label-light' do
               .form-text.text-muted
                 = _('Select a repository')
-                = link_to sprite_icon('question-o'), help_page_path('user/group/index.md', anchor: 'insights'), target: '_blank'
+                = link_to sprite_icon('question-o'), help_page_path('user/group/insights/index.md'), target: '_blank'
             = project_select_tag('group[insight_attributes][project_id]', class: 'project-item-select hidden-filter-value', toggle_class: 'js-project-search js-project-filter js-filter-submit', dropdown_class: 'dropdown-menu-selectable dropdown-menu-project js-filter-submit',
               placeholder: _('Search projects'), idAttribute: 'id', data: { order_by: 'last_activity_at', idattribute: 'id', simple_filter: true, allow_clear: true, include_projects_in_subgroups: true }, value: insight.project_id)
       = form.submit _('Save changes'), class: "btn gl-button btn-success"
