@@ -1,5 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import GeoNodeDetails from 'ee/geo_nodes_beta/components/details/geo_node_details.vue';
 import GeoNodes from 'ee/geo_nodes_beta/components/geo_nodes.vue';
 import GeoNodeHeader from 'ee/geo_nodes_beta/components/header/geo_node_header.vue';
 import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES, MOCK_NODES } from '../mock_data';
@@ -42,7 +43,7 @@ describe('GeoNodes', () => {
   const findGeoNodesContainer = () => wrapper.find('div');
   const findGeoSiteTitle = () => wrapper.find('h4');
   const findGeoNodeHeader = () => wrapper.find(GeoNodeHeader);
-  const findGeoNodeDetails = () => wrapper.find('p');
+  const findGeoNodeDetails = () => wrapper.find(GeoNodeDetails);
 
   describe('template', () => {
     beforeEach(() => {
