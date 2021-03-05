@@ -68,7 +68,9 @@ project, it continues to be used whether or not Auto DevOps is enabled.
 
 ### At the project level
 
-If enabling, check that your project does not have a `.gitlab-ci.yml`, or if one exists, remove it.
+When you enable Auto DevOps for a project, ensure that your project does not have a `.gitlab-ci.yml` present. If it exists, remove it before enabling Auto DevOps.
+
+To enable it:
 
 1. Go to your project's **Settings > CI/CD > Auto DevOps**.
 1. Select the **Default to Auto DevOps pipeline** checkbox to enable it.
