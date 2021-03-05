@@ -2,6 +2,8 @@
 
 module Namespaces
   class InProductMarketingEmail < ApplicationRecord
+    include BulkInsertSafe
+
     belongs_to :user
     belongs_to :namespace
 
@@ -14,11 +16,11 @@ module Namespaces
       message: 'has already been sent'
     }
 
-    enum tracks: {
-      create_track: 0,
-      verify_track: 1,
-      trial_track: 2,
-      team_track: 3
-    }
+    enum track: {
+      create: 0,
+      verify: 1,
+      trial: 2,
+      team: 3
+    }, _suffix: true
   end
 end

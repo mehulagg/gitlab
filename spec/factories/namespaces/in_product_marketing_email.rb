@@ -5,7 +5,7 @@ FactoryBot.define do
     namespace
     user
 
-    track { 'create_track' }
+    track { 'create' }
     series { 0 }
   end
 end
