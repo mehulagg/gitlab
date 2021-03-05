@@ -41,7 +41,7 @@ module IncidentManagement
 
           raise RotationModificationError.new(error_in_validation(oncall_rotation)) unless oncall_rotation.update(params)
 
-          success(oncall_rotation.reload)
+          success(oncall_rotation.reset)
         end
 
       rescue RotationModificationError => err

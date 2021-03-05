@@ -157,7 +157,7 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
     end
 
     context 'editing rotation attributes' do
-      let(:params) { { name: 'Changed rotation', length: 7, length_unit: 'days', starts_at: 1.week.from_now, ends_at: 1.month.from_now } }
+      let(:params) { { name: 'Changed rotation', length: 7, length_unit: 'days', starts_at: 1.week.from_now.change(sec: 0), ends_at: 1.month.from_now.change(sec: 0) } }
 
       it 'updates the rotation to match the params' do
         subject
