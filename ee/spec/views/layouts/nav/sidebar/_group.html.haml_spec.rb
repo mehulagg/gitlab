@@ -12,11 +12,12 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
   let(:user) { create(:user) }
 
   describe 'trial status widget', :aggregate_failures do
-    let!(:gitlab_subscription) { create(:gitlab_subscription, :active_trial, namespace: group) }
     let(:show_widget) { false }
 
     before do
       allow(view).to receive(:show_trial_status_widget?).and_return(show_widget)
+      allow(view).to receive(:trial_status_widget_data_attrs)
+      allow(view).to receive(:trial_status_popover_data_attrs)
       render
     end
 
@@ -35,13 +36,6 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       it 'renders both the widget & popover component initialization elements' do
         is_expected.to have_selector '#js-trial-status-widget'
         is_expected.to have_selector '#js-trial-status-popover'
-      end
-
-      it 'supplies the same popover-trigger id value to both initialization elements' do
-        expected_id = 'trial-status-sidebar-widget'
-
-        is_expected.to have_selector "[data-container-id=#{expected_id}]"
-        is_expected.to have_selector "[data-target-id=#{expected_id}]"
       end
     end
   end
