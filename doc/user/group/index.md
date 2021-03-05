@@ -261,7 +261,7 @@ To view the activity feed in Atom format, select the
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18328) in GitLab 12.7.
 
-Similar to how you [share a project with a group](#share-a-project-with-a-group),
+Similar to how you [share a project with a group](../project/members/share_project_with_groups.md),
 you can share a group with another group. Members get direct access
 to the shared group. This is not valid for inherited members.
 
@@ -667,7 +667,7 @@ The group's new subgroups have push rules set for them based on either:
 - [Pipelines quota](../admin_area/settings/continuous_integration.md): Keep track of the pipeline quota for the group.
 - [Integrations](../admin_area/settings/project_integration_management.md).
 - [Transfer a project into a group](../project/settings/index.md#transferring-an-existing-project-into-another-namespace).
-- [Share a projects with a group](../project/members/share_project_with_groups.md): Give all group members access to the project at once.
+- [Share a project with a group](../project/members/share_project_with_groups.md): Give all group members access to the project at once.
 - [Lock the sharing with group feature](#prevent-a-project-from-being-shared-with-groups).
 - [Enforce two-factor authentication (2FA)](../../security/two_factor_authentication.md#enforcing-2fa-for-all-users-in-a-group): Enforce 2FA
   for all group members.
