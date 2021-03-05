@@ -41,6 +41,10 @@ module EE
         @subject.feature_available?(:dora4_analytics)
       end
 
+      condition(:dora_metrics_available) do
+        @subject.feature_available?(:dora_metrics)
+      end
+
       condition(:can_owners_manage_ldap, scope: :global) do
         ::Gitlab::CurrentSettings.allow_group_owners_to_manage_ldap?
       end
@@ -144,10 +148,11 @@ module EE
       end
 
       rule { reporter }.policy do
-        enable :admin_issue_board_list
+        enable :admin_list
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
         enable :read_group_timelogs
+        enable :read_deployment
         enable :download_wiki_code
       end
 
@@ -176,6 +181,9 @@ module EE
 
       rule { reporter & dora4_analytics_available }
         .enable :read_dora4_analytics
+
+      rule { can?(:read_deployment) & dora_metrics_available }
+        .enable :read_dora_metrics
 
       rule { reporter & group_repository_analytics_available }
         .enable :read_group_repository_analytics
@@ -268,6 +276,7 @@ module EE
         enable :admin_merge_request
         enable :read_ci_minutes_quota
         enable :read_group_audit_events
+        enable :read_deployment
       end
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard
@@ -288,7 +297,7 @@ module EE
         prevent :read_group
       end
 
-      rule { ip_enforcement_prevents_access & ~owner & ~auditor }.policy do
+      rule { ip_enforcement_prevents_access & ~owner }.policy do
         prevent :read_group
       end
 
@@ -341,7 +350,7 @@ module EE
         prevent :admin_milestone
         prevent :upload_file
         prevent :admin_label
-        prevent :admin_issue_board_list
+        prevent :admin_list
         prevent :admin_issue
         prevent :admin_pipeline
         prevent :add_cluster

@@ -56,6 +56,11 @@ module EE
         @subject.feature_available?(:dora4_analytics)
       end
 
+      with_scope :subject
+      condition(:dora_metrics_available) do
+        @subject.feature_available?(:dora_metrics)
+      end
+
       condition(:project_merge_request_analytics_available) do
         @subject.feature_available?(:project_merge_request_analytics)
       end
@@ -209,7 +214,7 @@ module EE
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
-        enable :admin_issue_board
+        enable :admin_board
         enable :admin_epic_issue
         enable :read_group_timelogs
       end
@@ -217,7 +222,7 @@ module EE
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
 
       rule { can?(:developer_access) }.policy do
-        enable :admin_issue_board
+        enable :admin_board
         enable :read_vulnerability_feedback
         enable :create_vulnerability_feedback
         enable :destroy_vulnerability_feedback
@@ -366,7 +371,7 @@ module EE
         prevent :owner_access
       end
 
-      rule { ip_enforcement_prevents_access & ~admin & ~auditor }.policy do
+      rule { ip_enforcement_prevents_access & ~admin }.policy do
         prevent :read_project
       end
 
@@ -388,6 +393,9 @@ module EE
 
       rule { reporter & dora4_analytics_available }
         .enable :read_dora4_analytics
+
+      rule { can?(:read_deployment) & dora_metrics_available }
+        .enable :read_dora_metrics
 
       rule { reporter & project_merge_request_analytics_available }
         .enable :read_project_merge_request_analytics

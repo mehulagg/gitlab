@@ -10,6 +10,12 @@ module Dora
 
     self.table_name = 'dora_daily_metrics'
 
+    scope :in_range_of, -> (environments, before, after) do
+      where(environment: environments)
+        .where('date >= ?', after)
+        .where('date <= ?', before)
+    end
+
     class << self
       def refresh!(environment, date)
         raise ArgumentError unless environment.is_a?(::Environment) && date.is_a?(Date)
@@ -36,6 +42,42 @@ module Dora
             deployment_frequency = (#{deployment_frequency}),
             lead_time_for_changes_in_seconds = (#{lead_time_for_changes})
         SQL
+      end
+
+      def aggregate_deployment_frequency_all
+        select('SUM(deployment_frequency) AS data').first.data
+      end
+
+      def aggregate_deployment_frequency_monthly
+        select("DATE_TRUNC('month', date)::date AS month, SUM(deployment_frequency) AS data")
+          .group("DATE_TRUNC('month', date)")
+          .order('month ASC')
+          .map { |row| { row.month.to_s => row.data } }
+      end
+
+      def aggregate_deployment_frequency_daily
+        select("date, SUM(deployment_frequency) AS data")
+          .group('date')
+          .order('date ASC')
+          .map { |row| { row.date.to_s => row.data } }
+      end
+
+      def aggregate_lead_time_for_changes_all
+        select('(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY lead_time_for_changes)) AS data').first.data
+      end
+
+      def aggregate_lead_time_for_changes_monthly
+        select("DATE_TRUNC('month', date)::date AS month, (PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY lead_time_for_changes)) AS data")
+          .group("DATE_TRUNC('month', date)")
+          .order('month ASC')
+          .map { |row| { row.month.to_s => row.data } }
+      end
+
+      def aggregate_lead_time_for_changes_daily
+        select("date, (PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY lead_time_for_changes)) AS data")
+          .group('date')
+          .order('date ASC')
+          .map { |row| { row.date.to_s => row.data } }
       end
 
       private

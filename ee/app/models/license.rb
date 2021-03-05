@@ -145,6 +145,7 @@ class License < ApplicationRecord
     dependency_scanning
     devops_adoption
     dora4_analytics
+    dora_metrics
     enforce_personal_access_token_expiration
     enforce_ssh_key_expiration
     enterprise_templates
