@@ -77,26 +77,37 @@ module GroupsHelper
       .count
   end
 
-  def cached_open_group_issues_count(group)
-    count_service = Groups::OpenIssuesCountService
-    issues_count = count_service.new(group, current_user).count
-
-    if issues_count > count_service::CACHED_COUNT_THRESHOLD
-      ActiveSupport::NumberHelper
-        .number_to_human(
-          issues_count,
-          units: { thousand: 'k', million: 'm' }, precision: 1, significant: false, format: '%n%u'
-        )
-    else
-      number_with_delimiter(issues_count)
-    end
-  end
-
   def group_merge_requests_count(state:)
     MergeRequestsFinder
       .new(current_user, group_id: @group.id, state: state, non_archived: true, include_subgroups: true)
       .execute
       .count
+  end
+
+  def cached_open_group_issues_count(group)
+    count_service = Groups::OpenIssuesCountService
+    issues_count = count_service.new(group, current_user).count
+
+    format_issuables_count(count_service, issues_count)
+  end
+
+  def cached_open_group_merge_requests_count(group)
+    count_service = Groups::MergeRequestsCountService
+    merge_requests_count = count_service.new(group, current_user).count
+
+    format_issuables_count(count_service, merge_requests_count)
+  end
+
+  def format_issuables_count(service, count)
+    if count > service::CACHED_COUNT_THRESHOLD
+      ActiveSupport::NumberHelper
+        .number_to_human(
+          count,
+          units: { thousand: 'k', million: 'm' }, precision: 1, significant: false, format: '%n%u'
+        )
+    else
+      number_with_delimiter(count)
+    end
   end
 
   def group_icon_url(group, options = {})
