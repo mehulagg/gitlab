@@ -17,6 +17,7 @@ export default class ActionCableLink extends ApolloLink {
         },
         {
           received(data) {
+            console.log(data);
             if (data.errors) {
               observer.error(data.errors);
             } else if (data.result) {
