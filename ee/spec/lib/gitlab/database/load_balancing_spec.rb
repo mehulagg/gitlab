@@ -209,7 +209,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     it 'returns true when Sidekiq is being used' do
       allow(described_class).to receive(:hosts).and_return(%w(foo))
       allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
-      expect(described_class).not_to receive(:program_name)
 
       expect(described_class.configured?).to eq(true)
     end
@@ -243,12 +242,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       it 'is not configured' do
         expect(described_class.configured?).to eq(false)
       end
-    end
-  end
-
-  describe '.program_name' do
-    it 'returns a String' do
-      expect(described_class.program_name).to be_an_instance_of(String)
     end
   end
 
