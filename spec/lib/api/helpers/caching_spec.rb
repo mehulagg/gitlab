@@ -7,13 +7,12 @@ RSpec.describe API::Helpers::Caching do
 
   describe "#present_cached" do
     let_it_be(:project) { create(:project) }
+    let_it_be(:user) { create(:user) }
     let(:presenter) { API::Entities::Todo }
-    let(:cache_context) { nil }
 
     let(:kwargs) do
       {
         with: presenter,
-        cache_context: cache_context,
         project: project
       }
     end
@@ -28,6 +27,8 @@ RSpec.describe API::Helpers::Caching do
       expect(instance).to receive(:body) do |data|
         data
       end
+
+      allow(instance).to receive(:current_user) { user }
     end
 
     context "single object" do
@@ -49,14 +50,14 @@ RSpec.describe API::Helpers::Caching do
       end
 
       it "fetches from the cache" do
-        expect(instance.cache).to receive(:fetch).with(presentable.cache_key, expires_in: described_class::DEFAULT_EXPIRY).once
+        expect(instance.cache).to receive(:fetch).with("#{presentable.cache_key}:#{user.cache_key}", expires_in: described_class::DEFAULT_EXPIRY).once
 
         subject
       end
 
       context "when a cache context is supplied" do
-        let(:cache_context) do
-          -> (todo) { todo.project.cache_key }
+        before do
+          kwargs[:cache_context] = -> (todo) { todo.project.cache_key }
         end
 
         it "uses the context to augment the cache key" do
@@ -70,7 +71,7 @@ RSpec.describe API::Helpers::Caching do
         it "sets the expiry when accessing the cache" do
           kwargs[:expires_in] = 7.days
 
-          expect(instance.cache).to receive(:fetch).with(presentable.cache_key, expires_in: 7.days).once
+          expect(instance.cache).to receive(:fetch).with("#{presentable.cache_key}:#{user.cache_key}", expires_in: 7.days).once
 
           subject
         end
@@ -101,14 +102,16 @@ RSpec.describe API::Helpers::Caching do
       end
 
       it "fetches from the cache" do
-        expect(instance.cache).to receive(:fetch_multi).with(*presentable.map(&:cache_key), expires_in: described_class::DEFAULT_EXPIRY).once.and_call_original
+        keys = presentable.map { |todo| "#{todo.cache_key}:#{user.cache_key}" }
+
+        expect(instance.cache).to receive(:fetch_multi).with(*keys, expires_in: described_class::DEFAULT_EXPIRY).once.and_call_original
 
         subject
       end
 
       context "when a cache context is supplied" do
-        let(:cache_context) do
-          -> (todo) { todo.project.cache_key }
+        before do
+          kwargs[:cache_context] = -> (todo) { todo.project.cache_key }
         end
 
         it "uses the context to augment the cache key" do
@@ -122,9 +125,10 @@ RSpec.describe API::Helpers::Caching do
 
       context "expires_in is supplied" do
         it "sets the expiry when accessing the cache" do
+          keys = presentable.map { |todo| "#{todo.cache_key}:#{user.cache_key}" }
           kwargs[:expires_in] = 7.days
 
-          expect(instance.cache).to receive(:fetch_multi).with(*presentable.map(&:cache_key), expires_in: 7.days).once.and_call_original
+          expect(instance.cache).to receive(:fetch_multi).with(*keys, expires_in: 7.days).once.and_call_original
 
           subject
         end
