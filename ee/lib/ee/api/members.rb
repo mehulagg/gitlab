@@ -82,19 +82,17 @@ module EE
           params do
             requires :user_id, type: Integer, desc: 'The user ID of the member'
           end
-          # rubocop: disable CodeReuse/ActiveRecord
           delete ":id/billable_members/:user_id" do
             group = find_group!(params[:id])
 
-            bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
+            result = ::Members::RemoveBillableMemberService.new(group, user_id: params[:user_id], current_user: current_user).execute
 
-            member = ::Member.in_hierarchy(group).find_by!(user_id: params[:user_id])
-
-            destroy_conditionally!(member) do
-              ::Members::DestroyService.new(current_user).execute(member)
+            if result[:status] == :success
+              no_content!
+            else
+              bad_request!(nil)
             end
           end
-          # rubocop: enable CodeReuse/ActiveRecord
         end
       end
     end
