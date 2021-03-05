@@ -94,7 +94,7 @@ The available `agentk` and `kas` versions can be found in
 
 ### Install the Kubernetes Agent Server
 
-GitLab includes the KAS on GitLab.com already. If you are interested in using the GitLab Kubernetes Agent on gitlab.com, you can move to setting up the configuration repository for your agent.
+GitLab includes the KAS on GitLab.com already. If you are interested in using the GitLab Kubernetes Agent on GitLab.com, you can move to setting up the configuration repository for your agent.
 
 The GitLab Kubernetes Agent Server (KAS) can be deployed using [Omnibus
 GitLab](https://docs.gitlab.com/omnibus/) or the [GitLab
