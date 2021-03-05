@@ -995,6 +995,13 @@ class Repository
     raw_repository.search_files_by_name(query, ref)
   end
 
+  def search_files_by_wildcard_path(path, ref)
+    return [] if empty?
+
+    regexp_string = Regexp.escape(path).gsub('\*', '.*?')
+    raw_repository.search_files_by_regexp(regexp_string, ref)
+  end
+
   def copy_gitattributes(ref)
     actual_ref = ref || root_ref
     begin
