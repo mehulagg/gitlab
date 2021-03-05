@@ -1863,7 +1863,7 @@ class User < ApplicationRecord
   end
 
   def can_trigger_notifications?
-    !blocked? && !ghost?
+    confirmed? && !blocked? && !ghost?
   end
 
   protected

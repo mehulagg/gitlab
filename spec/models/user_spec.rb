@@ -5426,6 +5426,14 @@ RSpec.describe User do
   end
 
   describe 'can_trigger_notifications?' do
+    context 'when user is not confirmed' do
+      let_it_be(:user) { create(:user, :unconfirmed) }
+
+      it 'returns false' do
+        expect(user.can_trigger_notifications?).to be(false)
+      end
+    end
+
     context 'when user is blocked' do
       let_it_be(:user) { create(:user, :blocked) }
 
@@ -5442,7 +5450,7 @@ RSpec.describe User do
       end
     end
 
-    context 'when user is neither blocked or a ghost' do
+    context 'when user is confirmed and neither blocked or a ghost' do
       let_it_be(:user) { create(:user) }
 
       it 'returns true' do
