@@ -23,7 +23,7 @@ to create a schedule, you can do this manually.
 
 ## Schedules
 
-Set-up an on-call schedule for your team to add rotations to.
+Set up an on-call schedule for your team to add rotations to.
 
 Follow these steps to create a schedule:
 
