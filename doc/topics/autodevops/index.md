@@ -54,7 +54,7 @@ following levels:
 | GitLab SaaS         | **{check-circle}** Yes | **{dotted-circle}** No | **{dotted-circle}** No |
 | GitLab self-managed | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
 
-When enabled, Auto DevOps attempts to run on all pipelines in each project, but
+When you enable AutoDevOps for your instance, it attempts to run on all pipelines in each project, but
 will automatically disable itself for individual projects on their first
 pipeline failure. An instance administrator can enable or disable this default
 in the [Auto DevOps settings](../../user/admin_area/settings/continuous_integration.md#auto-devops).
