@@ -29,7 +29,10 @@ class Projects::PathLocksController < Projects::ApplicationController
       lock_file
     end
 
-    head :ok
+    respond_to do |format|
+      format.html { redirect_back_or_default }
+      format.js { head :ok }
+    end
   rescue PathLocks::UnlockService::AccessDenied, PathLocks::LockService::AccessDenied
     access_denied!
   end

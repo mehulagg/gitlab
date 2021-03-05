@@ -26,6 +26,7 @@ export default {
       modalId: uniqueId('confirm-modal-'),
       path: '',
       method: '',
+      formData: {},
       modalAttributes: {},
     };
   },
@@ -34,9 +35,14 @@ export default {
       button.addEventListener('click', (e) => {
         e.preventDefault();
 
-        this.path = button.dataset.path;
-        this.method = button.dataset.method;
-        this.modalAttributes = JSON.parse(button.dataset.modalAttributes);
+        const {
+          dataset: { path, method, formData, modalAttributes },
+        } = button;
+
+        this.path = path;
+        this.method = method;
+        this.formData = formData ? JSON.parse(formData) : {};
+        this.modalAttributes = modalAttributes ? JSON.parse(modalAttributes) : {};
         this.openModal();
       });
     });
@@ -74,6 +80,13 @@ export default {
       -->
       <input type="hidden" name="_method" :value="method" />
       <input type="hidden" name="authenticity_token" :value="$options.csrf.token" />
+      <input
+        v-for="(value, name) in formData"
+        :key="name"
+        type="hidden"
+        :name="name"
+        :value="value"
+      />
       <div v-if="modalAttributes.messageHtml" v-safe-html="modalAttributes.messageHtml"></div>
       <div v-else>{{ modalAttributes.message }}</div>
     </form>
