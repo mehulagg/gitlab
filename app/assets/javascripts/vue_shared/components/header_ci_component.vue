@@ -142,7 +142,11 @@ export default {
       </template>
     </section>
 
-    <section v-if="$slots.default" data-testid="ci-header-action-buttons" class="gl-display-flex gl-mr-3">
+    <section
+      v-if="$slots.default"
+      data-testid="ci-header-action-buttons"
+      class="gl-display-flex gl-mr-3"
+    >
       <slot></slot>
     </section>
     <gl-button

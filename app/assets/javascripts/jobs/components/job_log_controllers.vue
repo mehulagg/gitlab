@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlTooltipDirective, GlLink, GlButton } from '@gitlab/ui';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __, sprintf } from '~/locale';
