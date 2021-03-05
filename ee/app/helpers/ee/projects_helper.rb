@@ -221,6 +221,11 @@ module EE
       "Max size of this project's repository, #{show_lfs}. For no limit, enter 0. To inherit the group/global value, leave blank."
     end
 
+    override :learn_more_link
+    def learn_more_link
+      link_to(s_('Learn more.'), help_page_path('user/admin_area/settings/account_and_limit_settings'), target: '_blank', rel: 'noopener noreferrer', aria-label: _(Learn more about repository size limits)
+    end
+
     override :membership_locked?
     def membership_locked?
       group = @project.group
