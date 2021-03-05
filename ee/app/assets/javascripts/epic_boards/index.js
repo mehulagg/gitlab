@@ -12,6 +12,7 @@ import toggleLabels from 'ee_component/boards/toggle_labels';
 import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
+import boardConfigToggle from '~/boards/config_toggle';
 import mountMultipleBoardsSwitcher from '~/boards/mount_multiple_boards_switcher';
 import store from '~/boards/stores';
 import createDefaultClient from '~/lib/graphql';
@@ -127,6 +128,7 @@ export default () => {
   }
 
   toggleLabels();
+  boardConfigToggle();
 
   mountMultipleBoardsSwitcher({
     fullPath: $boardApp.dataset.fullPath,

@@ -183,18 +183,18 @@ export default {
     boardScopeMutationVariables() {
       /* eslint-disable @gitlab/require-i18n-strings */
       return {
-        weight: this.board.weight,
+        weight: this.board.weight || undefined,
         assigneeId: this.board.assignee?.id
           ? convertToGraphQLId('User', this.board.assignee.id)
-          : null,
+          : undefined,
         milestoneId:
           this.board.milestone?.id || this.board.milestone?.id === 0
             ? convertToGraphQLId('Milestone', this.board.milestone.id)
-            : null,
+            : undefined,
         labelIds: this.board.labels.map(fullLabelId),
         iterationId: this.board.iteration_id
           ? convertToGraphQLId('Iteration', this.board.iteration_id)
-          : null,
+          : undefined,
       };
       /* eslint-enable @gitlab/require-i18n-strings */
     },

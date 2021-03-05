@@ -33,7 +33,7 @@ module Boards
     end
 
     def scoped?
-      false
+      labels.any?
     end
 
     def milestone_id
