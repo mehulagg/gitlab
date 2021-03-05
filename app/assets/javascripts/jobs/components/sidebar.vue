@@ -48,7 +48,7 @@ export default {
       return this.job.status && this.job.recoverable ? 'primary' : 'secondary';
     },
     hasArtifact() {
-      return Boolean(this.job?.artifact?.browse_path);
+      return !isEmpty(this.job.artifact);
     },
     hasTriggers() {
       return !isEmpty(this.job.trigger);
@@ -103,7 +103,6 @@ export default {
             category="tertiary"
             class="gl-md-display-none gl-ml-2"
             icon="chevron-double-lg-right"
-            data-testid="sidebar-build-toggle"
             @click="toggleSidebar"
           />
         </div>
@@ -114,7 +113,7 @@ export default {
             category="secondary"
             variant="confirm"
             :href="job.new_issue_path"
-            class="float-left mr-2"
+            class="float-left gl-mr-2"
             data-testid="job-new-issue"
             >{{ $options.i18n.newIssue }}
           </gl-button>
