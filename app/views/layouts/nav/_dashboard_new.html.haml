@@ -1,0 +1,7 @@
+%ul.list-unstyled.navbar-sub-nav
+  = nav_link(path: ['root#index', 'projects#trending', 'projects#starred', 'dashboard/projects#index'], html_options: { id: 'nav-projects-dropdown', class: "home dropdown header-projects qa-projects-dropdown", data: { track_label: "projects_dropdown", track_event: "click_dropdown" } }) do
+    %button{ type: 'button', data: { toggle: "dropdown" } }
+      = sprite_icon('ellipsis_v')
+      = _('Projects')
+    .dropdown-menu.frequent-items-dropdown-menu
+      = render "layouts/nav/projects_dropdown/show"

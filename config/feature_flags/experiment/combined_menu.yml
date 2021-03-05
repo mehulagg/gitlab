@@ -1,0 +1,8 @@
+---
+name: combined_menu
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/321904
+milestone: '13.10'
+type: experiment
+group: group::editor
+default_enabled: false

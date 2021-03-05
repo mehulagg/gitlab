@@ -19,10 +19,14 @@
               %span.gl-badge.gl-bg-green-500.gl-text-white.gl-rounded-pill.gl-font-weight-bold.gl-py-1
                 = _('Next')
 
-        - if current_user
-          = render "layouts/nav/dashboard"
-        - else
-          = render "layouts/nav/explore"
+        - experiment(:combined_menu, actor: current_user) do |e|
+          - e.use do
+            - if current_user
+              = render "layouts/nav/dashboard"
+            - else
+              = render "layouts/nav/explore"
+          - e.try do
+            = render "layouts/nav/dashboard_new"
 
       .navbar-collapse.collapse
         %ul.nav.navbar-nav
