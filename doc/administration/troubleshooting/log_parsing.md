@@ -47,6 +47,12 @@ This skips over all invalid lines and parses the rest.
 cat log.json | (head -1; tail -1) | jq -rs '[.[].time] | join(" to ")'
 ```
 
+If the file has been rotated and compressed:
+
+```shell
+zcat @400000006026b71d1a7af804.s | (head -1 | jq .time; tail -1 | jq .time)
+zcat some_json.log.25.gz | (head -1; tail -1) | jq -rs '[.[].time] | join(" to ")'
+```
 ### Parsing `production_json.log` and `api_json.log`
 
 #### Find all requests with a 5XX status code
