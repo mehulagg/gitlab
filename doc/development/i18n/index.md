@@ -21,16 +21,6 @@ Translating strings helps complete and improve each language.
 
 There are many ways you can contribute in translating GitLab.
 
-### Review the translation language list
-
-Review <https://translate.gitlab.com>. If you need to add your preferred
-language,
-[open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization).
-
-Once the language is approved, confirm your language at
-<https://crowdin.com/project/gitlab-ee>. You can then continue with the
-translation process described on this page.
-
 ### Externalize strings
 
 Before a string can be translated, it must be externalized.

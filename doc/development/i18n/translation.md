@@ -22,9 +22,16 @@ You may create a new account or use any of their supported sign in services.
 
 GitLab is being translated into many languages.
 
-1. Select the language you would like to contribute translations to by clicking the flag
+1. Find the language that you want to contribute to, in our
+   [GitLab Crowdin project](https://crowdin.com/project/gitlab-ee).
+   1. If the language that you're looking for is available, proceed
+      to the next step.
+   1. If the language you are looking for is not available,
+      [open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization). Notify our Crowdin
+      administrators, by <substitute something>.
+   1. Once the issue is complete, restart this procedure.
 1. Next, you can view list of files and folders.
-  Click `gitlab.pot` to open the translation editor.
+   Select `gitlab.pot` to open the translation editor.
 
 ### Translation Editor
 
