@@ -7,6 +7,58 @@ RSpec.describe Dora::DailyMetrics, type: :model do
     it { is_expected.to belong_to(:environment) }
   end
 
+  describe '.in_range_of' do
+    subject { described_class.in_range_of(environments, from, to) }
+
+    let_it_be(:environment_a) { create(:environment) }
+    let_it_be(:environment_b) { create(:environment) }
+    let_it_be(:daily_metrics_a_1) { create(:dora_daily_metrics, environment: environment_a, date: 1.day.ago.to_date) }
+    let_it_be(:daily_metrics_a_2) { create(:dora_daily_metrics, environment: environment_a, date: 3.days.ago.to_date) }
+    let_it_be(:daily_metrics_b_1) { create(:dora_daily_metrics, environment: environment_b, date: 1.day.ago.to_date) }
+
+    context 'when between 2 days ago and 1 day ago' do
+      let(:from) { 2.days.ago.to_date }
+      let(:to) { 1.day.ago.to_date }
+
+      context 'when targeting environment A only' do
+        let(:environments) { environment_a }
+
+        it 'returns the entry of environment A' do
+          is_expected.to eq([daily_metrics_a_1])
+        end
+      end
+
+      context 'when targeting environment B only' do
+        let(:environments) { environment_b }
+
+        it 'returns the entry of environment B' do
+          is_expected.to eq([daily_metrics_b_1])
+        end
+      end
+    end
+
+    context 'when between 3 days ago and 2 days ago' do
+      let(:from) { 3.days.ago.to_date }
+      let(:to) { 2.days.ago.to_date }
+
+      context 'when targeting environment A only' do
+        let(:environments) { environment_a }
+
+        it 'returns the entry of environment A' do
+          is_expected.to eq([daily_metrics_a_2])
+        end
+      end
+
+      context 'when targeting environment B only' do
+        let(:environments) { environment_b }
+
+        it 'returns nothing' do
+          is_expected.to be_empty
+        end
+      end
+    end
+  end
+
   describe '.refresh!' do
     subject { described_class.refresh!(environment, date) }
 
@@ -105,6 +157,134 @@ RSpec.describe Dora::DailyMetrics, type: :model do
       it 'raises an error' do
         expect { subject }.to raise_error(ArgumentError)
       end
+    end
+  end
+
+  describe '.aggregate_for!' do
+    subject { described_class.aggregate_for!(metric, interval) }
+
+    around do |example|
+      freeze_time do
+        example.run
+      end
+    end
+
+    context 'when metric is deployment frequency' do
+      let_it_be(:data) do
+        create(:dora_daily_metrics, deployment_frequency: 3, date: 3.days.ago.to_date)
+        create(:dora_daily_metrics, deployment_frequency: 3, date: 3.days.ago.to_date)
+        create(:dora_daily_metrics, deployment_frequency: 2, date: 2.days.ago.to_date)
+        create(:dora_daily_metrics, deployment_frequency: 2, date: 2.days.ago.to_date)
+        create(:dora_daily_metrics, deployment_frequency: 1, date: 1.day.ago.to_date)
+        create(:dora_daily_metrics, deployment_frequency: 1, date: 1.day.ago.to_date)
+        create(:dora_daily_metrics, deployment_frequency: nil, date: Time.current.to_date)
+      end
+
+      let(:metric) { described_class::METRIC_DEPLOYMENT_FREQUENCY }
+
+      context 'when interval is all' do
+        let(:interval) { described_class::INTERVAL_ALL }
+
+        it 'aggregates the rows' do
+          is_expected.to eq(12)
+        end
+      end
+
+      context 'when interval is monthly' do
+        let(:interval) { described_class::INTERVAL_MONTHLY }
+
+        it 'aggregates the rows' do
+          ruby_aggregation =
+            described_class.order(:date).all.group_by { |row| row.date.beginning_of_month.to_s }.map do |month, rows|
+              { month => rows.sum { |r| r.deployment_frequency.to_i } }
+            end
+
+          is_expected.to eq(ruby_aggregation)
+        end
+      end
+
+      context 'when interval is daily' do
+        let(:interval) { described_class::INTERVAL_DAILY }
+
+        it 'aggregates the rows' do
+          is_expected.to eq([{ 3.days.ago.to_date.to_s => 6 },
+                             { 2.days.ago.to_date.to_s => 4 },
+                             { 1.day.ago.to_date.to_s => 2 },
+                             { Time.current.to_date.to_s => nil }])
+        end
+      end
+
+      context 'when interval is unknown' do
+        let(:interval) { 'unknown' }
+
+        it { expect { subject }.to raise_error(ArgumentError, 'Unknown interval') }
+      end
+    end
+
+    context 'when metric is lead time for changes' do
+      let_it_be(:data) do
+        create(:dora_daily_metrics, lead_time_for_changes_in_seconds: 100, date: 3.days.ago.to_date)
+        create(:dora_daily_metrics, lead_time_for_changes_in_seconds: 90, date: 3.days.ago.to_date)
+        create(:dora_daily_metrics, lead_time_for_changes_in_seconds: 80, date: 2.days.ago.to_date)
+        create(:dora_daily_metrics, lead_time_for_changes_in_seconds: 70, date: 2.days.ago.to_date)
+        create(:dora_daily_metrics, lead_time_for_changes_in_seconds: 60, date: 1.day.ago.to_date)
+        create(:dora_daily_metrics, lead_time_for_changes_in_seconds: 50, date: 1.day.ago.to_date)
+        create(:dora_daily_metrics, lead_time_for_changes_in_seconds: nil, date: Time.current.to_date)
+      end
+
+      let(:metric) { described_class::METRIC_LEAD_TIME_FOR_CHANGES }
+
+      context 'when interval is all' do
+        let(:interval) { described_class::INTERVAL_ALL }
+
+        it 'calculates the median' do
+          is_expected.to eq(75)
+        end
+      end
+
+      context 'when interval is monthly' do
+        let(:interval) { described_class::INTERVAL_MONTHLY }
+
+        it 'calculates the median' do
+          ruby_aggregation =
+            described_class.order(:date).all.group_by { |row| row.date.beginning_of_month.to_s }.map do |month, rows|
+              { month => median(rows.map { |r| r.lead_time_for_changes_in_seconds }.compact) }
+            end
+
+          is_expected.to eq(ruby_aggregation)
+        end
+      end
+
+      context 'when interval is daily' do
+        let(:interval) { described_class::INTERVAL_DAILY }
+
+        it 'calculates the median' do
+          is_expected.to eq([{ 3.days.ago.to_date.to_s => 95 },
+                             { 2.days.ago.to_date.to_s => 75 },
+                             { 1.day.ago.to_date.to_s => 55 },
+                             { Time.current.to_date.to_s => nil }])
+        end
+      end
+
+      context 'when interval is unknown' do
+        let(:interval) { 'unknown' }
+
+        it { expect { subject }.to raise_error(ArgumentError, 'Unknown interval') }
+      end
+
+      def median(array)
+        array.sort.yield_self do |sorted|
+          pointer = (sorted.size / 2).to_i
+          sorted.size.odd? ? sorted[pointer] : (sorted[pointer - 1] + sorted[pointer]) / 2.0
+        end
+      end
+    end
+
+    context 'when metric is unknown' do
+      let(:metric) { 'unknown' }
+      let(:interval) { described_class::INTERVAL_ALL }
+
+      it { expect { subject }.to raise_error(ArgumentError, 'Unknown metric') }
     end
   end
 end

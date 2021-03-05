@@ -9661,6 +9661,9 @@ msgstr ""
 msgid "Date range is greater than %{quarter_days} days"
 msgstr ""
 
+msgid "Date range must be shorter than %{max_range} days."
+msgstr ""
+
 msgid "Day of month"
 msgstr ""
 
@@ -29609,6 +29612,9 @@ msgstr ""
 msgid "The X509 Certificate to use when mutual TLS is required to communicate with the external authorization service. If left blank, the server certificate is still validated when accessing over HTTPS."
 msgstr ""
 
+msgid "The after date must be ealier than the before date."
+msgstr ""
+
 msgid "The application will be used where the client secret can be kept confidential. Native mobile apps and Single Page Apps are considered non-confidential."
 msgstr ""
 
@@ -29676,6 +29682,9 @@ msgid "The domain you entered is not allowed."
 msgstr ""
 
 msgid "The download link will expire in 24 hours."
+msgstr ""
+
+msgid "The environment tier must be one of %{environment_tiers}."
 msgstr ""
 
 msgid "The errors we encountered were:"
@@ -29752,6 +29761,9 @@ msgstr ""
 msgid "The import will time out after %{timeout}. For repositories that take longer, use a clone/push combination."
 msgstr ""
 
+msgid "The interval must be one of %{intervals}."
+msgstr ""
+
 msgid "The invitation could not be accepted."
 msgstr ""
 
@@ -29810,6 +29822,9 @@ msgid "The merge conflicts for this merge request have already been resolved. Pl
 msgstr ""
 
 msgid "The merge request can now be merged."
+msgstr ""
+
+msgid "The metric must be one of %{metrics}."
 msgstr ""
 
 msgid "The name \"%{name}\" is already taken in this directory."
@@ -32092,6 +32107,9 @@ msgstr ""
 msgid "Unsubscribes from this %{quick_action_target}."
 msgstr ""
 
+msgid "Unsupported container level."
+msgstr ""
+
 msgid "Unsupported todo type passed. Supported todo types are: %{todo_types}"
 msgstr ""
 
@@ -34280,6 +34298,9 @@ msgid "You do not have any subscriptions yet"
 msgstr ""
 
 msgid "You do not have permission to access deployment frequencies"
+msgstr ""
+
+msgid "You do not have permission to access dora metrics."
 msgstr ""
 
 msgid "You do not have permission to leave this %{namespaceType}."
