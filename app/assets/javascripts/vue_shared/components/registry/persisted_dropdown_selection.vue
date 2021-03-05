@@ -26,7 +26,7 @@ export default {
   },
   computed: {
     dropdownText() {
-      const selected = this.options.find((o) => o.value === this.selected);
+      const selected = this.parsedOptions.find((o) => o.selected);
       return selected?.label || this.options[0].label;
     },
     parsedOptions() {
