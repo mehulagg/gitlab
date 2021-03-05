@@ -102,6 +102,7 @@ export default {
           v-model.trim="stage.name"
           :name="`custom-stage-name-${index}`"
           :placeholder="$options.i18n.FORM_FIELD_STAGE_NAME_PLACEHOLDER"
+          autofocus
           required
           @input="$emit('input', { field: 'name', value: $event })"
         />

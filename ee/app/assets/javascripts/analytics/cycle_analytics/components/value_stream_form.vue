@@ -332,6 +332,7 @@ export default {
             name="create-value-stream-name"
             :placeholder="$options.i18n.FORM_FIELD_NAME_PLACEHOLDER"
             :state="isValueStreamNameValid"
+            autofocus
             required
           />
           <transition name="fade">
