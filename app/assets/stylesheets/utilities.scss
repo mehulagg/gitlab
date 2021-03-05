@@ -172,3 +172,15 @@
     width: 50%;
   }
 }
+
+.gl-sm-display-inline-block {
+  @media (min-width: $breakpoint-sm) {
+    display: inline-block;
+  }
+}
+
+.gl-sm-display-inline-block\! {
+  @media (min-width: $breakpoint-sm) {
+    display: inline-block !important;
+  }
+}

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import IssuesListApp from '~/issues_list/components/issues_list_app.vue';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import IssuablesListApp from './components/issuables_list_app.vue';
@@ -61,6 +62,25 @@ function mountIssuablesListApp() {
         });
       },
     });
+  });
+}
+
+export function initIssuesListApp() {
+  const el = document.querySelector('.js-issues-list');
+
+  if (!el) {
+    return false;
+  }
+
+  return new Vue({
+    el,
+    render: (createComponent) =>
+      createComponent(IssuesListApp, {
+        props: {
+          endpoint: el.dataset.endpoint,
+          fullPath: el.dataset.fullPath,
+        },
+      }),
   });
 }
 

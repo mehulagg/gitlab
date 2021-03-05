@@ -993,6 +993,76 @@ export const isToday = (date) => {
 };
 
 /**
+ *
+ * @param {Date} date
+ */
+export const isInPast = (date) => {
+  if (isToday(date)) {
+    return false;
+  }
+  const today = new Date();
+  const difference = today.getTime() - date.getTime();
+  return difference > 0;
+};
+/**
+ *
+ * @param {Date} date
+ */
+export const isInFuture = (date) => {
+  if (isToday(date)) {
+    return false;
+  }
+  const today = new Date();
+  const difference = today.getTime() - date.getTime();
+  return difference < 0;
+};
+
+/**
+ *
+ * @param {Date} date Date in future
+ */
+export const getTimeRemainingInWords = (date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const oneWeekFromNow = new Date();
+  oneWeekFromNow.setHours(0, 0, 0, 0);
+  oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+
+  const oneMonthFromNow = new Date();
+  oneMonthFromNow.setHours(0, 0, 0, 0);
+  oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setHours(0, 0, 0, 0);
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+  const future = new Date(date.getTime());
+  future.setHours(0, 0, 0, 0);
+
+  if (oneWeekFromNow.getTime() - future.getTime() > 0) {
+    const days = getDayDifference(today, future);
+    return n__('Timeago|1 day remaining', 'Timeago|%d days remaining', days);
+  }
+
+  if (oneMonthFromNow.getTime() - future.getTime() > 0) {
+    const weeks = getDayDifference(today, future) / 7;
+    return n__('Timeago|1 week remaining', 'Timeago|%d weeks remaining', weeks);
+  }
+
+  if (oneYearFromNow.getTime() - future.getTime() > 0) {
+    const todayMonth = today.getMonth();
+    const futureMonth = future.getMonth();
+    const months =
+      futureMonth > todayMonth ? futureMonth - todayMonth : futureMonth + 12 - todayMonth;
+    return n__('Timeago|1 month remaining', 'Timeago|%d months remaining', months);
+  }
+
+  const years = future.getFullYear() - today.getFullYear();
+  return n__('Timeago|1 year remaining', 'Timeago|%d years remaining', years);
+};
+
+/**
  * Returns the start of the provided day
  *
  * @param {Object} [options={}] Additional options for this calculation

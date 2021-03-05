@@ -2,10 +2,19 @@
 import { GlLink, GlIcon, GlLabel, GlFormCheckbox, GlTooltipDirective } from '@gitlab/ui';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { issueHealthStatus, issueHealthStatusCSSMapping } from '~/issue_show/constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import { getTimeago } from '~/lib/utils/datetime_utility';
+import {
+  dateInWords,
+  getTimeago,
+  getTimeRemainingInWords,
+  isInFuture,
+  isInPast,
+  isToday,
+} from '~/lib/utils/datetime_utility';
+import { convertToCamelCase } from '~/lib/utils/text_utility';
 import { isExternal, setUrlFragment } from '~/lib/utils/url_utility';
-import { __, sprintf } from '~/locale';
+import { __, n__, sprintf } from '~/locale';
 import IssuableAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
@@ -86,8 +95,52 @@ export default {
       }
       return {};
     },
+    taskStatus() {
+      const { completedCount, count } = this.issuable.taskCompletionStatus || {};
+      if (!count) {
+        return undefined;
+      }
+
+      const text = n__(
+        '%{completedCount} of %d task completed',
+        '%{completedCount} of %d tasks completed',
+        count,
+      );
+      return sprintf(text, { completedCount });
+    },
+    milestoneDate() {
+      if (this.issuable.milestone?.dueDate) {
+        const { dueDate, startDate } = this.issuable.milestone;
+        const date = dateInWords(new Date(dueDate), true);
+        const remainingTime = this.milestoneRemainingTime(dueDate, startDate);
+        return `${date} (${remainingTime})`;
+      }
+      return __('Milestone');
+    },
+    dueDate() {
+      return this.issuable.dueDate ? dateInWords(new Date(this.issuable.dueDate), true) : undefined;
+    },
+    isDueDateInPast() {
+      return isInPast(new Date(this.issuable.dueDate));
+    },
+    healthStatusClass() {
+      return this.issuable.healthStatus
+        ? issueHealthStatusCSSMapping[convertToCamelCase(this.issuable.healthStatus)]
+        : '';
+    },
+    healthStatusText() {
+      return this.issuable.healthStatus
+        ? issueHealthStatus[convertToCamelCase(this.issuable.healthStatus)]
+        : '';
+    },
+    timeEstimate() {
+      return this.issuable.timeStats?.humanTimeEstimate;
+    },
+    notesCount() {
+      return this.issuable.userDiscussionsCount ?? this.issuable.userNotesCount;
+    },
     showDiscussions() {
-      return typeof this.issuable.userDiscussionsCount === 'number';
+      return typeof this.notesCount === 'number';
     },
     showIssuableMeta() {
       return Boolean(
@@ -126,6 +179,21 @@ export default {
       }
       return '';
     },
+    milestoneRemainingTime(dueDate, startDate) {
+      const due = new Date(dueDate);
+      const start = new Date(startDate);
+
+      if (dueDate && isInPast(due)) {
+        return __('Past due');
+      } else if (dueDate && isToday(due)) {
+        return __('Today');
+      } else if (startDate && isInFuture(start)) {
+        return __('Upcoming');
+      } else if (dueDate) {
+        return getTimeRemainingInWords(due);
+      }
+      return '';
+    },
   },
 };
 </script>
@@ -148,11 +216,18 @@ export default {
               v-gl-tooltip
               name="eye-slash"
               :title="__('Confidential')"
+              :aria-label="__('Confidential')"
             />
             <gl-link :href="webUrl" v-bind="issuableTitleProps"
               >{{ issuable.title
               }}<gl-icon v-if="isIssuableUrlExternal" name="external-link" class="gl-ml-2"
             /></gl-link>
+          </span>
+          <span
+            v-if="taskStatus"
+            class="task-status gl-display-none gl-sm-display-inline-block! gl-ml-3"
+          >
+            {{ taskStatus }}
           </span>
         </div>
         <div class="issuable-info">
@@ -160,7 +235,7 @@ export default {
           <span v-else data-testid="issuable-reference" class="issuable-reference"
             >{{ issuableSymbol }}{{ issuable.iid }}</span
           >
-          <span class="issuable-authored d-none d-sm-inline-block">
+          <span class="issuable-authored gl-display-none gl-sm-display-inline-block!">
             &middot;
             <span
               v-gl-tooltip:tooltipcontainer.bottom
@@ -183,8 +258,42 @@ export default {
               <span class="author">{{ author.name }}</span>
             </gl-link>
           </span>
+          <span
+            v-if="issuable.milestone"
+            class="issuable-milestone gl-display-none gl-sm-display-inline-block! gl-ml-3"
+          >
+            <gl-link v-gl-tooltip :href="issuable.milestone.webUrl" :title="milestoneDate">
+              <gl-icon name="clock" />
+              {{ issuable.milestone.title }}
+            </gl-link>
+          </span>
+          <span
+            v-if="issuable.dueDate"
+            v-gl-tooltip
+            class="issuable-due-date gl-display-none gl-sm-display-inline-block! gl-ml-3"
+            :class="{ 'gl-text-red-500': isDueDateInPast }"
+            :title="__('Due date')"
+          >
+            <gl-icon name="calendar" />
+            {{ dueDate }}
+          </span>
+          <span
+            v-if="issuable.weight != null"
+            v-gl-tooltip
+            class="issuable-weight gl-display-none gl-sm-display-inline-block! gl-ml-3"
+            :title="__('Weight')"
+          >
+            <gl-icon name="weight" />
+            {{ issuable.weight }}
+          </span>
+          <span v-if="issuable.healthStatus" class="health-status gl-ml-3">
+            <span class="gl-label gl-label-sm" :class="[healthStatusClass]">
+              <span class="gl-label-text">
+                {{ healthStatusText }}
+              </span>
+            </span>
+          </span>
           <slot name="timeframe"></slot>
-          &nbsp;
           <gl-label
             v-for="(label, index) in labels"
             :key="index"
@@ -193,31 +302,24 @@ export default {
             :description="label.description"
             :scoped="scopedLabel(label)"
             :target="labelTarget(label)"
-            :class="{ 'gl-ml-2': index }"
+            :class="{ 'gl-ml-3': index === 0, 'gl-ml-2': index }"
             size="sm"
           />
+          <span
+            v-if="timeEstimate"
+            v-gl-tooltip
+            class="gl-display-none gl-sm-display-inline-block! gl-ml-3"
+            :title="__('Estimate')"
+          >
+            <gl-icon name="timer" />
+            {{ timeEstimate }}
+          </span>
         </div>
       </div>
       <div class="issuable-meta">
         <ul v-if="showIssuableMeta" class="controls">
           <li v-if="hasSlotContents('status')" class="issuable-status">
             <slot name="status"></slot>
-          </li>
-          <li
-            v-if="showDiscussions"
-            data-testid="issuable-discussions"
-            class="issuable-comments gl-display-none gl-sm-display-block"
-          >
-            <gl-link
-              v-gl-tooltip:tooltipcontainer.top
-              :title="__('Comments')"
-              :href="issuableNotesLink"
-              :class="{ 'no-comments': !issuable.userDiscussionsCount }"
-              class="gl-reset-color!"
-            >
-              <gl-icon name="comments" />
-              {{ issuable.userDiscussionsCount }}
-            </gl-link>
           </li>
           <li v-if="assignees.length" class="gl-display-flex">
             <issuable-assignees
@@ -228,10 +330,62 @@ export default {
               class="gl-align-items-center gl-display-flex gl-ml-3"
             />
           </li>
+          <li
+            v-if="issuable.mergeRequestsCount > 0"
+            v-gl-tooltip
+            class="gl-display-none gl-sm-display-block"
+            :title="__('Related merge requests')"
+          >
+            <gl-icon name="merge-request" />
+            {{ issuable.mergeRequestsCount }}
+          </li>
+          <li
+            v-if="issuable.upvotes > 0"
+            v-gl-tooltip
+            class="issuable-upvotes gl-display-none gl-sm-display-block"
+            :title="__('Upvotes')"
+          >
+            <gl-icon name="thumb-up" />
+            {{ issuable.upvotes }}
+          </li>
+          <li
+            v-if="issuable.downvotes > 0"
+            v-gl-tooltip
+            class="issuable-downvotes gl-display-none gl-sm-display-block"
+            :title="__('Downvotes')"
+          >
+            <gl-icon name="thumb-down" />
+            {{ issuable.downvotes }}
+          </li>
+          <li
+            v-if="issuable.blockingIssuesCount > 0"
+            v-gl-tooltip
+            class="blocking-issues gl-display-none gl-sm-display-block"
+            :title="__('Blocking issues')"
+          >
+            <gl-icon name="issue-block" />
+            {{ issuable.blockingIssuesCount }}
+          </li>
+          <li
+            v-if="showDiscussions"
+            data-testid="issuable-discussions"
+            class="issuable-comments gl-display-none gl-sm-display-block"
+          >
+            <gl-link
+              v-gl-tooltip:tooltipcontainer.top
+              :title="__('Comments')"
+              :href="issuableNotesLink"
+              :class="{ 'no-comments': !notesCount }"
+              class="gl-reset-color!"
+            >
+              <gl-icon name="comments" />
+              {{ notesCount }}
+            </gl-link>
+          </li>
         </ul>
         <div
           data-testid="issuable-updated-at"
-          class="float-right issuable-updated-at d-none d-sm-inline-block"
+          class="float-right issuable-updated-at gl-display-none gl-sm-display-inline-block!"
         >
           <span
             v-gl-tooltip:tooltipcontainer.bottom

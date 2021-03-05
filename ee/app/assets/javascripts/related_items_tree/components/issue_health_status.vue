@@ -1,5 +1,5 @@
 <script>
-import { issueHealthStatus, issueHealthStatusCSSMapping } from '../constants';
+import { issueHealthStatus, issueHealthStatusCSSMapping } from '~/issue_show/constants';
 
 export default {
   props: {

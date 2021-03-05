@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
 import IssueHealthStatus from 'ee/related_items_tree/components/issue_health_status.vue';
-import { issueHealthStatus, issueHealthStatusCSSMapping } from 'ee/related_items_tree/constants';
+import { issueHealthStatus, issueHealthStatusCSSMapping } from '~/issue_show/constants';
 import { mockIssue1 } from '../mock_data';
 
 const createComponent = () => {

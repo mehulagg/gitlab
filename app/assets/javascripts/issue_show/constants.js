@@ -25,3 +25,15 @@ export const IssueStateEvent = {
 
 export const STATUS_PAGE_PUBLISHED = __('Published on status page');
 export const JOIN_ZOOM_MEETING = __('Join Zoom meeting');
+
+export const issueHealthStatus = {
+  atRisk: __('At risk'),
+  onTrack: __('On track'),
+  needsAttention: __('Needs attention'),
+};
+
+export const issueHealthStatusCSSMapping = {
+  atRisk: 'status-at-risk',
+  onTrack: 'status-on-track',
+  needsAttention: 'status-needs-attention',
+};
