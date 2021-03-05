@@ -7,8 +7,8 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be_with_refind(:project) { create(:project) }
 
-  let!(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
-  let!(:oncall_rotation) { create(:incident_management_oncall_rotation, :with_participants, schedule: oncall_schedule, participants_count: 2) }
+  let_it_be_with_refind(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
+  let_it_be_with_refind(:oncall_rotation) { create(:incident_management_oncall_rotation, :with_participants, schedule: oncall_schedule, participants_count: 2) }
   let(:current_user) { user_with_permissions }
   let(:params) { rotation_params }
   let(:service) { described_class.new(oncall_rotation, current_user, params) }
@@ -137,7 +137,7 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
     context 'removing all participants' do
       let(:params) { rotation_params(participants: []) }
 
-      it 'soft-removes all the rotation participants' do
+      it 'soft-deletes all the rotation participants' do
         subject
 
         expect(oncall_rotation.participants.not_removed).to be_empty

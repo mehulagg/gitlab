@@ -53,31 +53,6 @@ RSpec.describe IncidentManagement::OncallParticipant do
 
       it { is_expected.to contain_exactly(removed_participant) }
     end
-
-    context 'including/excluding users' do
-      let_it_be(:second_user) { create(:user) }
-      let_it_be(:second_participant) { create(:incident_management_oncall_participant, rotation: rotation, user: second_user) }
-
-      describe 'including_users' do
-        subject { described_class.including_users(second_user) }
-
-        it { is_expected.to contain_exactly(second_participant) }
-      end
-
-      describe 'excluding_users' do
-        subject { described_class.excluding_users(second_user) }
-
-        it { is_expected.to contain_exactly(participant, removed_participant) }
-      end
-    end
-  end
-
-  describe '#mark_as_removed' do
-    subject { participant.mark_as_removed }
-
-    it 'updates is_removed to true' do
-      expect { subject }.to change { participant.reload.is_removed }.to(true)
-    end
   end
 
   private

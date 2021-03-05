@@ -53,6 +53,8 @@ module IncidentManagement
       attr_reader :oncall_rotation, :user, :project, :params, :participants_params
 
       def update_and_remove_participants
+        return if participants_params.nil?
+
         participants = participants_for(oncall_rotation)
         raise RotationModificationError.new(error_participant_has_no_permission) if participants.nil?
 
@@ -60,6 +62,8 @@ module IncidentManagement
         raise RotationModificationError.new(error_in_validation(first_invalid_participant)) if first_invalid_participant
 
         upsert_participants(participants)
+
+        oncall_rotation.touch
       end
 
       def error_no_permissions
