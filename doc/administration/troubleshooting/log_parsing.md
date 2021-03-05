@@ -41,6 +41,12 @@ jq -cR 'fromjson?' file.json | jq <COMMAND>
 By default `jq` will error out when it encounters a line that is not valid JSON.
 This skips over all invalid lines and parses the rest.
 
+#### Print a JSON log's time range
+
+```shell
+cat log.json | (head -1; tail -1) | jq -rs '[.[].time] | join(" to ")'
+```
+
 ### Parsing `production_json.log` and `api_json.log`
 
 #### Find all requests with a 5XX status code
