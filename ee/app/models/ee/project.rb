@@ -425,6 +425,12 @@ module EE
       group_hooks.hooks_for(hooks_scope).any?
     end
 
+    def execute_external_compliance_hooks(data)
+      external_approval_rules.each do |approval_rule|
+        approval_rule.async_execute(data)
+      end
+    end
+
     def execute_hooks(data, hooks_scope = :push_hooks)
       super
 

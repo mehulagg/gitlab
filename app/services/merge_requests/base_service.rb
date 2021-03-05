@@ -22,6 +22,7 @@ module MergeRequests
     def execute_hooks(merge_request, action = 'open', old_rev: nil, old_associations: {})
       merge_data = hook_data(merge_request, action, old_rev: old_rev, old_associations: old_associations)
       merge_request.project.execute_hooks(merge_data, :merge_request_hooks)
+      merge_request.project.execute_external_compliance_hooks(merge_data)
       merge_request.project.execute_services(merge_data, :merge_request_hooks)
 
       enqueue_jira_connect_messages_for(merge_request)

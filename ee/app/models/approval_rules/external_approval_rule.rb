@@ -10,5 +10,10 @@ module ApprovalRules
 
     validates :external_url, presence: true, uniqueness: { scope: :project_id }, addressable_url: true
     validates :name, uniqueness: { scope: :project_id }, presence: true
+
+    def async_execute(data)
+      Gitlab::HTTP.post(external_url,
+                        body: Gitlab::Json::LimitedEncoder.encode(data, limit: 25.megabytes), allow_local_requests: true)
+    end
   end
 end
