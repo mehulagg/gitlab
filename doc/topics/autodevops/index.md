@@ -49,7 +49,7 @@ available. First-time users should follow the [quick start guide](quick_start_gu
 Depending on your instance type, you can enable or disable Auto DevOps at the
 following levels:
 
-| Instance type       | [Project](#at-the-project-level) | [Group](#at-the-group-level) | [Instance](#at-the-instance-level-administrators-only) (Admin Area)  |
+| Instance type       | [Project](#at-the-project-level) | [Group](#at-the-group-level) | [Instance](#at-the-instance-level) (Admin Area)  |
 |---------------------|------------------------|------------------------|------------------------|
 | GitLab SaaS         | **{check-circle}** Yes | **{dotted-circle}** No | **{dotted-circle}** No |
 | GitLab self-managed | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
