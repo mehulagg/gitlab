@@ -19,7 +19,6 @@ const propsData = {
   gitlabCiPresent: false,
   gitlabCiHistoryPath: '/ci/history',
   autoFixSettingsProps: {},
-  createSastMergeRequestPath: 'http://createSastMergeRequestPath',
 };
 
 describe('Security Configuration App', () => {
@@ -183,7 +182,6 @@ describe('Security Configuration App', () => {
         expect(manage.find(ManageFeature).props()).toEqual({
           feature: features[i],
           autoDevopsEnabled: propsData.autoDevopsEnabled,
-          createSastMergeRequestPath: propsData.createSastMergeRequestPath,
         });
         expect(feature.find(GlLink).props('href')).toBe(features[i].href);
       }

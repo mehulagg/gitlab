@@ -11,7 +11,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       end
 
       after do
-        subject.configure_proxy(nil)
+        subject.clear_configuration
       end
 
       it 'returns the connection proxy' do
@@ -132,6 +132,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
   describe '.enable?' do
     let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
 
+    before do
+      subject.clear_configuration
+    end
+
     it 'returns false when no hosts are specified' do
       allow(described_class).to receive(:hosts).and_return([])
 
@@ -250,7 +254,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
 
   describe '.configure_proxy' do
     after do
-      described_class.configure_proxy(nil)
+      described_class.clear_configuration
     end
 
     it 'configures the connection proxy' do
@@ -341,6 +345,69 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         .to receive(:start)
 
       described_class.start_service_discovery
+    end
+  end
+
+  describe '.db_role_for_connection' do
+    let(:connection) { double(:conneciton) }
+
+    context 'when the load balancing is not configured' do
+      before do
+        allow(described_class).to receive(:enable?).and_return(false)
+      end
+
+      it 'returns primary' do
+        expect(described_class.db_role_for_connection(connection)).to be(:primary)
+      end
+    end
+
+    context 'when the load balancing is configured' do
+      let(:proxy) { described_class::ConnectionProxy.new(%w(foo)) }
+      let(:load_balancer) { described_class::LoadBalancer.new(%w(foo)) }
+
+      before do
+        allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
+
+        allow(described_class).to receive(:enable?).and_return(true)
+        allow(described_class).to receive(:proxy).and_return(proxy)
+        allow(proxy).to receive(:load_balancer).and_return(load_balancer)
+
+        subject.configure_proxy(proxy)
+      end
+
+      after do
+        subject.clear_configuration
+      end
+
+      context 'when the load balancer returns :replica' do
+        it 'returns :replica' do
+          allow(load_balancer).to receive(:db_role_for_connection).and_return(:replica)
+
+          expect(described_class.db_role_for_connection(connection)).to be(:replica)
+
+          expect(load_balancer).to have_received(:db_role_for_connection).with(connection)
+        end
+      end
+
+      context 'when the load balancer returns :primary' do
+        it 'returns :primary' do
+          allow(load_balancer).to receive(:db_role_for_connection).and_return(:primary)
+
+          expect(described_class.db_role_for_connection(connection)).to be(:primary)
+
+          expect(load_balancer).to have_received(:db_role_for_connection).with(connection)
+        end
+      end
+
+      context 'when the load balancer returns nil' do
+        it 'returns :primary' do
+          allow(load_balancer).to receive(:db_role_for_connection).and_return(nil)
+
+          expect(described_class.db_role_for_connection(connection)).to be(:primary)
+
+          expect(load_balancer).to have_received(:db_role_for_connection).with(connection)
+        end
+      end
     end
   end
 end

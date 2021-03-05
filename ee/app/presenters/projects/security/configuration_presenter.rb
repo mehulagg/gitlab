@@ -53,7 +53,6 @@ module Projects
         {
           auto_devops_enabled: auto_devops_source?,
           auto_devops_help_page_path: help_page_path('topics/autodevops/index'),
-          create_sast_merge_request_path: project_security_configuration_sast_path(project),
           auto_devops_path: auto_devops_settings_path(project),
           can_enable_auto_devops: can_enable_auto_devops?,
           features: features,

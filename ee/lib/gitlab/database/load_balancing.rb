@@ -96,9 +96,29 @@ module Gitlab
       # posting the write location of the database if load balancing is
       # configured.
       def self.configured?
-        return false unless ::License.feature_available?(:db_load_balancing)
+        return false unless feature_available?
 
         hosts.any? || service_discovery_enabled?
+      end
+
+      def self.feature_available?
+        # If this method is called in any subscribers listening to
+        # sql.active_record, the SQL call below may cause infinite recursion.
+        # So, the memoization variable must have 3 states
+        # - First call: @feature_available is undefined
+        #   -> Set @feature_available to false
+        #   -> Trigger SQL
+        #   -> SQL subscriber triggers this method again
+        #     -> return false
+        #   -> Set @feature_available  to true
+        #   -> return true
+        # - Second call: return @feature_available right away
+
+        return @feature_available if defined?(@feature_available)
+
+        @feature_available = false
+        @feature_available = Gitlab::Database.cached_table_exists?('licenses') &&
+                             ::License.feature_available?(:db_load_balancing)
       end
 
       def self.program_name
@@ -121,8 +141,31 @@ module Gitlab
         ActiveRecord::Base.singleton_class.prepend(ActiveRecordProxy)
       end
 
+      # Clear configuration
+      def self.clear_configuration
+        @proxy = nil
+        remove_instance_variable(:@feature_available)
+      end
+
       def self.active_record_models
         ActiveRecord::Base.descendants
+      end
+
+      DB_ROLES = [
+        ROLE_PRIMARY = :primary,
+        ROLE_REPLICA = :replica
+      ].freeze
+
+      # Returns the role (primary/replica) of the database the connection is
+      # connecting to. At the moment, the connection can only be retrieved by
+      # Gitlab::Database::LoadBalancer#read or #read_write or from the
+      # ActiveRecord directly. Therefore, if the load balancer doesn't
+      # recognize the connection, this method returns the primary role
+      # directly. In future, we may need to check for other sources.
+      def self.db_role_for_connection(connection)
+        return ROLE_PRIMARY if !enable? || @proxy.blank?
+
+        proxy.load_balancer.db_role_for_connection(connection) || ROLE_PRIMARY
       end
     end
   end

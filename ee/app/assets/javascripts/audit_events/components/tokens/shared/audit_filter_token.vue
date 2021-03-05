@@ -8,8 +8,8 @@ import {
 import { debounce } from 'lodash';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
+import { isNumeric } from '~/lib/utils/number_utils';
 import { sprintf, s__, __ } from '~/locale';
-import { isNumeric } from '../../../utils';
 
 export default {
   components: {
