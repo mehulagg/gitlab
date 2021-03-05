@@ -218,7 +218,7 @@ module EE
     def size_limit_message(project)
       show_lfs = project.lfs_enabled? ? 'including files in LFS' : ''
 
-      "The total size of this project's repository #{show_lfs} will be limited to this size. 0 for unlimited. Leave empty to inherit the group/global value."
+      "Max size of this project's repository, #{show_lfs}. Enter 0 for no limit. Leave empty to inherit the group/global value."
     end
 
     override :membership_locked?
