@@ -30,19 +30,20 @@ module IncidentManagement
         return error_too_many_participants if participants_params && participants_params.size > MAXIMUM_PARTICIPANTS
         return error_duplicate_participants if !participants_params.nil? && duplicated_users?
 
+        # Ensure shift history is up to date before saving new params
         IncidentManagement::OncallRotations::PersistShiftsJob.new.perform(oncall_rotation.id)
 
-        unless participants_params.nil?
+        OncallRotation.transaction do
           update_and_remove_participants
-          oncall_rotation.touch
+
+          # TODO Recalculate rotation with new params
+          # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55570
+
+          raise RotationModificationError.new(error_in_validation(oncall_rotation)) unless oncall_rotation.update(params)
+
+          success(oncall_rotation.reload)
         end
 
-        # TODO Recalculate rotation with new params
-        # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55570
-
-        return error_in_validation(oncall_rotation) unless oncall_rotation.update(params)
-
-        success(oncall_rotation.reload)
       rescue RotationModificationError => err
         err.service_response_error
       end

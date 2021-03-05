@@ -72,6 +72,17 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
 
         it_behaves_like 'error response', "Color palette can't be blank"
       end
+
+      context 'rotation params have a validation error' do
+        let(:rotation_edit_params) { { name: '' } }
+        let(:params) { rotation_params(edit_params: rotation_edit_params, participants: oncall_rotation.participants.to_a.push(participant_to_add)) }
+
+        it 'does not add the participant' do
+          expect { subject }.not_to change(IncidentManagement::OncallParticipant, :count)
+        end
+
+        it_behaves_like 'error response', "Name can't be blank"
+      end
     end
 
     context 'adding too many participants' do
