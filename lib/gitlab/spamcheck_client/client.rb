@@ -5,42 +5,66 @@ module Gitlab
   module SpamcheckClient
     class Client
       include ::Spam::SpamConstants
+      DEFAULT_TIMEOUT = 5
 
       def initialize(endpoint_url:)
         @endpoint_url = endpoint_url
-        @stub = Spamcheck::SpamcheckService::Service::Stub.new(@endpoint_url)
+        @stub = Spamcheck::SpamcheckService::Stub.new(@endpoint_url,
+                                                      :this_channel_is_insecure,
+                                                      timeout: DEFAULT_TIMEOUT)
       end
 
-      def is_issue_spam?(target:, user:, context:)
-        issue = Spamcheck::Issue.new()
-        issue.title = target.spam_title
-        issue.description = target.spam_description
-        issue.created_at = target.created_at
-        issue.updated_at = target.updated_at
-        issue.user_in_project = user.authorized_project?(project)
-        issue.action = action_to_enum(context[:action])
+      def issue_spam?(spam_issue:, user:, context: nil)
+        issue = Spamcheck::Issue.new
+        issue.title = spam_issue.spam_title || ''
+        issue.description = spam_issue.spam_description || ''
+        issue.created_at = convert_to_pb_timestamp(spam_issue.created_at)
+        issue.updated_at = convert_to_pb_timestamp(spam_issue.updated_at)
+        issue.user_in_project = user.authorized_project?(spam_issue.project)
+        issue.action = action_to_enum(context.fetch(:action)) unless context.nil?
         issue.user = build_user(user)
 
         response = @stub.check_for_spam_issue(issue)
-        response
+        [convert_verdict_to_gitlab_constant(verdict: response.verdict), response.error]
       end
 
       private
 
-      def build_user(user)
-        userPB = Spamcheck::User.new()
-        userPB.username = user.username
-        userPB.org = user.organization
-        userPB.created_at = user.created_at
-
-        userPB.emails = user.emails.map do |email| 
-          emailPB = Spamcheck::Email.new()
-          emailPB.email = email.email
-          emailPB.verified = !email.confirmed_at.nil?
+      def convert_verdict_to_gitlab_constant(verdict:)
+        case verdict
+        when Spamcheck::SpamVerdict::Verdict::ALLOW
+          ALLLOW
+        when Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW
+          CONDITIONAL_ALLOW
+        when Spamcheck::SpamVerdict::Verdict::DISALLOW
+          DISALLOW
+        when Spamcheck::SpamVerdict::Verdict::BLOCK_USER
+          BLOCK_USER
+        else
+          verdict
         end
-        userPB
       end
 
+      def build_user(user)
+        user_pb = Spamcheck::User.new
+        user_pb.username = user.username
+        user_pb.org = user.organization || ''
+        user_pb.created_at = convert_to_pb_timestamp(user.created_at)
+
+        emails = user.emails.map do |email|
+          email_pb = Spamcheck::Email.new
+          email_pb.email = email.email
+          email_pb.verified = !email.confirmed_at.nil?
+        end
+
+        user_pb.emails.replace(emails)
+        user_pb
+      end
+
+      def convert_to_pb_timestamp(ar_timestamp)
+        Google::Protobuf::Timestamp.new(seconds: ar_timestamp.to_time.to_i,
+                                        nanos: ar_timestamp.to_time.nsec)
+      end
     end
   end
 end

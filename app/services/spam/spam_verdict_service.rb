@@ -10,7 +10,6 @@ module Spam
       @request = request
       @user = user
       @options = options
-      @verdict_params = assemble_verdict_params(context)
     end
 
     def execute
@@ -28,7 +27,7 @@ module Spam
 
     private
 
-    attr_reader :user, :target, :request, :options, :verdict_params
+    attr_reader :user, :target, :request, :options
 
     def akismet_verdict
       if akismet.spam?
@@ -43,65 +42,24 @@ module Spam
       return if endpoint_url.blank?
 
       begin
-        binding.pry
-        result = client.is_issue_spam?(target: target, user: user, context:context)
-        #result = Gitlab::HTTP.post(endpoint_url, body: verdict_params.to_json, headers: { 'Content-Type' => 'application/json' })
+        result, _error = client.issue_spam?(spam_issue: target, user: user)
         return unless result
 
-        #json_result = Gitlab::Json.parse(result).with_indifferent_access
-        #json_result = { verdict: ALLOW } if json_result.empty? # gRPC doesn't encode default values if they're 0 (which ALLOW is)
         # @TODO metrics/logging
         # Expecting:
         # error: (string or nil)
         # verdict: (string or nil)
-        # @TODO log if json_result[:error]
+        # @TODO log if error is not nill
 
-        #json_result[:verdict]&.downcase
-        result.verdict.downcase
-        # TODO what do do if error is not nil?
-      rescue *Gitlab::HTTP::HTTP_ERRORS => e
+        result
+      rescue *Gitlab::HTTP::HTTP_ERRORS, GRPC::BadStatus => e
         # @TODO: log error via try_post https://gitlab.com/gitlab-org/gitlab/-/issues/219223
         Gitlab::ErrorTracking.log_exception(e)
         nil
       rescue => e
-        # @TODO log
+        Gitlab::ErrorTracking.log_exception(e)
         ALLOW
       end
-    end
-
-    def assemble_verdict_params(context)
-      return {} unless endpoint_url.present?
-
-      project = target.try(:project)
-
-      emails = user.emails.map { |email| { email: email.email, verified: !email.confirmed_at.nil? } }
-      
-      case target.class
-      when Issue
-        issue = Spamcheck::Issue.new()
-        issue.title = target.spam_title
-        issue.description = target.spam_description
-        issue.created_at = target.created_at
-        issue.updated_at = target.updated_at
-        issue.user_in_project = user.authorized_project?(project)
-        issue.action = action_to_enum(context[:action])
-      else
-        {
-          user: {
-            created_at: user.created_at,
-            username: user.username,
-            org: user.organization,
-            emails: emails
-          },
-          title: target.spam_title,
-          description: target.spam_description,
-          created_at: target.created_at,
-          updated_at: target.updated_at,
-          user_in_project: user.authorized_project?(project),
-          action: context[:action] == 'create' ? 0 : 1
-        }
-      end
-
     end
 
     def endpoint_url
