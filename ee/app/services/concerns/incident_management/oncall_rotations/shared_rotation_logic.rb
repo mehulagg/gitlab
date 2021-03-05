@@ -21,9 +21,9 @@ module IncidentManagement
 
         # Merge the new expected attributes over the existing .
         # participant's attributes to apply any changes
-        existing_participants_by_user.merge(expected_participants_by_user) do |user_id, existing, expected|
-          existing.assign_attributes(expected.attributes.except('id'))
-          existing
+        existing_participants_by_user.merge(expected_participants_by_user) do |_, existing_participant, expected_participant|
+          existing_participant.assign_attributes(expected_participant.attributes.except('id'))
+          existing_participant
         end.values
       end
 
@@ -38,7 +38,6 @@ module IncidentManagement
         end
       end
 
-      # this should return {} for new rotations, so the create service could use this too
       def expected_participants_by_user
         participants_params.to_h do |participant|
           break unless participant[:user].can?(:read_project, project)
