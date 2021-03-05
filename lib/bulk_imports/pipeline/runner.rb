@@ -8,7 +8,7 @@ module BulkImports
       MarkedAsFailedError = Class.new(StandardError)
 
       def run
-        raise MarkedAsFailedError if marked_as_failed?
+        raise MarkedAsFailedError if context.entity.failed?
 
         info(message: 'Pipeline started')
 
@@ -40,7 +40,7 @@ module BulkImports
       private # rubocop:disable Lint/UselessAccessModifier
 
       def run_pipeline_step(step, class_name = nil)
-        raise MarkedAsFailedError if marked_as_failed?
+        raise MarkedAsFailedError if context.entity.failed?
 
         info(pipeline_step: step, step_class: class_name)
 
@@ -62,30 +62,17 @@ module BulkImports
       end
 
       def mark_as_failed
-        warn(message: 'Pipeline failed', pipeline_class: pipeline)
+        warn(message: 'Pipeline failed')
 
         context.entity.fail_op!
       end
 
-      def marked_as_failed?
-        return true if context.entity.failed?
-
-        false
-      end
-
       def log_skip(extra = {})
-        log = {
-          message: 'Skipping due to failed pipeline status',
-          pipeline_class: pipeline
-        }.merge(extra)
-
-        info(log)
+        info({ message: 'Skipping due to failed pipeline status' }.merge(extra))
       end
 
       def log_import_failure(exception, step)
-        attributes = {
-          bulk_import_entity_id: context.entity.id,
-          pipeline_class: pipeline,
+        attributes = log_params(
           pipeline_step: step,
           exception_class: exception.class.to_s,
           exception_message: exception.message.truncate(255),
@@ -105,12 +92,16 @@ module BulkImports
 
       def log_params(extra)
         defaults = {
+          bulk_import_id: context.bulk_import.id,
           bulk_import_entity_id: context.entity.id,
           bulk_import_entity_type: context.entity.source_type,
+          'context.extra': context.extra,
           pipeline_class: pipeline
         }
 
-        defaults.merge(extra).compact
+        defaults
+          .merge(extra)
+          .reject { |_key, value| value.blank? }
       end
 
       def logger
