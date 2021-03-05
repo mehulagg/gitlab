@@ -25,6 +25,10 @@ module Gitlab
       application_context.use(&block)
     end
 
+    def self.with_base_context(attributes = {}, &block)
+      Labkit::Context.with_context(attributes, &block)
+    end
+
     def self.push(args)
       application_context = new(**args)
       Labkit::Context.push(application_context.to_lazy_hash)

@@ -2,7 +2,7 @@
 
 RSpec.shared_examples 'storing arguments in the application context' do
   around do |example|
-    Labkit::Context.with_context { example.run }
+    Gitlab::ApplicationContext.with_base_context { example.run }
   end
 
   it 'places the expected params in the application context' do
@@ -12,7 +12,7 @@ RSpec.shared_examples 'storing arguments in the application context' do
 
     subject
 
-    Labkit::Context.with_context do |context|
+    Gitlab::ApplicationContext.with_base_context do |context|
       expect(context.to_h)
         .to include(log_hash(expected_params))
     end

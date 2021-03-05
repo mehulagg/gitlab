@@ -93,7 +93,7 @@ module Elastic
     end
 
     def send_to_processing_queue(job)
-      Labkit::Context.with_context(job['context']) do
+      Gitlab::ApplicationContext.with_base_context(job['context']) do
         klass.perform_async(*job['args'])
       end
     end

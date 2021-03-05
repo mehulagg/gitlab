@@ -307,7 +307,7 @@ RSpec.configure do |config|
   config.around do |example|
     # Wrap each example in it's own context to make sure the contexts don't
     # leak
-    Labkit::Context.with_context { example.run }
+    Gitlab::ApplicationContext.with_base_context { example.run }
   end
 
   config.around do |example|
