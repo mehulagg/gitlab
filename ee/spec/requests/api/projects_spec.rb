@@ -253,6 +253,34 @@ RSpec.describe API::Projects do
         end
       end
     end
+
+    context 'issuable default templates feature is available' do
+      before do
+        stub_licensed_features(issuable_default_templates: true)
+      end
+
+      it 'returns issuable default templates' do
+        get api("/projects/#{project.id}", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to have_key 'issues_template'
+        expect(json_response).to have_key 'merge_requests_template'
+      end
+    end
+
+    context 'issuable default templates feature not available' do
+      before do
+        stub_licensed_features(issuable_default_templates: false)
+      end
+
+      it 'does not return issuable default templates' do
+        get api("/projects/#{project.id}", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).not_to have_key 'issues_template'
+        expect(json_response).not_to have_key 'merge_requests_template'
+      end
+    end
   end
 
   # Assumes the following variables are defined:
@@ -780,6 +808,66 @@ RSpec.describe API::Projects do
 
   describe 'PUT /projects/:id' do
     let(:project) { create(:project, namespace: user.namespace) }
+
+    context 'issuable default templates feature is available' do
+      before do
+        stub_licensed_features(issuable_default_templates: true)
+      end
+
+      context 'when updating issues_template' do
+        it 'updates the content' do
+          template_content = '## New Issue Template'
+          project_param = { issues_template: template_content }
+
+          put api("/projects/#{project.id}", user), params: project_param
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['issues_template']).to eq(template_content)
+        end
+      end
+
+      context 'when updating merge_requests_template' do
+        it 'updates the content' do
+          template_content = '## New Merge Request Template'
+          project_param = { merge_requests_template: template_content }
+
+          put api("/projects/#{project.id}", user), params: project_param
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['merge_requests_template']).to eq(template_content)
+        end
+      end
+    end
+
+    context 'issuable default templates feature not available' do
+      before do
+        stub_licensed_features(issuable_default_templates: false)
+      end
+
+      context 'when updating issues_template' do
+        it 'does not update the content' do
+          template_content = '## New Issue Template'
+          project_param = { issues_template: template_content }
+
+          put api("/projects/#{project.id}", user), params: project_param
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).not_to have_key 'issues_template'
+        end
+      end
+
+      context 'when updating merge_requests_template' do
+        it 'does not update the content' do
+          template_content = '## New Merge Request Template'
+          project_param = { merge_requests_template: template_content }
+
+          put api("/projects/#{project.id}", user), params: project_param
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).not_to have_key 'merge_requests_template'
+        end
+      end
+    end
 
     context 'when updating external classification' do
       before do
