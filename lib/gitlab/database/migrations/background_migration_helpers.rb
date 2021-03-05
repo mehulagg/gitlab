@@ -5,7 +5,9 @@ module Gitlab
     module Migrations
       module BackgroundMigrationHelpers
         BACKGROUND_MIGRATION_BATCH_SIZE = 1_000 # Number of rows to process per job
+        BACKGROUND_MIGRATION_SUB_BATCH_SIZE = 100 # Number of rows to process per sub-batch
         BACKGROUND_MIGRATION_JOB_BUFFER_SIZE = 1_000 # Number of jobs to bulk queue at a time
+        BACKGROUND_MIGRATION_BATCH_CLASS_NAME = 'Gitlab::Database::BackgroundMigration::PrimaryKeyBatchingStrategy'
 
         # Bulk queues background migration jobs for an entire table, batched by ID range.
         # "Bulk" meaning many jobs will be pushed at a time for efficiency.
@@ -125,6 +127,94 @@ module Gitlab
           SAY
 
           final_delay
+        end
+
+        # Creates a batched background migration for the given table. A batched migration runs one job
+        # at a time, computing the bounds of the next batch based on the current migration settings and the previous
+        # batch bounds. Each job's execution status is tracked in the database as the migration runs.
+        #
+        # job_class_name - The background migration job class as a string
+        # batch_table_name - The name of the table the migration will batch over
+        # batch_column_name - The name of the column the migration will batch over
+        # job_interval - The pause interval between each job's execution
+        # batch_min_value - The value in the column the batching will begin at
+        # batch_max_value - The value in the column the batching will end at, defaults to `SELECT MAX(batch_column)`
+        # batch_class_name - The name of the class that will be called to find the range of each next batch
+        # batch_size - The maximum number of rows per job
+        # sub_batch_size - The maximum number of rows processed per "iteration" within the job
+        # other_job_arguments - Other arguments to send to the job
+        #
+        # *Returns the created BatchedMigration record*
+        #
+        # Example:
+        #
+        #     queue_batched_background_migration(
+        #       'Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJob',
+        #       :events,
+        #       :id,
+        #       job_interval: 2.minutes,
+        #       other_job_arguments: ['column1', 'column2'])
+        #
+        # Where the the background migration exists:
+        #
+        #     class Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJob
+        #       def perform(start_id, end_id, batch_table, batch_column, sub_batch_size, *other_args)
+        #         # do something
+        #       end
+        #     end
+        def queue_batched_background_migration( # rubocop:disable Metrics/ParameterLists
+          job_class_name,
+          batch_table_name,
+          batch_column_name,
+          job_interval:,
+          batch_min_value: 1,
+          batch_max_value: nil,
+          batch_class_name: BACKGROUND_MIGRATION_BATCH_CLASS_NAME,
+          batch_size: BACKGROUND_MIGRATION_BATCH_SIZE,
+          sub_batch_size: BACKGROUND_MIGRATION_SUB_BATCH_SIZE,
+          other_job_arguments: []
+        )
+
+          batch_max_value ||= connection.select_value(<<~SQL)
+            SELECT MAX(#{connection.quote_column_name(batch_column_name)})
+            FROM #{connection.quote_table_name(batch_table_name)}
+          SQL
+
+          return if batch_max_value.nil?
+
+          Gitlab::Database::BackgroundMigration::BatchedMigration.create!(
+            job_class_name: job_class_name,
+            table_name: batch_table_name,
+            column_name: batch_column_name,
+            interval: job_interval,
+            min_value: batch_min_value,
+            max_value: batch_max_value,
+            batch_class_name: batch_class_name,
+            batch_size: batch_size,
+            sub_batch_size: sub_batch_size,
+            job_arguments: other_job_arguments,
+            status: :active)
+        end
+
+        # Aborts all incomplete batched background migration for the given job, table and column. This would
+        # typically be used in a migration rollback, to bail out on any background migrations that were started by
+        # the migration.
+        #
+        # job_class_name - The background migration job class as a string
+        # batch_table_name - The name of the table the migration was batching over
+        # batch_column_name - The name of the column the migration was batching over
+        #
+        # Example:
+        #
+        #     abort_batched_background_migrations(
+        #       'Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJob',
+        #       :events,
+        #       :id)
+        def abort_batched_background_migrations(job_class_name, batch_table_name, batch_column_name)
+          Gitlab::Database::BackgroundMigration::BatchedMigration
+            .for_batch_configuration(job_class_name, batch_table_name, batch_column_name)
+            .not_finished
+            .update_all(status: :aborted, updated_at: Time.current)
         end
 
         def perform_background_migration_inline?
