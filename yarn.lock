@@ -907,10 +907,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@28.1.0":
-  version "28.1.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-28.1.0.tgz#aaec227c03c345632bcb2bc6222ed49a004b2dbd"
-  integrity sha512-V4AH41sRVPp4gOSNt/safVbmsF8RS7H49JuaMWtOkNqfc90ePW+OGyv5ioCYDMYLvk8BaGlmH8f01BuCgOrplA==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1077211017/artifacts/raw/gitlab-ui.cuddyz-add-new-margins.tgz":
+  version "28.3.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1077211017/artifacts/raw/gitlab-ui.cuddyz-add-new-margins.tgz#dcdfc0db80f0a473569e657b674f43d20f5f8383"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
