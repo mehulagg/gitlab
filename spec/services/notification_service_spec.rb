@@ -112,6 +112,7 @@ RSpec.describe NotificationService, :mailer do
       should_not_email(@u_mentioned)
       should_not_email(@u_guest_watcher)
       should_not_email(user_1)
+      should_not_email(current_user)
     end
   end
 
