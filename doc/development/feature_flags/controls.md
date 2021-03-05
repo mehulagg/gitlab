@@ -240,7 +240,7 @@ To disable a feature flag that has been enabled for a specific project you can r
 /chatops run feature set --group=gitlab-org some_feature false
 ```
 
-You cannot selectively disable feature flags for a specific project/group/user without applying a [specific method of implementing](development.md#selectively-disable-by-actor) the feature flags.
+You cannot selectively disable feature flags for a specific project/group/user without applying a [specific method of implementing](index.md#selectively-disable-by-actor) the feature flags.
 
 ### Feature flag change logging
 
