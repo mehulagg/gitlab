@@ -26,7 +26,7 @@ module API
 
     before do
       require_packages_enabled!
-      authenticate!
+      authenticate_non_get!
       not_found! unless Feature.enabled?(:rubygem_packages, user_project)
     end
 
@@ -121,8 +121,18 @@ module API
             optional :gems, type: String, desc: 'Comma delimited gem names'
           end
           get 'dependencies' do
-            # To be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299282
-            not_found!
+            if params[:gems].blank?
+              status :ok
+            else
+              results = params[:gems].split(',').map do |gem_name|
+                service_result = Packages::Rubygems::DependencyResolverService.new(user_project, current_user, gem_name: gem_name).execute
+                render_api_error!(service_result.message, service_result.http_status) if service_result.error?
+
+                service_result.payload
+              end
+
+              Marshal.dump(results)
+            end
           end
         end
       end

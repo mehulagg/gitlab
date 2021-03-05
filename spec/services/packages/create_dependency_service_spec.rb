@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+A# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe Packages::CreateDependencyService do
