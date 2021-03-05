@@ -48,9 +48,8 @@ RSpec.describe Emails::MergeRequests do
         is_expected.to have_body_text(project_merge_request_path(project, merge_request))
         is_expected.to have_body_text('due to conflict.')
         is_expected.to have_link(merge_request.to_reference, href: project_merge_request_url(merge_request.target_project, merge_request))
-
-        expect(subject.text_part).to have_content(assignee.name)
-        expect(subject.text_part).to have_content(reviewer.name)
+        is_expected.to have_text_part_content(assignee.name)
+        is_expected.to have_text_part_content(reviewer.name)
       end
     end
   end
@@ -62,13 +61,13 @@ RSpec.describe Emails::MergeRequests do
 
     it "has required details" do
       aggregate_failures do
-        expect(subject).to have_content title
-        expect(subject).to have_content merge_request.to_reference
-        expect(subject).to have_content current_user.name
-        expect(subject.html_part).to have_content(assignee.name)
-        expect(subject.text_part).to have_content(assignee.name)
-        expect(subject.html_part).to have_content(reviewer.name)
-        expect(subject.text_part).to have_content(reviewer.name)
+        is_expected.to have_content(title)
+        is_expected.to have_content(merge_request.to_reference)
+        is_expected.to have_content(current_user.name)
+        is_expected.to have_text_part_content(assignee.name)
+        is_expected.to have_html_part_content(assignee.name)
+        is_expected.to have_text_part_content(reviewer.name)
+        is_expected.to have_html_part_content(reviewer.name)
       end
     end
   end
