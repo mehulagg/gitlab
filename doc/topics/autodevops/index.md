@@ -64,7 +64,7 @@ Auto DevOps runs on pipelines automatically only if a [`Dockerfile` or matching 
 exists.
 
 If a [CI/CD configuration file](../../ci/yaml/README.md) is present in the
-project, it continues to be used whether or not Auto DevOps is enabled.
+project, it isn't changed and won't be affected by Auto DevOps.
 
 ### At the project level
 
