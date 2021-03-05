@@ -170,7 +170,10 @@ module Gitlab
         end
 
         def  logging_for_all_caught_up_method?
-          @logging_for_all_caught_up_method ||= ::Feature.enabled?(:logging_for_all_caught_up_method)
+          return @logging_for_all_caught_up_method if defined?(@logging_for_all_caught_up_method)
+
+          @logging_for_all_caught_up_method = false
+          @logging_for_all_caught_up_method = ::Feature.enabled?(:logging_for_all_caught_up_method)
         end
 
         # Yields a block, retrying it upon error using an exponential backoff.

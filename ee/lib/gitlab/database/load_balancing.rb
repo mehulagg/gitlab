@@ -91,7 +91,15 @@ module Gitlab
       end
 
       def self.disabled_for_sidekiq?
-         Gitlab::Runtime.sidekiq? && ::Feature.disabled?(:load_balancer_for_sidekiq)
+         Gitlab::Runtime.sidekiq? && !load_balancing_for_sidekiq?
+      end
+
+
+      def self.load_balancing_for_sidekiq?
+        return @load_balancing_for_sidekiq if defined?(@load_balancing_for_sidekiq)
+
+        @load_balancing_for_sidekiq = false
+        @load_balancing_for_sidekiq = ::Feature.enabled?(:load_balancer_for_sidekiq)
       end
 
       # Returns true if load balancing has been configured. Since
