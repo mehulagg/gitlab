@@ -12,6 +12,26 @@ RSpec.describe 'Project fork' do
     sign_in(user)
   end
 
+  shared_examples 'fork button on project page' do
+    it 'allows user to fork project from the project page' do
+      visit project_path(project)
+
+      expect(page).not_to have_css('a.disabled', text: 'Fork')
+    end
+
+    context 'user has exceeded personal project limit' do
+      before do
+        user.update!(projects_limit: 0)
+      end
+
+      it 'disables fork button on project page' do
+        visit project_path(project)
+
+        expect(page).to have_css('a.disabled', text: 'Fork')
+      end
+    end
+  end
+
   shared_examples 'create fork page' do |fork_page_text|
     before do
       project.project_feature.update_attribute(
@@ -95,32 +115,16 @@ RSpec.describe 'Project fork' do
     end
   end
 
-  it 'allows user to fork project from the project page' do
-    visit project_path(project)
-
-    expect(page).not_to have_css('a.disabled', text: 'Fork')
-  end
-
-  context 'user has exceeded personal project limit' do
-    before do
-      user.update!(projects_limit: 0)
-    end
-
-    it 'disables fork button on project page' do
-      visit project_path(project)
-
-      expect(page).to have_css('a.disabled', text: 'Fork')
-    end
-  end
-
-  it_behaves_like 'create fork page',
-    'Fork project'
+  it_behaves_like 'fork button on project page'
+  it_behaves_like 'create fork page', 'Fork project'
 
   context 'with fork_project_form feature flag disabled' do
     before do
       stub_feature_flags(fork_project_form: false)
       sign_in(user)
     end
+
+    it_behaves_like 'fork button on project page'
 
     context 'user has exceeded personal project limit' do
       before do
@@ -142,8 +146,7 @@ RSpec.describe 'Project fork' do
       end
     end
 
-    it_behaves_like 'create fork page',
-      ' Select a namespace to fork the project '
+    it_behaves_like 'create fork page', ' Select a namespace to fork the project '
 
     it 'forks the project', :sidekiq_might_not_need_inline do
       visit project_path(project)
