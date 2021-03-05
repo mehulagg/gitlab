@@ -58,7 +58,7 @@ describe('Persisted dropdown selection', () => {
 
       await nextTick();
 
-      expect(wrapper.emitted('change')).toEqual([[inputPayload]]);
+      expect(wrapper.emitted('change')).toStrictEqual([[inputPayload]]);
       expect(findLocalStorageSync().props('value')).toBe(inputPayload);
     });
   });
@@ -113,7 +113,7 @@ describe('Persisted dropdown selection', () => {
 
         await nextTick();
 
-        expect(wrapper.emitted('change')).toEqual([['gradle']]);
+        expect(wrapper.emitted('change')).toStrictEqual([['gradle']]);
         expect(findDropdownItems().at(0).props('isChecked')).toBe(false);
         expect(findDropdownItems().at(1).props('isChecked')).toBe(true);
       });
