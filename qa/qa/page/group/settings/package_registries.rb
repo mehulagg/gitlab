@@ -17,7 +17,7 @@ module QA
 
           def set_allow_duplicates_disabled
             expand_content :package_registry_settings_content do
-              uncheck_element :allow_duplicates_checkbox
+              uncheck_element(:allow_duplicates_checkbox)
             end
           end
 

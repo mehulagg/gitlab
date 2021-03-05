@@ -11,7 +11,7 @@ module QA
           end
 
           def enable_autodevops
-            check_element :enable_autodevops_checkbox
+            check_element(:enable_autodevops_checkbox)
             click_element :save_changes_button
           end
         end
