@@ -3,7 +3,6 @@
 import { GlTooltipDirective, GlLink, GlButton } from '@gitlab/ui';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __, sprintf } from '~/locale';
-import scrollDown from '../svg/scroll_down.svg';
 
 export default {
   components: {
@@ -13,7 +12,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  scrollDown,
   props: {
     erasePath: {
       type: String,
@@ -109,7 +107,7 @@ export default {
       <div v-gl-tooltip :title="s__('Job|Scroll to top')" class="controllers-buttons">
         <gl-button
           :disabled="isScrollTopDisabled"
-          class="btn-scroll btn-transparent btn-blank"
+          class="btn-scroll"
           data-testid="job-controller-scroll-top"
           icon="scroll_up"
           @click="handleScrollToTop"
@@ -119,12 +117,11 @@ export default {
       <div v-gl-tooltip :title="s__('Job|Scroll to bottom')" class="controllers-buttons">
         <gl-button
           :disabled="isScrollBottomDisabled"
-          class="js-scroll-bottom btn-scroll btn-transparent btn-blank"
+          class="js-scroll-bottom btn-scroll"
           data-testid="job-controller-scroll-bottom"
           icon="scroll_down"
           :class="{ animate: isScrollingDown }"
           @click="handleScrollToBottom"
-          v-html="$options.scrollDown"
         />
       </div>
       <!-- eo scroll buttons -->

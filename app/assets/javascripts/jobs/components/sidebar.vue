@@ -46,10 +46,7 @@ export default {
     ...mapGetters(['hasForwardDeploymentFailure']),
     ...mapState(['job', 'stages', 'jobs', 'selectedStage']),
     retryButtonClass() {
-      let className = 'btn gl-button gl-text-decoration-none!';
-      className +=
-        this.job.status && this.job.recoverable ? ' btn-confirm' : ' btn-confirm-secondary';
-      return className;
+      return 'btn gl-button btn-confirm gl-text-decoration-none!';
     },
     hasArtifact() {
       return !isEmpty(this.job.artifact);
