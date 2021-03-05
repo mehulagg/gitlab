@@ -2,6 +2,7 @@ import {
   getIdFromGraphQLId,
   convertToGraphQLId,
   convertToGraphQLIds,
+  convertFromGraphQLIds,
 } from '~/graphql_shared/utils';
 
 const mockType = 'Group';
@@ -79,5 +80,17 @@ describe('convertToGraphQLIds', () => {
     ${null}     | ${[mockId]}       | ${'type must be a string; got object'}
   `('throws TypeError with "$message" if a param is missing', ({ type, ids, message }) => {
     expect(() => convertToGraphQLIds(type, ids)).toThrow(new TypeError(message));
+  });
+});
+
+describe('convertFromGraphQLIds', () => {
+  it.each`
+    input                                 | expected
+    ${[mockGid]}                          | ${[mockId]}
+    ${[mockGid, 'invalid id']}            | ${[mockId, null]}
+    ${[{ id: mockGid, name: 'foo bar' }]} | ${[{ id: mockId, name: 'foo bar' }]}
+    ${[{ name: 'foo bar' }]}              | ${[{ name: 'foo bar' }]}
+  `('converts GraphQL IDs in $input', ({ input, expected }) => {
+    expect(convertFromGraphQLIds(input)).toEqual(expected);
   });
 });
