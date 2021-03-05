@@ -334,13 +334,15 @@ export default {
             :state="isValueStreamNameValid"
             required
           />
-          <gl-button
-            v-if="canRestore"
-            class="gl-ml-3"
-            variant="link"
-            @click="handleResetDefaults"
-            >{{ $options.i18n.RESTORE_DEFAULTS }}</gl-button
-          >
+          <transition name="fade">
+            <gl-button
+              v-if="canRestore"
+              class="gl-ml-3"
+              variant="link"
+              @click="handleResetDefaults"
+              >{{ $options.i18n.RESTORE_DEFAULTS }}</gl-button
+            >
+          </transition>
         </div>
       </gl-form-group>
       <gl-form-radio-group
