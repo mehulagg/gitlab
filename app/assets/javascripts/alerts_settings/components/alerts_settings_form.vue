@@ -114,6 +114,9 @@ export default {
       currentIntegration: null,
       parsedPayload: [],
       activeTabIndex: 0,
+      validationState: {
+        name: true,
+      }
     };
   },
   computed: {
@@ -122,6 +125,9 @@ export default {
     },
     isHttp() {
       return this.selectedIntegration === this.$options.typeSet.http;
+    },
+    isNone() {
+      return !this.isHttp && !this.isPrometheus;
     },
     isCreating() {
       return !this.currentIntegration;
@@ -193,6 +199,12 @@ export default {
         ? i18n.integrationFormSteps.setupCredentials.prometheusHelp
         : i18n.integrationFormSteps.setupCredentials.help;
     },
+    isFormValid() {
+      return Object.values(this.validationState).every(Boolean)
+        && !this.isNone
+        && this.isSampePayloadValid
+       // && this.validateName(this.integrationForm.name);
+    },
   },
   watch: {
     currentIntegration(val) {
@@ -217,6 +229,14 @@ export default {
     },
   },
   methods: {
+    validateName(name){
+      return Boolean(name?.length);
+    },
+    validate(field) {
+      if (field === 'name') {
+        this.validationState.name = this.validateName(this.integrationForm.name);
+      }
+    },
     isValidNonEmptyJSON(JSONString) {
       if (JSONString) {
         let parsed;
@@ -386,15 +406,20 @@ export default {
               )
             "
             label-for="name-integration"
+            :invalid-feedback="$options.i18n.integrationFormSteps.nameIntegration.error"
+            :state="validationState.name"
           >
             <gl-form-input
               v-model="integrationForm.name"
               type="text"
               :placeholder="$options.i18n.integrationFormSteps.nameIntegration.placeholder"
+              @input="validate('name')"
+              @blur="validate('name')"
             />
           </gl-form-group>
 
           <gl-toggle
+            v-if="!isNone"
             v-model="active"
             :is-loading="loading"
             :label="$options.i18n.integrationFormSteps.nameIntegration.activeToggle"
@@ -510,6 +535,7 @@ export default {
         <div class="gl-display-flex gl-justify-content-start gl-py-3">
           <gl-button
             type="submit"
+            :disabled="!isFormValid"
             variant="confirm"
             class="js-no-auto-disable"
             data-testid="integration-form-submit"

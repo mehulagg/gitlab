@@ -17,6 +17,7 @@ export const i18n = {
       label: s__('AlertSettings|Name integration'),
       placeholder: s__('AlertSettings|Enter integration name'),
       activeToggle: __('Active'),
+      error: __('Name can\'t be blank'),
     },
     setupCredentials: {
       help: s__(
