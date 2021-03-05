@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { groupMemberRequestFormatter } from '~/groups/members/utils';
 import groupsSelect from '~/groups_select';
 import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
+import initInviteMembersForm from '~/invite_members/init_invite_members_form';
 import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
 import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
 import { s__ } from '~/locale';
@@ -72,5 +73,9 @@ mountRemoveMemberModal();
 initInviteMembersModal();
 initInviteMembersTrigger();
 initInviteGroupTrigger();
+
+// This is only used when `invite_members_group_modal` feature flag is disabled.
+// This can be removed when `invite_members_group_modal` feature flag is removed.
+initInviteMembersForm();
 
 new UsersSelect(); // eslint-disable-line no-new

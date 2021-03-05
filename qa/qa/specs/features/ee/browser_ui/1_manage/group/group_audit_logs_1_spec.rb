@@ -103,7 +103,6 @@ module QA
 
       context 'Add and remove project access', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/735' do
         before do
-          Runtime::Feature.enable('vue_project_members_list', project: project)
           Runtime::Feature.enable(:invite_members_group_modal)
           sign_in
           project.visit!
@@ -119,10 +118,6 @@ module QA
           end
 
           group.visit!
-        end
-
-        after do
-          Runtime::Feature.disable('vue_project_members_list', project: project)
         end
 
         it_behaves_like 'audit event', ['Added project access', 'Removed project access']
