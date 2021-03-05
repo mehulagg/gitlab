@@ -216,7 +216,11 @@ module Gitlab
         @value = value
       end
 
+      # Convert the value to a String. This will invoke
+      # `#to_s` on the members of the value if it's an array.
+      #
       # @return [String]
+      # @raise [NoMethodError] if the objects in an array doesn't support to_s
       # @raise [PrecompiledJson::UnsupportedFormatError] if the value is neither a String or Array
       def to_s
         return @value if @value.is_a?(String)

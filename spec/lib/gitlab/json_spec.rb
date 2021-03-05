@@ -392,6 +392,14 @@ RSpec.describe Gitlab::Json do
         end
       end
 
+      context "obj is an array of un-stringables" do
+        let(:obj) { [BasicObject.new] }
+
+        it "raises an error" do
+          expect { subject }.to raise_error(NoMethodError)
+        end
+      end
+
       context "obj is something else" do
         let(:obj) { {} }
 

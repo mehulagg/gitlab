@@ -13,7 +13,7 @@ module API
 
       # @return [ActiveSupport::Cache::Store]
       def cache
-        @cache ||= Rails.cache
+        Rails.cache
       end
 
       # This is functionally equivalent to the standard `#present` used in
