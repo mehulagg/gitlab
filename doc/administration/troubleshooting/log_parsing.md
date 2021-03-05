@@ -44,14 +44,15 @@ This skips over all invalid lines and parses the rest.
 #### Print a JSON log's time range
 
 ```shell
-cat log.json | (head -1; tail -1) | jq -rs '[.[].time] | join(" to ")'
+cat log.json | (head -1; tail -1) | jq '.time'
 ```
 
-If the file has been rotated and compressed:
+Use `zcat` if the file has been rotated and compressed:
 
 ```shell
-zcat @400000006026b71d1a7af804.s | (head -1 | jq .time; tail -1 | jq .time)
-zcat some_json.log.25.gz | (head -1; tail -1) | jq -rs '[.[].time] | join(" to ")'
+zcat @400000006026b71d1a7af804.s | (head -1; tail -1) | jq '.time'
+
+zcat some_json.log.25.gz | (head -1; tail -1) | jq '.time'
 ```
 ### Parsing `production_json.log` and `api_json.log`
 
