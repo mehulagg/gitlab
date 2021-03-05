@@ -94,14 +94,22 @@ export const formattedMockNetworkPolicyStatisticsResponse = {
 export const mockAlerts = [
   {
     iid: '01',
+    assignees: { nodes: [] },
     eventCount: '1',
+    issueIid: null,
+    issue: { iid: '1', state: '', title: '' },
     title: 'Issue 01',
+    severity: 'HIGH',
     status: 'TRIGGERED',
     startedAt: '2020-11-19T18:36:23Z',
   },
   {
     iid: '02',
     eventCount: '2',
+    assignees: { nodes: [] },
+    issueIid: null,
+    issue: { iid: '2', state: '', title: '' },
+    severity: 'CRITICAL',
     title: 'Issue 02',
     status: 'ACKNOWLEDGED',
     startedAt: '2020-11-16T21:59:28Z',
@@ -109,15 +117,30 @@ export const mockAlerts = [
   {
     iid: '03',
     eventCount: '3',
+    assignees: { nodes: [] },
+    issueIid: null,
+    issue: { iid: '3', state: '', title: '' },
+    severity: 'MEDIUM',
     title: 'Issue 03',
     status: 'RESOLVED',
     startedAt: '2020-11-13T20:03:04Z',
   },
   {
     iid: '04',
+    assignees: { nodes: [] },
+    issueIid: null,
+    issue: { iid: '4', state: '', title: '' },
+    severity: 'LOW',
     eventCount: '4',
     title: 'Issue 04',
     status: 'IGNORED',
     startedAt: '2020-10-29T13:37:55Z',
   },
 ];
+
+export const mockPageInfo = {
+  endCursor: 'eyJpZCI6IjIwIiwic3RhcnRlZF9hdCI6IjIwMjAtMTItMDMgMjM6MTI6NDkuODM3Mjc1MDAwIFVUQyJ9',
+  hasNextPage: true,
+  hasPreviousPage: false,
+  startCursor: 'eyJpZCI6IjM5Iiwic3RhcnRlZF9hdCI6IjIwMjAtMTItMDQgMTg6MDE6MDcuNzY1ODgyMDAwIFVUQyJ9',
+};
