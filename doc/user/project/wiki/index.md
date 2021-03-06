@@ -24,8 +24,8 @@ a separate Git repository.
 
 ## First time creating the Home page
 
-The first time you visit a Wiki, you will be directed to create the Home page.
-The Home page is necessary to be created since it serves as the landing page
+The first time you visit a Wiki, you are directed to create the Home page.
+The Home page is necessary to be created because it serves as the landing page
 when viewing a Wiki. You only have to fill in the **Content** section and click
 **Create page**. You can always edit it later, so go ahead and write a welcome
 message.
@@ -40,11 +40,11 @@ Requires Developer [permissions](../../permissions.md).
 Create a new page by clicking the **New page** button that can be found
 in all wiki pages.
 
-You will be asked to fill in a title for your new wiki page.
+Fill in a title for your new wiki page.
 
 You can specify a full path for the wiki page by using '/' in the
-title to indicate subdirectories. Any missing directories will be created
-automatically. For example, a title of `docs/my-page` will create a wiki
+title to indicate subdirectories. Any missing directories are created
+automatically. For example, a title of `docs/my-page` creates a wiki
 page with a path `/wikis/docs/my-page`.
 
 Once you enter the page name, it's time to fill in its content. GitLab wikis
@@ -53,10 +53,10 @@ support Markdown, RDoc, AsciiDoc, and Org. For Markdown based pages, all the
 some [wiki specific](../../markdown.md#wiki-specific-markdown) behavior.
 
 In the web interface the commit message is optional, but the GitLab Wiki is
-based on Git and needs a commit message, so one will be created for you if you
+based on Git and needs a commit message, so one is created for you if you
 do not enter one.
 
-When you're ready, click the **Create page** and the new page will be created.
+When you're ready, click the **Create page** and the new page is created.
 
 ![New page](img/wiki_create_new_page.png)
 
@@ -65,10 +65,10 @@ When you're ready, click the **Create page** and the new page will be created.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33475) in GitLab 11.3.
 
 Starting with GitLab 11.3, any file that is uploaded to the wiki via the GitLab
-interface will be stored in the wiki Git repository, and it will be available
+interface is stored in the wiki Git repository, and it is available
 if you clone the wiki repository locally. All uploaded files prior to GitLab
 11.3 are stored in GitLab itself. If you want them to be part of the wiki's Git
-repository, you will have to upload them again.
+repository, you must upload them again.
 
 ### Special characters in page titles
 
@@ -148,7 +148,7 @@ found. The list is ordered alphabetically.
 
 ![Wiki sidebar](img/wiki_sidebar_v13_5.png)
 
-If you have many pages, not all will be listed in the sidebar. Click on
+If you have many pages, not all are listed in the sidebar. Click on
 **View All Pages** to see all of them.
 
 ## Viewing the history of a wiki page
@@ -196,7 +196,7 @@ instructions.
 
 Files that you add to your wiki locally must have one of the following
 supported extensions, depending on the markup language you wish to use,
-otherwise they will not display when pushed to GitLab:
+otherwise they don't display when pushed to GitLab:
 
 - Markdown extensions: `.mdown`, `.mkd`, `.mkdn`, `.md`, `.markdown`.
 - AsciiDoc extensions: `.adoc`, `.ad`, `.asciidoc`.
