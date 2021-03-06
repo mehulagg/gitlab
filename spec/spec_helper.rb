@@ -92,6 +92,18 @@ RSpec.configure do |config|
     config.full_backtrace = true
   end
 
+  if ENV['CI']
+    config.after(:each) do |example|
+      if example.exception.class == GRPC::Unavailable
+        STDERR.puts "=== gRPC unavailable detected, process list:"
+        processes = `ps -ef | grep toml`
+        STDERR.puts processes
+        STDERR.puts "=== dmesg output"
+        STDERR.puts `dmesg`
+      end
+    end
+  end
+
   unless ENV['CI']
     # Re-run failures locally with `--only-failures`
     config.example_status_persistence_file_path = './spec/examples.txt'
