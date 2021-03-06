@@ -514,7 +514,7 @@ export default {
               v-for="(file, index) in diffs"
               :key="file.newPath"
               :file="file"
-              :reviewed="fileReviews[index]"
+              :reviewed="fileReviews[file.id]"
               :is-first-file="index === 0"
               :is-last-file="index === diffFilesLength - 1"
               :help-page-path="helpPagePath"
