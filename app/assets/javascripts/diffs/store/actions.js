@@ -740,10 +740,18 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
   commit(types.VIEW_DIFF_FILE, fileHash);
 };
 
-export const setFileByFile = ({ commit }, { fileByFile }) => {
+export const setFileByFile = ({ state, commit }, { fileByFile }) => {
   const fileViewMode = fileByFile ? DIFF_VIEW_FILE_BY_FILE : DIFF_VIEW_ALL_FILES;
   commit(types.SET_FILE_BY_FILE, fileByFile);
   Cookies.set(DIFF_FILE_BY_FILE_COOKIE_NAME, fileViewMode);
+
+  return axios
+    .post(state.endpointUpdateUser, {
+      view_diffs_file_by_file: fileViewMode === 'single'
+    })
+    .then(( results ) => {
+      console.log( results );
+    });
 };
 
 export function reviewFile({ commit, state }, { file, reviewed = true }) {
