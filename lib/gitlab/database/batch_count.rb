@@ -123,7 +123,11 @@ module Gitlab
       private
 
       def build_relation_batch(start, finish, mode)
-        @relation.select(@column).public_send(mode).where(between_condition(start, finish)) # rubocop:disable GitlabSecurity/PublicSend
+        if mode == :distinct && (!@relation.is_a?(ActiveRecord::Relation) || @relation.group_values.blank?)
+          Gitlab::Database::DistinctCount.new(@relation, @column).execute(from: start, to: finish)
+        else
+          @relation.select(@column).public_send(mode).where(between_condition(start, finish)) # rubocop:disable GitlabSecurity/PublicSend
+        end
       end
 
       def batch_size_for_mode_and_operation(mode, operation)

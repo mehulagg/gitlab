@@ -15,9 +15,10 @@ module Gitlab
     #
     #     Project.where("id IN (#{sql})")
     class SetOperator
-      def initialize(relations, remove_duplicates: true)
+      def initialize(relations, remove_duplicates: true, remove_order: true)
         @relations = relations
         @remove_duplicates = remove_duplicates
+        @remove_order = remove_order
       end
 
       def self.operator_keyword
@@ -30,7 +31,13 @@ module Gitlab
         # By using "unprepared_statements" we remove the usage of placeholders
         # (thus fixing this problem), at a slight performance cost.
         fragments = ActiveRecord::Base.connection.unprepared_statement do
-          relations.map { |rel| rel.reorder(nil).to_sql }.reject(&:blank?)
+          relations.map do |rel| 
+            if remove_order
+              rel.to_sql 
+            else
+              rel.to_sql
+            end
+          end.reject(&:blank?)
         end
 
         if fragments.any?
@@ -47,7 +54,7 @@ module Gitlab
 
       private
 
-      attr_reader :relations, :remove_duplicates
+      attr_reader :relations, :remove_duplicates, :remove_order
     end
   end
 end
