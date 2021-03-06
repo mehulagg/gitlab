@@ -11,7 +11,6 @@ module EE
     ULTIMATE_TRIAL                 = 'ultimate_trial'
     NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
-    THREAT_MONITORING_INFO         = 'threat_monitoring_info'
     EOA_BRONZE_PLAN_BANNER         = 'eoa_bronze_plan_banner'
 
     def render_enable_hashed_storage_warning
@@ -60,10 +59,6 @@ module EE
           !user_dismissed?(ACCOUNT_RECOVERY_REGULAR_CHECK, 3.months.ago)
 
       render 'shared/check_recovery_settings'
-    end
-
-    def show_threat_monitoring_info?
-      !user_dismissed?(THREAT_MONITORING_INFO)
     end
 
     def show_token_expiry_notification?
