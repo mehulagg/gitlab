@@ -55,36 +55,34 @@ module Types
         graphql_name "#{model_class.name.gsub(/::/, '')}ID"
         description "Identifier of `#{model_class.name}` objects. See GlobalID."
 
-        self.define_singleton_method(:to_s) do
+        define_singleton_method(:to_s) do
           graphql_name
         end
 
-        self.define_singleton_method(:inspect) do
+        define_singleton_method(:inspect) do
           graphql_name
         end
 
-        self.define_singleton_method(:coerce_result) do |gid, ctx|
+        define_singleton_method(:coerce_result) do |gid, ctx|
           global_id = ::Gitlab::GlobalId.as_global_id(gid, model_name: model_class.name)
 
-          if suitable?(global_id)
-            global_id.to_s
-          else
-            raise GraphQL::CoercionError, "Expected a #{model_class.name} ID, got #{global_id}"
-          end
+          next global_id.to_s if suitable?(global_id)
+
+          raise GraphQL::CoercionError, "Expected a #{model_class.name} ID, got #{global_id}"
         end
 
-        self.define_singleton_method(:suitable?) do |gid|
+        define_singleton_method(:suitable?) do |gid|
           next false if gid.nil?
 
           gid.model_name.safe_constantize.present? &&
             gid.model_class.ancestors.include?(model_class)
         end
 
-        self.define_singleton_method(:coerce_input) do |string, ctx|
+        define_singleton_method(:coerce_input) do |string, ctx|
           gid = super(string, ctx)
-          raise GraphQL::CoercionError, "#{string.inspect} does not represent an instance of #{model_class.name}" unless suitable?(gid)
+          next gid if suitable?(gid)
 
-          gid
+          raise GraphQL::CoercionError, "#{string.inspect} does not represent an instance of #{model_class.name}"
         end
       end
     end
