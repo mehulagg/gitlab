@@ -7,7 +7,7 @@ RSpec.shared_context 'project navbar structure' do
       nav_sub_items: [
         _('CI / CD'),
         (_('Code Review') if Gitlab.ee?),
-        (_('Merge Request') if Gitlab.ee?),
+        (_('Merge request') if Gitlab.ee?),
         _('Repository'),
         _('Value Stream')
       ]
@@ -59,7 +59,7 @@ RSpec.shared_context 'project navbar structure' do
         ]
       },
       {
-        nav_item: _('Merge Requests'),
+        nav_item: _('Merge requests'),
         nav_sub_items: []
       },
       {
@@ -188,7 +188,7 @@ RSpec.shared_context 'group navbar structure' do
         ]
       },
       {
-        nav_item: _('Merge Requests'),
+        nav_item: _('Merge requests'),
         nav_sub_items: []
       },
       security_and_compliance_nav_item,

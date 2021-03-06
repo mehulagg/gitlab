@@ -85,7 +85,7 @@ RSpec.describe 'Project navbar' do
       stub_licensed_features(requirements: true)
 
       insert_after_nav_item(
-        _('Merge Requests'),
+        _('Merge requests'),
         new_nav_item: {
           nav_item: _('Requirements'),
           nav_sub_items: [_('List')]
