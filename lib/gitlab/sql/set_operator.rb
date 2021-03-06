@@ -33,9 +33,9 @@ module Gitlab
         fragments = ActiveRecord::Base.connection.unprepared_statement do
           relations.map do |rel| 
             if remove_order
-              rel.to_sql 
+              rel.reorder(nil).to_sql
             else
-              rel.to_sql
+              rel.to_sql 
             end
           end.reject(&:blank?)
         end

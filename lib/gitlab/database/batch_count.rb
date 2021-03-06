@@ -92,7 +92,13 @@ module Gitlab
           batch_relation = build_relation_batch(batch_start, batch_end, mode)
 
           begin
-            results = merge_results(results, batch_relation.send(@operation, *@operation_args)) # rubocop:disable GitlabSecurity/PublicSend
+            op_args = @operation_args
+            # fix count
+            if @operation == :count && @operation_args.blank?
+              op_args = [@column]
+            end
+
+            results = merge_results(results, batch_relation.send(@operation, *op_args)) # rubocop:disable GitlabSecurity/PublicSend
             batch_start = batch_end
           rescue ActiveRecord::QueryCanceled => error
             # retry with a safe batch size & warmer cache
@@ -123,7 +129,7 @@ module Gitlab
       private
 
       def build_relation_batch(start, finish, mode)
-        if mode == :distinct && (!@relation.is_a?(ActiveRecord::Relation) || @relation.group_values.blank?)
+        if false && mode == :distinct && (!@relation.is_a?(ActiveRecord::Relation) || @relation.group_values.blank?)
           Gitlab::Database::DistinctCount.new(@relation, @column).execute(from: start, to: finish)
         else
           @relation.select(@column).public_send(mode).where(between_condition(start, finish)) # rubocop:disable GitlabSecurity/PublicSend
