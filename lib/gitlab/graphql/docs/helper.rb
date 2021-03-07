@@ -5,6 +5,20 @@ return if Rails.env.production?
 module Gitlab
   module Graphql
     module Docs
+      FIELD_HEADER = <<~MD
+        #### fields
+        
+        | name | type | description |
+        | ---- | ---- | ----------- |
+      MD
+
+      ARG_HEADER = <<~MD
+        # arguments
+        
+        | name | type | description |
+        | ---- | ---- | ----------- |
+      MD
+
       # Helper with functions to be used by HAML templates
       # This includes graphql-docs gem helpers class.
       # You can check the included module on: https://github.com/gjtorikian/graphql-docs/blob/v1.6.0/lib/graphql-docs/helpers.rb
@@ -27,16 +41,53 @@ module Gitlab
           MD
         end
 
+        def render_full_field(field, level = 3)
+          arg_header = ('#' * level) + ARG_HEADER
+          [
+            render_name_and_description(field, level),
+            render_return_type(field),
+            render_field_table(arg_header, field[:arguments])
+          ].compact.join("\n\n")
+        end
+
+        def render_field_table(header, fields)
+          return if fields.empty?
+
+          header + fields.map { |f| render_field(f) }.join("\n")
+        end
+
+        def render_object_fields(fields)
+          return if fields.empty?
+
+          (simple, has_args) = fields.partition { |f| f[:arguments].empty? }
+
+          [simple_fields(simple), fields_with_arguments(has_args)].compact.join("\n\n")
+        end
+
+        def simple_fields(fields)
+          render_field_table(FIELD_HEADER, sorted_by_name(fields))
+        end
+
+        def fields_with_arguments(fields)
+          return if fields.empty?
+
+          <<~MD.chomp
+            #### fields with arguments
+
+            #{sorted_by_name(fields).map { |f| render_full_field(f, 5) }.join("\n\n")}
+          MD
+        end
+
         def render_name_and_description(object, level = 3)
-          content = "#{'#' * level} `#{object[:name]}`\n"
+          content = ["#{'#' * level} `#{object[:name]}`"]
 
           if object[:description].present?
-            content += "\n#{object[:description]}"
-            content += '.' unless object[:description].ends_with?('.')
-            content += "\n"
+            desc = object[:description]
+            desc += '.' unless object[:description].ends_with?('.')
+            content << desc
           end
 
-          content
+          content.join("\n\n")
         end
 
         def sorted_by_name(objects)
@@ -80,7 +131,7 @@ module Gitlab
         end
 
         def render_return_type(query)
-          "Returns #{render_field_type(query[:type])}\n"
+          "Returns #{render_field_type(query[:type])}"
         end
 
         # We are ignoring connections and built in types for now,

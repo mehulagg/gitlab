@@ -27,15 +27,8 @@
 \
 
 - sorted_by_name(queries).each do |query|
-  = render_name_and_description(query)
-  = render_return_type(query)
-  - unless query[:arguments].empty?
-    ~ "#### Arguments\n"
-    ~ "| Name | Type | Description |"
-    ~ "| ---- | ---- | ----------- |"
-    - sorted_by_name(query[:arguments]).each do |argument|
-      = render_field(argument)
-    \
+  = render_full_field(query)
+  \
 
 :plain
   ## Object types
@@ -51,13 +44,10 @@
 \
 
 - objects.each do |type|
-  - unless type[:fields].empty?
-    = render_name_and_description(type)
-    ~ "| Field | Type | Description |"
-    ~ "| ----- | ---- | ----------- |"
-    - sorted_by_name(type[:fields]).each do |field|
-      = render_field(field)
-    \
+  = render_name_and_description(type)
+  \
+  = render_object_fields(type[:fields])
+  \
 
 :plain
   ## Enumeration types

@@ -42,13 +42,13 @@ Get linted and processed contents of a CI config. Should not be requested more t
 
 Returns [`CiConfig`](#ciconfig)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `projectPath` | [`ID!`](#id) | The project of the CI config. |
 | `content` | [`String!`](#string) | Contents of `.gitlab-ci.yml`. |
 | `dryRun` | [`Boolean`](#boolean) | Run pipeline creation simulation, or only do static check. |
-| `projectPath` | [`ID!`](#id) | The project of the CI config. |
 
 ### `containerRepository`
 
@@ -56,9 +56,9 @@ Find a container repository.
 
 Returns [`ContainerRepositoryDetails`](#containerrepositorydetails)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `id` | [`ContainerRepositoryID!`](#containerrepositoryid) | The global ID of the container repository. |
 
@@ -80,9 +80,9 @@ Get configured DevOps adoption segments on the instance.
 
 Returns [`DevopsAdoptionSegmentConnection`](#devopsadoptionsegmentconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
@@ -95,9 +95,9 @@ Text to echo back.
 
 Returns [`String!`](#string)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `text` | [`String!`](#string) | Text to echo back. |
 
@@ -107,9 +107,9 @@ Find a Geo node.
 
 Returns [`GeoNode`](#geonode)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `name` | [`String`](#string) | The name of the Geo node. Defaults to the current Geo node name. |
 
@@ -119,9 +119,9 @@ Find a group.
 
 Returns [`Group`](#group)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `fullPath` | [`ID!`](#id) | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
@@ -137,17 +137,17 @@ Get statistics on the instance. Deprecated in 13.10: This field was renamed. Use
 
 Returns [`UsageTrendsMeasurementConnection`](#usagetrendsmeasurementconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `identifier` | [`MeasurementIdentifier!`](#measurementidentifier) | The type of measurement/statistics to retrieve. |
+| `recordedAfter` | [`Time`](#time) | Measurement recorded after this date. |
+| `recordedBefore` | [`Time`](#time) | Measurement recorded before this date. |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
-| `identifier` | [`MeasurementIdentifier!`](#measurementidentifier) | The type of measurement/statistics to retrieve. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
-| `recordedAfter` | [`Time`](#time) | Measurement recorded after this date. |
-| `recordedBefore` | [`Time`](#time) | Measurement recorded before this date. |
 
 ### `issue`
 
@@ -155,9 +155,9 @@ Find an Issue.
 
 Returns [`Issue`](#issue)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `id` | [`IssueID!`](#issueid) | The global ID of the Issue. |
 
@@ -167,9 +167,9 @@ Find an iteration.
 
 Returns [`Iteration`](#iteration)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `id` | [`IterationID!`](#iterationid) | Find an iteration by its ID. |
 
@@ -185,9 +185,9 @@ Find a milestone.
 
 Returns [`Milestone`](#milestone)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `id` | [`MilestoneID!`](#milestoneid) | Find a milestone by its ID. |
 
@@ -197,9 +197,9 @@ Find a namespace.
 
 Returns [`Namespace`](#namespace)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `fullPath` | [`ID!`](#id) | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
@@ -209,9 +209,9 @@ Find a package.
 
 Returns [`Package`](#package)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `id` | [`PackagesPackageID!`](#packagespackageid) | The global ID of the package. |
 
@@ -221,9 +221,9 @@ Find a project.
 
 Returns [`Project`](#project)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `fullPath` | [`ID!`](#id) | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
@@ -233,19 +233,19 @@ Find projects visible to the current user.
 
 Returns [`ProjectConnection`](#projectconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `membership` | [`Boolean`](#boolean) | Limit projects that the current user is a member of. |
+| `search` | [`String`](#string) | Search query for project name, path, or description. |
+| `ids` | [`[ID!]`](#id) | Filter projects by IDs. |
+| `searchNamespaces` | [`Boolean`](#boolean) | Include namespace in project search. |
+| `sort` | [`String`](#string) | Sort order of results. |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
-| `ids` | [`[ID!]`](#id) | Filter projects by IDs. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
-| `membership` | [`Boolean`](#boolean) | Limit projects that the current user is a member of. |
-| `search` | [`String`](#string) | Search query for project name, path, or description. |
-| `searchNamespaces` | [`Boolean`](#boolean) | Include namespace in project search. |
-| `sort` | [`String`](#string) | Sort order of results. |
 
 ### `runnerPlatforms`
 
@@ -253,9 +253,9 @@ Supported runner platforms.
 
 Returns [`RunnerPlatformConnection`](#runnerplatformconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
@@ -268,14 +268,14 @@ Get runner setup instructions.
 
 Returns [`RunnerSetup`](#runnersetup)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
-| `architecture` | [`String!`](#string) | Architecture to generate the instructions for. |
-| `groupId` | [`GroupID`](#groupid) | Group to register the runner for. |
 | `platform` | [`String!`](#string) | Platform to generate the instructions for. |
+| `architecture` | [`String!`](#string) | Architecture to generate the instructions for. |
 | `projectId` | [`ProjectID`](#projectid) | Project to register the runner for. |
+| `groupId` | [`GroupID`](#groupid) | Group to register the runner for. |
 
 ### `snippets`
 
@@ -283,20 +283,20 @@ Find Snippets visible to the current user.
 
 Returns [`SnippetConnection`](#snippetconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
-| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
-| `authorId` | [`UserID`](#userid) | The ID of an author. |
-| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
-| `explore` | [`Boolean`](#boolean) | Explore personal snippets. |
-| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `ids` | [`[SnippetID!]`](#snippetid) | Array of global snippet IDs. For example, `gid://gitlab/ProjectSnippet/1`. |
-| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+| `visibility` | [`VisibilityScopesEnum`](#visibilityscopesenum) | The visibility of the snippet. |
+| `authorId` | [`UserID`](#userid) | The ID of an author. |
 | `projectId` | [`ProjectID`](#projectid) | The ID of a project. |
 | `type` | [`TypeEnum`](#typeenum) | The type of snippet. |
-| `visibility` | [`VisibilityScopesEnum`](#visibilityscopesenum) | The visibility of the snippet. |
+| `explore` | [`Boolean`](#boolean) | Explore personal snippets. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `usageTrendsMeasurements`
 
@@ -304,17 +304,17 @@ Get statistics on the instance.
 
 Returns [`UsageTrendsMeasurementConnection`](#usagetrendsmeasurementconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `identifier` | [`MeasurementIdentifier!`](#measurementidentifier) | The type of measurement/statistics to retrieve. |
+| `recordedAfter` | [`Time`](#time) | Measurement recorded after this date. |
+| `recordedBefore` | [`Time`](#time) | Measurement recorded before this date. |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
-| `identifier` | [`MeasurementIdentifier!`](#measurementidentifier) | The type of measurement/statistics to retrieve. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
-| `recordedAfter` | [`Time`](#time) | Measurement recorded after this date. |
-| `recordedBefore` | [`Time`](#time) | Measurement recorded before this date. |
 
 ### `user`
 
@@ -322,9 +322,9 @@ Find a user.
 
 Returns [`User`](#user)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `id` | [`UserID`](#userid) | ID of the User. |
 | `username` | [`String`](#string) | Username of the User. |
@@ -335,19 +335,19 @@ Find users.
 
 Returns [`UserConnection`](#userconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `ids` | [`[ID!]`](#id) | List of user Global IDs. |
+| `usernames` | [`[String!]`](#string) | List of usernames. |
+| `sort` | [`Sort`](#sort) | Sort users by this criteria. |
+| `search` | [`String`](#string) | Query to search users by name, username, or primary email. |
 | `admins` | [`Boolean`](#boolean) | Return only admin users. |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
-| `ids` | [`[ID!]`](#id) | List of user Global IDs. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
-| `search` | [`String`](#string) | Query to search users by name, username, or primary email. |
-| `sort` | [`Sort`](#sort) | Sort users by this criteria. |
-| `usernames` | [`[String!]`](#string) | List of usernames. |
 
 ### `vulnerabilities`
 
@@ -355,22 +355,22 @@ Vulnerabilities reported on projects on the current user's instance security das
 
 Returns [`VulnerabilityConnection`](#vulnerabilityconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
+| `reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
+| `severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
+| `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
+| `scanner` | [`[String!]`](#string) | Filter vulnerabilities by VulnerabilityScanner.externalId. |
+| `sort` | [`VulnerabilitySort`](#vulnerabilitysort) | List vulnerabilities by sort order. |
+| `hasResolution` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have been resolved on default branch. |
+| `hasIssues` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have linked issues. |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
-| `hasIssues` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have linked issues. |
-| `hasResolution` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have been resolved on default branch. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
-| `projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
-| `reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
-| `scanner` | [`[String!]`](#string) | Filter vulnerabilities by VulnerabilityScanner.externalId. |
-| `severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
-| `sort` | [`VulnerabilitySort`](#vulnerabilitysort) | List vulnerabilities by sort order. |
-| `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 
 ### `vulnerabilitiesCountByDay`
 
@@ -378,16 +378,16 @@ Number of vulnerabilities per day for the projects on the current user's instanc
 
 Returns [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
+| `endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
-| `endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
-| `startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
 
 ### `vulnerabilitiesCountByDayAndSeverity`
 
@@ -395,16 +395,16 @@ Number of vulnerabilities per severity level, per day, for the projects on the c
 
 Returns [`VulnerabilitiesCountByDayAndSeverityConnection`](#vulnerabilitiescountbydayandseverityconnection)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
+| `startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
+| `endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
 | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
-| `endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
-| `startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
 
 ### `vulnerability`
 
@@ -412,9 +412,9 @@ Find a vulnerability.
 
 Returns [`Vulnerability`](#vulnerability)
 
-#### Arguments
+#### arguments
 
-| Name | Type | Description |
+| name | type | description |
 | ---- | ---- | ----------- |
 | `id` | [`VulnerabilityID!`](#vulnerabilityid) | The Global ID of the Vulnerability. |
 
@@ -433,8 +433,10 @@ on `graphql.org`.
 
 Represents the access level of a relationship between a User and object that it is related to.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `integerValue` | [`Int`](#int) | Integer representation of access level. |
 | `stringValue` | [`AccessLevelEnum`](#accesslevelenum) | String representation of access level. |
 
@@ -442,8 +444,10 @@ Represents the access level of a relationship between a User and object that it 
 
 Autogenerated return type of AddAwardEmoji.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -452,8 +456,10 @@ Autogenerated return type of AddAwardEmoji.
 
 Autogenerated return type of AddProjectToSecurityDashboard.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `project` | [`Project`](#project) | Project that was added to the Instance Security Dashboard. |
@@ -462,8 +468,10 @@ Autogenerated return type of AddProjectToSecurityDashboard.
 
 Autogenerated return type of AdminSidekiqQueuesDeleteJobs.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `result` | [`DeleteJobsResponse`](#deletejobsresponse) | Information about the status of the deletion request. |
@@ -472,14 +480,14 @@ Autogenerated return type of AdminSidekiqQueuesDeleteJobs.
 
 Describes an alert from the project's Alert Management.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `assignees` | [`UserConnection`](#userconnection) | Assignees of the alert. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp the alert was created. |
 | `description` | [`String`](#string) | Description of the alert. |
 | `details` | [`JSON`](#json) | Alert details. |
 | `detailsUrl` | [`String!`](#string) | The URL of the alert detail page. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `endedAt` | [`Time`](#time) | Timestamp the alert ended. |
 | `environment` | [`Environment`](#environment) | Environment for the alert. |
 | `eventCount` | [`Int`](#int) | Number of events of this alert. |
@@ -489,7 +497,6 @@ Describes an alert from the project's Alert Management.
 | `issueIid` **{warning-solid}** | [`ID`](#id) | **Deprecated:** Use issue field. Deprecated in 13.10. |
 | `metricsDashboardUrl` | [`String`](#string) | URL for metrics embed for the alert. |
 | `monitoringTool` | [`String`](#string) | Monitoring tool the alert came from. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 | `prometheusAlert` | [`PrometheusAlert`](#prometheusalert) | The alert condition for Prometheus. |
 | `runbook` | [`String`](#string) | Runbook for the alert as defined in alert details. |
 | `service` | [`String`](#string) | Service the alert came from. |
@@ -497,15 +504,84 @@ Describes an alert from the project's Alert Management.
 | `startedAt` | [`Time`](#time) | Timestamp the alert was raised. |
 | `status` | [`AlertManagementStatus`](#alertmanagementstatus) | Status of the alert. |
 | `title` | [`String`](#string) | Title of the alert. |
-| `todos` | [`TodoConnection`](#todoconnection) | To-do items of the current user for the alert. |
 | `updatedAt` | [`Time`](#time) | Timestamp the alert was last updated. |
+
+#### fields with arguments
+
+##### `assignees`
+
+Assignees of the alert.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `todos`
+
+To-do items of the current user for the alert.
+
+Returns [`TodoConnection`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `action` | [`[TodoActionEnum!]`](#todoactionenum) | The action to be filtered. |
+| `authorId` | [`[ID!]`](#id) | The ID of an author. |
+| `projectId` | [`[ID!]`](#id) | The ID of a project. |
+| `groupId` | [`[ID!]`](#id) | The ID of a group. |
+| `state` | [`[TodoStateEnum!]`](#todostateenum) | The state of the todo. |
+| `type` | [`[TodoTargetEnum!]`](#todotargetenum) | The type of the todo. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `AlertManagementAlertConnection`
 
 The connection type for AlertManagementAlert.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[AlertManagementAlertEdge]`](#alertmanagementalertedge) | A list of edges. |
 | `nodes` | [`[AlertManagementAlert]`](#alertmanagementalert) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -514,8 +590,10 @@ The connection type for AlertManagementAlert.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AlertManagementAlert`](#alertmanagementalert) | The item at the end of the edge. |
 
@@ -523,8 +601,10 @@ An edge in a connection.
 
 Represents total number of alerts for the represented categories.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `acknowledged` | [`Int`](#int) | Number of alerts with status ACKNOWLEDGED for the project |
 | `all` | [`Int`](#int) | Total number of alerts for the project. |
 | `ignored` | [`Int`](#int) | Number of alerts with status IGNORED for the project |
@@ -536,8 +616,10 @@ Represents total number of alerts for the represented categories.
 
 An endpoint and credentials used to accept alerts for a project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `active` | [`Boolean`](#boolean) | Whether the endpoint is currently accepting alerts. |
 | `apiUrl` | [`String`](#string) | URL at which Prometheus metrics can be queried to populate the metrics dashboard. |
 | `id` | [`ID!`](#id) | ID of the integration. |
@@ -553,8 +635,10 @@ An endpoint and credentials used to accept alerts for a project.
 
 The connection type for AlertManagementHttpIntegration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[AlertManagementHttpIntegrationEdge]`](#alertmanagementhttpintegrationedge) | A list of edges. |
 | `nodes` | [`[AlertManagementHttpIntegration]`](#alertmanagementhttpintegration) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -563,8 +647,10 @@ The connection type for AlertManagementHttpIntegration.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The item at the end of the edge. |
 
@@ -572,8 +658,10 @@ An edge in a connection.
 
 The connection type for AlertManagementIntegration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[AlertManagementIntegrationEdge]`](#alertmanagementintegrationedge) | A list of edges. |
 | `nodes` | [`[AlertManagementIntegration]`](#alertmanagementintegration) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -582,8 +670,10 @@ The connection type for AlertManagementIntegration.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AlertManagementIntegration`](#alertmanagementintegration) | The item at the end of the edge. |
 
@@ -591,8 +681,10 @@ An edge in a connection.
 
 Parsed field from an alert used for custom mappings.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `label` | [`String`](#string) | Human-readable label of the payload path. |
 | `path` | [`[String!]`](#string) | Path to value inside payload JSON. |
 | `type` | [`AlertManagementPayloadAlertFieldType`](#alertmanagementpayloadalertfieldtype) | Type of the parsed value. |
@@ -601,8 +693,10 @@ Parsed field from an alert used for custom mappings.
 
 Parsed field (with its name) from an alert used for custom mappings.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `fieldName` | [`AlertManagementPayloadAlertFieldName`](#alertmanagementpayloadalertfieldname) | A GitLab alert field name. |
 | `label` | [`String`](#string) | Human-readable label of the payload path. |
 | `path` | [`[String!]`](#string) | Path to value inside payload JSON. |
@@ -612,8 +706,10 @@ Parsed field (with its name) from an alert used for custom mappings.
 
 An endpoint and credentials used to accept Prometheus alerts for a project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `active` | [`Boolean`](#boolean) | Whether the endpoint is currently accepting alerts. |
 | `apiUrl` | [`String`](#string) | URL at which Prometheus metrics can be queried to populate the metrics dashboard. |
 | `id` | [`ID!`](#id) | ID of the integration. |
@@ -626,8 +722,10 @@ An endpoint and credentials used to accept Prometheus alerts for a project.
 
 Autogenerated return type of AlertSetAssignees.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `alert` | [`AlertManagementAlert`](#alertmanagementalert) | The alert after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -638,8 +736,10 @@ Autogenerated return type of AlertSetAssignees.
 
 Autogenerated return type of AlertTodoCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `alert` | [`AlertManagementAlert`](#alertmanagementalert) | The alert after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -650,8 +750,10 @@ Autogenerated return type of AlertTodoCreate.
 
 Data associated with configuring API fuzzing scans in GitLab CI.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `scanModes` | [`[ApiFuzzingScanMode!]`](#apifuzzingscanmode) | All available scan modes. |
 | `scanProfiles` | [`[ApiFuzzingScanProfile!]`](#apifuzzingscanprofile) | All default scan profiles. |
 
@@ -659,8 +761,10 @@ Data associated with configuring API fuzzing scans in GitLab CI.
 
 Autogenerated return type of ApiFuzzingCiConfigurationCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `configurationYaml` | [`String`](#string) | A YAML snippet that can be inserted into the project's `.gitlab-ci.yml` to set up API fuzzing scans. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -670,8 +774,10 @@ Autogenerated return type of ApiFuzzingCiConfigurationCreate.
 
 An API Fuzzing scan profile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | A short description of the profile. |
 | `name` | [`String`](#string) | The unique name of the profile. |
 | `yaml` | [`String`](#string) | A syntax highlit HTML representation of the YAML. |
@@ -680,8 +786,10 @@ An API Fuzzing scan profile.
 
 An emoji awarded by a user.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String!`](#string) | The emoji description. |
 | `emoji` | [`String!`](#string) | The emoji as an icon. |
 | `name` | [`String!`](#string) | The emoji name. |
@@ -693,8 +801,10 @@ An emoji awarded by a user.
 
 Autogenerated return type of AwardEmojiAdd.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -703,8 +813,10 @@ Autogenerated return type of AwardEmojiAdd.
 
 The connection type for AwardEmoji.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[AwardEmojiEdge]`](#awardemojiedge) | A list of edges. |
 | `nodes` | [`[AwardEmoji]`](#awardemoji) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -713,8 +825,10 @@ The connection type for AwardEmoji.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AwardEmoji`](#awardemoji) | The item at the end of the edge. |
 
@@ -722,8 +836,10 @@ An edge in a connection.
 
 Autogenerated return type of AwardEmojiRemove.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -732,8 +848,10 @@ Autogenerated return type of AwardEmojiRemove.
 
 Autogenerated return type of AwardEmojiToggle.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -741,15 +859,19 @@ Autogenerated return type of AwardEmojiToggle.
 
 ### `BaseService`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `active` | [`Boolean`](#boolean) | Indicates if the service is active. |
 | `type` | [`String`](#string) | Class name of the service. |
 
 ### `Blob`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `flatPath` | [`String!`](#string) | Flat path of the entry. |
 | `id` | [`ID!`](#id) | ID of the entry. |
 | `lfsOid` | [`String`](#string) | LFS ID of the blob. |
@@ -765,8 +887,10 @@ Autogenerated return type of AwardEmojiToggle.
 
 The connection type for Blob.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[BlobEdge]`](#blobedge) | A list of edges. |
 | `nodes` | [`[Blob]`](#blob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -775,8 +899,10 @@ The connection type for Blob.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Blob`](#blob) | The item at the end of the edge. |
 
@@ -784,28 +910,79 @@ An edge in a connection.
 
 Represents a project or group issue board.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `assignee` | [`User`](#user) | The board assignee. |
-| `epics` | [`BoardEpicConnection`](#boardepicconnection) | Epics associated with board issues. |
 | `hideBacklogList` | [`Boolean`](#boolean) | Whether or not backlog list is hidden. |
 | `hideClosedList` | [`Boolean`](#boolean) | Whether or not closed list is hidden. |
 | `id` | [`ID!`](#id) | ID (global ID) of the board. |
 | `iteration` | [`Iteration`](#iteration) | The board iteration. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels of the board. |
-| `lists` | [`BoardListConnection`](#boardlistconnection) | Lists of the board. |
 | `milestone` | [`Milestone`](#milestone) | The board milestone. |
 | `name` | [`String`](#string) | Name of the board. |
 | `webPath` | [`String!`](#string) | Web path of the board. |
 | `webUrl` | [`String!`](#string) | Web URL of the board. |
 | `weight` | [`Int`](#int) | Weight of the board. |
 
+#### fields with arguments
+
+##### `epics`
+
+Epics associated with board issues.
+
+Returns [`BoardEpicConnection`](#boardepicconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `issueFilters` | [`BoardIssueInput`](#boardissueinput) | Filters applied when selecting issues on the board. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `labels`
+
+Labels of the board.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `lists`
+
+Lists of the board.
+
+Returns [`BoardListConnection`](#boardlistconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`ListID`](#listid) | Find a list by its global ID. |
+| `issueFilters` | [`BoardIssueInput`](#boardissueinput) | Filters applied when getting issue metadata in the board list. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `BoardConnection`
 
 The connection type for Board.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[BoardEdge]`](#boardedge) | A list of edges. |
 | `nodes` | [`[Board]`](#board) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -814,8 +991,10 @@ The connection type for Board.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Board`](#board) | The item at the end of the edge. |
 
@@ -823,25 +1002,22 @@ An edge in a connection.
 
 Represents an epic on an issue board.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `author` | [`User!`](#user) | Author of the epic. |
-| `awardEmoji` | [`AwardEmojiConnection`](#awardemojiconnection) | A list of award emojis associated with the epic. |
-| `children` | [`EpicConnection`](#epicconnection) | Children (sub-epics) of the epic. |
 | `closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
 | `confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | `createdAt` | [`Time`](#time) | Timestamp of when the epic was created. |
-| `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
 | `descendantCounts` | [`EpicDescendantCount`](#epicdescendantcount) | Number of open and closed descendant epics and issues. |
 | `descendantWeightSum` | [`EpicDescendantWeights`](#epicdescendantweights) | Total weight of open and closed issues in the epic and its descendants. |
 | `description` | [`String`](#string) | Description of the epic. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `downvotes` | [`Int!`](#int) | Number of downvotes the epic has received. |
 | `dueDate` | [`Time`](#time) | Due date of the epic. |
 | `dueDateFixed` | [`Time`](#time) | Fixed due date of the epic. |
 | `dueDateFromMilestones` | [`Time`](#time) | Inherited due date of the epic from milestones. |
 | `dueDateIsFixed` | [`Boolean`](#boolean) | Indicates if the due date has been manually set. |
-| `events` | [`EventConnection`](#eventconnection) | A list of events associated with the object. |
 | `group` | [`Group!`](#group) | Group to which the epic belongs. |
 | `hasChildren` | [`Boolean!`](#boolean) | Indicates if the epic has children. |
 | `hasIssues` | [`Boolean!`](#boolean) | Indicates if the epic has direct issues. |
@@ -849,12 +1025,7 @@ Represents an epic on an issue board.
 | `healthStatus` | [`EpicHealthStatus`](#epichealthstatus) | Current health status of the epic. |
 | `id` | [`ID!`](#id) | ID of the epic. |
 | `iid` | [`ID!`](#id) | Internal ID of the epic. |
-| `issues` | [`EpicIssueConnection`](#epicissueconnection) | A list of issues associated with the epic. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels assigned to the epic. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 | `parent` | [`Epic`](#epic) | Parent epic of the epic. |
-| `participants` | [`UserConnection`](#userconnection) | List of participants for the epic. |
-| `reference` | [`String!`](#string) | Internal reference of the epic. Returned in shortened format by default. |
 | `relationPath` | [`String`](#string) | URI path of the epic-issue relationship. |
 | `relativePosition` | [`Int`](#int) | The relative position of the epic in the epic tree. |
 | `startDate` | [`Time`](#time) | Start date of the epic. |
@@ -873,12 +1044,178 @@ Represents an epic on an issue board.
 | `webPath` | [`String!`](#string) | Web path of the epic. |
 | `webUrl` | [`String!`](#string) | Web URL of the epic. |
 
+#### fields with arguments
+
+##### `awardEmoji`
+
+A list of award emojis associated with the epic.
+
+Returns [`AwardEmojiConnection`](#awardemojiconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `children`
+
+Children (sub-epics) of the epic.
+
+Returns [`EpicConnection`](#epicconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
+| `iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
+| `state` | [`EpicState`](#epicstate) | Filter epics by state. |
+| `search` | [`String`](#string) | Search query for epic title or description. |
+| `sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
+| `authorUsername` | [`String`](#string) | Filter epics by author. |
+| `labelName` | [`[String!]`](#string) | Filter epics by labels. |
+| `milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
+| `iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
+| `includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
+| `confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `currentUserTodos`
+
+To-do items for the current user.
+
+Returns [`TodoConnection!`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+| `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `events`
+
+A list of events associated with the object.
+
+Returns [`EventConnection`](#eventconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `issues`
+
+A list of issues associated with the epic.
+
+Returns [`EpicIssueConnection`](#epicissueconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `labels`
+
+Labels assigned to the epic.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `participants`
+
+List of participants for the epic.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `reference`
+
+Internal reference of the epic. Returned in shortened format by default.
+
+Returns [`String!`](#string)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `full` | [`Boolean`](#boolean) | Indicates if the reference should be returned in full. |
+
 ### `BoardEpicConnection`
 
 The connection type for BoardEpic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[BoardEpicEdge]`](#boardepicedge) | A list of edges. |
 | `nodes` | [`[BoardEpic]`](#boardepic) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -887,8 +1224,10 @@ The connection type for BoardEpic.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`BoardEpic`](#boardepic) | The item at the end of the edge. |
 
@@ -896,20 +1235,23 @@ An edge in a connection.
 
 Represents user preferences for a board epic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `collapsed` | [`Boolean!`](#boolean) | Indicates epic should be displayed as collapsed. |
 
 ### `BoardList`
 
 Represents a list for an issue board.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `assignee` | [`User`](#user) | Assignee in the list. |
 | `collapsed` | [`Boolean`](#boolean) | Indicates if the list is collapsed for this user. |
 | `id` | [`ID!`](#id) | ID (global ID) of the list. |
-| `issues` | [`IssueConnection`](#issueconnection) | Board issues. |
 | `issuesCount` | [`Int`](#int) | Count of issues in the list. |
 | `iteration` | [`Iteration`](#iteration) | Iteration of the list. |
 | `label` | [`Label`](#label) | Label of the list. |
@@ -922,12 +1264,32 @@ Represents a list for an issue board.
 | `title` | [`String!`](#string) | Title of the list. |
 | `totalWeight` | [`Int`](#int) | Total weight of all issues in the list. |
 
+#### fields with arguments
+
+##### `issues`
+
+Board issues.
+
+Returns [`IssueConnection`](#issueconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `filters` | [`BoardIssueInput`](#boardissueinput) | Filters applied when selecting issues in the board list. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `BoardListConnection`
 
 The connection type for BoardList.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[BoardListEdge]`](#boardlistedge) | A list of edges. |
 | `nodes` | [`[BoardList]`](#boardlist) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -936,8 +1298,10 @@ The connection type for BoardList.
 
 Autogenerated return type of BoardListCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | Issue list in the issue board. |
@@ -946,8 +1310,10 @@ Autogenerated return type of BoardListCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`BoardList`](#boardlist) | The item at the end of the edge. |
 
@@ -955,16 +1321,20 @@ An edge in a connection.
 
 Autogenerated return type of BoardListUpdateLimitMetrics.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | The updated list. |
 
 ### `Branch`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `commit` | [`Commit`](#commit) | Commit for the branch. |
 | `name` | [`String!`](#string) | Name of the branch. |
 
@@ -972,8 +1342,10 @@ Autogenerated return type of BoardListUpdateLimitMetrics.
 
 Autogenerated return type of BulkFindOrCreateDevopsAdoptionSegments.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `segments` | [`[DevopsAdoptionSegment!]`](#devopsadoptionsegment) | Created segments after mutation. |
@@ -982,8 +1354,10 @@ Autogenerated return type of BulkFindOrCreateDevopsAdoptionSegments.
 
 Represents the total number of issues and their weights for a particular day.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `completedCount` | [`Int!`](#int) | Number of closed issues as of this day. |
 | `completedWeight` | [`Int!`](#int) | Total weight of closed issues as of this day. |
 | `date` | [`ISO8601Date!`](#iso8601date) | Date for burnup totals. |
@@ -992,22 +1366,28 @@ Represents the total number of issues and their weights for a particular day.
 
 ### `CiApplicationSettings`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `keepLatestArtifact` | [`Boolean`](#boolean) | Whether to keep the latest jobs artifacts. |
 
 ### `CiBuildNeed`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `name` | [`String`](#string) | Name of the job we need to complete. |
 
 ### `CiBuildNeedConnection`
 
 The connection type for CiBuildNeed.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiBuildNeedEdge]`](#cibuildneededge) | A list of edges. |
 | `nodes` | [`[CiBuildNeed]`](#cibuildneed) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1016,8 +1396,10 @@ The connection type for CiBuildNeed.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiBuildNeed`](#cibuildneed) | The item at the end of the edge. |
 
@@ -1025,34 +1407,74 @@ An edge in a connection.
 
 Autogenerated return type of CiCdSettingsUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `CiConfig`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `errors` | [`[String!]`](#string) | Linting errors. |
 | `mergedYaml` | [`String`](#string) | Merged CI configuration YAML. |
-| `stages` | [`CiConfigStageConnection`](#ciconfigstageconnection) | Stages of the pipeline. |
 | `status` | [`CiConfigStatus`](#ciconfigstatus) | Status of linting, can be either valid or invalid. |
+
+#### fields with arguments
+
+##### `stages`
+
+Stages of the pipeline.
+
+Returns [`CiConfigStageConnection`](#ciconfigstageconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `CiConfigGroup`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `jobs` | [`CiConfigJobConnection`](#ciconfigjobconnection) | Jobs in group. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `name` | [`String`](#string) | Name of the job group. |
 | `size` | [`Int`](#int) | Size of the job group. |
+
+#### fields with arguments
+
+##### `jobs`
+
+Jobs in group.
+
+Returns [`CiConfigJobConnection`](#ciconfigjobconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `CiConfigGroupConnection`
 
 The connection type for CiConfigGroup.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiConfigGroupEdge]`](#ciconfiggroupedge) | A list of edges. |
 | `nodes` | [`[CiConfigGroup]`](#ciconfiggroup) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1061,15 +1483,19 @@ The connection type for CiConfigGroup.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigGroup`](#ciconfiggroup) | The item at the end of the edge. |
 
 ### `CiConfigJob`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `afterScript` | [`[String!]`](#string) | Override a set of commands that are executed after the job. |
 | `allowFailure` | [`Boolean`](#boolean) | Allow job to fail. |
 | `beforeScript` | [`[String!]`](#string) | Override a set of commands that are executed before the job. |
@@ -1077,19 +1503,37 @@ An edge in a connection.
 | `except` | [`CiConfigJobRestriction`](#ciconfigjobrestriction) | Limit when jobs are not created. |
 | `groupName` | [`String`](#string) | Name of the job group. |
 | `name` | [`String`](#string) | Name of the job. |
-| `needs` | [`CiConfigNeedConnection`](#ciconfigneedconnection) | Builds that must complete before the jobs run. |
 | `only` | [`CiConfigJobRestriction`](#ciconfigjobrestriction) | Jobs are created when these conditions do not apply. |
 | `script` | [`[String!]`](#string) | Shell script that is executed by a runner. |
 | `stage` | [`String`](#string) | Name of the job stage. |
 | `tags` | [`[String!]`](#string) | List of tags that are used to select a runner. |
 | `when` | [`String`](#string) | When to run the job. |
 
+#### fields with arguments
+
+##### `needs`
+
+Builds that must complete before the jobs run.
+
+Returns [`CiConfigNeedConnection`](#ciconfigneedconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `CiConfigJobConnection`
 
 The connection type for CiConfigJob.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiConfigJobEdge]`](#ciconfigjobedge) | A list of edges. |
 | `nodes` | [`[CiConfigJob]`](#ciconfigjob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1098,29 +1542,37 @@ The connection type for CiConfigJob.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigJob`](#ciconfigjob) | The item at the end of the edge. |
 
 ### `CiConfigJobRestriction`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `refs` | [`[String!]`](#string) | The Git refs the job restriction applies to. |
 
 ### `CiConfigNeed`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `name` | [`String`](#string) | Name of the need. |
 
 ### `CiConfigNeedConnection`
 
 The connection type for CiConfigNeed.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiConfigNeedEdge]`](#ciconfigneededge) | A list of edges. |
 | `nodes` | [`[CiConfigNeed]`](#ciconfigneed) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1129,24 +1581,46 @@ The connection type for CiConfigNeed.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigNeed`](#ciconfigneed) | The item at the end of the edge. |
 
 ### `CiConfigStage`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `groups` | [`CiConfigGroupConnection`](#ciconfiggroupconnection) | Groups of jobs for the stage. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `name` | [`String`](#string) | Name of the stage. |
+
+#### fields with arguments
+
+##### `groups`
+
+Groups of jobs for the stage.
+
+Returns [`CiConfigGroupConnection`](#ciconfiggroupconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `CiConfigStageConnection`
 
 The connection type for CiConfigStage.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiConfigStageEdge]`](#ciconfigstageedge) | A list of edges. |
 | `nodes` | [`[CiConfigStage]`](#ciconfigstage) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1155,26 +1629,48 @@ The connection type for CiConfigStage.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigStage`](#ciconfigstage) | The item at the end of the edge. |
 
 ### `CiGroup`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the group. |
-| `jobs` | [`CiJobConnection`](#cijobconnection) | Jobs in group. |
 | `name` | [`String`](#string) | Name of the job group. |
 | `size` | [`Int`](#int) | Size of the group. |
+
+#### fields with arguments
+
+##### `jobs`
+
+Jobs in group.
+
+Returns [`CiJobConnection`](#cijobconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `CiGroupConnection`
 
 The connection type for CiGroup.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiGroupEdge]`](#cigroupedge) | A list of edges. |
 | `nodes` | [`[CiGroup]`](#cigroup) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1183,28 +1679,64 @@ The connection type for CiGroup.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiGroup`](#cigroup) | The item at the end of the edge. |
 
 ### `CiJob`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `artifacts` | [`CiJobArtifactConnection`](#cijobartifactconnection) | Artifacts generated by the job. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the job. |
 | `duration` | [`Int`](#int) | Duration of the job in seconds. |
 | `finishedAt` | [`Time`](#time) | When a job has finished running. |
 | `name` | [`String`](#string) | Name of the job. |
-| `needs` | [`CiBuildNeedConnection`](#cibuildneedconnection) | References to builds that must complete before the jobs run. |
 | `pipeline` | [`Pipeline`](#pipeline) | Pipeline the job belongs to. |
 | `scheduledAt` | [`Time`](#time) | Schedule for the build. |
 
+#### fields with arguments
+
+##### `artifacts`
+
+Artifacts generated by the job.
+
+Returns [`CiJobArtifactConnection`](#cijobartifactconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `needs`
+
+References to builds that must complete before the jobs run.
+
+Returns [`CiBuildNeedConnection`](#cibuildneedconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `CiJobArtifact`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `downloadPath` | [`String`](#string) | URL for downloading the artifact's file. |
 | `fileType` | [`JobArtifactFileType`](#jobartifactfiletype) | File type of the artifact. |
 
@@ -1212,8 +1744,10 @@ An edge in a connection.
 
 The connection type for CiJobArtifact.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiJobArtifactEdge]`](#cijobartifactedge) | A list of edges. |
 | `nodes` | [`[CiJobArtifact]`](#cijobartifact) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1222,8 +1756,10 @@ The connection type for CiJobArtifact.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiJobArtifact`](#cijobartifact) | The item at the end of the edge. |
 
@@ -1231,8 +1767,10 @@ An edge in a connection.
 
 The connection type for CiJob.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiJobEdge]`](#cijobedge) | A list of edges. |
 | `nodes` | [`[CiJob]`](#cijob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1241,25 +1779,47 @@ The connection type for CiJob.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiJob`](#cijob) | The item at the end of the edge. |
 
 ### `CiStage`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the stage. |
-| `groups` | [`CiGroupConnection`](#cigroupconnection) | Group of jobs for the stage. |
 | `name` | [`String`](#string) | Name of the stage. |
+
+#### fields with arguments
+
+##### `groups`
+
+Group of jobs for the stage.
+
+Returns [`CiGroupConnection`](#cigroupconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `CiStageConnection`
 
 The connection type for CiStage.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CiStageEdge]`](#cistageedge) | A list of edges. |
 | `nodes` | [`[CiStage]`](#cistage) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1268,30 +1828,52 @@ The connection type for CiStage.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiStage`](#cistage) | The item at the end of the edge. |
 
 ### `ClusterAgent`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp the cluster agent was created. |
 | `createdByUser` | [`User`](#user) | User object, containing information about the person who created the agent. |
 | `id` | [`ID!`](#id) | ID of the cluster agent. |
 | `name` | [`String`](#string) | Name of the cluster agent. |
 | `project` | [`Project`](#project) | The project this cluster agent is associated with. |
-| `tokens` | [`ClusterAgentTokenConnection`](#clusteragenttokenconnection) | Tokens associated with the cluster agent. |
 | `updatedAt` | [`Time`](#time) | Timestamp the cluster agent was updated. |
 | `webPath` | [`String`](#string) | Web path of the cluster agent. |
+
+#### fields with arguments
+
+##### `tokens`
+
+Tokens associated with the cluster agent.
+
+Returns [`ClusterAgentTokenConnection`](#clusteragenttokenconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `ClusterAgentConnection`
 
 The connection type for ClusterAgent.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[ClusterAgentEdge]`](#clusteragentedge) | A list of edges. |
 | `nodes` | [`[ClusterAgent]`](#clusteragent) | A list of nodes. |
@@ -1301,8 +1883,10 @@ The connection type for ClusterAgent.
 
 Autogenerated return type of ClusterAgentDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -1310,15 +1894,19 @@ Autogenerated return type of ClusterAgentDelete.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ClusterAgent`](#clusteragent) | The item at the end of the edge. |
 
 ### `ClusterAgentToken`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clusterAgent` | [`ClusterAgent`](#clusteragent) | Cluster agent this token is associated with. |
 | `createdAt` | [`Time`](#time) | Timestamp the token was created. |
 | `createdByUser` | [`User`](#user) | The user who created the token. |
@@ -1330,8 +1918,10 @@ An edge in a connection.
 
 The connection type for ClusterAgentToken.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[ClusterAgentTokenEdge]`](#clusteragenttokenedge) | A list of edges. |
 | `nodes` | [`[ClusterAgentToken]`](#clusteragenttoken) | A list of nodes. |
@@ -1341,8 +1931,10 @@ The connection type for ClusterAgentToken.
 
 Autogenerated return type of ClusterAgentTokenCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `secret` | [`String`](#string) | Token secret value. Make sure you save it - you won't be able to access it again. |
@@ -1352,8 +1944,10 @@ Autogenerated return type of ClusterAgentTokenCreate.
 
 Autogenerated return type of ClusterAgentTokenDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -1361,8 +1955,10 @@ Autogenerated return type of ClusterAgentTokenDelete.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ClusterAgentToken`](#clusteragenttoken) | The item at the end of the edge. |
 
@@ -1370,8 +1966,10 @@ An edge in a connection.
 
 Represents the code coverage activity for a group.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `averageCoverage` | [`Float`](#float) | Average percentage of the different code coverage results available for the group. |
 | `coverageCount` | [`Int`](#int) | Number of different code coverage results available for the group. |
 | `date` | [`Date!`](#date) | Date when the code coverage was created. |
@@ -1381,8 +1979,10 @@ Represents the code coverage activity for a group.
 
 The connection type for CodeCoverageActivity.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CodeCoverageActivityEdge]`](#codecoverageactivityedge) | A list of edges. |
 | `nodes` | [`[CodeCoverageActivity]`](#codecoverageactivity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1391,8 +1991,10 @@ The connection type for CodeCoverageActivity.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CodeCoverageActivity`](#codecoverageactivity) | The item at the end of the edge. |
 
@@ -1400,16 +2002,20 @@ An edge in a connection.
 
 Represents the code coverage summary for a project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `averageCoverage` | [`Float`](#float) | Average percentage of the different code coverage results available for the project. |
 | `coverageCount` | [`Int`](#int) | Number of different code coverage results available. |
 | `lastUpdatedOn` | [`Date`](#date) | Latest date when the code coverage was created for the project. |
 
 ### `Commit`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `author` | [`User`](#user) | Author of the commit. |
 | `authorGravatar` | [`String`](#string) | Commit authors gravatar. |
 | `authorName` | [`String`](#string) | Commit authors name. |
@@ -1418,7 +2024,6 @@ Represents the code coverage summary for a project.
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
 | `id` | [`ID!`](#id) | ID (global ID) of the commit. |
 | `message` | [`String`](#string) | Raw commit message. |
-| `pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines of the commit ordered latest first. |
 | `sha` | [`String!`](#string) | SHA1 ID of the commit. |
 | `shortId` | [`String!`](#string) | Short SHA1 ID of the commit. |
 | `signatureHtml` | [`String`](#string) | Rendered HTML of the commit signature. |
@@ -1427,12 +2032,34 @@ Represents the code coverage summary for a project.
 | `webPath` | [`String!`](#string) | Web path of the commit. |
 | `webUrl` | [`String!`](#string) | Web URL of the commit. |
 
+#### fields with arguments
+
+##### `pipelines`
+
+Pipelines of the commit ordered latest first.
+
+Returns [`PipelineConnection`](#pipelineconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `status` | [`PipelineStatusEnum`](#pipelinestatusenum) | Filter pipelines by their status. |
+| `ref` | [`String`](#string) | Filter pipelines by the ref they are run for. |
+| `sha` | [`String`](#string) | Filter pipelines by the sha of the commit they are run for. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `CommitConnection`
 
 The connection type for Commit.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CommitEdge]`](#commitedge) | A list of edges. |
 | `nodes` | [`[Commit]`](#commit) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1441,8 +2068,10 @@ The connection type for Commit.
 
 Autogenerated return type of CommitCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `commit` | [`Commit`](#commit) | The commit after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1451,8 +2080,10 @@ Autogenerated return type of CommitCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Commit`](#commit) | The item at the end of the edge. |
 
@@ -1460,8 +2091,10 @@ An edge in a connection.
 
 Represents a ComplianceFramework associated with a Project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `color` | [`String!`](#string) | Hexadecimal representation of compliance framework's label color. |
 | `description` | [`String!`](#string) | Description of the compliance framework. |
 | `id` | [`ID!`](#id) | Compliance framework ID. |
@@ -1472,8 +2105,10 @@ Represents a ComplianceFramework associated with a Project.
 
 The connection type for ComplianceFramework.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ComplianceFrameworkEdge]`](#complianceframeworkedge) | A list of edges. |
 | `nodes` | [`[ComplianceFramework]`](#complianceframework) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1482,8 +2117,10 @@ The connection type for ComplianceFramework.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ComplianceFramework`](#complianceframework) | The item at the end of the edge. |
 
@@ -1491,8 +2128,10 @@ An edge in a connection.
 
 Composer metadata.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `composerJson` | [`PackageComposerJsonType!`](#packagecomposerjsontype) | Data of the Composer JSON file. |
 | `targetSha` | [`String!`](#string) | Target SHA of the package. |
 
@@ -1500,8 +2139,10 @@ Composer metadata.
 
 Autogenerated return type of ConfigureSast.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `status` | [`String!`](#string) | Status of creating the commit for the supplied SAST CI configuration. |
@@ -1511,8 +2152,10 @@ Autogenerated return type of ConfigureSast.
 
 A tag expiration policy designed to keep only the images that matter most.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cadence` | [`ContainerExpirationPolicyCadenceEnum!`](#containerexpirationpolicycadenceenum) | This container expiration policy schedule. |
 | `createdAt` | [`Time!`](#time) | Timestamp of when the container expiration policy was created. |
 | `enabled` | [`Boolean!`](#boolean) | Indicates whether this container expiration policy is enabled. |
@@ -1527,8 +2170,10 @@ A tag expiration policy designed to keep only the images that matter most.
 
 A container repository.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `canDelete` | [`Boolean!`](#boolean) | Can the current user delete the container repository. |
 | `createdAt` | [`Time!`](#time) | Timestamp when the container repository was created. |
 | `expirationPolicyCleanupStatus` | [`ContainerRepositoryCleanupStatus`](#containerrepositorycleanupstatus) | The tags cleanup status for the container repository. |
@@ -1546,8 +2191,10 @@ A container repository.
 
 The connection type for ContainerRepository.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ContainerRepositoryEdge]`](#containerrepositoryedge) | A list of edges. |
 | `nodes` | [`[ContainerRepository]`](#containerrepository) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1556,8 +2203,10 @@ The connection type for ContainerRepository.
 
 Details of a container repository.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `canDelete` | [`Boolean!`](#boolean) | Can the current user delete the container repository. |
 | `createdAt` | [`Time!`](#time) | Timestamp when the container repository was created. |
 | `expirationPolicyCleanupStatus` | [`ContainerRepositoryCleanupStatus`](#containerrepositorycleanupstatus) | The tags cleanup status for the container repository. |
@@ -1568,16 +2217,34 @@ Details of a container repository.
 | `path` | [`String!`](#string) | Path of the container repository. |
 | `project` | [`Project!`](#project) | Project of the container registry. |
 | `status` | [`ContainerRepositoryStatus`](#containerrepositorystatus) | Status of the container repository. |
-| `tags` | [`ContainerRepositoryTagConnection`](#containerrepositorytagconnection) | Tags of the container repository. |
 | `tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | `updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
+
+#### fields with arguments
+
+##### `tags`
+
+Tags of the container repository.
+
+Returns [`ContainerRepositoryTagConnection`](#containerrepositorytagconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `ContainerRepositoryEdge`
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ContainerRepository`](#containerrepository) | The item at the end of the edge. |
 
@@ -1585,8 +2252,10 @@ An edge in a connection.
 
 A tag from a container repository.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `canDelete` | [`Boolean!`](#boolean) | Can the current user delete this tag. |
 | `createdAt` | [`Time`](#time) | Timestamp when the tag was created. |
 | `digest` | [`String`](#string) | Digest of the tag. |
@@ -1601,8 +2270,10 @@ A tag from a container repository.
 
 The connection type for ContainerRepositoryTag.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ContainerRepositoryTagEdge]`](#containerrepositorytagedge) | A list of edges. |
 | `nodes` | [`[ContainerRepositoryTag]`](#containerrepositorytag) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1611,8 +2282,10 @@ The connection type for ContainerRepositoryTag.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ContainerRepositoryTag`](#containerrepositorytag) | The item at the end of the edge. |
 
@@ -1620,8 +2293,10 @@ An edge in a connection.
 
 Autogenerated return type of CreateAlertIssue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `alert` | [`AlertManagementAlert`](#alertmanagementalert) | The alert after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1632,8 +2307,10 @@ Autogenerated return type of CreateAlertIssue.
 
 Autogenerated return type of CreateAnnotation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `annotation` | [`MetricsDashboardAnnotation`](#metricsdashboardannotation) | The created annotation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1642,8 +2319,10 @@ Autogenerated return type of CreateAnnotation.
 
 Autogenerated return type of CreateBoard.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `board` | [`Board`](#board) | The board after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1652,8 +2331,10 @@ Autogenerated return type of CreateBoard.
 
 Autogenerated return type of CreateBranch.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `branch` | [`Branch`](#branch) | Branch after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1662,8 +2343,10 @@ Autogenerated return type of CreateBranch.
 
 Autogenerated return type of CreateClusterAgent.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `clusterAgent` | [`ClusterAgent`](#clusteragent) | Cluster agent created after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1672,8 +2355,10 @@ Autogenerated return type of CreateClusterAgent.
 
 Autogenerated return type of CreateComplianceFramework.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `framework` | [`ComplianceFramework`](#complianceframework) | The created compliance framework. |
@@ -1682,8 +2367,10 @@ Autogenerated return type of CreateComplianceFramework.
 
 Autogenerated return type of CreateCustomEmoji.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `customEmoji` | [`CustomEmoji`](#customemoji) | The new custom emoji. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1692,8 +2379,10 @@ Autogenerated return type of CreateCustomEmoji.
 
 Autogenerated return type of CreateDevopsAdoptionSegment.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `segment` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | The segment after mutation. |
@@ -1702,8 +2391,10 @@ Autogenerated return type of CreateDevopsAdoptionSegment.
 
 Autogenerated return type of CreateDiffNote.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
@@ -1712,8 +2403,10 @@ Autogenerated return type of CreateDiffNote.
 
 Autogenerated return type of CreateEpic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epic` | [`Epic`](#epic) | The created epic. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1722,8 +2415,10 @@ Autogenerated return type of CreateEpic.
 
 Autogenerated return type of CreateImageDiffNote.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
@@ -1732,8 +2427,10 @@ Autogenerated return type of CreateImageDiffNote.
 
 Autogenerated return type of CreateIssue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -1742,8 +2439,10 @@ Autogenerated return type of CreateIssue.
 
 Autogenerated return type of CreateIteration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `iteration` | [`Iteration`](#iteration) | The created iteration. |
@@ -1752,8 +2451,10 @@ Autogenerated return type of CreateIteration.
 
 Autogenerated return type of CreateNote.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
@@ -1762,8 +2463,10 @@ Autogenerated return type of CreateNote.
 
 Autogenerated return type of CreateRequirement.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `requirement` | [`Requirement`](#requirement) | Requirement after mutation. |
@@ -1772,8 +2475,10 @@ Autogenerated return type of CreateRequirement.
 
 Autogenerated return type of CreateSnippet.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `captchaSiteKey` | [`String`](#string) | The CAPTCHA site key which must be used to render a challenge for the user to solve to obtain a valid captchaResponse value. Included only when an operation was not completed because "NeedsCaptchaResponse" is true. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1786,8 +2491,10 @@ Autogenerated return type of CreateSnippet.
 
 Autogenerated return type of CreateTestCase.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `testCase` | [`Issue`](#issue) | The test case created. |
@@ -1796,8 +2503,10 @@ Autogenerated return type of CreateTestCase.
 
 A custom emoji uploaded by user.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `external` | [`Boolean!`](#boolean) | Whether the emoji is an external link. |
 | `id` | [`CustomEmojiID!`](#customemojiid) | The ID of the emoji. |
 | `name` | [`String!`](#string) | The name of the emoji. |
@@ -1807,8 +2516,10 @@ A custom emoji uploaded by user.
 
 The connection type for CustomEmoji.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[CustomEmojiEdge]`](#customemojiedge) | A list of edges. |
 | `nodes` | [`[CustomEmoji]`](#customemoji) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1817,8 +2528,10 @@ The connection type for CustomEmoji.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CustomEmoji`](#customemoji) | The item at the end of the edge. |
 
@@ -1826,8 +2539,10 @@ An edge in a connection.
 
 Autogenerated return type of DastOnDemandScanCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
@@ -1836,8 +2551,10 @@ Autogenerated return type of DastOnDemandScanCreate.
 
 Represents a DAST Profile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `branch` | [`DastProfileBranch`](#dastprofilebranch) | The associated branch. Will always return `null` if `dast_branch_selection` feature flag is disabled. |
 | `dastScannerProfile` | [`DastScannerProfile`](#dastscannerprofile) | The associated scanner profile. |
 | `dastSiteProfile` | [`DastSiteProfile`](#dastsiteprofile) | The associated site profile. |
@@ -1850,8 +2567,10 @@ Represents a DAST Profile.
 
 Represents a DAST Profile Branch.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `exists` | [`Boolean`](#boolean) | Indicates whether or not the branch exists. |
 | `name` | [`String`](#string) | The name of the branch. |
 
@@ -1859,8 +2578,10 @@ Represents a DAST Profile Branch.
 
 The connection type for DastProfile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DastProfileEdge]`](#dastprofileedge) | A list of edges. |
 | `nodes` | [`[DastProfile]`](#dastprofile) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1869,8 +2590,10 @@ The connection type for DastProfile.
 
 Autogenerated return type of DastProfileCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `dastProfile` | [`DastProfile`](#dastprofile) | The created profile. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1880,8 +2603,10 @@ Autogenerated return type of DastProfileCreate.
 
 Autogenerated return type of DastProfileDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -1889,8 +2614,10 @@ Autogenerated return type of DastProfileDelete.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastProfile`](#dastprofile) | The item at the end of the edge. |
 
@@ -1898,8 +2625,10 @@ An edge in a connection.
 
 Autogenerated return type of DastProfileRun.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
@@ -1908,8 +2637,10 @@ Autogenerated return type of DastProfileRun.
 
 Autogenerated return type of DastProfileUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `dastProfile` | [`DastProfile`](#dastprofile) | The updated profile. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -1919,8 +2650,10 @@ Autogenerated return type of DastProfileUpdate.
 
 Represents a DAST scanner profile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `editPath` | [`String`](#string) | Relative web path to the edit page of a scanner profile. |
 | `globalId` **{warning-solid}** | [`DastScannerProfileID!`](#dastscannerprofileid) | **Deprecated:** Use `id`. Deprecated in 13.6. |
 | `id` | [`DastScannerProfileID!`](#dastscannerprofileid) | ID of the DAST scanner profile. |
@@ -1936,8 +2669,10 @@ Represents a DAST scanner profile.
 
 The connection type for DastScannerProfile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DastScannerProfileEdge]`](#dastscannerprofileedge) | A list of edges. |
 | `nodes` | [`[DastScannerProfile]`](#dastscannerprofile) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -1946,8 +2681,10 @@ The connection type for DastScannerProfile.
 
 Autogenerated return type of DastScannerProfileCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `globalId` **{warning-solid}** | [`DastScannerProfileID`](#dastscannerprofileid) | **Deprecated:** Use `id`. Deprecated in 13.6. |
@@ -1957,8 +2694,10 @@ Autogenerated return type of DastScannerProfileCreate.
 
 Autogenerated return type of DastScannerProfileDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -1966,8 +2705,10 @@ Autogenerated return type of DastScannerProfileDelete.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastScannerProfile`](#dastscannerprofile) | The item at the end of the edge. |
 
@@ -1975,8 +2716,10 @@ An edge in a connection.
 
 Autogenerated return type of DastScannerProfileUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastScannerProfileID`](#dastscannerprofileid) | ID of the scanner profile. |
@@ -1985,8 +2728,10 @@ Autogenerated return type of DastScannerProfileUpdate.
 
 Represents a DAST Site Profile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `editPath` | [`String`](#string) | Relative web path to the edit page of a site profile. |
 | `id` | [`DastSiteProfileID!`](#dastsiteprofileid) | ID of the site profile. |
 | `normalizedTargetUrl` | [`String`](#string) | Normalized URL of the target to be scanned. |
@@ -2000,8 +2745,10 @@ Represents a DAST Site Profile.
 
 The connection type for DastSiteProfile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DastSiteProfileEdge]`](#dastsiteprofileedge) | A list of edges. |
 | `nodes` | [`[DastSiteProfile]`](#dastsiteprofile) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2010,8 +2757,10 @@ The connection type for DastSiteProfile.
 
 Autogenerated return type of DastSiteProfileCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastSiteProfileID`](#dastsiteprofileid) | ID of the site profile. |
@@ -2020,8 +2769,10 @@ Autogenerated return type of DastSiteProfileCreate.
 
 Autogenerated return type of DastSiteProfileDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2029,8 +2780,10 @@ Autogenerated return type of DastSiteProfileDelete.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastSiteProfile`](#dastsiteprofile) | The item at the end of the edge. |
 
@@ -2038,16 +2791,20 @@ An edge in a connection.
 
 Check permissions for the current user on site profile.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createOnDemandDastScan` | [`Boolean!`](#boolean) | Indicates the user can perform `create_on_demand_dast_scan` on this resource |
 
 ### `DastSiteProfileUpdatePayload`
 
 Autogenerated return type of DastSiteProfileUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastSiteProfileID`](#dastsiteprofileid) | ID of the site profile. |
@@ -2056,8 +2813,10 @@ Autogenerated return type of DastSiteProfileUpdate.
 
 Autogenerated return type of DastSiteTokenCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastSiteTokenID`](#dastsitetokenid) | ID of the site token. |
@@ -2068,8 +2827,10 @@ Autogenerated return type of DastSiteTokenCreate.
 
 Represents a DAST Site Validation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `id` | [`DastSiteValidationID!`](#dastsitevalidationid) | Global ID of the site validation. |
 | `normalizedTargetUrl` | [`String`](#string) | Normalized URL of the target to be validated. |
 | `status` | [`DastSiteProfileValidationStatusEnum!`](#dastsiteprofilevalidationstatusenum) | Status of the site validation. |
@@ -2078,8 +2839,10 @@ Represents a DAST Site Validation.
 
 The connection type for DastSiteValidation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DastSiteValidationEdge]`](#dastsitevalidationedge) | A list of edges. |
 | `nodes` | [`[DastSiteValidation]`](#dastsitevalidation) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2088,8 +2851,10 @@ The connection type for DastSiteValidation.
 
 Autogenerated return type of DastSiteValidationCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastSiteValidationID`](#dastsitevalidationid) | ID of the site validation. |
@@ -2099,8 +2864,10 @@ Autogenerated return type of DastSiteValidationCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastSiteValidation`](#dastsitevalidation) | The item at the end of the edge. |
 
@@ -2108,8 +2875,10 @@ An edge in a connection.
 
 Autogenerated return type of DastSiteValidationRevoke.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2117,8 +2886,10 @@ Autogenerated return type of DastSiteValidationRevoke.
 
 Autogenerated return type of DeleteAnnotation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2126,8 +2897,10 @@ Autogenerated return type of DeleteAnnotation.
 
 Autogenerated return type of DeleteDevopsAdoptionSegment.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2135,8 +2908,10 @@ Autogenerated return type of DeleteDevopsAdoptionSegment.
 
 The response from the AdminSidekiqQueuesDeleteJobs mutation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `completed` | [`Boolean`](#boolean) | Whether or not the entire queue was processed in time; if not, retrying the same request is safe. |
 | `deletedJobs` | [`Int`](#int) | The number of matching jobs deleted. |
 | `queueSize` | [`Int`](#int) | The queue size after processing. |
@@ -2145,11 +2920,11 @@ The response from the AdminSidekiqQueuesDeleteJobs mutation.
 
 A single design.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `diffRefs` | [`DiffRefs!`](#diffrefs) | The diff refs for this design. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `event` | [`DesignVersionEvent!`](#designversionevent) | How this design was changed in the current version. |
 | `filename` | [`String!`](#string) | The filename of the design. |
 | `fullPath` | [`String!`](#string) | The full path to the design file. |
@@ -2157,17 +2932,82 @@ A single design.
 | `image` | [`String!`](#string) | The URL of the full-sized image. |
 | `imageV432x230` | [`String`](#string) | The URL of the design resized to fit within the bounds of 432x230. This will be `null` if the image has not been generated |
 | `issue` | [`Issue!`](#issue) | The issue the design belongs to. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 | `notesCount` | [`Int!`](#int) | The total count of user-created notes for this design. |
 | `project` | [`Project!`](#project) | The project the design belongs to. |
-| `versions` | [`DesignVersionConnection!`](#designversionconnection) | All versions related to this design ordered newest first. |
+
+#### fields with arguments
+
+##### `currentUserTodos`
+
+To-do items for the current user.
+
+Returns [`TodoConnection!`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+| `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `versions`
+
+All versions related to this design ordered newest first.
+
+Returns [`DesignVersionConnection!`](#designversionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `earlierOrEqualToSha` | [`String`](#string) | The SHA256 of the most recent acceptable version. |
+| `earlierOrEqualToId` | [`DesignManagementVersionID`](#designmanagementversionid) | The Global ID of the most recent acceptable version. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `DesignAtVersion`
 
 A design pinned to a specific version. The image field reflects the design as of the associated version.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `design` | [`Design!`](#design) | The underlying design. |
 | `diffRefs` | [`DiffRefs!`](#diffrefs) | The diff refs for this design. |
 | `event` | [`DesignVersionEvent!`](#designversionevent) | How this design was changed in the current version. |
@@ -2185,8 +3025,10 @@ A design pinned to a specific version. The image field reflects the design as of
 
 The connection type for DesignAtVersion.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DesignAtVersionEdge]`](#designatversionedge) | A list of edges. |
 | `nodes` | [`[DesignAtVersion]`](#designatversion) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2195,8 +3037,10 @@ The connection type for DesignAtVersion.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DesignAtVersion`](#designatversion) | The item at the end of the edge. |
 
@@ -2204,23 +3048,97 @@ An edge in a connection.
 
 A collection of designs.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `copyState` | [`DesignCollectionCopyState`](#designcollectioncopystate) | Copy state of the design collection. |
-| `design` | [`Design`](#design) | Find a specific design. |
-| `designAtVersion` | [`DesignAtVersion`](#designatversion) | Find a design as of a version. |
-| `designs` | [`DesignConnection!`](#designconnection) | All designs for the design collection. |
 | `issue` | [`Issue!`](#issue) | Issue associated with the design collection. |
 | `project` | [`Project!`](#project) | Project associated with the design collection. |
-| `version` | [`DesignVersion`](#designversion) | A specific version. |
-| `versions` | [`DesignVersionConnection!`](#designversionconnection) | All versions related to all designs, ordered newest first. |
+
+#### fields with arguments
+
+##### `design`
+
+Find a specific design.
+
+Returns [`Design`](#design)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`DesignManagementDesignID`](#designmanagementdesignid) | Find a design by its ID. |
+| `filename` | [`String`](#string) | Find a design by its filename. |
+
+##### `designAtVersion`
+
+Find a design as of a version.
+
+Returns [`DesignAtVersion`](#designatversion)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`DesignManagementDesignAtVersionID!`](#designmanagementdesignatversionid) | The Global ID of the design at this version. |
+
+##### `designs`
+
+All designs for the design collection.
+
+Returns [`DesignConnection!`](#designconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[DesignManagementDesignID!]`](#designmanagementdesignid) | Filters designs by their ID. |
+| `filenames` | [`[String!]`](#string) | Filters designs by their filename. |
+| `atVersion` | [`DesignManagementVersionID`](#designmanagementversionid) | Filters designs to only those that existed at the version. If argument is omitted or nil then all designs will reflect the latest version |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `version`
+
+A specific version.
+
+Returns [`DesignVersion`](#designversion)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `sha` | [`String`](#string) | The SHA256 of a specific version. |
+| `id` | [`DesignManagementVersionID`](#designmanagementversionid) | The Global ID of the version. |
+
+##### `versions`
+
+All versions related to all designs, ordered newest first.
+
+Returns [`DesignVersionConnection!`](#designversionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `earlierOrEqualToSha` | [`String`](#string) | The SHA256 of the most recent acceptable version. |
+| `earlierOrEqualToId` | [`DesignManagementVersionID`](#designmanagementversionid) | The Global ID of the most recent acceptable version. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `DesignConnection`
 
 The connection type for Design.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DesignEdge]`](#designedge) | A list of edges. |
 | `nodes` | [`[Design]`](#design) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2229,24 +3147,49 @@ The connection type for Design.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Design`](#design) | The item at the end of the edge. |
 
 ### `DesignManagement`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `designAtVersion` | [`DesignAtVersion`](#designatversion) | Find a design as of a version. |
-| `version` | [`DesignVersion`](#designversion) | Find a version. |
+#### fields with arguments
+
+##### `designAtVersion`
+
+Find a design as of a version.
+
+Returns [`DesignAtVersion`](#designatversion)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`DesignManagementDesignAtVersionID!`](#designmanagementdesignatversionid) | The Global ID of the design at this version. |
+
+##### `version`
+
+Find a version.
+
+Returns [`DesignVersion`](#designversion)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`DesignManagementVersionID!`](#designmanagementversionid) | The Global ID of the version. |
 
 ### `DesignManagementDeletePayload`
 
 Autogenerated return type of DesignManagementDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `version` | [`DesignVersion`](#designversion) | The new version in which the designs are deleted. |
@@ -2255,8 +3198,10 @@ Autogenerated return type of DesignManagementDelete.
 
 Autogenerated return type of DesignManagementMove.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `designCollection` | [`DesignCollection`](#designcollection) | The current state of the collection. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2265,8 +3210,10 @@ Autogenerated return type of DesignManagementMove.
 
 Autogenerated return type of DesignManagementUpload.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `designs` | [`[Design!]!`](#design) | The designs that were uploaded by the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2276,20 +3223,69 @@ Autogenerated return type of DesignManagementUpload.
 
 A specific version in which designs were added, modified or deleted.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `designAtVersion` | [`DesignAtVersion!`](#designatversion) | A particular design as of this version, provided it is visible at this version. |
-| `designs` | [`DesignConnection!`](#designconnection) | All designs that were changed in the version. |
-| `designsAtVersion` | [`DesignAtVersionConnection!`](#designatversionconnection) | All designs that are visible at this version, as of this version. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `id` | [`ID!`](#id) | ID of the design version. |
 | `sha` | [`ID!`](#id) | SHA of the design version. |
+
+#### fields with arguments
+
+##### `designAtVersion`
+
+A particular design as of this version, provided it is visible at this version.
+
+Returns [`DesignAtVersion!`](#designatversion)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`DesignManagementDesignAtVersionID`](#designmanagementdesignatversionid) | The ID of the DesignAtVersion. |
+| `designId` | [`DesignManagementDesignID`](#designmanagementdesignid) | The ID of a specific design. |
+| `filename` | [`String`](#string) | The filename of a specific design. |
+
+##### `designs`
+
+All designs that were changed in the version.
+
+Returns [`DesignConnection!`](#designconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `designsAtVersion`
+
+All designs that are visible at this version, as of this version.
+
+Returns [`DesignAtVersionConnection!`](#designatversionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[DesignManagementDesignID!]`](#designmanagementdesignid) | Filters designs by their ID. |
+| `filenames` | [`[String!]`](#string) | Filters designs by their filename. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `DesignVersionConnection`
 
 The connection type for DesignVersion.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DesignVersionEdge]`](#designversionedge) | A list of edges. |
 | `nodes` | [`[DesignVersion]`](#designversion) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2298,8 +3294,10 @@ The connection type for DesignVersion.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DesignVersion`](#designversion) | The item at the end of the edge. |
 
@@ -2307,8 +3305,10 @@ An edge in a connection.
 
 Autogenerated return type of DestroyBoardList.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | The list after mutation. |
@@ -2317,8 +3317,10 @@ Autogenerated return type of DestroyBoardList.
 
 Autogenerated return type of DestroyBoard.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `board` | [`Board`](#board) | The board after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2327,8 +3329,10 @@ Autogenerated return type of DestroyBoard.
 
 Autogenerated return type of DestroyComplianceFramework.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2336,8 +3340,10 @@ Autogenerated return type of DestroyComplianceFramework.
 
 Autogenerated return type of DestroyContainerRepository.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `containerRepository` | [`ContainerRepository!`](#containerrepository) | The container repository policy after scheduling the deletion. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2346,8 +3352,10 @@ Autogenerated return type of DestroyContainerRepository.
 
 Autogenerated return type of DestroyContainerRepositoryTags.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `deletedTagNames` | [`[String!]!`](#string) | Deleted container repository tags. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2356,8 +3364,10 @@ Autogenerated return type of DestroyContainerRepositoryTags.
 
 Autogenerated return type of DestroyNote.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
@@ -2366,16 +3376,20 @@ Autogenerated return type of DestroyNote.
 
 Autogenerated return type of DestroySnippet.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `snippet` | [`Snippet`](#snippet) | The snippet after mutation. |
 
 ### `DetailedStatus`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `action` | [`StatusAction`](#statusaction) | Action information for the status. This includes method, button title, icon, path, and title. |
 | `detailsPath` | [`String`](#string) | Path of the details for the status. |
 | `favicon` | [`String`](#string) | Favicon of the status. |
@@ -2390,8 +3404,10 @@ Autogenerated return type of DestroySnippet.
 
 Segment.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `id` | [`ID!`](#id) | ID of the segment. |
 | `latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the segment. |
 | `namespace` | [`Namespace`](#namespace) | Segment namespace. |
@@ -2400,8 +3416,10 @@ Segment.
 
 The connection type for DevopsAdoptionSegment.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DevopsAdoptionSegmentEdge]`](#devopsadoptionsegmentedge) | A list of edges. |
 | `nodes` | [`[DevopsAdoptionSegment]`](#devopsadoptionsegment) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2410,8 +3428,10 @@ The connection type for DevopsAdoptionSegment.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | The item at the end of the edge. |
 
@@ -2419,8 +3439,10 @@ An edge in a connection.
 
 Snapshot.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `deploySucceeded` | [`Boolean!`](#boolean) | At least one deployment succeeded. |
 | `endTime` | [`Time!`](#time) | The end time for the snapshot where the data points were collected. |
 | `issueOpened` | [`Boolean!`](#boolean) | At least one issue was opened. |
@@ -2434,8 +3456,10 @@ Snapshot.
 
 ### `DiffPosition`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `diffRefs` | [`DiffRefs!`](#diffrefs) | Information about the branch, HEAD, and base at the time of commenting. |
 | `filePath` | [`String!`](#string) | Path of the file that was changed. |
 | `height` | [`Int`](#int) | Total height of the image. |
@@ -2450,8 +3474,10 @@ Snapshot.
 
 ### `DiffRefs`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `baseSha` | [`String`](#string) | Merge base of the branch the comment was made on. |
 | `headSha` | [`String!`](#string) | SHA of the HEAD at the time the comment was made. |
 | `startSha` | [`String!`](#string) | SHA of the branch being compared against. |
@@ -2460,8 +3486,10 @@ Snapshot.
 
 Changes to a single file.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `additions` | [`Int!`](#int) | Number of lines added to this file. |
 | `deletions` | [`Int!`](#int) | Number of lines deleted from this file. |
 | `path` | [`String!`](#string) | File path, relative to repository root. |
@@ -2470,8 +3498,10 @@ Changes to a single file.
 
 Aggregated summary of changes.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `additions` | [`Int!`](#int) | Number of lines added. |
 | `changes` | [`Int!`](#int) | Number of lines changed. |
 | `deletions` | [`Int!`](#int) | Number of lines deleted. |
@@ -2479,23 +3509,43 @@ Aggregated summary of changes.
 
 ### `Discussion`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Timestamp of the discussion's creation. |
 | `id` | [`DiscussionID!`](#discussionid) | ID of this discussion. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes in the discussion. |
 | `replyId` | [`DiscussionID!`](#discussionid) | ID used to reply to this discussion. |
 | `resolvable` | [`Boolean!`](#boolean) | Indicates if the object can be resolved. |
 | `resolved` | [`Boolean!`](#boolean) | Indicates if the object is resolved. |
 | `resolvedAt` | [`Time`](#time) | Timestamp of when the object was resolved. |
 | `resolvedBy` | [`User`](#user) | User who resolved the object. |
 
+#### fields with arguments
+
+##### `notes`
+
+All notes in the discussion.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `DiscussionConnection`
 
 The connection type for Discussion.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[DiscussionEdge]`](#discussionedge) | A list of edges. |
 | `nodes` | [`[Discussion]`](#discussion) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2504,8 +3554,10 @@ The connection type for Discussion.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Discussion`](#discussion) | The item at the end of the edge. |
 
@@ -2513,8 +3565,10 @@ An edge in a connection.
 
 Autogenerated return type of DiscussionToggleResolve.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `discussion` | [`Discussion`](#discussion) | The discussion after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2523,8 +3577,10 @@ Autogenerated return type of DiscussionToggleResolve.
 
 Autogenerated return type of DismissVulnerability.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after dismissal. |
@@ -2533,21 +3589,38 @@ Autogenerated return type of DismissVulnerability.
 
 Describes where code is deployed for a project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `id` | [`ID!`](#id) | ID of the environment. |
 | `latestOpenedMostSevereAlert` | [`AlertManagementAlert`](#alertmanagementalert) | The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned. |
-| `metricsDashboard` | [`MetricsDashboard`](#metricsdashboard) | Metrics dashboard schema for the environment. |
 | `name` | [`String!`](#string) | Human-readable name of the environment. |
 | `path` | [`String!`](#string) | The path to the environment. |
 | `state` | [`String!`](#string) | State of the environment, for example: available/stopped. |
+
+#### fields with arguments
+
+##### `metricsDashboard`
+
+Metrics dashboard schema for the environment.
+
+Returns [`MetricsDashboard`](#metricsdashboard)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `path` | [`String!`](#string) | Path to a file which defines metrics dashboard eg: 'config/prometheus/common_metrics.yml'. |
 
 ### `EnvironmentConnection`
 
 The connection type for Environment.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[EnvironmentEdge]`](#environmentedge) | A list of edges. |
 | `nodes` | [`[Environment]`](#environment) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2556,8 +3629,10 @@ The connection type for Environment.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Environment`](#environment) | The item at the end of the edge. |
 
@@ -2565,8 +3640,10 @@ An edge in a connection.
 
 Autogenerated return type of EnvironmentsCanaryIngressUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2574,25 +3651,22 @@ Autogenerated return type of EnvironmentsCanaryIngressUpdate.
 
 Represents an epic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `author` | [`User!`](#user) | Author of the epic. |
-| `awardEmoji` | [`AwardEmojiConnection`](#awardemojiconnection) | A list of award emojis associated with the epic. |
-| `children` | [`EpicConnection`](#epicconnection) | Children (sub-epics) of the epic. |
 | `closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
 | `confidential` | [`Boolean`](#boolean) | Indicates if the epic is confidential. |
 | `createdAt` | [`Time`](#time) | Timestamp of when the epic was created. |
-| `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
 | `descendantCounts` | [`EpicDescendantCount`](#epicdescendantcount) | Number of open and closed descendant epics and issues. |
 | `descendantWeightSum` | [`EpicDescendantWeights`](#epicdescendantweights) | Total weight of open and closed issues in the epic and its descendants. |
 | `description` | [`String`](#string) | Description of the epic. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `downvotes` | [`Int!`](#int) | Number of downvotes the epic has received. |
 | `dueDate` | [`Time`](#time) | Due date of the epic. |
 | `dueDateFixed` | [`Time`](#time) | Fixed due date of the epic. |
 | `dueDateFromMilestones` | [`Time`](#time) | Inherited due date of the epic from milestones. |
 | `dueDateIsFixed` | [`Boolean`](#boolean) | Indicates if the due date has been manually set. |
-| `events` | [`EventConnection`](#eventconnection) | A list of events associated with the object. |
 | `group` | [`Group!`](#group) | Group to which the epic belongs. |
 | `hasChildren` | [`Boolean!`](#boolean) | Indicates if the epic has children. |
 | `hasIssues` | [`Boolean!`](#boolean) | Indicates if the epic has direct issues. |
@@ -2600,12 +3674,7 @@ Represents an epic.
 | `healthStatus` | [`EpicHealthStatus`](#epichealthstatus) | Current health status of the epic. |
 | `id` | [`ID!`](#id) | ID of the epic. |
 | `iid` | [`ID!`](#id) | Internal ID of the epic. |
-| `issues` | [`EpicIssueConnection`](#epicissueconnection) | A list of issues associated with the epic. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels assigned to the epic. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 | `parent` | [`Epic`](#epic) | Parent epic of the epic. |
-| `participants` | [`UserConnection`](#userconnection) | List of participants for the epic. |
-| `reference` | [`String!`](#string) | Internal reference of the epic. Returned in shortened format by default. |
 | `relationPath` | [`String`](#string) | URI path of the epic-issue relationship. |
 | `relativePosition` | [`Int`](#int) | The relative position of the epic in the epic tree. |
 | `startDate` | [`Time`](#time) | Start date of the epic. |
@@ -2623,12 +3692,178 @@ Represents an epic.
 | `webPath` | [`String!`](#string) | Web path of the epic. |
 | `webUrl` | [`String!`](#string) | Web URL of the epic. |
 
+#### fields with arguments
+
+##### `awardEmoji`
+
+A list of award emojis associated with the epic.
+
+Returns [`AwardEmojiConnection`](#awardemojiconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `children`
+
+Children (sub-epics) of the epic.
+
+Returns [`EpicConnection`](#epicconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
+| `iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
+| `state` | [`EpicState`](#epicstate) | Filter epics by state. |
+| `search` | [`String`](#string) | Search query for epic title or description. |
+| `sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
+| `authorUsername` | [`String`](#string) | Filter epics by author. |
+| `labelName` | [`[String!]`](#string) | Filter epics by labels. |
+| `milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
+| `iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
+| `includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
+| `confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `currentUserTodos`
+
+To-do items for the current user.
+
+Returns [`TodoConnection!`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+| `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `events`
+
+A list of events associated with the object.
+
+Returns [`EventConnection`](#eventconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `issues`
+
+A list of issues associated with the epic.
+
+Returns [`EpicIssueConnection`](#epicissueconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `labels`
+
+Labels assigned to the epic.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `participants`
+
+List of participants for the epic.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `reference`
+
+Internal reference of the epic. Returned in shortened format by default.
+
+Returns [`String!`](#string)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `full` | [`Boolean`](#boolean) | Indicates if the reference should be returned in full. |
+
 ### `EpicAddIssuePayload`
 
 Autogenerated return type of EpicAddIssue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epic` | [`Epic`](#epic) | The epic after mutation. |
 | `epicIssue` | [`EpicIssue`](#epicissue) | The epic-issue relation. |
@@ -2638,23 +3873,58 @@ Autogenerated return type of EpicAddIssue.
 
 Represents an epic board.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `hideBacklogList` | [`Boolean`](#boolean) | Whether or not backlog list is hidden. |
 | `hideClosedList` | [`Boolean`](#boolean) | Whether or not closed list is hidden. |
 | `id` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Global ID of the epic board. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels of the board. |
-| `lists` | [`EpicListConnection`](#epiclistconnection) | Epic board lists. |
 | `name` | [`String`](#string) | Name of the epic board. |
 | `webPath` | [`String!`](#string) | Web path of the epic board. |
 | `webUrl` | [`String!`](#string) | Web URL of the epic board. |
+
+#### fields with arguments
+
+##### `labels`
+
+Labels of the board.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `lists`
+
+Epic board lists.
+
+Returns [`EpicListConnection`](#epiclistconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`BoardsEpicListID`](#boardsepiclistid) | Find an epic board list by ID. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `EpicBoardConnection`
 
 The connection type for EpicBoard.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[EpicBoardEdge]`](#epicboardedge) | A list of edges. |
 | `nodes` | [`[EpicBoard]`](#epicboard) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2663,8 +3933,10 @@ The connection type for EpicBoard.
 
 Autogenerated return type of EpicBoardCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epicBoard` | [`EpicBoard`](#epicboard) | The created epic board. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2673,8 +3945,10 @@ Autogenerated return type of EpicBoardCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`EpicBoard`](#epicboard) | The item at the end of the edge. |
 
@@ -2682,8 +3956,10 @@ An edge in a connection.
 
 Autogenerated return type of EpicBoardListCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`EpicList`](#epiclist) | Epic list in the epic board. |
@@ -2692,8 +3968,10 @@ Autogenerated return type of EpicBoardListCreate.
 
 Autogenerated return type of EpicBoardUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epicBoard` | [`EpicBoard`](#epicboard) | The updated epic board. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2702,8 +3980,10 @@ Autogenerated return type of EpicBoardUpdate.
 
 The connection type for Epic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[EpicEdge]`](#epicedge) | A list of edges. |
 | `nodes` | [`[Epic]`](#epic) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2712,8 +3992,10 @@ The connection type for Epic.
 
 Counts of descendent epics.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `closedEpics` | [`Int`](#int) | Number of closed child epics. |
 | `closedIssues` | [`Int`](#int) | Number of closed epic issues. |
 | `openedEpics` | [`Int`](#int) | Number of opened child epics. |
@@ -2723,8 +4005,10 @@ Counts of descendent epics.
 
 Total weight of open and closed descendant issues.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `closedIssues` | [`Int`](#int) | Total weight of completed (closed) issues in this epic, including epic descendants. |
 | `openedIssues` | [`Int`](#int) | Total weight of opened issues in this epic, including epic descendants. |
 
@@ -2732,8 +4016,10 @@ Total weight of open and closed descendant issues.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Epic`](#epic) | The item at the end of the edge. |
 
@@ -2741,8 +4027,10 @@ An edge in a connection.
 
 Health status of child issues.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `issuesAtRisk` | [`Int`](#int) | Number of issues at risk. |
 | `issuesNeedingAttention` | [`Int`](#int) | Number of issues that need attention. |
 | `issuesOnTrack` | [`Int`](#int) | Number of issues on track. |
@@ -2751,24 +4039,22 @@ Health status of child issues.
 
 Relationship between an epic and an issue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `alertManagementAlert` | [`AlertManagementAlert`](#alertmanagementalert) | Alert associated to this issue. |
-| `assignees` | [`UserConnection`](#userconnection) | Assignees of the issue. |
 | `author` | [`User!`](#user) | User that created the issue. |
 | `blocked` | [`Boolean!`](#boolean) | Indicates the issue is blocked. |
 | `blockedByCount` | [`Int`](#int) | Count of issues blocking this issue. |
-| `blockedByIssues` | [`IssueConnection`](#issueconnection) | Issues blocking this issue. |
 | `closedAt` | [`Time`](#time) | Timestamp of when the issue was closed. |
 | `confidential` | [`Boolean!`](#boolean) | Indicates the issue is confidential. |
 | `createNoteEmail` | [`String`](#string) | User specific email address for the issue. |
 | `createdAt` | [`Time!`](#time) | Timestamp of when the issue was created. |
-| `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
 | `description` | [`String`](#string) | Description of the issue. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
 | `designCollection` | [`DesignCollection`](#designcollection) | Collection of design images associated with this issue. |
 | `discussionLocked` | [`Boolean!`](#boolean) | Indicates discussion is locked on the issue. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `downvotes` | [`Int!`](#int) | Number of downvotes the issue has received. |
 | `dueDate` | [`Time`](#time) | Due date of the issue. |
 | `emailsDisabled` | [`Boolean!`](#boolean) | Indicates if a project has email notifications disabled: `true` if email notifications are disabled. |
@@ -2780,14 +4066,10 @@ Relationship between an epic and an issue.
 | `id` | [`ID`](#id) | Global ID of the epic-issue relation. |
 | `iid` | [`ID!`](#id) | Internal ID of the issue. |
 | `iteration` | [`Iteration`](#iteration) | Iteration of the issue. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels of the issue. |
 | `metricImages` | [`[MetricImage!]`](#metricimage) | Metric images associated to the issue. |
 | `milestone` | [`Milestone`](#milestone) | Milestone of the issue. |
 | `moved` | [`Boolean`](#boolean) | Indicates if issue got moved from other project. |
 | `movedTo` | [`Issue`](#issue) | Updated Issue after it got moved to another project. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
-| `participants` | [`UserConnection`](#userconnection) | List of participants in the issue. |
-| `reference` | [`String!`](#string) | Internal reference of the issue. Returned in shortened format by default. |
 | `relationPath` | [`String`](#string) | URI path of the epic-issue relation. |
 | `relativePosition` | [`Int`](#int) | Relative position of the issue (used for positioning in epic tree and issue boards). |
 | `severity` | [`IssuableSeverity`](#issuableseverity) | Severity level of the incident. |
@@ -2811,12 +4093,134 @@ Relationship between an epic and an issue.
 | `webUrl` | [`String!`](#string) | Web URL of the issue. |
 | `weight` | [`Int`](#int) | Weight of the issue. |
 
+#### fields with arguments
+
+##### `assignees`
+
+Assignees of the issue.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `blockedByIssues`
+
+Issues blocking this issue.
+
+Returns [`IssueConnection`](#issueconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `currentUserTodos`
+
+To-do items for the current user.
+
+Returns [`TodoConnection!`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+| `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `labels`
+
+Labels of the issue.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `participants`
+
+List of participants in the issue.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `reference`
+
+Internal reference of the issue. Returned in shortened format by default.
+
+Returns [`String!`](#string)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `full` | [`Boolean`](#boolean) | Boolean option specifying whether the reference should be returned in full. |
+
 ### `EpicIssueConnection`
 
 The connection type for EpicIssue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[EpicIssueEdge]`](#epicissueedge) | A list of edges. |
 | `nodes` | [`[EpicIssue]`](#epicissue) | A list of nodes. |
@@ -2827,8 +4231,10 @@ The connection type for EpicIssue.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`EpicIssue`](#epicissue) | The item at the end of the edge. |
 
@@ -2836,10 +4242,11 @@ An edge in a connection.
 
 Represents an epic board list.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `collapsed` | [`Boolean`](#boolean) | Indicates if this list is collapsed for this user. |
-| `epics` | [`EpicConnection`](#epicconnection) | List epics. |
 | `epicsCount` | [`Int`](#int) | Count of epics in the list. |
 | `id` | [`BoardsEpicListID!`](#boardsepiclistid) | Global ID of the board list. |
 | `label` | [`Label`](#label) | Label of the list. |
@@ -2847,12 +4254,31 @@ Represents an epic board list.
 | `position` | [`Int`](#int) | Position of the list within the board. |
 | `title` | [`String!`](#string) | Title of the list. |
 
+#### fields with arguments
+
+##### `epics`
+
+List epics.
+
+Returns [`EpicConnection`](#epicconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `EpicListConnection`
 
 The connection type for EpicList.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[EpicListEdge]`](#epiclistedge) | A list of edges. |
 | `nodes` | [`[EpicList]`](#epiclist) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2861,8 +4287,10 @@ The connection type for EpicList.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`EpicList`](#epiclist) | The item at the end of the edge. |
 
@@ -2870,8 +4298,10 @@ An edge in a connection.
 
 Check permissions for the current user on an epic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminEpic` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_epic` on this resource |
 | `awardEmoji` | [`Boolean!`](#boolean) | Indicates the user can perform `award_emoji` on this resource |
 | `createEpic` | [`Boolean!`](#boolean) | Indicates the user can perform `create_epic` on this resource |
@@ -2885,8 +4315,10 @@ Check permissions for the current user on an epic.
 
 Autogenerated return type of EpicSetSubscription.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epic` | [`Epic`](#epic) | The epic after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -2895,8 +4327,10 @@ Autogenerated return type of EpicSetSubscription.
 
 Autogenerated return type of EpicTreeReorder.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2904,8 +4338,10 @@ Autogenerated return type of EpicTreeReorder.
 
 Representing an event.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `action` | [`EventAction!`](#eventaction) | Action of the event. |
 | `author` | [`User!`](#user) | Author of this event. |
 | `createdAt` | [`Time!`](#time) | When this event was created. |
@@ -2916,8 +4352,10 @@ Representing an event.
 
 The connection type for Event.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[EventEdge]`](#eventedge) | A list of edges. |
 | `nodes` | [`[Event]`](#event) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -2926,8 +4364,10 @@ The connection type for Event.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Event`](#event) | The item at the end of the edge. |
 
@@ -2935,8 +4375,10 @@ An edge in a connection.
 
 Autogenerated return type of ExportRequirements.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -2944,8 +4386,10 @@ Autogenerated return type of ExportRequirements.
 
 Represents an external issue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp of when the issue was created. |
 | `externalTracker` | [`String`](#string) | Type of external tracker. |
 | `relativeReference` | [`String`](#string) | Relative reference of the issue in the external tracker. |
@@ -2956,41 +4400,123 @@ Represents an external issue.
 
 ### `GeoNode`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `containerRepositoriesMaxCapacity` | [`Int`](#int) | The maximum concurrency of container repository sync for this secondary node. |
 | `enabled` | [`Boolean`](#boolean) | Indicates whether this Geo node is enabled. |
 | `filesMaxCapacity` | [`Int`](#int) | The maximum concurrency of LFS/attachment backfill for this secondary node. |
 | `id` | [`ID!`](#id) | ID of this GeoNode. |
 | `internalUrl` | [`String`](#string) | The URL defined on the primary node that secondary nodes should use to contact it. |
-| `mergeRequestDiffRegistries` | [`MergeRequestDiffRegistryConnection`](#mergerequestdiffregistryconnection) | Find merge request diff registries on this Geo node. |
 | `minimumReverificationInterval` | [`Int`](#int) | The interval (in days) in which the repository verification is valid. Once expired, it will be reverified. |
 | `name` | [`String`](#string) | The unique identifier for this Geo node. |
-| `packageFileRegistries` | [`PackageFileRegistryConnection`](#packagefileregistryconnection) | Package file registries of the GeoNode. |
 | `primary` | [`Boolean`](#boolean) | Indicates whether this Geo node is the primary. |
 | `reposMaxCapacity` | [`Int`](#int) | The maximum concurrency of repository backfill for this secondary node. |
-| `selectiveSyncNamespaces` | [`NamespaceConnection`](#namespaceconnection) | The namespaces that should be synced, if `selective_sync_type` == `namespaces`. |
 | `selectiveSyncShards` | [`[String!]`](#string) | The repository storages whose projects should be synced, if `selective_sync_type` == `shards`. |
 | `selectiveSyncType` | [`String`](#string) | Indicates if syncing is limited to only specific groups, or shards. |
-| `snippetRepositoryRegistries` | [`SnippetRepositoryRegistryConnection`](#snippetrepositoryregistryconnection) | Find snippet repository registries on this Geo node. |
 | `syncObjectStorage` | [`Boolean`](#boolean) | Indicates if this secondary node will replicate blobs in Object Storage. |
-| `terraformStateVersionRegistries` | [`TerraformStateVersionRegistryConnection`](#terraformstateversionregistryconnection) | Find terraform state version registries on this Geo node. |
 | `url` | [`String`](#string) | The user-facing URL for this Geo node. |
 | `verificationMaxCapacity` | [`Int`](#int) | The maximum concurrency of repository verification for this secondary node. |
+
+#### fields with arguments
+
+##### `mergeRequestDiffRegistries`
+
+Find merge request diff registries on this Geo node.
+
+Returns [`MergeRequestDiffRegistryConnection`](#mergerequestdiffregistryconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[ID!]`](#id) | Filters registries by their ID. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `packageFileRegistries`
+
+Package file registries of the GeoNode.
+
+Returns [`PackageFileRegistryConnection`](#packagefileregistryconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[ID!]`](#id) | Filters registries by their ID. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `selectiveSyncNamespaces`
+
+The namespaces that should be synced, if `selective_sync_type` == `namespaces`.
+
+Returns [`NamespaceConnection`](#namespaceconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `snippetRepositoryRegistries`
+
+Find snippet repository registries on this Geo node.
+
+Returns [`SnippetRepositoryRegistryConnection`](#snippetrepositoryregistryconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[ID!]`](#id) | Filters registries by their ID. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `terraformStateVersionRegistries`
+
+Find terraform state version registries on this Geo node.
+
+Returns [`TerraformStateVersionRegistryConnection`](#terraformstateversionregistryconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[ID!]`](#id) | Filters registries by their ID. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `GitlabSubscriptionActivatePayload`
 
 Autogenerated return type of GitlabSubscriptionActivate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `GrafanaIntegration`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Timestamp of the issue's creation. |
 | `enabled` | [`Boolean!`](#boolean) | Indicates whether Grafana integration is enabled. |
 | `grafanaUrl` | [`String!`](#string) | URL for the Grafana host for the Grafana integration. |
@@ -2999,49 +4525,32 @@ Autogenerated return type of GitlabSubscriptionActivate.
 
 ### `Group`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `actualRepositorySizeLimit` | [`Float`](#float) | Size limit for repositories in the namespace in bytes. |
 | `additionalPurchasedStorageSize` | [`Float`](#float) | Additional storage purchased for the root namespace in bytes. |
 | `autoDevopsEnabled` | [`Boolean`](#boolean) | Indicates whether Auto DevOps is enabled for all projects within this group. |
 | `avatarUrl` | [`String`](#string) | Avatar URL of the group. |
-| `board` | [`Board`](#board) | A single board of the group. |
-| `boards` | [`BoardConnection`](#boardconnection) | Boards of the group. |
-| `codeCoverageActivities` | [`CodeCoverageActivityConnection`](#codecoverageactivityconnection) | Represents the code coverage activity for this group. |
-| `complianceFrameworks` | [`ComplianceFrameworkConnection`](#complianceframeworkconnection) | Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled. |
-| `containerRepositories` | [`ContainerRepositoryConnection`](#containerrepositoryconnection) | Container repositories of the group. |
 | `containerRepositoriesCount` | [`Int!`](#int) | Number of container repositories in the group. |
 | `containsLockedProjects` | [`Boolean!`](#boolean) | Includes at least one project where the repository size exceeds the limit. |
-| `customEmoji` | [`CustomEmojiConnection`](#customemojiconnection) | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled. |
 | `description` | [`String`](#string) | Description of the namespace. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
 | `emailsDisabled` | [`Boolean`](#boolean) | Indicates if a group has email notifications disabled. |
-| `epic` | [`Epic`](#epic) | Find a single epic. |
-| `epicBoard` | [`EpicBoard`](#epicboard) | Find a single epic board. |
-| `epicBoards` | [`EpicBoardConnection`](#epicboardconnection) | Find epic boards. |
-| `epics` | [`EpicConnection`](#epicconnection) | Find epics. |
 | `epicsEnabled` | [`Boolean`](#boolean) | Indicates if Epics are enabled for namespace |
 | `fullName` | [`String!`](#string) | Full name of the namespace. |
 | `fullPath` | [`ID!`](#id) | Full path of the namespace. |
-| `groupMembers` | [`GroupMemberConnection`](#groupmemberconnection) | A membership of a user within this group. |
 | `groupTimelogsEnabled` | [`Boolean`](#boolean) | Indicates if Group timelogs are enabled for namespace |
 | `id` | [`ID!`](#id) | ID of the namespace. |
 | `isTemporaryStorageIncreaseEnabled` | [`Boolean!`](#boolean) | Status of the temporary storage increase. |
-| `issues` | [`IssueConnection`](#issueconnection) | Issues for projects in this group. |
-| `iterations` | [`IterationConnection`](#iterationconnection) | Find iterations. |
-| `label` | [`Label`](#label) | A label available on this group. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels available on this group. |
 | `lfsEnabled` | [`Boolean`](#boolean) | Indicates if Large File Storage (LFS) is enabled for namespace. |
 | `mentionsDisabled` | [`Boolean`](#boolean) | Indicates if a group is disabled from getting mentioned. |
-| `mergeRequests` | [`MergeRequestConnection`](#mergerequestconnection) | Merge requests for projects in this group. |
-| `milestones` | [`MilestoneConnection`](#milestoneconnection) | Milestones of the group. |
 | `name` | [`String!`](#string) | Name of the namespace. |
 | `packageSettings` | [`PackageSettings`](#packagesettings) | The package settings for the namespace. |
-| `packages` | [`PackageConnection`](#packageconnection) | Packages of the group. |
 | `parent` | [`Group`](#group) | Parent group. |
 | `path` | [`String!`](#string) | Path of the namespace. |
 | `projectCreationLevel` | [`String`](#string) | The permission level required to create projects in the group. |
-| `projects` | [`ProjectConnection!`](#projectconnection) | Projects within this namespace. |
 | `repositorySizeExcessProjectCount` | [`Int!`](#int) | Number of projects in the root namespace where the repository size exceeds the limit. |
 | `requestAccessEnabled` | [`Boolean`](#boolean) | Indicates if users can request access to namespace. |
 | `requireTwoFactorAuthentication` | [`Boolean`](#boolean) | Indicates if all users in this group are required to set up two-factor authentication. |
@@ -3051,26 +4560,509 @@ Autogenerated return type of GitlabSubscriptionActivate.
 | `storageSizeLimit` | [`Float`](#float) | Total storage limit of the root namespace in bytes. |
 | `subgroupCreationLevel` | [`String`](#string) | The permission level required to create subgroups within the group. |
 | `temporaryStorageIncreaseEndsOn` | [`Time`](#time) | Date until the temporary storage increase is active. |
-| `timelogs` | [`TimelogConnection!`](#timelogconnection) | Time logged in issues by group members. |
 | `totalRepositorySize` | [`Float`](#float) | Total repository size of all projects in the root namespace in bytes. |
 | `totalRepositorySizeExcess` | [`Float`](#float) | Total excess repository size of all projects in the root namespace in bytes. |
 | `twoFactorGracePeriod` | [`Int`](#int) | Time before two-factor authentication is enforced. |
 | `userPermissions` | [`GroupPermissions!`](#grouppermissions) | Permissions for the current user on the resource |
 | `visibility` | [`String`](#string) | Visibility of the namespace. |
-| `vulnerabilities` | [`VulnerabilityConnection`](#vulnerabilityconnection) | Vulnerabilities reported on the projects in the group and its subgroups. |
-| `vulnerabilitiesCountByDay` | [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnection) | Number of vulnerabilities per day for the projects in the group and its subgroups. |
-| `vulnerabilitiesCountByDayAndSeverity` **{warning-solid}** | [`VulnerabilitiesCountByDayAndSeverityConnection`](#vulnerabilitiescountbydayandseverityconnection) | **Deprecated:** Use `vulnerabilitiesCountByDay`. Deprecated in 13.3. |
-| `vulnerabilityGrades` | [`[VulnerableProjectsByGrade!]!`](#vulnerableprojectsbygrade) | Represents vulnerable project counts for each grade. |
-| `vulnerabilityScanners` | [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection) | Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups. |
-| `vulnerabilitySeveritiesCount` | [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount) | Counts for each vulnerability severity in the group and its subgroups. |
 | `webUrl` | [`String!`](#string) | Web URL of the group. |
+
+#### fields with arguments
+
+##### `board`
+
+A single board of the group.
+
+Returns [`Board`](#board)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`BoardID!`](#boardid) | The board's ID. |
+
+##### `boards`
+
+Boards of the group.
+
+Returns [`BoardConnection`](#boardconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`BoardID`](#boardid) | Find a board by its ID. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `codeCoverageActivities`
+
+Represents the code coverage activity for this group.
+
+Returns [`CodeCoverageActivityConnection`](#codecoverageactivityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Date!`](#date) | First day for which to fetch code coverage activity (maximum time window is set to 90 days). |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `complianceFrameworks`
+
+Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled.
+
+Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`ComplianceManagementFrameworkID`](#compliancemanagementframeworkid) | Global ID of a specific compliance framework to return. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `containerRepositories`
+
+Container repositories of the group.
+
+Returns [`ContainerRepositoryConnection`](#containerrepositoryconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `name` | [`String`](#string) | Filter the container repositories by their name. |
+| `sort` | [`ContainerRepositorySort`](#containerrepositorysort) | Sort container repositories by this criteria. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `customEmoji`
+
+Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled.
+
+Returns [`CustomEmojiConnection`](#customemojiconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `epic`
+
+Find a single epic.
+
+Returns [`Epic`](#epic)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
+| `iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
+| `state` | [`EpicState`](#epicstate) | Filter epics by state. |
+| `search` | [`String`](#string) | Search query for epic title or description. |
+| `sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
+| `authorUsername` | [`String`](#string) | Filter epics by author. |
+| `labelName` | [`[String!]`](#string) | Filter epics by labels. |
+| `milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
+| `iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
+| `includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
+| `confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
+
+##### `epicBoard`
+
+Find a single epic board.
+
+Returns [`EpicBoard`](#epicboard)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Find an epic board by ID. |
+
+##### `epicBoards`
+
+Find epic boards.
+
+Returns [`EpicBoardConnection`](#epicboardconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `epics`
+
+Find epics.
+
+Returns [`EpicConnection`](#epicconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
+| `iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
+| `state` | [`EpicState`](#epicstate) | Filter epics by state. |
+| `search` | [`String`](#string) | Search query for epic title or description. |
+| `sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
+| `authorUsername` | [`String`](#string) | Filter epics by author. |
+| `labelName` | [`[String!]`](#string) | Filter epics by labels. |
+| `milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
+| `iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
+| `includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
+| `confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `groupMembers`
+
+A membership of a user within this group.
+
+Returns [`GroupMemberConnection`](#groupmemberconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `search` | [`String`](#string) | Search query. |
+| `relations` | [`[GroupMemberRelation!]`](#groupmemberrelation) | Filter members by the given member relations. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `issues`
+
+Issues for projects in this group.
+
+Returns [`IssueConnection`](#issueconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| `iids` | [`[String!]`](#string) | List of IIDs of issues. For example, [1, 2]. |
+| `labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| `milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| `authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
+| `assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| `assigneeId` | [`String`](#string) | ID of a user assigned to the issues, "none" and "any" values are supported. |
+| `createdBefore` | [`Time`](#time) | Issues created before this date. |
+| `createdAfter` | [`Time`](#time) | Issues created after this date. |
+| `updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| `updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| `closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| `closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| `search` | [`String`](#string) | Search query for issue title or description. |
+| `types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| `state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| `sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| `iterationId` | [`[ID]`](#id) | Iterations applied to the issue. |
+| `epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| `includeSubgroups` | [`Boolean`](#boolean) | Include issues belonging to subgroups |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `iterations`
+
+Find iterations.
+
+Returns [`IterationConnection`](#iterationconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `state` | [`IterationState`](#iterationstate) | Filter iterations by state. |
+| `title` | [`String`](#string) | Fuzzy search by title. |
+| `id` | [`ID`](#id) | Global ID of the Iteration to look up. |
+| `iid` | [`ID`](#id) | Internal ID of the Iteration to look up. |
+| `includeAncestors` | [`Boolean`](#boolean) | Whether to include ancestor iterations. Defaults to true. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `label`
+
+A label available on this group.
+
+Returns [`Label`](#label)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `title` | [`String!`](#string) | Title of the label. |
+
+##### `labels`
+
+Labels available on this group.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `searchTerm` | [`String`](#string) | A search term to find labels with. |
+| `includeAncestorGroups` | [`Boolean`](#boolean) | Include labels from ancestor groups. |
+| `includeDescendantGroups` | [`Boolean`](#boolean) | Include labels from descendant groups. |
+| `onlyGroupLabels` | [`Boolean`](#boolean) | Include only group level labels. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `mergeRequests`
+
+Merge requests for projects in this group.
+
+Returns [`MergeRequestConnection`](#mergerequestconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
+| `sourceBranches` | [`[String!]`](#string) | Array of source branch names. All resolved merge requests will have one of these branches as their source. |
+| `targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
+| `state` | [`MergeRequestState`](#mergerequeststate) | A merge request state. If provided, all resolved merge requests will have this state. |
+| `labels` | [`[String!]`](#string) | Array of label names. All resolved merge requests will have all of these labels. |
+| `mergedAfter` | [`Time`](#time) | Merge requests merged after this date. |
+| `mergedBefore` | [`Time`](#time) | Merge requests merged before this date. |
+| `milestoneTitle` | [`String`](#string) | Title of the milestone. |
+| `sort` | [`MergeRequestSort`](#mergerequestsort) | Sort merge requests by this criteria. |
+| `includeSubgroups` | [`Boolean`](#boolean) | Include merge requests belonging to subgroups |
+| `assigneeUsername` | [`String`](#string) | Username of the assignee. |
+| `authorUsername` | [`String`](#string) | Username of the author. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `milestones`
+
+Milestones of the group.
+
+Returns [`MilestoneConnection`](#milestoneconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1". |
+| `state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
+| `title` | [`String`](#string) | The title of the milestone. |
+| `searchTitle` | [`String`](#string) | A search string for the title. |
+| `containingDate` | [`Time`](#time) | A date that the milestone contains. |
+| `includeDescendants` | [`Boolean`](#boolean) | Also return milestones in all subgroups and subprojects. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `packages`
+
+Packages of the group.
+
+Returns [`PackageConnection`](#packageconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `projects`
+
+Projects within this namespace.
+
+Returns [`ProjectConnection!`](#projectconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `includeSubgroups` | [`Boolean`](#boolean) | Include also subgroup projects. |
+| `search` | [`String`](#string) | Search project with most similar names or paths. |
+| `sort` | [`NamespaceProjectSort`](#namespaceprojectsort) | Sort projects by this criteria. |
+| `ids` | [`[ID!]`](#id) | Filter projects by IDs. |
+| `hasCodeCoverage` | [`Boolean`](#boolean) | Returns only the projects which have code coverage. |
+| `hasVulnerabilities` | [`Boolean`](#boolean) | Returns only the projects which have vulnerabilities. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `timelogs`
+
+Time logged in issues by group members.
+
+Returns [`TimelogConnection!`](#timelogconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List time logs within a date range where the logged date is equal to or after startDate. |
+| `endDate` | [`Time`](#time) | List time logs within a date range where the logged date is equal to or before endDate. |
+| `startTime` | [`Time`](#time) | List time-logs within a time range where the logged time is equal to or after startTime. |
+| `endTime` | [`Time`](#time) | List time-logs within a time range where the logged time is equal to or before endTime. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilities`
+
+Vulnerabilities reported on the projects in the group and its subgroups.
+
+Returns [`VulnerabilityConnection`](#vulnerabilityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
+| `reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
+| `severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
+| `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
+| `scanner` | [`[String!]`](#string) | Filter vulnerabilities by VulnerabilityScanner.externalId. |
+| `sort` | [`VulnerabilitySort`](#vulnerabilitysort) | List vulnerabilities by sort order. |
+| `hasResolution` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have been resolved on default branch. |
+| `hasIssues` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have linked issues. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilitiesCountByDay`
+
+Number of vulnerabilities per day for the projects in the group and its subgroups.
+
+Returns [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
+| `endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilitiesCountByDayAndSeverity`
+
+Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
+
+Returns [`VulnerabilitiesCountByDayAndSeverityConnection`](#vulnerabilitiescountbydayandseverityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
+| `endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilityGrades`
+
+Represents vulnerable project counts for each grade.
+
+Returns [`[VulnerableProjectsByGrade!]!`](#vulnerableprojectsbygrade)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `includeSubgroups` | [`Boolean`](#boolean) | Include grades belonging to subgroups. |
+
+##### `vulnerabilityScanners`
+
+Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups.
+
+Returns [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilitySeveritiesCount`
+
+Counts for each vulnerability severity in the group and its subgroups.
+
+Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
+| `reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
+| `severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
+| `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
+| `scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
 
 ### `GroupMember`
 
 Represents a Group Membership.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `accessLevel` | [`AccessLevel`](#accesslevel) | GitLab::Access level. |
 | `createdAt` | [`Time`](#time) | Date and time the membership was created. |
 | `createdBy` | [`User`](#user) | User that authorized membership. |
@@ -3085,8 +5077,10 @@ Represents a Group Membership.
 
 The connection type for GroupMember.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[GroupMemberEdge]`](#groupmemberedge) | A list of edges. |
 | `nodes` | [`[GroupMember]`](#groupmember) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3095,23 +5089,29 @@ The connection type for GroupMember.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`GroupMember`](#groupmember) | The item at the end of the edge. |
 
 ### `GroupPermissions`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `readGroup` | [`Boolean!`](#boolean) | Indicates the user can perform `read_group` on this resource |
 
 ### `GroupReleaseStats`
 
 Contains release-related statistics about a group.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `releasesCount` | [`Int`](#int) | Total number of releases in all descendant projects of the group. Will always return `null` if `group_level_release_statistics` feature flag is disabled |
 | `releasesPercentage` | [`Int`](#int) | Percentage of the group's descendant projects that have at least one release. Will always return `null` if `group_level_release_statistics` feature flag is disabled |
 
@@ -3119,16 +5119,20 @@ Contains release-related statistics about a group.
 
 Contains statistics about a group.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `releaseStats` | [`GroupReleaseStats`](#groupreleasestats) | Statistics related to releases within the group. |
 
 ### `HttpIntegrationCreatePayload`
 
 Autogenerated return type of HttpIntegrationCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
@@ -3137,8 +5141,10 @@ Autogenerated return type of HttpIntegrationCreate.
 
 Autogenerated return type of HttpIntegrationDestroy.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
@@ -3147,8 +5153,10 @@ Autogenerated return type of HttpIntegrationDestroy.
 
 Autogenerated return type of HttpIntegrationResetToken.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
@@ -3157,8 +5165,10 @@ Autogenerated return type of HttpIntegrationResetToken.
 
 Autogenerated return type of HttpIntegrationUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
@@ -3167,24 +5177,60 @@ Autogenerated return type of HttpIntegrationUpdate.
 
 Describes an incident management on-call rotation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `activePeriod` | [`OncallRotationActivePeriodType`](#oncallrotationactiveperiodtype) | Active period for the on-call rotation. |
 | `endsAt` | [`Time`](#time) | End date and time of the on-call rotation. |
 | `id` | [`IncidentManagementOncallRotationID!`](#incidentmanagementoncallrotationid) | ID of the on-call rotation. |
 | `length` | [`Int`](#int) | Length of the on-call schedule, in the units specified by lengthUnit. |
 | `lengthUnit` | [`OncallRotationUnitEnum`](#oncallrotationunitenum) | Unit of the on-call rotation length. |
 | `name` | [`String!`](#string) | Name of the on-call rotation. |
-| `participants` | [`OncallParticipantTypeConnection`](#oncallparticipanttypeconnection) | Participants of the on-call rotation. |
-| `shifts` | [`IncidentManagementOncallShiftConnection`](#incidentmanagementoncallshiftconnection) | Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month. |
 | `startsAt` | [`Time`](#time) | Start date of the on-call rotation. |
+
+#### fields with arguments
+
+##### `participants`
+
+Participants of the on-call rotation.
+
+Returns [`OncallParticipantTypeConnection`](#oncallparticipanttypeconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `shifts`
+
+Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.
+
+Returns [`IncidentManagementOncallShiftConnection`](#incidentmanagementoncallshiftconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startTime` | [`Time!`](#time) | Start of timeframe to include shifts for. |
+| `endTime` | [`Time!`](#time) | End of timeframe to include shifts for. Cannot exceed one month after start. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `IncidentManagementOncallRotationConnection`
 
 The connection type for IncidentManagementOncallRotation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[IncidentManagementOncallRotationEdge]`](#incidentmanagementoncallrotationedge) | A list of edges. |
 | `nodes` | [`[IncidentManagementOncallRotation]`](#incidentmanagementoncallrotation) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3193,8 +5239,10 @@ The connection type for IncidentManagementOncallRotation.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`IncidentManagementOncallRotation`](#incidentmanagementoncallrotation) | The item at the end of the edge. |
 
@@ -3202,20 +5250,40 @@ An edge in a connection.
 
 Describes an incident management on-call schedule.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the on-call schedule. |
 | `iid` | [`ID!`](#id) | Internal ID of the on-call schedule. |
 | `name` | [`String!`](#string) | Name of the on-call schedule. |
-| `rotations` | [`IncidentManagementOncallRotationConnection!`](#incidentmanagementoncallrotationconnection) | On-call rotations for the on-call schedule. |
 | `timezone` | [`String!`](#string) | Time zone of the on-call schedule. |
+
+#### fields with arguments
+
+##### `rotations`
+
+On-call rotations for the on-call schedule.
+
+Returns [`IncidentManagementOncallRotationConnection!`](#incidentmanagementoncallrotationconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `IncidentManagementOncallScheduleConnection`
 
 The connection type for IncidentManagementOncallSchedule.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[IncidentManagementOncallScheduleEdge]`](#incidentmanagementoncallscheduleedge) | A list of edges. |
 | `nodes` | [`[IncidentManagementOncallSchedule]`](#incidentmanagementoncallschedule) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3224,8 +5292,10 @@ The connection type for IncidentManagementOncallSchedule.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The item at the end of the edge. |
 
@@ -3233,8 +5303,10 @@ An edge in a connection.
 
 A block of time for which a participant is on-call.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `endsAt` | [`Time`](#time) | End time of the on-call shift. |
 | `participant` | [`OncallParticipantType`](#oncallparticipanttype) | Participant assigned to the on-call shift. |
 | `startsAt` | [`Time`](#time) | Start time of the on-call shift. |
@@ -3243,8 +5315,10 @@ A block of time for which a participant is on-call.
 
 The connection type for IncidentManagementOncallShift.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[IncidentManagementOncallShiftEdge]`](#incidentmanagementoncallshiftedge) | A list of edges. |
 | `nodes` | [`[IncidentManagementOncallShift]`](#incidentmanagementoncallshift) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3253,40 +5327,87 @@ The connection type for IncidentManagementOncallShift.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`IncidentManagementOncallShift`](#incidentmanagementoncallshift) | The item at the end of the edge. |
 
 ### `InstanceSecurityDashboard`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `projects` | [`ProjectConnection!`](#projectconnection) | Projects selected in Instance Security Dashboard. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `vulnerabilityGrades` | [`[VulnerableProjectsByGrade!]!`](#vulnerableprojectsbygrade) | Represents vulnerable project counts for each grade. |
-| `vulnerabilityScanners` | [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection) | Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard. |
-| `vulnerabilitySeveritiesCount` | [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount) | Counts for each vulnerability severity from projects selected in Instance Security Dashboard. |
+
+#### fields with arguments
+
+##### `projects`
+
+Projects selected in Instance Security Dashboard.
+
+Returns [`ProjectConnection!`](#projectconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilityScanners`
+
+Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard.
+
+Returns [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilitySeveritiesCount`
+
+Counts for each vulnerability severity from projects selected in Instance Security Dashboard.
+
+Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
+| `reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
+| `severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
+| `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
+| `scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
 
 ### `Issue`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `alertManagementAlert` | [`AlertManagementAlert`](#alertmanagementalert) | Alert associated to this issue. |
-| `assignees` | [`UserConnection`](#userconnection) | Assignees of the issue. |
 | `author` | [`User!`](#user) | User that created the issue. |
 | `blocked` | [`Boolean!`](#boolean) | Indicates the issue is blocked. |
 | `blockedByCount` | [`Int`](#int) | Count of issues blocking this issue. |
-| `blockedByIssues` | [`IssueConnection`](#issueconnection) | Issues blocking this issue. |
 | `closedAt` | [`Time`](#time) | Timestamp of when the issue was closed. |
 | `confidential` | [`Boolean!`](#boolean) | Indicates the issue is confidential. |
 | `createNoteEmail` | [`String`](#string) | User specific email address for the issue. |
 | `createdAt` | [`Time!`](#time) | Timestamp of when the issue was created. |
-| `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
 | `description` | [`String`](#string) | Description of the issue. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
 | `designCollection` | [`DesignCollection`](#designcollection) | Collection of design images associated with this issue. |
 | `discussionLocked` | [`Boolean!`](#boolean) | Indicates discussion is locked on the issue. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `downvotes` | [`Int!`](#int) | Number of downvotes the issue has received. |
 | `dueDate` | [`Time`](#time) | Due date of the issue. |
 | `emailsDisabled` | [`Boolean!`](#boolean) | Indicates if a project has email notifications disabled: `true` if email notifications are disabled. |
@@ -3297,14 +5418,10 @@ An edge in a connection.
 | `id` | [`ID!`](#id) | ID of the issue. |
 | `iid` | [`ID!`](#id) | Internal ID of the issue. |
 | `iteration` | [`Iteration`](#iteration) | Iteration of the issue. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels of the issue. |
 | `metricImages` | [`[MetricImage!]`](#metricimage) | Metric images associated to the issue. |
 | `milestone` | [`Milestone`](#milestone) | Milestone of the issue. |
 | `moved` | [`Boolean`](#boolean) | Indicates if issue got moved from other project. |
 | `movedTo` | [`Issue`](#issue) | Updated Issue after it got moved to another project. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
-| `participants` | [`UserConnection`](#userconnection) | List of participants in the issue. |
-| `reference` | [`String!`](#string) | Internal reference of the issue. Returned in shortened format by default. |
 | `relativePosition` | [`Int`](#int) | Relative position of the issue (used for positioning in epic tree and issue boards). |
 | `severity` | [`IssuableSeverity`](#issuableseverity) | Severity level of the incident. |
 | `slaDueAt` | [`Time`](#time) | Timestamp of when the issue SLA expires. |
@@ -3327,12 +5444,134 @@ An edge in a connection.
 | `webUrl` | [`String!`](#string) | Web URL of the issue. |
 | `weight` | [`Int`](#int) | Weight of the issue. |
 
+#### fields with arguments
+
+##### `assignees`
+
+Assignees of the issue.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `blockedByIssues`
+
+Issues blocking this issue.
+
+Returns [`IssueConnection`](#issueconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `currentUserTodos`
+
+To-do items for the current user.
+
+Returns [`TodoConnection!`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+| `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `labels`
+
+Labels of the issue.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `participants`
+
+List of participants in the issue.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `reference`
+
+Internal reference of the issue. Returned in shortened format by default.
+
+Returns [`String!`](#string)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `full` | [`Boolean`](#boolean) | Boolean option specifying whether the reference should be returned in full. |
+
 ### `IssueConnection`
 
 The connection type for Issue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[IssueEdge]`](#issueedge) | A list of edges. |
 | `nodes` | [`[Issue]`](#issue) | A list of nodes. |
@@ -3343,8 +5582,10 @@ The connection type for Issue.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Issue`](#issue) | The item at the end of the edge. |
 
@@ -3352,8 +5593,10 @@ An edge in a connection.
 
 Autogenerated return type of IssueMoveList.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3362,8 +5605,10 @@ Autogenerated return type of IssueMoveList.
 
 Autogenerated return type of IssueMove.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3372,8 +5617,10 @@ Autogenerated return type of IssueMove.
 
 Check permissions for the current user on a issue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminIssue` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_issue` on this resource |
 | `createDesign` | [`Boolean!`](#boolean) | Indicates the user can perform `create_design` on this resource |
 | `createNote` | [`Boolean!`](#boolean) | Indicates the user can perform `create_note` on this resource |
@@ -3387,8 +5634,10 @@ Check permissions for the current user on a issue.
 
 Autogenerated return type of IssueSetAssignees.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3397,8 +5646,10 @@ Autogenerated return type of IssueSetAssignees.
 
 Autogenerated return type of IssueSetConfidential.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3407,8 +5658,10 @@ Autogenerated return type of IssueSetConfidential.
 
 Autogenerated return type of IssueSetDueDate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3417,8 +5670,10 @@ Autogenerated return type of IssueSetDueDate.
 
 Autogenerated return type of IssueSetEpic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3427,8 +5682,10 @@ Autogenerated return type of IssueSetEpic.
 
 Autogenerated return type of IssueSetIteration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3437,8 +5694,10 @@ Autogenerated return type of IssueSetIteration.
 
 Autogenerated return type of IssueSetLocked.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3447,8 +5706,10 @@ Autogenerated return type of IssueSetLocked.
 
 Autogenerated return type of IssueSetSeverity.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3457,8 +5718,10 @@ Autogenerated return type of IssueSetSeverity.
 
 Autogenerated return type of IssueSetSubscription.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3467,8 +5730,10 @@ Autogenerated return type of IssueSetSubscription.
 
 Autogenerated return type of IssueSetWeight.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -3477,8 +5742,10 @@ Autogenerated return type of IssueSetWeight.
 
 Represents total number of issues for the represented statuses.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `all` | [`Int`](#int) | Number of issues with status ALL for the project |
 | `closed` | [`Int`](#int) | Number of issues with status CLOSED for the project |
 | `opened` | [`Int`](#int) | Number of issues with status OPENED for the project |
@@ -3487,8 +5754,10 @@ Represents total number of issues for the represented statuses.
 
 Represents an iteration object.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Timestamp of iteration creation. |
 | `description` | [`String`](#string) | Description of the iteration. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
@@ -3509,8 +5778,10 @@ Represents an iteration object.
 
 The connection type for Iteration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[IterationEdge]`](#iterationedge) | A list of edges. |
 | `nodes` | [`[Iteration]`](#iteration) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3519,15 +5790,19 @@ The connection type for Iteration.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Iteration`](#iteration) | The item at the end of the edge. |
 
 ### `JiraImport`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp of when the Jira import was created. |
 | `failedToImportCount` | [`Int!`](#int) | Count of issues that failed to import. |
 | `importedIssuesCount` | [`Int!`](#int) | Count of issues that were successfully imported. |
@@ -3540,8 +5815,10 @@ An edge in a connection.
 
 The connection type for JiraImport.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[JiraImportEdge]`](#jiraimportedge) | A list of edges. |
 | `nodes` | [`[JiraImport]`](#jiraimport) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3550,8 +5827,10 @@ The connection type for JiraImport.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`JiraImport`](#jiraimport) | The item at the end of the edge. |
 
@@ -3559,8 +5838,10 @@ An edge in a connection.
 
 Autogenerated return type of JiraImportStart.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `jiraImport` | [`JiraImport`](#jiraimport) | The Jira import data after mutation. |
@@ -3569,16 +5850,20 @@ Autogenerated return type of JiraImportStart.
 
 Autogenerated return type of JiraImportUsers.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `jiraUsers` | [`[JiraUser!]`](#jirauser) | Users returned from Jira, matched by email and name if possible. |
 
 ### `JiraProject`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `key` | [`String!`](#string) | Key of the Jira project. |
 | `name` | [`String`](#string) | Name of the Jira project. |
 | `projectId` | [`Int!`](#int) | ID of the Jira project. |
@@ -3587,8 +5872,10 @@ Autogenerated return type of JiraImportUsers.
 
 The connection type for JiraProject.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[JiraProjectEdge]`](#jiraprojectedge) | A list of edges. |
 | `nodes` | [`[JiraProject]`](#jiraproject) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3597,23 +5884,46 @@ The connection type for JiraProject.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`JiraProject`](#jiraproject) | The item at the end of the edge. |
 
 ### `JiraService`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `active` | [`Boolean`](#boolean) | Indicates if the service is active. |
-| `projects` | [`JiraProjectConnection`](#jiraprojectconnection) | List of all Jira projects fetched through Jira REST API. |
 | `type` | [`String`](#string) | Class name of the service. |
+
+#### fields with arguments
+
+##### `projects`
+
+List of all Jira projects fetched through Jira REST API.
+
+Returns [`JiraProjectConnection`](#jiraprojectconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `name` | [`String`](#string) | Project name or key. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `JiraUser`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `gitlabId` | [`Int`](#int) | ID of the matched GitLab user. |
 | `gitlabName` | [`String`](#string) | Name of the matched GitLab user. |
 | `gitlabUsername` | [`String`](#string) | Username of the matched GitLab user. |
@@ -3623,8 +5933,10 @@ An edge in a connection.
 
 ### `Label`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `color` | [`String!`](#string) | Background color of the label. |
 | `createdAt` | [`Time!`](#time) | When this label was created. |
 | `description` | [`String`](#string) | Description of the label (Markdown rendered as HTML for caching). |
@@ -3638,8 +5950,10 @@ An edge in a connection.
 
 The connection type for Label.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[LabelEdge]`](#labeledge) | A list of edges. |
 | `nodes` | [`[Label]`](#label) | A list of nodes. |
@@ -3649,8 +5963,10 @@ The connection type for Label.
 
 Autogenerated return type of LabelCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `label` | [`Label`](#label) | The label after mutation. |
@@ -3659,8 +5975,10 @@ Autogenerated return type of LabelCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Label`](#label) | The item at the end of the edge. |
 
@@ -3668,8 +5986,10 @@ An edge in a connection.
 
 Autogenerated return type of MarkAsSpamSnippet.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `snippet` | [`Snippet`](#snippet) | The snippet after mutation. |
@@ -3678,8 +5998,10 @@ Autogenerated return type of MarkAsSpamSnippet.
 
 The connection type for MemberInterface.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[MemberInterfaceEdge]`](#memberinterfaceedge) | A list of edges. |
 | `nodes` | [`[MemberInterface]`](#memberinterface) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3688,30 +6010,30 @@ The connection type for MemberInterface.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MemberInterface`](#memberinterface) | The item at the end of the edge. |
 
 ### `MergeRequest`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `allowCollaboration` | [`Boolean`](#boolean) | Indicates if members of the target project can push to the fork. |
 | `approvalsLeft` | [`Int`](#int) | Number of approvals left. |
 | `approvalsRequired` | [`Int`](#int) | Number of approvals required. |
 | `approved` | [`Boolean!`](#boolean) | Indicates if the merge request has all the required approvals. Returns true if no required approvals are configured. |
-| `approvedBy` | [`UserConnection`](#userconnection) | Users who approved the merge request. |
-| `assignees` | [`UserConnection`](#userconnection) | Assignees of the merge request. |
 | `author` | [`User`](#user) | User who created this merge request. |
 | `autoMergeEnabled` | [`Boolean!`](#boolean) | Indicates if auto merge is enabled for the merge request. |
 | `autoMergeStrategy` | [`String`](#string) | Selected auto merge strategy. |
 | `availableAutoMergeStrategies` | [`[String!]`](#string) | Array of available auto merge strategies. |
 | `commitCount` | [`Int`](#int) | Number of commits in the merge request. |
-| `commitsWithoutMergeCommits` | [`CommitConnection`](#commitconnection) | Merge request commits excluding merge commits. |
 | `conflicts` | [`Boolean!`](#boolean) | Indicates if the merge request has conflicts. |
 | `createdAt` | [`Time!`](#time) | Timestamp of when the merge request was created. |
-| `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
 | `defaultMergeCommitMessage` | [`String`](#string) | Default merge commit message of the merge request. |
 | `defaultMergeCommitMessageWithDescription` | [`String`](#string) | Default merge commit message of the merge request with description. |
 | `defaultSquashCommitMessage` | [`String`](#string) | Default squash commit message of the merge request. |
@@ -3719,10 +6041,8 @@ An edge in a connection.
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
 | `diffHeadSha` | [`String`](#string) | Diff head SHA of the merge request. |
 | `diffRefs` | [`DiffRefs`](#diffrefs) | References of the base SHA, the head SHA, and the start SHA for this merge request. |
-| `diffStats` | [`[DiffStats!]`](#diffstats) | Details about which files were changed in this merge request. |
 | `diffStatsSummary` | [`DiffStatsSummary`](#diffstatssummary) | Summary of which files were changed in this merge request. |
 | `discussionLocked` | [`Boolean!`](#boolean) | Indicates if comments on the merge request are locked to members only. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `divergedFromTargetBranch` | [`Boolean!`](#boolean) | Indicates if the source branch is behind the target branch. |
 | `downvotes` | [`Int!`](#int) | Number of downvotes for the merge request. |
 | `forceRemoveSourceBranch` | [`Boolean`](#boolean) | Indicates if the project settings will lead to source branch deletion after merge. |
@@ -3732,7 +6052,6 @@ An edge in a connection.
 | `id` | [`ID!`](#id) | ID of the merge request. |
 | `iid` | [`String!`](#string) | Internal ID of the merge request. |
 | `inProgressMergeCommitSha` | [`String`](#string) | Commit SHA of the merge request if merge is in progress. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels of the merge request. |
 | `mergeCommitSha` | [`String`](#string) | SHA of the merge request commit (set once merged). |
 | `mergeError` | [`String`](#string) | Error message due to a merge error. |
 | `mergeOngoing` | [`Boolean!`](#boolean) | Indicates if a merge is currently occurring. |
@@ -3744,15 +6063,10 @@ An edge in a connection.
 | `mergeableDiscussionsState` | [`Boolean`](#boolean) | Indicates if all discussions in the merge request have been resolved, allowing the merge request to be merged. |
 | `mergedAt` | [`Time`](#time) | Timestamp of when the merge request was merged, null if not merged. |
 | `milestone` | [`Milestone`](#milestone) | The milestone of the merge request. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
-| `participants` | [`UserConnection`](#userconnection) | Participants in the merge request. This includes the author, assignees, reviewers, and users mentioned in notes. |
-| `pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines for the merge request. Note: for performance reasons, no more than the most recent 500 pipelines will be returned. |
 | `project` | [`Project!`](#project) | Alias for target_project. |
 | `projectId` | [`Int!`](#int) | ID of the merge request project. |
 | `rebaseCommitSha` | [`String`](#string) | Rebase commit SHA of the merge request. |
 | `rebaseInProgress` | [`Boolean!`](#boolean) | Indicates if there is a rebase currently in progress for the merge request. |
-| `reference` | [`String!`](#string) | Internal reference of the merge request. Returned in shortened format by default. |
-| `reviewers` | [`UserConnection`](#userconnection) | Users from whom a review has been requested. |
 | `securityAutoFix` | [`Boolean`](#boolean) | Indicates if the merge request is created by @GitLab-Security-Bot. |
 | `securityReportsUpToDateOnTargetBranch` | [`Boolean!`](#boolean) | Indicates if the target branch security reports are out of date. |
 | `shouldBeRebased` | [`Boolean!`](#boolean) | Indicates if the merge request will be rebased. |
@@ -3783,12 +6097,194 @@ An edge in a connection.
 | `webUrl` | [`String`](#string) | Web URL of the merge request. |
 | `workInProgress` | [`Boolean!`](#boolean) | Indicates if the merge request is a draft. |
 
+#### fields with arguments
+
+##### `approvedBy`
+
+Users who approved the merge request.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `assignees`
+
+Assignees of the merge request.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `commitsWithoutMergeCommits`
+
+Merge request commits excluding merge commits.
+
+Returns [`CommitConnection`](#commitconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `currentUserTodos`
+
+To-do items for the current user.
+
+Returns [`TodoConnection!`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+| `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
+
+##### `diffStats`
+
+Details about which files were changed in this merge request.
+
+Returns [`[DiffStats!]`](#diffstats)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `path` | [`String`](#string) | A specific file-path. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `labels`
+
+Labels of the merge request.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `participants`
+
+Participants in the merge request. This includes the author, assignees, reviewers, and users mentioned in notes.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `pipelines`
+
+Pipelines for the merge request. Note: for performance reasons, no more than the most recent 500 pipelines will be returned.
+
+Returns [`PipelineConnection`](#pipelineconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `status` | [`PipelineStatusEnum`](#pipelinestatusenum) | Filter pipelines by their status. |
+| `ref` | [`String`](#string) | Filter pipelines by the ref they are run for. |
+| `sha` | [`String`](#string) | Filter pipelines by the sha of the commit they are run for. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `reference`
+
+Internal reference of the merge request. Returned in shortened format by default.
+
+Returns [`String!`](#string)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `full` | [`Boolean`](#boolean) | Boolean option specifying whether the reference should be returned in full. |
+
+##### `reviewers`
+
+Users from whom a review has been requested.
+
+Returns [`UserConnection`](#userconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `MergeRequestConnection`
 
 The connection type for MergeRequest.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[MergeRequestEdge]`](#mergerequestedge) | A list of edges. |
 | `nodes` | [`[MergeRequest]`](#mergerequest) | A list of nodes. |
@@ -3799,8 +6295,10 @@ The connection type for MergeRequest.
 
 Autogenerated return type of MergeRequestCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3809,8 +6307,10 @@ Autogenerated return type of MergeRequestCreate.
 
 Represents the Geo sync and verification state of a Merge Request diff.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp when the MergeRequestDiffRegistry was created |
 | `id` | [`ID!`](#id) | ID of the MergeRequestDiffRegistry |
 | `lastSyncFailure` | [`String`](#string) | Error message during sync of the MergeRequestDiffRegistry |
@@ -3824,8 +6324,10 @@ Represents the Geo sync and verification state of a Merge Request diff.
 
 The connection type for MergeRequestDiffRegistry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[MergeRequestDiffRegistryEdge]`](#mergerequestdiffregistryedge) | A list of edges. |
 | `nodes` | [`[MergeRequestDiffRegistry]`](#mergerequestdiffregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3834,8 +6336,10 @@ The connection type for MergeRequestDiffRegistry.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MergeRequestDiffRegistry`](#mergerequestdiffregistry) | The item at the end of the edge. |
 
@@ -3843,8 +6347,10 @@ An edge in a connection.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MergeRequest`](#mergerequest) | The item at the end of the edge. |
 
@@ -3852,8 +6358,10 @@ An edge in a connection.
 
 Check permissions for the current user on a merge request.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminMergeRequest` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_merge_request` on this resource |
 | `canMerge` | [`Boolean!`](#boolean) | Indicates the user can perform `can_merge` on this resource |
 | `cherryPickOnCurrentMergeRequest` | [`Boolean!`](#boolean) | Indicates the user can perform `cherry_pick_on_current_merge_request` on this resource |
@@ -3868,8 +6376,10 @@ Check permissions for the current user on a merge request.
 
 Autogenerated return type of MergeRequestReviewerRereview.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3878,8 +6388,10 @@ Autogenerated return type of MergeRequestReviewerRereview.
 
 Autogenerated return type of MergeRequestSetAssignees.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3888,8 +6400,10 @@ Autogenerated return type of MergeRequestSetAssignees.
 
 Autogenerated return type of MergeRequestSetLabels.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3898,8 +6412,10 @@ Autogenerated return type of MergeRequestSetLabels.
 
 Autogenerated return type of MergeRequestSetLocked.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3908,8 +6424,10 @@ Autogenerated return type of MergeRequestSetLocked.
 
 Autogenerated return type of MergeRequestSetMilestone.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3918,8 +6436,10 @@ Autogenerated return type of MergeRequestSetMilestone.
 
 Autogenerated return type of MergeRequestSetSubscription.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3928,8 +6448,10 @@ Autogenerated return type of MergeRequestSetSubscription.
 
 Autogenerated return type of MergeRequestSetWip.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
@@ -3938,16 +6460,20 @@ Autogenerated return type of MergeRequestSetWip.
 
 Autogenerated return type of MergeRequestUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
 ### `Metadata`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `revision` | [`String!`](#string) | Revision. |
 | `version` | [`String!`](#string) | Version. |
 
@@ -3955,8 +6481,10 @@ Autogenerated return type of MergeRequestUpdate.
 
 Represents a metric image upload.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `fileName` | [`String`](#string) | File name of the metric image. |
 | `filePath` | [`String`](#string) | File path of the metric image. |
 | `id` | [`ID!`](#id) | ID of the metric upload. |
@@ -3965,16 +6493,38 @@ Represents a metric image upload.
 
 ### `MetricsDashboard`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `annotations` | [`MetricsDashboardAnnotationConnection`](#metricsdashboardannotationconnection) | Annotations added to the dashboard. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `path` | [`String`](#string) | Path to a file with the dashboard definition. |
 | `schemaValidationWarnings` | [`[String!]`](#string) | Dashboard schema validation warnings. |
 
+#### fields with arguments
+
+##### `annotations`
+
+Annotations added to the dashboard.
+
+Returns [`MetricsDashboardAnnotationConnection`](#metricsdashboardannotationconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `from` | [`Time!`](#time) | Timestamp marking date and time from which annotations need to be fetched. |
+| `to` | [`Time`](#time) | Timestamp marking date and time to which annotations need to be fetched. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `MetricsDashboardAnnotation`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the annotation. |
 | `endingAt` | [`Time`](#time) | Timestamp marking end of annotated time span. |
 | `id` | [`ID!`](#id) | ID of the annotation. |
@@ -3985,8 +6535,10 @@ Represents a metric image upload.
 
 The connection type for MetricsDashboardAnnotation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[MetricsDashboardAnnotationEdge]`](#metricsdashboardannotationedge) | A list of edges. |
 | `nodes` | [`[MetricsDashboardAnnotation]`](#metricsdashboardannotation) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -3995,8 +6547,10 @@ The connection type for MetricsDashboardAnnotation.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MetricsDashboardAnnotation`](#metricsdashboardannotation) | The item at the end of the edge. |
 
@@ -4004,8 +6558,10 @@ An edge in a connection.
 
 Represents a milestone.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Timestamp of milestone creation. |
 | `description` | [`String`](#string) | Description of the milestone. |
 | `dueDate` | [`Time`](#time) | Timestamp of the milestone due date. |
@@ -4025,8 +6581,10 @@ Represents a milestone.
 
 The connection type for Milestone.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[MilestoneEdge]`](#milestoneedge) | A list of edges. |
 | `nodes` | [`[Milestone]`](#milestone) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4035,8 +6593,10 @@ The connection type for Milestone.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Milestone`](#milestone) | The item at the end of the edge. |
 
@@ -4044,18 +6604,21 @@ An edge in a connection.
 
 Contains statistics about a milestone.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `closedIssuesCount` | [`Int`](#int) | Number of closed issues associated with the milestone. |
 | `totalIssuesCount` | [`Int`](#int) | Total number of issues associated with the milestone. |
 
 ### `Namespace`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `actualRepositorySizeLimit` | [`Float`](#float) | Size limit for repositories in the namespace in bytes. |
 | `additionalPurchasedStorageSize` | [`Float`](#float) | Additional storage purchased for the root namespace in bytes. |
-| `complianceFrameworks` | [`ComplianceFrameworkConnection`](#complianceframeworkconnection) | Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled. |
 | `containsLockedProjects` | [`Boolean!`](#boolean) | Includes at least one project where the repository size exceeds the limit. |
 | `description` | [`String`](#string) | Description of the namespace. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
@@ -4067,7 +6630,6 @@ Contains statistics about a milestone.
 | `name` | [`String!`](#string) | Name of the namespace. |
 | `packageSettings` | [`PackageSettings`](#packagesettings) | The package settings for the namespace. |
 | `path` | [`String!`](#string) | Path of the namespace. |
-| `projects` | [`ProjectConnection!`](#projectconnection) | Projects within this namespace. |
 | `repositorySizeExcessProjectCount` | [`Int!`](#int) | Number of projects in the root namespace where the repository size exceeds the limit. |
 | `requestAccessEnabled` | [`Boolean`](#boolean) | Indicates if users can request access to namespace. |
 | `rootStorageStatistics` | [`RootStorageStatistics`](#rootstoragestatistics) | Aggregated storage statistics of the namespace. Only available for root namespaces. |
@@ -4077,12 +6639,53 @@ Contains statistics about a milestone.
 | `totalRepositorySizeExcess` | [`Float`](#float) | Total excess repository size of all projects in the root namespace in bytes. |
 | `visibility` | [`String`](#string) | Visibility of the namespace. |
 
+#### fields with arguments
+
+##### `complianceFrameworks`
+
+Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled.
+
+Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`ComplianceManagementFrameworkID`](#compliancemanagementframeworkid) | Global ID of a specific compliance framework to return. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `projects`
+
+Projects within this namespace.
+
+Returns [`ProjectConnection!`](#projectconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `includeSubgroups` | [`Boolean`](#boolean) | Include also subgroup projects. |
+| `search` | [`String`](#string) | Search project with most similar names or paths. |
+| `sort` | [`NamespaceProjectSort`](#namespaceprojectsort) | Sort projects by this criteria. |
+| `ids` | [`[ID!]`](#id) | Filter projects by IDs. |
+| `hasCodeCoverage` | [`Boolean`](#boolean) | Returns only the projects which have code coverage. |
+| `hasVulnerabilities` | [`Boolean`](#boolean) | Returns only the projects which have vulnerabilities. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `NamespaceConnection`
 
 The connection type for Namespace.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[NamespaceEdge]`](#namespaceedge) | A list of edges. |
 | `nodes` | [`[Namespace]`](#namespace) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4091,8 +6694,10 @@ The connection type for Namespace.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Namespace`](#namespace) | The item at the end of the edge. |
 
@@ -4100,16 +6705,20 @@ An edge in a connection.
 
 Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `namespace` | [`Namespace`](#namespace) | The namespace after mutation. |
 
 ### `Note`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `author` | [`User!`](#user) | User who wrote this note. |
 | `body` | [`String!`](#string) | Content of the note. |
 | `bodyHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `note` |
@@ -4133,8 +6742,10 @@ Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 
 The connection type for Note.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[NoteEdge]`](#noteedge) | A list of edges. |
 | `nodes` | [`[Note]`](#note) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4143,15 +6754,19 @@ The connection type for Note.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Note`](#note) | The item at the end of the edge. |
 
 ### `NotePermissions`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminNote` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_note` on this resource |
 | `awardEmoji` | [`Boolean!`](#boolean) | Indicates the user can perform `award_emoji` on this resource |
 | `createNote` | [`Boolean!`](#boolean) | Indicates the user can perform `create_note` on this resource |
@@ -4163,8 +6778,10 @@ An edge in a connection.
 
 The rotation participant and color palette.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `colorPalette` | [`String`](#string) | The color palette to assign to the on-call user. For example "blue". |
 | `colorWeight` | [`String`](#string) | The color weight to assign to for the on-call user, for example "500". Max 4 chars. For easy identification of the user. |
 | `id` | [`IncidentManagementOncallParticipantID!`](#incidentmanagementoncallparticipantid) | ID of the on-call participant. |
@@ -4174,8 +6791,10 @@ The rotation participant and color palette.
 
 The connection type for OncallParticipantType.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[OncallParticipantTypeEdge]`](#oncallparticipanttypeedge) | A list of edges. |
 | `nodes` | [`[OncallParticipantType]`](#oncallparticipanttype) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4184,8 +6803,10 @@ The connection type for OncallParticipantType.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`OncallParticipantType`](#oncallparticipanttype) | The item at the end of the edge. |
 
@@ -4193,8 +6814,10 @@ An edge in a connection.
 
 Active period time range for on-call rotation.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `endTime` | [`String`](#string) | The end of the rotation active period. |
 | `startTime` | [`String`](#string) | The start of the rotation active period. |
 
@@ -4202,8 +6825,10 @@ Active period time range for on-call rotation.
 
 Autogenerated return type of OncallRotationCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallRotation` | [`IncidentManagementOncallRotation`](#incidentmanagementoncallrotation) | The on-call rotation. |
@@ -4212,8 +6837,10 @@ Autogenerated return type of OncallRotationCreate.
 
 Autogenerated return type of OncallRotationDestroy.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallRotation` | [`IncidentManagementOncallRotation`](#incidentmanagementoncallrotation) | The on-call rotation. |
@@ -4222,8 +6849,10 @@ Autogenerated return type of OncallRotationDestroy.
 
 Autogenerated return type of OncallScheduleCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule. |
@@ -4232,8 +6861,10 @@ Autogenerated return type of OncallScheduleCreate.
 
 Autogenerated return type of OncallScheduleDestroy.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule. |
@@ -4242,8 +6873,10 @@ Autogenerated return type of OncallScheduleDestroy.
 
 Autogenerated return type of OncallScheduleUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule. |
@@ -4252,26 +6885,74 @@ Autogenerated return type of OncallScheduleUpdate.
 
 Represents a package in the Package Registry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Date of creation. |
 | `id` | [`PackagesPackageID!`](#packagespackageid) | ID of the package. |
 | `metadata` | [`PackageMetadata`](#packagemetadata) | Package metadata. |
 | `name` | [`String!`](#string) | Name of the package. |
 | `packageType` | [`PackageTypeEnum!`](#packagetypeenum) | Package type. |
-| `pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines that built the package. |
 | `project` | [`Project!`](#project) | Project where the package is stored. |
-| `tags` | [`PackageTagConnection`](#packagetagconnection) | Package tags. |
 | `updatedAt` | [`Time!`](#time) | Date of most recent update. |
 | `version` | [`String`](#string) | Version string. |
-| `versions` | [`PackageWithoutVersionsConnection`](#packagewithoutversionsconnection) | The other versions of the package. |
+
+#### fields with arguments
+
+##### `pipelines`
+
+Pipelines that built the package.
+
+Returns [`PipelineConnection`](#pipelineconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `tags`
+
+Package tags.
+
+Returns [`PackageTagConnection`](#packagetagconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `versions`
+
+The other versions of the package.
+
+Returns [`PackageWithoutVersionsConnection`](#packagewithoutversionsconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `PackageComposerJsonType`
 
 Represents a composer JSON file.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `license` | [`String`](#string) | The license set in the Composer JSON file. |
 | `name` | [`String`](#string) | The name set in the Composer JSON file. |
 | `type` | [`String`](#string) | The type set in the Composer JSON file. |
@@ -4281,8 +6962,10 @@ Represents a composer JSON file.
 
 The connection type for Package.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[PackageEdge]`](#packageedge) | A list of edges. |
 | `nodes` | [`[Package]`](#package) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4291,8 +6974,10 @@ The connection type for Package.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Package`](#package) | The item at the end of the edge. |
 
@@ -4300,8 +6985,10 @@ An edge in a connection.
 
 Represents the Geo sync and verification state of a package file.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp when the PackageFileRegistry was created |
 | `id` | [`ID!`](#id) | ID of the PackageFileRegistry |
 | `lastSyncFailure` | [`String`](#string) | Error message during sync of the PackageFileRegistry |
@@ -4315,8 +7002,10 @@ Represents the Geo sync and verification state of a package file.
 
 The connection type for PackageFileRegistry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[PackageFileRegistryEdge]`](#packagefileregistryedge) | A list of edges. |
 | `nodes` | [`[PackageFileRegistry]`](#packagefileregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4325,8 +7014,10 @@ The connection type for PackageFileRegistry.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PackageFileRegistry`](#packagefileregistry) | The item at the end of the edge. |
 
@@ -4334,8 +7025,10 @@ An edge in a connection.
 
 Namespace-level Package Registry settings.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `mavenDuplicateExceptionRegex` | [`UntrustedRegexp`](#untrustedregexp) | When maven_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
 | `mavenDuplicatesAllowed` | [`Boolean!`](#boolean) | Indicates whether duplicate Maven packages are allowed for this namespace. |
 
@@ -4343,8 +7036,10 @@ Namespace-level Package Registry settings.
 
 Represents a package tag.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | The created date. |
 | `id` | [`ID!`](#id) | The ID of the tag. |
 | `name` | [`String!`](#string) | The name of the tag. |
@@ -4354,8 +7049,10 @@ Represents a package tag.
 
 The connection type for PackageTag.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[PackageTagEdge]`](#packagetagedge) | A list of edges. |
 | `nodes` | [`[PackageTag]`](#packagetag) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4364,8 +7061,10 @@ The connection type for PackageTag.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PackageTag`](#packagetag) | The item at the end of the edge. |
 
@@ -4373,25 +7072,59 @@ An edge in a connection.
 
 Represents a version of a package in the Package Registry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Date of creation. |
 | `id` | [`PackagesPackageID!`](#packagespackageid) | ID of the package. |
 | `metadata` | [`PackageMetadata`](#packagemetadata) | Package metadata. |
 | `name` | [`String!`](#string) | Name of the package. |
 | `packageType` | [`PackageTypeEnum!`](#packagetypeenum) | Package type. |
-| `pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines that built the package. |
 | `project` | [`Project!`](#project) | Project where the package is stored. |
-| `tags` | [`PackageTagConnection`](#packagetagconnection) | Package tags. |
 | `updatedAt` | [`Time!`](#time) | Date of most recent update. |
 | `version` | [`String`](#string) | Version string. |
+
+#### fields with arguments
+
+##### `pipelines`
+
+Pipelines that built the package.
+
+Returns [`PipelineConnection`](#pipelineconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `tags`
+
+Package tags.
+
+Returns [`PackageTagConnection`](#packagetagconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `PackageWithoutVersionsConnection`
 
 The connection type for PackageWithoutVersions.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[PackageWithoutVersionsEdge]`](#packagewithoutversionsedge) | A list of edges. |
 | `nodes` | [`[PackageWithoutVersions]`](#packagewithoutversions) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4400,8 +7133,10 @@ The connection type for PackageWithoutVersions.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PackageWithoutVersions`](#packagewithoutversions) | The item at the end of the edge. |
 
@@ -4409,8 +7144,10 @@ An edge in a connection.
 
 Information about pagination in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `endCursor` | [`String`](#string) | When paginating forwards, the cursor to continue. |
 | `hasNextPage` | [`Boolean!`](#boolean) | When paginating forwards, are there more items? |
 | `hasPreviousPage` | [`Boolean!`](#boolean) | When paginating backwards, are there more items? |
@@ -4418,8 +7155,10 @@ Information about pagination in a connection.
 
 ### `Pipeline`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `active` | [`Boolean!`](#boolean) | Indicates if the pipeline is active. |
 | `beforeSha` | [`String`](#string) | Base SHA of the source branch. |
 | `cancelable` | [`Boolean!`](#boolean) | Specifies if a pipeline can be canceled. |
@@ -4429,20 +7168,16 @@ Information about pagination in a connection.
 | `coverage` | [`Float`](#float) | Coverage percentage. |
 | `createdAt` | [`Time!`](#time) | Timestamp of the pipeline's creation. |
 | `detailedStatus` | [`DetailedStatus!`](#detailedstatus) | Detailed status of the pipeline. |
-| `downstream` | [`PipelineConnection`](#pipelineconnection) | Pipelines this pipeline will trigger. |
 | `duration` | [`Int`](#int) | Duration of the pipeline in seconds. |
 | `finishedAt` | [`Time`](#time) | Timestamp of the pipeline's completion. |
 | `id` | [`ID!`](#id) | ID of the pipeline. |
 | `iid` | [`String!`](#string) | Internal ID of the pipeline. |
-| `jobs` | [`CiJobConnection`](#cijobconnection) | Jobs belonging to the pipeline. |
 | `path` | [`String`](#string) | Relative path to the pipeline's page. |
 | `project` | [`Project`](#project) | Project the pipeline belongs to. |
 | `retryable` | [`Boolean!`](#boolean) | Specifies if a pipeline can be retried. |
-| `securityReportFindings` | [`PipelineSecurityReportFindingConnection`](#pipelinesecurityreportfindingconnection) | Vulnerability findings reported on the pipeline. |
 | `securityReportSummary` | [`SecurityReportSummary`](#securityreportsummary) | Vulnerability and scanned resource counts for each security scanner of the pipeline. |
 | `sha` | [`String!`](#string) | SHA of the pipeline's commit. |
 | `sourceJob` | [`CiJob`](#cijob) | Job where pipeline was triggered from. |
-| `stages` | [`CiStageConnection`](#cistageconnection) | Stages of the pipeline. |
 | `startedAt` | [`Time`](#time) | Timestamp when the pipeline was started. |
 | `status` | [`PipelineStatusEnum!`](#pipelinestatusenum) | Status of the pipeline (CREATED, WAITING_FOR_RESOURCE, PREPARING, PENDING, RUNNING, FAILED, SUCCESS, CANCELED, SKIPPED, MANUAL, SCHEDULED) |
 | `updatedAt` | [`Time!`](#time) | Timestamp of the pipeline's last activity. |
@@ -4451,10 +7186,78 @@ Information about pagination in a connection.
 | `userPermissions` | [`PipelinePermissions!`](#pipelinepermissions) | Permissions for the current user on the resource |
 | `warnings` | [`Boolean!`](#boolean) | Indicates if a pipeline has warnings. |
 
+#### fields with arguments
+
+##### `downstream`
+
+Pipelines this pipeline will trigger.
+
+Returns [`PipelineConnection`](#pipelineconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `jobs`
+
+Jobs belonging to the pipeline.
+
+Returns [`CiJobConnection`](#cijobconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `securityReportTypes` | [`[SecurityReportTypeEnum!]`](#securityreporttypeenum) | Filter jobs by the type of security report they produce. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `securityReportFindings`
+
+Vulnerability findings reported on the pipeline.
+
+Returns [`PipelineSecurityReportFindingConnection`](#pipelinesecurityreportfindingconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `reportType` | [`[String!]`](#string) | Filter vulnerability findings by report type. |
+| `severity` | [`[String!]`](#string) | Filter vulnerability findings by severity. |
+| `scanner` | [`[String!]`](#string) | Filter vulnerability findings by Scanner.externalId. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `stages`
+
+Stages of the pipeline.
+
+Returns [`CiStageConnection`](#cistageconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `PipelineAnalytics`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `monthPipelinesLabels` | [`[String!]`](#string) | Labels for the monthly pipeline count. |
 | `monthPipelinesSuccessful` | [`[Int!]`](#int) | Total monthly successful pipeline count. |
 | `monthPipelinesTotals` | [`[Int!]`](#int) | Total monthly pipeline count. |
@@ -4471,8 +7274,10 @@ Information about pagination in a connection.
 
 Autogenerated return type of PipelineCancel.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -4480,8 +7285,10 @@ Autogenerated return type of PipelineCancel.
 
 The connection type for Pipeline.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[PipelineEdge]`](#pipelineedge) | A list of edges. |
 | `nodes` | [`[Pipeline]`](#pipeline) | A list of nodes. |
@@ -4491,8 +7298,10 @@ The connection type for Pipeline.
 
 Autogenerated return type of PipelineDestroy.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -4500,15 +7309,19 @@ Autogenerated return type of PipelineDestroy.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Pipeline`](#pipeline) | The item at the end of the edge. |
 
 ### `PipelinePermissions`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminPipeline` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_pipeline` on this resource |
 | `destroyPipeline` | [`Boolean!`](#boolean) | Indicates the user can perform `destroy_pipeline` on this resource |
 | `updatePipeline` | [`Boolean!`](#boolean) | Indicates the user can perform `update_pipeline` on this resource |
@@ -4517,8 +7330,10 @@ An edge in a connection.
 
 Autogenerated return type of PipelineRetry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipeline` | [`Pipeline`](#pipeline) | The pipeline after mutation. |
@@ -4527,8 +7342,10 @@ Autogenerated return type of PipelineRetry.
 
 Represents vulnerability finding of a security report on the pipeline.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `confidence` | [`String`](#string) | Type of the security report that found the vulnerability. |
 | `description` | [`String`](#string) | Description of the vulnerability finding. |
 | `identifiers` | [`[VulnerabilityIdentifier!]!`](#vulnerabilityidentifier) | Identifiers of the vulnerabilit finding. |
@@ -4546,8 +7363,10 @@ Represents vulnerability finding of a security report on the pipeline.
 
 The connection type for PipelineSecurityReportFinding.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[PipelineSecurityReportFindingEdge]`](#pipelinesecurityreportfindingedge) | A list of edges. |
 | `nodes` | [`[PipelineSecurityReportFinding]`](#pipelinesecurityreportfinding) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4556,48 +7375,33 @@ The connection type for PipelineSecurityReportFinding.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PipelineSecurityReportFinding`](#pipelinesecurityreportfinding) | The item at the end of the edge. |
 
 ### `Project`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `actualRepositorySizeLimit` | [`Float`](#float) | Size limit for the repository in bytes. |
-| `alertManagementAlert` | [`AlertManagementAlert`](#alertmanagementalert) | A single Alert Management alert of the project. |
-| `alertManagementAlertStatusCounts` | [`AlertManagementAlertStatusCountsType`](#alertmanagementalertstatuscountstype) | Counts of alerts by status for the project. |
-| `alertManagementAlerts` | [`AlertManagementAlertConnection`](#alertmanagementalertconnection) | Alert Management alerts of the project. |
-| `alertManagementHttpIntegrations` | [`AlertManagementHttpIntegrationConnection`](#alertmanagementhttpintegrationconnection) | HTTP Integrations which can receive alerts for the project. |
-| `alertManagementIntegrations` | [`AlertManagementIntegrationConnection`](#alertmanagementintegrationconnection) | Integrations which can receive alerts for the project. |
-| `alertManagementPayloadFields` | [`[AlertManagementPayloadAlertField!]`](#alertmanagementpayloadalertfield) | Extract alert fields from payload for custom mapping. |
 | `allowMergeOnSkippedPipeline` | [`Boolean`](#boolean) | If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of the project can also be merged with skipped jobs. |
 | `apiFuzzingCiConfiguration` | [`ApiFuzzingCiConfiguration`](#apifuzzingciconfiguration) | API fuzzing configuration for the project. Available only when feature flag `api_fuzzing_configuration_ui` is enabled. |
 | `archived` | [`Boolean`](#boolean) | Indicates the archived status of the project. |
 | `autocloseReferencedIssues` | [`Boolean`](#boolean) | Indicates if issues referenced by merge requests and commits within the default branch are closed automatically. |
 | `avatarUrl` | [`String`](#string) | URL to avatar image file of the project. |
-| `board` | [`Board`](#board) | A single board of the project. |
-| `boards` | [`BoardConnection`](#boardconnection) | Boards of the project. |
 | `ciCdSettings` | [`ProjectCiCdSetting`](#projectcicdsetting) | CI/CD settings for the project. |
-| `clusterAgent` | [`ClusterAgent`](#clusteragent) | Find a single cluster agent by name. |
-| `clusterAgents` | [`ClusterAgentConnection`](#clusteragentconnection) | Cluster agents associated with the project. |
 | `codeCoverageSummary` | [`CodeCoverageSummary`](#codecoveragesummary) | Code coverage summary associated with the project. |
-| `complianceFrameworks` | [`ComplianceFrameworkConnection`](#complianceframeworkconnection) | Compliance frameworks associated with the project. |
 | `containerExpirationPolicy` | [`ContainerExpirationPolicy`](#containerexpirationpolicy) | The container expiration policy of the project. |
 | `containerRegistryEnabled` | [`Boolean`](#boolean) | Indicates if the project stores Docker container images in a container registry. |
-| `containerRepositories` | [`ContainerRepositoryConnection`](#containerrepositoryconnection) | Container repositories of the project. |
 | `containerRepositoriesCount` | [`Int!`](#int) | Number of container repositories in the project. |
 | `createdAt` | [`Time`](#time) | Timestamp of the project creation. |
-| `dastProfiles` | [`DastProfileConnection`](#dastprofileconnection) | DAST Profiles associated with the project. Always returns no nodes if `dast_saved_scans` is disabled. |
-| `dastScannerProfiles` | [`DastScannerProfileConnection`](#dastscannerprofileconnection) | The DAST scanner profiles associated with the project. |
-| `dastSiteProfile` | [`DastSiteProfile`](#dastsiteprofile) | DAST Site Profile associated with the project. |
-| `dastSiteProfiles` | [`DastSiteProfileConnection`](#dastsiteprofileconnection) | DAST Site Profiles associated with the project. |
-| `dastSiteValidations` | [`DastSiteValidationConnection`](#dastsitevalidationconnection) | DAST Site Validations associated with the project. |
 | `description` | [`String`](#string) | Short description of the project. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
-| `environment` | [`Environment`](#environment) | A single environment of the project. |
-| `environments` | [`EnvironmentConnection`](#environmentconnection) | Environments of the project. |
 | `forksCount` | [`Int!`](#int) | Number of times the project has been forked. |
 | `fullPath` | [`ID!`](#id) | Full path of the project. |
 | `grafanaIntegration` | [`GrafanaIntegration`](#grafanaintegration) | Grafana integration details for the project. |
@@ -4605,57 +7409,35 @@ An edge in a connection.
 | `httpUrlToRepo` | [`String`](#string) | URL to connect to the project via HTTPS. |
 | `id` | [`ID!`](#id) | ID of the project. |
 | `importStatus` | [`String`](#string) | Status of import background job of the project. |
-| `incidentManagementOncallSchedules` | [`IncidentManagementOncallScheduleConnection`](#incidentmanagementoncallscheduleconnection) | Incident Management On-call schedules of the project. |
-| `issue` | [`Issue`](#issue) | A single issue of the project. |
-| `issueStatusCounts` | [`IssueStatusCountsType`](#issuestatuscountstype) | Counts of issues by status for the project. |
-| `issues` | [`IssueConnection`](#issueconnection) | Issues of the project. |
 | `issuesEnabled` | [`Boolean`](#boolean) | Indicates if Issues are enabled for the current user |
-| `iterations` | [`IterationConnection`](#iterationconnection) | Find iterations. |
 | `jiraImportStatus` | [`String`](#string) | Status of Jira import background job of the project. |
-| `jiraImports` | [`JiraImportConnection`](#jiraimportconnection) | Jira imports into the project. |
 | `jobsEnabled` | [`Boolean`](#boolean) | Indicates if CI/CD pipeline jobs are enabled for the current user. |
-| `label` | [`Label`](#label) | A label available on this project. |
-| `labels` | [`LabelConnection`](#labelconnection) | Labels available on this project. |
 | `lastActivityAt` | [`Time`](#time) | Timestamp of the project last activity. |
 | `lfsEnabled` | [`Boolean`](#boolean) | Indicates if the project has Large File Storage (LFS) enabled. |
-| `mergeRequest` | [`MergeRequest`](#mergerequest) | A single merge request of the project. |
-| `mergeRequests` | [`MergeRequestConnection`](#mergerequestconnection) | Merge requests of the project. |
 | `mergeRequestsEnabled` | [`Boolean`](#boolean) | Indicates if Merge Requests are enabled for the current user |
 | `mergeRequestsFfOnlyEnabled` | [`Boolean`](#boolean) | Indicates if no merge commits should be created and all merges should instead be fast-forwarded, which means that merging is only allowed if the branch could be fast-forwarded. |
-| `milestones` | [`MilestoneConnection`](#milestoneconnection) | Milestones of the project. |
 | `name` | [`String!`](#string) | Name of the project (without namespace). |
 | `nameWithNamespace` | [`String!`](#string) | Full name of the project with its namespace. |
 | `namespace` | [`Namespace`](#namespace) | Namespace of the project. |
 | `onlyAllowMergeIfAllDiscussionsAreResolved` | [`Boolean`](#boolean) | Indicates if merge requests of the project can only be merged when all the discussions are resolved. |
 | `onlyAllowMergeIfPipelineSucceeds` | [`Boolean`](#boolean) | Indicates if merge requests of the project can only be merged with successful jobs. |
 | `openIssuesCount` | [`Int`](#int) | Number of open issues for the project. |
-| `packages` | [`PackageConnection`](#packageconnection) | Packages of the project. |
 | `path` | [`String!`](#string) | Path of the project. |
-| `pipeline` | [`Pipeline`](#pipeline) | Build pipeline of the project. |
 | `pipelineAnalytics` | [`PipelineAnalytics`](#pipelineanalytics) | Pipeline analytics. |
-| `pipelines` | [`PipelineConnection`](#pipelineconnection) | Build pipelines of the project. |
 | `printingMergeRequestLinkEnabled` | [`Boolean`](#boolean) | Indicates if a link to create or view a merge request should display after a push to Git repositories of the project from the command line. |
-| `projectMembers` | [`MemberInterfaceConnection`](#memberinterfaceconnection) | Members of the project. |
 | `publicJobs` | [`Boolean`](#boolean) | Indicates if there is public access to pipelines and job details of the project, including output logs and artifacts. |
-| `release` | [`Release`](#release) | A single release of the project. |
-| `releases` | [`ReleaseConnection`](#releaseconnection) | Releases of the project. |
 | `removeSourceBranchAfterMerge` | [`Boolean`](#boolean) | Indicates if `Delete source branch` option should be enabled by default for all new merge requests of the project. |
 | `repository` | [`Repository`](#repository) | Git repository of the project. |
 | `repositorySizeExcess` | [`Float`](#float) | Size of repository that exceeds the limit in bytes. |
 | `requestAccessEnabled` | [`Boolean`](#boolean) | Indicates if users can request member access to the project. |
-| `requirement` | [`Requirement`](#requirement) | Find a single requirement. |
 | `requirementStatesCount` | [`RequirementStatesCount`](#requirementstatescount) | Number of requirements for the project by their state. |
-| `requirements` | [`RequirementConnection`](#requirementconnection) | Find requirements. |
 | `sastCiConfiguration` | [`SastCiConfiguration`](#sastciconfiguration) | SAST CI configuration for the project. |
 | `securityDashboardPath` | [`String`](#string) | Path to project's security dashboard. |
 | `securityScanners` | [`SecurityScanners`](#securityscanners) | Information about security analyzers used in the project. |
-| `sentryDetailedError` | [`SentryDetailedError`](#sentrydetailederror) | Detailed version of a Sentry error on the project. |
 | `sentryErrors` | [`SentryErrorCollection`](#sentryerrorcollection) | Paginated collection of Sentry errors on the project. |
 | `serviceDeskAddress` | [`String`](#string) | E-mail address of the service desk. |
 | `serviceDeskEnabled` | [`Boolean`](#boolean) | Indicates if the project has service desk enabled. |
-| `services` | [`ServiceConnection`](#serviceconnection) | Project services. |
 | `sharedRunnersEnabled` | [`Boolean`](#boolean) | Indicates if shared runners are enabled for the project. |
-| `snippets` | [`SnippetConnection`](#snippetconnection) | Snippets of the project. |
 | `snippetsEnabled` | [`Boolean`](#boolean) | Indicates if Snippets are enabled for the current user |
 | `squashReadOnly` | [`Boolean!`](#boolean) | Indicates if `squashReadOnly` is enabled. |
 | `sshUrlToRepo` | [`String`](#string) | URL to connect to the project via SSH. |
@@ -4663,21 +7445,817 @@ An edge in a connection.
 | `statistics` | [`ProjectStatistics`](#projectstatistics) | Statistics of the project. |
 | `suggestionCommitMessage` | [`String`](#string) | The commit message used to apply merge request suggestions. |
 | `tagList` | [`String`](#string) | List of project topics (not Git tags). |
-| `terraformState` | [`TerraformState`](#terraformstate) | Find a single Terraform state by name. |
-| `terraformStates` | [`TerraformStateConnection`](#terraformstateconnection) | Terraform states associated with the project. |
 | `userPermissions` | [`ProjectPermissions!`](#projectpermissions) | Permissions for the current user on the resource |
 | `visibility` | [`String`](#string) | Visibility of the project. |
-| `vulnerabilities` | [`VulnerabilityConnection`](#vulnerabilityconnection) | Vulnerabilities reported on the project. |
-| `vulnerabilitiesCountByDay` | [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnection) | Number of vulnerabilities per day for the project. |
-| `vulnerabilityScanners` | [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection) | Vulnerability scanners reported on the project vulnerabilities. |
-| `vulnerabilitySeveritiesCount` | [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount) | Counts for each vulnerability severity in the project. |
 | `webUrl` | [`String`](#string) | Web URL of the project. |
 | `wikiEnabled` | [`Boolean`](#boolean) | Indicates if Wikis are enabled for the current user |
 
+#### fields with arguments
+
+##### `alertManagementAlert`
+
+A single Alert Management alert of the project.
+
+Returns [`AlertManagementAlert`](#alertmanagementalert)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`String`](#string) | IID of the alert. For example, "1". |
+| `statuses` | [`[AlertManagementStatus!]`](#alertmanagementstatus) | Alerts with the specified statues. For example, [TRIGGERED]. |
+| `sort` | [`AlertManagementAlertSort`](#alertmanagementalertsort) | Sort alerts by this criteria. |
+| `domain` | [`AlertManagementDomainFilter!`](#alertmanagementdomainfilter) | Filter query for given domain. |
+| `search` | [`String`](#string) | Search query for title, description, service, or monitoring_tool. |
+| `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
+
+##### `alertManagementAlertStatusCounts`
+
+Counts of alerts by status for the project.
+
+Returns [`AlertManagementAlertStatusCountsType`](#alertmanagementalertstatuscountstype)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `search` | [`String`](#string) | Search query for title, description, service, or monitoring_tool. |
+| `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
+
+##### `alertManagementAlerts`
+
+Alert Management alerts of the project.
+
+Returns [`AlertManagementAlertConnection`](#alertmanagementalertconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`String`](#string) | IID of the alert. For example, "1". |
+| `statuses` | [`[AlertManagementStatus!]`](#alertmanagementstatus) | Alerts with the specified statues. For example, [TRIGGERED]. |
+| `sort` | [`AlertManagementAlertSort`](#alertmanagementalertsort) | Sort alerts by this criteria. |
+| `domain` | [`AlertManagementDomainFilter!`](#alertmanagementdomainfilter) | Filter query for given domain. |
+| `search` | [`String`](#string) | Search query for title, description, service, or monitoring_tool. |
+| `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `alertManagementHttpIntegrations`
+
+HTTP Integrations which can receive alerts for the project.
+
+Returns [`AlertManagementHttpIntegrationConnection`](#alertmanagementhttpintegrationconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `alertManagementIntegrations`
+
+Integrations which can receive alerts for the project.
+
+Returns [`AlertManagementIntegrationConnection`](#alertmanagementintegrationconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `alertManagementPayloadFields`
+
+Extract alert fields from payload for custom mapping.
+
+Returns [`[AlertManagementPayloadAlertField!]`](#alertmanagementpayloadalertfield)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `payloadExample` | [`String!`](#string) | Sample payload for extracting alert fields for custom mappings. |
+
+##### `board`
+
+A single board of the project.
+
+Returns [`Board`](#board)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`BoardID!`](#boardid) | The board's ID. |
+
+##### `boards`
+
+Boards of the project.
+
+Returns [`BoardConnection`](#boardconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`BoardID`](#boardid) | Find a board by its ID. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `clusterAgent`
+
+Find a single cluster agent by name.
+
+Returns [`ClusterAgent`](#clusteragent)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `name` | [`String!`](#string) | Name of the cluster agent. |
+
+##### `clusterAgents`
+
+Cluster agents associated with the project.
+
+Returns [`ClusterAgentConnection`](#clusteragentconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `complianceFrameworks`
+
+Compliance frameworks associated with the project.
+
+Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `containerRepositories`
+
+Container repositories of the project.
+
+Returns [`ContainerRepositoryConnection`](#containerrepositoryconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `name` | [`String`](#string) | Filter the container repositories by their name. |
+| `sort` | [`ContainerRepositorySort`](#containerrepositorysort) | Sort container repositories by this criteria. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `dastProfiles`
+
+DAST Profiles associated with the project. Always returns no nodes if `dast_saved_scans` is disabled.
+
+Returns [`DastProfileConnection`](#dastprofileconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `dastScannerProfiles`
+
+The DAST scanner profiles associated with the project.
+
+Returns [`DastScannerProfileConnection`](#dastscannerprofileconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `dastSiteProfile`
+
+DAST Site Profile associated with the project.
+
+Returns [`DastSiteProfile`](#dastsiteprofile)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`DastSiteProfileID!`](#dastsiteprofileid) | ID of the site profile. |
+
+##### `dastSiteProfiles`
+
+DAST Site Profiles associated with the project.
+
+Returns [`DastSiteProfileConnection`](#dastsiteprofileconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `dastSiteValidations`
+
+DAST Site Validations associated with the project.
+
+Returns [`DastSiteValidationConnection`](#dastsitevalidationconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `normalizedTargetUrls` | [`[String!]`](#string) | Normalized URL of the target to be scanned. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `environment`
+
+A single environment of the project.
+
+Returns [`Environment`](#environment)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `name` | [`String`](#string) | Name of the environment. |
+| `search` | [`String`](#string) | Search query for environment name. |
+| `states` | [`[String!]`](#string) | States of environments that should be included in result. |
+
+##### `environments`
+
+Environments of the project.
+
+Returns [`EnvironmentConnection`](#environmentconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `name` | [`String`](#string) | Name of the environment. |
+| `search` | [`String`](#string) | Search query for environment name. |
+| `states` | [`[String!]`](#string) | States of environments that should be included in result. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `incidentManagementOncallSchedules`
+
+Incident Management On-call schedules of the project.
+
+Returns [`IncidentManagementOncallScheduleConnection`](#incidentmanagementoncallscheduleconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `issue`
+
+A single issue of the project.
+
+Returns [`Issue`](#issue)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| `iids` | [`[String!]`](#string) | List of IIDs of issues. For example, [1, 2]. |
+| `labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| `milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| `authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
+| `assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| `assigneeId` | [`String`](#string) | ID of a user assigned to the issues, "none" and "any" values are supported. |
+| `createdBefore` | [`Time`](#time) | Issues created before this date. |
+| `createdAfter` | [`Time`](#time) | Issues created after this date. |
+| `updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| `updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| `closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| `closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| `search` | [`String`](#string) | Search query for issue title or description. |
+| `types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| `state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| `sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| `iterationId` | [`[ID]`](#id) | Iterations applied to the issue. |
+| `epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+
+##### `issueStatusCounts`
+
+Counts of issues by status for the project.
+
+Returns [`IssueStatusCountsType`](#issuestatuscountstype)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| `iids` | [`[String!]`](#string) | List of IIDs of issues. For example, [1, 2]. |
+| `labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| `milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| `authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
+| `assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| `assigneeId` | [`String`](#string) | ID of a user assigned to the issues, "none" and "any" values are supported. |
+| `createdBefore` | [`Time`](#time) | Issues created before this date. |
+| `createdAfter` | [`Time`](#time) | Issues created after this date. |
+| `updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| `updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| `closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| `closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| `search` | [`String`](#string) | Search query for issue title or description. |
+| `types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+
+##### `issues`
+
+Issues of the project.
+
+Returns [`IssueConnection`](#issueconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`String`](#string) | IID of the issue. For example, "1". |
+| `iids` | [`[String!]`](#string) | List of IIDs of issues. For example, [1, 2]. |
+| `labelName` | [`[String]`](#string) | Labels applied to this issue. |
+| `milestoneTitle` | [`[String]`](#string) | Milestone applied to this issue. |
+| `authorUsername` | [`String`](#string) | Username of the author of the issue. |
+| `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
+| `assigneeUsernames` | [`[String!]`](#string) | Usernames of users assigned to the issue. |
+| `assigneeId` | [`String`](#string) | ID of a user assigned to the issues, "none" and "any" values are supported. |
+| `createdBefore` | [`Time`](#time) | Issues created before this date. |
+| `createdAfter` | [`Time`](#time) | Issues created after this date. |
+| `updatedBefore` | [`Time`](#time) | Issues updated before this date. |
+| `updatedAfter` | [`Time`](#time) | Issues updated after this date. |
+| `closedBefore` | [`Time`](#time) | Issues closed before this date. |
+| `closedAfter` | [`Time`](#time) | Issues closed after this date. |
+| `search` | [`String`](#string) | Search query for issue title or description. |
+| `types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
+| `state` | [`IssuableState`](#issuablestate) | Current state of this issue. |
+| `sort` | [`IssueSort`](#issuesort) | Sort issues by this criteria. |
+| `iterationId` | [`[ID]`](#id) | Iterations applied to the issue. |
+| `epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `iterations`
+
+Find iterations.
+
+Returns [`IterationConnection`](#iterationconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `state` | [`IterationState`](#iterationstate) | Filter iterations by state. |
+| `title` | [`String`](#string) | Fuzzy search by title. |
+| `id` | [`ID`](#id) | Global ID of the Iteration to look up. |
+| `iid` | [`ID`](#id) | Internal ID of the Iteration to look up. |
+| `includeAncestors` | [`Boolean`](#boolean) | Whether to include ancestor iterations. Defaults to true. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `jiraImports`
+
+Jira imports into the project.
+
+Returns [`JiraImportConnection`](#jiraimportconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `label`
+
+A label available on this project.
+
+Returns [`Label`](#label)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `title` | [`String!`](#string) | Title of the label. |
+
+##### `labels`
+
+Labels available on this project.
+
+Returns [`LabelConnection`](#labelconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `searchTerm` | [`String`](#string) | A search term to find labels with. |
+| `includeAncestorGroups` | [`Boolean`](#boolean) | Include labels from ancestor groups. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `mergeRequest`
+
+A single merge request of the project.
+
+Returns [`MergeRequest`](#mergerequest)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`String!`](#string) | IID of the merge request, for example `1`. |
+
+##### `mergeRequests`
+
+Merge requests of the project.
+
+Returns [`MergeRequestConnection`](#mergerequestconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
+| `sourceBranches` | [`[String!]`](#string) | Array of source branch names. All resolved merge requests will have one of these branches as their source. |
+| `targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
+| `state` | [`MergeRequestState`](#mergerequeststate) | A merge request state. If provided, all resolved merge requests will have this state. |
+| `labels` | [`[String!]`](#string) | Array of label names. All resolved merge requests will have all of these labels. |
+| `mergedAfter` | [`Time`](#time) | Merge requests merged after this date. |
+| `mergedBefore` | [`Time`](#time) | Merge requests merged before this date. |
+| `milestoneTitle` | [`String`](#string) | Title of the milestone. |
+| `sort` | [`MergeRequestSort`](#mergerequestsort) | Sort merge requests by this criteria. |
+| `assigneeUsername` | [`String`](#string) | Username of the assignee. |
+| `authorUsername` | [`String`](#string) | Username of the author. |
+| `reviewerUsername` | [`String`](#string) | Username of the reviewer. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `milestones`
+
+Milestones of the project.
+
+Returns [`MilestoneConnection`](#milestoneconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
+| `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
+| `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+| `ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1". |
+| `state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
+| `title` | [`String`](#string) | The title of the milestone. |
+| `searchTitle` | [`String`](#string) | A search string for the title. |
+| `containingDate` | [`Time`](#time) | A date that the milestone contains. |
+| `includeAncestors` | [`Boolean`](#boolean) | Also return milestones in the project's parent group and its ancestors. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `packages`
+
+Packages of the project.
+
+Returns [`PackageConnection`](#packageconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `pipeline`
+
+Build pipeline of the project.
+
+Returns [`Pipeline`](#pipeline)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iid` | [`ID`](#id) | IID of the Pipeline. For example, "1". |
+| `sha` | [`String`](#string) | SHA of the Pipeline. For example, "dyd0f15ay83993f5ab66k927w28673882x99100b". |
+
+##### `pipelines`
+
+Build pipelines of the project.
+
+Returns [`PipelineConnection`](#pipelineconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `status` | [`PipelineStatusEnum`](#pipelinestatusenum) | Filter pipelines by their status. |
+| `ref` | [`String`](#string) | Filter pipelines by the ref they are run for. |
+| `sha` | [`String`](#string) | Filter pipelines by the sha of the commit they are run for. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `projectMembers`
+
+Members of the project.
+
+Returns [`MemberInterfaceConnection`](#memberinterfaceconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `search` | [`String`](#string) | Search query. |
+| `relations` | [`[ProjectMemberRelation!]`](#projectmemberrelation) | Filter members by the given member relations. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `release`
+
+A single release of the project.
+
+Returns [`Release`](#release)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `tagName` | [`String!`](#string) | The name of the tag associated to the release. |
+
+##### `releases`
+
+Releases of the project.
+
+Returns [`ReleaseConnection`](#releaseconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `sort` | [`ReleaseSort`](#releasesort) | Sort releases by this criteria. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `requirement`
+
+Find a single requirement.
+
+Returns [`Requirement`](#requirement)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `sort` | [`Sort`](#sort) | List requirements by sort order. |
+| `state` | [`RequirementState`](#requirementstate) | Filter requirements by state. |
+| `search` | [`String`](#string) | Search query for requirement title. |
+| `authorUsername` | [`[String!]`](#string) | Filter requirements by author username. |
+| `iid` | [`ID`](#id) | IID of the requirement, e.g., "1". |
+| `iids` | [`[ID!]`](#id) | List of IIDs of requirements, e.g., [1, 2]. |
+| `lastTestReportState` | [`RequirementStatusFilter`](#requirementstatusfilter) | The state of latest requirement test report. |
+
+##### `requirements`
+
+Find requirements.
+
+Returns [`RequirementConnection`](#requirementconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `sort` | [`Sort`](#sort) | List requirements by sort order. |
+| `state` | [`RequirementState`](#requirementstate) | Filter requirements by state. |
+| `search` | [`String`](#string) | Search query for requirement title. |
+| `authorUsername` | [`[String!]`](#string) | Filter requirements by author username. |
+| `iid` | [`ID`](#id) | IID of the requirement, e.g., "1". |
+| `iids` | [`[ID!]`](#id) | List of IIDs of requirements, e.g., [1, 2]. |
+| `lastTestReportState` | [`RequirementStatusFilter`](#requirementstatusfilter) | The state of latest requirement test report. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `sentryDetailedError`
+
+Detailed version of a Sentry error on the project.
+
+Returns [`SentryDetailedError`](#sentrydetailederror)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`GitlabErrorTrackingDetailedErrorID!`](#gitlaberrortrackingdetailederrorid) | ID of the Sentry issue. |
+
+##### `services`
+
+Project services.
+
+Returns [`ServiceConnection`](#serviceconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `active` | [`Boolean`](#boolean) | Indicates if the service is active. |
+| `type` | [`ServiceType`](#servicetype) | Class name of the service. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `snippets`
+
+Snippets of the project.
+
+Returns [`SnippetConnection`](#snippetconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[SnippetID!]`](#snippetid) | Array of global snippet IDs. For example, `gid://gitlab/ProjectSnippet/1`. |
+| `visibility` | [`VisibilityScopesEnum`](#visibilityscopesenum) | The visibility of the snippet. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `terraformState`
+
+Find a single Terraform state by name.
+
+Returns [`TerraformState`](#terraformstate)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `name` | [`String!`](#string) | Name of the Terraform state. |
+
+##### `terraformStates`
+
+Terraform states associated with the project.
+
+Returns [`TerraformStateConnection`](#terraformstateconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilities`
+
+Vulnerabilities reported on the project.
+
+Returns [`VulnerabilityConnection`](#vulnerabilityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
+| `reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
+| `severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
+| `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
+| `scanner` | [`[String!]`](#string) | Filter vulnerabilities by VulnerabilityScanner.externalId. |
+| `sort` | [`VulnerabilitySort`](#vulnerabilitysort) | List vulnerabilities by sort order. |
+| `hasResolution` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have been resolved on default branch. |
+| `hasIssues` | [`Boolean`](#boolean) | Returns only the vulnerabilities which have linked issues. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilitiesCountByDay`
+
+Number of vulnerabilities per day for the project.
+
+Returns [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
+| `endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilityScanners`
+
+Vulnerability scanners reported on the project vulnerabilities.
+
+Returns [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `vulnerabilitySeveritiesCount`
+
+Counts for each vulnerability severity in the project.
+
+Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
+| `reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
+| `severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
+| `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
+| `scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
+
 ### `ProjectCiCdSetting`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `keepLatestArtifact` | [`Boolean`](#boolean) | Whether to keep the latest builds artifacts. |
 | `mergePipelinesEnabled` | [`Boolean`](#boolean) | Whether merge pipelines are enabled. |
 | `mergeTrainsEnabled` | [`Boolean`](#boolean) | Whether merge trains are enabled. |
@@ -4687,8 +8265,10 @@ An edge in a connection.
 
 The connection type for Project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ProjectEdge]`](#projectedge) | A list of edges. |
 | `nodes` | [`[Project]`](#project) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4697,8 +8277,10 @@ The connection type for Project.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Project`](#project) | The item at the end of the edge. |
 
@@ -4706,8 +8288,10 @@ An edge in a connection.
 
 Represents a Project Membership.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `accessLevel` | [`AccessLevel`](#accesslevel) | GitLab::Access level. |
 | `createdAt` | [`Time`](#time) | Date and time the membership was created. |
 | `createdBy` | [`User`](#user) | User that authorized membership. |
@@ -4722,8 +8306,10 @@ Represents a Project Membership.
 
 The connection type for ProjectMember.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ProjectMemberEdge]`](#projectmemberedge) | A list of edges. |
 | `nodes` | [`[ProjectMember]`](#projectmember) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4732,15 +8318,19 @@ The connection type for ProjectMember.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ProjectMember`](#projectmember) | The item at the end of the edge. |
 
 ### `ProjectPermissions`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminOperations` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_operations` on this resource |
 | `adminProject` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_project` on this resource |
 | `adminRemoteMirror` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_remote_mirror` on this resource |
@@ -4786,8 +8376,10 @@ An edge in a connection.
 
 ### `ProjectStatistics`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `buildArtifactsSize` | [`Float!`](#float) | Build artifacts size of the project in bytes. |
 | `commitCount` | [`Float!`](#float) | Commit count of the project. |
 | `lfsObjectsSize` | [`Float!`](#float) | Large File Storage (LFS) object size of the project in bytes. |
@@ -4802,8 +8394,10 @@ An edge in a connection.
 
 The alert condition for Prometheus.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `humanizedText` | [`String!`](#string) | The human-readable text of the alert condition. |
 | `id` | [`ID!`](#id) | ID of the alert condition. |
 
@@ -4811,8 +8405,10 @@ The alert condition for Prometheus.
 
 Autogenerated return type of PrometheusIntegrationCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementPrometheusIntegration`](#alertmanagementprometheusintegration) | The newly created integration. |
@@ -4821,8 +8417,10 @@ Autogenerated return type of PrometheusIntegrationCreate.
 
 Autogenerated return type of PrometheusIntegrationResetToken.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementPrometheusIntegration`](#alertmanagementprometheusintegration) | The newly created integration. |
@@ -4831,8 +8429,10 @@ Autogenerated return type of PrometheusIntegrationResetToken.
 
 Autogenerated return type of PrometheusIntegrationUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementPrometheusIntegration`](#alertmanagementprometheusintegration) | The newly created integration. |
@@ -4841,8 +8441,10 @@ Autogenerated return type of PrometheusIntegrationUpdate.
 
 Autogenerated return type of PromoteToEpic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epic` | [`Epic`](#epic) | The epic after issue promotion. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -4852,29 +8454,63 @@ Autogenerated return type of PromoteToEpic.
 
 Represents a release.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `assets` | [`ReleaseAssets`](#releaseassets) | Assets of the release. |
 | `author` | [`User`](#user) | User that created the release. |
 | `commit` | [`Commit`](#commit) | The commit associated with the release. |
 | `createdAt` | [`Time`](#time) | Timestamp of when the release was created. |
 | `description` | [`String`](#string) | Description (also known as "release notes") of the release. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
-| `evidences` | [`ReleaseEvidenceConnection`](#releaseevidenceconnection) | Evidence for the release. |
 | `links` | [`ReleaseLinks`](#releaselinks) | Links of the release. |
-| `milestones` | [`MilestoneConnection`](#milestoneconnection) | Milestones associated to the release. |
 | `name` | [`String`](#string) | Name of the release. |
 | `releasedAt` | [`Time`](#time) | Timestamp of when the release was released. |
 | `tagName` | [`String`](#string) | Name of the tag associated with the release. |
 | `tagPath` | [`String`](#string) | Relative web path to the tag associated with the release. |
 | `upcomingRelease` | [`Boolean`](#boolean) | Indicates the release is an upcoming release. |
 
+#### fields with arguments
+
+##### `evidences`
+
+Evidence for the release.
+
+Returns [`ReleaseEvidenceConnection`](#releaseevidenceconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `milestones`
+
+Milestones associated to the release.
+
+Returns [`MilestoneConnection`](#milestoneconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `ReleaseAssetLink`
 
 Represents an asset link associated with a release.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `directAssetUrl` | [`String`](#string) | Direct asset URL of the link. |
 | `external` | [`Boolean`](#boolean) | Indicates the link points to an external resource. |
 | `id` | [`ID!`](#id) | ID of the link. |
@@ -4886,8 +8522,10 @@ Represents an asset link associated with a release.
 
 The connection type for ReleaseAssetLink.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ReleaseAssetLinkEdge]`](#releaseassetlinkedge) | A list of edges. |
 | `nodes` | [`[ReleaseAssetLink]`](#releaseassetlink) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4896,8 +8534,10 @@ The connection type for ReleaseAssetLink.
 
 Autogenerated return type of ReleaseAssetLinkCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `link` | [`ReleaseAssetLink`](#releaseassetlink) | The asset link after mutation. |
@@ -4906,8 +8546,10 @@ Autogenerated return type of ReleaseAssetLinkCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ReleaseAssetLink`](#releaseassetlink) | The item at the end of the edge. |
 
@@ -4915,18 +8557,52 @@ An edge in a connection.
 
 A container for all assets associated with a release.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int`](#int) | Number of assets of the release. |
-| `links` | [`ReleaseAssetLinkConnection`](#releaseassetlinkconnection) | Asset links of the release. |
-| `sources` | [`ReleaseSourceConnection`](#releasesourceconnection) | Sources of the release. |
+
+#### fields with arguments
+
+##### `links`
+
+Asset links of the release.
+
+Returns [`ReleaseAssetLinkConnection`](#releaseassetlinkconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `sources`
+
+Sources of the release.
+
+Returns [`ReleaseSourceConnection`](#releasesourceconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `ReleaseConnection`
 
 The connection type for Release.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[ReleaseEdge]`](#releaseedge) | A list of edges. |
 | `nodes` | [`[Release]`](#release) | A list of nodes. |
@@ -4936,8 +8612,10 @@ The connection type for Release.
 
 Autogenerated return type of ReleaseCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `release` | [`Release`](#release) | The release after mutation. |
@@ -4946,8 +8624,10 @@ Autogenerated return type of ReleaseCreate.
 
 Autogenerated return type of ReleaseDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `release` | [`Release`](#release) | The deleted release. |
@@ -4956,8 +8636,10 @@ Autogenerated return type of ReleaseDelete.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Release`](#release) | The item at the end of the edge. |
 
@@ -4965,8 +8647,10 @@ An edge in a connection.
 
 Evidence for a release.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `collectedAt` | [`Time`](#time) | Timestamp when the evidence was collected. |
 | `filepath` | [`String`](#string) | URL from where the evidence can be downloaded. |
 | `id` | [`ID!`](#id) | ID of the evidence. |
@@ -4976,8 +8660,10 @@ Evidence for a release.
 
 The connection type for ReleaseEvidence.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ReleaseEvidenceEdge]`](#releaseevidenceedge) | A list of edges. |
 | `nodes` | [`[ReleaseEvidence]`](#releaseevidence) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -4986,15 +8672,19 @@ The connection type for ReleaseEvidence.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ReleaseEvidence`](#releaseevidence) | The item at the end of the edge. |
 
 ### `ReleaseLinks`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `closedIssuesUrl` | [`String`](#string) | HTTP URL of the issues page, filtered by this release and `state=closed`. |
 | `closedMergeRequestsUrl` | [`String`](#string) | HTTP URL of the merge request page , filtered by this release and `state=closed`. |
 | `editUrl` | [`String`](#string) | HTTP URL of the release's edit page. |
@@ -5007,8 +8697,10 @@ An edge in a connection.
 
 Represents the source code attached to a release in a particular format.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `format` | [`String`](#string) | Format of the source. |
 | `url` | [`String`](#string) | Download URL of the source. |
 
@@ -5016,8 +8708,10 @@ Represents the source code attached to a release in a particular format.
 
 The connection type for ReleaseSource.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ReleaseSourceEdge]`](#releasesourceedge) | A list of edges. |
 | `nodes` | [`[ReleaseSource]`](#releasesource) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5026,8 +8720,10 @@ The connection type for ReleaseSource.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ReleaseSource`](#releasesource) | The item at the end of the edge. |
 
@@ -5035,8 +8731,10 @@ An edge in a connection.
 
 Autogenerated return type of ReleaseUpdate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `release` | [`Release`](#release) | The release after mutation. |
@@ -5045,8 +8743,10 @@ Autogenerated return type of ReleaseUpdate.
 
 Autogenerated return type of RemoveAwardEmoji.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -5055,8 +8755,10 @@ Autogenerated return type of RemoveAwardEmoji.
 
 Autogenerated return type of RemoveProjectFromSecurityDashboard.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -5064,27 +8766,48 @@ Autogenerated return type of RemoveProjectFromSecurityDashboard.
 
 Autogenerated return type of RepositionImageDiffNote.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
 ### `Repository`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `empty` | [`Boolean!`](#boolean) | Indicates repository has no visible content. |
 | `exists` | [`Boolean!`](#boolean) | Indicates a corresponding Git repository exists on disk. |
 | `rootRef` | [`String`](#string) | Default branch of the repository. |
-| `tree` | [`Tree`](#tree) | Tree of the repository. |
+
+#### fields with arguments
+
+##### `tree`
+
+Tree of the repository.
+
+Returns [`Tree`](#tree)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `path` | [`String`](#string) | The path to get the tree for. Default value is the root of the repository. |
+| `ref` | [`String`](#string) | The commit ref to get the tree for. Default value is HEAD. |
+| `recursive` | [`Boolean`](#boolean) | Used to get a recursive tree. Default is false. |
 
 ### `Requirement`
 
 Represents a requirement.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `author` | [`User!`](#user) | Author of the requirement. |
 | `createdAt` | [`Time!`](#time) | Timestamp of when the requirement was created. |
 | `description` | [`String`](#string) | Description of the requirement. |
@@ -5095,18 +8818,37 @@ Represents a requirement.
 | `lastTestReportState` | [`TestReportState`](#testreportstate) | Latest requirement test report state. |
 | `project` | [`Project!`](#project) | Project to which the requirement belongs. |
 | `state` | [`RequirementState!`](#requirementstate) | State of the requirement. |
-| `testReports` | [`TestReportConnection`](#testreportconnection) | Test reports of the requirement. |
 | `title` | [`String`](#string) | Title of the requirement. |
 | `titleHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `title` |
 | `updatedAt` | [`Time!`](#time) | Timestamp of when the requirement was last updated. |
 | `userPermissions` | [`RequirementPermissions!`](#requirementpermissions) | Permissions for the current user on the resource |
 
+#### fields with arguments
+
+##### `testReports`
+
+Test reports of the requirement.
+
+Returns [`TestReportConnection`](#testreportconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `sort` | [`Sort`](#sort) | List test reports by sort order. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `RequirementConnection`
 
 The connection type for Requirement.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[RequirementEdge]`](#requirementedge) | A list of edges. |
 | `nodes` | [`[Requirement]`](#requirement) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5115,8 +8857,10 @@ The connection type for Requirement.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Requirement`](#requirement) | The item at the end of the edge. |
 
@@ -5124,8 +8868,10 @@ An edge in a connection.
 
 Check permissions for the current user on a requirement.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminRequirement` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_requirement` on this resource |
 | `createRequirement` | [`Boolean!`](#boolean) | Indicates the user can perform `create_requirement` on this resource |
 | `destroyRequirement` | [`Boolean!`](#boolean) | Indicates the user can perform `destroy_requirement` on this resource |
@@ -5136,8 +8882,10 @@ Check permissions for the current user on a requirement.
 
 Counts of requirements by their state.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `archived` | [`Int`](#int) | Number of archived requirements. |
 | `opened` | [`Int`](#int) | Number of opened requirements. |
 
@@ -5145,16 +8893,20 @@ Counts of requirements by their state.
 
 Autogenerated return type of RevertVulnerabilityToDetected.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after revert. |
 
 ### `RootStorageStatistics`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `buildArtifactsSize` | [`Float!`](#float) | The CI artifacts size in bytes. |
 | `lfsObjectsSize` | [`Float!`](#float) | The LFS objects size in bytes. |
 | `packagesSize` | [`Float!`](#float) | The packages size in bytes. |
@@ -5169,16 +8921,20 @@ Autogenerated return type of RevertVulnerabilityToDetected.
 
 Autogenerated return type of RunDASTScan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
 
 ### `RunnerArchitecture`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `downloadLocation` | [`String!`](#string) | Download location for the runner for the platform architecture. |
 | `name` | [`String!`](#string) | Name of the runner platform architecture. |
 
@@ -5186,8 +8942,10 @@ Autogenerated return type of RunDASTScan.
 
 The connection type for RunnerArchitecture.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[RunnerArchitectureEdge]`](#runnerarchitectureedge) | A list of edges. |
 | `nodes` | [`[RunnerArchitecture]`](#runnerarchitecture) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5196,25 +8954,47 @@ The connection type for RunnerArchitecture.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`RunnerArchitecture`](#runnerarchitecture) | The item at the end of the edge. |
 
 ### `RunnerPlatform`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `architectures` | [`RunnerArchitectureConnection`](#runnerarchitectureconnection) | Runner architectures supported for the platform. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `humanReadableName` | [`String!`](#string) | Human readable name of the runner platform. |
 | `name` | [`String!`](#string) | Name slug of the runner platform. |
+
+#### fields with arguments
+
+##### `architectures`
+
+Runner architectures supported for the platform.
+
+Returns [`RunnerArchitectureConnection`](#runnerarchitectureconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `RunnerPlatformConnection`
 
 The connection type for RunnerPlatform.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[RunnerPlatformEdge]`](#runnerplatformedge) | A list of edges. |
 | `nodes` | [`[RunnerPlatform]`](#runnerplatform) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5223,15 +9003,19 @@ The connection type for RunnerPlatform.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`RunnerPlatform`](#runnerplatform) | The item at the end of the edge. |
 
 ### `RunnerSetup`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `installInstructions` | [`String!`](#string) | Instructions for installing the runner on the specified architecture. |
 | `registerInstructions` | [`String`](#string) | Instructions for registering the runner. |
 
@@ -5239,30 +9023,91 @@ An edge in a connection.
 
 Represents a CI configuration of SAST.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `analyzers` | [`SastCiConfigurationAnalyzersEntityConnection`](#sastciconfigurationanalyzersentityconnection) | List of analyzers entities attached to SAST configuration. |
-| `global` | [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnection) | List of global entities related to SAST configuration. |
-| `pipeline` | [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnection) | List of pipeline entities related to SAST configuration. |
+#### fields with arguments
+
+##### `analyzers`
+
+List of analyzers entities attached to SAST configuration.
+
+Returns [`SastCiConfigurationAnalyzersEntityConnection`](#sastciconfigurationanalyzersentityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `global`
+
+List of global entities related to SAST configuration.
+
+Returns [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `pipeline`
+
+List of pipeline entities related to SAST configuration.
+
+Returns [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `SastCiConfigurationAnalyzersEntity`
 
 Represents an analyzer entity in SAST CI configuration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Analyzer description that is displayed on the form. |
 | `enabled` | [`Boolean`](#boolean) | Indicates whether an analyzer is enabled. |
 | `label` | [`String`](#string) | Analyzer label used in the config UI. |
 | `name` | [`String`](#string) | Name of the analyzer. |
-| `variables` | [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnection) | List of supported variables. |
+
+#### fields with arguments
+
+##### `variables`
+
+List of supported variables.
+
+Returns [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `SastCiConfigurationAnalyzersEntityConnection`
 
 The connection type for SastCiConfigurationAnalyzersEntity.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SastCiConfigurationAnalyzersEntityEdge]`](#sastciconfigurationanalyzersentityedge) | A list of edges. |
 | `nodes` | [`[SastCiConfigurationAnalyzersEntity]`](#sastciconfigurationanalyzersentity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5271,8 +9116,10 @@ The connection type for SastCiConfigurationAnalyzersEntity.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SastCiConfigurationAnalyzersEntity`](#sastciconfigurationanalyzersentity) | The item at the end of the edge. |
 
@@ -5280,23 +9127,43 @@ An edge in a connection.
 
 Represents an entity in SAST CI configuration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `defaultValue` | [`String`](#string) | Default value that is used if value is empty. |
 | `description` | [`String`](#string) | Entity description that is displayed on the form. |
 | `field` | [`String`](#string) | CI keyword of entity. |
 | `label` | [`String`](#string) | Label for entity used in the form. |
-| `options` | [`SastCiConfigurationOptionsEntityConnection`](#sastciconfigurationoptionsentityconnection) | Different possible values of the field. |
 | `size` | [`SastUiComponentSize`](#sastuicomponentsize) | Size of the UI component. |
 | `type` | [`String`](#string) | Type of the field value. |
 | `value` | [`String`](#string) | Current value of the entity. |
+
+#### fields with arguments
+
+##### `options`
+
+Different possible values of the field.
+
+Returns [`SastCiConfigurationOptionsEntityConnection`](#sastciconfigurationoptionsentityconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `SastCiConfigurationEntityConnection`
 
 The connection type for SastCiConfigurationEntity.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SastCiConfigurationEntityEdge]`](#sastciconfigurationentityedge) | A list of edges. |
 | `nodes` | [`[SastCiConfigurationEntity]`](#sastciconfigurationentity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5305,8 +9172,10 @@ The connection type for SastCiConfigurationEntity.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SastCiConfigurationEntity`](#sastciconfigurationentity) | The item at the end of the edge. |
 
@@ -5314,8 +9183,10 @@ An edge in a connection.
 
 Represents an entity for options in SAST CI configuration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `label` | [`String`](#string) | Label of option entity. |
 | `value` | [`String`](#string) | Value of option entity. |
 
@@ -5323,8 +9194,10 @@ Represents an entity for options in SAST CI configuration.
 
 The connection type for SastCiConfigurationOptionsEntity.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SastCiConfigurationOptionsEntityEdge]`](#sastciconfigurationoptionsentityedge) | A list of edges. |
 | `nodes` | [`[SastCiConfigurationOptionsEntity]`](#sastciconfigurationoptionsentity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5333,8 +9206,10 @@ The connection type for SastCiConfigurationOptionsEntity.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SastCiConfigurationOptionsEntity`](#sastciconfigurationoptionsentity) | The item at the end of the edge. |
 
@@ -5342,8 +9217,10 @@ An edge in a connection.
 
 Represents a resource scanned by a security scan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `requestMethod` | [`String`](#string) | The HTTP request method used to access the URL. |
 | `url` | [`String`](#string) | The URL scanned by the scanner. |
 
@@ -5351,8 +9228,10 @@ Represents a resource scanned by a security scan.
 
 The connection type for ScannedResource.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ScannedResourceEdge]`](#scannedresourceedge) | A list of edges. |
 | `nodes` | [`[ScannedResource]`](#scannedresource) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5361,8 +9240,10 @@ The connection type for ScannedResource.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ScannedResource`](#scannedresource) | The item at the end of the edge. |
 
@@ -5370,8 +9251,10 @@ An edge in a connection.
 
 Represents summary of a security report.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `apiFuzzing` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `api_fuzzing` scan |
 | `containerScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `container_scanning` scan |
 | `coverageFuzzing` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `coverage_fuzzing` scan |
@@ -5384,19 +9267,39 @@ Represents summary of a security report.
 
 Represents a section of a summary of a security report.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `scannedResources` | [`ScannedResourceConnection`](#scannedresourceconnection) | A list of the first 20 scanned resources. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `scannedResourcesCount` | [`Int`](#int) | Total number of scanned resources. |
 | `scannedResourcesCsvPath` | [`String`](#string) | Path to download all the scanned resources in CSV format. |
 | `vulnerabilitiesCount` | [`Int`](#int) | Total number of vulnerabilities. |
+
+#### fields with arguments
+
+##### `scannedResources`
+
+A list of the first 20 scanned resources.
+
+Returns [`ScannedResourceConnection`](#scannedresourceconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `SecurityScanners`
 
 Represents a list of security scanners.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `available` | [`[SecurityScannerType!]`](#securityscannertype) | List of analyzers which are available for the project. |
 | `enabled` | [`[SecurityScannerType!]`](#securityscannertype) | List of analyzers which are enabled for the project. |
 | `pipelineRun` | [`[SecurityScannerType!]`](#securityscannertype) | List of analyzers which ran successfully in the latest pipeline. |
@@ -5405,8 +9308,10 @@ Represents a list of security scanners.
 
 A Sentry error.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Count of occurrences. |
 | `culprit` | [`String!`](#string) | Culprit of the error. |
 | `externalBaseUrl` | [`String!`](#string) | External Base URL of the Sentry Instance. |
@@ -5440,8 +9345,10 @@ A Sentry error.
 
 A Sentry error. A simplified version of SentryDetailedError.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Count of occurrences. |
 | `culprit` | [`String!`](#string) | Culprit of the error. |
 | `externalUrl` | [`String!`](#string) | External URL of the error. |
@@ -5464,19 +9371,63 @@ A Sentry error. A simplified version of SentryDetailedError.
 
 An object containing a collection of Sentry errors, and a detailed error.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `detailedError` | [`SentryDetailedError`](#sentrydetailederror) | Detailed version of a Sentry error on the project. |
-| `errorStackTrace` | [`SentryErrorStackTrace`](#sentryerrorstacktrace) | Stack Trace of Sentry Error. |
-| `errors` | [`SentryErrorConnection`](#sentryerrorconnection) | Collection of Sentry Errors. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `externalUrl` | [`String`](#string) | External URL for Sentry. |
+
+#### fields with arguments
+
+##### `detailedError`
+
+Detailed version of a Sentry error on the project.
+
+Returns [`SentryDetailedError`](#sentrydetailederror)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`GitlabErrorTrackingDetailedErrorID!`](#gitlaberrortrackingdetailederrorid) | ID of the Sentry issue. |
+
+##### `errorStackTrace`
+
+Stack Trace of Sentry Error.
+
+Returns [`SentryErrorStackTrace`](#sentryerrorstacktrace)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `id` | [`GitlabErrorTrackingDetailedErrorID!`](#gitlaberrortrackingdetailederrorid) | ID of the Sentry issue. |
+
+##### `errors`
+
+Collection of Sentry Errors.
+
+Returns [`SentryErrorConnection`](#sentryerrorconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `searchTerm` | [`String`](#string) | Search query for the Sentry error details. |
+| `sort` | [`String`](#string) | Attribute to sort on. Options are frequency, first_seen, last_seen. last_seen is default. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `SentryErrorConnection`
 
 The connection type for SentryError.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SentryErrorEdge]`](#sentryerroredge) | A list of edges. |
 | `nodes` | [`[SentryError]`](#sentryerror) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5485,15 +9436,19 @@ The connection type for SentryError.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SentryError`](#sentryerror) | The item at the end of the edge. |
 
 ### `SentryErrorFrequency`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Count of errors received since the previously recorded time. |
 | `time` | [`Time!`](#time) | Time the error frequency stats were recorded. |
 
@@ -5501,8 +9456,10 @@ An edge in a connection.
 
 An object containing a stack trace entry for a Sentry error.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `dateReceived` | [`String!`](#string) | Time the stack trace was received by Sentry. |
 | `issueId` | [`String!`](#string) | ID of the Sentry error. |
 | `stackTraceEntries` | [`[SentryErrorStackTraceEntry!]!`](#sentryerrorstacktraceentry) | Stack trace entries for the Sentry error. |
@@ -5511,8 +9468,10 @@ An object containing a stack trace entry for a Sentry error.
 
 An object context for a Sentry error stack trace.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `code` | [`String!`](#string) | Code number of the context. |
 | `line` | [`Int!`](#int) | Line number of the context. |
 
@@ -5520,8 +9479,10 @@ An object context for a Sentry error stack trace.
 
 An object containing a stack trace entry for a Sentry error.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `col` | [`String`](#string) | Function in which the Sentry error occurred. |
 | `fileName` | [`String`](#string) | File in which the Sentry error occurred. |
 | `function` | [`String`](#string) | Function in which the Sentry error occurred. |
@@ -5532,8 +9493,10 @@ An object containing a stack trace entry for a Sentry error.
 
 State of a Sentry error.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `level` | [`String`](#string) | Severity level of the Sentry Error. |
 | `logger` | [`String`](#string) | Logger of the Sentry Error. |
 
@@ -5541,8 +9504,10 @@ State of a Sentry error.
 
 The connection type for Service.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[ServiceEdge]`](#serviceedge) | A list of edges. |
 | `nodes` | [`[Service]`](#service) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5551,8 +9516,10 @@ The connection type for Service.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Service`](#service) | The item at the end of the edge. |
 
@@ -5560,19 +9527,18 @@ An edge in a connection.
 
 Represents a snippet entry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `author` | [`User`](#user) | The owner of the snippet. |
 | `blob` **{warning-solid}** | [`SnippetBlob!`](#snippetblob) | **Deprecated:** Use `blobs`. Deprecated in 13.3. |
-| `blobs` | [`SnippetBlobConnection`](#snippetblobconnection) | Snippet blobs. |
 | `createdAt` | [`Time!`](#time) | Timestamp this snippet was created. |
 | `description` | [`String`](#string) | Description of the snippet. |
 | `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description` |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `fileName` | [`String`](#string) | File Name of the snippet. |
 | `httpUrlToRepo` | [`String`](#string) | HTTP URL to the snippet repository. |
 | `id` | [`SnippetID!`](#snippetid) | ID of the snippet. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 | `project` | [`Project`](#project) | The project the snippet is associated with. |
 | `rawUrl` | [`String!`](#string) | Raw URL of the snippet. |
 | `sshUrlToRepo` | [`String`](#string) | SSH URL to the snippet repository. |
@@ -5582,12 +9548,62 @@ Represents a snippet entry.
 | `visibilityLevel` | [`VisibilityLevelsEnum!`](#visibilitylevelsenum) | Visibility Level of the snippet. |
 | `webUrl` | [`String!`](#string) | Web URL of the snippet. |
 
+#### fields with arguments
+
+##### `blobs`
+
+Snippet blobs.
+
+Returns [`SnippetBlobConnection`](#snippetblobconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `paths` | [`[String!]`](#string) | Paths of the blobs. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `SnippetBlob`
 
 Represents the snippet blob.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `binary` | [`Boolean!`](#boolean) | Shows whether the blob is binary. |
 | `externalStorage` | [`String`](#string) | Blob external storage. |
 | `mode` | [`String`](#string) | Blob mode. |
@@ -5605,8 +9621,10 @@ Represents the snippet blob.
 
 The connection type for SnippetBlob.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SnippetBlobEdge]`](#snippetblobedge) | A list of edges. |
 | `nodes` | [`[SnippetBlob]`](#snippetblob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5615,8 +9633,10 @@ The connection type for SnippetBlob.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SnippetBlob`](#snippetblob) | The item at the end of the edge. |
 
@@ -5624,8 +9644,10 @@ An edge in a connection.
 
 Represents how the blob content should be displayed.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `collapsed` | [`Boolean!`](#boolean) | Shows whether the blob should be displayed collapsed. |
 | `fileType` | [`String!`](#string) | Content file type. |
 | `loadAsync` | [`Boolean!`](#boolean) | Shows whether the blob content is loaded asynchronously. |
@@ -5638,8 +9660,10 @@ Represents how the blob content should be displayed.
 
 The connection type for Snippet.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SnippetEdge]`](#snippetedge) | A list of edges. |
 | `nodes` | [`[Snippet]`](#snippet) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5648,15 +9672,19 @@ The connection type for Snippet.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Snippet`](#snippet) | The item at the end of the edge. |
 
 ### `SnippetPermissions`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminSnippet` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_snippet` on this resource |
 | `awardEmoji` | [`Boolean!`](#boolean) | Indicates the user can perform `award_emoji` on this resource |
 | `createNote` | [`Boolean!`](#boolean) | Indicates the user can perform `create_note` on this resource |
@@ -5668,8 +9696,10 @@ An edge in a connection.
 
 Represents the Geo sync and verification state of a snippet repository.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp when the SnippetRepositoryRegistry was created |
 | `id` | [`ID!`](#id) | ID of the SnippetRepositoryRegistry |
 | `lastSyncFailure` | [`String`](#string) | Error message during sync of the SnippetRepositoryRegistry |
@@ -5683,8 +9713,10 @@ Represents the Geo sync and verification state of a snippet repository.
 
 The connection type for SnippetRepositoryRegistry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SnippetRepositoryRegistryEdge]`](#snippetrepositoryregistryedge) | A list of edges. |
 | `nodes` | [`[SnippetRepositoryRegistry]`](#snippetrepositoryregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5693,15 +9725,19 @@ The connection type for SnippetRepositoryRegistry.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SnippetRepositoryRegistry`](#snippetrepositoryregistry) | The item at the end of the edge. |
 
 ### `StatusAction`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `buttonTitle` | [`String`](#string) | Title for the button, for example: Retry this job. |
 | `icon` | [`String`](#string) | Icon used in the action button. |
 | `method` | [`String`](#string) | Method for the action, for example: :post. |
@@ -5710,8 +9746,10 @@ An edge in a connection.
 
 ### `Submodule`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `flatPath` | [`String!`](#string) | Flat path of the entry. |
 | `id` | [`ID!`](#id) | ID of the entry. |
 | `name` | [`String!`](#string) | Name of the entry. |
@@ -5725,8 +9763,10 @@ An edge in a connection.
 
 The connection type for Submodule.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[SubmoduleEdge]`](#submoduleedge) | A list of edges. |
 | `nodes` | [`[Submodule]`](#submodule) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5735,8 +9775,10 @@ The connection type for Submodule.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Submodule`](#submodule) | The item at the end of the edge. |
 
@@ -5744,15 +9786,19 @@ An edge in a connection.
 
 Completion status of tasks.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `completedCount` | [`Int!`](#int) | Number of completed tasks. |
 | `count` | [`Int!`](#int) | Number of total tasks. |
 
 ### `TerraformState`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Timestamp the Terraform state was created. |
 | `id` | [`ID!`](#id) | ID of the Terraform state. |
 | `latestVersion` | [`TerraformStateVersion`](#terraformstateversion) | The latest version of the Terraform state. |
@@ -5765,8 +9811,10 @@ Completion status of tasks.
 
 The connection type for TerraformState.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Total count of collection. |
 | `edges` | [`[TerraformStateEdge]`](#terraformstateedge) | A list of edges. |
 | `nodes` | [`[TerraformState]`](#terraformstate) | A list of nodes. |
@@ -5776,8 +9824,10 @@ The connection type for TerraformState.
 
 Autogenerated return type of TerraformStateDelete.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -5785,8 +9835,10 @@ Autogenerated return type of TerraformStateDelete.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TerraformState`](#terraformstate) | The item at the end of the edge. |
 
@@ -5794,8 +9846,10 @@ An edge in a connection.
 
 Autogenerated return type of TerraformStateLock.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -5803,15 +9857,19 @@ Autogenerated return type of TerraformStateLock.
 
 Autogenerated return type of TerraformStateUnlock.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `TerraformStateVersion`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time!`](#time) | Timestamp the version was created. |
 | `createdByUser` | [`User`](#user) | The user that created this version. |
 | `downloadPath` | [`String`](#string) | URL for downloading the version's JSON file. |
@@ -5824,8 +9882,10 @@ Autogenerated return type of TerraformStateUnlock.
 
 Represents the Geo sync and verification state of a terraform state version.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createdAt` | [`Time`](#time) | Timestamp when the TerraformStateVersionRegistry was created |
 | `id` | [`ID!`](#id) | ID of the TerraformStateVersionRegistry |
 | `lastSyncFailure` | [`String`](#string) | Error message during sync of the TerraformStateVersionRegistry |
@@ -5839,8 +9899,10 @@ Represents the Geo sync and verification state of a terraform state version.
 
 The connection type for TerraformStateVersionRegistry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[TerraformStateVersionRegistryEdge]`](#terraformstateversionregistryedge) | A list of edges. |
 | `nodes` | [`[TerraformStateVersionRegistry]`](#terraformstateversionregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5849,8 +9911,10 @@ The connection type for TerraformStateVersionRegistry.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TerraformStateVersionRegistry`](#terraformstateversionregistry) | The item at the end of the edge. |
 
@@ -5858,8 +9922,10 @@ An edge in a connection.
 
 Represents a requirement test report.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `author` | [`User`](#user) | Author of the test report. |
 | `createdAt` | [`Time!`](#time) | Timestamp of when the test report was created. |
 | `id` | [`ID!`](#id) | ID of the test report. |
@@ -5869,8 +9935,10 @@ Represents a requirement test report.
 
 The connection type for TestReport.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[TestReportEdge]`](#testreportedge) | A list of edges. |
 | `nodes` | [`[TestReport]`](#testreport) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5879,8 +9947,10 @@ The connection type for TestReport.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TestReport`](#testreport) | The item at the end of the edge. |
 
@@ -5888,8 +9958,10 @@ An edge in a connection.
 
 Represents the time report stats for timeboxes.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `complete` | [`TimeboxMetrics`](#timeboxmetrics) | Completed issues metrics. |
 | `incomplete` | [`TimeboxMetrics`](#timeboxmetrics) | Incomplete issues metrics. |
 | `total` | [`TimeboxMetrics`](#timeboxmetrics) | Total issues metrics. |
@@ -5898,8 +9970,10 @@ Represents the time report stats for timeboxes.
 
 Represents measured stats metrics for timeboxes.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | The count metric. |
 | `weight` | [`Int!`](#int) | The weight metric. |
 
@@ -5907,15 +9981,19 @@ Represents measured stats metrics for timeboxes.
 
 Represents a historically accurate report about the timebox.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `burnupTimeSeries` | [`[BurnupChartDailyTotals!]`](#burnupchartdailytotals) | Daily scope and completed totals for burnup charts. |
 | `stats` | [`TimeReportStats`](#timereportstats) | Represents the time report stats for the timebox. |
 
 ### `Timelog`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `issue` | [`Issue`](#issue) | The issue that logged time was added to. |
 | `note` | [`Note`](#note) | The note where the quick action to add the logged time was executed. |
 | `spentAt` | [`Time`](#time) | Timestamp of when the time tracked was spent at. |
@@ -5926,8 +10004,10 @@ Represents a historically accurate report about the timebox.
 
 The connection type for Timelog.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[TimelogEdge]`](#timelogedge) | A list of edges. |
 | `nodes` | [`[Timelog]`](#timelog) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5936,8 +10016,10 @@ The connection type for Timelog.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Timelog`](#timelog) | The item at the end of the edge. |
 
@@ -5945,8 +10027,10 @@ An edge in a connection.
 
 Representing a to-do entry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `action` | [`TodoActionEnum!`](#todoactionenum) | Action of the to-do item. |
 | `author` | [`User!`](#user) | The author of this to-do item. |
 | `body` | [`String!`](#string) | Body of the to-do item. |
@@ -5961,8 +10045,10 @@ Representing a to-do entry.
 
 The connection type for Todo.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[TodoEdge]`](#todoedge) | A list of edges. |
 | `nodes` | [`[Todo]`](#todo) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -5971,8 +10057,10 @@ The connection type for Todo.
 
 Autogenerated return type of TodoCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todo` | [`Todo`](#todo) | The to-do item created. |
@@ -5981,8 +10069,10 @@ Autogenerated return type of TodoCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Todo`](#todo) | The item at the end of the edge. |
 
@@ -5990,8 +10080,10 @@ An edge in a connection.
 
 Autogenerated return type of TodoMarkDone.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todo` | [`Todo!`](#todo) | The requested to-do item. |
@@ -6000,8 +10092,10 @@ Autogenerated return type of TodoMarkDone.
 
 Autogenerated return type of TodoRestoreMany.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todos` | [`[Todo!]!`](#todo) | Updated to-do items. |
@@ -6011,8 +10105,10 @@ Autogenerated return type of TodoRestoreMany.
 
 Autogenerated return type of TodoRestore.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todo` | [`Todo!`](#todo) | The requested to-do item. |
@@ -6021,8 +10117,10 @@ Autogenerated return type of TodoRestore.
 
 Autogenerated return type of TodosMarkAllDone.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todos` | [`[Todo!]!`](#todo) | Updated to-do items. |
@@ -6032,8 +10130,10 @@ Autogenerated return type of TodosMarkAllDone.
 
 Autogenerated return type of ToggleAwardEmoji.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6041,19 +10141,67 @@ Autogenerated return type of ToggleAwardEmoji.
 
 ### `Tree`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `blobs` | [`BlobConnection!`](#blobconnection) | Blobs of the tree. |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `lastCommit` | [`Commit`](#commit) | Last commit for the tree. |
-| `submodules` | [`SubmoduleConnection!`](#submoduleconnection) | Sub-modules of the tree. |
-| `trees` | [`TreeEntryConnection!`](#treeentryconnection) | Trees of the tree. |
+
+#### fields with arguments
+
+##### `blobs`
+
+Blobs of the tree.
+
+Returns [`BlobConnection!`](#blobconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `submodules`
+
+Sub-modules of the tree.
+
+Returns [`SubmoduleConnection!`](#submoduleconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `trees`
+
+Trees of the tree.
+
+Returns [`TreeEntryConnection!`](#treeentryconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ### `TreeEntry`
 
 Represents a directory.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `flatPath` | [`String!`](#string) | Flat path of the entry. |
 | `id` | [`ID!`](#id) | ID of the entry. |
 | `name` | [`String!`](#string) | Name of the entry. |
@@ -6067,8 +10215,10 @@ Represents a directory.
 
 The connection type for TreeEntry.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[TreeEntryEdge]`](#treeentryedge) | A list of edges. |
 | `nodes` | [`[TreeEntry]`](#treeentry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6077,8 +10227,10 @@ The connection type for TreeEntry.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TreeEntry`](#treeentry) | The item at the end of the edge. |
 
@@ -6086,8 +10238,10 @@ An edge in a connection.
 
 Autogenerated return type of UpdateAlertStatus.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `alert` | [`AlertManagementAlert`](#alertmanagementalert) | The alert after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6098,8 +10252,10 @@ Autogenerated return type of UpdateAlertStatus.
 
 Autogenerated return type of UpdateBoardEpicUserPreferences.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epicUserPreferences` | [`BoardEpicUserPreferences`](#boardepicuserpreferences) | User preferences for the epic in the board after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6108,8 +10264,10 @@ Autogenerated return type of UpdateBoardEpicUserPreferences.
 
 Autogenerated return type of UpdateBoardList.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | Mutated list. |
@@ -6118,8 +10276,10 @@ Autogenerated return type of UpdateBoardList.
 
 Autogenerated return type of UpdateBoard.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `board` | [`Board`](#board) | The board after mutation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6128,8 +10288,10 @@ Autogenerated return type of UpdateBoard.
 
 Autogenerated return type of UpdateComplianceFramework.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `complianceFramework` | [`ComplianceFramework`](#complianceframework) | The compliance framework after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6138,8 +10300,10 @@ Autogenerated return type of UpdateComplianceFramework.
 
 Autogenerated return type of UpdateContainerExpirationPolicy.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `containerExpirationPolicy` | [`ContainerExpirationPolicy`](#containerexpirationpolicy) | The container expiration policy after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6148,8 +10312,10 @@ Autogenerated return type of UpdateContainerExpirationPolicy.
 
 Autogenerated return type of UpdateEpic.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `epic` | [`Epic`](#epic) | The epic after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6158,8 +10324,10 @@ Autogenerated return type of UpdateEpic.
 
 Autogenerated return type of UpdateImageDiffNote.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
@@ -6168,8 +10336,10 @@ Autogenerated return type of UpdateImageDiffNote.
 
 Autogenerated return type of UpdateIssue.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
@@ -6178,8 +10348,10 @@ Autogenerated return type of UpdateIssue.
 
 Autogenerated return type of UpdateIteration.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `iteration` | [`Iteration`](#iteration) | Updated iteration. |
@@ -6188,8 +10360,10 @@ Autogenerated return type of UpdateIteration.
 
 Autogenerated return type of UpdateNamespacePackageSettings.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `packageSettings` | [`PackageSettings`](#packagesettings) | The namespace package setting after mutation. |
@@ -6198,8 +10372,10 @@ Autogenerated return type of UpdateNamespacePackageSettings.
 
 Autogenerated return type of UpdateNote.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
@@ -6208,8 +10384,10 @@ Autogenerated return type of UpdateNote.
 
 Autogenerated return type of UpdateRequirement.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `requirement` | [`Requirement`](#requirement) | Requirement after mutation. |
@@ -6218,8 +10396,10 @@ Autogenerated return type of UpdateRequirement.
 
 Autogenerated return type of UpdateSnippet.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `captchaSiteKey` | [`String`](#string) | The CAPTCHA site key which must be used to render a challenge for the user to solve to obtain a valid captchaResponse value. Included only when an operation was not completed because "NeedsCaptchaResponse" is true. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
@@ -6232,8 +10412,10 @@ Autogenerated return type of UpdateSnippet.
 
 Represents a recorded measurement (object count) for the Admins.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Object count. |
 | `identifier` | [`MeasurementIdentifier!`](#measurementidentifier) | The type of objects being measured. |
 | `recordedAt` | [`Time`](#time) | The time the measurement was recorded. |
@@ -6242,8 +10424,10 @@ Represents a recorded measurement (object count) for the Admins.
 
 The connection type for UsageTrendsMeasurement.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[UsageTrendsMeasurementEdge]`](#usagetrendsmeasurementedge) | A list of edges. |
 | `nodes` | [`[UsageTrendsMeasurement]`](#usagetrendsmeasurement) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6252,43 +10436,228 @@ The connection type for UsageTrendsMeasurement.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`UsageTrendsMeasurement`](#usagetrendsmeasurement) | The item at the end of the edge. |
 
 ### `User`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `assignedMergeRequests` | [`MergeRequestConnection`](#mergerequestconnection) | Merge Requests assigned to the user. |
-| `authoredMergeRequests` | [`MergeRequestConnection`](#mergerequestconnection) | Merge Requests authored by the user. |
+Representation of a GitLab user.
+
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | `bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
-| `callouts` | [`UserCalloutConnection`](#usercalloutconnection) | User callouts that belong to the user. |
 | `email` **{warning-solid}** | [`String`](#string) | **Deprecated:** Use public_email. Deprecated in 13.7. |
 | `groupCount` | [`Int`](#int) | Group count for the user. Available only when feature flag `user_group_counts` is enabled. |
-| `groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. |
 | `id` | [`ID!`](#id) | ID of the user. |
 | `location` | [`String`](#string) | The location of the user. |
 | `name` | [`String!`](#string) | Human-readable name of the user. |
-| `projectMemberships` | [`ProjectMemberConnection`](#projectmemberconnection) | Project memberships of the user. |
 | `publicEmail` | [`String`](#string) | User's public email. |
-| `reviewRequestedMergeRequests` | [`MergeRequestConnection`](#mergerequestconnection) | Merge Requests assigned to the user for review. |
-| `snippets` | [`SnippetConnection`](#snippetconnection) | Snippets authored by the user. |
-| `starredProjects` | [`ProjectConnection`](#projectconnection) | Projects starred by the user. |
 | `state` | [`UserState!`](#userstate) | State of the user. |
 | `status` | [`UserStatus`](#userstatus) | User status. |
-| `todos` | [`TodoConnection!`](#todoconnection) | To-do items of the user. |
 | `userPermissions` | [`UserPermissions!`](#userpermissions) | Permissions for the current user on the resource |
 | `username` | [`String!`](#string) | Username of the user. Unique within this instance of GitLab. |
 | `webPath` | [`String!`](#string) | Web path of the user. |
 | `webUrl` | [`String!`](#string) | Web URL of the user. |
 
+#### fields with arguments
+
+##### `assignedMergeRequests`
+
+Merge Requests assigned to the user.
+
+Returns [`MergeRequestConnection`](#mergerequestconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
+| `sourceBranches` | [`[String!]`](#string) | Array of source branch names. All resolved merge requests will have one of these branches as their source. |
+| `targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
+| `state` | [`MergeRequestState`](#mergerequeststate) | A merge request state. If provided, all resolved merge requests will have this state. |
+| `labels` | [`[String!]`](#string) | Array of label names. All resolved merge requests will have all of these labels. |
+| `mergedAfter` | [`Time`](#time) | Merge requests merged after this date. |
+| `mergedBefore` | [`Time`](#time) | Merge requests merged before this date. |
+| `milestoneTitle` | [`String`](#string) | Title of the milestone. |
+| `sort` | [`MergeRequestSort`](#mergerequestsort) | Sort merge requests by this criteria. |
+| `projectPath` | [`String`](#string) | The full-path of the project the authored merge requests should be in. Incompatible with projectId. |
+| `projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored merge requests should be in. Incompatible with projectPath. |
+| `authorUsername` | [`String`](#string) | Username of the author. |
+| `reviewerUsername` | [`String`](#string) | Username of the reviewer. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `authoredMergeRequests`
+
+Merge Requests authored by the user.
+
+Returns [`MergeRequestConnection`](#mergerequestconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
+| `sourceBranches` | [`[String!]`](#string) | Array of source branch names. All resolved merge requests will have one of these branches as their source. |
+| `targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
+| `state` | [`MergeRequestState`](#mergerequeststate) | A merge request state. If provided, all resolved merge requests will have this state. |
+| `labels` | [`[String!]`](#string) | Array of label names. All resolved merge requests will have all of these labels. |
+| `mergedAfter` | [`Time`](#time) | Merge requests merged after this date. |
+| `mergedBefore` | [`Time`](#time) | Merge requests merged before this date. |
+| `milestoneTitle` | [`String`](#string) | Title of the milestone. |
+| `sort` | [`MergeRequestSort`](#mergerequestsort) | Sort merge requests by this criteria. |
+| `projectPath` | [`String`](#string) | The full-path of the project the authored merge requests should be in. Incompatible with projectId. |
+| `projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored merge requests should be in. Incompatible with projectPath. |
+| `assigneeUsername` | [`String`](#string) | Username of the assignee. |
+| `reviewerUsername` | [`String`](#string) | Username of the reviewer. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `callouts`
+
+User callouts that belong to the user.
+
+Returns [`UserCalloutConnection`](#usercalloutconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `groupMemberships`
+
+Group memberships of the user.
+
+Returns [`GroupMemberConnection`](#groupmemberconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `projectMemberships`
+
+Project memberships of the user.
+
+Returns [`ProjectMemberConnection`](#projectmemberconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `reviewRequestedMergeRequests`
+
+Merge Requests assigned to the user for review.
+
+Returns [`MergeRequestConnection`](#mergerequestconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
+| `sourceBranches` | [`[String!]`](#string) | Array of source branch names. All resolved merge requests will have one of these branches as their source. |
+| `targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
+| `state` | [`MergeRequestState`](#mergerequeststate) | A merge request state. If provided, all resolved merge requests will have this state. |
+| `labels` | [`[String!]`](#string) | Array of label names. All resolved merge requests will have all of these labels. |
+| `mergedAfter` | [`Time`](#time) | Merge requests merged after this date. |
+| `mergedBefore` | [`Time`](#time) | Merge requests merged before this date. |
+| `milestoneTitle` | [`String`](#string) | Title of the milestone. |
+| `sort` | [`MergeRequestSort`](#mergerequestsort) | Sort merge requests by this criteria. |
+| `projectPath` | [`String`](#string) | The full-path of the project the authored merge requests should be in. Incompatible with projectId. |
+| `projectId` | [`ProjectID`](#projectid) | The global ID of the project the authored merge requests should be in. Incompatible with projectPath. |
+| `authorUsername` | [`String`](#string) | Username of the author. |
+| `assigneeUsername` | [`String`](#string) | Username of the assignee. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `snippets`
+
+Snippets authored by the user.
+
+Returns [`SnippetConnection`](#snippetconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `ids` | [`[SnippetID!]`](#snippetid) | Array of global snippet IDs. For example, `gid://gitlab/ProjectSnippet/1`. |
+| `visibility` | [`VisibilityScopesEnum`](#visibilityscopesenum) | The visibility of the snippet. |
+| `type` | [`TypeEnum`](#typeenum) | The type of snippet. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `starredProjects`
+
+Projects starred by the user.
+
+Returns [`ProjectConnection`](#projectconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `search` | [`String`](#string) | Search query. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `todos`
+
+To-do items of the user.
+
+Returns [`TodoConnection!`](#todoconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `action` | [`[TodoActionEnum!]`](#todoactionenum) | The action to be filtered. |
+| `authorId` | [`[ID!]`](#id) | The ID of an author. |
+| `projectId` | [`[ID!]`](#id) | The ID of a project. |
+| `groupId` | [`[ID!]`](#id) | The ID of a group. |
+| `state` | [`[TodoStateEnum!]`](#todostateenum) | The state of the todo. |
+| `type` | [`[TodoTargetEnum!]`](#todotargetenum) | The type of the todo. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `UserCallout`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `dismissedAt` | [`Time`](#time) | Date when the callout was dismissed. |
 | `featureName` | [`UserCalloutFeatureNameEnum!`](#usercalloutfeaturenameenum) | Name of the feature that the callout is for. |
 
@@ -6296,8 +10665,10 @@ An edge in a connection.
 
 The connection type for UserCallout.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[UserCalloutEdge]`](#usercalloutedge) | A list of edges. |
 | `nodes` | [`[UserCallout]`](#usercallout) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6306,8 +10677,10 @@ The connection type for UserCallout.
 
 Autogenerated return type of UserCalloutCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `userCallout` | [`UserCallout!`](#usercallout) | The user callout dismissed. |
@@ -6316,8 +10689,10 @@ Autogenerated return type of UserCalloutCreate.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`UserCallout`](#usercallout) | The item at the end of the edge. |
 
@@ -6325,8 +10700,10 @@ An edge in a connection.
 
 The connection type for User.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[UserEdge]`](#useredge) | A list of edges. |
 | `nodes` | [`[User]`](#user) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6335,21 +10712,27 @@ The connection type for User.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`User`](#user) | The item at the end of the edge. |
 
 ### `UserPermissions`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `createSnippet` | [`Boolean!`](#boolean) | Indicates the user can perform `create_snippet` on this resource |
 
 ### `UserStatus`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `availability` | [`AvailabilityEnum!`](#availabilityenum) | User availability status. |
 | `emoji` | [`String`](#string) | String representation of emoji. |
 | `message` | [`String`](#string) | User status message. |
@@ -6359,8 +10742,10 @@ An edge in a connection.
 
 Represents the count of vulnerabilities by severity on a particular day. This data is retained for 365 days.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `critical` | [`Int!`](#int) | Total number of vulnerabilities on a particular day with critical severity |
 | `date` | [`ISO8601Date!`](#iso8601date) | Date for the count. |
 | `high` | [`Int!`](#int) | Total number of vulnerabilities on a particular day with high severity |
@@ -6374,8 +10759,10 @@ Represents the count of vulnerabilities by severity on a particular day. This da
 
 Represents the number of vulnerabilities for a particular severity on a particular day. This data is retained for 365 days.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int`](#int) | Number of vulnerabilities. |
 | `day` | [`ISO8601Date`](#iso8601date) | Date for the count. |
 | `severity` | [`VulnerabilitySeverity`](#vulnerabilityseverity) | Severity of the counted vulnerabilities. |
@@ -6384,8 +10771,10 @@ Represents the number of vulnerabilities for a particular severity on a particul
 
 The connection type for VulnerabilitiesCountByDayAndSeverity.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[VulnerabilitiesCountByDayAndSeverityEdge]`](#vulnerabilitiescountbydayandseverityedge) | A list of edges. |
 | `nodes` | [`[VulnerabilitiesCountByDayAndSeverity]`](#vulnerabilitiescountbydayandseverity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6394,8 +10783,10 @@ The connection type for VulnerabilitiesCountByDayAndSeverity.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilitiesCountByDayAndSeverity`](#vulnerabilitiescountbydayandseverity) | The item at the end of the edge. |
 
@@ -6403,8 +10794,10 @@ An edge in a connection.
 
 The connection type for VulnerabilitiesCountByDay.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[VulnerabilitiesCountByDayEdge]`](#vulnerabilitiescountbydayedge) | A list of edges. |
 | `nodes` | [`[VulnerabilitiesCountByDay]`](#vulnerabilitiescountbyday) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6413,8 +10806,10 @@ The connection type for VulnerabilitiesCountByDay.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilitiesCountByDay`](#vulnerabilitiescountbyday) | The item at the end of the edge. |
 
@@ -6422,24 +10817,22 @@ An edge in a connection.
 
 Represents a vulnerability.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `confirmedAt` | [`Time`](#time) | Timestamp of when the vulnerability state was changed to confirmed. |
 | `confirmedBy` | [`User`](#user) | The user that confirmed the vulnerability. |
 | `description` | [`String`](#string) | Description of the vulnerability. |
 | `details` | [`[VulnerabilityDetail!]!`](#vulnerabilitydetail) | Details of the vulnerability. |
 | `detectedAt` | [`Time!`](#time) | Timestamp of when the vulnerability was first detected. |
-| `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `dismissedAt` | [`Time`](#time) | Timestamp of when the vulnerability state was changed to dismissed. |
 | `dismissedBy` | [`User`](#user) | The user that dismissed the vulnerability. |
-| `externalIssueLinks` | [`VulnerabilityExternalIssueLinkConnection!`](#vulnerabilityexternalissuelinkconnection) | List of external issue links related to the vulnerability. |
 | `hasSolutions` | [`Boolean`](#boolean) | Indicates whether there is a solution available for this vulnerability. |
 | `id` | [`ID!`](#id) | GraphQL ID of the vulnerability. |
 | `identifiers` | [`[VulnerabilityIdentifier!]!`](#vulnerabilityidentifier) | Identifiers of the vulnerability. |
-| `issueLinks` | [`VulnerabilityIssueLinkConnection!`](#vulnerabilityissuelinkconnection) | List of issue links related to the vulnerability. |
 | `location` | [`VulnerabilityLocation`](#vulnerabilitylocation) | Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | Merge request that fixes the vulnerability. |
-| `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 | `primaryIdentifier` | [`VulnerabilityIdentifier`](#vulnerabilityidentifier) | Primary identifier of the vulnerability. |
 | `project` | [`Project`](#project) | The project on which the vulnerability was found. |
 | `reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING) |
@@ -6454,12 +10847,77 @@ Represents a vulnerability.
 | `userPermissions` | [`VulnerabilityPermissions!`](#vulnerabilitypermissions) | Permissions for the current user on the resource |
 | `vulnerabilityPath` | [`String`](#string) | URL to the vulnerability's details page. |
 
+#### fields with arguments
+
+##### `discussions`
+
+All discussions on this noteable.
+
+Returns [`DiscussionConnection!`](#discussionconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `externalIssueLinks`
+
+List of external issue links related to the vulnerability.
+
+Returns [`VulnerabilityExternalIssueLinkConnection!`](#vulnerabilityexternalissuelinkconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `issueLinks`
+
+List of issue links related to the vulnerability.
+
+Returns [`VulnerabilityIssueLinkConnection!`](#vulnerabilityissuelinkconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `linkType` | [`VulnerabilityIssueLinkType`](#vulnerabilityissuelinktype) | Filter issue links by link type. |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+##### `notes`
+
+All notes on this noteable.
+
+Returns [`NoteConnection!`](#noteconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
 ### `VulnerabilityConfirmPayload`
 
 Autogenerated return type of VulnerabilityConfirm.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after state change. |
@@ -6468,8 +10926,10 @@ Autogenerated return type of VulnerabilityConfirm.
 
 The connection type for Vulnerability.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[VulnerabilityEdge]`](#vulnerabilityedge) | A list of edges. |
 | `nodes` | [`[Vulnerability]`](#vulnerability) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6478,8 +10938,10 @@ The connection type for Vulnerability.
 
 Represents the vulnerability details base.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
@@ -6488,8 +10950,10 @@ Represents the vulnerability details base.
 
 Represents the vulnerability details boolean value.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
@@ -6499,8 +10963,10 @@ Represents the vulnerability details boolean value.
 
 Represents the vulnerability details code field.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `lang` | [`String`](#string) | Language of the code. |
@@ -6511,8 +10977,10 @@ Represents the vulnerability details code field.
 
 Represents the vulnerability details commit field.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
@@ -6522,8 +10990,10 @@ Represents the vulnerability details commit field.
 
 Represents the vulnerability details diff field.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `after` | [`String!`](#string) | Value of the field after the change. |
 | `before` | [`String!`](#string) | Value of the field before the change. |
 | `description` | [`String`](#string) | Description of the field. |
@@ -6534,8 +11004,10 @@ Represents the vulnerability details diff field.
 
 Represents the vulnerability details location within a file in the project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `fileName` | [`String!`](#string) | File name. |
@@ -6547,8 +11019,10 @@ Represents the vulnerability details location within a file in the project.
 
 Represents the vulnerability details integer value.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
@@ -6558,8 +11032,10 @@ Represents the vulnerability details integer value.
 
 Represents the vulnerability details list value.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `items` | [`[VulnerabilityDetail!]!`](#vulnerabilitydetail) | List of details. |
@@ -6569,8 +11045,10 @@ Represents the vulnerability details list value.
 
 Represents the vulnerability details Markdown field.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
@@ -6580,8 +11058,10 @@ Represents the vulnerability details Markdown field.
 
 Represents the vulnerability details location within a file in the project.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `moduleName` | [`String!`](#string) | Module name. |
@@ -6592,8 +11072,10 @@ Represents the vulnerability details location within a file in the project.
 
 Represents the vulnerability details table value.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `headers` | [`[VulnerabilityDetail!]!`](#vulnerabilitydetail) | Table headers. |
@@ -6604,8 +11086,10 @@ Represents the vulnerability details table value.
 
 Represents the vulnerability details text field.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
@@ -6615,8 +11099,10 @@ Represents the vulnerability details text field.
 
 Represents the vulnerability details URL field.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the field. |
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `href` | [`String!`](#string) | Href of the URL. |
@@ -6627,8 +11113,10 @@ Represents the vulnerability details URL field.
 
 Autogenerated return type of VulnerabilityDismiss.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after dismissal. |
@@ -6637,8 +11125,10 @@ Autogenerated return type of VulnerabilityDismiss.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Vulnerability`](#vulnerability) | The item at the end of the edge. |
 
@@ -6646,8 +11136,10 @@ An edge in a connection.
 
 Represents an external issue link of a vulnerability.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `externalIssue` | [`ExternalIssue`](#externalissue) | The external issue attached to the issue link. |
 | `id` | [`VulnerabilitiesExternalIssueLinkID!`](#vulnerabilitiesexternalissuelinkid) | GraphQL ID of the external issue link. |
 | `linkType` | [`VulnerabilityExternalIssueLinkType!`](#vulnerabilityexternalissuelinktype) | Type of the external issue link. |
@@ -6656,8 +11148,10 @@ Represents an external issue link of a vulnerability.
 
 The connection type for VulnerabilityExternalIssueLink.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[VulnerabilityExternalIssueLinkEdge]`](#vulnerabilityexternalissuelinkedge) | A list of edges. |
 | `nodes` | [`[VulnerabilityExternalIssueLink]`](#vulnerabilityexternalissuelink) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6666,8 +11160,10 @@ The connection type for VulnerabilityExternalIssueLink.
 
 Autogenerated return type of VulnerabilityExternalIssueLinkCreate.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `externalIssueLink` | [`VulnerabilityExternalIssueLink`](#vulnerabilityexternalissuelink) | The created external issue link. |
@@ -6676,8 +11172,10 @@ Autogenerated return type of VulnerabilityExternalIssueLinkCreate.
 
 Autogenerated return type of VulnerabilityExternalIssueLinkDestroy.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
@@ -6685,8 +11183,10 @@ Autogenerated return type of VulnerabilityExternalIssueLinkDestroy.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilityExternalIssueLink`](#vulnerabilityexternalissuelink) | The item at the end of the edge. |
 
@@ -6694,8 +11194,10 @@ An edge in a connection.
 
 Represents a vulnerability identifier.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `externalId` | [`String`](#string) | External ID of the vulnerability identifier. |
 | `externalType` | [`String`](#string) | External type of the vulnerability identifier. |
 | `name` | [`String`](#string) | Name of the vulnerability identifier. |
@@ -6705,8 +11207,10 @@ Represents a vulnerability identifier.
 
 Represents an issue link of a vulnerability.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `id` | [`ID!`](#id) | GraphQL ID of the vulnerability. |
 | `issue` | [`Issue!`](#issue) | The issue attached to issue link. |
 | `linkType` | [`VulnerabilityIssueLinkType!`](#vulnerabilityissuelinktype) | Type of the issue link. |
@@ -6715,8 +11219,10 @@ Represents an issue link of a vulnerability.
 
 The connection type for VulnerabilityIssueLink.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[VulnerabilityIssueLinkEdge]`](#vulnerabilityissuelinkedge) | A list of edges. |
 | `nodes` | [`[VulnerabilityIssueLink]`](#vulnerabilityissuelink) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6725,8 +11231,10 @@ The connection type for VulnerabilityIssueLink.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilityIssueLink`](#vulnerabilityissuelink) | The item at the end of the edge. |
 
@@ -6734,8 +11242,10 @@ An edge in a connection.
 
 Represents the location of a vulnerability found by a container security scan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `dependency` | [`VulnerableDependency`](#vulnerabledependency) | Dependency containing the vulnerability. |
 | `image` | [`String`](#string) | Name of the vulnerable container image. |
 | `operatingSystem` | [`String`](#string) | Operating system that runs on the vulnerable container image. |
@@ -6744,8 +11254,10 @@ Represents the location of a vulnerability found by a container security scan.
 
 Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `blobPath` | [`String`](#string) | Blob path to the vulnerable file. |
 | `endLine` | [`String`](#string) | Number of the last relevant line in the vulnerable file. |
 | `file` | [`String`](#string) | Path to the vulnerable file. |
@@ -6757,8 +11269,10 @@ Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 
 Represents the location of a vulnerability found by a DAST scan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `hostname` | [`String`](#string) | Domain name of the vulnerable request. |
 | `param` | [`String`](#string) | Query parameter for the URL on which the vulnerability occurred. |
 | `path` | [`String`](#string) | URL path and query string of the vulnerable request. |
@@ -6768,8 +11282,10 @@ Represents the location of a vulnerability found by a DAST scan.
 
 Represents the location of a vulnerability found by a dependency security scan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `blobPath` | [`String`](#string) | Blob path to the vulnerable file. |
 | `dependency` | [`VulnerableDependency`](#vulnerabledependency) | Dependency containing the vulnerability. |
 | `file` | [`String`](#string) | Path to the vulnerable file. |
@@ -6778,8 +11294,10 @@ Represents the location of a vulnerability found by a dependency security scan.
 
 Represents the location of a vulnerability found by a SAST scan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `blobPath` | [`String`](#string) | Blob path to the vulnerable file. |
 | `endLine` | [`String`](#string) | Number of the last relevant line in the vulnerable file. |
 | `file` | [`String`](#string) | Path to the vulnerable file. |
@@ -6791,8 +11309,10 @@ Represents the location of a vulnerability found by a SAST scan.
 
 Represents the location of a vulnerability found by a secret detection scan.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `blobPath` | [`String`](#string) | Blob path to the vulnerable file. |
 | `endLine` | [`String`](#string) | Number of the last relevant line in the vulnerable file. |
 | `file` | [`String`](#string) | Path to the vulnerable file. |
@@ -6804,8 +11324,10 @@ Represents the location of a vulnerability found by a secret detection scan.
 
 Check permissions for the current user on a vulnerability.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `adminVulnerability` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_vulnerability` on this resource |
 | `adminVulnerabilityExternalIssueLink` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_vulnerability_external_issue_link` on this resource |
 | `adminVulnerabilityIssueLink` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_vulnerability_issue_link` on this resource |
@@ -6820,8 +11342,10 @@ Check permissions for the current user on a vulnerability.
 
 Autogenerated return type of VulnerabilityResolve.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after state change. |
@@ -6830,8 +11354,10 @@ Autogenerated return type of VulnerabilityResolve.
 
 Autogenerated return type of VulnerabilityRevertToDetected.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after revert. |
@@ -6840,8 +11366,10 @@ Autogenerated return type of VulnerabilityRevertToDetected.
 
 Represents a vulnerability scanner.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `externalId` | [`String`](#string) | External ID of the vulnerability scanner. |
 | `name` | [`String`](#string) | Name of the vulnerability scanner. |
 | `reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the vulnerability report. |
@@ -6851,8 +11379,10 @@ Represents a vulnerability scanner.
 
 The connection type for VulnerabilityScanner.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `edges` | [`[VulnerabilityScannerEdge]`](#vulnerabilityscanneredge) | A list of edges. |
 | `nodes` | [`[VulnerabilityScanner]`](#vulnerabilityscanner) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
@@ -6861,8 +11391,10 @@ The connection type for VulnerabilityScanner.
 
 An edge in a connection.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilityScanner`](#vulnerabilityscanner) | The item at the end of the edge. |
 
@@ -6870,8 +11402,10 @@ An edge in a connection.
 
 Represents vulnerability counts by severity.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `critical` | [`Int`](#int) | Number of vulnerabilities of CRITICAL severity of the project |
 | `high` | [`Int`](#int) | Number of vulnerabilities of HIGH severity of the project |
 | `info` | [`Int`](#int) | Number of vulnerabilities of INFO severity of the project |
@@ -6883,8 +11417,10 @@ Represents vulnerability counts by severity.
 
 Represents a vulnerable dependency. Used in vulnerability location data.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `package` | [`VulnerablePackage`](#vulnerablepackage) | The package associated with the vulnerable dependency. |
 | `version` | [`String`](#string) | The version of the vulnerable dependency. |
 
@@ -6892,19 +11428,39 @@ Represents a vulnerable dependency. Used in vulnerability location data.
 
 Represents a vulnerable package. Used in vulnerability dependency data.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `name` | [`String`](#string) | The name of the vulnerable package. |
 
 ### `VulnerableProjectsByGrade`
 
 Represents vulnerability letter grades with associated projects.
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
+#### fields
+
+| name | type | description |
+| ---- | ---- | ----------- |
 | `count` | [`Int!`](#int) | Number of projects within this grade. |
 | `grade` | [`VulnerabilityGrade!`](#vulnerabilitygrade) | Grade based on the highest severity vulnerability present. |
-| `projects` | [`ProjectConnection!`](#projectconnection) | Projects within this grade. |
+
+#### fields with arguments
+
+##### `projects`
+
+Projects within this grade.
+
+Returns [`ProjectConnection!`](#projectconnection)
+
+###### arguments
+
+| name | type | description |
+| ---- | ---- | ----------- |
+| `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+| `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+| `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+| `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
 ## Enumeration types
 
@@ -6918,7 +11474,6 @@ on `graphql.org`.
 ### `AccessLevelEnum`
 
 Access level to a resource.
-
 | Value | Description |
 | ----- | ----------- |
 | `DEVELOPER` | Developer access |
@@ -6932,7 +11487,6 @@ Access level to a resource.
 ### `AlertManagementAlertSort`
 
 Values for sorting alerts.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -6961,7 +11515,6 @@ Values for sorting alerts.
 ### `AlertManagementDomainFilter`
 
 Filters the alerts based on given domain.
-
 | Value | Description |
 | ----- | ----------- |
 | `operations` | Alerts for operations domain. |
@@ -6970,7 +11523,6 @@ Filters the alerts based on given domain.
 ### `AlertManagementIntegrationType`
 
 Values of types of integrations.
-
 | Value | Description |
 | ----- | ----------- |
 | `HTTP` | Integration with any monitoring tool. |
@@ -6979,7 +11531,6 @@ Values of types of integrations.
 ### `AlertManagementPayloadAlertFieldName`
 
 Values for alert field names used in the custom mapping.
-
 | Value | Description |
 | ----- | ----------- |
 | `DESCRIPTION` | A high-level summary of the problem. |
@@ -6996,7 +11547,6 @@ Values for alert field names used in the custom mapping.
 ### `AlertManagementPayloadAlertFieldType`
 
 Values for alert field types used in the custom mapping.
-
 | Value | Description |
 | ----- | ----------- |
 | `ARRAY` | Array field type. |
@@ -7006,7 +11556,6 @@ Values for alert field types used in the custom mapping.
 ### `AlertManagementSeverity`
 
 Alert severity values.
-
 | Value | Description |
 | ----- | ----------- |
 | `CRITICAL` | Critical severity |
@@ -7019,7 +11568,6 @@ Alert severity values.
 ### `AlertManagementStatus`
 
 Alert status values.
-
 | Value | Description |
 | ----- | ----------- |
 | `ACKNOWLEDGED` | Acknowledged status |
@@ -7030,7 +11578,6 @@ Alert status values.
 ### `ApiFuzzingScanMode`
 
 All possible ways to specify the API surface for an API fuzzing scan.
-
 | Value | Description |
 | ----- | ----------- |
 | `HAR` | The API surface is specified by a HAR file. |
@@ -7039,7 +11586,6 @@ All possible ways to specify the API surface for an API fuzzing scan.
 ### `AvailabilityEnum`
 
 User availability status.
-
 | Value | Description |
 | ----- | ----------- |
 | `BUSY` | Busy |
@@ -7048,7 +11594,6 @@ User availability status.
 ### `BlobViewersType`
 
 Types of blob viewers.
-
 | Value | Description |
 | ----- | ----------- |
 | `auxiliary` | Auxiliary blob viewers type. |
@@ -7058,7 +11603,6 @@ Types of blob viewers.
 ### `CiConfigStatus`
 
 Values for YAML processor result.
-
 | Value | Description |
 | ----- | ----------- |
 | `INVALID` | The configuration file is not valid. |
@@ -7067,7 +11611,6 @@ Values for YAML processor result.
 ### `CommitActionMode`
 
 Mode of a commit action.
-
 | Value | Description |
 | ----- | ----------- |
 | `CHMOD` | Chmod command. |
@@ -7077,14 +11620,12 @@ Mode of a commit action.
 | `UPDATE` | Update command. |
 
 ### `CommitEncoding`
-
 | Value | Description |
 | ----- | ----------- |
 | `BASE64` | Base64 encoding. |
 | `TEXT` | Text encoding. |
 
 ### `ContainerExpirationPolicyCadenceEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `EVERY_DAY` | Every day |
@@ -7094,7 +11635,6 @@ Mode of a commit action.
 | `EVERY_WEEK` | Every week |
 
 ### `ContainerExpirationPolicyKeepEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `FIFTY_TAGS` | 50 tags per image name |
@@ -7105,7 +11645,6 @@ Mode of a commit action.
 | `TWENTY_FIVE_TAGS` | 25 tags per image name |
 
 ### `ContainerExpirationPolicyOlderThanEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `FOURTEEN_DAYS` | 14 days until tags are automatically removed |
@@ -7116,7 +11655,6 @@ Mode of a commit action.
 ### `ContainerRepositoryCleanupStatus`
 
 Status of the tags cleanup of a container repository.
-
 | Value | Description |
 | ----- | ----------- |
 | `ONGOING` | The tags cleanup is ongoing. |
@@ -7127,7 +11665,6 @@ Status of the tags cleanup of a container repository.
 ### `ContainerRepositorySort`
 
 Values for sorting container repositories.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -7144,21 +11681,18 @@ Values for sorting container repositories.
 ### `ContainerRepositoryStatus`
 
 Status of a container repository.
-
 | Value | Description |
 | ----- | ----------- |
 | `DELETE_FAILED` | Delete Failed status. |
 | `DELETE_SCHEDULED` | Delete Scheduled status. |
 
 ### `DastScanTypeEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `ACTIVE` | Active DAST scan. This scan will make active attacks against the target site. |
 | `PASSIVE` | Passive DAST scan. This scan will not make active attacks against the target site. |
 
 ### `DastSiteProfileValidationStatusEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `FAILED_VALIDATION` | Site validation process finished but failed. |
@@ -7168,7 +11702,6 @@ Status of a container repository.
 | `PENDING_VALIDATION` | Site validation process has not started. |
 
 ### `DastSiteValidationStrategyEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `HEADER` | Header validation. |
@@ -7177,7 +11710,6 @@ Status of a container repository.
 ### `DataVisualizationColorEnum`
 
 Color of the data visualization palette.
-
 | Value | Description |
 | ----- | ----------- |
 | `AQUA` | Aqua color |
@@ -7189,7 +11721,6 @@ Color of the data visualization palette.
 ### `DataVisualizationWeightEnum`
 
 Weight of the data visualization palette.
-
 | Value | Description |
 | ----- | ----------- |
 | `WEIGHT_100` | 100 weight |
@@ -7207,7 +11738,6 @@ Weight of the data visualization palette.
 ### `DesignCollectionCopyState`
 
 Copy state of a DesignCollection.
-
 | Value | Description |
 | ----- | ----------- |
 | `ERROR` | The DesignCollection encountered an error during a copy |
@@ -7217,7 +11747,6 @@ Copy state of a DesignCollection.
 ### `DesignVersionEvent`
 
 Mutation event of a design within a version.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATION` | A creation event |
@@ -7228,7 +11757,6 @@ Mutation event of a design within a version.
 ### `DiffPositionType`
 
 Type of file the position refers to.
-
 | Value | Description |
 | ----- | ----------- |
 | `image` |  |
@@ -7237,7 +11765,6 @@ Type of file the position refers to.
 ### `EntryType`
 
 Type of a tree entry.
-
 | Value | Description |
 | ----- | ----------- |
 | `blob` |  |
@@ -7247,7 +11774,6 @@ Type of a tree entry.
 ### `EpicSort`
 
 Roadmap sort values.
-
 | Value | Description |
 | ----- | ----------- |
 | `end_date_asc` | End date at ascending order. |
@@ -7258,7 +11784,6 @@ Roadmap sort values.
 ### `EpicState`
 
 State of an epic.
-
 | Value | Description |
 | ----- | ----------- |
 | `all` |  |
@@ -7268,7 +11793,6 @@ State of an epic.
 ### `EpicStateEvent`
 
 State event of an epic.
-
 | Value | Description |
 | ----- | ----------- |
 | `CLOSE` | Close the epic. |
@@ -7277,7 +11801,6 @@ State event of an epic.
 ### `EpicWildcardId`
 
 Epic ID wildcard values.
-
 | Value | Description |
 | ----- | ----------- |
 | `ANY` | Any epic is assigned. |
@@ -7286,7 +11809,6 @@ Epic ID wildcard values.
 ### `EventAction`
 
 Event action.
-
 | Value | Description |
 | ----- | ----------- |
 | `APPROVED` | Approved action |
@@ -7306,7 +11828,6 @@ Event action.
 ### `GroupMemberRelation`
 
 Group member relation.
-
 | Value | Description |
 | ----- | ----------- |
 | `DESCENDANTS` | Descendants members |
@@ -7316,7 +11837,6 @@ Group member relation.
 ### `HealthStatus`
 
 Health status of an issue or epic.
-
 | Value | Description |
 | ----- | ----------- |
 | `atRisk` |  |
@@ -7326,7 +11846,6 @@ Health status of an issue or epic.
 ### `IssuableSeverity`
 
 Incident severity.
-
 | Value | Description |
 | ----- | ----------- |
 | `CRITICAL` | Critical severity |
@@ -7338,7 +11857,6 @@ Incident severity.
 ### `IssuableState`
 
 State of a GitLab issue or merge request.
-
 | Value | Description |
 | ----- | ----------- |
 | `all` | All available. |
@@ -7349,7 +11867,6 @@ State of a GitLab issue or merge request.
 ### `IssueSort`
 
 Values for sorting issues.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -7381,7 +11898,6 @@ Values for sorting issues.
 ### `IssueState`
 
 State of a GitLab issue.
-
 | Value | Description |
 | ----- | ----------- |
 | `all` | All available. |
@@ -7392,7 +11908,6 @@ State of a GitLab issue.
 ### `IssueStateEvent`
 
 Values for issue state events.
-
 | Value | Description |
 | ----- | ----------- |
 | `CLOSE` | Closes the issue. |
@@ -7401,7 +11916,6 @@ Values for issue state events.
 ### `IssueType`
 
 Issue type.
-
 | Value | Description |
 | ----- | ----------- |
 | `INCIDENT` | Incident issue type |
@@ -7411,7 +11925,6 @@ Issue type.
 ### `IterationState`
 
 State of a GitLab iteration.
-
 | Value | Description |
 | ----- | ----------- |
 | `all` |  |
@@ -7423,7 +11936,6 @@ State of a GitLab iteration.
 ### `IterationWildcardId`
 
 Iteration ID wildcard values.
-
 | Value | Description |
 | ----- | ----------- |
 | `ANY` | An iteration is assigned. |
@@ -7431,7 +11943,6 @@ Iteration ID wildcard values.
 | `NONE` | No iteration is assigned. |
 
 ### `JobArtifactFileType`
-
 | Value | Description |
 | ----- | ----------- |
 | `ACCESSIBILITY` | ACCESSIBILITY job artifact file type. |
@@ -7465,7 +11976,6 @@ Iteration ID wildcard values.
 ### `ListLimitMetric`
 
 List limit metric setting.
-
 | Value | Description |
 | ----- | ----------- |
 | `all_metrics` |  |
@@ -7475,7 +11985,6 @@ List limit metric setting.
 ### `MeasurementIdentifier`
 
 Possible identifier types for a measurement.
-
 | Value | Description |
 | ----- | ----------- |
 | `GROUPS` | Group count. |
@@ -7492,7 +12001,6 @@ Possible identifier types for a measurement.
 ### `MergeRequestNewState`
 
 New state to apply to a merge request.
-
 | Value | Description |
 | ----- | ----------- |
 | `CLOSED` | Close the merge request if it is open. |
@@ -7501,7 +12009,6 @@ New state to apply to a merge request.
 ### `MergeRequestSort`
 
 Values for sorting merge requests.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -7524,7 +12031,6 @@ Values for sorting merge requests.
 ### `MergeRequestState`
 
 State of a GitLab merge request.
-
 | Value | Description |
 | ----- | ----------- |
 | `all` | All available. |
@@ -7536,7 +12042,6 @@ State of a GitLab merge request.
 ### `MilestoneStateEnum`
 
 Current state of milestone.
-
 | Value | Description |
 | ----- | ----------- |
 | `active` | Milestone is currently active. |
@@ -7545,7 +12050,6 @@ Current state of milestone.
 ### `MoveType`
 
 The position to which the adjacent object should be moved.
-
 | Value | Description |
 | ----- | ----------- |
 | `after` | The adjacent object will be moved after the object that is being moved. |
@@ -7554,7 +12058,6 @@ The position to which the adjacent object should be moved.
 ### `MutationOperationMode`
 
 Different toggles for changing mutator behavior.
-
 | Value | Description |
 | ----- | ----------- |
 | `APPEND` | Performs an append operation. |
@@ -7564,7 +12067,6 @@ Different toggles for changing mutator behavior.
 ### `NamespaceProjectSort`
 
 Values for sorting projects.
-
 | Value | Description |
 | ----- | ----------- |
 | `SIMILARITY` | Most similar to the search query. |
@@ -7573,7 +12075,6 @@ Values for sorting projects.
 ### `OncallRotationUnitEnum`
 
 Rotation length unit of an on-call rotation.
-
 | Value | Description |
 | ----- | ----------- |
 | `DAYS` | Days |
@@ -7581,7 +12082,6 @@ Rotation length unit of an on-call rotation.
 | `WEEKS` | Weeks |
 
 ### `PackageTypeEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `COMPOSER` | Packages from the Composer package manager |
@@ -7596,7 +12096,6 @@ Rotation length unit of an on-call rotation.
 | `RUBYGEMS` | Packages from the Rubygems package manager |
 
 ### `PipelineConfigSourceEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `AUTO_DEVOPS_SOURCE` |  |
@@ -7610,7 +12109,6 @@ Rotation length unit of an on-call rotation.
 | `WEBIDE_SOURCE` |  |
 
 ### `PipelineStatusEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `CANCELED` |  |
@@ -7628,7 +12126,6 @@ Rotation length unit of an on-call rotation.
 ### `ProjectMemberRelation`
 
 Project member relation.
-
 | Value | Description |
 | ----- | ----------- |
 | `DESCENDANTS` | Descendants members |
@@ -7639,7 +12136,6 @@ Project member relation.
 ### `RegistryState`
 
 State of a Geo registry.
-
 | Value | Description |
 | ----- | ----------- |
 | `FAILED` | Registry that failed to sync. |
@@ -7650,7 +12146,6 @@ State of a Geo registry.
 ### `ReleaseAssetLinkType`
 
 Type of the link: `other`, `runbook`, `image`, `package`.
-
 | Value | Description |
 | ----- | ----------- |
 | `IMAGE` | Image link type |
@@ -7661,7 +12156,6 @@ Type of the link: `other`, `runbook`, `image`, `package`.
 ### `ReleaseSort`
 
 Values for sorting releases.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -7672,7 +12166,6 @@ Values for sorting releases.
 ### `RequirementState`
 
 State of a requirement.
-
 | Value | Description |
 | ----- | ----------- |
 | `ARCHIVED` |  |
@@ -7681,7 +12174,6 @@ State of a requirement.
 ### `RequirementStatusFilter`
 
 Status of a requirement based on last test report.
-
 | Value | Description |
 | ----- | ----------- |
 | `FAILED` |  |
@@ -7691,7 +12183,6 @@ Status of a requirement based on last test report.
 ### `SastUiComponentSize`
 
 Size of UI component in SAST configuration page.
-
 | Value | Description |
 | ----- | ----------- |
 | `LARGE` | The size of UI component in SAST configuration page is large. |
@@ -7699,7 +12190,6 @@ Size of UI component in SAST configuration page.
 | `SMALL` | The size of UI component in SAST configuration page is small. |
 
 ### `SecurityReportTypeEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `API_FUZZING` | API FUZZING scan report |
@@ -7713,7 +12203,6 @@ Size of UI component in SAST configuration page.
 ### `SecurityScannerType`
 
 The type of the security scanner.
-
 | Value | Description |
 | ----- | ----------- |
 | `API_FUZZING` |  |
@@ -7727,7 +12216,6 @@ The type of the security scanner.
 ### `SentryErrorStatus`
 
 State of a Sentry error.
-
 | Value | Description |
 | ----- | ----------- |
 | `IGNORED` | Error has been ignored. |
@@ -7736,7 +12224,6 @@ State of a Sentry error.
 | `UNRESOLVED` | Error is unresolved. |
 
 ### `ServiceType`
-
 | Value | Description |
 | ----- | ----------- |
 | `ASANA_SERVICE` | AsanaService type |
@@ -7779,7 +12266,6 @@ State of a Sentry error.
 ### `SnippetBlobActionEnum`
 
 Type of a snippet blob input action.
-
 | Value | Description |
 | ----- | ----------- |
 | `create` |  |
@@ -7790,7 +12276,6 @@ Type of a snippet blob input action.
 ### `Sort`
 
 Common sort values.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -7805,14 +12290,12 @@ Common sort values.
 ### `TestReportState`
 
 State of a test report.
-
 | Value | Description |
 | ----- | ----------- |
 | `FAILED` |  |
 | `PASSED` |  |
 
 ### `TodoActionEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `approval_required` | User was set as an approver. |
@@ -7826,14 +12309,12 @@ State of a test report.
 | `unmergeable` | Merge request authored by the user could not be merged. |
 
 ### `TodoStateEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `done` | The state of the todo is done. |
 | `pending` | The state of the todo is pending. |
 
 ### `TodoTargetEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `ALERT` | An Alert. |
@@ -7844,7 +12325,6 @@ State of a test report.
 | `MERGEREQUEST` | A MergeRequest. |
 
 ### `TypeEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `personal` |  |
@@ -7853,7 +12333,6 @@ State of a test report.
 ### `UserCalloutFeatureNameEnum`
 
 Name of the feature that the callout is for.
-
 | Value | Description |
 | ----- | ----------- |
 | `ACCOUNT_RECOVERY_REGULAR_CHECK` | Callout feature name for account_recovery_regular_check. |
@@ -7886,7 +12365,6 @@ Name of the feature that the callout is for.
 ### `UserState`
 
 Possible states of a user.
-
 | Value | Description |
 | ----- | ----------- |
 | `active` | The user is active and is able to use the system. |
@@ -7894,7 +12372,6 @@ Possible states of a user.
 | `deactivated` | The user is no longer active and is unable to use the system. |
 
 ### `VisibilityLevelsEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `internal` | Internal visibility level. |
@@ -7902,7 +12379,6 @@ Possible states of a user.
 | `public` | Public visibility level. |
 
 ### `VisibilityScopesEnum`
-
 | Value | Description |
 | ----- | ----------- |
 | `internal` |  |
@@ -7912,7 +12388,6 @@ Possible states of a user.
 ### `VulnerabilityDismissalReason`
 
 The dismissal reason of the Vulnerability.
-
 | Value | Description |
 | ----- | ----------- |
 | `ACCEPTABLE_RISK` | The likelihood of the Vulnerability occurring and its impact are deemed acceptable |
@@ -7924,7 +12399,6 @@ The dismissal reason of the Vulnerability.
 ### `VulnerabilityExternalIssueLinkExternalTracker`
 
 The external tracker of the external issue link related to a vulnerability.
-
 | Value | Description |
 | ----- | ----------- |
 | `JIRA` | Jira external tracker |
@@ -7932,7 +12406,6 @@ The external tracker of the external issue link related to a vulnerability.
 ### `VulnerabilityExternalIssueLinkType`
 
 The type of the external issue link related to a vulnerability.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED` | Created link type |
@@ -7940,7 +12413,6 @@ The type of the external issue link related to a vulnerability.
 ### `VulnerabilityGrade`
 
 The grade of the vulnerable project.
-
 | Value | Description |
 | ----- | ----------- |
 | `A` |  |
@@ -7952,7 +12424,6 @@ The grade of the vulnerable project.
 ### `VulnerabilityIssueLinkType`
 
 The type of the issue link related to a vulnerability.
-
 | Value | Description |
 | ----- | ----------- |
 | `CREATED` |  |
@@ -7961,7 +12432,6 @@ The type of the issue link related to a vulnerability.
 ### `VulnerabilityReportType`
 
 The type of the security scan that found the vulnerability.
-
 | Value | Description |
 | ----- | ----------- |
 | `API_FUZZING` |  |
@@ -7975,7 +12445,6 @@ The type of the security scan that found the vulnerability.
 ### `VulnerabilitySeverity`
 
 The severity of the vulnerability.
-
 | Value | Description |
 | ----- | ----------- |
 | `CRITICAL` |  |
@@ -7988,7 +12457,6 @@ The severity of the vulnerability.
 ### `VulnerabilitySort`
 
 Vulnerability sort values.
-
 | Value | Description |
 | ----- | ----------- |
 | `detected_asc` | Detection timestamp in ascending order. |
@@ -8005,7 +12473,6 @@ Vulnerability sort values.
 ### `VulnerabilityState`
 
 The state of the vulnerability.
-
 | Value | Description |
 | ----- | ----------- |
 | `CONFIRMED` |  |
@@ -8027,256 +12494,193 @@ For more information, read about [Scalar Types](https://graphql.org/learn/schema
 ### `AlertManagementHttpIntegrationID`
 
 Identifier of `AlertManagement::HttpIntegration` objects. See GlobalID.
-
 ### `AnalyticsDevopsAdoptionSegmentID`
 
 Identifier of `Analytics::DevopsAdoption::Segment` objects. See GlobalID.
-
 ### `AwardableID`
 
 Identifier of `Awardable` objects. See GlobalID.
-
 ### `BigInt`
 
 Represents non-fractional signed whole numeric values. Since the value may exceed the size of a 32-bit integer, it's encoded as a string.
-
 ### `BoardID`
 
 Identifier of `Board` objects. See GlobalID.
-
 ### `BoardsEpicBoardID`
 
 Identifier of `Boards::EpicBoard` objects. See GlobalID.
-
 ### `BoardsEpicListID`
 
 Identifier of `Boards::EpicList` objects. See GlobalID.
-
 ### `Boolean`
 
 Represents `true` or `false` values.
-
 ### `CiPipelineID`
 
 Identifier of `Ci::Pipeline` objects. See GlobalID.
-
 ### `ClustersAgentID`
 
 Identifier of `Clusters::Agent` objects. See GlobalID.
-
 ### `ClustersAgentTokenID`
 
 Identifier of `Clusters::AgentToken` objects. See GlobalID.
-
 ### `ClustersClusterID`
 
 Identifier of `Clusters::Cluster` objects. See GlobalID.
-
 ### `ComplianceManagementFrameworkID`
 
 Identifier of `ComplianceManagement::Framework` objects. See GlobalID.
-
 ### `ContainerRepositoryID`
 
 Identifier of `ContainerRepository` objects. See GlobalID.
-
 ### `CustomEmojiID`
 
 Identifier of `CustomEmoji` objects. See GlobalID.
-
 ### `DastProfileID`
 
 Identifier of `Dast::Profile` objects. See GlobalID.
-
 ### `DastScannerProfileID`
 
 Identifier of `DastScannerProfile` objects. See GlobalID.
-
 ### `DastSiteProfileID`
 
 Identifier of `DastSiteProfile` objects. See GlobalID.
-
 ### `DastSiteTokenID`
 
 Identifier of `DastSiteToken` objects. See GlobalID.
-
 ### `DastSiteValidationID`
 
 Identifier of `DastSiteValidation` objects. See GlobalID.
-
 ### `Date`
 
 Date represented in ISO 8601.
-
 ### `DesignManagementDesignAtVersionID`
 
 Identifier of `DesignManagement::DesignAtVersion` objects. See GlobalID.
-
 ### `DesignManagementDesignID`
 
 Identifier of `DesignManagement::Design` objects. See GlobalID.
-
 ### `DesignManagementVersionID`
 
 Identifier of `DesignManagement::Version` objects. See GlobalID.
-
 ### `DiffNoteID`
 
 Identifier of `DiffNote` objects. See GlobalID.
-
 ### `DiscussionID`
 
 Identifier of `Discussion` objects. See GlobalID.
-
 ### `EnvironmentID`
 
 Identifier of `Environment` objects. See GlobalID.
-
 ### `EpicID`
 
 Identifier of `Epic` objects. See GlobalID.
-
 ### `EpicTreeSortingID`
 
 Identifier of `EpicTreeSorting` objects. See GlobalID.
-
 ### `Float`
 
 Represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
-
 ### `GitlabErrorTrackingDetailedErrorID`
 
 Identifier of `Gitlab::ErrorTracking::DetailedError` objects. See GlobalID.
-
 ### `GroupID`
 
 Identifier of `Group` objects. See GlobalID.
-
 ### `ID`
 
 Represents a unique identifier that is Base64 obfuscated. It is often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"VXNlci0xMA=="`) or integer (such as `4`) input value will be accepted as an ID.
-
 ### `ISO8601Date`
 
 An ISO 8601-encoded date.
-
 ### `IncidentManagementOncallParticipantID`
 
 Identifier of `IncidentManagement::OncallParticipant` objects. See GlobalID.
-
 ### `IncidentManagementOncallRotationID`
 
 Identifier of `IncidentManagement::OncallRotation` objects. See GlobalID.
-
 ### `Int`
 
 Represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
-
 ### `IssueID`
 
 Identifier of `Issue` objects. See GlobalID.
-
 ### `IterationID`
 
 Identifier of `Iteration` objects. See GlobalID.
-
 ### `JSON`
 
 Represents untyped JSON.
-
 ### `JsonString`
 
 JSON object as raw string.
-
 ### `LabelID`
 
 Identifier of `Label` objects. See GlobalID.
-
 ### `ListID`
 
 Identifier of `List` objects. See GlobalID.
-
 ### `MergeRequestID`
 
 Identifier of `MergeRequest` objects. See GlobalID.
-
 ### `MetricsDashboardAnnotationID`
 
 Identifier of `Metrics::Dashboard::Annotation` objects. See GlobalID.
-
 ### `MilestoneID`
 
 Identifier of `Milestone` objects. See GlobalID.
-
 ### `NamespaceID`
 
 Identifier of `Namespace` objects. See GlobalID.
-
 ### `NoteID`
 
 Identifier of `Note` objects. See GlobalID.
-
 ### `NoteableID`
 
 Identifier of `Noteable` objects. See GlobalID.
-
 ### `PackagesPackageID`
 
 Identifier of `Packages::Package` objects. See GlobalID.
-
 ### `ProjectID`
 
 Identifier of `Project` objects. See GlobalID.
-
 ### `PrometheusServiceID`
 
 Identifier of `PrometheusService` objects. See GlobalID.
-
 ### `SnippetID`
 
 Identifier of `Snippet` objects. See GlobalID.
-
 ### `String`
 
 Represents textual data as UTF-8 character sequences. This type is most often used by GraphQL to represent free-form human-readable text.
-
 ### `TerraformStateID`
 
 Identifier of `Terraform::State` objects. See GlobalID.
-
 ### `Time`
 
 Time represented in ISO 8601.
 
 See [iso.org](https://www.iso.org/iso-8601-date-and-time-format.html)
 .
-
 ### `TodoID`
 
 Identifier of `Todo` objects. See GlobalID.
-
 ### `TodoableID`
 
 Identifier of `Todoable` objects. See GlobalID.
-
 ### `UntrustedRegexp`
 
 A regexp containing patterns sourced from user input.
-
 ### `Upload`
-
 ### `UserID`
 
 Identifier of `User` objects. See GlobalID.
-
 ### `VulnerabilitiesExternalIssueLinkID`
 
 Identifier of `Vulnerabilities::ExternalIssueLink` objects. See GlobalID.
-
 ### `VulnerabilityID`
 
 Identifier of `Vulnerability` objects. See GlobalID.
-
 ## Abstract types
 
 Abstract types (unions and interfaces) represent ways the schema can represent
@@ -8289,7 +12693,6 @@ implement an interface).
 #### `PackageMetadata`
 
 Represents metadata associated with a Package.
-
 One of:
 
 - [`ComposerMetadata`](#composermetadata)
@@ -8297,7 +12700,6 @@ One of:
 #### `VulnerabilityDetail`
 
 Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type.
-
 One of:
 
 - [`VulnerabilityDetailBase`](#vulnerabilitydetailbase)
@@ -8317,7 +12719,6 @@ One of:
 #### `VulnerabilityLocation`
 
 Represents a vulnerability location. The fields with data will depend on the vulnerability report type.
-
 One of:
 
 - [`VulnerabilityLocationContainerScanning`](#vulnerabilitylocationcontainerscanning)
@@ -8330,7 +12731,6 @@ One of:
 ### Interfaces
 
 #### `AlertManagementIntegration`
-
 Implementations:
 
 - [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration)
@@ -8347,7 +12747,6 @@ Implementations:
 | `url` | [`String`](#string) | Endpoint which accepts alert notifications. |
 
 #### `CurrentUserTodos`
-
 Implementations:
 
 - [`BoardEpic`](#boardepic)
@@ -8362,7 +12761,6 @@ Implementations:
 | `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
 
 #### `DesignFields`
-
 Implementations:
 
 - [`Design`](#design)
@@ -8382,7 +12780,6 @@ Implementations:
 | `project` | [`Project!`](#project) | The project the design belongs to. |
 
 #### `Entry`
-
 Implementations:
 
 - [`Blob`](#blob)
@@ -8399,7 +12796,6 @@ Implementations:
 | `type` | [`EntryType!`](#entrytype) | Type of tree entry. |
 
 #### `Eventable`
-
 Implementations:
 
 - [`BoardEpic`](#boardepic)
@@ -8410,7 +12806,6 @@ Implementations:
 | `events` | [`EventConnection`](#eventconnection) | A list of events associated with the object. |
 
 #### `MemberInterface`
-
 Implementations:
 
 - [`GroupMember`](#groupmember)
@@ -8427,7 +12822,6 @@ Implementations:
 | `user` | [`User!`](#user) | User that is associated with the member object. |
 
 #### `Noteable`
-
 Implementations:
 
 - [`AlertManagementAlert`](#alertmanagementalert)
@@ -8446,7 +12840,6 @@ Implementations:
 | `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 
 #### `ResolvableInterface`
-
 Implementations:
 
 - [`Discussion`](#discussion)
@@ -8460,7 +12853,6 @@ Implementations:
 | `resolvedBy` | [`User`](#user) | User who resolved the object. |
 
 #### `Service`
-
 Implementations:
 
 - [`BaseService`](#baseservice)
@@ -8472,7 +12864,6 @@ Implementations:
 | `type` | [`String`](#string) | Class name of the service. |
 
 #### `TimeboxReportInterface`
-
 Implementations:
 
 - [`Iteration`](#iteration)
