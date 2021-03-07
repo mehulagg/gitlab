@@ -15132,7 +15132,7 @@ A node of an epic tree.
 #### Arguments
 
 | `jiraAccountId` | [`String!`](#string) | Jira account ID of the user. |
-| `gitlabId` | [`Int`](#int) | Id of the GitLab user. |
+| `gitlabId` | [`Int`](#int) | ID of the GitLab user. |
 
 ### `NegatedBoardIssueInput` {#negatedboardissueinput}
 
