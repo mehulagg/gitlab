@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'digest/md5'
+
 class JwtController < ApplicationController
   skip_around_action :set_session_storage
   skip_before_action :authenticate_user!
@@ -19,6 +21,10 @@ class JwtController < ApplicationController
     service = SERVICES[params[:service]]
     return head :not_found unless service
 
+    if !@authentication_result.actor.present? || !@authentication_result.project.present?
+      Gitlab::AppLogger.info("Auth completed but user was absent. All: #{@authentication_result}, Actor: #{@authentication_result.actor}, Abilities: #{@authentication_result.authentication_abilities}, Project: #{@authentication_result.project}, Params: #{auth_params}")
+    end
+
     result = service.new(@authentication_result.project, @authentication_result.actor, auth_params)
       .execute(authentication_abilities: @authentication_result.authentication_abilities)
 
@@ -35,6 +41,10 @@ class JwtController < ApplicationController
 
       if @authentication_result.failed?
         render_unauthorized
+      end
+
+      if !@authentication_result.actor.present?
+        Gitlab::AppLogger.info("Auth credentials processed, but a user wasn't discovered. Login received: #{login}, hashval: #{Digest::MD5.hexdigest(password)}, result: #{@authentication_result}")
       end
     end
   rescue Gitlab::Auth::MissingPersonalAccessTokenError

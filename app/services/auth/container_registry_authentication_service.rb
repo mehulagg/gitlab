@@ -19,10 +19,10 @@ module Auth
 
       return error('UNAVAILABLE', status: 404, message: 'registry not enabled') unless registry.enabled
 
-      return error('DENIED', status: 403, message: 'access forbidden') unless has_registry_ability?
+      return error('DENIED', status: 403, message: 'access forbidden due to missing ability') unless has_registry_ability?
 
       unless scopes.any? || current_user || project
-        return error('DENIED', status: 403, message: 'access forbidden')
+        return error('DENIED', status: 403, message: 'access forbidden due to scope, user, or project')
       end
 
       { token: authorized_token(*scopes).encoded }
