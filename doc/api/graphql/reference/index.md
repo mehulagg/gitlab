@@ -13556,6 +13556,7 @@ on `graphql.org`.
 ### `AccessLevelEnum` {#accesslevelenum}
 
 Access level to a resource.
+
 | Value | Description |
 | ----- | ----------- |
 | `DEVELOPER` | Developer access |
@@ -13569,6 +13570,7 @@ Access level to a resource.
 ### `AlertManagementAlertSort` {#alertmanagementalertsort}
 
 Values for sorting alerts.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -13597,6 +13599,7 @@ Values for sorting alerts.
 ### `AlertManagementDomainFilter` {#alertmanagementdomainfilter}
 
 Filters the alerts based on given domain.
+
 | Value | Description |
 | ----- | ----------- |
 | `operations` | Alerts for operations domain. |
@@ -13605,6 +13608,7 @@ Filters the alerts based on given domain.
 ### `AlertManagementIntegrationType` {#alertmanagementintegrationtype}
 
 Values of types of integrations.
+
 | Value | Description |
 | ----- | ----------- |
 | `HTTP` | Integration with any monitoring tool. |
@@ -13613,6 +13617,7 @@ Values of types of integrations.
 ### `AlertManagementPayloadAlertFieldName` {#alertmanagementpayloadalertfieldname}
 
 Values for alert field names used in the custom mapping.
+
 | Value | Description |
 | ----- | ----------- |
 | `DESCRIPTION` | A high-level summary of the problem. |
@@ -13629,6 +13634,7 @@ Values for alert field names used in the custom mapping.
 ### `AlertManagementPayloadAlertFieldType` {#alertmanagementpayloadalertfieldtype}
 
 Values for alert field types used in the custom mapping.
+
 | Value | Description |
 | ----- | ----------- |
 | `ARRAY` | Array field type. |
@@ -13638,6 +13644,7 @@ Values for alert field types used in the custom mapping.
 ### `AlertManagementSeverity` {#alertmanagementseverity}
 
 Alert severity values.
+
 | Value | Description |
 | ----- | ----------- |
 | `CRITICAL` | Critical severity |
@@ -13650,6 +13657,7 @@ Alert severity values.
 ### `AlertManagementStatus` {#alertmanagementstatus}
 
 Alert status values.
+
 | Value | Description |
 | ----- | ----------- |
 | `ACKNOWLEDGED` | Acknowledged status |
@@ -13660,6 +13668,7 @@ Alert status values.
 ### `ApiFuzzingScanMode` {#apifuzzingscanmode}
 
 All possible ways to specify the API surface for an API fuzzing scan.
+
 | Value | Description |
 | ----- | ----------- |
 | `HAR` | The API surface is specified by a HAR file. |
@@ -13668,6 +13677,7 @@ All possible ways to specify the API surface for an API fuzzing scan.
 ### `AvailabilityEnum` {#availabilityenum}
 
 User availability status.
+
 | Value | Description |
 | ----- | ----------- |
 | `BUSY` | Busy |
@@ -13676,6 +13686,7 @@ User availability status.
 ### `BlobViewersType` {#blobviewerstype}
 
 Types of blob viewers.
+
 | Value | Description |
 | ----- | ----------- |
 | `auxiliary` | Auxiliary blob viewers type. |
@@ -13685,6 +13696,7 @@ Types of blob viewers.
 ### `CiConfigStatus` {#ciconfigstatus}
 
 Values for YAML processor result.
+
 | Value | Description |
 | ----- | ----------- |
 | `INVALID` | The configuration file is not valid. |
@@ -13693,6 +13705,7 @@ Values for YAML processor result.
 ### `CommitActionMode` {#commitactionmode}
 
 Mode of a commit action.
+
 | Value | Description |
 | ----- | ----------- |
 | `CHMOD` | Chmod command. |
@@ -13702,12 +13715,14 @@ Mode of a commit action.
 | `UPDATE` | Update command. |
 
 ### `CommitEncoding` {#commitencoding}
+
 | Value | Description |
 | ----- | ----------- |
 | `BASE64` | Base64 encoding. |
 | `TEXT` | Text encoding. |
 
 ### `ContainerExpirationPolicyCadenceEnum` {#containerexpirationpolicycadenceenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `EVERY_DAY` | Every day |
@@ -13717,6 +13732,7 @@ Mode of a commit action.
 | `EVERY_WEEK` | Every week |
 
 ### `ContainerExpirationPolicyKeepEnum` {#containerexpirationpolicykeepenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `FIFTY_TAGS` | 50 tags per image name |
@@ -13727,6 +13743,7 @@ Mode of a commit action.
 | `TWENTY_FIVE_TAGS` | 25 tags per image name |
 
 ### `ContainerExpirationPolicyOlderThanEnum` {#containerexpirationpolicyolderthanenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `FOURTEEN_DAYS` | 14 days until tags are automatically removed |
@@ -13737,6 +13754,7 @@ Mode of a commit action.
 ### `ContainerRepositoryCleanupStatus` {#containerrepositorycleanupstatus}
 
 Status of the tags cleanup of a container repository.
+
 | Value | Description |
 | ----- | ----------- |
 | `ONGOING` | The tags cleanup is ongoing. |
@@ -13747,6 +13765,7 @@ Status of the tags cleanup of a container repository.
 ### `ContainerRepositorySort` {#containerrepositorysort}
 
 Values for sorting container repositories.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -13763,18 +13782,21 @@ Values for sorting container repositories.
 ### `ContainerRepositoryStatus` {#containerrepositorystatus}
 
 Status of a container repository.
+
 | Value | Description |
 | ----- | ----------- |
 | `DELETE_FAILED` | Delete Failed status. |
 | `DELETE_SCHEDULED` | Delete Scheduled status. |
 
 ### `DastScanTypeEnum` {#dastscantypeenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `ACTIVE` | Active DAST scan. This scan will make active attacks against the target site. |
 | `PASSIVE` | Passive DAST scan. This scan will not make active attacks against the target site. |
 
 ### `DastSiteProfileValidationStatusEnum` {#dastsiteprofilevalidationstatusenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `FAILED_VALIDATION` | Site validation process finished but failed. |
@@ -13784,6 +13806,7 @@ Status of a container repository.
 | `PENDING_VALIDATION` | Site validation process has not started. |
 
 ### `DastSiteValidationStrategyEnum` {#dastsitevalidationstrategyenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `HEADER` | Header validation. |
@@ -13792,6 +13815,7 @@ Status of a container repository.
 ### `DataVisualizationColorEnum` {#datavisualizationcolorenum}
 
 Color of the data visualization palette.
+
 | Value | Description |
 | ----- | ----------- |
 | `AQUA` | Aqua color |
@@ -13803,6 +13827,7 @@ Color of the data visualization palette.
 ### `DataVisualizationWeightEnum` {#datavisualizationweightenum}
 
 Weight of the data visualization palette.
+
 | Value | Description |
 | ----- | ----------- |
 | `WEIGHT_100` | 100 weight |
@@ -13820,6 +13845,7 @@ Weight of the data visualization palette.
 ### `DesignCollectionCopyState` {#designcollectioncopystate}
 
 Copy state of a DesignCollection.
+
 | Value | Description |
 | ----- | ----------- |
 | `ERROR` | The DesignCollection encountered an error during a copy |
@@ -13829,6 +13855,7 @@ Copy state of a DesignCollection.
 ### `DesignVersionEvent` {#designversionevent}
 
 Mutation event of a design within a version.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATION` | A creation event |
@@ -13839,6 +13866,7 @@ Mutation event of a design within a version.
 ### `DiffPositionType` {#diffpositiontype}
 
 Type of file the position refers to.
+
 | Value | Description |
 | ----- | ----------- |
 | `image` |  |
@@ -13847,6 +13875,7 @@ Type of file the position refers to.
 ### `EntryType` {#entrytype}
 
 Type of a tree entry.
+
 | Value | Description |
 | ----- | ----------- |
 | `blob` |  |
@@ -13856,6 +13885,7 @@ Type of a tree entry.
 ### `EpicSort` {#epicsort}
 
 Roadmap sort values.
+
 | Value | Description |
 | ----- | ----------- |
 | `end_date_asc` | End date at ascending order. |
@@ -13866,6 +13896,7 @@ Roadmap sort values.
 ### `EpicState` {#epicstate}
 
 State of an epic.
+
 | Value | Description |
 | ----- | ----------- |
 | `all` |  |
@@ -13875,6 +13906,7 @@ State of an epic.
 ### `EpicStateEvent` {#epicstateevent}
 
 State event of an epic.
+
 | Value | Description |
 | ----- | ----------- |
 | `CLOSE` | Close the epic. |
@@ -13883,6 +13915,7 @@ State event of an epic.
 ### `EpicWildcardId` {#epicwildcardid}
 
 Epic ID wildcard values.
+
 | Value | Description |
 | ----- | ----------- |
 | `ANY` | Any epic is assigned. |
@@ -13891,6 +13924,7 @@ Epic ID wildcard values.
 ### `EventAction` {#eventaction}
 
 Event action.
+
 | Value | Description |
 | ----- | ----------- |
 | `APPROVED` | Approved action |
@@ -13910,6 +13944,7 @@ Event action.
 ### `GroupMemberRelation` {#groupmemberrelation}
 
 Group member relation.
+
 | Value | Description |
 | ----- | ----------- |
 | `DESCENDANTS` | Descendants members |
@@ -13919,6 +13954,7 @@ Group member relation.
 ### `HealthStatus` {#healthstatus}
 
 Health status of an issue or epic.
+
 | Value | Description |
 | ----- | ----------- |
 | `atRisk` |  |
@@ -13928,6 +13964,7 @@ Health status of an issue or epic.
 ### `IssuableSeverity` {#issuableseverity}
 
 Incident severity.
+
 | Value | Description |
 | ----- | ----------- |
 | `CRITICAL` | Critical severity |
@@ -13939,6 +13976,7 @@ Incident severity.
 ### `IssuableState` {#issuablestate}
 
 State of a GitLab issue or merge request.
+
 | Value | Description |
 | ----- | ----------- |
 | `all` | All available. |
@@ -13949,6 +13987,7 @@ State of a GitLab issue or merge request.
 ### `IssueSort` {#issuesort}
 
 Values for sorting issues.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -13980,6 +14019,7 @@ Values for sorting issues.
 ### `IssueState` {#issuestate}
 
 State of a GitLab issue.
+
 | Value | Description |
 | ----- | ----------- |
 | `all` | All available. |
@@ -13990,6 +14030,7 @@ State of a GitLab issue.
 ### `IssueStateEvent` {#issuestateevent}
 
 Values for issue state events.
+
 | Value | Description |
 | ----- | ----------- |
 | `CLOSE` | Closes the issue. |
@@ -13998,6 +14039,7 @@ Values for issue state events.
 ### `IssueType` {#issuetype}
 
 Issue type.
+
 | Value | Description |
 | ----- | ----------- |
 | `INCIDENT` | Incident issue type |
@@ -14007,6 +14049,7 @@ Issue type.
 ### `IterationState` {#iterationstate}
 
 State of a GitLab iteration.
+
 | Value | Description |
 | ----- | ----------- |
 | `all` |  |
@@ -14018,6 +14061,7 @@ State of a GitLab iteration.
 ### `IterationWildcardId` {#iterationwildcardid}
 
 Iteration ID wildcard values.
+
 | Value | Description |
 | ----- | ----------- |
 | `ANY` | An iteration is assigned. |
@@ -14025,6 +14069,7 @@ Iteration ID wildcard values.
 | `NONE` | No iteration is assigned. |
 
 ### `JobArtifactFileType` {#jobartifactfiletype}
+
 | Value | Description |
 | ----- | ----------- |
 | `ACCESSIBILITY` | ACCESSIBILITY job artifact file type. |
@@ -14058,6 +14103,7 @@ Iteration ID wildcard values.
 ### `ListLimitMetric` {#listlimitmetric}
 
 List limit metric setting.
+
 | Value | Description |
 | ----- | ----------- |
 | `all_metrics` |  |
@@ -14067,6 +14113,7 @@ List limit metric setting.
 ### `MeasurementIdentifier` {#measurementidentifier}
 
 Possible identifier types for a measurement.
+
 | Value | Description |
 | ----- | ----------- |
 | `GROUPS` | Group count. |
@@ -14083,6 +14130,7 @@ Possible identifier types for a measurement.
 ### `MergeRequestNewState` {#mergerequestnewstate}
 
 New state to apply to a merge request.
+
 | Value | Description |
 | ----- | ----------- |
 | `CLOSED` | Close the merge request if it is open. |
@@ -14091,6 +14139,7 @@ New state to apply to a merge request.
 ### `MergeRequestSort` {#mergerequestsort}
 
 Values for sorting merge requests.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -14113,6 +14162,7 @@ Values for sorting merge requests.
 ### `MergeRequestState` {#mergerequeststate}
 
 State of a GitLab merge request.
+
 | Value | Description |
 | ----- | ----------- |
 | `all` | All available. |
@@ -14124,6 +14174,7 @@ State of a GitLab merge request.
 ### `MilestoneStateEnum` {#milestonestateenum}
 
 Current state of milestone.
+
 | Value | Description |
 | ----- | ----------- |
 | `active` | Milestone is currently active. |
@@ -14132,6 +14183,7 @@ Current state of milestone.
 ### `MoveType` {#movetype}
 
 The position to which the adjacent object should be moved.
+
 | Value | Description |
 | ----- | ----------- |
 | `after` | The adjacent object will be moved after the object that is being moved. |
@@ -14140,6 +14192,7 @@ The position to which the adjacent object should be moved.
 ### `MutationOperationMode` {#mutationoperationmode}
 
 Different toggles for changing mutator behavior.
+
 | Value | Description |
 | ----- | ----------- |
 | `APPEND` | Performs an append operation. |
@@ -14149,6 +14202,7 @@ Different toggles for changing mutator behavior.
 ### `NamespaceProjectSort` {#namespaceprojectsort}
 
 Values for sorting projects.
+
 | Value | Description |
 | ----- | ----------- |
 | `SIMILARITY` | Most similar to the search query. |
@@ -14157,6 +14211,7 @@ Values for sorting projects.
 ### `OncallRotationUnitEnum` {#oncallrotationunitenum}
 
 Rotation length unit of an on-call rotation.
+
 | Value | Description |
 | ----- | ----------- |
 | `DAYS` | Days |
@@ -14164,6 +14219,7 @@ Rotation length unit of an on-call rotation.
 | `WEEKS` | Weeks |
 
 ### `PackageTypeEnum` {#packagetypeenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `COMPOSER` | Packages from the Composer package manager |
@@ -14178,6 +14234,7 @@ Rotation length unit of an on-call rotation.
 | `RUBYGEMS` | Packages from the Rubygems package manager |
 
 ### `PipelineConfigSourceEnum` {#pipelineconfigsourceenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `AUTO_DEVOPS_SOURCE` |  |
@@ -14191,6 +14248,7 @@ Rotation length unit of an on-call rotation.
 | `WEBIDE_SOURCE` |  |
 
 ### `PipelineStatusEnum` {#pipelinestatusenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `CANCELED` |  |
@@ -14208,6 +14266,7 @@ Rotation length unit of an on-call rotation.
 ### `ProjectMemberRelation` {#projectmemberrelation}
 
 Project member relation.
+
 | Value | Description |
 | ----- | ----------- |
 | `DESCENDANTS` | Descendants members |
@@ -14218,6 +14277,7 @@ Project member relation.
 ### `RegistryState` {#registrystate}
 
 State of a Geo registry.
+
 | Value | Description |
 | ----- | ----------- |
 | `FAILED` | Registry that failed to sync. |
@@ -14228,6 +14288,7 @@ State of a Geo registry.
 ### `ReleaseAssetLinkType` {#releaseassetlinktype}
 
 Type of the link: `other`, `runbook`, `image`, `package`.
+
 | Value | Description |
 | ----- | ----------- |
 | `IMAGE` | Image link type |
@@ -14238,6 +14299,7 @@ Type of the link: `other`, `runbook`, `image`, `package`.
 ### `ReleaseSort` {#releasesort}
 
 Values for sorting releases.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -14248,6 +14310,7 @@ Values for sorting releases.
 ### `RequirementState` {#requirementstate}
 
 State of a requirement.
+
 | Value | Description |
 | ----- | ----------- |
 | `ARCHIVED` |  |
@@ -14256,6 +14319,7 @@ State of a requirement.
 ### `RequirementStatusFilter` {#requirementstatusfilter}
 
 Status of a requirement based on last test report.
+
 | Value | Description |
 | ----- | ----------- |
 | `FAILED` |  |
@@ -14265,6 +14329,7 @@ Status of a requirement based on last test report.
 ### `SastUiComponentSize` {#sastuicomponentsize}
 
 Size of UI component in SAST configuration page.
+
 | Value | Description |
 | ----- | ----------- |
 | `LARGE` | The size of UI component in SAST configuration page is large. |
@@ -14272,6 +14337,7 @@ Size of UI component in SAST configuration page.
 | `SMALL` | The size of UI component in SAST configuration page is small. |
 
 ### `SecurityReportTypeEnum` {#securityreporttypeenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `API_FUZZING` | API FUZZING scan report |
@@ -14285,6 +14351,7 @@ Size of UI component in SAST configuration page.
 ### `SecurityScannerType` {#securityscannertype}
 
 The type of the security scanner.
+
 | Value | Description |
 | ----- | ----------- |
 | `API_FUZZING` |  |
@@ -14298,6 +14365,7 @@ The type of the security scanner.
 ### `SentryErrorStatus` {#sentryerrorstatus}
 
 State of a Sentry error.
+
 | Value | Description |
 | ----- | ----------- |
 | `IGNORED` | Error has been ignored. |
@@ -14306,6 +14374,7 @@ State of a Sentry error.
 | `UNRESOLVED` | Error is unresolved. |
 
 ### `ServiceType` {#servicetype}
+
 | Value | Description |
 | ----- | ----------- |
 | `ASANA_SERVICE` | AsanaService type |
@@ -14348,6 +14417,7 @@ State of a Sentry error.
 ### `SnippetBlobActionEnum` {#snippetblobactionenum}
 
 Type of a snippet blob input action.
+
 | Value | Description |
 | ----- | ----------- |
 | `create` |  |
@@ -14358,6 +14428,7 @@ Type of a snippet blob input action.
 ### `Sort` {#sort}
 
 Common sort values.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED_ASC` | Created at ascending order. |
@@ -14372,12 +14443,14 @@ Common sort values.
 ### `TestReportState` {#testreportstate}
 
 State of a test report.
+
 | Value | Description |
 | ----- | ----------- |
 | `FAILED` |  |
 | `PASSED` |  |
 
 ### `TodoActionEnum` {#todoactionenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `approval_required` | User was set as an approver. |
@@ -14391,12 +14464,14 @@ State of a test report.
 | `unmergeable` | Merge request authored by the user could not be merged. |
 
 ### `TodoStateEnum` {#todostateenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `done` | The state of the todo is done. |
 | `pending` | The state of the todo is pending. |
 
 ### `TodoTargetEnum` {#todotargetenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `ALERT` | An Alert. |
@@ -14407,6 +14482,7 @@ State of a test report.
 | `MERGEREQUEST` | A MergeRequest. |
 
 ### `TypeEnum` {#typeenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `personal` |  |
@@ -14415,6 +14491,7 @@ State of a test report.
 ### `UserCalloutFeatureNameEnum` {#usercalloutfeaturenameenum}
 
 Name of the feature that the callout is for.
+
 | Value | Description |
 | ----- | ----------- |
 | `ACCOUNT_RECOVERY_REGULAR_CHECK` | Callout feature name for account_recovery_regular_check. |
@@ -14447,6 +14524,7 @@ Name of the feature that the callout is for.
 ### `UserState` {#userstate}
 
 Possible states of a user.
+
 | Value | Description |
 | ----- | ----------- |
 | `active` | The user is active and is able to use the system. |
@@ -14454,6 +14532,7 @@ Possible states of a user.
 | `deactivated` | The user is no longer active and is unable to use the system. |
 
 ### `VisibilityLevelsEnum` {#visibilitylevelsenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `internal` | Internal visibility level. |
@@ -14461,6 +14540,7 @@ Possible states of a user.
 | `public` | Public visibility level. |
 
 ### `VisibilityScopesEnum` {#visibilityscopesenum}
+
 | Value | Description |
 | ----- | ----------- |
 | `internal` |  |
@@ -14470,6 +14550,7 @@ Possible states of a user.
 ### `VulnerabilityDismissalReason` {#vulnerabilitydismissalreason}
 
 The dismissal reason of the Vulnerability.
+
 | Value | Description |
 | ----- | ----------- |
 | `ACCEPTABLE_RISK` | The likelihood of the Vulnerability occurring and its impact are deemed acceptable |
@@ -14481,6 +14562,7 @@ The dismissal reason of the Vulnerability.
 ### `VulnerabilityExternalIssueLinkExternalTracker` {#vulnerabilityexternalissuelinkexternaltracker}
 
 The external tracker of the external issue link related to a vulnerability.
+
 | Value | Description |
 | ----- | ----------- |
 | `JIRA` | Jira external tracker |
@@ -14488,6 +14570,7 @@ The external tracker of the external issue link related to a vulnerability.
 ### `VulnerabilityExternalIssueLinkType` {#vulnerabilityexternalissuelinktype}
 
 The type of the external issue link related to a vulnerability.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED` | Created link type |
@@ -14495,6 +14578,7 @@ The type of the external issue link related to a vulnerability.
 ### `VulnerabilityGrade` {#vulnerabilitygrade}
 
 The grade of the vulnerable project.
+
 | Value | Description |
 | ----- | ----------- |
 | `A` |  |
@@ -14506,6 +14590,7 @@ The grade of the vulnerable project.
 ### `VulnerabilityIssueLinkType` {#vulnerabilityissuelinktype}
 
 The type of the issue link related to a vulnerability.
+
 | Value | Description |
 | ----- | ----------- |
 | `CREATED` |  |
@@ -14514,6 +14599,7 @@ The type of the issue link related to a vulnerability.
 ### `VulnerabilityReportType` {#vulnerabilityreporttype}
 
 The type of the security scan that found the vulnerability.
+
 | Value | Description |
 | ----- | ----------- |
 | `API_FUZZING` |  |
@@ -14527,6 +14613,7 @@ The type of the security scan that found the vulnerability.
 ### `VulnerabilitySeverity` {#vulnerabilityseverity}
 
 The severity of the vulnerability.
+
 | Value | Description |
 | ----- | ----------- |
 | `CRITICAL` |  |
@@ -14539,6 +14626,7 @@ The severity of the vulnerability.
 ### `VulnerabilitySort` {#vulnerabilitysort}
 
 Vulnerability sort values.
+
 | Value | Description |
 | ----- | ----------- |
 | `detected_asc` | Detection timestamp in ascending order. |
@@ -14555,6 +14643,7 @@ Vulnerability sort values.
 ### `VulnerabilityState` {#vulnerabilitystate}
 
 The state of the vulnerability.
+
 | Value | Description |
 | ----- | ----------- |
 | `CONFIRMED` |  |
@@ -14838,6 +14927,7 @@ implement an interface).
 #### `PackageMetadata` {#packagemetadata}
 
 Represents metadata associated with a Package.
+
 One of:
 
 - [`ComposerMetadata`](#composermetadata)
@@ -14845,6 +14935,7 @@ One of:
 #### `VulnerabilityDetail` {#vulnerabilitydetail}
 
 Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type.
+
 One of:
 
 - [`VulnerabilityDetailBase`](#vulnerabilitydetailbase)
@@ -14864,6 +14955,7 @@ One of:
 #### `VulnerabilityLocation` {#vulnerabilitylocation}
 
 Represents a vulnerability location. The fields with data will depend on the vulnerability report type.
+
 One of:
 
 - [`VulnerabilityLocationContainerScanning`](#vulnerabilitylocationcontainerscanning)

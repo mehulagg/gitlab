@@ -88,6 +88,7 @@
 - enums.each do |enum|
   - unless enum[:values].empty?
     = render_name_and_description(enum)
+    \
     ~ "| Value | Description |"
     ~ "| ----- | ----------- |"
     - sorted_by_name(enum[:values]).each do |value|
@@ -126,6 +127,7 @@
 
 - graphql_union_types.each do |type|
   = render_name_and_description(type, 4)
+  \
   One of:
   \
   - type[:possible_types].each do |type_name|
