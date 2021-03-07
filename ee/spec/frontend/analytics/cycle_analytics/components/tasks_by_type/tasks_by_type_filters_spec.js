@@ -110,13 +110,13 @@ describe('TasksByTypeFilters', () => {
       return waitForPromises();
     });
 
-    it('emits the `updateFilter` event when a label is selected', () => {
-      expect(wrapper.emitted('updateFilter')).toBeUndefined();
+    it('emits the `update-filter` event when a label is selected', () => {
+      expect(wrapper.emitted('update-filter')).toBeUndefined();
 
-      wrapper.find(LabelsSelector).vm.$emit('selectLabel', groupLabels[0].id);
+      wrapper.find(LabelsSelector).vm.$emit('select-label', groupLabels[0].id);
 
-      expect(wrapper.emitted('updateFilter')).toBeDefined();
-      expect(wrapper.emitted('updateFilter')[0]).toEqual([
+      expect(wrapper.emitted('update-filter')).toBeDefined();
+      expect(wrapper.emitted('update-filter')[0]).toEqual([
         { filter: TASKS_BY_TYPE_FILTERS.LABEL, value: groupLabels[0].id },
       ]);
     });
@@ -157,7 +157,7 @@ describe('TasksByTypeFilters', () => {
         });
 
         return waitForPromises().then(() => {
-          wrapper.find(LabelsSelector).vm.$emit('selectLabel', groupLabels[2].id);
+          wrapper.find(LabelsSelector).vm.$emit('select-label', groupLabels[2].id);
         });
       });
 
@@ -166,7 +166,7 @@ describe('TasksByTypeFilters', () => {
       });
 
       it('should not allow selecting another label', () => {
-        expect(wrapper.emitted('updateFilter')).toBeUndefined();
+        expect(wrapper.emitted('update-filter')).toBeUndefined();
       });
 
       it('should display a message', () => {
@@ -183,15 +183,15 @@ describe('TasksByTypeFilters', () => {
       expect(findSelectedSubjectFilters(wrapper)).toBe(TASKS_BY_TYPE_SUBJECT_ISSUE);
     });
 
-    it('emits the `updateFilter` event when a subject filter is clicked', () => {
+    it('emits the `update-filter` event when a subject filter is clicked', () => {
       wrapper = createComponent({ mountFn: mount });
-      expect(wrapper.emitted('updateFilter')).toBeUndefined();
+      expect(wrapper.emitted('update-filter')).toBeUndefined();
 
       findSubjectFilters(wrapper).findAll('label:not(.active)').at(0).trigger('click');
 
       return wrapper.vm.$nextTick(() => {
-        expect(wrapper.emitted('updateFilter')).toBeDefined();
-        expect(wrapper.emitted('updateFilter')[0]).toEqual([
+        expect(wrapper.emitted('update-filter')).toBeDefined();
+        expect(wrapper.emitted('update-filter')[0]).toEqual([
           {
             filter: TASKS_BY_TYPE_FILTERS.SUBJECT,
             value: TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST,

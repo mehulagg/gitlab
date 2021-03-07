@@ -77,7 +77,7 @@ export default {
     handleLabelSelected(value) {
       removeFlash('notice');
       if (this.canUpdateLabelFilters(value)) {
-        this.$emit('updateFilter', { filter: TASKS_BY_TYPE_FILTERS.LABEL, value });
+        this.$emit('update-filter', { filter: TASKS_BY_TYPE_FILTERS.LABEL, value });
       } else {
         const { maxLabels } = this;
         const message = sprintf(
@@ -108,7 +108,7 @@ export default {
         aria-expanded="false"
         multiselect
         right
-        @selectLabel="handleLabelSelected"
+        @select-label="handleLabelSelected"
       >
         <template #label-dropdown-button>
           <gl-icon class="vertical-align-top" name="settings" />
@@ -122,7 +122,7 @@ export default {
               :options="subjectFilterOptions"
               @input="
                 (value) =>
-                  $emit('updateFilter', { filter: $options.TASKS_BY_TYPE_FILTERS.SUBJECT, value })
+                  $emit('update-filter', { filter: $options.TASKS_BY_TYPE_FILTERS.SUBJECT, value })
               "
             />
           </div>
