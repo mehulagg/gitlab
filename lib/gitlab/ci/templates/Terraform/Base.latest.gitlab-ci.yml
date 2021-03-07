@@ -53,6 +53,7 @@ cache:
   when: manual
   only:
     - master
+    - main
 
 .destroy: &destroy
   stage: cleanup
