@@ -39,8 +39,9 @@ addressed.
 ## Implement an experiment
 
 Currently, there are two options to conduct experiments:
+
 1. [GitLab Experiment](https://gitlab.com/gitlab-org/gitlab-experiment/) is a gem included in GitLab
-2. [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb) is built in the GitLab codebase
+1. [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb) is built in the GitLab codebase
 
 Historical Context: `experimentation.rb` was built iteratively with the needs that appeared while implementing experiments in Growth. The `gitlab-experiment` gem was built with the learnings of `experimentation.rb` and an easier to use API.
 
@@ -60,7 +61,6 @@ Otherwise, there is currently no strong suggestion to use one over the other.
 You find out how to conduct experiments using `gitlab-experiment` in the [README](https://gitlab.com/gitlab-org/gitlab-experiment/-/blob/master/README.md).
 
 ### Experiments using `experimentation.rb`
-
 
 1. Add the experiment to the `Gitlab::Experimentation::EXPERIMENTS` hash in [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb):
 
