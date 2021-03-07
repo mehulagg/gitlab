@@ -209,18 +209,6 @@ export default {
     });
   },
 
-  [mutationTypes.REQUEST_UPDATE_ISSUE]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_UPDATE_ISSUE_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_UPDATE_ISSUE_ERROR]: () => {
-    notImplemented();
-  },
-
   [mutationTypes.CREATE_ISSUE_FAILURE]: (state) => {
     state.error = s__('Boards|An error occurred while creating the issue. Please try again.');
   },
@@ -300,5 +288,9 @@ export default {
 
   [mutationTypes.RESET_BOARD_ITEM_SELECTION]: (state) => {
     state.selectedBoardItems = [];
+  },
+
+  [mutationTypes.SET_ERROR]: (state, error) => {
+    state.error = error;
   },
 };

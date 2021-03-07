@@ -603,6 +603,10 @@ export default {
     }
   },
 
+  setError: ({ commit }, error) => {
+    commit(types.SET_ERROR, error);
+  },
+
   fetchBacklog: () => {
     notImplemented();
   },
