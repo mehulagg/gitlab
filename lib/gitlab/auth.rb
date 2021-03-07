@@ -284,17 +284,17 @@ module Gitlab
 
         build = find_build_by_token(password)
         if !build
-          Gitlab::AppLogger.info("Tried to lookup build token (hashval: #{Digest::MD5.hexvalue(password)}), but found no record in the database")
+          Gitlab::AppLogger.info("Tried to lookup build token (hashval: #{Digest::MD5.hexdigest(password)}), but found no record in the database")
         end
         return unless build
         if !build.project.builds_enabled?
-          Gitlab::AppLogger.info("Found build token (hashval: #{Digest::MD5.hexvalue(password)}), but project #{build.project} had build disabled")
+          Gitlab::AppLogger.info("Found build token (hashval: #{Digest::MD5.hexdigest(password)}), but project #{build.project} had build disabled")
         end
         return unless build.project.builds_enabled?
 
         if build.user
           unless build.user.can?(:log_in) || (build.user.project_bot? && build.project.bots&.include?(build.user))
-            Gitlab::AppLogger.info("Found build token and user (hashval: #{Digest::MD5.hexvalue(password)}, user: #{build.user}), but checks failed: login #{build.user.can?(:log_in)}, bot: #{(build.user.project_bot? && build.project.bots&.include?(build.user))}")
+            Gitlab::AppLogger.info("Found build token and user (hashval: #{Digest::MD5.hexdigest(password)}, user: #{build.user}), but checks failed: login #{build.user.can?(:log_in)}, bot: #{(build.user.project_bot? && build.project.bots&.include?(build.user))}")
           end
           return unless build.user.can?(:log_in) || (build.user.project_bot? && build.project.bots&.include?(build.user))
 
