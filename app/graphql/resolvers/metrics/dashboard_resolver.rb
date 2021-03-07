@@ -5,17 +5,19 @@ module Resolvers
     class DashboardResolver < Resolvers::BaseResolver
       argument :path, GraphQL::STRING_TYPE,
                required: true,
-               description: "Path to a file which defines metrics dashboard eg: 'config/prometheus/common_metrics.yml'."
+               description: <<~MD
+                 Path to a file which defines metrics dashboard eg: `"config/prometheus/common_metrics.yml"`.
+               MD
 
       type Types::Metrics::DashboardType, null: true
 
       alias_method :environment, :object
 
-      def resolve(**args)
+      def resolve(path:)
         return unless environment
 
         ::PerformanceMonitoring::PrometheusDashboard
-          .find_for(project: environment.project, user: context[:current_user], path: args[:path], options: { environment: environment })
+          .find_for(project: environment.project, user: current_user, path: path, options: { environment: environment })
       end
     end
   end

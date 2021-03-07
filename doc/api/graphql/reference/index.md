@@ -30,13 +30,13 @@ in [Removed Items](../removed_items.md).
 
 The `Query` type contains the API's top-level entry points for all executable queries.
 
-### `ciApplicationSettings` {#Query_ciApplicationSettings}
+### `ciApplicationSettings`Query_ciApplicationSettings
 
 CI related settings that apply to the entire instance.
 
 Returns [`CiApplicationSettings`](#ciapplicationsettings)
 
-### `ciConfig` {#Query_ciConfig}
+### `ciConfig`Query_ciConfig
 
 Get linted and processed contents of a CI config. Should not be requested more than once per request.
 
@@ -50,7 +50,7 @@ Returns [`CiConfig`](#ciconfig)
 | `content` | [`String!`](#string) | Contents of `.gitlab-ci.yml`. |
 | `dryRun` | [`Boolean`](#boolean) | Run pipeline creation simulation, or only do static check. |
 
-### `containerRepository` {#Query_containerRepository}
+### `containerRepository`Query_containerRepository
 
 Find a container repository.
 
@@ -62,19 +62,19 @@ Returns [`ContainerRepositoryDetails`](#containerrepositorydetails)
 | ---- | ---- | ----------- |
 | `id` | [`ContainerRepositoryID!`](#containerrepositoryid) | The global ID of the container repository. |
 
-### `currentUser` {#Query_currentUser}
+### `currentUser`Query_currentUser
 
 Get information about current user.
 
 Returns [`User`](#user)
 
-### `designManagement` {#Query_designManagement}
+### `designManagement`Query_designManagement
 
 Fields related to design management.
 
 Returns [`DesignManagement!`](#designmanagement)
 
-### `devopsAdoptionSegments` {#Query_devopsAdoptionSegments}
+### `devopsAdoptionSegments`Query_devopsAdoptionSegments
 
 Get configured DevOps adoption segments on the instance.
 
@@ -89,7 +89,7 @@ Returns [`DevopsAdoptionSegmentConnection`](#devopsadoptionsegmentconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `echo` {#Query_echo}
+### `echo`Query_echo
 
 Text to echo back.
 
@@ -101,7 +101,7 @@ Returns [`String!`](#string)
 | ---- | ---- | ----------- |
 | `text` | [`String!`](#string) | Text to echo back. |
 
-### `geoNode` {#Query_geoNode}
+### `geoNode`Query_geoNode
 
 Find a Geo node.
 
@@ -113,7 +113,7 @@ Returns [`GeoNode`](#geonode)
 | ---- | ---- | ----------- |
 | `name` | [`String`](#string) | The name of the Geo node. Defaults to the current Geo node name. |
 
-### `group` {#Query_group}
+### `group`Query_group
 
 Find a group.
 
@@ -125,13 +125,13 @@ Returns [`Group`](#group)
 | ---- | ---- | ----------- |
 | `fullPath` | [`ID!`](#id) | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
-### `instanceSecurityDashboard` {#Query_instanceSecurityDashboard}
+### `instanceSecurityDashboard`Query_instanceSecurityDashboard
 
 Fields related to Instance Security Dashboard.
 
 Returns [`InstanceSecurityDashboard`](#instancesecuritydashboard)
 
-### `instanceStatisticsMeasurements` {#Query_instanceStatisticsMeasurements}
+### `instanceStatisticsMeasurements`Query_instanceStatisticsMeasurements
 
 Get statistics on the instance. Deprecated in 13.10: This field was renamed. Use the `usageTrendsMeasurements` field instead.
 
@@ -149,7 +149,7 @@ Returns [`UsageTrendsMeasurementConnection`](#usagetrendsmeasurementconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `issue` {#Query_issue}
+### `issue`Query_issue
 
 Find an Issue.
 
@@ -161,7 +161,7 @@ Returns [`Issue`](#issue)
 | ---- | ---- | ----------- |
 | `id` | [`IssueID!`](#issueid) | The global ID of the Issue. |
 
-### `iteration` {#Query_iteration}
+### `iteration`Query_iteration
 
 Find an iteration.
 
@@ -173,13 +173,13 @@ Returns [`Iteration`](#iteration)
 | ---- | ---- | ----------- |
 | `id` | [`IterationID!`](#iterationid) | Find an iteration by its ID. |
 
-### `metadata` {#Query_metadata}
+### `metadata`Query_metadata
 
 Metadata about GitLab.
 
 Returns [`Metadata`](#metadata)
 
-### `milestone` {#Query_milestone}
+### `milestone`Query_milestone
 
 Find a milestone.
 
@@ -191,7 +191,7 @@ Returns [`Milestone`](#milestone)
 | ---- | ---- | ----------- |
 | `id` | [`MilestoneID!`](#milestoneid) | Find a milestone by its ID. |
 
-### `namespace` {#Query_namespace}
+### `namespace`Query_namespace
 
 Find a namespace.
 
@@ -203,7 +203,7 @@ Returns [`Namespace`](#namespace)
 | ---- | ---- | ----------- |
 | `fullPath` | [`ID!`](#id) | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
-### `package` {#Query_package}
+### `package`Query_package
 
 Find a package.
 
@@ -215,7 +215,7 @@ Returns [`Package`](#package)
 | ---- | ---- | ----------- |
 | `id` | [`PackagesPackageID!`](#packagespackageid) | The global ID of the package. |
 
-### `project` {#Query_project}
+### `project`Query_project
 
 Find a project.
 
@@ -227,7 +227,7 @@ Returns [`Project`](#project)
 | ---- | ---- | ----------- |
 | `fullPath` | [`ID!`](#id) | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
-### `projects` {#Query_projects}
+### `projects`Query_projects
 
 Find projects visible to the current user.
 
@@ -247,7 +247,7 @@ Returns [`ProjectConnection`](#projectconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `runnerPlatforms` {#Query_runnerPlatforms}
+### `runnerPlatforms`Query_runnerPlatforms
 
 Supported runner platforms.
 
@@ -262,7 +262,7 @@ Returns [`RunnerPlatformConnection`](#runnerplatformconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `runnerSetup` {#Query_runnerSetup}
+### `runnerSetup`Query_runnerSetup
 
 Get runner setup instructions.
 
@@ -277,7 +277,7 @@ Returns [`RunnerSetup`](#runnersetup)
 | `projectId` | [`ProjectID`](#projectid) | Project to register the runner for. |
 | `groupId` | [`GroupID`](#groupid) | Group to register the runner for. |
 
-### `snippets` {#Query_snippets}
+### `snippets`Query_snippets
 
 Find Snippets visible to the current user.
 
@@ -298,7 +298,7 @@ Returns [`SnippetConnection`](#snippetconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `usageTrendsMeasurements` {#Query_usageTrendsMeasurements}
+### `usageTrendsMeasurements`Query_usageTrendsMeasurements
 
 Get statistics on the instance.
 
@@ -316,7 +316,7 @@ Returns [`UsageTrendsMeasurementConnection`](#usagetrendsmeasurementconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `user` {#Query_user}
+### `user`Query_user
 
 Find a user.
 
@@ -329,7 +329,7 @@ Returns [`User`](#user)
 | `id` | [`UserID`](#userid) | ID of the User. |
 | `username` | [`String`](#string) | Username of the User. |
 
-### `users` {#Query_users}
+### `users`Query_users
 
 Find users.
 
@@ -349,7 +349,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `vulnerabilities` {#Query_vulnerabilities}
+### `vulnerabilities`Query_vulnerabilities
 
 Vulnerabilities reported on projects on the current user's instance security dashboard.
 
@@ -372,7 +372,7 @@ Returns [`VulnerabilityConnection`](#vulnerabilityconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `vulnerabilitiesCountByDay` {#Query_vulnerabilitiesCountByDay}
+### `vulnerabilitiesCountByDay`Query_vulnerabilitiesCountByDay
 
 Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
 
@@ -389,7 +389,7 @@ Returns [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnec
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `vulnerabilitiesCountByDayAndSeverity` {#Query_vulnerabilitiesCountByDayAndSeverity}
+### `vulnerabilitiesCountByDayAndSeverity`Query_vulnerabilitiesCountByDayAndSeverity
 
 Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
 
@@ -406,7 +406,7 @@ Returns [`VulnerabilitiesCountByDayAndSeverityConnection`](#vulnerabilitiescount
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `vulnerability` {#Query_vulnerability}
+### `vulnerability`Query_vulnerability
 
 Find a vulnerability.
 
@@ -437,7 +437,7 @@ mutation($id: NoteableID!, $body: String!) {
 }
 ```
 
-### `addAwardEmoji` {#Mutation_addAwardEmoji}
+### `addAwardEmoji`Mutation_addAwardEmoji
 
 Input type: `AddAwardEmojiInput`
 
@@ -449,7 +449,7 @@ Input type: `AddAwardEmojiInput`
 | `name` | [`String!`](#string) | The emoji name. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `addProjectToSecurityDashboard` {#Mutation_addProjectToSecurityDashboard}
+### `addProjectToSecurityDashboard`Mutation_addProjectToSecurityDashboard
 
 Input type: `AddProjectToSecurityDashboardInput`
 
@@ -460,7 +460,7 @@ Input type: `AddProjectToSecurityDashboardInput`
 | `id` | [`ProjectID!`](#projectid) | ID of the project to be added to Instance Security Dashboard. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `adminSidekiqQueuesDeleteJobs` {#Mutation_adminSidekiqQueuesDeleteJobs}
+### `adminSidekiqQueuesDeleteJobs`Mutation_adminSidekiqQueuesDeleteJobs
 
 Input type: `AdminSidekiqQueuesDeleteJobsInput`
 
@@ -479,7 +479,7 @@ Input type: `AdminSidekiqQueuesDeleteJobsInput`
 | `queueName` | [`String!`](#string) | The name of the queue to delete jobs from. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `alertSetAssignees` {#Mutation_alertSetAssignees}
+### `alertSetAssignees`Mutation_alertSetAssignees
 
 Input type: `AlertSetAssigneesInput`
 
@@ -493,7 +493,7 @@ Input type: `AlertSetAssigneesInput`
 | `operationMode` | [`MutationOperationMode`](#mutationoperationmode) | The operation to perform. Defaults to REPLACE. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `alertTodoCreate` {#Mutation_alertTodoCreate}
+### `alertTodoCreate`Mutation_alertTodoCreate
 
 Input type: `AlertTodoCreateInput`
 
@@ -505,7 +505,7 @@ Input type: `AlertTodoCreateInput`
 | `iid` | [`String!`](#string) | The IID of the alert to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `apiFuzzingCiConfigurationCreate` {#Mutation_apiFuzzingCiConfigurationCreate}
+### `apiFuzzingCiConfigurationCreate`Mutation_apiFuzzingCiConfigurationCreate
 
 Input type: `ApiFuzzingCiConfigurationCreateInput`
 
@@ -522,7 +522,7 @@ Input type: `ApiFuzzingCiConfigurationCreateInput`
 | `target` | [`String!`](#string) | URL for the target of API fuzzing scans. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `awardEmojiAdd` {#Mutation_awardEmojiAdd}
+### `awardEmojiAdd`Mutation_awardEmojiAdd
 
 Input type: `AwardEmojiAddInput`
 
@@ -534,7 +534,7 @@ Input type: `AwardEmojiAddInput`
 | `name` | [`String!`](#string) | The emoji name. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `awardEmojiRemove` {#Mutation_awardEmojiRemove}
+### `awardEmojiRemove`Mutation_awardEmojiRemove
 
 Input type: `AwardEmojiRemoveInput`
 
@@ -546,7 +546,7 @@ Input type: `AwardEmojiRemoveInput`
 | `name` | [`String!`](#string) | The emoji name. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `awardEmojiToggle` {#Mutation_awardEmojiToggle}
+### `awardEmojiToggle`Mutation_awardEmojiToggle
 
 Input type: `AwardEmojiToggleInput`
 
@@ -558,7 +558,7 @@ Input type: `AwardEmojiToggleInput`
 | `name` | [`String!`](#string) | The emoji name. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `boardListCreate` {#Mutation_boardListCreate}
+### `boardListCreate`Mutation_boardListCreate
 
 Input type: `BoardListCreateInput`
 
@@ -574,7 +574,7 @@ Input type: `BoardListCreateInput`
 | `assigneeId` | [`UserID`](#userid) | Global ID of an existing user. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `boardListUpdateLimitMetrics` {#Mutation_boardListUpdateLimitMetrics}
+### `boardListUpdateLimitMetrics`Mutation_boardListUpdateLimitMetrics
 
 Input type: `BoardListUpdateLimitMetricsInput`
 
@@ -588,7 +588,7 @@ Input type: `BoardListUpdateLimitMetricsInput`
 | `maxIssueWeight` | [`Int`](#int) | The new maximum issue weight limit. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `bulkFindOrCreateDevopsAdoptionSegments` {#Mutation_bulkFindOrCreateDevopsAdoptionSegments}
+### `bulkFindOrCreateDevopsAdoptionSegments`Mutation_bulkFindOrCreateDevopsAdoptionSegments
 
 Input type: `BulkFindOrCreateDevopsAdoptionSegmentsInput`
 
@@ -599,7 +599,7 @@ Input type: `BulkFindOrCreateDevopsAdoptionSegmentsInput`
 | `namespaceIds` | [`[NamespaceID!]!`](#namespaceid) | List of Namespace IDs for the segments. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `ciCdSettingsUpdate` {#Mutation_ciCdSettingsUpdate}
+### `ciCdSettingsUpdate`Mutation_ciCdSettingsUpdate
 
 Input type: `CiCdSettingsUpdateInput`
 
@@ -611,7 +611,7 @@ Input type: `CiCdSettingsUpdateInput`
 | `keepLatestArtifact` | [`Boolean`](#boolean) | Indicates if the latest artifact should be kept for this project. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `clusterAgentDelete` {#Mutation_clusterAgentDelete}
+### `clusterAgentDelete`Mutation_clusterAgentDelete
 
 Input type: `ClusterAgentDeleteInput`
 
@@ -622,7 +622,7 @@ Input type: `ClusterAgentDeleteInput`
 | `id` | [`ClustersAgentID!`](#clustersagentid) | Global ID of the cluster agent that will be deleted. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `clusterAgentTokenCreate` {#Mutation_clusterAgentTokenCreate}
+### `clusterAgentTokenCreate`Mutation_clusterAgentTokenCreate
 
 Input type: `ClusterAgentTokenCreateInput`
 
@@ -635,7 +635,7 @@ Input type: `ClusterAgentTokenCreateInput`
 | `name` | [`String!`](#string) | Name of the token. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `clusterAgentTokenDelete` {#Mutation_clusterAgentTokenDelete}
+### `clusterAgentTokenDelete`Mutation_clusterAgentTokenDelete
 
 Input type: `ClusterAgentTokenDeleteInput`
 
@@ -646,7 +646,7 @@ Input type: `ClusterAgentTokenDeleteInput`
 | `id` | [`ClustersAgentTokenID!`](#clustersagenttokenid) | Global ID of the cluster agent token that will be deleted. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `commitCreate` {#Mutation_commitCreate}
+### `commitCreate`Mutation_commitCreate
 
 Input type: `CommitCreateInput`
 
@@ -661,7 +661,7 @@ Input type: `CommitCreateInput`
 | `actions` | [`[CommitAction!]!`](#commitaction) | Array of action hashes to commit as a batch. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `configureSast` {#Mutation_configureSast}
+### `configureSast`Mutation_configureSast
 
 Input type: `ConfigureSastInput`
 
@@ -673,7 +673,7 @@ Input type: `ConfigureSastInput`
 | `configuration` | [`SastCiConfigurationInput!`](#sastciconfigurationinput) | SAST CI configuration for the project. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createAlertIssue` {#Mutation_createAlertIssue}
+### `createAlertIssue`Mutation_createAlertIssue
 
 Input type: `CreateAlertIssueInput`
 
@@ -685,7 +685,7 @@ Input type: `CreateAlertIssueInput`
 | `iid` | [`String!`](#string) | The IID of the alert to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createAnnotation` {#Mutation_createAnnotation}
+### `createAnnotation`Mutation_createAnnotation
 
 Input type: `CreateAnnotationInput`
 
@@ -701,7 +701,7 @@ Input type: `CreateAnnotationInput`
 | `description` | [`String!`](#string) | The description of the annotation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createBoard` {#Mutation_createBoard}
+### `createBoard`Mutation_createBoard
 
 Input type: `CreateBoardInput`
 
@@ -722,7 +722,7 @@ Input type: `CreateBoardInput`
 | `labelIds` | [`[LabelID!]`](#labelid) | The IDs of labels to be added to the board. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createBranch` {#Mutation_createBranch}
+### `createBranch`Mutation_createBranch
 
 Input type: `CreateBranchInput`
 
@@ -735,7 +735,7 @@ Input type: `CreateBranchInput`
 | `ref` | [`String!`](#string) | Branch name or commit SHA to create branch from. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createClusterAgent` {#Mutation_createClusterAgent}
+### `createClusterAgent`Mutation_createClusterAgent
 
 Input type: `CreateClusterAgentInput`
 
@@ -747,7 +747,7 @@ Input type: `CreateClusterAgentInput`
 | `name` | [`String!`](#string) | Name of the cluster agent. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createComplianceFramework` {#Mutation_createComplianceFramework}
+### `createComplianceFramework`Mutation_createComplianceFramework
 
 Input type: `CreateComplianceFrameworkInput`
 
@@ -759,7 +759,7 @@ Input type: `CreateComplianceFrameworkInput`
 | `params` | [`ComplianceFrameworkInput!`](#complianceframeworkinput) | Parameters to update the compliance framework with. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createCustomEmoji` {#Mutation_createCustomEmoji}
+### `createCustomEmoji`Mutation_createCustomEmoji
 
  Available only when feature flag `custom_emoji` is enabled.
 
@@ -774,7 +774,7 @@ Input type: `CreateCustomEmojiInput`
 | `url` | [`String!`](#string) | Location of the emoji file. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createDevopsAdoptionSegment` {#Mutation_createDevopsAdoptionSegment}
+### `createDevopsAdoptionSegment`Mutation_createDevopsAdoptionSegment
 
 Input type: `CreateDevopsAdoptionSegmentInput`
 
@@ -785,7 +785,7 @@ Input type: `CreateDevopsAdoptionSegmentInput`
 | `namespaceId` | [`NamespaceID!`](#namespaceid) | Namespace ID to set for the segment. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createDiffNote` {#Mutation_createDiffNote}
+### `createDiffNote`Mutation_createDiffNote
 
 Input type: `CreateDiffNoteInput`
 
@@ -799,7 +799,7 @@ Input type: `CreateDiffNoteInput`
 | `position` | [`DiffPositionInput!`](#diffpositioninput) | The position of this note on a diff. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createEpic` {#Mutation_createEpic}
+### `createEpic`Mutation_createEpic
 
 Input type: `CreateEpicInput`
 
@@ -819,7 +819,7 @@ Input type: `CreateEpicInput`
 | `removeLabelIds` | [`[ID!]`](#id) | The IDs of labels to be removed from the epic. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createImageDiffNote` {#Mutation_createImageDiffNote}
+### `createImageDiffNote`Mutation_createImageDiffNote
 
 Input type: `CreateImageDiffNoteInput`
 
@@ -833,7 +833,7 @@ Input type: `CreateImageDiffNoteInput`
 | `position` | [`DiffImagePositionInput!`](#diffimagepositioninput) | The position of this note on a diff. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createIssue` {#Mutation_createIssue}
+### `createIssue`Mutation_createIssue
 
 Input type: `CreateIssueInput`
 
@@ -860,7 +860,7 @@ Input type: `CreateIssueInput`
 | `epicId` | [`EpicID`](#epicid) | The ID of an epic to associate the issue with. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createIteration` {#Mutation_createIteration}
+### `createIteration`Mutation_createIteration
 
 Input type: `CreateIterationInput`
 
@@ -876,7 +876,7 @@ Input type: `CreateIterationInput`
 | `dueDate` | [`String`](#string) | The end date of the iteration. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createNote` {#Mutation_createNote}
+### `createNote`Mutation_createNote
 
 Input type: `CreateNoteInput`
 
@@ -890,7 +890,7 @@ Input type: `CreateNoteInput`
 | `discussionId` | [`DiscussionID`](#discussionid) | The global ID of the discussion this note is in reply to. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createRequirement` {#Mutation_createRequirement}
+### `createRequirement`Mutation_createRequirement
 
 Input type: `CreateRequirementInput`
 
@@ -903,7 +903,7 @@ Input type: `CreateRequirementInput`
 | `projectPath` | [`ID!`](#id) | Full project path the requirement is associated with. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createSnippet` {#Mutation_createSnippet}
+### `createSnippet`Mutation_createSnippet
 
 Input type: `CreateSnippetInput`
 
@@ -921,7 +921,7 @@ Input type: `CreateSnippetInput`
 | `blobActions` | [`[SnippetBlobActionInputType!]`](#snippetblobactioninputtype) | Actions to perform over the snippet repository and blobs. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `createTestCase` {#Mutation_createTestCase}
+### `createTestCase`Mutation_createTestCase
 
 Input type: `CreateTestCaseInput`
 
@@ -935,7 +935,7 @@ Input type: `CreateTestCaseInput`
 | `projectPath` | [`ID!`](#id) | The project full path to create the test case. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastOnDemandScanCreate` {#Mutation_dastOnDemandScanCreate}
+### `dastOnDemandScanCreate`Mutation_dastOnDemandScanCreate
 
 Input type: `DastOnDemandScanCreateInput`
 
@@ -948,7 +948,7 @@ Input type: `DastOnDemandScanCreateInput`
 | `dastScannerProfileId` | [`DastScannerProfileID`](#dastscannerprofileid) | ID of the scanner profile to be used for the scan. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastProfileCreate` {#Mutation_dastProfileCreate}
+### `dastProfileCreate`Mutation_dastProfileCreate
 
 Input type: `DastProfileCreateInput`
 
@@ -965,7 +965,7 @@ Input type: `DastProfileCreateInput`
 | `runAfterCreate` | [`Boolean`](#boolean) | Run scan using profile after creation. Defaults to false. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastProfileDelete` {#Mutation_dastProfileDelete}
+### `dastProfileDelete`Mutation_dastProfileDelete
 
 Input type: `DastProfileDeleteInput`
 
@@ -976,7 +976,7 @@ Input type: `DastProfileDeleteInput`
 | `id` | [`DastProfileID!`](#dastprofileid) | ID of the profile to be deleted. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastProfileRun` {#Mutation_dastProfileRun}
+### `dastProfileRun`Mutation_dastProfileRun
 
 Input type: `DastProfileRunInput`
 
@@ -988,7 +988,7 @@ Input type: `DastProfileRunInput`
 | `id` | [`DastProfileID!`](#dastprofileid) | ID of the profile to be used for the scan. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastProfileUpdate` {#Mutation_dastProfileUpdate}
+### `dastProfileUpdate`Mutation_dastProfileUpdate
 
 Input type: `DastProfileUpdateInput`
 
@@ -1006,7 +1006,7 @@ Input type: `DastProfileUpdateInput`
 | `runAfterUpdate` | [`Boolean`](#boolean) | Run scan using profile after update. Defaults to false. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastScannerProfileCreate` {#Mutation_dastScannerProfileCreate}
+### `dastScannerProfileCreate`Mutation_dastScannerProfileCreate
 
 Input type: `DastScannerProfileCreateInput`
 
@@ -1023,7 +1023,7 @@ Input type: `DastScannerProfileCreateInput`
 | `showDebugMessages` | [`Boolean`](#boolean) | Indicates if debug messages should be included in DAST console output. True to include the debug messages. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastScannerProfileDelete` {#Mutation_dastScannerProfileDelete}
+### `dastScannerProfileDelete`Mutation_dastScannerProfileDelete
 
 Input type: `DastScannerProfileDeleteInput`
 
@@ -1035,7 +1035,7 @@ Input type: `DastScannerProfileDeleteInput`
 | `id` | [`DastScannerProfileID!`](#dastscannerprofileid) | ID of the scanner profile to be deleted. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastScannerProfileUpdate` {#Mutation_dastScannerProfileUpdate}
+### `dastScannerProfileUpdate`Mutation_dastScannerProfileUpdate
 
 Input type: `DastScannerProfileUpdateInput`
 
@@ -1053,7 +1053,7 @@ Input type: `DastScannerProfileUpdateInput`
 | `showDebugMessages` | [`Boolean`](#boolean) | Indicates if debug messages should be included in DAST console output. True to include the debug messages. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastSiteProfileCreate` {#Mutation_dastSiteProfileCreate}
+### `dastSiteProfileCreate`Mutation_dastSiteProfileCreate
 
 Input type: `DastSiteProfileCreateInput`
 
@@ -1066,7 +1066,7 @@ Input type: `DastSiteProfileCreateInput`
 | `targetUrl` | [`String`](#string) | The URL of the target to be scanned. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastSiteProfileDelete` {#Mutation_dastSiteProfileDelete}
+### `dastSiteProfileDelete`Mutation_dastSiteProfileDelete
 
 Input type: `DastSiteProfileDeleteInput`
 
@@ -1078,7 +1078,7 @@ Input type: `DastSiteProfileDeleteInput`
 | `id` | [`DastSiteProfileID!`](#dastsiteprofileid) | ID of the site profile to be deleted. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastSiteProfileUpdate` {#Mutation_dastSiteProfileUpdate}
+### `dastSiteProfileUpdate`Mutation_dastSiteProfileUpdate
 
 Input type: `DastSiteProfileUpdateInput`
 
@@ -1092,7 +1092,7 @@ Input type: `DastSiteProfileUpdateInput`
 | `targetUrl` | [`String`](#string) | The URL of the target to be scanned. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastSiteTokenCreate` {#Mutation_dastSiteTokenCreate}
+### `dastSiteTokenCreate`Mutation_dastSiteTokenCreate
 
 Input type: `DastSiteTokenCreateInput`
 
@@ -1104,7 +1104,7 @@ Input type: `DastSiteTokenCreateInput`
 | `targetUrl` | [`String`](#string) | The URL of the target to be validated. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastSiteValidationCreate` {#Mutation_dastSiteValidationCreate}
+### `dastSiteValidationCreate`Mutation_dastSiteValidationCreate
 
 Input type: `DastSiteValidationCreateInput`
 
@@ -1118,7 +1118,7 @@ Input type: `DastSiteValidationCreateInput`
 | `strategy` | [`DastSiteValidationStrategyEnum`](#dastsitevalidationstrategyenum) | The validation strategy to be used. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dastSiteValidationRevoke` {#Mutation_dastSiteValidationRevoke}
+### `dastSiteValidationRevoke`Mutation_dastSiteValidationRevoke
 
 Input type: `DastSiteValidationRevokeInput`
 
@@ -1130,7 +1130,7 @@ Input type: `DastSiteValidationRevokeInput`
 | `normalizedTargetUrl` | [`String!`](#string) | Normalized URL of the target to be revoked. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `deleteAnnotation` {#Mutation_deleteAnnotation}
+### `deleteAnnotation`Mutation_deleteAnnotation
 
 Input type: `DeleteAnnotationInput`
 
@@ -1141,7 +1141,7 @@ Input type: `DeleteAnnotationInput`
 | `id` | [`MetricsDashboardAnnotationID!`](#metricsdashboardannotationid) | Global ID of the annotation to delete. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `deleteDevopsAdoptionSegment` {#Mutation_deleteDevopsAdoptionSegment}
+### `deleteDevopsAdoptionSegment`Mutation_deleteDevopsAdoptionSegment
 
 Input type: `DeleteDevopsAdoptionSegmentInput`
 
@@ -1152,7 +1152,7 @@ Input type: `DeleteDevopsAdoptionSegmentInput`
 | `id` | [`[AnalyticsDevopsAdoptionSegmentID!]!`](#analyticsdevopsadoptionsegmentid) | One or many IDs of the segments to delete. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `designManagementDelete` {#Mutation_designManagementDelete}
+### `designManagementDelete`Mutation_designManagementDelete
 
 Input type: `DesignManagementDeleteInput`
 
@@ -1165,7 +1165,7 @@ Input type: `DesignManagementDeleteInput`
 | `filenames` | [`[String!]!`](#string) | The filenames of the designs to delete. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `designManagementMove` {#Mutation_designManagementMove}
+### `designManagementMove`Mutation_designManagementMove
 
 Input type: `DesignManagementMoveInput`
 
@@ -1178,7 +1178,7 @@ Input type: `DesignManagementMoveInput`
 | `next` | [`DesignManagementDesignID`](#designmanagementdesignid) | ID of the immediately following design. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `designManagementUpload` {#Mutation_designManagementUpload}
+### `designManagementUpload`Mutation_designManagementUpload
 
 Input type: `DesignManagementUploadInput`
 
@@ -1191,7 +1191,7 @@ Input type: `DesignManagementUploadInput`
 | `files` | [`[Upload!]!`](#upload) | The files to upload. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `destroyBoard` {#Mutation_destroyBoard}
+### `destroyBoard`Mutation_destroyBoard
 
 Input type: `DestroyBoardInput`
 
@@ -1202,7 +1202,7 @@ Input type: `DestroyBoardInput`
 | `id` | [`BoardID!`](#boardid) | The global ID of the board to destroy. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `destroyBoardList` {#Mutation_destroyBoardList}
+### `destroyBoardList`Mutation_destroyBoardList
 
 Input type: `DestroyBoardListInput`
 
@@ -1213,7 +1213,7 @@ Input type: `DestroyBoardListInput`
 | `listId` | [`ListID!`](#listid) | Global ID of the list to destroy. Only label lists are accepted. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `destroyComplianceFramework` {#Mutation_destroyComplianceFramework}
+### `destroyComplianceFramework`Mutation_destroyComplianceFramework
 
 Input type: `DestroyComplianceFrameworkInput`
 
@@ -1224,7 +1224,7 @@ Input type: `DestroyComplianceFrameworkInput`
 | `id` | [`ComplianceManagementFrameworkID!`](#compliancemanagementframeworkid) | The global ID of the compliance framework to destroy. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `destroyContainerRepository` {#Mutation_destroyContainerRepository}
+### `destroyContainerRepository`Mutation_destroyContainerRepository
 
 Input type: `DestroyContainerRepositoryInput`
 
@@ -1235,7 +1235,7 @@ Input type: `DestroyContainerRepositoryInput`
 | `id` | [`ContainerRepositoryID!`](#containerrepositoryid) | ID of the container repository. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `destroyContainerRepositoryTags` {#Mutation_destroyContainerRepositoryTags}
+### `destroyContainerRepositoryTags`Mutation_destroyContainerRepositoryTags
 
 Input type: `DestroyContainerRepositoryTagsInput`
 
@@ -1247,7 +1247,7 @@ Input type: `DestroyContainerRepositoryTagsInput`
 | `tagNames` | [`[String!]!`](#string) | Container repository tag(s) to delete. Total number can't be greater than 20 |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `destroyNote` {#Mutation_destroyNote}
+### `destroyNote`Mutation_destroyNote
 
 Input type: `DestroyNoteInput`
 
@@ -1258,7 +1258,7 @@ Input type: `DestroyNoteInput`
 | `id` | [`NoteID!`](#noteid) | The global ID of the note to destroy. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `destroySnippet` {#Mutation_destroySnippet}
+### `destroySnippet`Mutation_destroySnippet
 
 Input type: `DestroySnippetInput`
 
@@ -1269,7 +1269,7 @@ Input type: `DestroySnippetInput`
 | `id` | [`SnippetID!`](#snippetid) | The global ID of the snippet to destroy. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `discussionToggleResolve` {#Mutation_discussionToggleResolve}
+### `discussionToggleResolve`Mutation_discussionToggleResolve
 
 Toggles the resolved state of a discussion.
 
@@ -1283,7 +1283,7 @@ Input type: `DiscussionToggleResolveInput`
 | `resolve` | [`Boolean!`](#boolean) | Will resolve the discussion when true, and unresolve the discussion when false. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `dismissVulnerability` {#Mutation_dismissVulnerability}
+### `dismissVulnerability`Mutation_dismissVulnerability
 
 Input type: `DismissVulnerabilityInput`
 
@@ -1296,7 +1296,7 @@ Input type: `DismissVulnerabilityInput`
 | `dismissalReason` | [`VulnerabilityDismissalReason`](#vulnerabilitydismissalreason) | Reason why vulnerability should be dismissed. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `environmentsCanaryIngressUpdate` {#Mutation_environmentsCanaryIngressUpdate}
+### `environmentsCanaryIngressUpdate`Mutation_environmentsCanaryIngressUpdate
 
 Input type: `EnvironmentsCanaryIngressUpdateInput`
 
@@ -1308,7 +1308,7 @@ Input type: `EnvironmentsCanaryIngressUpdateInput`
 | `weight` | [`Int!`](#int) | The weight of the Canary Ingress. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `epicAddIssue` {#Mutation_epicAddIssue}
+### `epicAddIssue`Mutation_epicAddIssue
 
 Input type: `EpicAddIssueInput`
 
@@ -1322,7 +1322,7 @@ Input type: `EpicAddIssueInput`
 | `issueIid` | [`String!`](#string) | The IID of the issue to be added. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `epicBoardCreate` {#Mutation_epicBoardCreate}
+### `epicBoardCreate`Mutation_epicBoardCreate
 
 Input type: `EpicBoardCreateInput`
 
@@ -1336,7 +1336,7 @@ Input type: `EpicBoardCreateInput`
 | `groupPath` | [`ID`](#id) | Full path of the group with which the resource is associated. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `epicBoardListCreate` {#Mutation_epicBoardListCreate}
+### `epicBoardListCreate`Mutation_epicBoardListCreate
 
 Input type: `EpicBoardListCreateInput`
 
@@ -1349,7 +1349,7 @@ Input type: `EpicBoardListCreateInput`
 | `boardId` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Global ID of the issue board to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `epicBoardUpdate` {#Mutation_epicBoardUpdate}
+### `epicBoardUpdate`Mutation_epicBoardUpdate
 
 Input type: `EpicBoardUpdateInput`
 
@@ -1365,7 +1365,7 @@ Input type: `EpicBoardUpdateInput`
 | `labelIds` | [`[LabelID!]`](#labelid) | The IDs of labels to be added to the board. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `epicSetSubscription` {#Mutation_epicSetSubscription}
+### `epicSetSubscription`Mutation_epicSetSubscription
 
 Input type: `EpicSetSubscriptionInput`
 
@@ -1378,7 +1378,7 @@ Input type: `EpicSetSubscriptionInput`
 | `subscribedState` | [`Boolean!`](#boolean) | The desired state of the subscription. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `epicTreeReorder` {#Mutation_epicTreeReorder}
+### `epicTreeReorder`Mutation_epicTreeReorder
 
 Input type: `EpicTreeReorderInput`
 
@@ -1390,7 +1390,7 @@ Input type: `EpicTreeReorderInput`
 | `moved` | [`EpicTreeNodeFieldsInputType!`](#epictreenodefieldsinputtype) | Parameters for updating the tree positions. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `exportRequirements` {#Mutation_exportRequirements}
+### `exportRequirements`Mutation_exportRequirements
 
 Input type: `ExportRequirementsInput`
 
@@ -1406,7 +1406,7 @@ Input type: `ExportRequirementsInput`
 | `selectedFields` | [`[String!]`](#string) | List of selected requirements fields to be exported. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `gitlabSubscriptionActivate` {#Mutation_gitlabSubscriptionActivate}
+### `gitlabSubscriptionActivate`Mutation_gitlabSubscriptionActivate
 
 Input type: `GitlabSubscriptionActivateInput`
 
@@ -1417,7 +1417,7 @@ Input type: `GitlabSubscriptionActivateInput`
 | `activationCode` | [`String!`](#string) | Activation code received after purchasing a GitLab subscription. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `httpIntegrationCreate` {#Mutation_httpIntegrationCreate}
+### `httpIntegrationCreate`Mutation_httpIntegrationCreate
 
 Input type: `HttpIntegrationCreateInput`
 
@@ -1432,7 +1432,7 @@ Input type: `HttpIntegrationCreateInput`
 | `payloadAttributeMappings` | [`[AlertManagementPayloadAlertFieldInput!]`](#alertmanagementpayloadalertfieldinput) | The custom mapping of GitLab alert attributes to fields from the payload_example. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `httpIntegrationDestroy` {#Mutation_httpIntegrationDestroy}
+### `httpIntegrationDestroy`Mutation_httpIntegrationDestroy
 
 Input type: `HttpIntegrationDestroyInput`
 
@@ -1443,7 +1443,7 @@ Input type: `HttpIntegrationDestroyInput`
 | `id` | [`AlertManagementHttpIntegrationID!`](#alertmanagementhttpintegrationid) | The ID of the integration to remove. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `httpIntegrationResetToken` {#Mutation_httpIntegrationResetToken}
+### `httpIntegrationResetToken`Mutation_httpIntegrationResetToken
 
 Input type: `HttpIntegrationResetTokenInput`
 
@@ -1454,7 +1454,7 @@ Input type: `HttpIntegrationResetTokenInput`
 | `id` | [`AlertManagementHttpIntegrationID!`](#alertmanagementhttpintegrationid) | The ID of the integration to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `httpIntegrationUpdate` {#Mutation_httpIntegrationUpdate}
+### `httpIntegrationUpdate`Mutation_httpIntegrationUpdate
 
 Input type: `HttpIntegrationUpdateInput`
 
@@ -1469,7 +1469,7 @@ Input type: `HttpIntegrationUpdateInput`
 | `payloadAttributeMappings` | [`[AlertManagementPayloadAlertFieldInput!]`](#alertmanagementpayloadalertfieldinput) | The custom mapping of GitLab alert attributes to fields from the payload_example. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueMove` {#Mutation_issueMove}
+### `issueMove`Mutation_issueMove
 
 Input type: `IssueMoveInput`
 
@@ -1482,7 +1482,7 @@ Input type: `IssueMoveInput`
 | `targetProjectPath` | [`ID!`](#id) | The project to move the issue to. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueMoveList` {#Mutation_issueMoveList}
+### `issueMoveList`Mutation_issueMoveList
 
 Input type: `IssueMoveListInput`
 
@@ -1500,7 +1500,7 @@ Input type: `IssueMoveListInput`
 | `epicId` | [`EpicID`](#epicid) | The ID of the parent epic. NULL when removing the association. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetAssignees` {#Mutation_issueSetAssignees}
+### `issueSetAssignees`Mutation_issueSetAssignees
 
 Input type: `IssueSetAssigneesInput`
 
@@ -1514,7 +1514,7 @@ Input type: `IssueSetAssigneesInput`
 | `operationMode` | [`MutationOperationMode`](#mutationoperationmode) | The operation to perform. Defaults to REPLACE. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetConfidential` {#Mutation_issueSetConfidential}
+### `issueSetConfidential`Mutation_issueSetConfidential
 
 Input type: `IssueSetConfidentialInput`
 
@@ -1527,7 +1527,7 @@ Input type: `IssueSetConfidentialInput`
 | `confidential` | [`Boolean!`](#boolean) | Whether or not to set the issue as a confidential. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetDueDate` {#Mutation_issueSetDueDate}
+### `issueSetDueDate`Mutation_issueSetDueDate
 
 Input type: `IssueSetDueDateInput`
 
@@ -1540,7 +1540,7 @@ Input type: `IssueSetDueDateInput`
 | `dueDate` | [`Time!`](#time) | The desired due date for the issue. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetEpic` {#Mutation_issueSetEpic}
+### `issueSetEpic`Mutation_issueSetEpic
 
 Input type: `IssueSetEpicInput`
 
@@ -1553,7 +1553,7 @@ Input type: `IssueSetEpicInput`
 | `epicId` | [`EpicID`](#epicid) | Global ID of the epic to be assigned to the issue, epic will be removed if absent or set to null |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetIteration` {#Mutation_issueSetIteration}
+### `issueSetIteration`Mutation_issueSetIteration
 
 Input type: `IssueSetIterationInput`
 
@@ -1567,7 +1567,7 @@ Input type: `IssueSetIterationInput`
  |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetLocked` {#Mutation_issueSetLocked}
+### `issueSetLocked`Mutation_issueSetLocked
 
 Input type: `IssueSetLockedInput`
 
@@ -1580,7 +1580,7 @@ Input type: `IssueSetLockedInput`
 | `locked` | [`Boolean!`](#boolean) | Whether or not to lock discussion on the issue. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetSeverity` {#Mutation_issueSetSeverity}
+### `issueSetSeverity`Mutation_issueSetSeverity
 
 Input type: `IssueSetSeverityInput`
 
@@ -1593,7 +1593,7 @@ Input type: `IssueSetSeverityInput`
 | `severity` | [`IssuableSeverity!`](#issuableseverity) | Set the incident severity level. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetSubscription` {#Mutation_issueSetSubscription}
+### `issueSetSubscription`Mutation_issueSetSubscription
 
 Input type: `IssueSetSubscriptionInput`
 
@@ -1606,7 +1606,7 @@ Input type: `IssueSetSubscriptionInput`
 | `subscribedState` | [`Boolean!`](#boolean) | The desired state of the subscription. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `issueSetWeight` {#Mutation_issueSetWeight}
+### `issueSetWeight`Mutation_issueSetWeight
 
 Input type: `IssueSetWeightInput`
 
@@ -1619,7 +1619,7 @@ Input type: `IssueSetWeightInput`
 | `weight` | [`Int!`](#int) | The desired weight for the issue. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `jiraImportStart` {#Mutation_jiraImportStart}
+### `jiraImportStart`Mutation_jiraImportStart
 
 Input type: `JiraImportStartInput`
 
@@ -1633,7 +1633,7 @@ Input type: `JiraImportStartInput`
 | `usersMapping` | [`[JiraUsersMappingInputType!]`](#jirausersmappinginputtype) | The mapping of Jira to GitLab users. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `jiraImportUsers` {#Mutation_jiraImportUsers}
+### `jiraImportUsers`Mutation_jiraImportUsers
 
 Input type: `JiraImportUsersInput`
 
@@ -1645,7 +1645,7 @@ Input type: `JiraImportUsersInput`
 | `startAt` | [`Int`](#int) | The index of the record the import should started at, default 0 (50 records returned). |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `labelCreate` {#Mutation_labelCreate}
+### `labelCreate`Mutation_labelCreate
 
 Input type: `LabelCreateInput`
 
@@ -1657,10 +1657,12 @@ Input type: `LabelCreateInput`
 | `groupPath` | [`ID`](#id) | Full path of the group with which the resource is associated. |
 | `title` | [`String!`](#string) | Title of the label. |
 | `description` | [`String`](#string) | Description of the label. |
-| `color` | [`String`](#string) | The color of the label given in 6-digit hex notation with leading '#' sign (e.g. #FFAABB) or one of the CSS color names in https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords. |
+| `color` | [`String`](#string) | The color of the label given in 6-digit hex notation with leading '#' sign (e.g. #FFAABB) or one of
+the [CSS color names](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords).
+ |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `markAsSpamSnippet` {#Mutation_markAsSpamSnippet}
+### `markAsSpamSnippet`Mutation_markAsSpamSnippet
 
 Input type: `MarkAsSpamSnippetInput`
 
@@ -1671,7 +1673,7 @@ Input type: `MarkAsSpamSnippetInput`
 | `id` | [`SnippetID!`](#snippetid) | The global ID of the snippet to update. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestCreate` {#Mutation_mergeRequestCreate}
+### `mergeRequestCreate`Mutation_mergeRequestCreate
 
 Input type: `MergeRequestCreateInput`
 
@@ -1687,7 +1689,7 @@ Input type: `MergeRequestCreateInput`
 | `labels` | [`[String!]`](#string) | Labels of the merge request. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestReviewerRereview` {#Mutation_mergeRequestReviewerRereview}
+### `mergeRequestReviewerRereview`Mutation_mergeRequestReviewerRereview
 
 Input type: `MergeRequestReviewerRereviewInput`
 
@@ -1701,7 +1703,7 @@ Input type: `MergeRequestReviewerRereviewInput`
  |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestSetAssignees` {#Mutation_mergeRequestSetAssignees}
+### `mergeRequestSetAssignees`Mutation_mergeRequestSetAssignees
 
 Input type: `MergeRequestSetAssigneesInput`
 
@@ -1715,7 +1717,7 @@ Input type: `MergeRequestSetAssigneesInput`
 | `operationMode` | [`MutationOperationMode`](#mutationoperationmode) | The operation to perform. Defaults to REPLACE. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestSetLabels` {#Mutation_mergeRequestSetLabels}
+### `mergeRequestSetLabels`Mutation_mergeRequestSetLabels
 
 Input type: `MergeRequestSetLabelsInput`
 
@@ -1731,7 +1733,7 @@ Input type: `MergeRequestSetLabelsInput`
  |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestSetLocked` {#Mutation_mergeRequestSetLocked}
+### `mergeRequestSetLocked`Mutation_mergeRequestSetLocked
 
 Input type: `MergeRequestSetLockedInput`
 
@@ -1745,7 +1747,7 @@ Input type: `MergeRequestSetLockedInput`
  |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestSetMilestone` {#Mutation_mergeRequestSetMilestone}
+### `mergeRequestSetMilestone`Mutation_mergeRequestSetMilestone
 
 Input type: `MergeRequestSetMilestoneInput`
 
@@ -1759,7 +1761,7 @@ Input type: `MergeRequestSetMilestoneInput`
  |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestSetSubscription` {#Mutation_mergeRequestSetSubscription}
+### `mergeRequestSetSubscription`Mutation_mergeRequestSetSubscription
 
 Input type: `MergeRequestSetSubscriptionInput`
 
@@ -1772,7 +1774,7 @@ Input type: `MergeRequestSetSubscriptionInput`
 | `subscribedState` | [`Boolean!`](#boolean) | The desired state of the subscription. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestSetWip` {#Mutation_mergeRequestSetWip}
+### `mergeRequestSetWip`Mutation_mergeRequestSetWip
 
 Input type: `MergeRequestSetWipInput`
 
@@ -1786,7 +1788,7 @@ Input type: `MergeRequestSetWipInput`
  |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `mergeRequestUpdate` {#Mutation_mergeRequestUpdate}
+### `mergeRequestUpdate`Mutation_mergeRequestUpdate
 
 Update attributes of a merge request.
 
@@ -1804,7 +1806,7 @@ Input type: `MergeRequestUpdateInput`
 | `state` | [`MergeRequestNewState`](#mergerequestnewstate) | The action to perform to change the state. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `namespaceIncreaseStorageTemporarily` {#Mutation_namespaceIncreaseStorageTemporarily}
+### `namespaceIncreaseStorageTemporarily`Mutation_namespaceIncreaseStorageTemporarily
 
 Input type: `NamespaceIncreaseStorageTemporarilyInput`
 
@@ -1815,7 +1817,7 @@ Input type: `NamespaceIncreaseStorageTemporarilyInput`
 | `id` | [`NamespaceID!`](#namespaceid) | The global ID of the namespace to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `oncallRotationCreate` {#Mutation_oncallRotationCreate}
+### `oncallRotationCreate`Mutation_oncallRotationCreate
 
 Input type: `OncallRotationCreateInput`
 
@@ -1833,7 +1835,7 @@ Input type: `OncallRotationCreateInput`
 | `participants` | [`[OncallUserInputType!]!`](#oncalluserinputtype) | The usernames of users participating in the on-call rotation. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `oncallRotationDestroy` {#Mutation_oncallRotationDestroy}
+### `oncallRotationDestroy`Mutation_oncallRotationDestroy
 
 Input type: `OncallRotationDestroyInput`
 
@@ -1846,7 +1848,7 @@ Input type: `OncallRotationDestroyInput`
 | `id` | [`IncidentManagementOncallRotationID!`](#incidentmanagementoncallrotationid) | The ID of the on-call rotation to remove. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `oncallScheduleCreate` {#Mutation_oncallScheduleCreate}
+### `oncallScheduleCreate`Mutation_oncallScheduleCreate
 
 Input type: `OncallScheduleCreateInput`
 
@@ -1860,7 +1862,7 @@ Input type: `OncallScheduleCreateInput`
 | `timezone` | [`String!`](#string) | The timezone of the on-call schedule. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `oncallScheduleDestroy` {#Mutation_oncallScheduleDestroy}
+### `oncallScheduleDestroy`Mutation_oncallScheduleDestroy
 
 Input type: `OncallScheduleDestroyInput`
 
@@ -1872,7 +1874,7 @@ Input type: `OncallScheduleDestroyInput`
 | `iid` | [`String!`](#string) | The on-call schedule internal ID to remove. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `oncallScheduleUpdate` {#Mutation_oncallScheduleUpdate}
+### `oncallScheduleUpdate`Mutation_oncallScheduleUpdate
 
 Input type: `OncallScheduleUpdateInput`
 
@@ -1887,7 +1889,7 @@ Input type: `OncallScheduleUpdateInput`
 | `timezone` | [`String`](#string) | The timezone of the on-call schedule. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `pipelineCancel` {#Mutation_pipelineCancel}
+### `pipelineCancel`Mutation_pipelineCancel
 
 Input type: `PipelineCancelInput`
 
@@ -1898,7 +1900,7 @@ Input type: `PipelineCancelInput`
 | `id` | [`CiPipelineID!`](#cipipelineid) | The ID of the pipeline to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `pipelineDestroy` {#Mutation_pipelineDestroy}
+### `pipelineDestroy`Mutation_pipelineDestroy
 
 Input type: `PipelineDestroyInput`
 
@@ -1909,7 +1911,7 @@ Input type: `PipelineDestroyInput`
 | `id` | [`CiPipelineID!`](#cipipelineid) | The ID of the pipeline to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `pipelineRetry` {#Mutation_pipelineRetry}
+### `pipelineRetry`Mutation_pipelineRetry
 
 Input type: `PipelineRetryInput`
 
@@ -1920,7 +1922,7 @@ Input type: `PipelineRetryInput`
 | `id` | [`CiPipelineID!`](#cipipelineid) | The ID of the pipeline to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `prometheusIntegrationCreate` {#Mutation_prometheusIntegrationCreate}
+### `prometheusIntegrationCreate`Mutation_prometheusIntegrationCreate
 
 Input type: `PrometheusIntegrationCreateInput`
 
@@ -1930,10 +1932,10 @@ Input type: `PrometheusIntegrationCreateInput`
 | ---- | ---- | ----------- |
 | `projectPath` | [`ID!`](#id) | The project to create the integration in. |
 | `active` | [`Boolean!`](#boolean) | Whether the integration is receiving alerts. |
-| `apiUrl` | [`String!`](#string) | Endpoint at which prometheus can be queried. |
+| `apiUrl` | [`String!`](#string) | Endpoint at which Prometheus can be queried. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `prometheusIntegrationResetToken` {#Mutation_prometheusIntegrationResetToken}
+### `prometheusIntegrationResetToken`Mutation_prometheusIntegrationResetToken
 
 Input type: `PrometheusIntegrationResetTokenInput`
 
@@ -1944,7 +1946,7 @@ Input type: `PrometheusIntegrationResetTokenInput`
 | `id` | [`PrometheusServiceID!`](#prometheusserviceid) | The ID of the integration to mutate. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `prometheusIntegrationUpdate` {#Mutation_prometheusIntegrationUpdate}
+### `prometheusIntegrationUpdate`Mutation_prometheusIntegrationUpdate
 
 Input type: `PrometheusIntegrationUpdateInput`
 
@@ -1954,10 +1956,10 @@ Input type: `PrometheusIntegrationUpdateInput`
 | ---- | ---- | ----------- |
 | `id` | [`PrometheusServiceID!`](#prometheusserviceid) | The ID of the integration to mutate. |
 | `active` | [`Boolean`](#boolean) | Whether the integration is receiving alerts. |
-| `apiUrl` | [`String`](#string) | Endpoint at which prometheus can be queried. |
+| `apiUrl` | [`String`](#string) | Endpoint at which Prometheus can be queried. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `promoteToEpic` {#Mutation_promoteToEpic}
+### `promoteToEpic`Mutation_promoteToEpic
 
 Input type: `PromoteToEpicInput`
 
@@ -1970,7 +1972,7 @@ Input type: `PromoteToEpicInput`
 | `groupPath` | [`ID`](#id) | The group the promoted epic will belong to. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `releaseAssetLinkCreate` {#Mutation_releaseAssetLinkCreate}
+### `releaseAssetLinkCreate`Mutation_releaseAssetLinkCreate
 
 Input type: `ReleaseAssetLinkCreateInput`
 
@@ -1986,7 +1988,7 @@ Input type: `ReleaseAssetLinkCreateInput`
 | `linkType` | [`ReleaseAssetLinkType`](#releaseassetlinktype) | The type of the asset link. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `releaseCreate` {#Mutation_releaseCreate}
+### `releaseCreate`Mutation_releaseCreate
 
 Input type: `ReleaseCreateInput`
 
@@ -2004,7 +2006,7 @@ Input type: `ReleaseCreateInput`
 | `assets` | [`ReleaseAssetsInput`](#releaseassetsinput) | Assets associated to the release. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `releaseDelete` {#Mutation_releaseDelete}
+### `releaseDelete`Mutation_releaseDelete
 
 Input type: `ReleaseDeleteInput`
 
@@ -2016,7 +2018,7 @@ Input type: `ReleaseDeleteInput`
 | `tagName` | [`String!`](#string) | Name of the tag associated with the release to delete. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `releaseUpdate` {#Mutation_releaseUpdate}
+### `releaseUpdate`Mutation_releaseUpdate
 
 Input type: `ReleaseUpdateInput`
 
@@ -2032,7 +2034,7 @@ Input type: `ReleaseUpdateInput`
 | `milestones` | [`[String!]`](#string) | The title of each milestone the release is associated with. GitLab Premium customers can specify group milestones. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `removeAwardEmoji` {#Mutation_removeAwardEmoji}
+### `removeAwardEmoji`Mutation_removeAwardEmoji
 
 Input type: `RemoveAwardEmojiInput`
 
@@ -2044,7 +2046,7 @@ Input type: `RemoveAwardEmojiInput`
 | `name` | [`String!`](#string) | The emoji name. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `removeProjectFromSecurityDashboard` {#Mutation_removeProjectFromSecurityDashboard}
+### `removeProjectFromSecurityDashboard`Mutation_removeProjectFromSecurityDashboard
 
 Input type: `RemoveProjectFromSecurityDashboardInput`
 
@@ -2055,7 +2057,7 @@ Input type: `RemoveProjectFromSecurityDashboardInput`
 | `id` | [`ProjectID!`](#projectid) | ID of the project to remove from the Instance Security Dashboard. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `repositionImageDiffNote` {#Mutation_repositionImageDiffNote}
+### `repositionImageDiffNote`Mutation_repositionImageDiffNote
 
 Repositions a DiffNote on an image (a `Note` where the `position.positionType` is `"image"`).
 
@@ -2069,7 +2071,7 @@ Input type: `RepositionImageDiffNoteInput`
 | `position` | [`UpdateDiffImagePositionInput!`](#updatediffimagepositioninput) | The position of this note on a diff. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `revertVulnerabilityToDetected` {#Mutation_revertVulnerabilityToDetected}
+### `revertVulnerabilityToDetected`Mutation_revertVulnerabilityToDetected
 
 Input type: `RevertVulnerabilityToDetectedInput`
 
@@ -2080,7 +2082,7 @@ Input type: `RevertVulnerabilityToDetectedInput`
 | `id` | [`VulnerabilityID!`](#vulnerabilityid) | ID of the vulnerability to be reverted. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `runDastScan` {#Mutation_runDastScan}
+### `runDastScan`Mutation_runDastScan
 
 Input type: `RunDASTScanInput`
 
@@ -2094,7 +2096,7 @@ Input type: `RunDASTScanInput`
 | `scanType` | [`DastScanTypeEnum!`](#dastscantypeenum) | The type of scan to be run. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `terraformStateDelete` {#Mutation_terraformStateDelete}
+### `terraformStateDelete`Mutation_terraformStateDelete
 
 Input type: `TerraformStateDeleteInput`
 
@@ -2105,7 +2107,7 @@ Input type: `TerraformStateDeleteInput`
 | `id` | [`TerraformStateID!`](#terraformstateid) | Global ID of the Terraform state. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `terraformStateLock` {#Mutation_terraformStateLock}
+### `terraformStateLock`Mutation_terraformStateLock
 
 Input type: `TerraformStateLockInput`
 
@@ -2116,7 +2118,7 @@ Input type: `TerraformStateLockInput`
 | `id` | [`TerraformStateID!`](#terraformstateid) | Global ID of the Terraform state. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `terraformStateUnlock` {#Mutation_terraformStateUnlock}
+### `terraformStateUnlock`Mutation_terraformStateUnlock
 
 Input type: `TerraformStateUnlockInput`
 
@@ -2127,7 +2129,7 @@ Input type: `TerraformStateUnlockInput`
 | `id` | [`TerraformStateID!`](#terraformstateid) | Global ID of the Terraform state. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `todoCreate` {#Mutation_todoCreate}
+### `todoCreate`Mutation_todoCreate
 
 Input type: `TodoCreateInput`
 
@@ -2138,7 +2140,7 @@ Input type: `TodoCreateInput`
 | `targetId` | [`TodoableID!`](#todoableid) | The global ID of the to-do item's parent. Issues, merge requests, designs and epics are supported. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `todoMarkDone` {#Mutation_todoMarkDone}
+### `todoMarkDone`Mutation_todoMarkDone
 
 Input type: `TodoMarkDoneInput`
 
@@ -2149,7 +2151,7 @@ Input type: `TodoMarkDoneInput`
 | `id` | [`TodoID!`](#todoid) | The global ID of the to-do item to mark as done. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `todoRestore` {#Mutation_todoRestore}
+### `todoRestore`Mutation_todoRestore
 
 Input type: `TodoRestoreInput`
 
@@ -2160,7 +2162,7 @@ Input type: `TodoRestoreInput`
 | `id` | [`TodoID!`](#todoid) | The global ID of the to-do item to restore. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `todoRestoreMany` {#Mutation_todoRestoreMany}
+### `todoRestoreMany`Mutation_todoRestoreMany
 
 Input type: `TodoRestoreManyInput`
 
@@ -2171,7 +2173,7 @@ Input type: `TodoRestoreManyInput`
 | `ids` | [`[TodoID!]!`](#todoid) | The global IDs of the to-do items to restore (a maximum of 50 is supported at once). |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `todosMarkAllDone` {#Mutation_todosMarkAllDone}
+### `todosMarkAllDone`Mutation_todosMarkAllDone
 
 Input type: `TodosMarkAllDoneInput`
 
@@ -2181,7 +2183,7 @@ Input type: `TodosMarkAllDoneInput`
 | ---- | ---- | ----------- |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `toggleAwardEmoji` {#Mutation_toggleAwardEmoji}
+### `toggleAwardEmoji`Mutation_toggleAwardEmoji
 
 Input type: `ToggleAwardEmojiInput`
 
@@ -2193,7 +2195,7 @@ Input type: `ToggleAwardEmojiInput`
 | `name` | [`String!`](#string) | The emoji name. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateAlertStatus` {#Mutation_updateAlertStatus}
+### `updateAlertStatus`Mutation_updateAlertStatus
 
 Input type: `UpdateAlertStatusInput`
 
@@ -2206,7 +2208,7 @@ Input type: `UpdateAlertStatusInput`
 | `status` | [`AlertManagementStatus!`](#alertmanagementstatus) | The status to set the alert. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateBoard` {#Mutation_updateBoard}
+### `updateBoard`Mutation_updateBoard
 
 Input type: `UpdateBoardInput`
 
@@ -2226,7 +2228,7 @@ Input type: `UpdateBoardInput`
 | `labelIds` | [`[LabelID!]`](#labelid) | The IDs of labels to be added to the board. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateBoardEpicUserPreferences` {#Mutation_updateBoardEpicUserPreferences}
+### `updateBoardEpicUserPreferences`Mutation_updateBoardEpicUserPreferences
 
 Input type: `UpdateBoardEpicUserPreferencesInput`
 
@@ -2239,7 +2241,7 @@ Input type: `UpdateBoardEpicUserPreferencesInput`
 | `collapsed` | [`Boolean!`](#boolean) | Whether the epic should be collapsed in the board. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateBoardList` {#Mutation_updateBoardList}
+### `updateBoardList`Mutation_updateBoardList
 
 Input type: `UpdateBoardListInput`
 
@@ -2252,7 +2254,7 @@ Input type: `UpdateBoardListInput`
 | `collapsed` | [`Boolean`](#boolean) | Indicates if the list is collapsed for this user. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateComplianceFramework` {#Mutation_updateComplianceFramework}
+### `updateComplianceFramework`Mutation_updateComplianceFramework
 
 Input type: `UpdateComplianceFrameworkInput`
 
@@ -2264,7 +2266,7 @@ Input type: `UpdateComplianceFrameworkInput`
 | `params` | [`ComplianceFrameworkInput!`](#complianceframeworkinput) | Parameters to update the compliance framework with. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateContainerExpirationPolicy` {#Mutation_updateContainerExpirationPolicy}
+### `updateContainerExpirationPolicy`Mutation_updateContainerExpirationPolicy
 
 Input type: `UpdateContainerExpirationPolicyInput`
 
@@ -2281,7 +2283,7 @@ Input type: `UpdateContainerExpirationPolicyInput`
 | `nameRegexKeep` | [`UntrustedRegexp`](#untrustedregexp) | Tags with names matching this regex pattern will be preserved. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateEpic` {#Mutation_updateEpic}
+### `updateEpic`Mutation_updateEpic
 
 Input type: `UpdateEpicInput`
 
@@ -2303,7 +2305,7 @@ Input type: `UpdateEpicInput`
 | `stateEvent` | [`EpicStateEvent`](#epicstateevent) | State event for the epic. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateImageDiffNote` {#Mutation_updateImageDiffNote}
+### `updateImageDiffNote`Mutation_updateImageDiffNote
 
 Updates a DiffNote on an image (a `Note` where the `position.positionType` is `"image"`). If the body of the Note contains only quick actions, the Note will be destroyed during the update, and no Note will be returned.
 
@@ -2318,7 +2320,7 @@ Input type: `UpdateImageDiffNoteInput`
 | `position` | [`UpdateDiffImagePositionInput`](#updatediffimagepositioninput) | The position of this note on a diff. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateIssue` {#Mutation_updateIssue}
+### `updateIssue`Mutation_updateIssue
 
 Input type: `UpdateIssueInput`
 
@@ -2342,7 +2344,7 @@ Input type: `UpdateIssueInput`
 | `epicId` | [`EpicID`](#epicid) | The ID of the parent epic. NULL when removing the association. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateIteration` {#Mutation_updateIteration}
+### `updateIteration`Mutation_updateIteration
 
 Input type: `UpdateIterationInput`
 
@@ -2358,7 +2360,7 @@ Input type: `UpdateIterationInput`
 | `dueDate` | [`String`](#string) | End date of the iteration. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateNamespacePackageSettings` {#Mutation_updateNamespacePackageSettings}
+### `updateNamespacePackageSettings`Mutation_updateNamespacePackageSettings
 
 Input type: `UpdateNamespacePackageSettingsInput`
 
@@ -2371,7 +2373,7 @@ Input type: `UpdateNamespacePackageSettingsInput`
 | `mavenDuplicateExceptionRegex` | [`UntrustedRegexp`](#untrustedregexp) | When maven_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateNote` {#Mutation_updateNote}
+### `updateNote`Mutation_updateNote
 
 Updates a Note. If the body of the Note contains only quick actions, the Note will be destroyed during the update, and no Note will be returned.
 
@@ -2386,7 +2388,7 @@ Input type: `UpdateNoteInput`
 | `confidential` | [`Boolean`](#boolean) | The confidentiality flag of a note. Default is false. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateRequirement` {#Mutation_updateRequirement}
+### `updateRequirement`Mutation_updateRequirement
 
 Input type: `UpdateRequirementInput`
 
@@ -2402,7 +2404,7 @@ Input type: `UpdateRequirementInput`
 | `lastTestReportState` | [`TestReportState`](#testreportstate) | Creates a test report for the requirement with the given state. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `updateSnippet` {#Mutation_updateSnippet}
+### `updateSnippet`Mutation_updateSnippet
 
 Input type: `UpdateSnippetInput`
 
@@ -2419,7 +2421,7 @@ Input type: `UpdateSnippetInput`
 | `blobActions` | [`[SnippetBlobActionInputType!]`](#snippetblobactioninputtype) | Actions to perform over the snippet repository and blobs. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `userCalloutCreate` {#Mutation_userCalloutCreate}
+### `userCalloutCreate`Mutation_userCalloutCreate
 
 Input type: `UserCalloutCreateInput`
 
@@ -2430,7 +2432,7 @@ Input type: `UserCalloutCreateInput`
 | `featureName` | [`String!`](#string) | The feature name you want to dismiss the callout for. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `vulnerabilityConfirm` {#Mutation_vulnerabilityConfirm}
+### `vulnerabilityConfirm`Mutation_vulnerabilityConfirm
 
 Input type: `VulnerabilityConfirmInput`
 
@@ -2441,7 +2443,7 @@ Input type: `VulnerabilityConfirmInput`
 | `id` | [`VulnerabilityID!`](#vulnerabilityid) | ID of the vulnerability to be confirmed. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `vulnerabilityDismiss` {#Mutation_vulnerabilityDismiss}
+### `vulnerabilityDismiss`Mutation_vulnerabilityDismiss
 
 Input type: `VulnerabilityDismissInput`
 
@@ -2454,7 +2456,7 @@ Input type: `VulnerabilityDismissInput`
 | `dismissalReason` | [`VulnerabilityDismissalReason`](#vulnerabilitydismissalreason) | Reason why vulnerability should be dismissed. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `vulnerabilityExternalIssueLinkCreate` {#Mutation_vulnerabilityExternalIssueLinkCreate}
+### `vulnerabilityExternalIssueLinkCreate`Mutation_vulnerabilityExternalIssueLinkCreate
 
 Input type: `VulnerabilityExternalIssueLinkCreateInput`
 
@@ -2467,7 +2469,7 @@ Input type: `VulnerabilityExternalIssueLinkCreateInput`
 | `externalTracker` | [`VulnerabilityExternalIssueLinkExternalTracker!`](#vulnerabilityexternalissuelinkexternaltracker) | External tracker type of the external issue link. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `vulnerabilityExternalIssueLinkDestroy` {#Mutation_vulnerabilityExternalIssueLinkDestroy}
+### `vulnerabilityExternalIssueLinkDestroy`Mutation_vulnerabilityExternalIssueLinkDestroy
 
 Input type: `VulnerabilityExternalIssueLinkDestroyInput`
 
@@ -2478,7 +2480,7 @@ Input type: `VulnerabilityExternalIssueLinkDestroyInput`
 | `id` | [`VulnerabilitiesExternalIssueLinkID!`](#vulnerabilitiesexternalissuelinkid) | The global ID of the vulnerability external issue link. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `vulnerabilityResolve` {#Mutation_vulnerabilityResolve}
+### `vulnerabilityResolve`Mutation_vulnerabilityResolve
 
 Input type: `VulnerabilityResolveInput`
 
@@ -2489,7 +2491,7 @@ Input type: `VulnerabilityResolveInput`
 | `id` | [`VulnerabilityID!`](#vulnerabilityid) | ID of the vulnerability to be resolved. |
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 
-### `vulnerabilityRevertToDetected` {#Mutation_vulnerabilityRevertToDetected}
+### `vulnerabilityRevertToDetected`Mutation_vulnerabilityRevertToDetected
 
 Input type: `VulnerabilityRevertToDetectedInput`
 
@@ -2511,7 +2513,7 @@ For more information, see
 [Object Types and Fields](https://graphql.org/learn/schema/#object-types-and-fields)
 on `graphql.org`.
 
-### `AccessLevel` {#accesslevel}
+### `AccessLevel`
 
 Represents the access level of a relationship between a User and object that it is related to.
 
@@ -2522,7 +2524,7 @@ Represents the access level of a relationship between a User and object that it 
 | `integerValue` | [`Int`](#int) | Integer representation of access level. |
 | `stringValue` | [`AccessLevelEnum`](#accesslevelenum) | String representation of access level. |
 
-### `AddAwardEmojiPayload` {#addawardemojipayload}
+### `AddAwardEmojiPayload`
 
 Autogenerated return type of AddAwardEmoji.
 
@@ -2534,7 +2536,7 @@ Autogenerated return type of AddAwardEmoji.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `AddProjectToSecurityDashboardPayload` {#addprojecttosecuritydashboardpayload}
+### `AddProjectToSecurityDashboardPayload`
 
 Autogenerated return type of AddProjectToSecurityDashboard.
 
@@ -2546,7 +2548,7 @@ Autogenerated return type of AddProjectToSecurityDashboard.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `project` | [`Project`](#project) | Project that was added to the Instance Security Dashboard. |
 
-### `AdminSidekiqQueuesDeleteJobsPayload` {#adminsidekiqqueuesdeletejobspayload}
+### `AdminSidekiqQueuesDeleteJobsPayload`
 
 Autogenerated return type of AdminSidekiqQueuesDeleteJobs.
 
@@ -2558,7 +2560,7 @@ Autogenerated return type of AdminSidekiqQueuesDeleteJobs.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `result` | [`DeleteJobsResponse`](#deletejobsresponse) | Information about the status of the deletion request. |
 
-### `AlertManagementAlert` {#alertmanagementalert}
+### `AlertManagementAlert`
 
 Describes an alert from the project's Alert Management.
 
@@ -2590,7 +2592,7 @@ Describes an alert from the project's Alert Management.
 
 #### fields with arguments
 
-##### `assignees` {#AlertManagementAlert_assignees}
+##### `assignees`AlertManagementAlert_assignees
 
 Assignees of the alert.
 
@@ -2605,7 +2607,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `discussions` {#AlertManagementAlert_discussions}
+##### `discussions`AlertManagementAlert_discussions
 
 All discussions on this noteable.
 
@@ -2620,7 +2622,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#AlertManagementAlert_notes}
+##### `notes`AlertManagementAlert_notes
 
 All notes on this noteable.
 
@@ -2635,7 +2637,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `todos` {#AlertManagementAlert_todos}
+##### `todos`AlertManagementAlert_todos
 
 To-do items of the current user for the alert.
 
@@ -2656,7 +2658,7 @@ Returns [`TodoConnection`](#todoconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `AlertManagementAlertConnection` {#alertmanagementalertconnection}
+### `AlertManagementAlertConnection`
 
 The connection type for AlertManagementAlert.
 
@@ -2668,7 +2670,7 @@ The connection type for AlertManagementAlert.
 | `nodes` | [`[AlertManagementAlert]`](#alertmanagementalert) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `AlertManagementAlertEdge` {#alertmanagementalertedge}
+### `AlertManagementAlertEdge`
 
 An edge in a connection.
 
@@ -2679,7 +2681,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AlertManagementAlert`](#alertmanagementalert) | The item at the end of the edge. |
 
-### `AlertManagementAlertStatusCountsType` {#alertmanagementalertstatuscountstype}
+### `AlertManagementAlertStatusCountsType`
 
 Represents total number of alerts for the represented categories.
 
@@ -2694,7 +2696,7 @@ Represents total number of alerts for the represented categories.
 | `resolved` | [`Int`](#int) | Number of alerts with status RESOLVED for the project |
 | `triggered` | [`Int`](#int) | Number of alerts with status TRIGGERED for the project |
 
-### `AlertManagementHttpIntegration` {#alertmanagementhttpintegration}
+### `AlertManagementHttpIntegration`
 
 An endpoint and credentials used to accept alerts for a project.
 
@@ -2713,7 +2715,7 @@ An endpoint and credentials used to accept alerts for a project.
 | `type` | [`AlertManagementIntegrationType!`](#alertmanagementintegrationtype) | Type of integration. |
 | `url` | [`String`](#string) | Endpoint which accepts alert notifications. |
 
-### `AlertManagementHttpIntegrationConnection` {#alertmanagementhttpintegrationconnection}
+### `AlertManagementHttpIntegrationConnection`
 
 The connection type for AlertManagementHttpIntegration.
 
@@ -2725,7 +2727,7 @@ The connection type for AlertManagementHttpIntegration.
 | `nodes` | [`[AlertManagementHttpIntegration]`](#alertmanagementhttpintegration) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `AlertManagementHttpIntegrationEdge` {#alertmanagementhttpintegrationedge}
+### `AlertManagementHttpIntegrationEdge`
 
 An edge in a connection.
 
@@ -2736,7 +2738,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The item at the end of the edge. |
 
-### `AlertManagementIntegrationConnection` {#alertmanagementintegrationconnection}
+### `AlertManagementIntegrationConnection`
 
 The connection type for AlertManagementIntegration.
 
@@ -2748,7 +2750,7 @@ The connection type for AlertManagementIntegration.
 | `nodes` | [`[AlertManagementIntegration]`](#alertmanagementintegration) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `AlertManagementIntegrationEdge` {#alertmanagementintegrationedge}
+### `AlertManagementIntegrationEdge`
 
 An edge in a connection.
 
@@ -2759,7 +2761,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AlertManagementIntegration`](#alertmanagementintegration) | The item at the end of the edge. |
 
-### `AlertManagementPayloadAlertField` {#alertmanagementpayloadalertfield}
+### `AlertManagementPayloadAlertField`
 
 Parsed field from an alert used for custom mappings.
 
@@ -2771,7 +2773,7 @@ Parsed field from an alert used for custom mappings.
 | `path` | [`[String!]`](#string) | Path to value inside payload JSON. |
 | `type` | [`AlertManagementPayloadAlertFieldType`](#alertmanagementpayloadalertfieldtype) | Type of the parsed value. |
 
-### `AlertManagementPayloadAlertMappingField` {#alertmanagementpayloadalertmappingfield}
+### `AlertManagementPayloadAlertMappingField`
 
 Parsed field (with its name) from an alert used for custom mappings.
 
@@ -2784,7 +2786,7 @@ Parsed field (with its name) from an alert used for custom mappings.
 | `path` | [`[String!]`](#string) | Path to value inside payload JSON. |
 | `type` | [`AlertManagementPayloadAlertFieldType`](#alertmanagementpayloadalertfieldtype) | Type of the parsed value. |
 
-### `AlertManagementPrometheusIntegration` {#alertmanagementprometheusintegration}
+### `AlertManagementPrometheusIntegration`
 
 An endpoint and credentials used to accept Prometheus alerts for a project.
 
@@ -2800,7 +2802,7 @@ An endpoint and credentials used to accept Prometheus alerts for a project.
 | `type` | [`AlertManagementIntegrationType!`](#alertmanagementintegrationtype) | Type of integration. |
 | `url` | [`String`](#string) | Endpoint which accepts alert notifications. |
 
-### `AlertSetAssigneesPayload` {#alertsetassigneespayload}
+### `AlertSetAssigneesPayload`
 
 Autogenerated return type of AlertSetAssignees.
 
@@ -2814,7 +2816,7 @@ Autogenerated return type of AlertSetAssignees.
 | `issue` | [`Issue`](#issue) | The issue created after mutation. |
 | `todo` | [`Todo`](#todo) | The to-do item after mutation. |
 
-### `AlertTodoCreatePayload` {#alerttodocreatepayload}
+### `AlertTodoCreatePayload`
 
 Autogenerated return type of AlertTodoCreate.
 
@@ -2828,7 +2830,7 @@ Autogenerated return type of AlertTodoCreate.
 | `issue` | [`Issue`](#issue) | The issue created after mutation. |
 | `todo` | [`Todo`](#todo) | The to-do item after mutation. |
 
-### `ApiFuzzingCiConfiguration` {#apifuzzingciconfiguration}
+### `ApiFuzzingCiConfiguration`
 
 Data associated with configuring API fuzzing scans in GitLab CI.
 
@@ -2839,7 +2841,7 @@ Data associated with configuring API fuzzing scans in GitLab CI.
 | `scanModes` | [`[ApiFuzzingScanMode!]`](#apifuzzingscanmode) | All available scan modes. |
 | `scanProfiles` | [`[ApiFuzzingScanProfile!]`](#apifuzzingscanprofile) | All default scan profiles. |
 
-### `ApiFuzzingCiConfigurationCreatePayload` {#apifuzzingciconfigurationcreatepayload}
+### `ApiFuzzingCiConfigurationCreatePayload`
 
 Autogenerated return type of ApiFuzzingCiConfigurationCreate.
 
@@ -2852,7 +2854,7 @@ Autogenerated return type of ApiFuzzingCiConfigurationCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `gitlabCiYamlEditPath` | [`String`](#string) | The location at which the project's `.gitlab-ci.yml` file can be edited in the browser. |
 
-### `ApiFuzzingScanProfile` {#apifuzzingscanprofile}
+### `ApiFuzzingScanProfile`
 
 An API Fuzzing scan profile.
 
@@ -2864,7 +2866,7 @@ An API Fuzzing scan profile.
 | `name` | [`String`](#string) | The unique name of the profile. |
 | `yaml` | [`String`](#string) | A syntax highlit HTML representation of the YAML. |
 
-### `AwardEmoji` {#awardemoji}
+### `AwardEmoji`
 
 An emoji awarded by a user.
 
@@ -2879,7 +2881,7 @@ An emoji awarded by a user.
 | `unicodeVersion` | [`String!`](#string) | The Unicode version for this emoji. |
 | `user` | [`User!`](#user) | The user who awarded the emoji. |
 
-### `AwardEmojiAddPayload` {#awardemojiaddpayload}
+### `AwardEmojiAddPayload`
 
 Autogenerated return type of AwardEmojiAdd.
 
@@ -2891,7 +2893,7 @@ Autogenerated return type of AwardEmojiAdd.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `AwardEmojiConnection` {#awardemojiconnection}
+### `AwardEmojiConnection`
 
 The connection type for AwardEmoji.
 
@@ -2903,7 +2905,7 @@ The connection type for AwardEmoji.
 | `nodes` | [`[AwardEmoji]`](#awardemoji) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `AwardEmojiEdge` {#awardemojiedge}
+### `AwardEmojiEdge`
 
 An edge in a connection.
 
@@ -2914,7 +2916,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`AwardEmoji`](#awardemoji) | The item at the end of the edge. |
 
-### `AwardEmojiRemovePayload` {#awardemojiremovepayload}
+### `AwardEmojiRemovePayload`
 
 Autogenerated return type of AwardEmojiRemove.
 
@@ -2926,7 +2928,7 @@ Autogenerated return type of AwardEmojiRemove.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `AwardEmojiTogglePayload` {#awardemojitogglepayload}
+### `AwardEmojiTogglePayload`
 
 Autogenerated return type of AwardEmojiToggle.
 
@@ -2939,7 +2941,7 @@ Autogenerated return type of AwardEmojiToggle.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `toggledOn` | [`Boolean!`](#boolean) | Indicates the status of the emoji. True if the toggle awarded the emoji, and false if the toggle removed the emoji. |
 
-### `BaseService` {#baseservice}
+### `BaseService`
 
 #### fields
 
@@ -2948,7 +2950,7 @@ Autogenerated return type of AwardEmojiToggle.
 | `active` | [`Boolean`](#boolean) | Indicates if the service is active. |
 | `type` | [`String`](#string) | Class name of the service. |
 
-### `Blob` {#blob}
+### `Blob`
 
 #### fields
 
@@ -2965,7 +2967,7 @@ Autogenerated return type of AwardEmojiToggle.
 | `webPath` | [`String`](#string) | Web path of the blob. |
 | `webUrl` | [`String`](#string) | Web URL of the blob. |
 
-### `BlobConnection` {#blobconnection}
+### `BlobConnection`
 
 The connection type for Blob.
 
@@ -2977,7 +2979,7 @@ The connection type for Blob.
 | `nodes` | [`[Blob]`](#blob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `BlobEdge` {#blobedge}
+### `BlobEdge`
 
 An edge in a connection.
 
@@ -2988,7 +2990,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Blob`](#blob) | The item at the end of the edge. |
 
-### `Board` {#board}
+### `Board`
 
 Represents a project or group issue board.
 
@@ -3009,7 +3011,7 @@ Represents a project or group issue board.
 
 #### fields with arguments
 
-##### `epics` {#Board_epics}
+##### `epics`Board_epics
 
 Epics associated with board issues.
 
@@ -3025,7 +3027,7 @@ Returns [`BoardEpicConnection`](#boardepicconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `labels` {#Board_labels}
+##### `labels`Board_labels
 
 Labels of the board.
 
@@ -3040,7 +3042,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `lists` {#Board_lists}
+##### `lists`Board_lists
 
 Lists of the board.
 
@@ -3057,7 +3059,7 @@ Returns [`BoardListConnection`](#boardlistconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `BoardConnection` {#boardconnection}
+### `BoardConnection`
 
 The connection type for Board.
 
@@ -3069,7 +3071,7 @@ The connection type for Board.
 | `nodes` | [`[Board]`](#board) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `BoardEdge` {#boardedge}
+### `BoardEdge`
 
 An edge in a connection.
 
@@ -3080,7 +3082,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Board`](#board) | The item at the end of the edge. |
 
-### `BoardEpic` {#boardepic}
+### `BoardEpic`
 
 Represents an epic on an issue board.
 
@@ -3128,7 +3130,7 @@ Represents an epic on an issue board.
 
 #### fields with arguments
 
-##### `awardEmoji` {#BoardEpic_awardEmoji}
+##### `awardEmoji`BoardEpic_awardEmoji
 
 A list of award emojis associated with the epic.
 
@@ -3143,7 +3145,7 @@ Returns [`AwardEmojiConnection`](#awardemojiconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `children` {#BoardEpic_children}
+##### `children`BoardEpic_children
 
 Children (sub-epics) of the epic.
 
@@ -3172,7 +3174,7 @@ Returns [`EpicConnection`](#epicconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `currentUserTodos` {#BoardEpic_currentUserTodos}
+##### `currentUserTodos`BoardEpic_currentUserTodos
 
 To-do items for the current user.
 
@@ -3188,7 +3190,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 | `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
 
-##### `discussions` {#BoardEpic_discussions}
+##### `discussions`BoardEpic_discussions
 
 All discussions on this noteable.
 
@@ -3203,7 +3205,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `events` {#BoardEpic_events}
+##### `events`BoardEpic_events
 
 A list of events associated with the object.
 
@@ -3218,7 +3220,7 @@ Returns [`EventConnection`](#eventconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `issues` {#BoardEpic_issues}
+##### `issues`BoardEpic_issues
 
 A list of issues associated with the epic.
 
@@ -3233,7 +3235,7 @@ Returns [`EpicIssueConnection`](#epicissueconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `labels` {#BoardEpic_labels}
+##### `labels`BoardEpic_labels
 
 Labels assigned to the epic.
 
@@ -3248,7 +3250,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#BoardEpic_notes}
+##### `notes`BoardEpic_notes
 
 All notes on this noteable.
 
@@ -3263,7 +3265,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `participants` {#BoardEpic_participants}
+##### `participants`BoardEpic_participants
 
 List of participants for the epic.
 
@@ -3278,7 +3280,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `reference` {#BoardEpic_reference}
+##### `reference`BoardEpic_reference
 
 Internal reference of the epic. Returned in shortened format by default.
 
@@ -3290,7 +3292,7 @@ Returns [`String!`](#string)
 | ---- | ---- | ----------- |
 | `full` | [`Boolean`](#boolean) | Indicates if the reference should be returned in full. |
 
-### `BoardEpicConnection` {#boardepicconnection}
+### `BoardEpicConnection`
 
 The connection type for BoardEpic.
 
@@ -3302,7 +3304,7 @@ The connection type for BoardEpic.
 | `nodes` | [`[BoardEpic]`](#boardepic) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `BoardEpicEdge` {#boardepicedge}
+### `BoardEpicEdge`
 
 An edge in a connection.
 
@@ -3313,7 +3315,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`BoardEpic`](#boardepic) | The item at the end of the edge. |
 
-### `BoardEpicUserPreferences` {#boardepicuserpreferences}
+### `BoardEpicUserPreferences`
 
 Represents user preferences for a board epic.
 
@@ -3323,7 +3325,7 @@ Represents user preferences for a board epic.
 | ---- | ---- | ----------- |
 | `collapsed` | [`Boolean!`](#boolean) | Indicates epic should be displayed as collapsed. |
 
-### `BoardList` {#boardlist}
+### `BoardList`
 
 Represents a list for an issue board.
 
@@ -3348,7 +3350,7 @@ Represents a list for an issue board.
 
 #### fields with arguments
 
-##### `issues` {#BoardList_issues}
+##### `issues`BoardList_issues
 
 Board issues.
 
@@ -3364,7 +3366,7 @@ Returns [`IssueConnection`](#issueconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `BoardListConnection` {#boardlistconnection}
+### `BoardListConnection`
 
 The connection type for BoardList.
 
@@ -3376,7 +3378,7 @@ The connection type for BoardList.
 | `nodes` | [`[BoardList]`](#boardlist) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `BoardListCreatePayload` {#boardlistcreatepayload}
+### `BoardListCreatePayload`
 
 Autogenerated return type of BoardListCreate.
 
@@ -3388,7 +3390,7 @@ Autogenerated return type of BoardListCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | Issue list in the issue board. |
 
-### `BoardListEdge` {#boardlistedge}
+### `BoardListEdge`
 
 An edge in a connection.
 
@@ -3399,7 +3401,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`BoardList`](#boardlist) | The item at the end of the edge. |
 
-### `BoardListUpdateLimitMetricsPayload` {#boardlistupdatelimitmetricspayload}
+### `BoardListUpdateLimitMetricsPayload`
 
 Autogenerated return type of BoardListUpdateLimitMetrics.
 
@@ -3411,7 +3413,7 @@ Autogenerated return type of BoardListUpdateLimitMetrics.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | The updated list. |
 
-### `Branch` {#branch}
+### `Branch`
 
 #### fields
 
@@ -3420,7 +3422,7 @@ Autogenerated return type of BoardListUpdateLimitMetrics.
 | `commit` | [`Commit`](#commit) | Commit for the branch. |
 | `name` | [`String!`](#string) | Name of the branch. |
 
-### `BulkFindOrCreateDevopsAdoptionSegmentsPayload` {#bulkfindorcreatedevopsadoptionsegmentspayload}
+### `BulkFindOrCreateDevopsAdoptionSegmentsPayload`
 
 Autogenerated return type of BulkFindOrCreateDevopsAdoptionSegments.
 
@@ -3432,7 +3434,7 @@ Autogenerated return type of BulkFindOrCreateDevopsAdoptionSegments.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `segments` | [`[DevopsAdoptionSegment!]`](#devopsadoptionsegment) | Created segments after mutation. |
 
-### `BurnupChartDailyTotals` {#burnupchartdailytotals}
+### `BurnupChartDailyTotals`
 
 Represents the total number of issues and their weights for a particular day.
 
@@ -3446,7 +3448,7 @@ Represents the total number of issues and their weights for a particular day.
 | `scopeCount` | [`Int!`](#int) | Number of issues as of this day. |
 | `scopeWeight` | [`Int!`](#int) | Total weight of issues as of this day. |
 
-### `CiApplicationSettings` {#ciapplicationsettings}
+### `CiApplicationSettings`
 
 #### fields
 
@@ -3454,7 +3456,7 @@ Represents the total number of issues and their weights for a particular day.
 | ---- | ---- | ----------- |
 | `keepLatestArtifact` | [`Boolean`](#boolean) | Whether to keep the latest jobs artifacts. |
 
-### `CiBuildNeed` {#cibuildneed}
+### `CiBuildNeed`
 
 #### fields
 
@@ -3462,7 +3464,7 @@ Represents the total number of issues and their weights for a particular day.
 | ---- | ---- | ----------- |
 | `name` | [`String`](#string) | Name of the job we need to complete. |
 
-### `CiBuildNeedConnection` {#cibuildneedconnection}
+### `CiBuildNeedConnection`
 
 The connection type for CiBuildNeed.
 
@@ -3474,7 +3476,7 @@ The connection type for CiBuildNeed.
 | `nodes` | [`[CiBuildNeed]`](#cibuildneed) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiBuildNeedEdge` {#cibuildneededge}
+### `CiBuildNeedEdge`
 
 An edge in a connection.
 
@@ -3485,7 +3487,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiBuildNeed`](#cibuildneed) | The item at the end of the edge. |
 
-### `CiCdSettingsUpdatePayload` {#cicdsettingsupdatepayload}
+### `CiCdSettingsUpdatePayload`
 
 Autogenerated return type of CiCdSettingsUpdate.
 
@@ -3496,7 +3498,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CiConfig` {#ciconfig}
+### `CiConfig`
 
 #### fields
 
@@ -3508,7 +3510,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 
 #### fields with arguments
 
-##### `stages` {#CiConfig_stages}
+##### `stages`CiConfig_stages
 
 Stages of the pipeline.
 
@@ -3523,7 +3525,7 @@ Returns [`CiConfigStageConnection`](#ciconfigstageconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CiConfigGroup` {#ciconfiggroup}
+### `CiConfigGroup`
 
 #### fields
 
@@ -3534,7 +3536,7 @@ Returns [`CiConfigStageConnection`](#ciconfigstageconnection)
 
 #### fields with arguments
 
-##### `jobs` {#CiConfigGroup_jobs}
+##### `jobs`CiConfigGroup_jobs
 
 Jobs in group.
 
@@ -3549,7 +3551,7 @@ Returns [`CiConfigJobConnection`](#ciconfigjobconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CiConfigGroupConnection` {#ciconfiggroupconnection}
+### `CiConfigGroupConnection`
 
 The connection type for CiConfigGroup.
 
@@ -3561,7 +3563,7 @@ The connection type for CiConfigGroup.
 | `nodes` | [`[CiConfigGroup]`](#ciconfiggroup) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiConfigGroupEdge` {#ciconfiggroupedge}
+### `CiConfigGroupEdge`
 
 An edge in a connection.
 
@@ -3572,7 +3574,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigGroup`](#ciconfiggroup) | The item at the end of the edge. |
 
-### `CiConfigJob` {#ciconfigjob}
+### `CiConfigJob`
 
 #### fields
 
@@ -3593,7 +3595,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `needs` {#CiConfigJob_needs}
+##### `needs`CiConfigJob_needs
 
 Builds that must complete before the jobs run.
 
@@ -3608,7 +3610,7 @@ Returns [`CiConfigNeedConnection`](#ciconfigneedconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CiConfigJobConnection` {#ciconfigjobconnection}
+### `CiConfigJobConnection`
 
 The connection type for CiConfigJob.
 
@@ -3620,7 +3622,7 @@ The connection type for CiConfigJob.
 | `nodes` | [`[CiConfigJob]`](#ciconfigjob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiConfigJobEdge` {#ciconfigjobedge}
+### `CiConfigJobEdge`
 
 An edge in a connection.
 
@@ -3631,7 +3633,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigJob`](#ciconfigjob) | The item at the end of the edge. |
 
-### `CiConfigJobRestriction` {#ciconfigjobrestriction}
+### `CiConfigJobRestriction`
 
 #### fields
 
@@ -3639,7 +3641,7 @@ An edge in a connection.
 | ---- | ---- | ----------- |
 | `refs` | [`[String!]`](#string) | The Git refs the job restriction applies to. |
 
-### `CiConfigNeed` {#ciconfigneed}
+### `CiConfigNeed`
 
 #### fields
 
@@ -3647,7 +3649,7 @@ An edge in a connection.
 | ---- | ---- | ----------- |
 | `name` | [`String`](#string) | Name of the need. |
 
-### `CiConfigNeedConnection` {#ciconfigneedconnection}
+### `CiConfigNeedConnection`
 
 The connection type for CiConfigNeed.
 
@@ -3659,7 +3661,7 @@ The connection type for CiConfigNeed.
 | `nodes` | [`[CiConfigNeed]`](#ciconfigneed) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiConfigNeedEdge` {#ciconfigneededge}
+### `CiConfigNeedEdge`
 
 An edge in a connection.
 
@@ -3670,7 +3672,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigNeed`](#ciconfigneed) | The item at the end of the edge. |
 
-### `CiConfigStage` {#ciconfigstage}
+### `CiConfigStage`
 
 #### fields
 
@@ -3680,7 +3682,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `groups` {#CiConfigStage_groups}
+##### `groups`CiConfigStage_groups
 
 Groups of jobs for the stage.
 
@@ -3695,7 +3697,7 @@ Returns [`CiConfigGroupConnection`](#ciconfiggroupconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CiConfigStageConnection` {#ciconfigstageconnection}
+### `CiConfigStageConnection`
 
 The connection type for CiConfigStage.
 
@@ -3707,7 +3709,7 @@ The connection type for CiConfigStage.
 | `nodes` | [`[CiConfigStage]`](#ciconfigstage) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiConfigStageEdge` {#ciconfigstageedge}
+### `CiConfigStageEdge`
 
 An edge in a connection.
 
@@ -3718,7 +3720,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiConfigStage`](#ciconfigstage) | The item at the end of the edge. |
 
-### `CiGroup` {#cigroup}
+### `CiGroup`
 
 #### fields
 
@@ -3730,7 +3732,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `jobs` {#CiGroup_jobs}
+##### `jobs`CiGroup_jobs
 
 Jobs in group.
 
@@ -3745,7 +3747,7 @@ Returns [`CiJobConnection`](#cijobconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CiGroupConnection` {#cigroupconnection}
+### `CiGroupConnection`
 
 The connection type for CiGroup.
 
@@ -3757,7 +3759,7 @@ The connection type for CiGroup.
 | `nodes` | [`[CiGroup]`](#cigroup) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiGroupEdge` {#cigroupedge}
+### `CiGroupEdge`
 
 An edge in a connection.
 
@@ -3768,7 +3770,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiGroup`](#cigroup) | The item at the end of the edge. |
 
-### `CiJob` {#cijob}
+### `CiJob`
 
 #### fields
 
@@ -3783,7 +3785,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `artifacts` {#CiJob_artifacts}
+##### `artifacts`CiJob_artifacts
 
 Artifacts generated by the job.
 
@@ -3798,7 +3800,7 @@ Returns [`CiJobArtifactConnection`](#cijobartifactconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `needs` {#CiJob_needs}
+##### `needs`CiJob_needs
 
 References to builds that must complete before the jobs run.
 
@@ -3813,7 +3815,7 @@ Returns [`CiBuildNeedConnection`](#cibuildneedconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CiJobArtifact` {#cijobartifact}
+### `CiJobArtifact`
 
 #### fields
 
@@ -3822,7 +3824,7 @@ Returns [`CiBuildNeedConnection`](#cibuildneedconnection)
 | `downloadPath` | [`String`](#string) | URL for downloading the artifact's file. |
 | `fileType` | [`JobArtifactFileType`](#jobartifactfiletype) | File type of the artifact. |
 
-### `CiJobArtifactConnection` {#cijobartifactconnection}
+### `CiJobArtifactConnection`
 
 The connection type for CiJobArtifact.
 
@@ -3834,7 +3836,7 @@ The connection type for CiJobArtifact.
 | `nodes` | [`[CiJobArtifact]`](#cijobartifact) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiJobArtifactEdge` {#cijobartifactedge}
+### `CiJobArtifactEdge`
 
 An edge in a connection.
 
@@ -3845,7 +3847,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiJobArtifact`](#cijobartifact) | The item at the end of the edge. |
 
-### `CiJobConnection` {#cijobconnection}
+### `CiJobConnection`
 
 The connection type for CiJob.
 
@@ -3857,7 +3859,7 @@ The connection type for CiJob.
 | `nodes` | [`[CiJob]`](#cijob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiJobEdge` {#cijobedge}
+### `CiJobEdge`
 
 An edge in a connection.
 
@@ -3868,7 +3870,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiJob`](#cijob) | The item at the end of the edge. |
 
-### `CiStage` {#cistage}
+### `CiStage`
 
 #### fields
 
@@ -3879,7 +3881,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `groups` {#CiStage_groups}
+##### `groups`CiStage_groups
 
 Group of jobs for the stage.
 
@@ -3894,7 +3896,7 @@ Returns [`CiGroupConnection`](#cigroupconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CiStageConnection` {#cistageconnection}
+### `CiStageConnection`
 
 The connection type for CiStage.
 
@@ -3906,7 +3908,7 @@ The connection type for CiStage.
 | `nodes` | [`[CiStage]`](#cistage) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CiStageEdge` {#cistageedge}
+### `CiStageEdge`
 
 An edge in a connection.
 
@@ -3917,7 +3919,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CiStage`](#cistage) | The item at the end of the edge. |
 
-### `ClusterAgent` {#clusteragent}
+### `ClusterAgent`
 
 #### fields
 
@@ -3933,7 +3935,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `tokens` {#ClusterAgent_tokens}
+##### `tokens`ClusterAgent_tokens
 
 Tokens associated with the cluster agent.
 
@@ -3948,7 +3950,7 @@ Returns [`ClusterAgentTokenConnection`](#clusteragenttokenconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `ClusterAgentConnection` {#clusteragentconnection}
+### `ClusterAgentConnection`
 
 The connection type for ClusterAgent.
 
@@ -3961,7 +3963,7 @@ The connection type for ClusterAgent.
 | `nodes` | [`[ClusterAgent]`](#clusteragent) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ClusterAgentDeletePayload` {#clusteragentdeletepayload}
+### `ClusterAgentDeletePayload`
 
 Autogenerated return type of ClusterAgentDelete.
 
@@ -3972,7 +3974,7 @@ Autogenerated return type of ClusterAgentDelete.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `ClusterAgentEdge` {#clusteragentedge}
+### `ClusterAgentEdge`
 
 An edge in a connection.
 
@@ -3983,7 +3985,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ClusterAgent`](#clusteragent) | The item at the end of the edge. |
 
-### `ClusterAgentToken` {#clusteragenttoken}
+### `ClusterAgentToken`
 
 #### fields
 
@@ -3996,7 +3998,7 @@ An edge in a connection.
 | `id` | [`ClustersAgentTokenID!`](#clustersagenttokenid) | Global ID of the token. |
 | `name` | [`String`](#string) | Name given to the token. |
 
-### `ClusterAgentTokenConnection` {#clusteragenttokenconnection}
+### `ClusterAgentTokenConnection`
 
 The connection type for ClusterAgentToken.
 
@@ -4009,7 +4011,7 @@ The connection type for ClusterAgentToken.
 | `nodes` | [`[ClusterAgentToken]`](#clusteragenttoken) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ClusterAgentTokenCreatePayload` {#clusteragenttokencreatepayload}
+### `ClusterAgentTokenCreatePayload`
 
 Autogenerated return type of ClusterAgentTokenCreate.
 
@@ -4022,7 +4024,7 @@ Autogenerated return type of ClusterAgentTokenCreate.
 | `secret` | [`String`](#string) | Token secret value. Make sure you save it - you won't be able to access it again. |
 | `token` | [`ClusterAgentToken`](#clusteragenttoken) | Token created after mutation. |
 
-### `ClusterAgentTokenDeletePayload` {#clusteragenttokendeletepayload}
+### `ClusterAgentTokenDeletePayload`
 
 Autogenerated return type of ClusterAgentTokenDelete.
 
@@ -4033,7 +4035,7 @@ Autogenerated return type of ClusterAgentTokenDelete.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `ClusterAgentTokenEdge` {#clusteragenttokenedge}
+### `ClusterAgentTokenEdge`
 
 An edge in a connection.
 
@@ -4044,7 +4046,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ClusterAgentToken`](#clusteragenttoken) | The item at the end of the edge. |
 
-### `CodeCoverageActivity` {#codecoverageactivity}
+### `CodeCoverageActivity`
 
 Represents the code coverage activity for a group.
 
@@ -4057,7 +4059,7 @@ Represents the code coverage activity for a group.
 | `date` | [`Date!`](#date) | Date when the code coverage was created. |
 | `projectCount` | [`Int`](#int) | Number of projects with code coverage results for the group. |
 
-### `CodeCoverageActivityConnection` {#codecoverageactivityconnection}
+### `CodeCoverageActivityConnection`
 
 The connection type for CodeCoverageActivity.
 
@@ -4069,7 +4071,7 @@ The connection type for CodeCoverageActivity.
 | `nodes` | [`[CodeCoverageActivity]`](#codecoverageactivity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CodeCoverageActivityEdge` {#codecoverageactivityedge}
+### `CodeCoverageActivityEdge`
 
 An edge in a connection.
 
@@ -4080,7 +4082,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CodeCoverageActivity`](#codecoverageactivity) | The item at the end of the edge. |
 
-### `CodeCoverageSummary` {#codecoveragesummary}
+### `CodeCoverageSummary`
 
 Represents the code coverage summary for a project.
 
@@ -4092,7 +4094,7 @@ Represents the code coverage summary for a project.
 | `coverageCount` | [`Int`](#int) | Number of different code coverage results available. |
 | `lastUpdatedOn` | [`Date`](#date) | Latest date when the code coverage was created for the project. |
 
-### `Commit` {#commit}
+### `Commit`
 
 #### fields
 
@@ -4116,7 +4118,7 @@ Represents the code coverage summary for a project.
 
 #### fields with arguments
 
-##### `pipelines` {#Commit_pipelines}
+##### `pipelines`Commit_pipelines
 
 Pipelines of the commit ordered latest first.
 
@@ -4134,7 +4136,7 @@ Returns [`PipelineConnection`](#pipelineconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `CommitConnection` {#commitconnection}
+### `CommitConnection`
 
 The connection type for Commit.
 
@@ -4146,7 +4148,7 @@ The connection type for Commit.
 | `nodes` | [`[Commit]`](#commit) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CommitCreatePayload` {#commitcreatepayload}
+### `CommitCreatePayload`
 
 Autogenerated return type of CommitCreate.
 
@@ -4158,7 +4160,7 @@ Autogenerated return type of CommitCreate.
 | `commit` | [`Commit`](#commit) | The commit after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CommitEdge` {#commitedge}
+### `CommitEdge`
 
 An edge in a connection.
 
@@ -4169,7 +4171,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Commit`](#commit) | The item at the end of the edge. |
 
-### `ComplianceFramework` {#complianceframework}
+### `ComplianceFramework`
 
 Represents a ComplianceFramework associated with a Project.
 
@@ -4183,7 +4185,7 @@ Represents a ComplianceFramework associated with a Project.
 | `name` | [`String!`](#string) | Name of the compliance framework. |
 | `pipelineConfigurationFullPath` | [`String`](#string) | Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa` **(ULTIMATE)**. |
 
-### `ComplianceFrameworkConnection` {#complianceframeworkconnection}
+### `ComplianceFrameworkConnection`
 
 The connection type for ComplianceFramework.
 
@@ -4195,7 +4197,7 @@ The connection type for ComplianceFramework.
 | `nodes` | [`[ComplianceFramework]`](#complianceframework) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ComplianceFrameworkEdge` {#complianceframeworkedge}
+### `ComplianceFrameworkEdge`
 
 An edge in a connection.
 
@@ -4206,7 +4208,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ComplianceFramework`](#complianceframework) | The item at the end of the edge. |
 
-### `ComposerMetadata` {#composermetadata}
+### `ComposerMetadata`
 
 Composer metadata.
 
@@ -4217,7 +4219,7 @@ Composer metadata.
 | `composerJson` | [`PackageComposerJsonType!`](#packagecomposerjsontype) | Data of the Composer JSON file. |
 | `targetSha` | [`String!`](#string) | Target SHA of the package. |
 
-### `ConfigureSastPayload` {#configuresastpayload}
+### `ConfigureSastPayload`
 
 Autogenerated return type of ConfigureSast.
 
@@ -4230,7 +4232,7 @@ Autogenerated return type of ConfigureSast.
 | `status` | [`String!`](#string) | Status of creating the commit for the supplied SAST CI configuration. |
 | `successPath` | [`String`](#string) | Redirect path to use when the response is successful. |
 
-### `ContainerExpirationPolicy` {#containerexpirationpolicy}
+### `ContainerExpirationPolicy`
 
 A tag expiration policy designed to keep only the images that matter most.
 
@@ -4248,7 +4250,7 @@ A tag expiration policy designed to keep only the images that matter most.
 | `olderThan` | [`ContainerExpirationPolicyOlderThanEnum`](#containerexpirationpolicyolderthanenum) | Tags older that this will expire. |
 | `updatedAt` | [`Time!`](#time) | Timestamp of when the container expiration policy was updated. |
 
-### `ContainerRepository` {#containerrepository}
+### `ContainerRepository`
 
 A container repository.
 
@@ -4269,7 +4271,7 @@ A container repository.
 | `tagsCount` | [`Int!`](#int) | Number of tags associated with this image. |
 | `updatedAt` | [`Time!`](#time) | Timestamp when the container repository was updated. |
 
-### `ContainerRepositoryConnection` {#containerrepositoryconnection}
+### `ContainerRepositoryConnection`
 
 The connection type for ContainerRepository.
 
@@ -4281,7 +4283,7 @@ The connection type for ContainerRepository.
 | `nodes` | [`[ContainerRepository]`](#containerrepository) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ContainerRepositoryDetails` {#containerrepositorydetails}
+### `ContainerRepositoryDetails`
 
 Details of a container repository.
 
@@ -4304,7 +4306,7 @@ Details of a container repository.
 
 #### fields with arguments
 
-##### `tags` {#ContainerRepositoryDetails_tags}
+##### `tags`ContainerRepositoryDetails_tags
 
 Tags of the container repository.
 
@@ -4319,7 +4321,7 @@ Returns [`ContainerRepositoryTagConnection`](#containerrepositorytagconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `ContainerRepositoryEdge` {#containerrepositoryedge}
+### `ContainerRepositoryEdge`
 
 An edge in a connection.
 
@@ -4330,7 +4332,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ContainerRepository`](#containerrepository) | The item at the end of the edge. |
 
-### `ContainerRepositoryTag` {#containerrepositorytag}
+### `ContainerRepositoryTag`
 
 A tag from a container repository.
 
@@ -4348,7 +4350,7 @@ A tag from a container repository.
 | `shortRevision` | [`String`](#string) | Short revision of the tag. |
 | `totalSize` | [`BigInt`](#bigint) | The size of the tag. |
 
-### `ContainerRepositoryTagConnection` {#containerrepositorytagconnection}
+### `ContainerRepositoryTagConnection`
 
 The connection type for ContainerRepositoryTag.
 
@@ -4360,7 +4362,7 @@ The connection type for ContainerRepositoryTag.
 | `nodes` | [`[ContainerRepositoryTag]`](#containerrepositorytag) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ContainerRepositoryTagEdge` {#containerrepositorytagedge}
+### `ContainerRepositoryTagEdge`
 
 An edge in a connection.
 
@@ -4371,7 +4373,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ContainerRepositoryTag`](#containerrepositorytag) | The item at the end of the edge. |
 
-### `CreateAlertIssuePayload` {#createalertissuepayload}
+### `CreateAlertIssuePayload`
 
 Autogenerated return type of CreateAlertIssue.
 
@@ -4385,7 +4387,7 @@ Autogenerated return type of CreateAlertIssue.
 | `issue` | [`Issue`](#issue) | The issue created after mutation. |
 | `todo` | [`Todo`](#todo) | The to-do item after mutation. |
 
-### `CreateAnnotationPayload` {#createannotationpayload}
+### `CreateAnnotationPayload`
 
 Autogenerated return type of CreateAnnotation.
 
@@ -4397,7 +4399,7 @@ Autogenerated return type of CreateAnnotation.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CreateBoardPayload` {#createboardpayload}
+### `CreateBoardPayload`
 
 Autogenerated return type of CreateBoard.
 
@@ -4409,7 +4411,7 @@ Autogenerated return type of CreateBoard.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CreateBranchPayload` {#createbranchpayload}
+### `CreateBranchPayload`
 
 Autogenerated return type of CreateBranch.
 
@@ -4421,7 +4423,7 @@ Autogenerated return type of CreateBranch.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CreateClusterAgentPayload` {#createclusteragentpayload}
+### `CreateClusterAgentPayload`
 
 Autogenerated return type of CreateClusterAgent.
 
@@ -4433,7 +4435,7 @@ Autogenerated return type of CreateClusterAgent.
 | `clusterAgent` | [`ClusterAgent`](#clusteragent) | Cluster agent created after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CreateComplianceFrameworkPayload` {#createcomplianceframeworkpayload}
+### `CreateComplianceFrameworkPayload`
 
 Autogenerated return type of CreateComplianceFramework.
 
@@ -4445,7 +4447,7 @@ Autogenerated return type of CreateComplianceFramework.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `framework` | [`ComplianceFramework`](#complianceframework) | The created compliance framework. |
 
-### `CreateCustomEmojiPayload` {#createcustomemojipayload}
+### `CreateCustomEmojiPayload`
 
 Autogenerated return type of CreateCustomEmoji.
 
@@ -4457,7 +4459,7 @@ Autogenerated return type of CreateCustomEmoji.
 | `customEmoji` | [`CustomEmoji`](#customemoji) | The new custom emoji. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CreateDevopsAdoptionSegmentPayload` {#createdevopsadoptionsegmentpayload}
+### `CreateDevopsAdoptionSegmentPayload`
 
 Autogenerated return type of CreateDevopsAdoptionSegment.
 
@@ -4469,7 +4471,7 @@ Autogenerated return type of CreateDevopsAdoptionSegment.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `segment` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | The segment after mutation. |
 
-### `CreateDiffNotePayload` {#creatediffnotepayload}
+### `CreateDiffNotePayload`
 
 Autogenerated return type of CreateDiffNote.
 
@@ -4481,7 +4483,7 @@ Autogenerated return type of CreateDiffNote.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
-### `CreateEpicPayload` {#createepicpayload}
+### `CreateEpicPayload`
 
 Autogenerated return type of CreateEpic.
 
@@ -4493,7 +4495,7 @@ Autogenerated return type of CreateEpic.
 | `epic` | [`Epic`](#epic) | The created epic. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `CreateImageDiffNotePayload` {#createimagediffnotepayload}
+### `CreateImageDiffNotePayload`
 
 Autogenerated return type of CreateImageDiffNote.
 
@@ -4505,7 +4507,7 @@ Autogenerated return type of CreateImageDiffNote.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
-### `CreateIssuePayload` {#createissuepayload}
+### `CreateIssuePayload`
 
 Autogenerated return type of CreateIssue.
 
@@ -4517,7 +4519,7 @@ Autogenerated return type of CreateIssue.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `CreateIterationPayload` {#createiterationpayload}
+### `CreateIterationPayload`
 
 Autogenerated return type of CreateIteration.
 
@@ -4529,7 +4531,7 @@ Autogenerated return type of CreateIteration.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `iteration` | [`Iteration`](#iteration) | The created iteration. |
 
-### `CreateNotePayload` {#createnotepayload}
+### `CreateNotePayload`
 
 Autogenerated return type of CreateNote.
 
@@ -4541,7 +4543,7 @@ Autogenerated return type of CreateNote.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
-### `CreateRequirementPayload` {#createrequirementpayload}
+### `CreateRequirementPayload`
 
 Autogenerated return type of CreateRequirement.
 
@@ -4553,7 +4555,7 @@ Autogenerated return type of CreateRequirement.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `requirement` | [`Requirement`](#requirement) | Requirement after mutation. |
 
-### `CreateSnippetPayload` {#createsnippetpayload}
+### `CreateSnippetPayload`
 
 Autogenerated return type of CreateSnippet.
 
@@ -4569,7 +4571,7 @@ Autogenerated return type of CreateSnippet.
 | `spam` | [`Boolean`](#boolean) | Indicates whether the operation was detected as definite spam. There is no option to resubmit the request with a CAPTCHA response. |
 | `spamLogId` | [`Int`](#int) | The spam log ID which must be passed along with a valid CAPTCHA response for an operation to be completed. Included only when an operation was not completed because "NeedsCaptchaResponse" is true. |
 
-### `CreateTestCasePayload` {#createtestcasepayload}
+### `CreateTestCasePayload`
 
 Autogenerated return type of CreateTestCase.
 
@@ -4581,7 +4583,7 @@ Autogenerated return type of CreateTestCase.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `testCase` | [`Issue`](#issue) | The test case created. |
 
-### `CustomEmoji` {#customemoji}
+### `CustomEmoji`
 
 A custom emoji uploaded by user.
 
@@ -4594,7 +4596,7 @@ A custom emoji uploaded by user.
 | `name` | [`String!`](#string) | The name of the emoji. |
 | `url` | [`String!`](#string) | The link to file of the emoji. |
 
-### `CustomEmojiConnection` {#customemojiconnection}
+### `CustomEmojiConnection`
 
 The connection type for CustomEmoji.
 
@@ -4606,7 +4608,7 @@ The connection type for CustomEmoji.
 | `nodes` | [`[CustomEmoji]`](#customemoji) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `CustomEmojiEdge` {#customemojiedge}
+### `CustomEmojiEdge`
 
 An edge in a connection.
 
@@ -4617,7 +4619,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`CustomEmoji`](#customemoji) | The item at the end of the edge. |
 
-### `DastOnDemandScanCreatePayload` {#dastondemandscancreatepayload}
+### `DastOnDemandScanCreatePayload`
 
 Autogenerated return type of DastOnDemandScanCreate.
 
@@ -4629,7 +4631,7 @@ Autogenerated return type of DastOnDemandScanCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
 
-### `DastProfile` {#dastprofile}
+### `DastProfile`
 
 Represents a DAST Profile.
 
@@ -4645,7 +4647,7 @@ Represents a DAST Profile.
 | `id` | [`DastProfileID!`](#dastprofileid) | ID of the profile. |
 | `name` | [`String`](#string) | The name of the profile. |
 
-### `DastProfileBranch` {#dastprofilebranch}
+### `DastProfileBranch`
 
 Represents a DAST Profile Branch.
 
@@ -4656,7 +4658,7 @@ Represents a DAST Profile Branch.
 | `exists` | [`Boolean`](#boolean) | Indicates whether or not the branch exists. |
 | `name` | [`String`](#string) | The name of the branch. |
 
-### `DastProfileConnection` {#dastprofileconnection}
+### `DastProfileConnection`
 
 The connection type for DastProfile.
 
@@ -4668,7 +4670,7 @@ The connection type for DastProfile.
 | `nodes` | [`[DastProfile]`](#dastprofile) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DastProfileCreatePayload` {#dastprofilecreatepayload}
+### `DastProfileCreatePayload`
 
 Autogenerated return type of DastProfileCreate.
 
@@ -4681,7 +4683,7 @@ Autogenerated return type of DastProfileCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | The URL of the pipeline that was created. Requires `runAfterCreate` to be set to `true`. |
 
-### `DastProfileDeletePayload` {#dastprofiledeletepayload}
+### `DastProfileDeletePayload`
 
 Autogenerated return type of DastProfileDelete.
 
@@ -4692,7 +4694,7 @@ Autogenerated return type of DastProfileDelete.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DastProfileEdge` {#dastprofileedge}
+### `DastProfileEdge`
 
 An edge in a connection.
 
@@ -4703,7 +4705,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastProfile`](#dastprofile) | The item at the end of the edge. |
 
-### `DastProfileRunPayload` {#dastprofilerunpayload}
+### `DastProfileRunPayload`
 
 Autogenerated return type of DastProfileRun.
 
@@ -4715,7 +4717,7 @@ Autogenerated return type of DastProfileRun.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
 
-### `DastProfileUpdatePayload` {#dastprofileupdatepayload}
+### `DastProfileUpdatePayload`
 
 Autogenerated return type of DastProfileUpdate.
 
@@ -4728,7 +4730,7 @@ Autogenerated return type of DastProfileUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | The URL of the pipeline that was created. Requires the input argument `runAfterUpdate` to be set to `true` when calling the mutation, otherwise no pipeline will be created. |
 
-### `DastScannerProfile` {#dastscannerprofile}
+### `DastScannerProfile`
 
 Represents a DAST scanner profile.
 
@@ -4747,7 +4749,7 @@ Represents a DAST scanner profile.
 | `targetTimeout` | [`Int`](#int) | The maximum number of seconds allowed for the site under test to respond to a request. |
 | `useAjaxSpider` | [`Boolean!`](#boolean) | Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider. |
 
-### `DastScannerProfileConnection` {#dastscannerprofileconnection}
+### `DastScannerProfileConnection`
 
 The connection type for DastScannerProfile.
 
@@ -4759,7 +4761,7 @@ The connection type for DastScannerProfile.
 | `nodes` | [`[DastScannerProfile]`](#dastscannerprofile) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DastScannerProfileCreatePayload` {#dastscannerprofilecreatepayload}
+### `DastScannerProfileCreatePayload`
 
 Autogenerated return type of DastScannerProfileCreate.
 
@@ -4772,7 +4774,7 @@ Autogenerated return type of DastScannerProfileCreate.
 | `globalId` **{warning-solid}** | [`DastScannerProfileID`](#dastscannerprofileid) | **Deprecated:** Use `id`. Deprecated in 13.6. |
 | `id` | [`DastScannerProfileID`](#dastscannerprofileid) | ID of the scanner profile. |
 
-### `DastScannerProfileDeletePayload` {#dastscannerprofiledeletepayload}
+### `DastScannerProfileDeletePayload`
 
 Autogenerated return type of DastScannerProfileDelete.
 
@@ -4783,7 +4785,7 @@ Autogenerated return type of DastScannerProfileDelete.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DastScannerProfileEdge` {#dastscannerprofileedge}
+### `DastScannerProfileEdge`
 
 An edge in a connection.
 
@@ -4794,7 +4796,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastScannerProfile`](#dastscannerprofile) | The item at the end of the edge. |
 
-### `DastScannerProfileUpdatePayload` {#dastscannerprofileupdatepayload}
+### `DastScannerProfileUpdatePayload`
 
 Autogenerated return type of DastScannerProfileUpdate.
 
@@ -4806,7 +4808,7 @@ Autogenerated return type of DastScannerProfileUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastScannerProfileID`](#dastscannerprofileid) | ID of the scanner profile. |
 
-### `DastSiteProfile` {#dastsiteprofile}
+### `DastSiteProfile`
 
 Represents a DAST Site Profile.
 
@@ -4823,7 +4825,7 @@ Represents a DAST Site Profile.
 | `userPermissions` | [`DastSiteProfilePermissions!`](#dastsiteprofilepermissions) | Permissions for the current user on the resource |
 | `validationStatus` | [`DastSiteProfileValidationStatusEnum`](#dastsiteprofilevalidationstatusenum) | The current validation status of the site profile. |
 
-### `DastSiteProfileConnection` {#dastsiteprofileconnection}
+### `DastSiteProfileConnection`
 
 The connection type for DastSiteProfile.
 
@@ -4835,7 +4837,7 @@ The connection type for DastSiteProfile.
 | `nodes` | [`[DastSiteProfile]`](#dastsiteprofile) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DastSiteProfileCreatePayload` {#dastsiteprofilecreatepayload}
+### `DastSiteProfileCreatePayload`
 
 Autogenerated return type of DastSiteProfileCreate.
 
@@ -4847,7 +4849,7 @@ Autogenerated return type of DastSiteProfileCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastSiteProfileID`](#dastsiteprofileid) | ID of the site profile. |
 
-### `DastSiteProfileDeletePayload` {#dastsiteprofiledeletepayload}
+### `DastSiteProfileDeletePayload`
 
 Autogenerated return type of DastSiteProfileDelete.
 
@@ -4858,7 +4860,7 @@ Autogenerated return type of DastSiteProfileDelete.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DastSiteProfileEdge` {#dastsiteprofileedge}
+### `DastSiteProfileEdge`
 
 An edge in a connection.
 
@@ -4869,7 +4871,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastSiteProfile`](#dastsiteprofile) | The item at the end of the edge. |
 
-### `DastSiteProfilePermissions` {#dastsiteprofilepermissions}
+### `DastSiteProfilePermissions`
 
 Check permissions for the current user on site profile.
 
@@ -4879,7 +4881,7 @@ Check permissions for the current user on site profile.
 | ---- | ---- | ----------- |
 | `createOnDemandDastScan` | [`Boolean!`](#boolean) | Indicates the user can perform `create_on_demand_dast_scan` on this resource |
 
-### `DastSiteProfileUpdatePayload` {#dastsiteprofileupdatepayload}
+### `DastSiteProfileUpdatePayload`
 
 Autogenerated return type of DastSiteProfileUpdate.
 
@@ -4891,7 +4893,7 @@ Autogenerated return type of DastSiteProfileUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `id` | [`DastSiteProfileID`](#dastsiteprofileid) | ID of the site profile. |
 
-### `DastSiteTokenCreatePayload` {#dastsitetokencreatepayload}
+### `DastSiteTokenCreatePayload`
 
 Autogenerated return type of DastSiteTokenCreate.
 
@@ -4905,7 +4907,7 @@ Autogenerated return type of DastSiteTokenCreate.
 | `status` | [`DastSiteProfileValidationStatusEnum`](#dastsiteprofilevalidationstatusenum) | The current validation status of the target. |
 | `token` | [`String`](#string) | Token string. |
 
-### `DastSiteValidation` {#dastsitevalidation}
+### `DastSiteValidation`
 
 Represents a DAST Site Validation.
 
@@ -4917,7 +4919,7 @@ Represents a DAST Site Validation.
 | `normalizedTargetUrl` | [`String`](#string) | Normalized URL of the target to be validated. |
 | `status` | [`DastSiteProfileValidationStatusEnum!`](#dastsiteprofilevalidationstatusenum) | Status of the site validation. |
 
-### `DastSiteValidationConnection` {#dastsitevalidationconnection}
+### `DastSiteValidationConnection`
 
 The connection type for DastSiteValidation.
 
@@ -4929,7 +4931,7 @@ The connection type for DastSiteValidation.
 | `nodes` | [`[DastSiteValidation]`](#dastsitevalidation) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DastSiteValidationCreatePayload` {#dastsitevalidationcreatepayload}
+### `DastSiteValidationCreatePayload`
 
 Autogenerated return type of DastSiteValidationCreate.
 
@@ -4942,7 +4944,7 @@ Autogenerated return type of DastSiteValidationCreate.
 | `id` | [`DastSiteValidationID`](#dastsitevalidationid) | ID of the site validation. |
 | `status` | [`DastSiteProfileValidationStatusEnum`](#dastsiteprofilevalidationstatusenum) | The current validation status. |
 
-### `DastSiteValidationEdge` {#dastsitevalidationedge}
+### `DastSiteValidationEdge`
 
 An edge in a connection.
 
@@ -4953,7 +4955,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DastSiteValidation`](#dastsitevalidation) | The item at the end of the edge. |
 
-### `DastSiteValidationRevokePayload` {#dastsitevalidationrevokepayload}
+### `DastSiteValidationRevokePayload`
 
 Autogenerated return type of DastSiteValidationRevoke.
 
@@ -4964,7 +4966,7 @@ Autogenerated return type of DastSiteValidationRevoke.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DeleteAnnotationPayload` {#deleteannotationpayload}
+### `DeleteAnnotationPayload`
 
 Autogenerated return type of DeleteAnnotation.
 
@@ -4975,7 +4977,7 @@ Autogenerated return type of DeleteAnnotation.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DeleteDevopsAdoptionSegmentPayload` {#deletedevopsadoptionsegmentpayload}
+### `DeleteDevopsAdoptionSegmentPayload`
 
 Autogenerated return type of DeleteDevopsAdoptionSegment.
 
@@ -4986,7 +4988,7 @@ Autogenerated return type of DeleteDevopsAdoptionSegment.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DeleteJobsResponse` {#deletejobsresponse}
+### `DeleteJobsResponse`
 
 The response from the AdminSidekiqQueuesDeleteJobs mutation.
 
@@ -4998,7 +5000,7 @@ The response from the AdminSidekiqQueuesDeleteJobs mutation.
 | `deletedJobs` | [`Int`](#int) | The number of matching jobs deleted. |
 | `queueSize` | [`Int`](#int) | The queue size after processing. |
 
-### `Design` {#design}
+### `Design`
 
 A single design.
 
@@ -5019,7 +5021,7 @@ A single design.
 
 #### fields with arguments
 
-##### `currentUserTodos` {#Design_currentUserTodos}
+##### `currentUserTodos`Design_currentUserTodos
 
 To-do items for the current user.
 
@@ -5035,7 +5037,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 | `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
 
-##### `discussions` {#Design_discussions}
+##### `discussions`Design_discussions
 
 All discussions on this noteable.
 
@@ -5050,7 +5052,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#Design_notes}
+##### `notes`Design_notes
 
 All notes on this noteable.
 
@@ -5065,7 +5067,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `versions` {#Design_versions}
+##### `versions`Design_versions
 
 All versions related to this design ordered newest first.
 
@@ -5082,7 +5084,7 @@ Returns [`DesignVersionConnection!`](#designversionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `DesignAtVersion` {#designatversion}
+### `DesignAtVersion`
 
 A design pinned to a specific version. The image field reflects the design as of the associated version.
 
@@ -5103,7 +5105,7 @@ A design pinned to a specific version. The image field reflects the design as of
 | `project` | [`Project!`](#project) | The project the design belongs to. |
 | `version` | [`DesignVersion!`](#designversion) | The version this design-at-versions is pinned to. |
 
-### `DesignAtVersionConnection` {#designatversionconnection}
+### `DesignAtVersionConnection`
 
 The connection type for DesignAtVersion.
 
@@ -5115,7 +5117,7 @@ The connection type for DesignAtVersion.
 | `nodes` | [`[DesignAtVersion]`](#designatversion) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DesignAtVersionEdge` {#designatversionedge}
+### `DesignAtVersionEdge`
 
 An edge in a connection.
 
@@ -5126,7 +5128,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DesignAtVersion`](#designatversion) | The item at the end of the edge. |
 
-### `DesignCollection` {#designcollection}
+### `DesignCollection`
 
 A collection of designs.
 
@@ -5140,7 +5142,7 @@ A collection of designs.
 
 #### fields with arguments
 
-##### `design` {#DesignCollection_design}
+##### `design`DesignCollection_design
 
 Find a specific design.
 
@@ -5153,7 +5155,7 @@ Returns [`Design`](#design)
 | `id` | [`DesignManagementDesignID`](#designmanagementdesignid) | Find a design by its ID. |
 | `filename` | [`String`](#string) | Find a design by its filename. |
 
-##### `designAtVersion` {#DesignCollection_designAtVersion}
+##### `designAtVersion`DesignCollection_designAtVersion
 
 Find a design as of a version.
 
@@ -5165,7 +5167,7 @@ Returns [`DesignAtVersion`](#designatversion)
 | ---- | ---- | ----------- |
 | `id` | [`DesignManagementDesignAtVersionID!`](#designmanagementdesignatversionid) | The Global ID of the design at this version. |
 
-##### `designs` {#DesignCollection_designs}
+##### `designs`DesignCollection_designs
 
 All designs for the design collection.
 
@@ -5183,7 +5185,7 @@ Returns [`DesignConnection!`](#designconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `version` {#DesignCollection_version}
+##### `version`DesignCollection_version
 
 A specific version.
 
@@ -5196,7 +5198,7 @@ Returns [`DesignVersion`](#designversion)
 | `sha` | [`String`](#string) | The SHA256 of a specific version. |
 | `id` | [`DesignManagementVersionID`](#designmanagementversionid) | The Global ID of the version. |
 
-##### `versions` {#DesignCollection_versions}
+##### `versions`DesignCollection_versions
 
 All versions related to all designs, ordered newest first.
 
@@ -5213,7 +5215,7 @@ Returns [`DesignVersionConnection!`](#designversionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `DesignConnection` {#designconnection}
+### `DesignConnection`
 
 The connection type for Design.
 
@@ -5225,7 +5227,7 @@ The connection type for Design.
 | `nodes` | [`[Design]`](#design) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DesignEdge` {#designedge}
+### `DesignEdge`
 
 An edge in a connection.
 
@@ -5236,11 +5238,11 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Design`](#design) | The item at the end of the edge. |
 
-### `DesignManagement` {#designmanagement}
+### `DesignManagement`
 
 #### fields with arguments
 
-##### `designAtVersion` {#DesignManagement_designAtVersion}
+##### `designAtVersion`DesignManagement_designAtVersion
 
 Find a design as of a version.
 
@@ -5252,7 +5254,7 @@ Returns [`DesignAtVersion`](#designatversion)
 | ---- | ---- | ----------- |
 | `id` | [`DesignManagementDesignAtVersionID!`](#designmanagementdesignatversionid) | The Global ID of the design at this version. |
 
-##### `version` {#DesignManagement_version}
+##### `version`DesignManagement_version
 
 Find a version.
 
@@ -5264,7 +5266,7 @@ Returns [`DesignVersion`](#designversion)
 | ---- | ---- | ----------- |
 | `id` | [`DesignManagementVersionID!`](#designmanagementversionid) | The Global ID of the version. |
 
-### `DesignManagementDeletePayload` {#designmanagementdeletepayload}
+### `DesignManagementDeletePayload`
 
 Autogenerated return type of DesignManagementDelete.
 
@@ -5276,7 +5278,7 @@ Autogenerated return type of DesignManagementDelete.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `version` | [`DesignVersion`](#designversion) | The new version in which the designs are deleted. |
 
-### `DesignManagementMovePayload` {#designmanagementmovepayload}
+### `DesignManagementMovePayload`
 
 Autogenerated return type of DesignManagementMove.
 
@@ -5288,7 +5290,7 @@ Autogenerated return type of DesignManagementMove.
 | `designCollection` | [`DesignCollection`](#designcollection) | The current state of the collection. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DesignManagementUploadPayload` {#designmanagementuploadpayload}
+### `DesignManagementUploadPayload`
 
 Autogenerated return type of DesignManagementUpload.
 
@@ -5301,7 +5303,7 @@ Autogenerated return type of DesignManagementUpload.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `skippedDesigns` | [`[Design!]!`](#design) | Any designs that were skipped from the upload due to there being no change to their content since their last version |
 
-### `DesignVersion` {#designversion}
+### `DesignVersion`
 
 A specific version in which designs were added, modified or deleted.
 
@@ -5314,7 +5316,7 @@ A specific version in which designs were added, modified or deleted.
 
 #### fields with arguments
 
-##### `designAtVersion` {#DesignVersion_designAtVersion}
+##### `designAtVersion`DesignVersion_designAtVersion
 
 A particular design as of this version, provided it is visible at this version.
 
@@ -5328,7 +5330,7 @@ Returns [`DesignAtVersion!`](#designatversion)
 | `designId` | [`DesignManagementDesignID`](#designmanagementdesignid) | The ID of a specific design. |
 | `filename` | [`String`](#string) | The filename of a specific design. |
 
-##### `designs` {#DesignVersion_designs}
+##### `designs`DesignVersion_designs
 
 All designs that were changed in the version.
 
@@ -5343,7 +5345,7 @@ Returns [`DesignConnection!`](#designconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `designsAtVersion` {#DesignVersion_designsAtVersion}
+##### `designsAtVersion`DesignVersion_designsAtVersion
 
 All designs that are visible at this version, as of this version.
 
@@ -5360,7 +5362,7 @@ Returns [`DesignAtVersionConnection!`](#designatversionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `DesignVersionConnection` {#designversionconnection}
+### `DesignVersionConnection`
 
 The connection type for DesignVersion.
 
@@ -5372,7 +5374,7 @@ The connection type for DesignVersion.
 | `nodes` | [`[DesignVersion]`](#designversion) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DesignVersionEdge` {#designversionedge}
+### `DesignVersionEdge`
 
 An edge in a connection.
 
@@ -5383,7 +5385,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DesignVersion`](#designversion) | The item at the end of the edge. |
 
-### `DestroyBoardListPayload` {#destroyboardlistpayload}
+### `DestroyBoardListPayload`
 
 Autogenerated return type of DestroyBoardList.
 
@@ -5395,7 +5397,7 @@ Autogenerated return type of DestroyBoardList.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | The list after mutation. |
 
-### `DestroyBoardPayload` {#destroyboardpayload}
+### `DestroyBoardPayload`
 
 Autogenerated return type of DestroyBoard.
 
@@ -5407,7 +5409,7 @@ Autogenerated return type of DestroyBoard.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DestroyComplianceFrameworkPayload` {#destroycomplianceframeworkpayload}
+### `DestroyComplianceFrameworkPayload`
 
 Autogenerated return type of DestroyComplianceFramework.
 
@@ -5418,7 +5420,7 @@ Autogenerated return type of DestroyComplianceFramework.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DestroyContainerRepositoryPayload` {#destroycontainerrepositorypayload}
+### `DestroyContainerRepositoryPayload`
 
 Autogenerated return type of DestroyContainerRepository.
 
@@ -5430,7 +5432,7 @@ Autogenerated return type of DestroyContainerRepository.
 | `containerRepository` | [`ContainerRepository!`](#containerrepository) | The container repository policy after scheduling the deletion. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DestroyContainerRepositoryTagsPayload` {#destroycontainerrepositorytagspayload}
+### `DestroyContainerRepositoryTagsPayload`
 
 Autogenerated return type of DestroyContainerRepositoryTags.
 
@@ -5442,7 +5444,7 @@ Autogenerated return type of DestroyContainerRepositoryTags.
 | `deletedTagNames` | [`[String!]!`](#string) | Deleted container repository tags. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DestroyNotePayload` {#destroynotepayload}
+### `DestroyNotePayload`
 
 Autogenerated return type of DestroyNote.
 
@@ -5454,7 +5456,7 @@ Autogenerated return type of DestroyNote.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
-### `DestroySnippetPayload` {#destroysnippetpayload}
+### `DestroySnippetPayload`
 
 Autogenerated return type of DestroySnippet.
 
@@ -5466,7 +5468,7 @@ Autogenerated return type of DestroySnippet.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `snippet` | [`Snippet`](#snippet) | The snippet after mutation. |
 
-### `DetailedStatus` {#detailedstatus}
+### `DetailedStatus`
 
 #### fields
 
@@ -5482,7 +5484,7 @@ Autogenerated return type of DestroySnippet.
 | `text` | [`String`](#string) | Text of the status. |
 | `tooltip` | [`String`](#string) | Tooltip associated with the status. |
 
-### `DevopsAdoptionSegment` {#devopsadoptionsegment}
+### `DevopsAdoptionSegment`
 
 Segment.
 
@@ -5494,7 +5496,7 @@ Segment.
 | `latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the segment. |
 | `namespace` | [`Namespace`](#namespace) | Segment namespace. |
 
-### `DevopsAdoptionSegmentConnection` {#devopsadoptionsegmentconnection}
+### `DevopsAdoptionSegmentConnection`
 
 The connection type for DevopsAdoptionSegment.
 
@@ -5506,7 +5508,7 @@ The connection type for DevopsAdoptionSegment.
 | `nodes` | [`[DevopsAdoptionSegment]`](#devopsadoptionsegment) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DevopsAdoptionSegmentEdge` {#devopsadoptionsegmentedge}
+### `DevopsAdoptionSegmentEdge`
 
 An edge in a connection.
 
@@ -5517,7 +5519,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | The item at the end of the edge. |
 
-### `DevopsAdoptionSnapshot` {#devopsadoptionsnapshot}
+### `DevopsAdoptionSnapshot`
 
 Snapshot.
 
@@ -5536,7 +5538,7 @@ Snapshot.
 | `securityScanSucceeded` | [`Boolean!`](#boolean) | At least one security scan succeeded. |
 | `startTime` | [`Time!`](#time) | The start time for the snapshot where the data points were collected. |
 
-### `DiffPosition` {#diffposition}
+### `DiffPosition`
 
 #### fields
 
@@ -5554,7 +5556,7 @@ Snapshot.
 | `x` | [`Int`](#int) | X position of the note. |
 | `y` | [`Int`](#int) | Y position of the note. |
 
-### `DiffRefs` {#diffrefs}
+### `DiffRefs`
 
 #### fields
 
@@ -5564,7 +5566,7 @@ Snapshot.
 | `headSha` | [`String!`](#string) | SHA of the HEAD at the time the comment was made. |
 | `startSha` | [`String!`](#string) | SHA of the branch being compared against. |
 
-### `DiffStats` {#diffstats}
+### `DiffStats`
 
 Changes to a single file.
 
@@ -5576,7 +5578,7 @@ Changes to a single file.
 | `deletions` | [`Int!`](#int) | Number of lines deleted from this file. |
 | `path` | [`String!`](#string) | File path, relative to repository root. |
 
-### `DiffStatsSummary` {#diffstatssummary}
+### `DiffStatsSummary`
 
 Aggregated summary of changes.
 
@@ -5589,7 +5591,7 @@ Aggregated summary of changes.
 | `deletions` | [`Int!`](#int) | Number of lines deleted. |
 | `fileCount` | [`Int!`](#int) | Number of files changed. |
 
-### `Discussion` {#discussion}
+### `Discussion`
 
 #### fields
 
@@ -5605,7 +5607,7 @@ Aggregated summary of changes.
 
 #### fields with arguments
 
-##### `notes` {#Discussion_notes}
+##### `notes`Discussion_notes
 
 All notes in the discussion.
 
@@ -5620,7 +5622,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `DiscussionConnection` {#discussionconnection}
+### `DiscussionConnection`
 
 The connection type for Discussion.
 
@@ -5632,7 +5634,7 @@ The connection type for Discussion.
 | `nodes` | [`[Discussion]`](#discussion) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `DiscussionEdge` {#discussionedge}
+### `DiscussionEdge`
 
 An edge in a connection.
 
@@ -5643,7 +5645,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Discussion`](#discussion) | The item at the end of the edge. |
 
-### `DiscussionToggleResolvePayload` {#discussiontoggleresolvepayload}
+### `DiscussionToggleResolvePayload`
 
 Autogenerated return type of DiscussionToggleResolve.
 
@@ -5655,7 +5657,7 @@ Autogenerated return type of DiscussionToggleResolve.
 | `discussion` | [`Discussion`](#discussion) | The discussion after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `DismissVulnerabilityPayload` {#dismissvulnerabilitypayload}
+### `DismissVulnerabilityPayload`
 
 Autogenerated return type of DismissVulnerability.
 
@@ -5667,7 +5669,7 @@ Autogenerated return type of DismissVulnerability.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after dismissal. |
 
-### `Environment` {#environment}
+### `Environment`
 
 Describes where code is deployed for a project.
 
@@ -5683,7 +5685,7 @@ Describes where code is deployed for a project.
 
 #### fields with arguments
 
-##### `metricsDashboard` {#Environment_metricsDashboard}
+##### `metricsDashboard`Environment_metricsDashboard
 
 Metrics dashboard schema for the environment.
 
@@ -5693,9 +5695,10 @@ Returns [`MetricsDashboard`](#metricsdashboard)
 
 | name | type | description |
 | ---- | ---- | ----------- |
-| `path` | [`String!`](#string) | Path to a file which defines metrics dashboard eg: 'config/prometheus/common_metrics.yml'. |
+| `path` | [`String!`](#string) | Path to a file which defines metrics dashboard eg: `"config/prometheus/common_metrics.yml"`.
+ |
 
-### `EnvironmentConnection` {#environmentconnection}
+### `EnvironmentConnection`
 
 The connection type for Environment.
 
@@ -5707,7 +5710,7 @@ The connection type for Environment.
 | `nodes` | [`[Environment]`](#environment) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `EnvironmentEdge` {#environmentedge}
+### `EnvironmentEdge`
 
 An edge in a connection.
 
@@ -5718,7 +5721,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Environment`](#environment) | The item at the end of the edge. |
 
-### `EnvironmentsCanaryIngressUpdatePayload` {#environmentscanaryingressupdatepayload}
+### `EnvironmentsCanaryIngressUpdatePayload`
 
 Autogenerated return type of EnvironmentsCanaryIngressUpdate.
 
@@ -5729,7 +5732,7 @@ Autogenerated return type of EnvironmentsCanaryIngressUpdate.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `Epic` {#epic}
+### `Epic`
 
 Represents an epic.
 
@@ -5776,7 +5779,7 @@ Represents an epic.
 
 #### fields with arguments
 
-##### `awardEmoji` {#Epic_awardEmoji}
+##### `awardEmoji`Epic_awardEmoji
 
 A list of award emojis associated with the epic.
 
@@ -5791,7 +5794,7 @@ Returns [`AwardEmojiConnection`](#awardemojiconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `children` {#Epic_children}
+##### `children`Epic_children
 
 Children (sub-epics) of the epic.
 
@@ -5820,7 +5823,7 @@ Returns [`EpicConnection`](#epicconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `currentUserTodos` {#Epic_currentUserTodos}
+##### `currentUserTodos`Epic_currentUserTodos
 
 To-do items for the current user.
 
@@ -5836,7 +5839,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 | `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
 
-##### `discussions` {#Epic_discussions}
+##### `discussions`Epic_discussions
 
 All discussions on this noteable.
 
@@ -5851,7 +5854,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `events` {#Epic_events}
+##### `events`Epic_events
 
 A list of events associated with the object.
 
@@ -5866,7 +5869,7 @@ Returns [`EventConnection`](#eventconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `issues` {#Epic_issues}
+##### `issues`Epic_issues
 
 A list of issues associated with the epic.
 
@@ -5881,7 +5884,7 @@ Returns [`EpicIssueConnection`](#epicissueconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `labels` {#Epic_labels}
+##### `labels`Epic_labels
 
 Labels assigned to the epic.
 
@@ -5896,7 +5899,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#Epic_notes}
+##### `notes`Epic_notes
 
 All notes on this noteable.
 
@@ -5911,7 +5914,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `participants` {#Epic_participants}
+##### `participants`Epic_participants
 
 List of participants for the epic.
 
@@ -5926,7 +5929,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `reference` {#Epic_reference}
+##### `reference`Epic_reference
 
 Internal reference of the epic. Returned in shortened format by default.
 
@@ -5938,7 +5941,7 @@ Returns [`String!`](#string)
 | ---- | ---- | ----------- |
 | `full` | [`Boolean`](#boolean) | Indicates if the reference should be returned in full. |
 
-### `EpicAddIssuePayload` {#epicaddissuepayload}
+### `EpicAddIssuePayload`
 
 Autogenerated return type of EpicAddIssue.
 
@@ -5951,7 +5954,7 @@ Autogenerated return type of EpicAddIssue.
 | `epicIssue` | [`EpicIssue`](#epicissue) | The epic-issue relation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `EpicBoard` {#epicboard}
+### `EpicBoard`
 
 Represents an epic board.
 
@@ -5968,7 +5971,7 @@ Represents an epic board.
 
 #### fields with arguments
 
-##### `labels` {#EpicBoard_labels}
+##### `labels`EpicBoard_labels
 
 Labels of the board.
 
@@ -5983,7 +5986,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `lists` {#EpicBoard_lists}
+##### `lists`EpicBoard_lists
 
 Epic board lists.
 
@@ -5999,7 +6002,7 @@ Returns [`EpicListConnection`](#epiclistconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `EpicBoardConnection` {#epicboardconnection}
+### `EpicBoardConnection`
 
 The connection type for EpicBoard.
 
@@ -6011,7 +6014,7 @@ The connection type for EpicBoard.
 | `nodes` | [`[EpicBoard]`](#epicboard) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `EpicBoardCreatePayload` {#epicboardcreatepayload}
+### `EpicBoardCreatePayload`
 
 Autogenerated return type of EpicBoardCreate.
 
@@ -6023,7 +6026,7 @@ Autogenerated return type of EpicBoardCreate.
 | `epicBoard` | [`EpicBoard`](#epicboard) | The created epic board. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `EpicBoardEdge` {#epicboardedge}
+### `EpicBoardEdge`
 
 An edge in a connection.
 
@@ -6034,7 +6037,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`EpicBoard`](#epicboard) | The item at the end of the edge. |
 
-### `EpicBoardListCreatePayload` {#epicboardlistcreatepayload}
+### `EpicBoardListCreatePayload`
 
 Autogenerated return type of EpicBoardListCreate.
 
@@ -6046,7 +6049,7 @@ Autogenerated return type of EpicBoardListCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`EpicList`](#epiclist) | Epic list in the epic board. |
 
-### `EpicBoardUpdatePayload` {#epicboardupdatepayload}
+### `EpicBoardUpdatePayload`
 
 Autogenerated return type of EpicBoardUpdate.
 
@@ -6058,7 +6061,7 @@ Autogenerated return type of EpicBoardUpdate.
 | `epicBoard` | [`EpicBoard`](#epicboard) | The updated epic board. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `EpicConnection` {#epicconnection}
+### `EpicConnection`
 
 The connection type for Epic.
 
@@ -6070,7 +6073,7 @@ The connection type for Epic.
 | `nodes` | [`[Epic]`](#epic) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `EpicDescendantCount` {#epicdescendantcount}
+### `EpicDescendantCount`
 
 Counts of descendent epics.
 
@@ -6083,7 +6086,7 @@ Counts of descendent epics.
 | `openedEpics` | [`Int`](#int) | Number of opened child epics. |
 | `openedIssues` | [`Int`](#int) | Number of opened epic issues. |
 
-### `EpicDescendantWeights` {#epicdescendantweights}
+### `EpicDescendantWeights`
 
 Total weight of open and closed descendant issues.
 
@@ -6094,7 +6097,7 @@ Total weight of open and closed descendant issues.
 | `closedIssues` | [`Int`](#int) | Total weight of completed (closed) issues in this epic, including epic descendants. |
 | `openedIssues` | [`Int`](#int) | Total weight of opened issues in this epic, including epic descendants. |
 
-### `EpicEdge` {#epicedge}
+### `EpicEdge`
 
 An edge in a connection.
 
@@ -6105,7 +6108,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Epic`](#epic) | The item at the end of the edge. |
 
-### `EpicHealthStatus` {#epichealthstatus}
+### `EpicHealthStatus`
 
 Health status of child issues.
 
@@ -6117,7 +6120,7 @@ Health status of child issues.
 | `issuesNeedingAttention` | [`Int`](#int) | Number of issues that need attention. |
 | `issuesOnTrack` | [`Int`](#int) | Number of issues on track. |
 
-### `EpicIssue` {#epicissue}
+### `EpicIssue`
 
 Relationship between an epic and an issue.
 
@@ -6177,7 +6180,7 @@ Relationship between an epic and an issue.
 
 #### fields with arguments
 
-##### `assignees` {#EpicIssue_assignees}
+##### `assignees`EpicIssue_assignees
 
 Assignees of the issue.
 
@@ -6192,7 +6195,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `blockedByIssues` {#EpicIssue_blockedByIssues}
+##### `blockedByIssues`EpicIssue_blockedByIssues
 
 Issues blocking this issue.
 
@@ -6207,7 +6210,7 @@ Returns [`IssueConnection`](#issueconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `currentUserTodos` {#EpicIssue_currentUserTodos}
+##### `currentUserTodos`EpicIssue_currentUserTodos
 
 To-do items for the current user.
 
@@ -6223,7 +6226,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 | `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
 
-##### `discussions` {#EpicIssue_discussions}
+##### `discussions`EpicIssue_discussions
 
 All discussions on this noteable.
 
@@ -6238,7 +6241,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `labels` {#EpicIssue_labels}
+##### `labels`EpicIssue_labels
 
 Labels of the issue.
 
@@ -6253,7 +6256,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#EpicIssue_notes}
+##### `notes`EpicIssue_notes
 
 All notes on this noteable.
 
@@ -6268,7 +6271,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `participants` {#EpicIssue_participants}
+##### `participants`EpicIssue_participants
 
 List of participants in the issue.
 
@@ -6283,7 +6286,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `reference` {#EpicIssue_reference}
+##### `reference`EpicIssue_reference
 
 Internal reference of the issue. Returned in shortened format by default.
 
@@ -6295,7 +6298,7 @@ Returns [`String!`](#string)
 | ---- | ---- | ----------- |
 | `full` | [`Boolean`](#boolean) | Boolean option specifying whether the reference should be returned in full. |
 
-### `EpicIssueConnection` {#epicissueconnection}
+### `EpicIssueConnection`
 
 The connection type for EpicIssue.
 
@@ -6309,7 +6312,7 @@ The connection type for EpicIssue.
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 | `weight` | [`Int!`](#int) | Total weight of issues collection. |
 
-### `EpicIssueEdge` {#epicissueedge}
+### `EpicIssueEdge`
 
 An edge in a connection.
 
@@ -6320,7 +6323,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`EpicIssue`](#epicissue) | The item at the end of the edge. |
 
-### `EpicList` {#epiclist}
+### `EpicList`
 
 Represents an epic board list.
 
@@ -6338,7 +6341,7 @@ Represents an epic board list.
 
 #### fields with arguments
 
-##### `epics` {#EpicList_epics}
+##### `epics`EpicList_epics
 
 List epics.
 
@@ -6353,7 +6356,7 @@ Returns [`EpicConnection`](#epicconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `EpicListConnection` {#epiclistconnection}
+### `EpicListConnection`
 
 The connection type for EpicList.
 
@@ -6365,7 +6368,7 @@ The connection type for EpicList.
 | `nodes` | [`[EpicList]`](#epiclist) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `EpicListEdge` {#epiclistedge}
+### `EpicListEdge`
 
 An edge in a connection.
 
@@ -6376,7 +6379,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`EpicList`](#epiclist) | The item at the end of the edge. |
 
-### `EpicPermissions` {#epicpermissions}
+### `EpicPermissions`
 
 Check permissions for the current user on an epic.
 
@@ -6393,7 +6396,7 @@ Check permissions for the current user on an epic.
 | `readEpicIid` | [`Boolean!`](#boolean) | Indicates the user can perform `read_epic_iid` on this resource |
 | `updateEpic` | [`Boolean!`](#boolean) | Indicates the user can perform `update_epic` on this resource |
 
-### `EpicSetSubscriptionPayload` {#epicsetsubscriptionpayload}
+### `EpicSetSubscriptionPayload`
 
 Autogenerated return type of EpicSetSubscription.
 
@@ -6405,7 +6408,7 @@ Autogenerated return type of EpicSetSubscription.
 | `epic` | [`Epic`](#epic) | The epic after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `EpicTreeReorderPayload` {#epictreereorderpayload}
+### `EpicTreeReorderPayload`
 
 Autogenerated return type of EpicTreeReorder.
 
@@ -6416,7 +6419,7 @@ Autogenerated return type of EpicTreeReorder.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `Event` {#event}
+### `Event`
 
 Representing an event.
 
@@ -6430,7 +6433,7 @@ Representing an event.
 | `id` | [`ID!`](#id) | ID of the event. |
 | `updatedAt` | [`Time!`](#time) | When this event was updated. |
 
-### `EventConnection` {#eventconnection}
+### `EventConnection`
 
 The connection type for Event.
 
@@ -6442,7 +6445,7 @@ The connection type for Event.
 | `nodes` | [`[Event]`](#event) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `EventEdge` {#eventedge}
+### `EventEdge`
 
 An edge in a connection.
 
@@ -6453,7 +6456,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Event`](#event) | The item at the end of the edge. |
 
-### `ExportRequirementsPayload` {#exportrequirementspayload}
+### `ExportRequirementsPayload`
 
 Autogenerated return type of ExportRequirements.
 
@@ -6464,7 +6467,7 @@ Autogenerated return type of ExportRequirements.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `ExternalIssue` {#externalissue}
+### `ExternalIssue`
 
 Represents an external issue.
 
@@ -6480,7 +6483,7 @@ Represents an external issue.
 | `updatedAt` | [`Time`](#time) | Timestamp of when the issue was updated. |
 | `webUrl` | [`String`](#string) | URL to the issue in the external tracker. |
 
-### `GeoNode` {#geonode}
+### `GeoNode`
 
 #### fields
 
@@ -6503,7 +6506,7 @@ Represents an external issue.
 
 #### fields with arguments
 
-##### `mergeRequestDiffRegistries` {#GeoNode_mergeRequestDiffRegistries}
+##### `mergeRequestDiffRegistries`GeoNode_mergeRequestDiffRegistries
 
 Find merge request diff registries on this Geo node.
 
@@ -6519,7 +6522,7 @@ Returns [`MergeRequestDiffRegistryConnection`](#mergerequestdiffregistryconnecti
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `packageFileRegistries` {#GeoNode_packageFileRegistries}
+##### `packageFileRegistries`GeoNode_packageFileRegistries
 
 Package file registries of the GeoNode.
 
@@ -6535,7 +6538,7 @@ Returns [`PackageFileRegistryConnection`](#packagefileregistryconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `selectiveSyncNamespaces` {#GeoNode_selectiveSyncNamespaces}
+##### `selectiveSyncNamespaces`GeoNode_selectiveSyncNamespaces
 
 The namespaces that should be synced, if `selective_sync_type` == `namespaces`.
 
@@ -6550,7 +6553,7 @@ Returns [`NamespaceConnection`](#namespaceconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `snippetRepositoryRegistries` {#GeoNode_snippetRepositoryRegistries}
+##### `snippetRepositoryRegistries`GeoNode_snippetRepositoryRegistries
 
 Find snippet repository registries on this Geo node.
 
@@ -6566,7 +6569,7 @@ Returns [`SnippetRepositoryRegistryConnection`](#snippetrepositoryregistryconnec
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `terraformStateVersionRegistries` {#GeoNode_terraformStateVersionRegistries}
+##### `terraformStateVersionRegistries`GeoNode_terraformStateVersionRegistries
 
 Find terraform state version registries on this Geo node.
 
@@ -6582,7 +6585,7 @@ Returns [`TerraformStateVersionRegistryConnection`](#terraformstateversionregist
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `GitlabSubscriptionActivatePayload` {#gitlabsubscriptionactivatepayload}
+### `GitlabSubscriptionActivatePayload`
 
 Autogenerated return type of GitlabSubscriptionActivate.
 
@@ -6593,7 +6596,7 @@ Autogenerated return type of GitlabSubscriptionActivate.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `GrafanaIntegration` {#grafanaintegration}
+### `GrafanaIntegration`
 
 #### fields
 
@@ -6605,7 +6608,7 @@ Autogenerated return type of GitlabSubscriptionActivate.
 | `id` | [`ID!`](#id) | Internal ID of the Grafana integration. |
 | `updatedAt` | [`Time!`](#time) | Timestamp of the issue's last activity. |
 
-### `Group` {#group}
+### `Group`
 
 #### fields
 
@@ -6651,7 +6654,7 @@ Autogenerated return type of GitlabSubscriptionActivate.
 
 #### fields with arguments
 
-##### `board` {#Group_board}
+##### `board`Group_board
 
 A single board of the group.
 
@@ -6663,7 +6666,7 @@ Returns [`Board`](#board)
 | ---- | ---- | ----------- |
 | `id` | [`BoardID!`](#boardid) | The board's ID. |
 
-##### `boards` {#Group_boards}
+##### `boards`Group_boards
 
 Boards of the group.
 
@@ -6679,7 +6682,7 @@ Returns [`BoardConnection`](#boardconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `codeCoverageActivities` {#Group_codeCoverageActivities}
+##### `codeCoverageActivities`Group_codeCoverageActivities
 
 Represents the code coverage activity for this group.
 
@@ -6695,7 +6698,7 @@ Returns [`CodeCoverageActivityConnection`](#codecoverageactivityconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `complianceFrameworks` {#Group_complianceFrameworks}
+##### `complianceFrameworks`Group_complianceFrameworks
 
 Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled.
 
@@ -6711,7 +6714,7 @@ Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `containerRepositories` {#Group_containerRepositories}
+##### `containerRepositories`Group_containerRepositories
 
 Container repositories of the group.
 
@@ -6728,7 +6731,7 @@ Returns [`ContainerRepositoryConnection`](#containerrepositoryconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `customEmoji` {#Group_customEmoji}
+##### `customEmoji`Group_customEmoji
 
 Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled.
 
@@ -6743,7 +6746,7 @@ Returns [`CustomEmojiConnection`](#customemojiconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `epic` {#Group_epic}
+##### `epic`Group_epic
 
 Find a single epic.
 
@@ -6768,7 +6771,7 @@ Returns [`Epic`](#epic)
 | `includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | `confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
 
-##### `epicBoard` {#Group_epicBoard}
+##### `epicBoard`Group_epicBoard
 
 Find a single epic board.
 
@@ -6780,7 +6783,7 @@ Returns [`EpicBoard`](#epicboard)
 | ---- | ---- | ----------- |
 | `id` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Find an epic board by ID. |
 
-##### `epicBoards` {#Group_epicBoards}
+##### `epicBoards`Group_epicBoards
 
 Find epic boards.
 
@@ -6795,7 +6798,7 @@ Returns [`EpicBoardConnection`](#epicboardconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `epics` {#Group_epics}
+##### `epics`Group_epics
 
 Find epics.
 
@@ -6824,7 +6827,7 @@ Returns [`EpicConnection`](#epicconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `groupMembers` {#Group_groupMembers}
+##### `groupMembers`Group_groupMembers
 
 A membership of a user within this group.
 
@@ -6841,7 +6844,7 @@ Returns [`GroupMemberConnection`](#groupmemberconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `issues` {#Group_issues}
+##### `issues`Group_issues
 
 Issues for projects in this group.
 
@@ -6877,7 +6880,7 @@ Returns [`IssueConnection`](#issueconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `iterations` {#Group_iterations}
+##### `iterations`Group_iterations
 
 Find iterations.
 
@@ -6900,7 +6903,7 @@ Returns [`IterationConnection`](#iterationconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `label` {#Group_label}
+##### `label`Group_label
 
 A label available on this group.
 
@@ -6912,7 +6915,7 @@ Returns [`Label`](#label)
 | ---- | ---- | ----------- |
 | `title` | [`String!`](#string) | Title of the label. |
 
-##### `labels` {#Group_labels}
+##### `labels`Group_labels
 
 Labels available on this group.
 
@@ -6931,7 +6934,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `mergeRequests` {#Group_mergeRequests}
+##### `mergeRequests`Group_mergeRequests
 
 Merge requests for projects in this group.
 
@@ -6958,7 +6961,7 @@ Returns [`MergeRequestConnection`](#mergerequestconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `milestones` {#Group_milestones}
+##### `milestones`Group_milestones
 
 Milestones of the group.
 
@@ -6971,7 +6974,7 @@ Returns [`MilestoneConnection`](#milestoneconnection)
 | `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
 | `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
 | `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
-| `ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1". |
+| `ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., `"gid://gitlab/Milestone/1"`. |
 | `state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | `title` | [`String`](#string) | The title of the milestone. |
 | `searchTitle` | [`String`](#string) | A search string for the title. |
@@ -6982,7 +6985,7 @@ Returns [`MilestoneConnection`](#milestoneconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `packages` {#Group_packages}
+##### `packages`Group_packages
 
 Packages of the group.
 
@@ -6997,7 +7000,7 @@ Returns [`PackageConnection`](#packageconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `projects` {#Group_projects}
+##### `projects`Group_projects
 
 Projects within this namespace.
 
@@ -7018,7 +7021,7 @@ Returns [`ProjectConnection!`](#projectconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `timelogs` {#Group_timelogs}
+##### `timelogs`Group_timelogs
 
 Time logged in issues by group members.
 
@@ -7037,7 +7040,7 @@ Returns [`TimelogConnection!`](#timelogconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilities` {#Group_vulnerabilities}
+##### `vulnerabilities`Group_vulnerabilities
 
 Vulnerabilities reported on the projects in the group and its subgroups.
 
@@ -7060,7 +7063,7 @@ Returns [`VulnerabilityConnection`](#vulnerabilityconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilitiesCountByDay` {#Group_vulnerabilitiesCountByDay}
+##### `vulnerabilitiesCountByDay`Group_vulnerabilitiesCountByDay
 
 Number of vulnerabilities per day for the projects in the group and its subgroups.
 
@@ -7077,7 +7080,7 @@ Returns [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnec
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilitiesCountByDayAndSeverity` {#Group_vulnerabilitiesCountByDayAndSeverity}
+##### `vulnerabilitiesCountByDayAndSeverity`Group_vulnerabilitiesCountByDayAndSeverity
 
 Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
 
@@ -7094,7 +7097,7 @@ Returns [`VulnerabilitiesCountByDayAndSeverityConnection`](#vulnerabilitiescount
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilityGrades` {#Group_vulnerabilityGrades}
+##### `vulnerabilityGrades`Group_vulnerabilityGrades
 
 Represents vulnerable project counts for each grade.
 
@@ -7106,7 +7109,7 @@ Returns [`[VulnerableProjectsByGrade!]!`](#vulnerableprojectsbygrade)
 | ---- | ---- | ----------- |
 | `includeSubgroups` | [`Boolean`](#boolean) | Include grades belonging to subgroups. |
 
-##### `vulnerabilityScanners` {#Group_vulnerabilityScanners}
+##### `vulnerabilityScanners`Group_vulnerabilityScanners
 
 Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups.
 
@@ -7121,7 +7124,7 @@ Returns [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilitySeveritiesCount` {#Group_vulnerabilitySeveritiesCount}
+##### `vulnerabilitySeveritiesCount`Group_vulnerabilitySeveritiesCount
 
 Counts for each vulnerability severity in the group and its subgroups.
 
@@ -7137,7 +7140,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
 | `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 | `scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
 
-### `GroupMember` {#groupmember}
+### `GroupMember`
 
 Represents a Group Membership.
 
@@ -7155,7 +7158,7 @@ Represents a Group Membership.
 | `user` | [`User!`](#user) | User that is associated with the member object. |
 | `userPermissions` | [`GroupPermissions!`](#grouppermissions) | Permissions for the current user on the resource |
 
-### `GroupMemberConnection` {#groupmemberconnection}
+### `GroupMemberConnection`
 
 The connection type for GroupMember.
 
@@ -7167,7 +7170,7 @@ The connection type for GroupMember.
 | `nodes` | [`[GroupMember]`](#groupmember) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `GroupMemberEdge` {#groupmemberedge}
+### `GroupMemberEdge`
 
 An edge in a connection.
 
@@ -7178,7 +7181,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`GroupMember`](#groupmember) | The item at the end of the edge. |
 
-### `GroupPermissions` {#grouppermissions}
+### `GroupPermissions`
 
 #### fields
 
@@ -7186,7 +7189,7 @@ An edge in a connection.
 | ---- | ---- | ----------- |
 | `readGroup` | [`Boolean!`](#boolean) | Indicates the user can perform `read_group` on this resource |
 
-### `GroupReleaseStats` {#groupreleasestats}
+### `GroupReleaseStats`
 
 Contains release-related statistics about a group.
 
@@ -7197,7 +7200,7 @@ Contains release-related statistics about a group.
 | `releasesCount` | [`Int`](#int) | Total number of releases in all descendant projects of the group. Will always return `null` if `group_level_release_statistics` feature flag is disabled |
 | `releasesPercentage` | [`Int`](#int) | Percentage of the group's descendant projects that have at least one release. Will always return `null` if `group_level_release_statistics` feature flag is disabled |
 
-### `GroupStats` {#groupstats}
+### `GroupStats`
 
 Contains statistics about a group.
 
@@ -7207,7 +7210,7 @@ Contains statistics about a group.
 | ---- | ---- | ----------- |
 | `releaseStats` | [`GroupReleaseStats`](#groupreleasestats) | Statistics related to releases within the group. |
 
-### `HttpIntegrationCreatePayload` {#httpintegrationcreatepayload}
+### `HttpIntegrationCreatePayload`
 
 Autogenerated return type of HttpIntegrationCreate.
 
@@ -7219,7 +7222,7 @@ Autogenerated return type of HttpIntegrationCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
 
-### `HttpIntegrationDestroyPayload` {#httpintegrationdestroypayload}
+### `HttpIntegrationDestroyPayload`
 
 Autogenerated return type of HttpIntegrationDestroy.
 
@@ -7231,7 +7234,7 @@ Autogenerated return type of HttpIntegrationDestroy.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
 
-### `HttpIntegrationResetTokenPayload` {#httpintegrationresettokenpayload}
+### `HttpIntegrationResetTokenPayload`
 
 Autogenerated return type of HttpIntegrationResetToken.
 
@@ -7243,7 +7246,7 @@ Autogenerated return type of HttpIntegrationResetToken.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
 
-### `HttpIntegrationUpdatePayload` {#httpintegrationupdatepayload}
+### `HttpIntegrationUpdatePayload`
 
 Autogenerated return type of HttpIntegrationUpdate.
 
@@ -7255,7 +7258,7 @@ Autogenerated return type of HttpIntegrationUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementHttpIntegration`](#alertmanagementhttpintegration) | The HTTP integration. |
 
-### `IncidentManagementOncallRotation` {#incidentmanagementoncallrotation}
+### `IncidentManagementOncallRotation`
 
 Describes an incident management on-call rotation.
 
@@ -7273,7 +7276,7 @@ Describes an incident management on-call rotation.
 
 #### fields with arguments
 
-##### `participants` {#IncidentManagementOncallRotation_participants}
+##### `participants`IncidentManagementOncallRotation_participants
 
 Participants of the on-call rotation.
 
@@ -7288,7 +7291,7 @@ Returns [`OncallParticipantTypeConnection`](#oncallparticipanttypeconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `shifts` {#IncidentManagementOncallRotation_shifts}
+##### `shifts`IncidentManagementOncallRotation_shifts
 
 Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.
 
@@ -7305,7 +7308,7 @@ Returns [`IncidentManagementOncallShiftConnection`](#incidentmanagementoncallshi
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `IncidentManagementOncallRotationConnection` {#incidentmanagementoncallrotationconnection}
+### `IncidentManagementOncallRotationConnection`
 
 The connection type for IncidentManagementOncallRotation.
 
@@ -7317,7 +7320,7 @@ The connection type for IncidentManagementOncallRotation.
 | `nodes` | [`[IncidentManagementOncallRotation]`](#incidentmanagementoncallrotation) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `IncidentManagementOncallRotationEdge` {#incidentmanagementoncallrotationedge}
+### `IncidentManagementOncallRotationEdge`
 
 An edge in a connection.
 
@@ -7328,7 +7331,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`IncidentManagementOncallRotation`](#incidentmanagementoncallrotation) | The item at the end of the edge. |
 
-### `IncidentManagementOncallSchedule` {#incidentmanagementoncallschedule}
+### `IncidentManagementOncallSchedule`
 
 Describes an incident management on-call schedule.
 
@@ -7343,7 +7346,7 @@ Describes an incident management on-call schedule.
 
 #### fields with arguments
 
-##### `rotations` {#IncidentManagementOncallSchedule_rotations}
+##### `rotations`IncidentManagementOncallSchedule_rotations
 
 On-call rotations for the on-call schedule.
 
@@ -7358,7 +7361,7 @@ Returns [`IncidentManagementOncallRotationConnection!`](#incidentmanagementoncal
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `IncidentManagementOncallScheduleConnection` {#incidentmanagementoncallscheduleconnection}
+### `IncidentManagementOncallScheduleConnection`
 
 The connection type for IncidentManagementOncallSchedule.
 
@@ -7370,7 +7373,7 @@ The connection type for IncidentManagementOncallSchedule.
 | `nodes` | [`[IncidentManagementOncallSchedule]`](#incidentmanagementoncallschedule) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `IncidentManagementOncallScheduleEdge` {#incidentmanagementoncallscheduleedge}
+### `IncidentManagementOncallScheduleEdge`
 
 An edge in a connection.
 
@@ -7381,7 +7384,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The item at the end of the edge. |
 
-### `IncidentManagementOncallShift` {#incidentmanagementoncallshift}
+### `IncidentManagementOncallShift`
 
 A block of time for which a participant is on-call.
 
@@ -7393,7 +7396,7 @@ A block of time for which a participant is on-call.
 | `participant` | [`OncallParticipantType`](#oncallparticipanttype) | Participant assigned to the on-call shift. |
 | `startsAt` | [`Time`](#time) | Start time of the on-call shift. |
 
-### `IncidentManagementOncallShiftConnection` {#incidentmanagementoncallshiftconnection}
+### `IncidentManagementOncallShiftConnection`
 
 The connection type for IncidentManagementOncallShift.
 
@@ -7405,7 +7408,7 @@ The connection type for IncidentManagementOncallShift.
 | `nodes` | [`[IncidentManagementOncallShift]`](#incidentmanagementoncallshift) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `IncidentManagementOncallShiftEdge` {#incidentmanagementoncallshiftedge}
+### `IncidentManagementOncallShiftEdge`
 
 An edge in a connection.
 
@@ -7416,7 +7419,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`IncidentManagementOncallShift`](#incidentmanagementoncallshift) | The item at the end of the edge. |
 
-### `InstanceSecurityDashboard` {#instancesecuritydashboard}
+### `InstanceSecurityDashboard`
 
 #### fields
 
@@ -7426,7 +7429,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `projects` {#InstanceSecurityDashboard_projects}
+##### `projects`InstanceSecurityDashboard_projects
 
 Projects selected in Instance Security Dashboard.
 
@@ -7441,7 +7444,7 @@ Returns [`ProjectConnection!`](#projectconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilityScanners` {#InstanceSecurityDashboard_vulnerabilityScanners}
+##### `vulnerabilityScanners`InstanceSecurityDashboard_vulnerabilityScanners
 
 Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard.
 
@@ -7456,7 +7459,7 @@ Returns [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilitySeveritiesCount` {#InstanceSecurityDashboard_vulnerabilitySeveritiesCount}
+##### `vulnerabilitySeveritiesCount`InstanceSecurityDashboard_vulnerabilitySeveritiesCount
 
 Counts for each vulnerability severity from projects selected in Instance Security Dashboard.
 
@@ -7472,7 +7475,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
 | `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 | `scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
 
-### `Issue` {#issue}
+### `Issue`
 
 #### fields
 
@@ -7528,7 +7531,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
 
 #### fields with arguments
 
-##### `assignees` {#Issue_assignees}
+##### `assignees`Issue_assignees
 
 Assignees of the issue.
 
@@ -7543,7 +7546,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `blockedByIssues` {#Issue_blockedByIssues}
+##### `blockedByIssues`Issue_blockedByIssues
 
 Issues blocking this issue.
 
@@ -7558,7 +7561,7 @@ Returns [`IssueConnection`](#issueconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `currentUserTodos` {#Issue_currentUserTodos}
+##### `currentUserTodos`Issue_currentUserTodos
 
 To-do items for the current user.
 
@@ -7574,7 +7577,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 | `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
 
-##### `discussions` {#Issue_discussions}
+##### `discussions`Issue_discussions
 
 All discussions on this noteable.
 
@@ -7589,7 +7592,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `labels` {#Issue_labels}
+##### `labels`Issue_labels
 
 Labels of the issue.
 
@@ -7604,7 +7607,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#Issue_notes}
+##### `notes`Issue_notes
 
 All notes on this noteable.
 
@@ -7619,7 +7622,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `participants` {#Issue_participants}
+##### `participants`Issue_participants
 
 List of participants in the issue.
 
@@ -7634,7 +7637,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `reference` {#Issue_reference}
+##### `reference`Issue_reference
 
 Internal reference of the issue. Returned in shortened format by default.
 
@@ -7646,7 +7649,7 @@ Returns [`String!`](#string)
 | ---- | ---- | ----------- |
 | `full` | [`Boolean`](#boolean) | Boolean option specifying whether the reference should be returned in full. |
 
-### `IssueConnection` {#issueconnection}
+### `IssueConnection`
 
 The connection type for Issue.
 
@@ -7660,7 +7663,7 @@ The connection type for Issue.
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 | `weight` | [`Int!`](#int) | Total weight of issues collection. |
 
-### `IssueEdge` {#issueedge}
+### `IssueEdge`
 
 An edge in a connection.
 
@@ -7671,7 +7674,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Issue`](#issue) | The item at the end of the edge. |
 
-### `IssueMoveListPayload` {#issuemovelistpayload}
+### `IssueMoveListPayload`
 
 Autogenerated return type of IssueMoveList.
 
@@ -7683,7 +7686,7 @@ Autogenerated return type of IssueMoveList.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueMovePayload` {#issuemovepayload}
+### `IssueMovePayload`
 
 Autogenerated return type of IssueMove.
 
@@ -7695,7 +7698,7 @@ Autogenerated return type of IssueMove.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssuePermissions` {#issuepermissions}
+### `IssuePermissions`
 
 Check permissions for the current user on a issue.
 
@@ -7712,7 +7715,7 @@ Check permissions for the current user on a issue.
 | `reopenIssue` | [`Boolean!`](#boolean) | Indicates the user can perform `reopen_issue` on this resource |
 | `updateIssue` | [`Boolean!`](#boolean) | Indicates the user can perform `update_issue` on this resource |
 
-### `IssueSetAssigneesPayload` {#issuesetassigneespayload}
+### `IssueSetAssigneesPayload`
 
 Autogenerated return type of IssueSetAssignees.
 
@@ -7724,7 +7727,7 @@ Autogenerated return type of IssueSetAssignees.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetConfidentialPayload` {#issuesetconfidentialpayload}
+### `IssueSetConfidentialPayload`
 
 Autogenerated return type of IssueSetConfidential.
 
@@ -7736,7 +7739,7 @@ Autogenerated return type of IssueSetConfidential.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetDueDatePayload` {#issuesetduedatepayload}
+### `IssueSetDueDatePayload`
 
 Autogenerated return type of IssueSetDueDate.
 
@@ -7748,7 +7751,7 @@ Autogenerated return type of IssueSetDueDate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetEpicPayload` {#issuesetepicpayload}
+### `IssueSetEpicPayload`
 
 Autogenerated return type of IssueSetEpic.
 
@@ -7760,7 +7763,7 @@ Autogenerated return type of IssueSetEpic.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetIterationPayload` {#issuesetiterationpayload}
+### `IssueSetIterationPayload`
 
 Autogenerated return type of IssueSetIteration.
 
@@ -7772,7 +7775,7 @@ Autogenerated return type of IssueSetIteration.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetLockedPayload` {#issuesetlockedpayload}
+### `IssueSetLockedPayload`
 
 Autogenerated return type of IssueSetLocked.
 
@@ -7784,7 +7787,7 @@ Autogenerated return type of IssueSetLocked.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetSeverityPayload` {#issuesetseveritypayload}
+### `IssueSetSeverityPayload`
 
 Autogenerated return type of IssueSetSeverity.
 
@@ -7796,7 +7799,7 @@ Autogenerated return type of IssueSetSeverity.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetSubscriptionPayload` {#issuesetsubscriptionpayload}
+### `IssueSetSubscriptionPayload`
 
 Autogenerated return type of IssueSetSubscription.
 
@@ -7808,7 +7811,7 @@ Autogenerated return type of IssueSetSubscription.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueSetWeightPayload` {#issuesetweightpayload}
+### `IssueSetWeightPayload`
 
 Autogenerated return type of IssueSetWeight.
 
@@ -7820,7 +7823,7 @@ Autogenerated return type of IssueSetWeight.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `IssueStatusCountsType` {#issuestatuscountstype}
+### `IssueStatusCountsType`
 
 Represents total number of issues for the represented statuses.
 
@@ -7832,7 +7835,7 @@ Represents total number of issues for the represented statuses.
 | `closed` | [`Int`](#int) | Number of issues with status CLOSED for the project |
 | `opened` | [`Int`](#int) | Number of issues with status OPENED for the project |
 
-### `Iteration` {#iteration}
+### `Iteration`
 
 Represents an iteration object.
 
@@ -7856,7 +7859,7 @@ Represents an iteration object.
 | `webPath` | [`String!`](#string) | Web path of the iteration. |
 | `webUrl` | [`String!`](#string) | Web URL of the iteration. |
 
-### `IterationConnection` {#iterationconnection}
+### `IterationConnection`
 
 The connection type for Iteration.
 
@@ -7868,7 +7871,7 @@ The connection type for Iteration.
 | `nodes` | [`[Iteration]`](#iteration) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `IterationEdge` {#iterationedge}
+### `IterationEdge`
 
 An edge in a connection.
 
@@ -7879,7 +7882,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Iteration`](#iteration) | The item at the end of the edge. |
 
-### `JiraImport` {#jiraimport}
+### `JiraImport`
 
 #### fields
 
@@ -7893,7 +7896,7 @@ An edge in a connection.
 | `scheduledBy` | [`User`](#user) | User that started the Jira import. |
 | `totalIssueCount` | [`Int!`](#int) | Total count of issues that were attempted to import. |
 
-### `JiraImportConnection` {#jiraimportconnection}
+### `JiraImportConnection`
 
 The connection type for JiraImport.
 
@@ -7905,7 +7908,7 @@ The connection type for JiraImport.
 | `nodes` | [`[JiraImport]`](#jiraimport) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `JiraImportEdge` {#jiraimportedge}
+### `JiraImportEdge`
 
 An edge in a connection.
 
@@ -7916,7 +7919,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`JiraImport`](#jiraimport) | The item at the end of the edge. |
 
-### `JiraImportStartPayload` {#jiraimportstartpayload}
+### `JiraImportStartPayload`
 
 Autogenerated return type of JiraImportStart.
 
@@ -7928,7 +7931,7 @@ Autogenerated return type of JiraImportStart.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `jiraImport` | [`JiraImport`](#jiraimport) | The Jira import data after mutation. |
 
-### `JiraImportUsersPayload` {#jiraimportuserspayload}
+### `JiraImportUsersPayload`
 
 Autogenerated return type of JiraImportUsers.
 
@@ -7940,7 +7943,7 @@ Autogenerated return type of JiraImportUsers.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `jiraUsers` | [`[JiraUser!]`](#jirauser) | Users returned from Jira, matched by email and name if possible. |
 
-### `JiraProject` {#jiraproject}
+### `JiraProject`
 
 #### fields
 
@@ -7950,7 +7953,7 @@ Autogenerated return type of JiraImportUsers.
 | `name` | [`String`](#string) | Name of the Jira project. |
 | `projectId` | [`Int!`](#int) | ID of the Jira project. |
 
-### `JiraProjectConnection` {#jiraprojectconnection}
+### `JiraProjectConnection`
 
 The connection type for JiraProject.
 
@@ -7962,7 +7965,7 @@ The connection type for JiraProject.
 | `nodes` | [`[JiraProject]`](#jiraproject) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `JiraProjectEdge` {#jiraprojectedge}
+### `JiraProjectEdge`
 
 An edge in a connection.
 
@@ -7973,7 +7976,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`JiraProject`](#jiraproject) | The item at the end of the edge. |
 
-### `JiraService` {#jiraservice}
+### `JiraService`
 
 #### fields
 
@@ -7984,7 +7987,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `projects` {#JiraService_projects}
+##### `projects`JiraService_projects
 
 List of all Jira projects fetched through Jira REST API.
 
@@ -8000,7 +8003,7 @@ Returns [`JiraProjectConnection`](#jiraprojectconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `JiraUser` {#jirauser}
+### `JiraUser`
 
 #### fields
 
@@ -8013,7 +8016,7 @@ Returns [`JiraProjectConnection`](#jiraprojectconnection)
 | `jiraDisplayName` | [`String!`](#string) | Display name of the Jira user. |
 | `jiraEmail` | [`String`](#string) | Email of the Jira user, returned only for users with public emails. |
 
-### `Label` {#label}
+### `Label`
 
 #### fields
 
@@ -8028,7 +8031,7 @@ Returns [`JiraProjectConnection`](#jiraprojectconnection)
 | `title` | [`String!`](#string) | Content of the label. |
 | `updatedAt` | [`Time!`](#time) | When this label was last updated. |
 
-### `LabelConnection` {#labelconnection}
+### `LabelConnection`
 
 The connection type for Label.
 
@@ -8041,7 +8044,7 @@ The connection type for Label.
 | `nodes` | [`[Label]`](#label) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `LabelCreatePayload` {#labelcreatepayload}
+### `LabelCreatePayload`
 
 Autogenerated return type of LabelCreate.
 
@@ -8053,7 +8056,7 @@ Autogenerated return type of LabelCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `label` | [`Label`](#label) | The label after mutation. |
 
-### `LabelEdge` {#labeledge}
+### `LabelEdge`
 
 An edge in a connection.
 
@@ -8064,7 +8067,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Label`](#label) | The item at the end of the edge. |
 
-### `MarkAsSpamSnippetPayload` {#markasspamsnippetpayload}
+### `MarkAsSpamSnippetPayload`
 
 Autogenerated return type of MarkAsSpamSnippet.
 
@@ -8076,7 +8079,7 @@ Autogenerated return type of MarkAsSpamSnippet.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `snippet` | [`Snippet`](#snippet) | The snippet after mutation. |
 
-### `MemberInterfaceConnection` {#memberinterfaceconnection}
+### `MemberInterfaceConnection`
 
 The connection type for MemberInterface.
 
@@ -8088,7 +8091,7 @@ The connection type for MemberInterface.
 | `nodes` | [`[MemberInterface]`](#memberinterface) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `MemberInterfaceEdge` {#memberinterfaceedge}
+### `MemberInterfaceEdge`
 
 An edge in a connection.
 
@@ -8099,7 +8102,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MemberInterface`](#memberinterface) | The item at the end of the edge. |
 
-### `MergeRequest` {#mergerequest}
+### `MergeRequest`
 
 #### fields
 
@@ -8181,7 +8184,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `approvedBy` {#MergeRequest_approvedBy}
+##### `approvedBy`MergeRequest_approvedBy
 
 Users who approved the merge request.
 
@@ -8196,7 +8199,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `assignees` {#MergeRequest_assignees}
+##### `assignees`MergeRequest_assignees
 
 Assignees of the merge request.
 
@@ -8211,7 +8214,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `commitsWithoutMergeCommits` {#MergeRequest_commitsWithoutMergeCommits}
+##### `commitsWithoutMergeCommits`MergeRequest_commitsWithoutMergeCommits
 
 Merge request commits excluding merge commits.
 
@@ -8226,7 +8229,7 @@ Returns [`CommitConnection`](#commitconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `currentUserTodos` {#MergeRequest_currentUserTodos}
+##### `currentUserTodos`MergeRequest_currentUserTodos
 
 To-do items for the current user.
 
@@ -8242,7 +8245,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 | `state` | [`TodoStateEnum`](#todostateenum) | State of the to-do items. |
 
-##### `diffStats` {#MergeRequest_diffStats}
+##### `diffStats`MergeRequest_diffStats
 
 Details about which files were changed in this merge request.
 
@@ -8254,7 +8257,7 @@ Returns [`[DiffStats!]`](#diffstats)
 | ---- | ---- | ----------- |
 | `path` | [`String`](#string) | A specific file-path. |
 
-##### `discussions` {#MergeRequest_discussions}
+##### `discussions`MergeRequest_discussions
 
 All discussions on this noteable.
 
@@ -8269,7 +8272,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `labels` {#MergeRequest_labels}
+##### `labels`MergeRequest_labels
 
 Labels of the merge request.
 
@@ -8284,7 +8287,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#MergeRequest_notes}
+##### `notes`MergeRequest_notes
 
 All notes on this noteable.
 
@@ -8299,7 +8302,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `participants` {#MergeRequest_participants}
+##### `participants`MergeRequest_participants
 
 Participants in the merge request. This includes the author, assignees, reviewers, and users mentioned in notes.
 
@@ -8314,7 +8317,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `pipelines` {#MergeRequest_pipelines}
+##### `pipelines`MergeRequest_pipelines
 
 Pipelines for the merge request. Note: for performance reasons, no more than the most recent 500 pipelines will be returned.
 
@@ -8332,7 +8335,7 @@ Returns [`PipelineConnection`](#pipelineconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `reference` {#MergeRequest_reference}
+##### `reference`MergeRequest_reference
 
 Internal reference of the merge request. Returned in shortened format by default.
 
@@ -8344,7 +8347,7 @@ Returns [`String!`](#string)
 | ---- | ---- | ----------- |
 | `full` | [`Boolean`](#boolean) | Boolean option specifying whether the reference should be returned in full. |
 
-##### `reviewers` {#MergeRequest_reviewers}
+##### `reviewers`MergeRequest_reviewers
 
 Users from whom a review has been requested.
 
@@ -8359,7 +8362,7 @@ Returns [`UserConnection`](#userconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `MergeRequestConnection` {#mergerequestconnection}
+### `MergeRequestConnection`
 
 The connection type for MergeRequest.
 
@@ -8373,7 +8376,7 @@ The connection type for MergeRequest.
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 | `totalTimeToMerge` | [`Float`](#float) | Total sum of time to merge, in seconds, for the collection of merge requests. |
 
-### `MergeRequestCreatePayload` {#mergerequestcreatepayload}
+### `MergeRequestCreatePayload`
 
 Autogenerated return type of MergeRequestCreate.
 
@@ -8385,7 +8388,7 @@ Autogenerated return type of MergeRequestCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestDiffRegistry` {#mergerequestdiffregistry}
+### `MergeRequestDiffRegistry`
 
 Represents the Geo sync and verification state of a Merge Request diff.
 
@@ -8402,7 +8405,7 @@ Represents the Geo sync and verification state of a Merge Request diff.
 | `retryCount` | [`Int`](#int) | Number of consecutive failed sync attempts of the MergeRequestDiffRegistry |
 | `state` | [`RegistryState`](#registrystate) | Sync state of the MergeRequestDiffRegistry |
 
-### `MergeRequestDiffRegistryConnection` {#mergerequestdiffregistryconnection}
+### `MergeRequestDiffRegistryConnection`
 
 The connection type for MergeRequestDiffRegistry.
 
@@ -8414,7 +8417,7 @@ The connection type for MergeRequestDiffRegistry.
 | `nodes` | [`[MergeRequestDiffRegistry]`](#mergerequestdiffregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `MergeRequestDiffRegistryEdge` {#mergerequestdiffregistryedge}
+### `MergeRequestDiffRegistryEdge`
 
 An edge in a connection.
 
@@ -8425,7 +8428,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MergeRequestDiffRegistry`](#mergerequestdiffregistry) | The item at the end of the edge. |
 
-### `MergeRequestEdge` {#mergerequestedge}
+### `MergeRequestEdge`
 
 An edge in a connection.
 
@@ -8436,7 +8439,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MergeRequest`](#mergerequest) | The item at the end of the edge. |
 
-### `MergeRequestPermissions` {#mergerequestpermissions}
+### `MergeRequestPermissions`
 
 Check permissions for the current user on a merge request.
 
@@ -8454,7 +8457,7 @@ Check permissions for the current user on a merge request.
 | `revertOnCurrentMergeRequest` | [`Boolean!`](#boolean) | Indicates the user can perform `revert_on_current_merge_request` on this resource |
 | `updateMergeRequest` | [`Boolean!`](#boolean) | Indicates the user can perform `update_merge_request` on this resource |
 
-### `MergeRequestReviewerRereviewPayload` {#mergerequestreviewerrereviewpayload}
+### `MergeRequestReviewerRereviewPayload`
 
 Autogenerated return type of MergeRequestReviewerRereview.
 
@@ -8466,7 +8469,7 @@ Autogenerated return type of MergeRequestReviewerRereview.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestSetAssigneesPayload` {#mergerequestsetassigneespayload}
+### `MergeRequestSetAssigneesPayload`
 
 Autogenerated return type of MergeRequestSetAssignees.
 
@@ -8478,7 +8481,7 @@ Autogenerated return type of MergeRequestSetAssignees.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestSetLabelsPayload` {#mergerequestsetlabelspayload}
+### `MergeRequestSetLabelsPayload`
 
 Autogenerated return type of MergeRequestSetLabels.
 
@@ -8490,7 +8493,7 @@ Autogenerated return type of MergeRequestSetLabels.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestSetLockedPayload` {#mergerequestsetlockedpayload}
+### `MergeRequestSetLockedPayload`
 
 Autogenerated return type of MergeRequestSetLocked.
 
@@ -8502,7 +8505,7 @@ Autogenerated return type of MergeRequestSetLocked.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestSetMilestonePayload` {#mergerequestsetmilestonepayload}
+### `MergeRequestSetMilestonePayload`
 
 Autogenerated return type of MergeRequestSetMilestone.
 
@@ -8514,7 +8517,7 @@ Autogenerated return type of MergeRequestSetMilestone.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestSetSubscriptionPayload` {#mergerequestsetsubscriptionpayload}
+### `MergeRequestSetSubscriptionPayload`
 
 Autogenerated return type of MergeRequestSetSubscription.
 
@@ -8526,7 +8529,7 @@ Autogenerated return type of MergeRequestSetSubscription.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestSetWipPayload` {#mergerequestsetwippayload}
+### `MergeRequestSetWipPayload`
 
 Autogenerated return type of MergeRequestSetWip.
 
@@ -8538,7 +8541,7 @@ Autogenerated return type of MergeRequestSetWip.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `MergeRequestUpdatePayload` {#mergerequestupdatepayload}
+### `MergeRequestUpdatePayload`
 
 Autogenerated return type of MergeRequestUpdate.
 
@@ -8550,7 +8553,7 @@ Autogenerated return type of MergeRequestUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
-### `Metadata` {#metadata}
+### `Metadata`
 
 #### fields
 
@@ -8559,7 +8562,7 @@ Autogenerated return type of MergeRequestUpdate.
 | `revision` | [`String!`](#string) | Revision. |
 | `version` | [`String!`](#string) | Version. |
 
-### `MetricImage` {#metricimage}
+### `MetricImage`
 
 Represents a metric image upload.
 
@@ -8573,7 +8576,7 @@ Represents a metric image upload.
 | `iid` | [`ID!`](#id) | Internal ID of the metric upload. |
 | `url` | [`String!`](#string) | URL of the metric source. |
 
-### `MetricsDashboard` {#metricsdashboard}
+### `MetricsDashboard`
 
 #### fields
 
@@ -8584,7 +8587,7 @@ Represents a metric image upload.
 
 #### fields with arguments
 
-##### `annotations` {#MetricsDashboard_annotations}
+##### `annotations`MetricsDashboard_annotations
 
 Annotations added to the dashboard.
 
@@ -8601,7 +8604,7 @@ Returns [`MetricsDashboardAnnotationConnection`](#metricsdashboardannotationconn
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `MetricsDashboardAnnotation` {#metricsdashboardannotation}
+### `MetricsDashboardAnnotation`
 
 #### fields
 
@@ -8613,7 +8616,7 @@ Returns [`MetricsDashboardAnnotationConnection`](#metricsdashboardannotationconn
 | `panelId` | [`String`](#string) | ID of a dashboard panel to which the annotation should be scoped. |
 | `startingAt` | [`Time`](#time) | Timestamp marking start of annotated time span. |
 
-### `MetricsDashboardAnnotationConnection` {#metricsdashboardannotationconnection}
+### `MetricsDashboardAnnotationConnection`
 
 The connection type for MetricsDashboardAnnotation.
 
@@ -8625,7 +8628,7 @@ The connection type for MetricsDashboardAnnotation.
 | `nodes` | [`[MetricsDashboardAnnotation]`](#metricsdashboardannotation) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `MetricsDashboardAnnotationEdge` {#metricsdashboardannotationedge}
+### `MetricsDashboardAnnotationEdge`
 
 An edge in a connection.
 
@@ -8636,7 +8639,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`MetricsDashboardAnnotation`](#metricsdashboardannotation) | The item at the end of the edge. |
 
-### `Milestone` {#milestone}
+### `Milestone`
 
 Represents a milestone.
 
@@ -8659,7 +8662,7 @@ Represents a milestone.
 | `updatedAt` | [`Time!`](#time) | Timestamp of last milestone update. |
 | `webPath` | [`String!`](#string) | Web path of the milestone. |
 
-### `MilestoneConnection` {#milestoneconnection}
+### `MilestoneConnection`
 
 The connection type for Milestone.
 
@@ -8671,7 +8674,7 @@ The connection type for Milestone.
 | `nodes` | [`[Milestone]`](#milestone) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `MilestoneEdge` {#milestoneedge}
+### `MilestoneEdge`
 
 An edge in a connection.
 
@@ -8682,7 +8685,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Milestone`](#milestone) | The item at the end of the edge. |
 
-### `MilestoneStats` {#milestonestats}
+### `MilestoneStats`
 
 Contains statistics about a milestone.
 
@@ -8693,7 +8696,7 @@ Contains statistics about a milestone.
 | `closedIssuesCount` | [`Int`](#int) | Number of closed issues associated with the milestone. |
 | `totalIssuesCount` | [`Int`](#int) | Total number of issues associated with the milestone. |
 
-### `Namespace` {#namespace}
+### `Namespace`
 
 #### fields
 
@@ -8723,7 +8726,7 @@ Contains statistics about a milestone.
 
 #### fields with arguments
 
-##### `complianceFrameworks` {#Namespace_complianceFrameworks}
+##### `complianceFrameworks`Namespace_complianceFrameworks
 
 Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled.
 
@@ -8739,7 +8742,7 @@ Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `projects` {#Namespace_projects}
+##### `projects`Namespace_projects
 
 Projects within this namespace.
 
@@ -8760,7 +8763,7 @@ Returns [`ProjectConnection!`](#projectconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `NamespaceConnection` {#namespaceconnection}
+### `NamespaceConnection`
 
 The connection type for Namespace.
 
@@ -8772,7 +8775,7 @@ The connection type for Namespace.
 | `nodes` | [`[Namespace]`](#namespace) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `NamespaceEdge` {#namespaceedge}
+### `NamespaceEdge`
 
 An edge in a connection.
 
@@ -8783,7 +8786,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Namespace`](#namespace) | The item at the end of the edge. |
 
-### `NamespaceIncreaseStorageTemporarilyPayload` {#namespaceincreasestoragetemporarilypayload}
+### `NamespaceIncreaseStorageTemporarilyPayload`
 
 Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 
@@ -8795,7 +8798,7 @@ Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `namespace` | [`Namespace`](#namespace) | The namespace after mutation. |
 
-### `Note` {#note}
+### `Note`
 
 #### fields
 
@@ -8820,7 +8823,7 @@ Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 | `url` | [`String`](#string) | URL to view this Note in the Web UI. |
 | `userPermissions` | [`NotePermissions!`](#notepermissions) | Permissions for the current user on the resource |
 
-### `NoteConnection` {#noteconnection}
+### `NoteConnection`
 
 The connection type for Note.
 
@@ -8832,7 +8835,7 @@ The connection type for Note.
 | `nodes` | [`[Note]`](#note) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `NoteEdge` {#noteedge}
+### `NoteEdge`
 
 An edge in a connection.
 
@@ -8843,7 +8846,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Note`](#note) | The item at the end of the edge. |
 
-### `NotePermissions` {#notepermissions}
+### `NotePermissions`
 
 #### fields
 
@@ -8856,7 +8859,7 @@ An edge in a connection.
 | `repositionNote` | [`Boolean!`](#boolean) | Indicates the user can perform `reposition_note` on this resource |
 | `resolveNote` | [`Boolean!`](#boolean) | Indicates the user can perform `resolve_note` on this resource |
 
-### `OncallParticipantType` {#oncallparticipanttype}
+### `OncallParticipantType`
 
 The rotation participant and color palette.
 
@@ -8869,7 +8872,7 @@ The rotation participant and color palette.
 | `id` | [`IncidentManagementOncallParticipantID!`](#incidentmanagementoncallparticipantid) | ID of the on-call participant. |
 | `user` | [`User!`](#user) | The user who is participating. |
 
-### `OncallParticipantTypeConnection` {#oncallparticipanttypeconnection}
+### `OncallParticipantTypeConnection`
 
 The connection type for OncallParticipantType.
 
@@ -8881,7 +8884,7 @@ The connection type for OncallParticipantType.
 | `nodes` | [`[OncallParticipantType]`](#oncallparticipanttype) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `OncallParticipantTypeEdge` {#oncallparticipanttypeedge}
+### `OncallParticipantTypeEdge`
 
 An edge in a connection.
 
@@ -8892,7 +8895,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`OncallParticipantType`](#oncallparticipanttype) | The item at the end of the edge. |
 
-### `OncallRotationActivePeriodType` {#oncallrotationactiveperiodtype}
+### `OncallRotationActivePeriodType`
 
 Active period time range for on-call rotation.
 
@@ -8903,7 +8906,7 @@ Active period time range for on-call rotation.
 | `endTime` | [`String`](#string) | The end of the rotation active period. |
 | `startTime` | [`String`](#string) | The start of the rotation active period. |
 
-### `OncallRotationCreatePayload` {#oncallrotationcreatepayload}
+### `OncallRotationCreatePayload`
 
 Autogenerated return type of OncallRotationCreate.
 
@@ -8915,7 +8918,7 @@ Autogenerated return type of OncallRotationCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallRotation` | [`IncidentManagementOncallRotation`](#incidentmanagementoncallrotation) | The on-call rotation. |
 
-### `OncallRotationDestroyPayload` {#oncallrotationdestroypayload}
+### `OncallRotationDestroyPayload`
 
 Autogenerated return type of OncallRotationDestroy.
 
@@ -8927,7 +8930,7 @@ Autogenerated return type of OncallRotationDestroy.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallRotation` | [`IncidentManagementOncallRotation`](#incidentmanagementoncallrotation) | The on-call rotation. |
 
-### `OncallScheduleCreatePayload` {#oncallschedulecreatepayload}
+### `OncallScheduleCreatePayload`
 
 Autogenerated return type of OncallScheduleCreate.
 
@@ -8939,7 +8942,7 @@ Autogenerated return type of OncallScheduleCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule. |
 
-### `OncallScheduleDestroyPayload` {#oncallscheduledestroypayload}
+### `OncallScheduleDestroyPayload`
 
 Autogenerated return type of OncallScheduleDestroy.
 
@@ -8951,7 +8954,7 @@ Autogenerated return type of OncallScheduleDestroy.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule. |
 
-### `OncallScheduleUpdatePayload` {#oncallscheduleupdatepayload}
+### `OncallScheduleUpdatePayload`
 
 Autogenerated return type of OncallScheduleUpdate.
 
@@ -8963,7 +8966,7 @@ Autogenerated return type of OncallScheduleUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule. |
 
-### `Package` {#package}
+### `Package`
 
 Represents a package in the Package Registry.
 
@@ -8982,7 +8985,7 @@ Represents a package in the Package Registry.
 
 #### fields with arguments
 
-##### `pipelines` {#Package_pipelines}
+##### `pipelines`Package_pipelines
 
 Pipelines that built the package.
 
@@ -8997,7 +9000,7 @@ Returns [`PipelineConnection`](#pipelineconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `tags` {#Package_tags}
+##### `tags`Package_tags
 
 Package tags.
 
@@ -9012,7 +9015,7 @@ Returns [`PackageTagConnection`](#packagetagconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `versions` {#Package_versions}
+##### `versions`Package_versions
 
 The other versions of the package.
 
@@ -9027,7 +9030,7 @@ Returns [`PackageWithoutVersionsConnection`](#packagewithoutversionsconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `PackageComposerJsonType` {#packagecomposerjsontype}
+### `PackageComposerJsonType`
 
 Represents a composer JSON file.
 
@@ -9040,7 +9043,7 @@ Represents a composer JSON file.
 | `type` | [`String`](#string) | The type set in the Composer JSON file. |
 | `version` | [`String`](#string) | The version set in the Composer JSON file. |
 
-### `PackageConnection` {#packageconnection}
+### `PackageConnection`
 
 The connection type for Package.
 
@@ -9052,7 +9055,7 @@ The connection type for Package.
 | `nodes` | [`[Package]`](#package) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `PackageEdge` {#packageedge}
+### `PackageEdge`
 
 An edge in a connection.
 
@@ -9063,7 +9066,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Package`](#package) | The item at the end of the edge. |
 
-### `PackageFileRegistry` {#packagefileregistry}
+### `PackageFileRegistry`
 
 Represents the Geo sync and verification state of a package file.
 
@@ -9080,7 +9083,7 @@ Represents the Geo sync and verification state of a package file.
 | `retryCount` | [`Int`](#int) | Number of consecutive failed sync attempts of the PackageFileRegistry |
 | `state` | [`RegistryState`](#registrystate) | Sync state of the PackageFileRegistry |
 
-### `PackageFileRegistryConnection` {#packagefileregistryconnection}
+### `PackageFileRegistryConnection`
 
 The connection type for PackageFileRegistry.
 
@@ -9092,7 +9095,7 @@ The connection type for PackageFileRegistry.
 | `nodes` | [`[PackageFileRegistry]`](#packagefileregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `PackageFileRegistryEdge` {#packagefileregistryedge}
+### `PackageFileRegistryEdge`
 
 An edge in a connection.
 
@@ -9103,7 +9106,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PackageFileRegistry`](#packagefileregistry) | The item at the end of the edge. |
 
-### `PackageSettings` {#packagesettings}
+### `PackageSettings`
 
 Namespace-level Package Registry settings.
 
@@ -9114,7 +9117,7 @@ Namespace-level Package Registry settings.
 | `mavenDuplicateExceptionRegex` | [`UntrustedRegexp`](#untrustedregexp) | When maven_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
 | `mavenDuplicatesAllowed` | [`Boolean!`](#boolean) | Indicates whether duplicate Maven packages are allowed for this namespace. |
 
-### `PackageTag` {#packagetag}
+### `PackageTag`
 
 Represents a package tag.
 
@@ -9127,7 +9130,7 @@ Represents a package tag.
 | `name` | [`String!`](#string) | The name of the tag. |
 | `updatedAt` | [`Time!`](#time) | The updated date. |
 
-### `PackageTagConnection` {#packagetagconnection}
+### `PackageTagConnection`
 
 The connection type for PackageTag.
 
@@ -9139,7 +9142,7 @@ The connection type for PackageTag.
 | `nodes` | [`[PackageTag]`](#packagetag) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `PackageTagEdge` {#packagetagedge}
+### `PackageTagEdge`
 
 An edge in a connection.
 
@@ -9150,7 +9153,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PackageTag`](#packagetag) | The item at the end of the edge. |
 
-### `PackageWithoutVersions` {#packagewithoutversions}
+### `PackageWithoutVersions`
 
 Represents a version of a package in the Package Registry.
 
@@ -9169,7 +9172,7 @@ Represents a version of a package in the Package Registry.
 
 #### fields with arguments
 
-##### `pipelines` {#PackageWithoutVersions_pipelines}
+##### `pipelines`PackageWithoutVersions_pipelines
 
 Pipelines that built the package.
 
@@ -9184,7 +9187,7 @@ Returns [`PipelineConnection`](#pipelineconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `tags` {#PackageWithoutVersions_tags}
+##### `tags`PackageWithoutVersions_tags
 
 Package tags.
 
@@ -9199,7 +9202,7 @@ Returns [`PackageTagConnection`](#packagetagconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `PackageWithoutVersionsConnection` {#packagewithoutversionsconnection}
+### `PackageWithoutVersionsConnection`
 
 The connection type for PackageWithoutVersions.
 
@@ -9211,7 +9214,7 @@ The connection type for PackageWithoutVersions.
 | `nodes` | [`[PackageWithoutVersions]`](#packagewithoutversions) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `PackageWithoutVersionsEdge` {#packagewithoutversionsedge}
+### `PackageWithoutVersionsEdge`
 
 An edge in a connection.
 
@@ -9222,7 +9225,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PackageWithoutVersions`](#packagewithoutversions) | The item at the end of the edge. |
 
-### `PageInfo` {#pageinfo}
+### `PageInfo`
 
 Information about pagination in a connection.
 
@@ -9235,7 +9238,7 @@ Information about pagination in a connection.
 | `hasPreviousPage` | [`Boolean!`](#boolean) | When paginating backwards, are there more items? |
 | `startCursor` | [`String`](#string) | When paginating backwards, the cursor to continue. |
 
-### `Pipeline` {#pipeline}
+### `Pipeline`
 
 #### fields
 
@@ -9270,7 +9273,7 @@ Information about pagination in a connection.
 
 #### fields with arguments
 
-##### `downstream` {#Pipeline_downstream}
+##### `downstream`Pipeline_downstream
 
 Pipelines this pipeline will trigger.
 
@@ -9285,7 +9288,7 @@ Returns [`PipelineConnection`](#pipelineconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `jobs` {#Pipeline_jobs}
+##### `jobs`Pipeline_jobs
 
 Jobs belonging to the pipeline.
 
@@ -9301,7 +9304,7 @@ Returns [`CiJobConnection`](#cijobconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `securityReportFindings` {#Pipeline_securityReportFindings}
+##### `securityReportFindings`Pipeline_securityReportFindings
 
 Vulnerability findings reported on the pipeline.
 
@@ -9319,7 +9322,7 @@ Returns [`PipelineSecurityReportFindingConnection`](#pipelinesecurityreportfindi
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `stages` {#Pipeline_stages}
+##### `stages`Pipeline_stages
 
 Stages of the pipeline.
 
@@ -9334,7 +9337,7 @@ Returns [`CiStageConnection`](#cistageconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `PipelineAnalytics` {#pipelineanalytics}
+### `PipelineAnalytics`
 
 #### fields
 
@@ -9352,7 +9355,7 @@ Returns [`CiStageConnection`](#cistageconnection)
 | `yearPipelinesSuccessful` | [`[Int!]`](#int) | Total yearly successful pipeline count. |
 | `yearPipelinesTotals` | [`[Int!]`](#int) | Total yearly pipeline count. |
 
-### `PipelineCancelPayload` {#pipelinecancelpayload}
+### `PipelineCancelPayload`
 
 Autogenerated return type of PipelineCancel.
 
@@ -9363,7 +9366,7 @@ Autogenerated return type of PipelineCancel.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `PipelineConnection` {#pipelineconnection}
+### `PipelineConnection`
 
 The connection type for Pipeline.
 
@@ -9376,7 +9379,7 @@ The connection type for Pipeline.
 | `nodes` | [`[Pipeline]`](#pipeline) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `PipelineDestroyPayload` {#pipelinedestroypayload}
+### `PipelineDestroyPayload`
 
 Autogenerated return type of PipelineDestroy.
 
@@ -9387,7 +9390,7 @@ Autogenerated return type of PipelineDestroy.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `PipelineEdge` {#pipelineedge}
+### `PipelineEdge`
 
 An edge in a connection.
 
@@ -9398,7 +9401,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Pipeline`](#pipeline) | The item at the end of the edge. |
 
-### `PipelinePermissions` {#pipelinepermissions}
+### `PipelinePermissions`
 
 #### fields
 
@@ -9408,7 +9411,7 @@ An edge in a connection.
 | `destroyPipeline` | [`Boolean!`](#boolean) | Indicates the user can perform `destroy_pipeline` on this resource |
 | `updatePipeline` | [`Boolean!`](#boolean) | Indicates the user can perform `update_pipeline` on this resource |
 
-### `PipelineRetryPayload` {#pipelineretrypayload}
+### `PipelineRetryPayload`
 
 Autogenerated return type of PipelineRetry.
 
@@ -9420,7 +9423,7 @@ Autogenerated return type of PipelineRetry.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipeline` | [`Pipeline`](#pipeline) | The pipeline after mutation. |
 
-### `PipelineSecurityReportFinding` {#pipelinesecurityreportfinding}
+### `PipelineSecurityReportFinding`
 
 Represents vulnerability finding of a security report on the pipeline.
 
@@ -9441,7 +9444,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | `solution` | [`String`](#string) | URL to the vulnerability's details page. |
 | `uuid` | [`String`](#string) | Name of the vulnerability finding. |
 
-### `PipelineSecurityReportFindingConnection` {#pipelinesecurityreportfindingconnection}
+### `PipelineSecurityReportFindingConnection`
 
 The connection type for PipelineSecurityReportFinding.
 
@@ -9453,7 +9456,7 @@ The connection type for PipelineSecurityReportFinding.
 | `nodes` | [`[PipelineSecurityReportFinding]`](#pipelinesecurityreportfinding) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `PipelineSecurityReportFindingEdge` {#pipelinesecurityreportfindingedge}
+### `PipelineSecurityReportFindingEdge`
 
 An edge in a connection.
 
@@ -9464,7 +9467,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PipelineSecurityReportFinding`](#pipelinesecurityreportfinding) | The item at the end of the edge. |
 
-### `Project` {#project}
+### `Project`
 
 #### fields
 
@@ -9534,7 +9537,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `alertManagementAlert` {#Project_alertManagementAlert}
+##### `alertManagementAlert`Project_alertManagementAlert
 
 A single Alert Management alert of the project.
 
@@ -9551,7 +9554,7 @@ Returns [`AlertManagementAlert`](#alertmanagementalert)
 | `search` | [`String`](#string) | Search query for title, description, service, or monitoring_tool. |
 | `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
 
-##### `alertManagementAlertStatusCounts` {#Project_alertManagementAlertStatusCounts}
+##### `alertManagementAlertStatusCounts`Project_alertManagementAlertStatusCounts
 
 Counts of alerts by status for the project.
 
@@ -9564,7 +9567,7 @@ Returns [`AlertManagementAlertStatusCountsType`](#alertmanagementalertstatuscoun
 | `search` | [`String`](#string) | Search query for title, description, service, or monitoring_tool. |
 | `assigneeUsername` | [`String`](#string) | Username of a user assigned to the issue. |
 
-##### `alertManagementAlerts` {#Project_alertManagementAlerts}
+##### `alertManagementAlerts`Project_alertManagementAlerts
 
 Alert Management alerts of the project.
 
@@ -9585,7 +9588,7 @@ Returns [`AlertManagementAlertConnection`](#alertmanagementalertconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `alertManagementHttpIntegrations` {#Project_alertManagementHttpIntegrations}
+##### `alertManagementHttpIntegrations`Project_alertManagementHttpIntegrations
 
 HTTP Integrations which can receive alerts for the project.
 
@@ -9600,7 +9603,7 @@ Returns [`AlertManagementHttpIntegrationConnection`](#alertmanagementhttpintegra
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `alertManagementIntegrations` {#Project_alertManagementIntegrations}
+##### `alertManagementIntegrations`Project_alertManagementIntegrations
 
 Integrations which can receive alerts for the project.
 
@@ -9615,7 +9618,7 @@ Returns [`AlertManagementIntegrationConnection`](#alertmanagementintegrationconn
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `alertManagementPayloadFields` {#Project_alertManagementPayloadFields}
+##### `alertManagementPayloadFields`Project_alertManagementPayloadFields
 
 Extract alert fields from payload for custom mapping.
 
@@ -9627,7 +9630,7 @@ Returns [`[AlertManagementPayloadAlertField!]`](#alertmanagementpayloadalertfiel
 | ---- | ---- | ----------- |
 | `payloadExample` | [`String!`](#string) | Sample payload for extracting alert fields for custom mappings. |
 
-##### `board` {#Project_board}
+##### `board`Project_board
 
 A single board of the project.
 
@@ -9639,7 +9642,7 @@ Returns [`Board`](#board)
 | ---- | ---- | ----------- |
 | `id` | [`BoardID!`](#boardid) | The board's ID. |
 
-##### `boards` {#Project_boards}
+##### `boards`Project_boards
 
 Boards of the project.
 
@@ -9655,7 +9658,7 @@ Returns [`BoardConnection`](#boardconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `clusterAgent` {#Project_clusterAgent}
+##### `clusterAgent`Project_clusterAgent
 
 Find a single cluster agent by name.
 
@@ -9667,7 +9670,7 @@ Returns [`ClusterAgent`](#clusteragent)
 | ---- | ---- | ----------- |
 | `name` | [`String!`](#string) | Name of the cluster agent. |
 
-##### `clusterAgents` {#Project_clusterAgents}
+##### `clusterAgents`Project_clusterAgents
 
 Cluster agents associated with the project.
 
@@ -9682,7 +9685,7 @@ Returns [`ClusterAgentConnection`](#clusteragentconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `complianceFrameworks` {#Project_complianceFrameworks}
+##### `complianceFrameworks`Project_complianceFrameworks
 
 Compliance frameworks associated with the project.
 
@@ -9697,7 +9700,7 @@ Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `containerRepositories` {#Project_containerRepositories}
+##### `containerRepositories`Project_containerRepositories
 
 Container repositories of the project.
 
@@ -9714,7 +9717,7 @@ Returns [`ContainerRepositoryConnection`](#containerrepositoryconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `dastProfiles` {#Project_dastProfiles}
+##### `dastProfiles`Project_dastProfiles
 
 DAST Profiles associated with the project. Always returns no nodes if `dast_saved_scans` is disabled.
 
@@ -9729,7 +9732,7 @@ Returns [`DastProfileConnection`](#dastprofileconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `dastScannerProfiles` {#Project_dastScannerProfiles}
+##### `dastScannerProfiles`Project_dastScannerProfiles
 
 The DAST scanner profiles associated with the project.
 
@@ -9744,7 +9747,7 @@ Returns [`DastScannerProfileConnection`](#dastscannerprofileconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `dastSiteProfile` {#Project_dastSiteProfile}
+##### `dastSiteProfile`Project_dastSiteProfile
 
 DAST Site Profile associated with the project.
 
@@ -9756,7 +9759,7 @@ Returns [`DastSiteProfile`](#dastsiteprofile)
 | ---- | ---- | ----------- |
 | `id` | [`DastSiteProfileID!`](#dastsiteprofileid) | ID of the site profile. |
 
-##### `dastSiteProfiles` {#Project_dastSiteProfiles}
+##### `dastSiteProfiles`Project_dastSiteProfiles
 
 DAST Site Profiles associated with the project.
 
@@ -9771,7 +9774,7 @@ Returns [`DastSiteProfileConnection`](#dastsiteprofileconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `dastSiteValidations` {#Project_dastSiteValidations}
+##### `dastSiteValidations`Project_dastSiteValidations
 
 DAST Site Validations associated with the project.
 
@@ -9787,7 +9790,7 @@ Returns [`DastSiteValidationConnection`](#dastsitevalidationconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `environment` {#Project_environment}
+##### `environment`Project_environment
 
 A single environment of the project.
 
@@ -9801,7 +9804,7 @@ Returns [`Environment`](#environment)
 | `search` | [`String`](#string) | Search query for environment name. |
 | `states` | [`[String!]`](#string) | States of environments that should be included in result. |
 
-##### `environments` {#Project_environments}
+##### `environments`Project_environments
 
 Environments of the project.
 
@@ -9819,7 +9822,7 @@ Returns [`EnvironmentConnection`](#environmentconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `incidentManagementOncallSchedules` {#Project_incidentManagementOncallSchedules}
+##### `incidentManagementOncallSchedules`Project_incidentManagementOncallSchedules
 
 Incident Management On-call schedules of the project.
 
@@ -9834,7 +9837,7 @@ Returns [`IncidentManagementOncallScheduleConnection`](#incidentmanagementoncall
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `issue` {#Project_issue}
+##### `issue`Project_issue
 
 A single issue of the project.
 
@@ -9865,7 +9868,7 @@ Returns [`Issue`](#issue)
 | `iterationId` | [`[ID]`](#id) | Iterations applied to the issue. |
 | `epicId` | [`String`](#string) | ID of an epic associated with the issues, "none" and "any" values are supported. |
 
-##### `issueStatusCounts` {#Project_issueStatusCounts}
+##### `issueStatusCounts`Project_issueStatusCounts
 
 Counts of issues by status for the project.
 
@@ -9892,7 +9895,7 @@ Returns [`IssueStatusCountsType`](#issuestatuscountstype)
 | `search` | [`String`](#string) | Search query for issue title or description. |
 | `types` | [`[IssueType!]`](#issuetype) | Filter issues by the given issue types. |
 
-##### `issues` {#Project_issues}
+##### `issues`Project_issues
 
 Issues of the project.
 
@@ -9927,7 +9930,7 @@ Returns [`IssueConnection`](#issueconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `iterations` {#Project_iterations}
+##### `iterations`Project_iterations
 
 Find iterations.
 
@@ -9950,7 +9953,7 @@ Returns [`IterationConnection`](#iterationconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `jiraImports` {#Project_jiraImports}
+##### `jiraImports`Project_jiraImports
 
 Jira imports into the project.
 
@@ -9965,7 +9968,7 @@ Returns [`JiraImportConnection`](#jiraimportconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `label` {#Project_label}
+##### `label`Project_label
 
 A label available on this project.
 
@@ -9977,7 +9980,7 @@ Returns [`Label`](#label)
 | ---- | ---- | ----------- |
 | `title` | [`String!`](#string) | Title of the label. |
 
-##### `labels` {#Project_labels}
+##### `labels`Project_labels
 
 Labels available on this project.
 
@@ -9994,7 +9997,7 @@ Returns [`LabelConnection`](#labelconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `mergeRequest` {#Project_mergeRequest}
+##### `mergeRequest`Project_mergeRequest
 
 A single merge request of the project.
 
@@ -10006,7 +10009,7 @@ Returns [`MergeRequest`](#mergerequest)
 | ---- | ---- | ----------- |
 | `iid` | [`String!`](#string) | IID of the merge request, for example `1`. |
 
-##### `mergeRequests` {#Project_mergeRequests}
+##### `mergeRequests`Project_mergeRequests
 
 Merge requests of the project.
 
@@ -10033,7 +10036,7 @@ Returns [`MergeRequestConnection`](#mergerequestconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `milestones` {#Project_milestones}
+##### `milestones`Project_milestones
 
 Milestones of the project.
 
@@ -10046,7 +10049,7 @@ Returns [`MilestoneConnection`](#milestoneconnection)
 | `startDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.start. |
 | `endDate` | [`Time`](#time) | List items overlapping a time frame defined by startDate..endDate (if one date is provided, both must be present) Deprecated in 13.5: Use timeframe.end. |
 | `timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
-| `ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1". |
+| `ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., `"gid://gitlab/Milestone/1"`. |
 | `state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | `title` | [`String`](#string) | The title of the milestone. |
 | `searchTitle` | [`String`](#string) | A search string for the title. |
@@ -10057,7 +10060,7 @@ Returns [`MilestoneConnection`](#milestoneconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `packages` {#Project_packages}
+##### `packages`Project_packages
 
 Packages of the project.
 
@@ -10072,7 +10075,7 @@ Returns [`PackageConnection`](#packageconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `pipeline` {#Project_pipeline}
+##### `pipeline`Project_pipeline
 
 Build pipeline of the project.
 
@@ -10085,7 +10088,7 @@ Returns [`Pipeline`](#pipeline)
 | `iid` | [`ID`](#id) | IID of the Pipeline. For example, "1". |
 | `sha` | [`String`](#string) | SHA of the Pipeline. For example, "dyd0f15ay83993f5ab66k927w28673882x99100b". |
 
-##### `pipelines` {#Project_pipelines}
+##### `pipelines`Project_pipelines
 
 Build pipelines of the project.
 
@@ -10103,7 +10106,7 @@ Returns [`PipelineConnection`](#pipelineconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `projectMembers` {#Project_projectMembers}
+##### `projectMembers`Project_projectMembers
 
 Members of the project.
 
@@ -10120,7 +10123,7 @@ Returns [`MemberInterfaceConnection`](#memberinterfaceconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `release` {#Project_release}
+##### `release`Project_release
 
 A single release of the project.
 
@@ -10132,7 +10135,7 @@ Returns [`Release`](#release)
 | ---- | ---- | ----------- |
 | `tagName` | [`String!`](#string) | The name of the tag associated to the release. |
 
-##### `releases` {#Project_releases}
+##### `releases`Project_releases
 
 Releases of the project.
 
@@ -10148,7 +10151,7 @@ Returns [`ReleaseConnection`](#releaseconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `requirement` {#Project_requirement}
+##### `requirement`Project_requirement
 
 Find a single requirement.
 
@@ -10166,7 +10169,7 @@ Returns [`Requirement`](#requirement)
 | `iids` | [`[ID!]`](#id) | List of IIDs of requirements, e.g., [1, 2]. |
 | `lastTestReportState` | [`RequirementStatusFilter`](#requirementstatusfilter) | The state of latest requirement test report. |
 
-##### `requirements` {#Project_requirements}
+##### `requirements`Project_requirements
 
 Find requirements.
 
@@ -10188,7 +10191,7 @@ Returns [`RequirementConnection`](#requirementconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `sentryDetailedError` {#Project_sentryDetailedError}
+##### `sentryDetailedError`Project_sentryDetailedError
 
 Detailed version of a Sentry error on the project.
 
@@ -10200,7 +10203,7 @@ Returns [`SentryDetailedError`](#sentrydetailederror)
 | ---- | ---- | ----------- |
 | `id` | [`GitlabErrorTrackingDetailedErrorID!`](#gitlaberrortrackingdetailederrorid) | ID of the Sentry issue. |
 
-##### `services` {#Project_services}
+##### `services`Project_services
 
 Project services.
 
@@ -10217,7 +10220,7 @@ Returns [`ServiceConnection`](#serviceconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `snippets` {#Project_snippets}
+##### `snippets`Project_snippets
 
 Snippets of the project.
 
@@ -10234,7 +10237,7 @@ Returns [`SnippetConnection`](#snippetconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `terraformState` {#Project_terraformState}
+##### `terraformState`Project_terraformState
 
 Find a single Terraform state by name.
 
@@ -10246,7 +10249,7 @@ Returns [`TerraformState`](#terraformstate)
 | ---- | ---- | ----------- |
 | `name` | [`String!`](#string) | Name of the Terraform state. |
 
-##### `terraformStates` {#Project_terraformStates}
+##### `terraformStates`Project_terraformStates
 
 Terraform states associated with the project.
 
@@ -10261,7 +10264,7 @@ Returns [`TerraformStateConnection`](#terraformstateconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilities` {#Project_vulnerabilities}
+##### `vulnerabilities`Project_vulnerabilities
 
 Vulnerabilities reported on the project.
 
@@ -10284,7 +10287,7 @@ Returns [`VulnerabilityConnection`](#vulnerabilityconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilitiesCountByDay` {#Project_vulnerabilitiesCountByDay}
+##### `vulnerabilitiesCountByDay`Project_vulnerabilitiesCountByDay
 
 Number of vulnerabilities per day for the project.
 
@@ -10301,7 +10304,7 @@ Returns [`VulnerabilitiesCountByDayConnection`](#vulnerabilitiescountbydayconnec
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilityScanners` {#Project_vulnerabilityScanners}
+##### `vulnerabilityScanners`Project_vulnerabilityScanners
 
 Vulnerability scanners reported on the project vulnerabilities.
 
@@ -10316,7 +10319,7 @@ Returns [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `vulnerabilitySeveritiesCount` {#Project_vulnerabilitySeveritiesCount}
+##### `vulnerabilitySeveritiesCount`Project_vulnerabilitySeveritiesCount
 
 Counts for each vulnerability severity in the project.
 
@@ -10332,7 +10335,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
 | `state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 | `scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
 
-### `ProjectCiCdSetting` {#projectcicdsetting}
+### `ProjectCiCdSetting`
 
 #### fields
 
@@ -10343,7 +10346,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount)
 | `mergeTrainsEnabled` | [`Boolean`](#boolean) | Whether merge trains are enabled. |
 | `project` | [`Project`](#project) | Project the CI/CD settings belong to. |
 
-### `ProjectConnection` {#projectconnection}
+### `ProjectConnection`
 
 The connection type for Project.
 
@@ -10355,7 +10358,7 @@ The connection type for Project.
 | `nodes` | [`[Project]`](#project) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ProjectEdge` {#projectedge}
+### `ProjectEdge`
 
 An edge in a connection.
 
@@ -10366,7 +10369,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Project`](#project) | The item at the end of the edge. |
 
-### `ProjectMember` {#projectmember}
+### `ProjectMember`
 
 Represents a Project Membership.
 
@@ -10384,7 +10387,7 @@ Represents a Project Membership.
 | `user` | [`User!`](#user) | User that is associated with the member object. |
 | `userPermissions` | [`ProjectPermissions!`](#projectpermissions) | Permissions for the current user on the resource |
 
-### `ProjectMemberConnection` {#projectmemberconnection}
+### `ProjectMemberConnection`
 
 The connection type for ProjectMember.
 
@@ -10396,7 +10399,7 @@ The connection type for ProjectMember.
 | `nodes` | [`[ProjectMember]`](#projectmember) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ProjectMemberEdge` {#projectmemberedge}
+### `ProjectMemberEdge`
 
 An edge in a connection.
 
@@ -10407,7 +10410,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ProjectMember`](#projectmember) | The item at the end of the edge. |
 
-### `ProjectPermissions` {#projectpermissions}
+### `ProjectPermissions`
 
 #### fields
 
@@ -10456,7 +10459,7 @@ An edge in a connection.
 | `updateWiki` | [`Boolean!`](#boolean) | Indicates the user can perform `update_wiki` on this resource |
 | `uploadFile` | [`Boolean!`](#boolean) | Indicates the user can perform `upload_file` on this resource |
 
-### `ProjectStatistics` {#projectstatistics}
+### `ProjectStatistics`
 
 #### fields
 
@@ -10472,7 +10475,7 @@ An edge in a connection.
 | `uploadsSize` | [`Float`](#float) | Uploads size of the project in bytes. |
 | `wikiSize` | [`Float`](#float) | Wiki size of the project in bytes. |
 
-### `PrometheusAlert` {#prometheusalert}
+### `PrometheusAlert`
 
 The alert condition for Prometheus.
 
@@ -10483,7 +10486,7 @@ The alert condition for Prometheus.
 | `humanizedText` | [`String!`](#string) | The human-readable text of the alert condition. |
 | `id` | [`ID!`](#id) | ID of the alert condition. |
 
-### `PrometheusIntegrationCreatePayload` {#prometheusintegrationcreatepayload}
+### `PrometheusIntegrationCreatePayload`
 
 Autogenerated return type of PrometheusIntegrationCreate.
 
@@ -10495,7 +10498,7 @@ Autogenerated return type of PrometheusIntegrationCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementPrometheusIntegration`](#alertmanagementprometheusintegration) | The newly created integration. |
 
-### `PrometheusIntegrationResetTokenPayload` {#prometheusintegrationresettokenpayload}
+### `PrometheusIntegrationResetTokenPayload`
 
 Autogenerated return type of PrometheusIntegrationResetToken.
 
@@ -10507,7 +10510,7 @@ Autogenerated return type of PrometheusIntegrationResetToken.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementPrometheusIntegration`](#alertmanagementprometheusintegration) | The newly created integration. |
 
-### `PrometheusIntegrationUpdatePayload` {#prometheusintegrationupdatepayload}
+### `PrometheusIntegrationUpdatePayload`
 
 Autogenerated return type of PrometheusIntegrationUpdate.
 
@@ -10519,7 +10522,7 @@ Autogenerated return type of PrometheusIntegrationUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `integration` | [`AlertManagementPrometheusIntegration`](#alertmanagementprometheusintegration) | The newly created integration. |
 
-### `PromoteToEpicPayload` {#promotetoepicpayload}
+### `PromoteToEpicPayload`
 
 Autogenerated return type of PromoteToEpic.
 
@@ -10532,7 +10535,7 @@ Autogenerated return type of PromoteToEpic.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `Release` {#release}
+### `Release`
 
 Represents a release.
 
@@ -10555,7 +10558,7 @@ Represents a release.
 
 #### fields with arguments
 
-##### `evidences` {#Release_evidences}
+##### `evidences`Release_evidences
 
 Evidence for the release.
 
@@ -10570,7 +10573,7 @@ Returns [`ReleaseEvidenceConnection`](#releaseevidenceconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `milestones` {#Release_milestones}
+##### `milestones`Release_milestones
 
 Milestones associated to the release.
 
@@ -10585,7 +10588,7 @@ Returns [`MilestoneConnection`](#milestoneconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `ReleaseAssetLink` {#releaseassetlink}
+### `ReleaseAssetLink`
 
 Represents an asset link associated with a release.
 
@@ -10600,7 +10603,7 @@ Represents an asset link associated with a release.
 | `name` | [`String`](#string) | Name of the link. |
 | `url` | [`String`](#string) | URL of the link. |
 
-### `ReleaseAssetLinkConnection` {#releaseassetlinkconnection}
+### `ReleaseAssetLinkConnection`
 
 The connection type for ReleaseAssetLink.
 
@@ -10612,7 +10615,7 @@ The connection type for ReleaseAssetLink.
 | `nodes` | [`[ReleaseAssetLink]`](#releaseassetlink) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ReleaseAssetLinkCreatePayload` {#releaseassetlinkcreatepayload}
+### `ReleaseAssetLinkCreatePayload`
 
 Autogenerated return type of ReleaseAssetLinkCreate.
 
@@ -10624,7 +10627,7 @@ Autogenerated return type of ReleaseAssetLinkCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `link` | [`ReleaseAssetLink`](#releaseassetlink) | The asset link after mutation. |
 
-### `ReleaseAssetLinkEdge` {#releaseassetlinkedge}
+### `ReleaseAssetLinkEdge`
 
 An edge in a connection.
 
@@ -10635,7 +10638,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ReleaseAssetLink`](#releaseassetlink) | The item at the end of the edge. |
 
-### `ReleaseAssets` {#releaseassets}
+### `ReleaseAssets`
 
 A container for all assets associated with a release.
 
@@ -10647,7 +10650,7 @@ A container for all assets associated with a release.
 
 #### fields with arguments
 
-##### `links` {#ReleaseAssets_links}
+##### `links`ReleaseAssets_links
 
 Asset links of the release.
 
@@ -10662,7 +10665,7 @@ Returns [`ReleaseAssetLinkConnection`](#releaseassetlinkconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `sources` {#ReleaseAssets_sources}
+##### `sources`ReleaseAssets_sources
 
 Sources of the release.
 
@@ -10677,7 +10680,7 @@ Returns [`ReleaseSourceConnection`](#releasesourceconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `ReleaseConnection` {#releaseconnection}
+### `ReleaseConnection`
 
 The connection type for Release.
 
@@ -10690,7 +10693,7 @@ The connection type for Release.
 | `nodes` | [`[Release]`](#release) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ReleaseCreatePayload` {#releasecreatepayload}
+### `ReleaseCreatePayload`
 
 Autogenerated return type of ReleaseCreate.
 
@@ -10702,7 +10705,7 @@ Autogenerated return type of ReleaseCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `release` | [`Release`](#release) | The release after mutation. |
 
-### `ReleaseDeletePayload` {#releasedeletepayload}
+### `ReleaseDeletePayload`
 
 Autogenerated return type of ReleaseDelete.
 
@@ -10714,7 +10717,7 @@ Autogenerated return type of ReleaseDelete.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `release` | [`Release`](#release) | The deleted release. |
 
-### `ReleaseEdge` {#releaseedge}
+### `ReleaseEdge`
 
 An edge in a connection.
 
@@ -10725,7 +10728,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Release`](#release) | The item at the end of the edge. |
 
-### `ReleaseEvidence` {#releaseevidence}
+### `ReleaseEvidence`
 
 Evidence for a release.
 
@@ -10738,7 +10741,7 @@ Evidence for a release.
 | `id` | [`ID!`](#id) | ID of the evidence. |
 | `sha` | [`String`](#string) | SHA1 ID of the evidence hash. |
 
-### `ReleaseEvidenceConnection` {#releaseevidenceconnection}
+### `ReleaseEvidenceConnection`
 
 The connection type for ReleaseEvidence.
 
@@ -10750,7 +10753,7 @@ The connection type for ReleaseEvidence.
 | `nodes` | [`[ReleaseEvidence]`](#releaseevidence) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ReleaseEvidenceEdge` {#releaseevidenceedge}
+### `ReleaseEvidenceEdge`
 
 An edge in a connection.
 
@@ -10761,7 +10764,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ReleaseEvidence`](#releaseevidence) | The item at the end of the edge. |
 
-### `ReleaseLinks` {#releaselinks}
+### `ReleaseLinks`
 
 #### fields
 
@@ -10775,7 +10778,7 @@ An edge in a connection.
 | `openedMergeRequestsUrl` | [`String`](#string) | HTTP URL of the merge request page, filtered by this release and `state=open`. |
 | `selfUrl` | [`String`](#string) | HTTP URL of the release. |
 
-### `ReleaseSource` {#releasesource}
+### `ReleaseSource`
 
 Represents the source code attached to a release in a particular format.
 
@@ -10786,7 +10789,7 @@ Represents the source code attached to a release in a particular format.
 | `format` | [`String`](#string) | Format of the source. |
 | `url` | [`String`](#string) | Download URL of the source. |
 
-### `ReleaseSourceConnection` {#releasesourceconnection}
+### `ReleaseSourceConnection`
 
 The connection type for ReleaseSource.
 
@@ -10798,7 +10801,7 @@ The connection type for ReleaseSource.
 | `nodes` | [`[ReleaseSource]`](#releasesource) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ReleaseSourceEdge` {#releasesourceedge}
+### `ReleaseSourceEdge`
 
 An edge in a connection.
 
@@ -10809,7 +10812,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ReleaseSource`](#releasesource) | The item at the end of the edge. |
 
-### `ReleaseUpdatePayload` {#releaseupdatepayload}
+### `ReleaseUpdatePayload`
 
 Autogenerated return type of ReleaseUpdate.
 
@@ -10821,7 +10824,7 @@ Autogenerated return type of ReleaseUpdate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `release` | [`Release`](#release) | The release after mutation. |
 
-### `RemoveAwardEmojiPayload` {#removeawardemojipayload}
+### `RemoveAwardEmojiPayload`
 
 Autogenerated return type of RemoveAwardEmoji.
 
@@ -10833,7 +10836,7 @@ Autogenerated return type of RemoveAwardEmoji.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `RemoveProjectFromSecurityDashboardPayload` {#removeprojectfromsecuritydashboardpayload}
+### `RemoveProjectFromSecurityDashboardPayload`
 
 Autogenerated return type of RemoveProjectFromSecurityDashboard.
 
@@ -10844,7 +10847,7 @@ Autogenerated return type of RemoveProjectFromSecurityDashboard.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `RepositionImageDiffNotePayload` {#repositionimagediffnotepayload}
+### `RepositionImageDiffNotePayload`
 
 Autogenerated return type of RepositionImageDiffNote.
 
@@ -10856,7 +10859,7 @@ Autogenerated return type of RepositionImageDiffNote.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
-### `Repository` {#repository}
+### `Repository`
 
 #### fields
 
@@ -10868,7 +10871,7 @@ Autogenerated return type of RepositionImageDiffNote.
 
 #### fields with arguments
 
-##### `tree` {#Repository_tree}
+##### `tree`Repository_tree
 
 Tree of the repository.
 
@@ -10882,7 +10885,7 @@ Returns [`Tree`](#tree)
 | `ref` | [`String`](#string) | The commit ref to get the tree for. Default value is HEAD. |
 | `recursive` | [`Boolean`](#boolean) | Used to get a recursive tree. Default is false. |
 
-### `Requirement` {#requirement}
+### `Requirement`
 
 Represents a requirement.
 
@@ -10907,7 +10910,7 @@ Represents a requirement.
 
 #### fields with arguments
 
-##### `testReports` {#Requirement_testReports}
+##### `testReports`Requirement_testReports
 
 Test reports of the requirement.
 
@@ -10923,7 +10926,7 @@ Returns [`TestReportConnection`](#testreportconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `RequirementConnection` {#requirementconnection}
+### `RequirementConnection`
 
 The connection type for Requirement.
 
@@ -10935,7 +10938,7 @@ The connection type for Requirement.
 | `nodes` | [`[Requirement]`](#requirement) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `RequirementEdge` {#requirementedge}
+### `RequirementEdge`
 
 An edge in a connection.
 
@@ -10946,7 +10949,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Requirement`](#requirement) | The item at the end of the edge. |
 
-### `RequirementPermissions` {#requirementpermissions}
+### `RequirementPermissions`
 
 Check permissions for the current user on a requirement.
 
@@ -10960,7 +10963,7 @@ Check permissions for the current user on a requirement.
 | `readRequirement` | [`Boolean!`](#boolean) | Indicates the user can perform `read_requirement` on this resource |
 | `updateRequirement` | [`Boolean!`](#boolean) | Indicates the user can perform `update_requirement` on this resource |
 
-### `RequirementStatesCount` {#requirementstatescount}
+### `RequirementStatesCount`
 
 Counts of requirements by their state.
 
@@ -10971,7 +10974,7 @@ Counts of requirements by their state.
 | `archived` | [`Int`](#int) | Number of archived requirements. |
 | `opened` | [`Int`](#int) | Number of opened requirements. |
 
-### `RevertVulnerabilityToDetectedPayload` {#revertvulnerabilitytodetectedpayload}
+### `RevertVulnerabilityToDetectedPayload`
 
 Autogenerated return type of RevertVulnerabilityToDetected.
 
@@ -10983,7 +10986,7 @@ Autogenerated return type of RevertVulnerabilityToDetected.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after revert. |
 
-### `RootStorageStatistics` {#rootstoragestatistics}
+### `RootStorageStatistics`
 
 #### fields
 
@@ -10999,7 +11002,7 @@ Autogenerated return type of RevertVulnerabilityToDetected.
 | `uploadsSize` | [`Float!`](#float) | The uploads size in bytes. |
 | `wikiSize` | [`Float!`](#float) | The wiki size in bytes. |
 
-### `RunDASTScanPayload` {#rundastscanpayload}
+### `RunDASTScanPayload`
 
 Autogenerated return type of RunDASTScan.
 
@@ -11011,7 +11014,7 @@ Autogenerated return type of RunDASTScan.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
 
-### `RunnerArchitecture` {#runnerarchitecture}
+### `RunnerArchitecture`
 
 #### fields
 
@@ -11020,7 +11023,7 @@ Autogenerated return type of RunDASTScan.
 | `downloadLocation` | [`String!`](#string) | Download location for the runner for the platform architecture. |
 | `name` | [`String!`](#string) | Name of the runner platform architecture. |
 
-### `RunnerArchitectureConnection` {#runnerarchitectureconnection}
+### `RunnerArchitectureConnection`
 
 The connection type for RunnerArchitecture.
 
@@ -11032,7 +11035,7 @@ The connection type for RunnerArchitecture.
 | `nodes` | [`[RunnerArchitecture]`](#runnerarchitecture) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `RunnerArchitectureEdge` {#runnerarchitectureedge}
+### `RunnerArchitectureEdge`
 
 An edge in a connection.
 
@@ -11043,7 +11046,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`RunnerArchitecture`](#runnerarchitecture) | The item at the end of the edge. |
 
-### `RunnerPlatform` {#runnerplatform}
+### `RunnerPlatform`
 
 #### fields
 
@@ -11054,7 +11057,7 @@ An edge in a connection.
 
 #### fields with arguments
 
-##### `architectures` {#RunnerPlatform_architectures}
+##### `architectures`RunnerPlatform_architectures
 
 Runner architectures supported for the platform.
 
@@ -11069,7 +11072,7 @@ Returns [`RunnerArchitectureConnection`](#runnerarchitectureconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `RunnerPlatformConnection` {#runnerplatformconnection}
+### `RunnerPlatformConnection`
 
 The connection type for RunnerPlatform.
 
@@ -11081,7 +11084,7 @@ The connection type for RunnerPlatform.
 | `nodes` | [`[RunnerPlatform]`](#runnerplatform) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `RunnerPlatformEdge` {#runnerplatformedge}
+### `RunnerPlatformEdge`
 
 An edge in a connection.
 
@@ -11092,7 +11095,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`RunnerPlatform`](#runnerplatform) | The item at the end of the edge. |
 
-### `RunnerSetup` {#runnersetup}
+### `RunnerSetup`
 
 #### fields
 
@@ -11101,13 +11104,13 @@ An edge in a connection.
 | `installInstructions` | [`String!`](#string) | Instructions for installing the runner on the specified architecture. |
 | `registerInstructions` | [`String`](#string) | Instructions for registering the runner. |
 
-### `SastCiConfiguration` {#sastciconfiguration}
+### `SastCiConfiguration`
 
 Represents a CI configuration of SAST.
 
 #### fields with arguments
 
-##### `analyzers` {#SastCiConfiguration_analyzers}
+##### `analyzers`SastCiConfiguration_analyzers
 
 List of analyzers entities attached to SAST configuration.
 
@@ -11122,7 +11125,7 @@ Returns [`SastCiConfigurationAnalyzersEntityConnection`](#sastciconfigurationana
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `global` {#SastCiConfiguration_global}
+##### `global`SastCiConfiguration_global
 
 List of global entities related to SAST configuration.
 
@@ -11137,7 +11140,7 @@ Returns [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnec
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `pipeline` {#SastCiConfiguration_pipeline}
+##### `pipeline`SastCiConfiguration_pipeline
 
 List of pipeline entities related to SAST configuration.
 
@@ -11152,7 +11155,7 @@ Returns [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnec
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `SastCiConfigurationAnalyzersEntity` {#sastciconfigurationanalyzersentity}
+### `SastCiConfigurationAnalyzersEntity`
 
 Represents an analyzer entity in SAST CI configuration.
 
@@ -11167,7 +11170,7 @@ Represents an analyzer entity in SAST CI configuration.
 
 #### fields with arguments
 
-##### `variables` {#SastCiConfigurationAnalyzersEntity_variables}
+##### `variables`SastCiConfigurationAnalyzersEntity_variables
 
 List of supported variables.
 
@@ -11182,7 +11185,7 @@ Returns [`SastCiConfigurationEntityConnection`](#sastciconfigurationentityconnec
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `SastCiConfigurationAnalyzersEntityConnection` {#sastciconfigurationanalyzersentityconnection}
+### `SastCiConfigurationAnalyzersEntityConnection`
 
 The connection type for SastCiConfigurationAnalyzersEntity.
 
@@ -11194,7 +11197,7 @@ The connection type for SastCiConfigurationAnalyzersEntity.
 | `nodes` | [`[SastCiConfigurationAnalyzersEntity]`](#sastciconfigurationanalyzersentity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SastCiConfigurationAnalyzersEntityEdge` {#sastciconfigurationanalyzersentityedge}
+### `SastCiConfigurationAnalyzersEntityEdge`
 
 An edge in a connection.
 
@@ -11205,7 +11208,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SastCiConfigurationAnalyzersEntity`](#sastciconfigurationanalyzersentity) | The item at the end of the edge. |
 
-### `SastCiConfigurationEntity` {#sastciconfigurationentity}
+### `SastCiConfigurationEntity`
 
 Represents an entity in SAST CI configuration.
 
@@ -11223,7 +11226,7 @@ Represents an entity in SAST CI configuration.
 
 #### fields with arguments
 
-##### `options` {#SastCiConfigurationEntity_options}
+##### `options`SastCiConfigurationEntity_options
 
 Different possible values of the field.
 
@@ -11238,7 +11241,7 @@ Returns [`SastCiConfigurationOptionsEntityConnection`](#sastciconfigurationoptio
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `SastCiConfigurationEntityConnection` {#sastciconfigurationentityconnection}
+### `SastCiConfigurationEntityConnection`
 
 The connection type for SastCiConfigurationEntity.
 
@@ -11250,7 +11253,7 @@ The connection type for SastCiConfigurationEntity.
 | `nodes` | [`[SastCiConfigurationEntity]`](#sastciconfigurationentity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SastCiConfigurationEntityEdge` {#sastciconfigurationentityedge}
+### `SastCiConfigurationEntityEdge`
 
 An edge in a connection.
 
@@ -11261,7 +11264,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SastCiConfigurationEntity`](#sastciconfigurationentity) | The item at the end of the edge. |
 
-### `SastCiConfigurationOptionsEntity` {#sastciconfigurationoptionsentity}
+### `SastCiConfigurationOptionsEntity`
 
 Represents an entity for options in SAST CI configuration.
 
@@ -11272,7 +11275,7 @@ Represents an entity for options in SAST CI configuration.
 | `label` | [`String`](#string) | Label of option entity. |
 | `value` | [`String`](#string) | Value of option entity. |
 
-### `SastCiConfigurationOptionsEntityConnection` {#sastciconfigurationoptionsentityconnection}
+### `SastCiConfigurationOptionsEntityConnection`
 
 The connection type for SastCiConfigurationOptionsEntity.
 
@@ -11284,7 +11287,7 @@ The connection type for SastCiConfigurationOptionsEntity.
 | `nodes` | [`[SastCiConfigurationOptionsEntity]`](#sastciconfigurationoptionsentity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SastCiConfigurationOptionsEntityEdge` {#sastciconfigurationoptionsentityedge}
+### `SastCiConfigurationOptionsEntityEdge`
 
 An edge in a connection.
 
@@ -11295,7 +11298,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SastCiConfigurationOptionsEntity`](#sastciconfigurationoptionsentity) | The item at the end of the edge. |
 
-### `ScannedResource` {#scannedresource}
+### `ScannedResource`
 
 Represents a resource scanned by a security scan.
 
@@ -11306,7 +11309,7 @@ Represents a resource scanned by a security scan.
 | `requestMethod` | [`String`](#string) | The HTTP request method used to access the URL. |
 | `url` | [`String`](#string) | The URL scanned by the scanner. |
 
-### `ScannedResourceConnection` {#scannedresourceconnection}
+### `ScannedResourceConnection`
 
 The connection type for ScannedResource.
 
@@ -11318,7 +11321,7 @@ The connection type for ScannedResource.
 | `nodes` | [`[ScannedResource]`](#scannedresource) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ScannedResourceEdge` {#scannedresourceedge}
+### `ScannedResourceEdge`
 
 An edge in a connection.
 
@@ -11329,7 +11332,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`ScannedResource`](#scannedresource) | The item at the end of the edge. |
 
-### `SecurityReportSummary` {#securityreportsummary}
+### `SecurityReportSummary`
 
 Represents summary of a security report.
 
@@ -11345,7 +11348,7 @@ Represents summary of a security report.
 | `sast` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `sast` scan |
 | `secretDetection` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `secret_detection` scan |
 
-### `SecurityReportSummarySection` {#securityreportsummarysection}
+### `SecurityReportSummarySection`
 
 Represents a section of a summary of a security report.
 
@@ -11359,7 +11362,7 @@ Represents a section of a summary of a security report.
 
 #### fields with arguments
 
-##### `scannedResources` {#SecurityReportSummarySection_scannedResources}
+##### `scannedResources`SecurityReportSummarySection_scannedResources
 
 A list of the first 20 scanned resources.
 
@@ -11374,7 +11377,7 @@ Returns [`ScannedResourceConnection`](#scannedresourceconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `SecurityScanners` {#securityscanners}
+### `SecurityScanners`
 
 Represents a list of security scanners.
 
@@ -11386,7 +11389,7 @@ Represents a list of security scanners.
 | `enabled` | [`[SecurityScannerType!]`](#securityscannertype) | List of analyzers which are enabled for the project. |
 | `pipelineRun` | [`[SecurityScannerType!]`](#securityscannertype) | List of analyzers which ran successfully in the latest pipeline. |
 
-### `SentryDetailedError` {#sentrydetailederror}
+### `SentryDetailedError`
 
 A Sentry error.
 
@@ -11423,7 +11426,7 @@ A Sentry error.
 | `type` | [`String!`](#string) | Type of the error. |
 | `userCount` | [`Int!`](#int) | Count of users affected by the error. |
 
-### `SentryError` {#sentryerror}
+### `SentryError`
 
 A Sentry error. A simplified version of SentryDetailedError.
 
@@ -11449,7 +11452,7 @@ A Sentry error. A simplified version of SentryDetailedError.
 | `type` | [`String!`](#string) | Type of the error. |
 | `userCount` | [`Int!`](#int) | Count of users affected by the error. |
 
-### `SentryErrorCollection` {#sentryerrorcollection}
+### `SentryErrorCollection`
 
 An object containing a collection of Sentry errors, and a detailed error.
 
@@ -11461,7 +11464,7 @@ An object containing a collection of Sentry errors, and a detailed error.
 
 #### fields with arguments
 
-##### `detailedError` {#SentryErrorCollection_detailedError}
+##### `detailedError`SentryErrorCollection_detailedError
 
 Detailed version of a Sentry error on the project.
 
@@ -11473,7 +11476,7 @@ Returns [`SentryDetailedError`](#sentrydetailederror)
 | ---- | ---- | ----------- |
 | `id` | [`GitlabErrorTrackingDetailedErrorID!`](#gitlaberrortrackingdetailederrorid) | ID of the Sentry issue. |
 
-##### `errorStackTrace` {#SentryErrorCollection_errorStackTrace}
+##### `errorStackTrace`SentryErrorCollection_errorStackTrace
 
 Stack Trace of Sentry Error.
 
@@ -11485,7 +11488,7 @@ Returns [`SentryErrorStackTrace`](#sentryerrorstacktrace)
 | ---- | ---- | ----------- |
 | `id` | [`GitlabErrorTrackingDetailedErrorID!`](#gitlaberrortrackingdetailederrorid) | ID of the Sentry issue. |
 
-##### `errors` {#SentryErrorCollection_errors}
+##### `errors`SentryErrorCollection_errors
 
 Collection of Sentry Errors.
 
@@ -11502,7 +11505,7 @@ Returns [`SentryErrorConnection`](#sentryerrorconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `SentryErrorConnection` {#sentryerrorconnection}
+### `SentryErrorConnection`
 
 The connection type for SentryError.
 
@@ -11514,7 +11517,7 @@ The connection type for SentryError.
 | `nodes` | [`[SentryError]`](#sentryerror) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SentryErrorEdge` {#sentryerroredge}
+### `SentryErrorEdge`
 
 An edge in a connection.
 
@@ -11525,7 +11528,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SentryError`](#sentryerror) | The item at the end of the edge. |
 
-### `SentryErrorFrequency` {#sentryerrorfrequency}
+### `SentryErrorFrequency`
 
 #### fields
 
@@ -11534,7 +11537,7 @@ An edge in a connection.
 | `count` | [`Int!`](#int) | Count of errors received since the previously recorded time. |
 | `time` | [`Time!`](#time) | Time the error frequency stats were recorded. |
 
-### `SentryErrorStackTrace` {#sentryerrorstacktrace}
+### `SentryErrorStackTrace`
 
 An object containing a stack trace entry for a Sentry error.
 
@@ -11546,7 +11549,7 @@ An object containing a stack trace entry for a Sentry error.
 | `issueId` | [`String!`](#string) | ID of the Sentry error. |
 | `stackTraceEntries` | [`[SentryErrorStackTraceEntry!]!`](#sentryerrorstacktraceentry) | Stack trace entries for the Sentry error. |
 
-### `SentryErrorStackTraceContext` {#sentryerrorstacktracecontext}
+### `SentryErrorStackTraceContext`
 
 An object context for a Sentry error stack trace.
 
@@ -11557,7 +11560,7 @@ An object context for a Sentry error stack trace.
 | `code` | [`String!`](#string) | Code number of the context. |
 | `line` | [`Int!`](#int) | Line number of the context. |
 
-### `SentryErrorStackTraceEntry` {#sentryerrorstacktraceentry}
+### `SentryErrorStackTraceEntry`
 
 An object containing a stack trace entry for a Sentry error.
 
@@ -11571,7 +11574,7 @@ An object containing a stack trace entry for a Sentry error.
 | `line` | [`String`](#string) | Function in which the Sentry error occurred. |
 | `traceContext` | [`[SentryErrorStackTraceContext!]`](#sentryerrorstacktracecontext) | Context of the Sentry error. |
 
-### `SentryErrorTags` {#sentryerrortags}
+### `SentryErrorTags`
 
 State of a Sentry error.
 
@@ -11582,7 +11585,7 @@ State of a Sentry error.
 | `level` | [`String`](#string) | Severity level of the Sentry Error. |
 | `logger` | [`String`](#string) | Logger of the Sentry Error. |
 
-### `ServiceConnection` {#serviceconnection}
+### `ServiceConnection`
 
 The connection type for Service.
 
@@ -11594,7 +11597,7 @@ The connection type for Service.
 | `nodes` | [`[Service]`](#service) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `ServiceEdge` {#serviceedge}
+### `ServiceEdge`
 
 An edge in a connection.
 
@@ -11605,7 +11608,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Service`](#service) | The item at the end of the edge. |
 
-### `Snippet` {#snippet}
+### `Snippet`
 
 Represents a snippet entry.
 
@@ -11632,7 +11635,7 @@ Represents a snippet entry.
 
 #### fields with arguments
 
-##### `blobs` {#Snippet_blobs}
+##### `blobs`Snippet_blobs
 
 Snippet blobs.
 
@@ -11648,7 +11651,7 @@ Returns [`SnippetBlobConnection`](#snippetblobconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `discussions` {#Snippet_discussions}
+##### `discussions`Snippet_discussions
 
 All discussions on this noteable.
 
@@ -11663,7 +11666,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#Snippet_notes}
+##### `notes`Snippet_notes
 
 All notes on this noteable.
 
@@ -11678,7 +11681,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `SnippetBlob` {#snippetblob}
+### `SnippetBlob`
 
 Represents the snippet blob.
 
@@ -11699,7 +11702,7 @@ Represents the snippet blob.
 | `simpleViewer` | [`SnippetBlobViewer!`](#snippetblobviewer) | Blob content simple viewer. |
 | `size` | [`Int!`](#int) | Blob size. |
 
-### `SnippetBlobConnection` {#snippetblobconnection}
+### `SnippetBlobConnection`
 
 The connection type for SnippetBlob.
 
@@ -11711,7 +11714,7 @@ The connection type for SnippetBlob.
 | `nodes` | [`[SnippetBlob]`](#snippetblob) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SnippetBlobEdge` {#snippetblobedge}
+### `SnippetBlobEdge`
 
 An edge in a connection.
 
@@ -11722,7 +11725,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SnippetBlob`](#snippetblob) | The item at the end of the edge. |
 
-### `SnippetBlobViewer` {#snippetblobviewer}
+### `SnippetBlobViewer`
 
 Represents how the blob content should be displayed.
 
@@ -11738,7 +11741,7 @@ Represents how the blob content should be displayed.
 | `tooLarge` | [`Boolean!`](#boolean) | Shows whether the blob too large to be displayed. |
 | `type` | [`BlobViewersType!`](#blobviewerstype) | Type of blob viewer. |
 
-### `SnippetConnection` {#snippetconnection}
+### `SnippetConnection`
 
 The connection type for Snippet.
 
@@ -11750,7 +11753,7 @@ The connection type for Snippet.
 | `nodes` | [`[Snippet]`](#snippet) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SnippetEdge` {#snippetedge}
+### `SnippetEdge`
 
 An edge in a connection.
 
@@ -11761,7 +11764,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Snippet`](#snippet) | The item at the end of the edge. |
 
-### `SnippetPermissions` {#snippetpermissions}
+### `SnippetPermissions`
 
 #### fields
 
@@ -11774,7 +11777,7 @@ An edge in a connection.
 | `reportSnippet` | [`Boolean!`](#boolean) | Indicates the user can perform `report_snippet` on this resource |
 | `updateSnippet` | [`Boolean!`](#boolean) | Indicates the user can perform `update_snippet` on this resource |
 
-### `SnippetRepositoryRegistry` {#snippetrepositoryregistry}
+### `SnippetRepositoryRegistry`
 
 Represents the Geo sync and verification state of a snippet repository.
 
@@ -11791,7 +11794,7 @@ Represents the Geo sync and verification state of a snippet repository.
 | `snippetRepositoryId` | [`ID!`](#id) | ID of the Snippet Repository. |
 | `state` | [`RegistryState`](#registrystate) | Sync state of the SnippetRepositoryRegistry |
 
-### `SnippetRepositoryRegistryConnection` {#snippetrepositoryregistryconnection}
+### `SnippetRepositoryRegistryConnection`
 
 The connection type for SnippetRepositoryRegistry.
 
@@ -11803,7 +11806,7 @@ The connection type for SnippetRepositoryRegistry.
 | `nodes` | [`[SnippetRepositoryRegistry]`](#snippetrepositoryregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SnippetRepositoryRegistryEdge` {#snippetrepositoryregistryedge}
+### `SnippetRepositoryRegistryEdge`
 
 An edge in a connection.
 
@@ -11814,7 +11817,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`SnippetRepositoryRegistry`](#snippetrepositoryregistry) | The item at the end of the edge. |
 
-### `StatusAction` {#statusaction}
+### `StatusAction`
 
 #### fields
 
@@ -11826,7 +11829,7 @@ An edge in a connection.
 | `path` | [`String`](#string) | Path for the action. |
 | `title` | [`String`](#string) | Title for the action, for example: Retry. |
 
-### `Submodule` {#submodule}
+### `Submodule`
 
 #### fields
 
@@ -11841,7 +11844,7 @@ An edge in a connection.
 | `type` | [`EntryType!`](#entrytype) | Type of tree entry. |
 | `webUrl` | [`String`](#string) | Web URL for the sub-module. |
 
-### `SubmoduleConnection` {#submoduleconnection}
+### `SubmoduleConnection`
 
 The connection type for Submodule.
 
@@ -11853,7 +11856,7 @@ The connection type for Submodule.
 | `nodes` | [`[Submodule]`](#submodule) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `SubmoduleEdge` {#submoduleedge}
+### `SubmoduleEdge`
 
 An edge in a connection.
 
@@ -11864,7 +11867,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Submodule`](#submodule) | The item at the end of the edge. |
 
-### `TaskCompletionStatus` {#taskcompletionstatus}
+### `TaskCompletionStatus`
 
 Completion status of tasks.
 
@@ -11875,7 +11878,7 @@ Completion status of tasks.
 | `completedCount` | [`Int!`](#int) | Number of completed tasks. |
 | `count` | [`Int!`](#int) | Number of total tasks. |
 
-### `TerraformState` {#terraformstate}
+### `TerraformState`
 
 #### fields
 
@@ -11889,7 +11892,7 @@ Completion status of tasks.
 | `name` | [`String!`](#string) | Name of the Terraform state. |
 | `updatedAt` | [`Time!`](#time) | Timestamp the Terraform state was updated. |
 
-### `TerraformStateConnection` {#terraformstateconnection}
+### `TerraformStateConnection`
 
 The connection type for TerraformState.
 
@@ -11902,7 +11905,7 @@ The connection type for TerraformState.
 | `nodes` | [`[TerraformState]`](#terraformstate) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `TerraformStateDeletePayload` {#terraformstatedeletepayload}
+### `TerraformStateDeletePayload`
 
 Autogenerated return type of TerraformStateDelete.
 
@@ -11913,7 +11916,7 @@ Autogenerated return type of TerraformStateDelete.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `TerraformStateEdge` {#terraformstateedge}
+### `TerraformStateEdge`
 
 An edge in a connection.
 
@@ -11924,7 +11927,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TerraformState`](#terraformstate) | The item at the end of the edge. |
 
-### `TerraformStateLockPayload` {#terraformstatelockpayload}
+### `TerraformStateLockPayload`
 
 Autogenerated return type of TerraformStateLock.
 
@@ -11935,7 +11938,7 @@ Autogenerated return type of TerraformStateLock.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `TerraformStateUnlockPayload` {#terraformstateunlockpayload}
+### `TerraformStateUnlockPayload`
 
 Autogenerated return type of TerraformStateUnlock.
 
@@ -11946,7 +11949,7 @@ Autogenerated return type of TerraformStateUnlock.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `TerraformStateVersion` {#terraformstateversion}
+### `TerraformStateVersion`
 
 #### fields
 
@@ -11960,7 +11963,7 @@ Autogenerated return type of TerraformStateUnlock.
 | `serial` | [`Int`](#int) | Serial number of the version. |
 | `updatedAt` | [`Time!`](#time) | Timestamp the version was updated. |
 
-### `TerraformStateVersionRegistry` {#terraformstateversionregistry}
+### `TerraformStateVersionRegistry`
 
 Represents the Geo sync and verification state of a terraform state version.
 
@@ -11977,7 +11980,7 @@ Represents the Geo sync and verification state of a terraform state version.
 | `state` | [`RegistryState`](#registrystate) | Sync state of the TerraformStateVersionRegistry |
 | `terraformStateVersionId` | [`ID!`](#id) | ID of the terraform state version. |
 
-### `TerraformStateVersionRegistryConnection` {#terraformstateversionregistryconnection}
+### `TerraformStateVersionRegistryConnection`
 
 The connection type for TerraformStateVersionRegistry.
 
@@ -11989,7 +11992,7 @@ The connection type for TerraformStateVersionRegistry.
 | `nodes` | [`[TerraformStateVersionRegistry]`](#terraformstateversionregistry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `TerraformStateVersionRegistryEdge` {#terraformstateversionregistryedge}
+### `TerraformStateVersionRegistryEdge`
 
 An edge in a connection.
 
@@ -12000,7 +12003,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TerraformStateVersionRegistry`](#terraformstateversionregistry) | The item at the end of the edge. |
 
-### `TestReport` {#testreport}
+### `TestReport`
 
 Represents a requirement test report.
 
@@ -12013,7 +12016,7 @@ Represents a requirement test report.
 | `id` | [`ID!`](#id) | ID of the test report. |
 | `state` | [`TestReportState!`](#testreportstate) | State of the test report. |
 
-### `TestReportConnection` {#testreportconnection}
+### `TestReportConnection`
 
 The connection type for TestReport.
 
@@ -12025,7 +12028,7 @@ The connection type for TestReport.
 | `nodes` | [`[TestReport]`](#testreport) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `TestReportEdge` {#testreportedge}
+### `TestReportEdge`
 
 An edge in a connection.
 
@@ -12036,7 +12039,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TestReport`](#testreport) | The item at the end of the edge. |
 
-### `TimeReportStats` {#timereportstats}
+### `TimeReportStats`
 
 Represents the time report stats for timeboxes.
 
@@ -12048,7 +12051,7 @@ Represents the time report stats for timeboxes.
 | `incomplete` | [`TimeboxMetrics`](#timeboxmetrics) | Incomplete issues metrics. |
 | `total` | [`TimeboxMetrics`](#timeboxmetrics) | Total issues metrics. |
 
-### `TimeboxMetrics` {#timeboxmetrics}
+### `TimeboxMetrics`
 
 Represents measured stats metrics for timeboxes.
 
@@ -12059,7 +12062,7 @@ Represents measured stats metrics for timeboxes.
 | `count` | [`Int!`](#int) | The count metric. |
 | `weight` | [`Int!`](#int) | The weight metric. |
 
-### `TimeboxReport` {#timeboxreport}
+### `TimeboxReport`
 
 Represents a historically accurate report about the timebox.
 
@@ -12070,7 +12073,7 @@ Represents a historically accurate report about the timebox.
 | `burnupTimeSeries` | [`[BurnupChartDailyTotals!]`](#burnupchartdailytotals) | Daily scope and completed totals for burnup charts. |
 | `stats` | [`TimeReportStats`](#timereportstats) | Represents the time report stats for the timebox. |
 
-### `Timelog` {#timelog}
+### `Timelog`
 
 #### fields
 
@@ -12082,7 +12085,7 @@ Represents a historically accurate report about the timebox.
 | `timeSpent` | [`Int!`](#int) | The time spent displayed in seconds. |
 | `user` | [`User!`](#user) | The user that logged the time. |
 
-### `TimelogConnection` {#timelogconnection}
+### `TimelogConnection`
 
 The connection type for Timelog.
 
@@ -12094,7 +12097,7 @@ The connection type for Timelog.
 | `nodes` | [`[Timelog]`](#timelog) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `TimelogEdge` {#timelogedge}
+### `TimelogEdge`
 
 An edge in a connection.
 
@@ -12105,7 +12108,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Timelog`](#timelog) | The item at the end of the edge. |
 
-### `Todo` {#todo}
+### `Todo`
 
 Representing a to-do entry.
 
@@ -12123,7 +12126,7 @@ Representing a to-do entry.
 | `state` | [`TodoStateEnum!`](#todostateenum) | State of the to-do item. |
 | `targetType` | [`TodoTargetEnum!`](#todotargetenum) | Target type of the to-do item. |
 
-### `TodoConnection` {#todoconnection}
+### `TodoConnection`
 
 The connection type for Todo.
 
@@ -12135,7 +12138,7 @@ The connection type for Todo.
 | `nodes` | [`[Todo]`](#todo) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `TodoCreatePayload` {#todocreatepayload}
+### `TodoCreatePayload`
 
 Autogenerated return type of TodoCreate.
 
@@ -12147,7 +12150,7 @@ Autogenerated return type of TodoCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todo` | [`Todo`](#todo) | The to-do item created. |
 
-### `TodoEdge` {#todoedge}
+### `TodoEdge`
 
 An edge in a connection.
 
@@ -12158,7 +12161,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Todo`](#todo) | The item at the end of the edge. |
 
-### `TodoMarkDonePayload` {#todomarkdonepayload}
+### `TodoMarkDonePayload`
 
 Autogenerated return type of TodoMarkDone.
 
@@ -12170,7 +12173,7 @@ Autogenerated return type of TodoMarkDone.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todo` | [`Todo!`](#todo) | The requested to-do item. |
 
-### `TodoRestoreManyPayload` {#todorestoremanypayload}
+### `TodoRestoreManyPayload`
 
 Autogenerated return type of TodoRestoreMany.
 
@@ -12183,7 +12186,7 @@ Autogenerated return type of TodoRestoreMany.
 | `todos` | [`[Todo!]!`](#todo) | Updated to-do items. |
 | `updatedIds` **{warning-solid}** | [`[TodoID!]!`](#todoid) | **Deprecated:** Use to-do items. Deprecated in 13.2. |
 
-### `TodoRestorePayload` {#todorestorepayload}
+### `TodoRestorePayload`
 
 Autogenerated return type of TodoRestore.
 
@@ -12195,7 +12198,7 @@ Autogenerated return type of TodoRestore.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `todo` | [`Todo!`](#todo) | The requested to-do item. |
 
-### `TodosMarkAllDonePayload` {#todosmarkalldonepayload}
+### `TodosMarkAllDonePayload`
 
 Autogenerated return type of TodosMarkAllDone.
 
@@ -12208,7 +12211,7 @@ Autogenerated return type of TodosMarkAllDone.
 | `todos` | [`[Todo!]!`](#todo) | Updated to-do items. |
 | `updatedIds` **{warning-solid}** | [`[TodoID!]!`](#todoid) | **Deprecated:** Use to-do items. Deprecated in 13.2. |
 
-### `ToggleAwardEmojiPayload` {#toggleawardemojipayload}
+### `ToggleAwardEmojiPayload`
 
 Autogenerated return type of ToggleAwardEmoji.
 
@@ -12221,7 +12224,7 @@ Autogenerated return type of ToggleAwardEmoji.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `toggledOn` | [`Boolean!`](#boolean) | Indicates the status of the emoji. True if the toggle awarded the emoji, and false if the toggle removed the emoji. |
 
-### `Tree` {#tree}
+### `Tree`
 
 #### fields
 
@@ -12231,7 +12234,7 @@ Autogenerated return type of ToggleAwardEmoji.
 
 #### fields with arguments
 
-##### `blobs` {#Tree_blobs}
+##### `blobs`Tree_blobs
 
 Blobs of the tree.
 
@@ -12246,7 +12249,7 @@ Returns [`BlobConnection!`](#blobconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `submodules` {#Tree_submodules}
+##### `submodules`Tree_submodules
 
 Sub-modules of the tree.
 
@@ -12261,7 +12264,7 @@ Returns [`SubmoduleConnection!`](#submoduleconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `trees` {#Tree_trees}
+##### `trees`Tree_trees
 
 Trees of the tree.
 
@@ -12276,7 +12279,7 @@ Returns [`TreeEntryConnection!`](#treeentryconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `TreeEntry` {#treeentry}
+### `TreeEntry`
 
 Represents a directory.
 
@@ -12293,7 +12296,7 @@ Represents a directory.
 | `webPath` | [`String`](#string) | Web path for the tree entry (directory). |
 | `webUrl` | [`String`](#string) | Web URL for the tree entry (directory). |
 
-### `TreeEntryConnection` {#treeentryconnection}
+### `TreeEntryConnection`
 
 The connection type for TreeEntry.
 
@@ -12305,7 +12308,7 @@ The connection type for TreeEntry.
 | `nodes` | [`[TreeEntry]`](#treeentry) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `TreeEntryEdge` {#treeentryedge}
+### `TreeEntryEdge`
 
 An edge in a connection.
 
@@ -12316,7 +12319,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`TreeEntry`](#treeentry) | The item at the end of the edge. |
 
-### `UpdateAlertStatusPayload` {#updatealertstatuspayload}
+### `UpdateAlertStatusPayload`
 
 Autogenerated return type of UpdateAlertStatus.
 
@@ -12330,7 +12333,7 @@ Autogenerated return type of UpdateAlertStatus.
 | `issue` | [`Issue`](#issue) | The issue created after mutation. |
 | `todo` | [`Todo`](#todo) | The to-do item after mutation. |
 
-### `UpdateBoardEpicUserPreferencesPayload` {#updateboardepicuserpreferencespayload}
+### `UpdateBoardEpicUserPreferencesPayload`
 
 Autogenerated return type of UpdateBoardEpicUserPreferences.
 
@@ -12342,7 +12345,7 @@ Autogenerated return type of UpdateBoardEpicUserPreferences.
 | `epicUserPreferences` | [`BoardEpicUserPreferences`](#boardepicuserpreferences) | User preferences for the epic in the board after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `UpdateBoardListPayload` {#updateboardlistpayload}
+### `UpdateBoardListPayload`
 
 Autogenerated return type of UpdateBoardList.
 
@@ -12354,7 +12357,7 @@ Autogenerated return type of UpdateBoardList.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `list` | [`BoardList`](#boardlist) | Mutated list. |
 
-### `UpdateBoardPayload` {#updateboardpayload}
+### `UpdateBoardPayload`
 
 Autogenerated return type of UpdateBoard.
 
@@ -12366,7 +12369,7 @@ Autogenerated return type of UpdateBoard.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `UpdateComplianceFrameworkPayload` {#updatecomplianceframeworkpayload}
+### `UpdateComplianceFrameworkPayload`
 
 Autogenerated return type of UpdateComplianceFramework.
 
@@ -12378,7 +12381,7 @@ Autogenerated return type of UpdateComplianceFramework.
 | `complianceFramework` | [`ComplianceFramework`](#complianceframework) | The compliance framework after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `UpdateContainerExpirationPolicyPayload` {#updatecontainerexpirationpolicypayload}
+### `UpdateContainerExpirationPolicyPayload`
 
 Autogenerated return type of UpdateContainerExpirationPolicy.
 
@@ -12390,7 +12393,7 @@ Autogenerated return type of UpdateContainerExpirationPolicy.
 | `containerExpirationPolicy` | [`ContainerExpirationPolicy`](#containerexpirationpolicy) | The container expiration policy after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `UpdateEpicPayload` {#updateepicpayload}
+### `UpdateEpicPayload`
 
 Autogenerated return type of UpdateEpic.
 
@@ -12402,7 +12405,7 @@ Autogenerated return type of UpdateEpic.
 | `epic` | [`Epic`](#epic) | The epic after mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `UpdateImageDiffNotePayload` {#updateimagediffnotepayload}
+### `UpdateImageDiffNotePayload`
 
 Autogenerated return type of UpdateImageDiffNote.
 
@@ -12414,7 +12417,7 @@ Autogenerated return type of UpdateImageDiffNote.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
-### `UpdateIssuePayload` {#updateissuepayload}
+### `UpdateIssuePayload`
 
 Autogenerated return type of UpdateIssue.
 
@@ -12426,7 +12429,7 @@ Autogenerated return type of UpdateIssue.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `issue` | [`Issue`](#issue) | The issue after mutation. |
 
-### `UpdateIterationPayload` {#updateiterationpayload}
+### `UpdateIterationPayload`
 
 Autogenerated return type of UpdateIteration.
 
@@ -12438,7 +12441,7 @@ Autogenerated return type of UpdateIteration.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `iteration` | [`Iteration`](#iteration) | Updated iteration. |
 
-### `UpdateNamespacePackageSettingsPayload` {#updatenamespacepackagesettingspayload}
+### `UpdateNamespacePackageSettingsPayload`
 
 Autogenerated return type of UpdateNamespacePackageSettings.
 
@@ -12450,7 +12453,7 @@ Autogenerated return type of UpdateNamespacePackageSettings.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `packageSettings` | [`PackageSettings`](#packagesettings) | The namespace package setting after mutation. |
 
-### `UpdateNotePayload` {#updatenotepayload}
+### `UpdateNotePayload`
 
 Autogenerated return type of UpdateNote.
 
@@ -12462,7 +12465,7 @@ Autogenerated return type of UpdateNote.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `note` | [`Note`](#note) | The note after mutation. |
 
-### `UpdateRequirementPayload` {#updaterequirementpayload}
+### `UpdateRequirementPayload`
 
 Autogenerated return type of UpdateRequirement.
 
@@ -12474,7 +12477,7 @@ Autogenerated return type of UpdateRequirement.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `requirement` | [`Requirement`](#requirement) | Requirement after mutation. |
 
-### `UpdateSnippetPayload` {#updatesnippetpayload}
+### `UpdateSnippetPayload`
 
 Autogenerated return type of UpdateSnippet.
 
@@ -12490,7 +12493,7 @@ Autogenerated return type of UpdateSnippet.
 | `spam` | [`Boolean`](#boolean) | Indicates whether the operation was detected as definite spam. There is no option to resubmit the request with a CAPTCHA response. |
 | `spamLogId` | [`Int`](#int) | The spam log ID which must be passed along with a valid CAPTCHA response for an operation to be completed. Included only when an operation was not completed because "NeedsCaptchaResponse" is true. |
 
-### `UsageTrendsMeasurement` {#usagetrendsmeasurement}
+### `UsageTrendsMeasurement`
 
 Represents a recorded measurement (object count) for the Admins.
 
@@ -12502,7 +12505,7 @@ Represents a recorded measurement (object count) for the Admins.
 | `identifier` | [`MeasurementIdentifier!`](#measurementidentifier) | The type of objects being measured. |
 | `recordedAt` | [`Time`](#time) | The time the measurement was recorded. |
 
-### `UsageTrendsMeasurementConnection` {#usagetrendsmeasurementconnection}
+### `UsageTrendsMeasurementConnection`
 
 The connection type for UsageTrendsMeasurement.
 
@@ -12514,7 +12517,7 @@ The connection type for UsageTrendsMeasurement.
 | `nodes` | [`[UsageTrendsMeasurement]`](#usagetrendsmeasurement) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `UsageTrendsMeasurementEdge` {#usagetrendsmeasurementedge}
+### `UsageTrendsMeasurementEdge`
 
 An edge in a connection.
 
@@ -12525,7 +12528,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`UsageTrendsMeasurement`](#usagetrendsmeasurement) | The item at the end of the edge. |
 
-### `User` {#user}
+### `User`
 
 Representation of a GitLab user.
 
@@ -12550,7 +12553,7 @@ Representation of a GitLab user.
 
 #### fields with arguments
 
-##### `assignedMergeRequests` {#User_assignedMergeRequests}
+##### `assignedMergeRequests`User_assignedMergeRequests
 
 Merge Requests assigned to the user.
 
@@ -12578,7 +12581,7 @@ Returns [`MergeRequestConnection`](#mergerequestconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `authoredMergeRequests` {#User_authoredMergeRequests}
+##### `authoredMergeRequests`User_authoredMergeRequests
 
 Merge Requests authored by the user.
 
@@ -12606,7 +12609,7 @@ Returns [`MergeRequestConnection`](#mergerequestconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `callouts` {#User_callouts}
+##### `callouts`User_callouts
 
 User callouts that belong to the user.
 
@@ -12621,7 +12624,7 @@ Returns [`UserCalloutConnection`](#usercalloutconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `groupMemberships` {#User_groupMemberships}
+##### `groupMemberships`User_groupMemberships
 
 Group memberships of the user.
 
@@ -12636,7 +12639,7 @@ Returns [`GroupMemberConnection`](#groupmemberconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `projectMemberships` {#User_projectMemberships}
+##### `projectMemberships`User_projectMemberships
 
 Project memberships of the user.
 
@@ -12651,7 +12654,7 @@ Returns [`ProjectMemberConnection`](#projectmemberconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `reviewRequestedMergeRequests` {#User_reviewRequestedMergeRequests}
+##### `reviewRequestedMergeRequests`User_reviewRequestedMergeRequests
 
 Merge Requests assigned to the user for review.
 
@@ -12679,11 +12682,11 @@ Returns [`MergeRequestConnection`](#mergerequestconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `snippets` {#User_snippets}
+##### `snippets`User_snippets
 
 Snippets authored by the user.
 
-Returns [`SnippetConnection`](#snippetconnection)
+Returns [`SnippetConnection!`](#snippetconnection)
 
 ###### arguments
 
@@ -12697,7 +12700,7 @@ Returns [`SnippetConnection`](#snippetconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `starredProjects` {#User_starredProjects}
+##### `starredProjects`User_starredProjects
 
 Projects starred by the user.
 
@@ -12713,11 +12716,11 @@ Returns [`ProjectConnection`](#projectconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `todos` {#User_todos}
+##### `todos`User_todos
 
 To-do items of the user.
 
-Returns [`TodoConnection!`](#todoconnection)
+Returns [`TodoConnection`](#todoconnection)
 
 ###### arguments
 
@@ -12734,7 +12737,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `UserCallout` {#usercallout}
+### `UserCallout`
 
 #### fields
 
@@ -12743,7 +12746,7 @@ Returns [`TodoConnection!`](#todoconnection)
 | `dismissedAt` | [`Time`](#time) | Date when the callout was dismissed. |
 | `featureName` | [`UserCalloutFeatureNameEnum!`](#usercalloutfeaturenameenum) | Name of the feature that the callout is for. |
 
-### `UserCalloutConnection` {#usercalloutconnection}
+### `UserCalloutConnection`
 
 The connection type for UserCallout.
 
@@ -12755,7 +12758,7 @@ The connection type for UserCallout.
 | `nodes` | [`[UserCallout]`](#usercallout) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `UserCalloutCreatePayload` {#usercalloutcreatepayload}
+### `UserCalloutCreatePayload`
 
 Autogenerated return type of UserCalloutCreate.
 
@@ -12767,7 +12770,7 @@ Autogenerated return type of UserCalloutCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `userCallout` | [`UserCallout!`](#usercallout) | The user callout dismissed. |
 
-### `UserCalloutEdge` {#usercalloutedge}
+### `UserCalloutEdge`
 
 An edge in a connection.
 
@@ -12778,7 +12781,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`UserCallout`](#usercallout) | The item at the end of the edge. |
 
-### `UserConnection` {#userconnection}
+### `UserConnection`
 
 The connection type for User.
 
@@ -12790,7 +12793,7 @@ The connection type for User.
 | `nodes` | [`[User]`](#user) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `UserEdge` {#useredge}
+### `UserEdge`
 
 An edge in a connection.
 
@@ -12801,7 +12804,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`User`](#user) | The item at the end of the edge. |
 
-### `UserPermissions` {#userpermissions}
+### `UserPermissions`
 
 #### fields
 
@@ -12809,7 +12812,7 @@ An edge in a connection.
 | ---- | ---- | ----------- |
 | `createSnippet` | [`Boolean!`](#boolean) | Indicates the user can perform `create_snippet` on this resource |
 
-### `UserStatus` {#userstatus}
+### `UserStatus`
 
 #### fields
 
@@ -12820,7 +12823,7 @@ An edge in a connection.
 | `message` | [`String`](#string) | User status message. |
 | `messageHtml` | [`String`](#string) | HTML of the user status message |
 
-### `VulnerabilitiesCountByDay` {#vulnerabilitiescountbyday}
+### `VulnerabilitiesCountByDay`
 
 Represents the count of vulnerabilities by severity on a particular day. This data is retained for 365 days.
 
@@ -12837,7 +12840,7 @@ Represents the count of vulnerabilities by severity on a particular day. This da
 | `total` | [`Int!`](#int) | Total number of vulnerabilities on a particular day. |
 | `unknown` | [`Int!`](#int) | Total number of vulnerabilities on a particular day with unknown severity |
 
-### `VulnerabilitiesCountByDayAndSeverity` {#vulnerabilitiescountbydayandseverity}
+### `VulnerabilitiesCountByDayAndSeverity`
 
 Represents the number of vulnerabilities for a particular severity on a particular day. This data is retained for 365 days.
 
@@ -12849,7 +12852,7 @@ Represents the number of vulnerabilities for a particular severity on a particul
 | `day` | [`ISO8601Date`](#iso8601date) | Date for the count. |
 | `severity` | [`VulnerabilitySeverity`](#vulnerabilityseverity) | Severity of the counted vulnerabilities. |
 
-### `VulnerabilitiesCountByDayAndSeverityConnection` {#vulnerabilitiescountbydayandseverityconnection}
+### `VulnerabilitiesCountByDayAndSeverityConnection`
 
 The connection type for VulnerabilitiesCountByDayAndSeverity.
 
@@ -12861,7 +12864,7 @@ The connection type for VulnerabilitiesCountByDayAndSeverity.
 | `nodes` | [`[VulnerabilitiesCountByDayAndSeverity]`](#vulnerabilitiescountbydayandseverity) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `VulnerabilitiesCountByDayAndSeverityEdge` {#vulnerabilitiescountbydayandseverityedge}
+### `VulnerabilitiesCountByDayAndSeverityEdge`
 
 An edge in a connection.
 
@@ -12872,7 +12875,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilitiesCountByDayAndSeverity`](#vulnerabilitiescountbydayandseverity) | The item at the end of the edge. |
 
-### `VulnerabilitiesCountByDayConnection` {#vulnerabilitiescountbydayconnection}
+### `VulnerabilitiesCountByDayConnection`
 
 The connection type for VulnerabilitiesCountByDay.
 
@@ -12884,7 +12887,7 @@ The connection type for VulnerabilitiesCountByDay.
 | `nodes` | [`[VulnerabilitiesCountByDay]`](#vulnerabilitiescountbyday) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `VulnerabilitiesCountByDayEdge` {#vulnerabilitiescountbydayedge}
+### `VulnerabilitiesCountByDayEdge`
 
 An edge in a connection.
 
@@ -12895,7 +12898,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilitiesCountByDay`](#vulnerabilitiescountbyday) | The item at the end of the edge. |
 
-### `Vulnerability` {#vulnerability}
+### `Vulnerability`
 
 Represents a vulnerability.
 
@@ -12931,7 +12934,7 @@ Represents a vulnerability.
 
 #### fields with arguments
 
-##### `discussions` {#Vulnerability_discussions}
+##### `discussions`Vulnerability_discussions
 
 All discussions on this noteable.
 
@@ -12946,7 +12949,7 @@ Returns [`DiscussionConnection!`](#discussionconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `externalIssueLinks` {#Vulnerability_externalIssueLinks}
+##### `externalIssueLinks`Vulnerability_externalIssueLinks
 
 List of external issue links related to the vulnerability.
 
@@ -12961,7 +12964,7 @@ Returns [`VulnerabilityExternalIssueLinkConnection!`](#vulnerabilityexternalissu
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `issueLinks` {#Vulnerability_issueLinks}
+##### `issueLinks`Vulnerability_issueLinks
 
 List of issue links related to the vulnerability.
 
@@ -12977,7 +12980,7 @@ Returns [`VulnerabilityIssueLinkConnection!`](#vulnerabilityissuelinkconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-##### `notes` {#Vulnerability_notes}
+##### `notes`Vulnerability_notes
 
 All notes on this noteable.
 
@@ -12992,7 +12995,7 @@ Returns [`NoteConnection!`](#noteconnection)
 | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
 | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
 
-### `VulnerabilityConfirmPayload` {#vulnerabilityconfirmpayload}
+### `VulnerabilityConfirmPayload`
 
 Autogenerated return type of VulnerabilityConfirm.
 
@@ -13004,7 +13007,7 @@ Autogenerated return type of VulnerabilityConfirm.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after state change. |
 
-### `VulnerabilityConnection` {#vulnerabilityconnection}
+### `VulnerabilityConnection`
 
 The connection type for Vulnerability.
 
@@ -13016,7 +13019,7 @@ The connection type for Vulnerability.
 | `nodes` | [`[Vulnerability]`](#vulnerability) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `VulnerabilityDetailBase` {#vulnerabilitydetailbase}
+### `VulnerabilityDetailBase`
 
 Represents the vulnerability details base.
 
@@ -13028,7 +13031,7 @@ Represents the vulnerability details base.
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
 
-### `VulnerabilityDetailBoolean` {#vulnerabilitydetailboolean}
+### `VulnerabilityDetailBoolean`
 
 Represents the vulnerability details boolean value.
 
@@ -13041,7 +13044,7 @@ Represents the vulnerability details boolean value.
 | `name` | [`String`](#string) | Name of the field. |
 | `value` | [`Boolean!`](#boolean) | Value of the field. |
 
-### `VulnerabilityDetailCode` {#vulnerabilitydetailcode}
+### `VulnerabilityDetailCode`
 
 Represents the vulnerability details code field.
 
@@ -13055,7 +13058,7 @@ Represents the vulnerability details code field.
 | `name` | [`String`](#string) | Name of the field. |
 | `value` | [`String!`](#string) | Source code. |
 
-### `VulnerabilityDetailCommit` {#vulnerabilitydetailcommit}
+### `VulnerabilityDetailCommit`
 
 Represents the vulnerability details commit field.
 
@@ -13068,7 +13071,7 @@ Represents the vulnerability details commit field.
 | `name` | [`String`](#string) | Name of the field. |
 | `value` | [`String!`](#string) | The commit SHA value. |
 
-### `VulnerabilityDetailDiff` {#vulnerabilitydetaildiff}
+### `VulnerabilityDetailDiff`
 
 Represents the vulnerability details diff field.
 
@@ -13082,7 +13085,7 @@ Represents the vulnerability details diff field.
 | `fieldName` | [`String`](#string) | Name of the field. |
 | `name` | [`String`](#string) | Name of the field. |
 
-### `VulnerabilityDetailFileLocation` {#vulnerabilitydetailfilelocation}
+### `VulnerabilityDetailFileLocation`
 
 Represents the vulnerability details location within a file in the project.
 
@@ -13097,7 +13100,7 @@ Represents the vulnerability details location within a file in the project.
 | `lineStart` | [`Int!`](#int) | Start line number of the file location. |
 | `name` | [`String`](#string) | Name of the field. |
 
-### `VulnerabilityDetailInt` {#vulnerabilitydetailint}
+### `VulnerabilityDetailInt`
 
 Represents the vulnerability details integer value.
 
@@ -13110,7 +13113,7 @@ Represents the vulnerability details integer value.
 | `name` | [`String`](#string) | Name of the field. |
 | `value` | [`Int!`](#int) | Value of the field. |
 
-### `VulnerabilityDetailList` {#vulnerabilitydetaillist}
+### `VulnerabilityDetailList`
 
 Represents the vulnerability details list value.
 
@@ -13123,7 +13126,7 @@ Represents the vulnerability details list value.
 | `items` | [`[VulnerabilityDetail!]!`](#vulnerabilitydetail) | List of details. |
 | `name` | [`String`](#string) | Name of the field. |
 
-### `VulnerabilityDetailMarkdown` {#vulnerabilitydetailmarkdown}
+### `VulnerabilityDetailMarkdown`
 
 Represents the vulnerability details Markdown field.
 
@@ -13136,7 +13139,7 @@ Represents the vulnerability details Markdown field.
 | `name` | [`String`](#string) | Name of the field. |
 | `value` | [`String!`](#string) | Value of the Markdown field. |
 
-### `VulnerabilityDetailModuleLocation` {#vulnerabilitydetailmodulelocation}
+### `VulnerabilityDetailModuleLocation`
 
 Represents the vulnerability details location within a file in the project.
 
@@ -13150,7 +13153,7 @@ Represents the vulnerability details location within a file in the project.
 | `name` | [`String`](#string) | Name of the field. |
 | `offset` | [`Int!`](#int) | Offset of the module location. |
 
-### `VulnerabilityDetailTable` {#vulnerabilitydetailtable}
+### `VulnerabilityDetailTable`
 
 Represents the vulnerability details table value.
 
@@ -13164,7 +13167,7 @@ Represents the vulnerability details table value.
 | `name` | [`String`](#string) | Name of the field. |
 | `rows` | [`[VulnerabilityDetail!]!`](#vulnerabilitydetail) | Table rows. |
 
-### `VulnerabilityDetailText` {#vulnerabilitydetailtext}
+### `VulnerabilityDetailText`
 
 Represents the vulnerability details text field.
 
@@ -13177,7 +13180,7 @@ Represents the vulnerability details text field.
 | `name` | [`String`](#string) | Name of the field. |
 | `value` | [`String!`](#string) | Value of the text field. |
 
-### `VulnerabilityDetailUrl` {#vulnerabilitydetailurl}
+### `VulnerabilityDetailUrl`
 
 Represents the vulnerability details URL field.
 
@@ -13191,7 +13194,7 @@ Represents the vulnerability details URL field.
 | `name` | [`String`](#string) | Name of the field. |
 | `text` | [`String`](#string) | Text of the URL. |
 
-### `VulnerabilityDismissPayload` {#vulnerabilitydismisspayload}
+### `VulnerabilityDismissPayload`
 
 Autogenerated return type of VulnerabilityDismiss.
 
@@ -13203,7 +13206,7 @@ Autogenerated return type of VulnerabilityDismiss.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after dismissal. |
 
-### `VulnerabilityEdge` {#vulnerabilityedge}
+### `VulnerabilityEdge`
 
 An edge in a connection.
 
@@ -13214,7 +13217,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Vulnerability`](#vulnerability) | The item at the end of the edge. |
 
-### `VulnerabilityExternalIssueLink` {#vulnerabilityexternalissuelink}
+### `VulnerabilityExternalIssueLink`
 
 Represents an external issue link of a vulnerability.
 
@@ -13226,7 +13229,7 @@ Represents an external issue link of a vulnerability.
 | `id` | [`VulnerabilitiesExternalIssueLinkID!`](#vulnerabilitiesexternalissuelinkid) | GraphQL ID of the external issue link. |
 | `linkType` | [`VulnerabilityExternalIssueLinkType!`](#vulnerabilityexternalissuelinktype) | Type of the external issue link. |
 
-### `VulnerabilityExternalIssueLinkConnection` {#vulnerabilityexternalissuelinkconnection}
+### `VulnerabilityExternalIssueLinkConnection`
 
 The connection type for VulnerabilityExternalIssueLink.
 
@@ -13238,7 +13241,7 @@ The connection type for VulnerabilityExternalIssueLink.
 | `nodes` | [`[VulnerabilityExternalIssueLink]`](#vulnerabilityexternalissuelink) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `VulnerabilityExternalIssueLinkCreatePayload` {#vulnerabilityexternalissuelinkcreatepayload}
+### `VulnerabilityExternalIssueLinkCreatePayload`
 
 Autogenerated return type of VulnerabilityExternalIssueLinkCreate.
 
@@ -13250,7 +13253,7 @@ Autogenerated return type of VulnerabilityExternalIssueLinkCreate.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `externalIssueLink` | [`VulnerabilityExternalIssueLink`](#vulnerabilityexternalissuelink) | The created external issue link. |
 
-### `VulnerabilityExternalIssueLinkDestroyPayload` {#vulnerabilityexternalissuelinkdestroypayload}
+### `VulnerabilityExternalIssueLinkDestroyPayload`
 
 Autogenerated return type of VulnerabilityExternalIssueLinkDestroy.
 
@@ -13261,7 +13264,7 @@ Autogenerated return type of VulnerabilityExternalIssueLinkDestroy.
 | `clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `VulnerabilityExternalIssueLinkEdge` {#vulnerabilityexternalissuelinkedge}
+### `VulnerabilityExternalIssueLinkEdge`
 
 An edge in a connection.
 
@@ -13272,7 +13275,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilityExternalIssueLink`](#vulnerabilityexternalissuelink) | The item at the end of the edge. |
 
-### `VulnerabilityIdentifier` {#vulnerabilityidentifier}
+### `VulnerabilityIdentifier`
 
 Represents a vulnerability identifier.
 
@@ -13285,7 +13288,7 @@ Represents a vulnerability identifier.
 | `name` | [`String`](#string) | Name of the vulnerability identifier. |
 | `url` | [`String`](#string) | URL of the vulnerability identifier. |
 
-### `VulnerabilityIssueLink` {#vulnerabilityissuelink}
+### `VulnerabilityIssueLink`
 
 Represents an issue link of a vulnerability.
 
@@ -13297,7 +13300,7 @@ Represents an issue link of a vulnerability.
 | `issue` | [`Issue!`](#issue) | The issue attached to issue link. |
 | `linkType` | [`VulnerabilityIssueLinkType!`](#vulnerabilityissuelinktype) | Type of the issue link. |
 
-### `VulnerabilityIssueLinkConnection` {#vulnerabilityissuelinkconnection}
+### `VulnerabilityIssueLinkConnection`
 
 The connection type for VulnerabilityIssueLink.
 
@@ -13309,7 +13312,7 @@ The connection type for VulnerabilityIssueLink.
 | `nodes` | [`[VulnerabilityIssueLink]`](#vulnerabilityissuelink) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `VulnerabilityIssueLinkEdge` {#vulnerabilityissuelinkedge}
+### `VulnerabilityIssueLinkEdge`
 
 An edge in a connection.
 
@@ -13320,7 +13323,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilityIssueLink`](#vulnerabilityissuelink) | The item at the end of the edge. |
 
-### `VulnerabilityLocationContainerScanning` {#vulnerabilitylocationcontainerscanning}
+### `VulnerabilityLocationContainerScanning`
 
 Represents the location of a vulnerability found by a container security scan.
 
@@ -13332,7 +13335,7 @@ Represents the location of a vulnerability found by a container security scan.
 | `image` | [`String`](#string) | Name of the vulnerable container image. |
 | `operatingSystem` | [`String`](#string) | Operating system that runs on the vulnerable container image. |
 
-### `VulnerabilityLocationCoverageFuzzing` {#vulnerabilitylocationcoveragefuzzing}
+### `VulnerabilityLocationCoverageFuzzing`
 
 Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 
@@ -13347,7 +13350,7 @@ Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 | `vulnerableClass` | [`String`](#string) | Class containing the vulnerability. |
 | `vulnerableMethod` | [`String`](#string) | Method containing the vulnerability. |
 
-### `VulnerabilityLocationDast` {#vulnerabilitylocationdast}
+### `VulnerabilityLocationDast`
 
 Represents the location of a vulnerability found by a DAST scan.
 
@@ -13360,7 +13363,7 @@ Represents the location of a vulnerability found by a DAST scan.
 | `path` | [`String`](#string) | URL path and query string of the vulnerable request. |
 | `requestMethod` | [`String`](#string) | HTTP method of the vulnerable request. |
 
-### `VulnerabilityLocationDependencyScanning` {#vulnerabilitylocationdependencyscanning}
+### `VulnerabilityLocationDependencyScanning`
 
 Represents the location of a vulnerability found by a dependency security scan.
 
@@ -13372,7 +13375,7 @@ Represents the location of a vulnerability found by a dependency security scan.
 | `dependency` | [`VulnerableDependency`](#vulnerabledependency) | Dependency containing the vulnerability. |
 | `file` | [`String`](#string) | Path to the vulnerable file. |
 
-### `VulnerabilityLocationSast` {#vulnerabilitylocationsast}
+### `VulnerabilityLocationSast`
 
 Represents the location of a vulnerability found by a SAST scan.
 
@@ -13387,7 +13390,7 @@ Represents the location of a vulnerability found by a SAST scan.
 | `vulnerableClass` | [`String`](#string) | Class containing the vulnerability. |
 | `vulnerableMethod` | [`String`](#string) | Method containing the vulnerability. |
 
-### `VulnerabilityLocationSecretDetection` {#vulnerabilitylocationsecretdetection}
+### `VulnerabilityLocationSecretDetection`
 
 Represents the location of a vulnerability found by a secret detection scan.
 
@@ -13402,7 +13405,7 @@ Represents the location of a vulnerability found by a secret detection scan.
 | `vulnerableClass` | [`String`](#string) | Class containing the vulnerability. |
 | `vulnerableMethod` | [`String`](#string) | Method containing the vulnerability. |
 
-### `VulnerabilityPermissions` {#vulnerabilitypermissions}
+### `VulnerabilityPermissions`
 
 Check permissions for the current user on a vulnerability.
 
@@ -13420,7 +13423,7 @@ Check permissions for the current user on a vulnerability.
 | `readVulnerabilityFeedback` | [`Boolean!`](#boolean) | Indicates the user can perform `read_vulnerability_feedback` on this resource |
 | `updateVulnerabilityFeedback` | [`Boolean!`](#boolean) | Indicates the user can perform `update_vulnerability_feedback` on this resource |
 
-### `VulnerabilityResolvePayload` {#vulnerabilityresolvepayload}
+### `VulnerabilityResolvePayload`
 
 Autogenerated return type of VulnerabilityResolve.
 
@@ -13432,7 +13435,7 @@ Autogenerated return type of VulnerabilityResolve.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after state change. |
 
-### `VulnerabilityRevertToDetectedPayload` {#vulnerabilityreverttodetectedpayload}
+### `VulnerabilityRevertToDetectedPayload`
 
 Autogenerated return type of VulnerabilityRevertToDetected.
 
@@ -13444,7 +13447,7 @@ Autogenerated return type of VulnerabilityRevertToDetected.
 | `errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | `vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after revert. |
 
-### `VulnerabilityScanner` {#vulnerabilityscanner}
+### `VulnerabilityScanner`
 
 Represents a vulnerability scanner.
 
@@ -13457,7 +13460,7 @@ Represents a vulnerability scanner.
 | `reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the vulnerability report. |
 | `vendor` | [`String`](#string) | Vendor of the vulnerability scanner. |
 
-### `VulnerabilityScannerConnection` {#vulnerabilityscannerconnection}
+### `VulnerabilityScannerConnection`
 
 The connection type for VulnerabilityScanner.
 
@@ -13469,7 +13472,7 @@ The connection type for VulnerabilityScanner.
 | `nodes` | [`[VulnerabilityScanner]`](#vulnerabilityscanner) | A list of nodes. |
 | `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
 
-### `VulnerabilityScannerEdge` {#vulnerabilityscanneredge}
+### `VulnerabilityScannerEdge`
 
 An edge in a connection.
 
@@ -13480,7 +13483,7 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`VulnerabilityScanner`](#vulnerabilityscanner) | The item at the end of the edge. |
 
-### `VulnerabilitySeveritiesCount` {#vulnerabilityseveritiescount}
+### `VulnerabilitySeveritiesCount`
 
 Represents vulnerability counts by severity.
 
@@ -13495,7 +13498,7 @@ Represents vulnerability counts by severity.
 | `medium` | [`Int`](#int) | Number of vulnerabilities of MEDIUM severity of the project |
 | `unknown` | [`Int`](#int) | Number of vulnerabilities of UNKNOWN severity of the project |
 
-### `VulnerableDependency` {#vulnerabledependency}
+### `VulnerableDependency`
 
 Represents a vulnerable dependency. Used in vulnerability location data.
 
@@ -13506,7 +13509,7 @@ Represents a vulnerable dependency. Used in vulnerability location data.
 | `package` | [`VulnerablePackage`](#vulnerablepackage) | The package associated with the vulnerable dependency. |
 | `version` | [`String`](#string) | The version of the vulnerable dependency. |
 
-### `VulnerablePackage` {#vulnerablepackage}
+### `VulnerablePackage`
 
 Represents a vulnerable package. Used in vulnerability dependency data.
 
@@ -13516,7 +13519,7 @@ Represents a vulnerable package. Used in vulnerability dependency data.
 | ---- | ---- | ----------- |
 | `name` | [`String`](#string) | The name of the vulnerable package. |
 
-### `VulnerableProjectsByGrade` {#vulnerableprojectsbygrade}
+### `VulnerableProjectsByGrade`
 
 Represents vulnerability letter grades with associated projects.
 
@@ -13529,7 +13532,7 @@ Represents vulnerability letter grades with associated projects.
 
 #### fields with arguments
 
-##### `projects` {#VulnerableProjectsByGrade_projects}
+##### `projects`VulnerableProjectsByGrade_projects
 
 Projects within this grade.
 
@@ -13553,7 +13556,7 @@ For more information, see
 [Enumeration Types](https://graphql.org/learn/schema/#enumeration-types)
 on `graphql.org`.
 
-### `AccessLevelEnum` {#accesslevelenum}
+### `AccessLevelEnum`
 
 Access level to a resource.
 
@@ -13567,7 +13570,7 @@ Access level to a resource.
 | `OWNER` | Owner access |
 | `REPORTER` | Reporter access |
 
-### `AlertManagementAlertSort` {#alertmanagementalertsort}
+### `AlertManagementAlertSort`
 
 Values for sorting alerts.
 
@@ -13596,7 +13599,7 @@ Values for sorting alerts.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### `AlertManagementDomainFilter` {#alertmanagementdomainfilter}
+### `AlertManagementDomainFilter`
 
 Filters the alerts based on given domain.
 
@@ -13605,7 +13608,7 @@ Filters the alerts based on given domain.
 | `operations` | Alerts for operations domain. |
 | `threat_monitoring` | Alerts for threat monitoring domain. |
 
-### `AlertManagementIntegrationType` {#alertmanagementintegrationtype}
+### `AlertManagementIntegrationType`
 
 Values of types of integrations.
 
@@ -13614,7 +13617,7 @@ Values of types of integrations.
 | `HTTP` | Integration with any monitoring tool. |
 | `PROMETHEUS` | Prometheus integration. |
 
-### `AlertManagementPayloadAlertFieldName` {#alertmanagementpayloadalertfieldname}
+### `AlertManagementPayloadAlertFieldName`
 
 Values for alert field names used in the custom mapping.
 
@@ -13631,7 +13634,7 @@ Values for alert field names used in the custom mapping.
 | `START_TIME` | The time of the incident. |
 | `TITLE` | The title of the incident. |
 
-### `AlertManagementPayloadAlertFieldType` {#alertmanagementpayloadalertfieldtype}
+### `AlertManagementPayloadAlertFieldType`
 
 Values for alert field types used in the custom mapping.
 
@@ -13641,7 +13644,7 @@ Values for alert field types used in the custom mapping.
 | `DATETIME` | DateTime field type. |
 | `STRING` | String field type. |
 
-### `AlertManagementSeverity` {#alertmanagementseverity}
+### `AlertManagementSeverity`
 
 Alert severity values.
 
@@ -13654,7 +13657,7 @@ Alert severity values.
 | `MEDIUM` | Medium severity |
 | `UNKNOWN` | Unknown severity |
 
-### `AlertManagementStatus` {#alertmanagementstatus}
+### `AlertManagementStatus`
 
 Alert status values.
 
@@ -13665,7 +13668,7 @@ Alert status values.
 | `RESOLVED` | Resolved status |
 | `TRIGGERED` | Triggered status |
 
-### `ApiFuzzingScanMode` {#apifuzzingscanmode}
+### `ApiFuzzingScanMode`
 
 All possible ways to specify the API surface for an API fuzzing scan.
 
@@ -13674,7 +13677,7 @@ All possible ways to specify the API surface for an API fuzzing scan.
 | `HAR` | The API surface is specified by a HAR file. |
 | `OPENAPI` | The API surface is specified by a OPENAPI file. |
 
-### `AvailabilityEnum` {#availabilityenum}
+### `AvailabilityEnum`
 
 User availability status.
 
@@ -13683,7 +13686,7 @@ User availability status.
 | `BUSY` | Busy |
 | `NOT_SET` | Not Set |
 
-### `BlobViewersType` {#blobviewerstype}
+### `BlobViewersType`
 
 Types of blob viewers.
 
@@ -13693,7 +13696,7 @@ Types of blob viewers.
 | `rich` | Rich blob viewers type. |
 | `simple` | Simple blob viewers type. |
 
-### `CiConfigStatus` {#ciconfigstatus}
+### `CiConfigStatus`
 
 Values for YAML processor result.
 
@@ -13702,7 +13705,7 @@ Values for YAML processor result.
 | `INVALID` | The configuration file is not valid. |
 | `VALID` | The configuration file is valid. |
 
-### `CommitActionMode` {#commitactionmode}
+### `CommitActionMode`
 
 Mode of a commit action.
 
@@ -13714,14 +13717,14 @@ Mode of a commit action.
 | `MOVE` | Move command. |
 | `UPDATE` | Update command. |
 
-### `CommitEncoding` {#commitencoding}
+### `CommitEncoding`
 
 | Value | Description |
 | ----- | ----------- |
 | `BASE64` | Base64 encoding. |
 | `TEXT` | Text encoding. |
 
-### `ContainerExpirationPolicyCadenceEnum` {#containerexpirationpolicycadenceenum}
+### `ContainerExpirationPolicyCadenceEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -13731,7 +13734,7 @@ Mode of a commit action.
 | `EVERY_TWO_WEEKS` | Every two weeks |
 | `EVERY_WEEK` | Every week |
 
-### `ContainerExpirationPolicyKeepEnum` {#containerexpirationpolicykeepenum}
+### `ContainerExpirationPolicyKeepEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -13742,7 +13745,7 @@ Mode of a commit action.
 | `TEN_TAGS` | 10 tags per image name |
 | `TWENTY_FIVE_TAGS` | 25 tags per image name |
 
-### `ContainerExpirationPolicyOlderThanEnum` {#containerexpirationpolicyolderthanenum}
+### `ContainerExpirationPolicyOlderThanEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -13751,7 +13754,7 @@ Mode of a commit action.
 | `SEVEN_DAYS` | 7 days until tags are automatically removed |
 | `THIRTY_DAYS` | 30 days until tags are automatically removed |
 
-### `ContainerRepositoryCleanupStatus` {#containerrepositorycleanupstatus}
+### `ContainerRepositoryCleanupStatus`
 
 Status of the tags cleanup of a container repository.
 
@@ -13762,7 +13765,7 @@ Status of the tags cleanup of a container repository.
 | `UNFINISHED` | The tags cleanup has been partially executed. There are still remaining tags to delete. |
 | `UNSCHEDULED` | The tags cleanup is not scheduled. This is the default state. |
 
-### `ContainerRepositorySort` {#containerrepositorysort}
+### `ContainerRepositorySort`
 
 Values for sorting container repositories.
 
@@ -13779,7 +13782,7 @@ Values for sorting container repositories.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### `ContainerRepositoryStatus` {#containerrepositorystatus}
+### `ContainerRepositoryStatus`
 
 Status of a container repository.
 
@@ -13788,14 +13791,14 @@ Status of a container repository.
 | `DELETE_FAILED` | Delete Failed status. |
 | `DELETE_SCHEDULED` | Delete Scheduled status. |
 
-### `DastScanTypeEnum` {#dastscantypeenum}
+### `DastScanTypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `ACTIVE` | Active DAST scan. This scan will make active attacks against the target site. |
 | `PASSIVE` | Passive DAST scan. This scan will not make active attacks against the target site. |
 
-### `DastSiteProfileValidationStatusEnum` {#dastsiteprofilevalidationstatusenum}
+### `DastSiteProfileValidationStatusEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -13805,14 +13808,14 @@ Status of a container repository.
 | `PASSED_VALIDATION` | Site validation process finished successfully. |
 | `PENDING_VALIDATION` | Site validation process has not started. |
 
-### `DastSiteValidationStrategyEnum` {#dastsitevalidationstrategyenum}
+### `DastSiteValidationStrategyEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `HEADER` | Header validation. |
 | `TEXT_FILE` | Text file validation. |
 
-### `DataVisualizationColorEnum` {#datavisualizationcolorenum}
+### `DataVisualizationColorEnum`
 
 Color of the data visualization palette.
 
@@ -13824,7 +13827,7 @@ Color of the data visualization palette.
 | `MAGENTA` | Magenta color |
 | `ORANGE` | Orange color |
 
-### `DataVisualizationWeightEnum` {#datavisualizationweightenum}
+### `DataVisualizationWeightEnum`
 
 Weight of the data visualization palette.
 
@@ -13842,7 +13845,7 @@ Weight of the data visualization palette.
 | `WEIGHT_900` | 900 weight |
 | `WEIGHT_950` | 950 weight |
 
-### `DesignCollectionCopyState` {#designcollectioncopystate}
+### `DesignCollectionCopyState`
 
 Copy state of a DesignCollection.
 
@@ -13852,7 +13855,7 @@ Copy state of a DesignCollection.
 | `IN_PROGRESS` | The DesignCollection is being copied |
 | `READY` | The DesignCollection has no copy in progress |
 
-### `DesignVersionEvent` {#designversionevent}
+### `DesignVersionEvent`
 
 Mutation event of a design within a version.
 
@@ -13863,7 +13866,7 @@ Mutation event of a design within a version.
 | `MODIFICATION` | A modification event |
 | `NONE` | No change. |
 
-### `DiffPositionType` {#diffpositiontype}
+### `DiffPositionType`
 
 Type of file the position refers to.
 
@@ -13872,7 +13875,7 @@ Type of file the position refers to.
 | `image` |  |
 | `text` |  |
 
-### `EntryType` {#entrytype}
+### `EntryType`
 
 Type of a tree entry.
 
@@ -13882,7 +13885,7 @@ Type of a tree entry.
 | `commit` |  |
 | `tree` |  |
 
-### `EpicSort` {#epicsort}
+### `EpicSort`
 
 Roadmap sort values.
 
@@ -13893,7 +13896,7 @@ Roadmap sort values.
 | `start_date_asc` | Start date at ascending order. |
 | `start_date_desc` | Start date at descending order. |
 
-### `EpicState` {#epicstate}
+### `EpicState`
 
 State of an epic.
 
@@ -13903,7 +13906,7 @@ State of an epic.
 | `closed` |  |
 | `opened` |  |
 
-### `EpicStateEvent` {#epicstateevent}
+### `EpicStateEvent`
 
 State event of an epic.
 
@@ -13912,7 +13915,7 @@ State event of an epic.
 | `CLOSE` | Close the epic. |
 | `REOPEN` | Reopen the epic. |
 
-### `EpicWildcardId` {#epicwildcardid}
+### `EpicWildcardId`
 
 Epic ID wildcard values.
 
@@ -13921,7 +13924,7 @@ Epic ID wildcard values.
 | `ANY` | Any epic is assigned. |
 | `NONE` | No epic is assigned. |
 
-### `EventAction` {#eventaction}
+### `EventAction`
 
 Event action.
 
@@ -13941,7 +13944,7 @@ Event action.
 | `REOPENED` | Reopened action |
 | `UPDATED` | Updated action |
 
-### `GroupMemberRelation` {#groupmemberrelation}
+### `GroupMemberRelation`
 
 Group member relation.
 
@@ -13951,7 +13954,7 @@ Group member relation.
 | `DIRECT` | Direct members |
 | `INHERITED` | Inherited members |
 
-### `HealthStatus` {#healthstatus}
+### `HealthStatus`
 
 Health status of an issue or epic.
 
@@ -13961,7 +13964,7 @@ Health status of an issue or epic.
 | `needsAttention` |  |
 | `onTrack` |  |
 
-### `IssuableSeverity` {#issuableseverity}
+### `IssuableSeverity`
 
 Incident severity.
 
@@ -13973,7 +13976,7 @@ Incident severity.
 | `MEDIUM` | Medium severity |
 | `UNKNOWN` | Unknown severity |
 
-### `IssuableState` {#issuablestate}
+### `IssuableState`
 
 State of a GitLab issue or merge request.
 
@@ -13984,7 +13987,7 @@ State of a GitLab issue or merge request.
 | `locked` | Discussion has been locked. |
 | `opened` | In open state. |
 
-### `IssueSort` {#issuesort}
+### `IssueSort`
 
 Values for sorting issues.
 
@@ -14016,7 +14019,7 @@ Values for sorting issues.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### `IssueState` {#issuestate}
+### `IssueState`
 
 State of a GitLab issue.
 
@@ -14027,7 +14030,7 @@ State of a GitLab issue.
 | `locked` | Discussion has been locked. |
 | `opened` | In open state. |
 
-### `IssueStateEvent` {#issuestateevent}
+### `IssueStateEvent`
 
 Values for issue state events.
 
@@ -14036,7 +14039,7 @@ Values for issue state events.
 | `CLOSE` | Closes the issue. |
 | `REOPEN` | Reopens the issue. |
 
-### `IssueType` {#issuetype}
+### `IssueType`
 
 Issue type.
 
@@ -14046,7 +14049,7 @@ Issue type.
 | `ISSUE` | Issue issue type |
 | `TEST_CASE` | Test Case issue type |
 
-### `IterationState` {#iterationstate}
+### `IterationState`
 
 State of a GitLab iteration.
 
@@ -14058,7 +14061,7 @@ State of a GitLab iteration.
 | `started` |  |
 | `upcoming` |  |
 
-### `IterationWildcardId` {#iterationwildcardid}
+### `IterationWildcardId`
 
 Iteration ID wildcard values.
 
@@ -14068,7 +14071,7 @@ Iteration ID wildcard values.
 | `CURRENT` | Current iteration. |
 | `NONE` | No iteration is assigned. |
 
-### `JobArtifactFileType` {#jobartifactfiletype}
+### `JobArtifactFileType`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14100,7 +14103,7 @@ Iteration ID wildcard values.
 | `TERRAFORM` | TERRAFORM job artifact file type. |
 | `TRACE` | TRACE job artifact file type. |
 
-### `ListLimitMetric` {#listlimitmetric}
+### `ListLimitMetric`
 
 List limit metric setting.
 
@@ -14110,7 +14113,7 @@ List limit metric setting.
 | `issue_count` |  |
 | `issue_weights` |  |
 
-### `MeasurementIdentifier` {#measurementidentifier}
+### `MeasurementIdentifier`
 
 Possible identifier types for a measurement.
 
@@ -14127,7 +14130,7 @@ Possible identifier types for a measurement.
 | `PROJECTS` | Project count. |
 | `USERS` | User count. |
 
-### `MergeRequestNewState` {#mergerequestnewstate}
+### `MergeRequestNewState`
 
 New state to apply to a merge request.
 
@@ -14136,7 +14139,7 @@ New state to apply to a merge request.
 | `CLOSED` | Close the merge request if it is open. |
 | `OPEN` | Open the merge request if it is closed. |
 
-### `MergeRequestSort` {#mergerequestsort}
+### `MergeRequestSort`
 
 Values for sorting merge requests.
 
@@ -14159,7 +14162,7 @@ Values for sorting merge requests.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### `MergeRequestState` {#mergerequeststate}
+### `MergeRequestState`
 
 State of a GitLab merge request.
 
@@ -14171,7 +14174,7 @@ State of a GitLab merge request.
 | `merged` | Merge Request has been merged. |
 | `opened` | In open state. |
 
-### `MilestoneStateEnum` {#milestonestateenum}
+### `MilestoneStateEnum`
 
 Current state of milestone.
 
@@ -14180,7 +14183,7 @@ Current state of milestone.
 | `active` | Milestone is currently active. |
 | `closed` | Milestone is closed. |
 
-### `MoveType` {#movetype}
+### `MoveType`
 
 The position to which the adjacent object should be moved.
 
@@ -14189,7 +14192,7 @@ The position to which the adjacent object should be moved.
 | `after` | The adjacent object will be moved after the object that is being moved. |
 | `before` | The adjacent object will be moved before the object that is being moved. |
 
-### `MutationOperationMode` {#mutationoperationmode}
+### `MutationOperationMode`
 
 Different toggles for changing mutator behavior.
 
@@ -14199,7 +14202,7 @@ Different toggles for changing mutator behavior.
 | `REMOVE` | Performs a removal operation. |
 | `REPLACE` | Performs a replace operation. |
 
-### `NamespaceProjectSort` {#namespaceprojectsort}
+### `NamespaceProjectSort`
 
 Values for sorting projects.
 
@@ -14208,7 +14211,7 @@ Values for sorting projects.
 | `SIMILARITY` | Most similar to the search query. |
 | `STORAGE` | Sort by storage size. |
 
-### `OncallRotationUnitEnum` {#oncallrotationunitenum}
+### `OncallRotationUnitEnum`
 
 Rotation length unit of an on-call rotation.
 
@@ -14218,7 +14221,7 @@ Rotation length unit of an on-call rotation.
 | `HOURS` | Hours |
 | `WEEKS` | Weeks |
 
-### `PackageTypeEnum` {#packagetypeenum}
+### `PackageTypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14233,7 +14236,7 @@ Rotation length unit of an on-call rotation.
 | `PYPI` | Packages from the PyPI package manager |
 | `RUBYGEMS` | Packages from the Rubygems package manager |
 
-### `PipelineConfigSourceEnum` {#pipelineconfigsourceenum}
+### `PipelineConfigSourceEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14247,7 +14250,7 @@ Rotation length unit of an on-call rotation.
 | `UNKNOWN_SOURCE` |  |
 | `WEBIDE_SOURCE` |  |
 
-### `PipelineStatusEnum` {#pipelinestatusenum}
+### `PipelineStatusEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14263,7 +14266,7 @@ Rotation length unit of an on-call rotation.
 | `SUCCESS` |  |
 | `WAITING_FOR_RESOURCE` |  |
 
-### `ProjectMemberRelation` {#projectmemberrelation}
+### `ProjectMemberRelation`
 
 Project member relation.
 
@@ -14274,7 +14277,7 @@ Project member relation.
 | `INHERITED` | Inherited members |
 | `INVITED_GROUPS` | Invited Groups members |
 
-### `RegistryState` {#registrystate}
+### `RegistryState`
 
 State of a Geo registry.
 
@@ -14285,7 +14288,7 @@ State of a Geo registry.
 | `STARTED` | Registry currently syncing. |
 | `SYNCED` | Registry that is synced. |
 
-### `ReleaseAssetLinkType` {#releaseassetlinktype}
+### `ReleaseAssetLinkType`
 
 Type of the link: `other`, `runbook`, `image`, `package`.
 
@@ -14296,7 +14299,7 @@ Type of the link: `other`, `runbook`, `image`, `package`.
 | `PACKAGE` | Package link type |
 | `RUNBOOK` | Runbook link type |
 
-### `ReleaseSort` {#releasesort}
+### `ReleaseSort`
 
 Values for sorting releases.
 
@@ -14307,7 +14310,7 @@ Values for sorting releases.
 | `RELEASED_AT_ASC` | Released at by ascending order. |
 | `RELEASED_AT_DESC` | Released at by descending order. |
 
-### `RequirementState` {#requirementstate}
+### `RequirementState`
 
 State of a requirement.
 
@@ -14316,7 +14319,7 @@ State of a requirement.
 | `ARCHIVED` |  |
 | `OPENED` |  |
 
-### `RequirementStatusFilter` {#requirementstatusfilter}
+### `RequirementStatusFilter`
 
 Status of a requirement based on last test report.
 
@@ -14326,7 +14329,7 @@ Status of a requirement based on last test report.
 | `MISSING` | Requirements without any test report. |
 | `PASSED` |  |
 
-### `SastUiComponentSize` {#sastuicomponentsize}
+### `SastUiComponentSize`
 
 Size of UI component in SAST configuration page.
 
@@ -14336,7 +14339,7 @@ Size of UI component in SAST configuration page.
 | `MEDIUM` | The size of UI component in SAST configuration page is medium. |
 | `SMALL` | The size of UI component in SAST configuration page is small. |
 
-### `SecurityReportTypeEnum` {#securityreporttypeenum}
+### `SecurityReportTypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14348,7 +14351,7 @@ Size of UI component in SAST configuration page.
 | `SAST` | SAST scan report |
 | `SECRET_DETECTION` | SECRET DETECTION scan report |
 
-### `SecurityScannerType` {#securityscannertype}
+### `SecurityScannerType`
 
 The type of the security scanner.
 
@@ -14362,7 +14365,7 @@ The type of the security scanner.
 | `SAST` |  |
 | `SECRET_DETECTION` |  |
 
-### `SentryErrorStatus` {#sentryerrorstatus}
+### `SentryErrorStatus`
 
 State of a Sentry error.
 
@@ -14373,7 +14376,7 @@ State of a Sentry error.
 | `RESOLVED_IN_NEXT_RELEASE` | Error has been ignored until next release. |
 | `UNRESOLVED` | Error is unresolved. |
 
-### `ServiceType` {#servicetype}
+### `ServiceType`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14414,7 +14417,7 @@ State of a Sentry error.
 | `WEBEX_TEAMS_SERVICE` | WebexTeamsService type |
 | `YOUTRACK_SERVICE` | YoutrackService type |
 
-### `SnippetBlobActionEnum` {#snippetblobactionenum}
+### `SnippetBlobActionEnum`
 
 Type of a snippet blob input action.
 
@@ -14425,7 +14428,7 @@ Type of a snippet blob input action.
 | `move` |  |
 | `update` |  |
 
-### `Sort` {#sort}
+### `Sort`
 
 Common sort values.
 
@@ -14440,7 +14443,7 @@ Common sort values.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### `TestReportState` {#testreportstate}
+### `TestReportState`
 
 State of a test report.
 
@@ -14449,7 +14452,7 @@ State of a test report.
 | `FAILED` |  |
 | `PASSED` |  |
 
-### `TodoActionEnum` {#todoactionenum}
+### `TodoActionEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14463,14 +14466,14 @@ State of a test report.
 | `review_requested` | Review was requested from the user. |
 | `unmergeable` | Merge request authored by the user could not be merged. |
 
-### `TodoStateEnum` {#todostateenum}
+### `TodoStateEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `done` | The state of the todo is done. |
 | `pending` | The state of the todo is pending. |
 
-### `TodoTargetEnum` {#todotargetenum}
+### `TodoTargetEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14481,14 +14484,14 @@ State of a test report.
 | `ISSUE` | An Issue. |
 | `MERGEREQUEST` | A MergeRequest. |
 
-### `TypeEnum` {#typeenum}
+### `TypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `personal` |  |
 | `project` |  |
 
-### `UserCalloutFeatureNameEnum` {#usercalloutfeaturenameenum}
+### `UserCalloutFeatureNameEnum`
 
 Name of the feature that the callout is for.
 
@@ -14521,7 +14524,7 @@ Name of the feature that the callout is for.
 | `WEBHOOKS_MOVED` | Callout feature name for webhooks_moved. |
 | `WEB_IDE_ALERT_DISMISSED` | Callout feature name for web_ide_alert_dismissed. |
 
-### `UserState` {#userstate}
+### `UserState`
 
 Possible states of a user.
 
@@ -14531,7 +14534,7 @@ Possible states of a user.
 | `blocked` | The user has been blocked and is prevented from using the system. |
 | `deactivated` | The user is no longer active and is unable to use the system. |
 
-### `VisibilityLevelsEnum` {#visibilitylevelsenum}
+### `VisibilityLevelsEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14539,7 +14542,7 @@ Possible states of a user.
 | `private` | Private visibility level. |
 | `public` | Public visibility level. |
 
-### `VisibilityScopesEnum` {#visibilityscopesenum}
+### `VisibilityScopesEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -14547,7 +14550,7 @@ Possible states of a user.
 | `private` |  |
 | `public` |  |
 
-### `VulnerabilityDismissalReason` {#vulnerabilitydismissalreason}
+### `VulnerabilityDismissalReason`
 
 The dismissal reason of the Vulnerability.
 
@@ -14559,7 +14562,7 @@ The dismissal reason of the Vulnerability.
 | `NOT_APPLICABLE` | Other reasons for dismissal |
 | `USED_IN_TESTS` | The Vulnerability is used in tests and does not pose an actual risk |
 
-### `VulnerabilityExternalIssueLinkExternalTracker` {#vulnerabilityexternalissuelinkexternaltracker}
+### `VulnerabilityExternalIssueLinkExternalTracker`
 
 The external tracker of the external issue link related to a vulnerability.
 
@@ -14567,7 +14570,7 @@ The external tracker of the external issue link related to a vulnerability.
 | ----- | ----------- |
 | `JIRA` | Jira external tracker |
 
-### `VulnerabilityExternalIssueLinkType` {#vulnerabilityexternalissuelinktype}
+### `VulnerabilityExternalIssueLinkType`
 
 The type of the external issue link related to a vulnerability.
 
@@ -14575,7 +14578,7 @@ The type of the external issue link related to a vulnerability.
 | ----- | ----------- |
 | `CREATED` | Created link type |
 
-### `VulnerabilityGrade` {#vulnerabilitygrade}
+### `VulnerabilityGrade`
 
 The grade of the vulnerable project.
 
@@ -14587,7 +14590,7 @@ The grade of the vulnerable project.
 | `D` |  |
 | `F` |  |
 
-### `VulnerabilityIssueLinkType` {#vulnerabilityissuelinktype}
+### `VulnerabilityIssueLinkType`
 
 The type of the issue link related to a vulnerability.
 
@@ -14596,7 +14599,7 @@ The type of the issue link related to a vulnerability.
 | `CREATED` |  |
 | `RELATED` |  |
 
-### `VulnerabilityReportType` {#vulnerabilityreporttype}
+### `VulnerabilityReportType`
 
 The type of the security scan that found the vulnerability.
 
@@ -14610,7 +14613,7 @@ The type of the security scan that found the vulnerability.
 | `SAST` |  |
 | `SECRET_DETECTION` |  |
 
-### `VulnerabilitySeverity` {#vulnerabilityseverity}
+### `VulnerabilitySeverity`
 
 The severity of the vulnerability.
 
@@ -14623,7 +14626,7 @@ The severity of the vulnerability.
 | `MEDIUM` |  |
 | `UNKNOWN` |  |
 
-### `VulnerabilitySort` {#vulnerabilitysort}
+### `VulnerabilitySort`
 
 Vulnerability sort values.
 
@@ -14640,7 +14643,7 @@ Vulnerability sort values.
 | `title_asc` | Title in ascending order. |
 | `title_desc` | Title in descending order. |
 
-### `VulnerabilityState` {#vulnerabilitystate}
+### `VulnerabilityState`
 
 The state of the vulnerability.
 
@@ -14662,256 +14665,256 @@ each kind of object.
 
 For more information, read about [Scalar Types](https://graphql.org/learn/schema/#scalar-types) on `graphql.org`.
 
-### `AlertManagementHttpIntegrationID` {#alertmanagementhttpintegrationid}
+### `AlertManagementHttpIntegrationID`
 
 Identifier of `AlertManagement::HttpIntegration` objects. See GlobalID.
 
-### `AnalyticsDevopsAdoptionSegmentID` {#analyticsdevopsadoptionsegmentid}
+### `AnalyticsDevopsAdoptionSegmentID`
 
 Identifier of `Analytics::DevopsAdoption::Segment` objects. See GlobalID.
 
-### `AwardableID` {#awardableid}
+### `AwardableID`
 
 Identifier of `Awardable` objects. See GlobalID.
 
-### `BigInt` {#bigint}
+### `BigInt`
 
 Represents non-fractional signed whole numeric values. Since the value may exceed the size of a 32-bit integer, it's encoded as a string.
 
-### `BoardID` {#boardid}
+### `BoardID`
 
 Identifier of `Board` objects. See GlobalID.
 
-### `BoardsEpicBoardID` {#boardsepicboardid}
+### `BoardsEpicBoardID`
 
 Identifier of `Boards::EpicBoard` objects. See GlobalID.
 
-### `BoardsEpicListID` {#boardsepiclistid}
+### `BoardsEpicListID`
 
 Identifier of `Boards::EpicList` objects. See GlobalID.
 
-### `Boolean` {#boolean}
+### `Boolean`
 
 Represents `true` or `false` values.
 
-### `CiPipelineID` {#cipipelineid}
+### `CiPipelineID`
 
 Identifier of `Ci::Pipeline` objects. See GlobalID.
 
-### `ClustersAgentID` {#clustersagentid}
+### `ClustersAgentID`
 
 Identifier of `Clusters::Agent` objects. See GlobalID.
 
-### `ClustersAgentTokenID` {#clustersagenttokenid}
+### `ClustersAgentTokenID`
 
 Identifier of `Clusters::AgentToken` objects. See GlobalID.
 
-### `ClustersClusterID` {#clustersclusterid}
+### `ClustersClusterID`
 
 Identifier of `Clusters::Cluster` objects. See GlobalID.
 
-### `ComplianceManagementFrameworkID` {#compliancemanagementframeworkid}
+### `ComplianceManagementFrameworkID`
 
 Identifier of `ComplianceManagement::Framework` objects. See GlobalID.
 
-### `ContainerRepositoryID` {#containerrepositoryid}
+### `ContainerRepositoryID`
 
 Identifier of `ContainerRepository` objects. See GlobalID.
 
-### `CustomEmojiID` {#customemojiid}
+### `CustomEmojiID`
 
 Identifier of `CustomEmoji` objects. See GlobalID.
 
-### `DastProfileID` {#dastprofileid}
+### `DastProfileID`
 
 Identifier of `Dast::Profile` objects. See GlobalID.
 
-### `DastScannerProfileID` {#dastscannerprofileid}
+### `DastScannerProfileID`
 
 Identifier of `DastScannerProfile` objects. See GlobalID.
 
-### `DastSiteProfileID` {#dastsiteprofileid}
+### `DastSiteProfileID`
 
 Identifier of `DastSiteProfile` objects. See GlobalID.
 
-### `DastSiteTokenID` {#dastsitetokenid}
+### `DastSiteTokenID`
 
 Identifier of `DastSiteToken` objects. See GlobalID.
 
-### `DastSiteValidationID` {#dastsitevalidationid}
+### `DastSiteValidationID`
 
 Identifier of `DastSiteValidation` objects. See GlobalID.
 
-### `Date` {#date}
+### `Date`
 
 Date represented in ISO 8601.
 
-### `DesignManagementDesignAtVersionID` {#designmanagementdesignatversionid}
+### `DesignManagementDesignAtVersionID`
 
 Identifier of `DesignManagement::DesignAtVersion` objects. See GlobalID.
 
-### `DesignManagementDesignID` {#designmanagementdesignid}
+### `DesignManagementDesignID`
 
 Identifier of `DesignManagement::Design` objects. See GlobalID.
 
-### `DesignManagementVersionID` {#designmanagementversionid}
+### `DesignManagementVersionID`
 
 Identifier of `DesignManagement::Version` objects. See GlobalID.
 
-### `DiffNoteID` {#diffnoteid}
+### `DiffNoteID`
 
 Identifier of `DiffNote` objects. See GlobalID.
 
-### `DiscussionID` {#discussionid}
+### `DiscussionID`
 
 Identifier of `Discussion` objects. See GlobalID.
 
-### `EnvironmentID` {#environmentid}
+### `EnvironmentID`
 
 Identifier of `Environment` objects. See GlobalID.
 
-### `EpicID` {#epicid}
+### `EpicID`
 
 Identifier of `Epic` objects. See GlobalID.
 
-### `EpicTreeSortingID` {#epictreesortingid}
+### `EpicTreeSortingID`
 
 Identifier of `EpicTreeSorting` objects. See GlobalID.
 
-### `Float` {#float}
+### `Float`
 
 Represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
 
-### `GitlabErrorTrackingDetailedErrorID` {#gitlaberrortrackingdetailederrorid}
+### `GitlabErrorTrackingDetailedErrorID`
 
 Identifier of `Gitlab::ErrorTracking::DetailedError` objects. See GlobalID.
 
-### `GroupID` {#groupid}
+### `GroupID`
 
 Identifier of `Group` objects. See GlobalID.
 
-### `ID` {#id}
+### `ID`
 
 Represents a unique identifier that is Base64 obfuscated. It is often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"VXNlci0xMA=="`) or integer (such as `4`) input value will be accepted as an ID.
 
-### `ISO8601Date` {#iso8601date}
+### `ISO8601Date`
 
 An ISO 8601-encoded date.
 
-### `IncidentManagementOncallParticipantID` {#incidentmanagementoncallparticipantid}
+### `IncidentManagementOncallParticipantID`
 
 Identifier of `IncidentManagement::OncallParticipant` objects. See GlobalID.
 
-### `IncidentManagementOncallRotationID` {#incidentmanagementoncallrotationid}
+### `IncidentManagementOncallRotationID`
 
 Identifier of `IncidentManagement::OncallRotation` objects. See GlobalID.
 
-### `Int` {#int}
+### `Int`
 
 Represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
 
-### `IssueID` {#issueid}
+### `IssueID`
 
 Identifier of `Issue` objects. See GlobalID.
 
-### `IterationID` {#iterationid}
+### `IterationID`
 
 Identifier of `Iteration` objects. See GlobalID.
 
-### `JSON` {#json}
+### `JSON`
 
 Represents untyped JSON.
 
-### `JsonString` {#jsonstring}
+### `JsonString`
 
 JSON object as raw string.
 
-### `LabelID` {#labelid}
+### `LabelID`
 
 Identifier of `Label` objects. See GlobalID.
 
-### `ListID` {#listid}
+### `ListID`
 
 Identifier of `List` objects. See GlobalID.
 
-### `MergeRequestID` {#mergerequestid}
+### `MergeRequestID`
 
 Identifier of `MergeRequest` objects. See GlobalID.
 
-### `MetricsDashboardAnnotationID` {#metricsdashboardannotationid}
+### `MetricsDashboardAnnotationID`
 
 Identifier of `Metrics::Dashboard::Annotation` objects. See GlobalID.
 
-### `MilestoneID` {#milestoneid}
+### `MilestoneID`
 
 Identifier of `Milestone` objects. See GlobalID.
 
-### `NamespaceID` {#namespaceid}
+### `NamespaceID`
 
 Identifier of `Namespace` objects. See GlobalID.
 
-### `NoteID` {#noteid}
+### `NoteID`
 
 Identifier of `Note` objects. See GlobalID.
 
-### `NoteableID` {#noteableid}
+### `NoteableID`
 
 Identifier of `Noteable` objects. See GlobalID.
 
-### `PackagesPackageID` {#packagespackageid}
+### `PackagesPackageID`
 
 Identifier of `Packages::Package` objects. See GlobalID.
 
-### `ProjectID` {#projectid}
+### `ProjectID`
 
 Identifier of `Project` objects. See GlobalID.
 
-### `PrometheusServiceID` {#prometheusserviceid}
+### `PrometheusServiceID`
 
 Identifier of `PrometheusService` objects. See GlobalID.
 
-### `SnippetID` {#snippetid}
+### `SnippetID`
 
 Identifier of `Snippet` objects. See GlobalID.
 
-### `String` {#string}
+### `String`
 
 Represents textual data as UTF-8 character sequences. This type is most often used by GraphQL to represent free-form human-readable text.
 
-### `TerraformStateID` {#terraformstateid}
+### `TerraformStateID`
 
 Identifier of `Terraform::State` objects. See GlobalID.
 
-### `Time` {#time}
+### `Time`
 
 Time represented in ISO 8601.
 
 See [iso.org](https://www.iso.org/iso-8601-date-and-time-format.html)
 .
 
-### `TodoID` {#todoid}
+### `TodoID`
 
 Identifier of `Todo` objects. See GlobalID.
 
-### `TodoableID` {#todoableid}
+### `TodoableID`
 
 Identifier of `Todoable` objects. See GlobalID.
 
-### `UntrustedRegexp` {#untrustedregexp}
+### `UntrustedRegexp`
 
 A regexp containing patterns sourced from user input.
 
-### `Upload` {#upload}
+### `Upload`
 
-### `UserID` {#userid}
+### `UserID`
 
 Identifier of `User` objects. See GlobalID.
 
-### `VulnerabilitiesExternalIssueLinkID` {#vulnerabilitiesexternalissuelinkid}
+### `VulnerabilitiesExternalIssueLinkID`
 
 Identifier of `Vulnerabilities::ExternalIssueLink` objects. See GlobalID.
 
-### `VulnerabilityID` {#vulnerabilityid}
+### `VulnerabilityID`
 
 Identifier of `Vulnerability` objects. See GlobalID.
 
@@ -14924,7 +14927,7 @@ implement an interface).
 
 ### Unions
 
-#### `PackageMetadata` {#packagemetadata}
+#### `PackageMetadata`
 
 Represents metadata associated with a Package.
 
@@ -14932,7 +14935,7 @@ One of:
 
 - [`ComposerMetadata`](#composermetadata)
 
-#### `VulnerabilityDetail` {#vulnerabilitydetail}
+#### `VulnerabilityDetail`
 
 Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type.
 
@@ -14952,7 +14955,7 @@ One of:
 - [`VulnerabilityDetailText`](#vulnerabilitydetailtext)
 - [`VulnerabilityDetailUrl`](#vulnerabilitydetailurl)
 
-#### `VulnerabilityLocation` {#vulnerabilitylocation}
+#### `VulnerabilityLocation`
 
 Represents a vulnerability location. The fields with data will depend on the vulnerability report type.
 
@@ -14967,7 +14970,7 @@ One of:
 
 ### Interfaces
 
-#### `AlertManagementIntegration` {#alertmanagementintegration}
+#### `AlertManagementIntegration`
 
 Implementations:
 
@@ -14984,7 +14987,7 @@ Implementations:
 | `type` | [`AlertManagementIntegrationType!`](#alertmanagementintegrationtype) | Type of integration. |
 | `url` | [`String`](#string) | Endpoint which accepts alert notifications. |
 
-#### `CurrentUserTodos` {#currentusertodos}
+#### `CurrentUserTodos`
 
 Implementations:
 
@@ -14999,7 +15002,7 @@ Implementations:
 | ----- | ---- | ----------- |
 | `currentUserTodos` | [`TodoConnection!`](#todoconnection) | To-do items for the current user. |
 
-#### `DesignFields` {#designfields}
+#### `DesignFields`
 
 Implementations:
 
@@ -15019,7 +15022,7 @@ Implementations:
 | `notesCount` | [`Int!`](#int) | The total count of user-created notes for this design. |
 | `project` | [`Project!`](#project) | The project the design belongs to. |
 
-#### `Entry` {#entry}
+#### `Entry`
 
 Implementations:
 
@@ -15036,7 +15039,7 @@ Implementations:
 | `sha` | [`String!`](#string) | Last commit SHA for the entry. |
 | `type` | [`EntryType!`](#entrytype) | Type of tree entry. |
 
-#### `Eventable` {#eventable}
+#### `Eventable`
 
 Implementations:
 
@@ -15047,7 +15050,7 @@ Implementations:
 | ----- | ---- | ----------- |
 | `events` | [`EventConnection`](#eventconnection) | A list of events associated with the object. |
 
-#### `MemberInterface` {#memberinterface}
+#### `MemberInterface`
 
 Implementations:
 
@@ -15064,7 +15067,7 @@ Implementations:
 | `updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
 | `user` | [`User!`](#user) | User that is associated with the member object. |
 
-#### `Noteable` {#noteable}
+#### `Noteable`
 
 Implementations:
 
@@ -15083,7 +15086,7 @@ Implementations:
 | `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. |
 
-#### `ResolvableInterface` {#resolvableinterface}
+#### `ResolvableInterface`
 
 Implementations:
 
@@ -15097,7 +15100,7 @@ Implementations:
 | `resolvedAt` | [`Time`](#time) | Timestamp of when the object was resolved. |
 | `resolvedBy` | [`User`](#user) | User who resolved the object. |
 
-#### `Service` {#service}
+#### `Service`
 
 Implementations:
 
@@ -15109,7 +15112,7 @@ Implementations:
 | `active` | [`Boolean`](#boolean) | Indicates if the service is active. |
 | `type` | [`String`](#string) | Class name of the service. |
 
-#### `TimeboxReportInterface` {#timeboxreportinterface}
+#### `TimeboxReportInterface`
 
 Implementations:
 
@@ -15127,7 +15130,8 @@ be used as arguments).
 
 Only general use input types are listed here. For mutation input types,
 see the associated mutation type above.
-### `AlertManagementPayloadAlertFieldInput` {#alertmanagementpayloadalertfieldinput}
+
+### `AlertManagementPayloadAlertFieldInput`
 
 Field that are available while modifying the custom mapping attributes for an HTTP integration.
 
@@ -15138,7 +15142,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 | `label` | [`String`](#string) | Human-readable label of the payload path. |
 | `type` | [`AlertManagementPayloadAlertFieldType!`](#alertmanagementpayloadalertfieldtype) | Type of the parsed value. |
 
-### `BoardIssueInput` {#boardissueinput}
+### `BoardIssueInput`
 
 #### Arguments
 
@@ -15156,7 +15160,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 | `epicWildcardId` | [`EpicWildcardId`](#epicwildcardid) | Filter by epic ID wildcard. Incompatible with epicId. |
 | `iterationWildcardId` | [`IterationWildcardId`](#iterationwildcardid) | Filter by iteration ID wildcard. |
 
-### `CommitAction` {#commitaction}
+### `CommitAction`
 
 #### Arguments
 
@@ -15168,7 +15172,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 | `executeFilemode` | [`Boolean`](#boolean) | Enables/disables the execute flag on the file. |
 | `encoding` | [`CommitEncoding`](#commitencoding) | Encoding of the file. Default is text. |
 
-### `ComplianceFrameworkInput` {#complianceframeworkinput}
+### `ComplianceFrameworkInput`
 
 #### Arguments
 
@@ -15177,7 +15181,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 | `color` | [`String`](#string) | New color representation of the compliance framework in hex format. e.g. #FCA121. |
 | `pipelineConfigurationFullPath` | [`String`](#string) | Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa` **(ULTIMATE)**. |
 
-### `DiffImagePositionInput` {#diffimagepositioninput}
+### `DiffImagePositionInput`
 
 #### Arguments
 
@@ -15190,14 +15194,14 @@ Field that are available while modifying the custom mapping attributes for an HT
 | `width` | [`Int!`](#int) | Total width of the image. |
 | `height` | [`Int!`](#int) | Total height of the image. |
 
-### `DiffPathsInput` {#diffpathsinput}
+### `DiffPathsInput`
 
 #### Arguments
 
 | `oldPath` | [`String`](#string) | The path of the file on the start sha. |
 | `newPath` | [`String`](#string) | The path of the file on the head sha. |
 
-### `DiffPositionInput` {#diffpositioninput}
+### `DiffPositionInput`
 
 #### Arguments
 
@@ -15208,7 +15212,7 @@ Field that are available while modifying the custom mapping attributes for an HT
 | `oldLine` | [`Int`](#int) | Line on start SHA that was changed. |
 | `newLine` | [`Int`](#int) | Line on HEAD SHA that was changed. |
 
-### `EpicTreeNodeFieldsInputType` {#epictreenodefieldsinputtype}
+### `EpicTreeNodeFieldsInputType`
 
 A node of an epic tree.
 
@@ -15219,14 +15223,14 @@ A node of an epic tree.
 | `relativePosition` | [`MoveType`](#movetype) | The type of the switch, after or before allowed. |
 | `newParentId` | [`EpicID`](#epicid) | ID of the new parent epic. |
 
-### `JiraUsersMappingInputType` {#jirausersmappinginputtype}
+### `JiraUsersMappingInputType`
 
 #### Arguments
 
 | `jiraAccountId` | [`String!`](#string) | Jira account ID of the user. |
 | `gitlabId` | [`Int`](#int) | ID of the GitLab user. |
 
-### `NegatedBoardIssueInput` {#negatedboardissueinput}
+### `NegatedBoardIssueInput`
 
 #### Arguments
 
@@ -15240,7 +15244,7 @@ A node of an epic tree.
 | `iterationTitle` | [`String`](#string) | Filter by iteration title. |
 | `weight` | [`String`](#string) | Filter by weight. |
 
-### `OncallRotationActivePeriodInputType` {#oncallrotationactiveperiodinputtype}
+### `OncallRotationActivePeriodInputType`
 
 Active period time range for on-call rotation.
 
@@ -15249,7 +15253,7 @@ Active period time range for on-call rotation.
 | `startTime` | [`String!`](#string) | The start of the rotation active period. |
 | `endTime` | [`String!`](#string) | The end of the rotation active period. |
 
-### `OncallRotationDateInputType` {#oncallrotationdateinputtype}
+### `OncallRotationDateInputType`
 
 Date input type for on-call rotation.
 
@@ -15258,7 +15262,7 @@ Date input type for on-call rotation.
 | `date` | [`String!`](#string) | The date component of the date in YYYY-MM-DD format. |
 | `time` | [`String!`](#string) | The time component of the date in 24hr HH:MM format. |
 
-### `OncallRotationLengthInputType` {#oncallrotationlengthinputtype}
+### `OncallRotationLengthInputType`
 
 The rotation length of the on-call rotation.
 
@@ -15267,7 +15271,7 @@ The rotation length of the on-call rotation.
 | `length` | [`Int!`](#int) | The rotation length of the on-call rotation. |
 | `unit` | [`OncallRotationUnitEnum!`](#oncallrotationunitenum) | The unit of the rotation length of the on-call rotation. |
 
-### `OncallUserInputType` {#oncalluserinputtype}
+### `OncallUserInputType`
 
 The rotation user and color palette.
 
@@ -15277,7 +15281,7 @@ The rotation user and color palette.
 | `colorPalette` | [`DataVisualizationColorEnum`](#datavisualizationcolorenum) | A value of DataVisualizationColorEnum. The color from the palette to assign to the on-call user. |
 | `colorWeight` | [`DataVisualizationWeightEnum`](#datavisualizationweightenum) | A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user. |
 
-### `ReleaseAssetLinkInput` {#releaseassetlinkinput}
+### `ReleaseAssetLinkInput`
 
 Fields that are available when modifying a release asset link.
 
@@ -15288,7 +15292,7 @@ Fields that are available when modifying a release asset link.
 | `directAssetPath` | [`String`](#string) | Relative path for a direct asset link. |
 | `linkType` | [`ReleaseAssetLinkType`](#releaseassetlinktype) | The type of the asset link. |
 
-### `ReleaseAssetsInput` {#releaseassetsinput}
+### `ReleaseAssetsInput`
 
 Fields that are available when modifying release assets.
 
@@ -15296,7 +15300,7 @@ Fields that are available when modifying release assets.
 
 | `links` | [`[ReleaseAssetLinkInput!]`](#releaseassetlinkinput) | A list of asset links to associate to the release. |
 
-### `SastCiConfigurationAnalyzersEntityInput` {#sastciconfigurationanalyzersentityinput}
+### `SastCiConfigurationAnalyzersEntityInput`
 
 Represents the analyzers entity in SAST CI configuration.
 
@@ -15306,7 +15310,7 @@ Represents the analyzers entity in SAST CI configuration.
 | `enabled` | [`Boolean!`](#boolean) | State of the analyzer. |
 | `variables` | [`[SastCiConfigurationEntityInput!]`](#sastciconfigurationentityinput) | List of variables for the analyzer. |
 
-### `SastCiConfigurationEntityInput` {#sastciconfigurationentityinput}
+### `SastCiConfigurationEntityInput`
 
 Represents an entity in SAST CI configuration.
 
@@ -15316,7 +15320,7 @@ Represents an entity in SAST CI configuration.
 | `defaultValue` | [`String!`](#string) | Default value that is used if value is empty. |
 | `value` | [`String!`](#string) | Current value of the entity. |
 
-### `SastCiConfigurationInput` {#sastciconfigurationinput}
+### `SastCiConfigurationInput`
 
 Represents a CI configuration of SAST.
 
@@ -15326,7 +15330,7 @@ Represents a CI configuration of SAST.
 | `pipeline` | [`[SastCiConfigurationEntityInput!]`](#sastciconfigurationentityinput) | List of pipeline entities related to SAST configuration. |
 | `analyzers` | [`[SastCiConfigurationAnalyzersEntityInput!]`](#sastciconfigurationanalyzersentityinput) | List of analyzers and related variables for the SAST configuration. |
 
-### `SnippetBlobActionInputType` {#snippetblobactioninputtype}
+### `SnippetBlobActionInputType`
 
 Represents an action to perform over a snippet file.
 
@@ -15337,7 +15341,7 @@ Represents an action to perform over a snippet file.
 | `filePath` | [`String!`](#string) | Path of the snippet file. |
 | `content` | [`String`](#string) | Snippet file content. |
 
-### `Timeframe` {#timeframe}
+### `Timeframe`
 
 A time-frame defined as a closed inclusive range of two dates.
 
@@ -15346,7 +15350,7 @@ A time-frame defined as a closed inclusive range of two dates.
 | `start` | [`Date!`](#date) | The start of the range. |
 | `end` | [`Date!`](#date) | The end of the range. |
 
-### `UpdateDiffImagePositionInput` {#updatediffimagepositioninput}
+### `UpdateDiffImagePositionInput`
 
 #### Arguments
 

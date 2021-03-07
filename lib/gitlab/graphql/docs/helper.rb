@@ -81,8 +81,8 @@ module Gitlab
         end
 
         def render_name_and_description(object, level = 3, owner = nil)
-          id = owner ? "#{owner}_#{object[:name]}" : object[:name].downcase
-          content = ["#{'#' * level} `#{object[:name]}` {##{id}}"]
+          content = ["#{'#' * level} `#{object[:name]}`"]
+          content[0] += "#{owner}_#{object[:name]}" if owner
 
           if object[:description].present?
             desc = object[:description]
