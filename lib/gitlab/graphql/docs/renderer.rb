@@ -23,11 +23,20 @@ module Gitlab
           @template = template
           @layout = Haml::Engine.new(File.read(template))
           @parsed_schema = GraphQLDocs::Parser.new(schema, {}).parse
+          @seen = Set.new
         end
 
         def contents
           # Render and remove an extra trailing new line
           @contents ||= @layout.render(self).sub!(/\n(?=\Z)/, '')
+        end
+
+        def seen_type(name)
+          @seen << name
+        end
+
+        def seen?(name)
+          @seen.include?(name)
         end
 
         def write

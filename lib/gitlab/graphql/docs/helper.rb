@@ -41,11 +41,12 @@ module Gitlab
           MD
         end
 
-        def render_full_field(field, level = 3)
+        def render_full_field(field, level = 3, owner = nil)
           arg_header = ('#' * level) + ARG_HEADER
           [
-            render_name_and_description(field, level),
+            render_name_and_description(field, level, owner),
             render_return_type(field),
+            render_input_type(field),
             render_field_table(arg_header, field[:arguments])
           ].compact.join("\n\n")
         end
@@ -56,30 +57,32 @@ module Gitlab
           header + fields.map { |f| render_field(f) }.join("\n")
         end
 
-        def render_object_fields(fields)
+        def render_object_fields(fields, owner)
           return if fields.empty?
 
           (simple, has_args) = fields.partition { |f| f[:arguments].empty? }
+          type_name = owner[:name] if owner
 
-          [simple_fields(simple), fields_with_arguments(has_args)].compact.join("\n\n")
+          [simple_fields(simple, type_name), fields_with_arguments(has_args, type_name)].compact.join("\n\n")
         end
 
-        def simple_fields(fields)
+        def simple_fields(fields, type_name)
           render_field_table(FIELD_HEADER, sorted_by_name(fields))
         end
 
-        def fields_with_arguments(fields)
+        def fields_with_arguments(fields, type_name)
           return if fields.empty?
 
           <<~MD.chomp
             #### fields with arguments
 
-            #{sorted_by_name(fields).map { |f| render_full_field(f, 5) }.join("\n\n")}
+            #{sorted_by_name(fields).map { |f| render_full_field(f, 5, type_name) }.join("\n\n")}
           MD
         end
 
-        def render_name_and_description(object, level = 3)
-          content = ["#{'#' * level} `#{object[:name]}`"]
+        def render_name_and_description(object, level = 3, owner = nil)
+          id = owner ? "#{owner}_#{object[:name]}" : object[:name].downcase
+          content = ["#{'#' * level} `#{object[:name]}` {##{id}}"]
 
           if object[:description].present?
             desc = object[:description]
@@ -122,16 +125,21 @@ module Gitlab
           "**Deprecated:** #{object[:deprecation_reason]}"
         end
 
-        # Some fields types are arrays of other types and are displayed
-        # on docs wrapped in square brackets, for example: [String!].
-        # This makes GitLab docs renderer thinks they are links so here
-        # we change them to be rendered as: String! => Array.
         def render_field_type(type)
           "[`#{type[:info]}`](##{type[:name].downcase})"
         end
 
         def render_return_type(query)
+          return unless query[:type]
+
           "Returns #{render_field_type(query[:type])}"
+        end
+
+        def render_input_type(query)
+          input_field = query[:input_fields]&.first
+          return unless input_field
+
+          "Input type: `#{input_field[:type][:name]}`"
         end
 
         # We are ignoring connections and built in types for now,
@@ -147,7 +155,25 @@ module Gitlab
         end
 
         def queries
-          graphql_operation_types.find { |type| type[:name] == 'Query' }.to_h.values_at(:fields, :connections).flatten
+          operation_fields('Query')
+        end
+
+        def mutations
+          graphql_mutation_types.map do |t|
+            input_type_name = t[:input_fields].first[:type][:name]
+            input_type = graphql_input_object_types.find { |t| t[:name] == input_type_name }
+            arguments = input_type ? input_type[:input_fields] : t[:input_fields]
+            seen_type(input_type_name)
+            t.merge(arguments: arguments, fields: t[:return_fields])
+          end
+        end
+
+        def input_types
+          graphql_input_object_types.reject { |t| seen?(t[:name]) }
+        end
+
+        def operation_fields(name)
+          graphql_operation_types.find { |type| type[:name] == name }.to_h.values_at(:fields, :connections).flatten
         end
 
         # We ignore the built-in enum types.
