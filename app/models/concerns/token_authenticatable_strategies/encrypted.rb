@@ -88,8 +88,8 @@ module TokenAuthenticatableStrategies
 
     def find_by_encrypted_token(token, unscoped)
       encrypted_value = form_encrypted_token(token)
-
-      relation(unscoped).find_by(encrypted_field => encrypted_value)
+      token_encrypted_with_static_iv = Gitlab::CryptoHelper.aes256_gcm_encrypt(token)
+      relation(unscoped).find_by(encrypted_field => [encrypted_value, token_encrypted_with_static_iv])
     end
 
     def form_encrypted_token(token)
@@ -99,6 +99,8 @@ module TokenAuthenticatableStrategies
     end
 
     def decrypt_token(encrypted_token)
+      return unless encrypted_token
+
       if encrypted_token[0] == DYNAMIC_NONCE_IDENTIFIER
         iv = encrypted_token[-12..-1]
         token = encrypted_token[1...-12]

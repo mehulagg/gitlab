@@ -10,17 +10,34 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
     form_encrypted_token('my-value')
   end
 
+  let(:encrypted_with_static) do
+    Gitlab::CryptoHelper.aes256_gcm_encrypt('my-value')
+  end
+
   subject do
     described_class.new(model, 'some_field', options)
   end
 
   describe '#find_token_authenticatable' do
+    context 'when using required strategy' do
+      let(:options) { { encrypted: :required } }
+
+      it 'finds the encrypted resource by cleartext' do
+        allow(model).to receive(:find_by)
+          .with('some_field_encrypted' => [encrypted, encrypted_with_static])
+          .and_return('encrypted resource')
+
+        expect(subject.find_token_authenticatable('my-value'))
+          .to eq 'encrypted resource'
+      end
+    end
+
     context 'when using optional strategy' do
       let(:options) { { encrypted: :optional } }
 
       it 'finds the encrypted resource by cleartext' do
         allow(model).to receive(:find_by)
-          .with('some_field_encrypted' => encrypted)
+          .with('some_field_encrypted' => [encrypted, encrypted_with_static])
           .and_return('encrypted resource')
 
         expect(subject.find_token_authenticatable('my-value'))
@@ -33,7 +50,7 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
           .and_return('plaintext resource')
 
         allow(model).to receive(:find_by)
-          .with('some_field_encrypted' => encrypted)
+          .with('some_field_encrypted' => [encrypted, encrypted_with_static])
           .and_return(nil)
 
         expect(subject.find_token_authenticatable('my-value'))
