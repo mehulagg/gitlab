@@ -92,8 +92,14 @@ export default {
     shouldDisplayTypeOfWorkCharts() {
       return !this.hasNoAccessError;
     },
+    selectedStageReady() {
+      return !this.hasNoAccessError && this.selectedStage;
+    },
     shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
+      return this.featureFlags.hasPathNavigation && this.selectedStageReady;
+    },
+    shouldDisplayVerticalNavigation() {
+      return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
     },
     shouldDisplayCreateMultipleValueStreams() {
       return Boolean(!this.shouldRenderEmptyState && !this.isLoadingValueStreams);
@@ -255,8 +261,9 @@ export default {
           :current-stage-events="currentStageEvents"
           :no-data-svg-path="noDataSvgPath"
           :empty-state-message="selectedStageError"
+          :has-path-navigation="featureFlags.hasPathNavigation"
         >
-          <template #nav>
+          <template v-if="shouldDisplayVerticalNavigation" #nav>
             <stage-table-nav
               :current-stage="selectedStage"
               :stages="activeStages"
