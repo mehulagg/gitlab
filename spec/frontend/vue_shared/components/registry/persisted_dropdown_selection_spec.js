@@ -51,7 +51,7 @@ describe('Persisted dropdown selection', () => {
       });
     });
 
-    it('on input event updates the model and emit event', async () => {
+    it('on input event updates the model and emits event', async () => {
       const inputPayload = 'bar';
       createComponent();
       findLocalStorageSync().vm.$emit('input', inputPayload);
