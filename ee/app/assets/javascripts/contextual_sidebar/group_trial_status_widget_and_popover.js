@@ -27,7 +27,7 @@ export const initTrialStatusPopover = () => {
 
   if (!el) return undefined;
 
-  const { trialEndDate, ...props } = el.dataset;
+  const { daysRemaining, trialEndDate, ...props } = el.dataset;
 
   return new Vue({
     el,
@@ -35,6 +35,7 @@ export const initTrialStatusPopover = () => {
       createElement(TrialStatusPopover, {
         props: {
           ...props,
+          daysRemaining: Number(daysRemaining),
           trialEndDate: new Date(trialEndDate),
         },
       }),

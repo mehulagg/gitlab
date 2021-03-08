@@ -3,7 +3,7 @@ import { GlButton, GlPopover, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import { s__ } from '~/locale';
+import { n__, s__, sprintf } from '~/locale';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
 
@@ -18,6 +18,10 @@ export default {
       type: [String, null],
       required: false,
       default: null,
+    },
+    daysRemaining: {
+      type: Number,
+      required: true,
     },
     groupName: {
       type: String,
@@ -49,17 +53,28 @@ export default {
   }),
   i18n: {
     compareAllButtonTitle: s__('Trials|Compare all plans'),
-    popoverTitle: s__('Trials|Hey there'),
     popoverContent: s__(`Trials|Your trial ends on
-      %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab
-      %{planName}. To continue using GitLab %{planName} after your trial ends,
-      you will need to buy a subscription. You can also choose GitLab Premium
-      if its features are sufficient for your needs.`),
+      %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the
+      features of GitLab %{planName}. To keep those features after your trial
+      ends, you’ll need to buy a subscription. (You can also choose GitLab
+      Premium if it meets your needs.)`),
     upgradeButtonTitle: s__('Trials|Upgrade %{groupName} to %{planName}'),
   },
   computed: {
     formattedTrialEndDate() {
-      return formatDate(this.trialEndDate, 'yyyy-mm-dd');
+      return formatDate(this.trialEndDate, 'mmmm d');
+    },
+    popoverTitle() {
+      const i18nPopoverTitle = n__(
+        'Trials|You’ve got %{num} day remaining on GitLab %{planName}!',
+        'Trials|You’ve got %{num} days remaining on GitLab %{planName}!',
+        this.daysRemaining,
+      );
+
+      return sprintf(i18nPopoverTitle, {
+        planName: this.planName,
+        num: this.daysRemaining,
+      });
     },
   },
   created() {
@@ -93,10 +108,7 @@ export default {
     boundary="viewport"
     :delay="{ hide: 400 }"
   >
-    <template #title>
-      {{ $options.i18n.popoverTitle }}
-      <gl-emoji class="gl-vertical-align-baseline font-size-inherit gl-ml-1" data-name="wave" />
-    </template>
+    <template #title>{{ popoverTitle }}</template>
 
     <gl-sprintf :message="$options.i18n.popoverContent">
       <template #bold="{ content }">

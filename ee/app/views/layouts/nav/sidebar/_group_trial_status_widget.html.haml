@@ -10,6 +10,7 @@
     plans_href: group_billings_path(root_group) } }
 
   #js-trial-status-popover{ data: { container_id: 'trial-status-sidebar-widget',
+    days_remaining: root_group.trial_days_remaining,
     group_name: root_group.name,
     plan_name: plan_title_for_group(root_group),
     plans_href: group_billings_path(root_group),
