@@ -24,8 +24,9 @@ module Banzai
     # This filter does the initial surrounding, and MarkdownPostEscapeFilter
     # does the conversion into span tags.
     class MarkdownPreEscapeFilter < HTML::Pipeline::TextFilter
-      ASCII_PUNCTUATION   = %r{([\\][!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~])}.freeze
-      LITERAL_KEYWORD     = 'cmliteral'
+      # We just need to target those that are special GitLab references
+      ASCII_PUNCTUATION = %r{([\\][@#!$&~%^])}.freeze
+      LITERAL_KEYWORD   = 'cmliteral'
 
       def call
         return @text unless Feature.enabled?(:honor_escaped_markdown, context[:group] || context[:project]&.group)
