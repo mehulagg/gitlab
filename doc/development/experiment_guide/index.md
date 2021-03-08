@@ -38,16 +38,19 @@ addressed.
 
 ## Implement an experiment
 
-Currently, there are two options to conduct experiments:
+There are two options to conduct experiments:
 
-1. [GitLab Experiment](https://gitlab.com/gitlab-org/gitlab-experiment/) is a gem included in GitLab
-1. [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb) is built in the GitLab codebase
+1. [GitLab Experiment](https://gitlab.com/gitlab-org/gitlab-experiment/) is a gem included in GitLab.
+1. [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb) is built in the GitLab codebase.
 
-Historical Context: `experimentation.rb` was built iteratively with the needs that appeared while implementing experiments in Growth. The `gitlab-experiment` gem was built with the learnings of `experimentation.rb` and an easier to use API.
+Both methods use [experiment](../feature_flags/development.md#experiment-type) feature flags.
 
-Currently there is no decision yet made which of these two ways we'll use in the future.
-If you need to record conducted experiments and usage into the database, we currently recommend using `experimentation.rb`.
-If you want to conduct a [multivariate](https://en.wikipedia.org/wiki/Multivariate_statistics) experiment, we recommend using `gitlab-experiment`.
+Historical Context: `experimentation.rb` was built iteratively with the needs that appeared while implementing Growth sub-department experiments. The `gitlab-experiment` gem was built with the learnings of `experimentation.rb` and an easier to use API.
+
+Currently both methods for running experiments are included in the codebase. When considering which to use:
+
+- If you need to record conducted experiments and usage into the database, we currently recommend using `experimentation.rb`.
+- If you want to conduct a [multivariate](https://en.wikipedia.org/wiki/Multivariate_statistics) experiment, we recommend using `gitlab-experiment`.
 
 Otherwise, there is currently no strong suggestion to use one over the other.
 
