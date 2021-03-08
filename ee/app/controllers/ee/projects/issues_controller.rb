@@ -10,8 +10,13 @@ module EE
         include DescriptionDiffActions
 
         before_action :whitelist_query_limiting_ee, only: [:update]
+
         before_action only: [:new, :create] do
           populate_vulnerability_id
+        end
+
+        before_action only: :show do
+          push_frontend_feature_flag(:cve_id_request_button, project)
         end
 
         before_action :redirect_if_test_case, only: [:show]
