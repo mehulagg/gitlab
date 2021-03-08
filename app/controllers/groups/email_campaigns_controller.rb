@@ -18,13 +18,20 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
   private
 
   def track_click
+    # rubocop: disable CodeReuse/ActiveRecord
+    Namespaces::InProductMarketingEmail.find_by(
+      user: current_user,
+      track: @track,
+      series: @series
+    )&.cta_clicked
+    # rubocop: enable CodeReuse/ActiveRecord
+
     data = {
       namespace_id: group.id,
       track: @track,
       series: @series,
       subject_line: subject_line(@track, @series)
     }
-
     track_self_describing_event(EMAIL_CAMPAIGNS_SCHEMA_URL, data: data)
   end
 

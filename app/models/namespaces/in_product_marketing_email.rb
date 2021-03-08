@@ -22,5 +22,9 @@ module Namespaces
       trial: 2,
       team: 3
     }, _suffix: true
+
+    def cta_clicked
+      update(cta_clicked_at: Time.zone.now)
+    end
   end
 end

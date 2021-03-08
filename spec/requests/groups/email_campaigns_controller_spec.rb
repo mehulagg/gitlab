@@ -34,8 +34,21 @@ RSpec.describe Groups::EmailCampaignsController do
     end
 
     shared_examples 'track and redirect' do
-      it do
+      it 'tracks snowplow event' do
         is_expected.to track_self_describing_event(schema, data)
+      end
+
+      context 'when InProductMarketingEmail exists' do
+        it 'updates cta click' do
+          create(:in_product_marketing_email, user: user, namespace: group, track: track, series: series)
+
+          subject
+
+          expect(Namespaces::InProductMarketingEmail.last.cta_clicked_at).to be_present
+        end
+      end
+
+      it 'redirects' do
         is_expected.to have_gitlab_http_status(:redirect)
       end
     end
