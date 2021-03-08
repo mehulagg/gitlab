@@ -144,7 +144,7 @@ Let's take a short look into Vue land. Vue is a critical part of the GitLab Java
 </template>
 ```
 
-Testing the `hasMetricTypes` computed prop would seem like a given here. But to test if the computed property is returning the length of `metricTypes`, is testing the Vue library itself. There is no value in this, besides it adding to the test suite. Better is to test it in the way the user interacts with it: checking the rendered template
+Testing the `hasMetricTypes` computed prop would seem like a given here. But to test if the computed property is returning the length of `metricTypes`, is testing the Vue library itself. There is no value in this, besides it adding to the test suite. It's better to test a component in the way the user interacts with it: checking the rendered template.
 
 ```javascript
 // Bad
