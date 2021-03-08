@@ -20,6 +20,16 @@ RSpec.describe Gitlab::Pages::Settings do
         expect { subject }.to raise_error(described_class::DiskAccessDenied)
       end
     end
+
+    context 'when legacy storage is disabled' do
+      before do
+        allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
+      end
+
+      it 'raises a DiskAccessDenied exception' do
+        expect { subject }.to raise_error(described_class::DiskAccessDenied)
+      end
+    end
   end
 
   describe '#local_store' do
