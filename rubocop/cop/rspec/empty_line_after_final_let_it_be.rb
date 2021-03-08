@@ -5,6 +5,19 @@ require 'rubocop-rspec'
 module RuboCop
   module Cop
     module RSpec
+      # Checks if there is an empty line after the last `let_it_be` block.
+      #
+      # @example
+      #   # bad
+      #   let_it_be(:foo) { bar }
+      #   let_it_be(:something) { other }
+      #   it { does_something }
+      #
+      #   # good
+      #   let_it_be(:foo) { bar }
+      #   let_it_be(:something) { other }
+      #
+      #   it { does_something }
       class EmptyLineAfterFinalLetItBe < RuboCop::Cop::Base
         extend RuboCop::Cop::AutoCorrector
         include RuboCop::RSpec::EmptyLineSeparation
