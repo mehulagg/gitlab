@@ -9236,8 +9236,10 @@ msgstr ""
 msgid "CycleAnalytics|Show"
 msgstr ""
 
-msgid "CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels"
-msgstr ""
+msgid "CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} label"
+msgid_plural "CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "CycleAnalytics|Showing data for group '%{groupName}' and %{selectedProjectCount} projects from %{startDate} to %{endDate}"
 msgstr ""

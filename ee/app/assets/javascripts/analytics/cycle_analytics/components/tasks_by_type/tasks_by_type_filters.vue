@@ -1,7 +1,7 @@
 <script>
 import { GlDropdownDivider, GlSegmentedControl, GlIcon } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { s__, sprintf } from '~/locale';
+import { s__, n__, sprintf } from '~/locale';
 import {
   TASKS_BY_TYPE_FILTERS,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
@@ -47,14 +47,19 @@ export default {
     },
     selectedFiltersText() {
       const { subjectFilter, selectedLabelIds } = this;
+      const selectedLabelsCount = selectedLabelIds.length;
       const subjectFilterText = TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
         ? TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
         : TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[TASKS_BY_TYPE_SUBJECT_ISSUE];
       return sprintf(
-        s__('CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels'),
+        n__(
+          'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} label',
+          'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels',
+          selectedLabelsCount,
+        ),
         {
           subjectFilterText,
-          selectedLabelsCount: selectedLabelIds.length,
+          selectedLabelsCount,
         },
       );
     },
@@ -101,6 +106,7 @@ export default {
     </div>
     <div class="flex-column">
       <labels-selector
+        data-testid="type-of-work-filters-label"
         :default-selected-labels-ids="selectedLabelIds"
         :max-labels="maxLabels"
         :aria-label="__('CycleAnalytics|Display chart filters')"
@@ -118,6 +124,7 @@ export default {
           <div class="mb-3 px-3">
             <p class="font-weight-bold text-left mb-2">{{ s__('CycleAnalytics|Show') }}</p>
             <gl-segmented-control
+              data-testid="type-of-work-filters-subject"
               :checked="subjectFilter"
               :options="subjectFilterOptions"
               @input="
