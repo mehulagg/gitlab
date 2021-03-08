@@ -85,10 +85,6 @@ RSpec.describe OperationsHelper, :routing do
 
         it { is_expected.to include('multi_integrations' => 'true') }
 
-        context 'with multiple_http_integrations_custom_mapping feature flag enabled' do
-          before do
-            stub_feature_flags(multiple_http_integrations_custom_mapping: true)
-          end
 
           it 'has the correct list of fields', :aggregate_failures do
             fields = Gitlab::Json.parse(alerts_settings_data['alert_fields'])
@@ -99,15 +95,6 @@ RSpec.describe OperationsHelper, :routing do
               %w[title description start_time end_time service monitoring_tool hosts severity fingerprint gitlab_environment_name]
             )
           end
-        end
-
-        context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
-          before do
-            stub_feature_flags(multiple_http_integrations_custom_mapping: false)
-          end
-
-          it { is_expected.not_to have_key('alert_fields') }
-        end
       end
 
       context 'when not available' do

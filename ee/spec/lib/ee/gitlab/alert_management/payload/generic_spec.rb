@@ -106,7 +106,6 @@ RSpec.describe Gitlab::AlertManagement::Payload::Generic do
         stub_licensed_features(multiple_alert_http_integrations: project)
       end
 
-      context 'with multiple_http_integrations_custom_mapping feature flag enabled' do
         let_it_be(:attribute_mapping) do
           {
             title: { path: %w(alert name), type: 'string' },
@@ -123,10 +122,6 @@ RSpec.describe Gitlab::AlertManagement::Payload::Generic do
         end
 
         let(:parsed_payload) { described_class.new(project: project, payload: raw_payload, integration: integration) }
-
-        before do
-          stub_feature_flags(multiple_http_integrations_custom_mapping: project)
-        end
 
         context 'with defined custom mapping' do
           let_it_be(:integration) do
@@ -269,15 +264,7 @@ RSpec.describe Gitlab::AlertManagement::Payload::Generic do
 
           it_behaves_like 'parsing alert payload fields with default paths'
         end
-      end
 
-      context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
-        before do
-          stub_feature_flags(multiple_http_integrations_custom_mapping: false)
-        end
-
-        it_behaves_like 'parsing alert payload fields with default paths'
-      end
     end
 
     context 'with multiple HTTP integrations feature unavailable' do

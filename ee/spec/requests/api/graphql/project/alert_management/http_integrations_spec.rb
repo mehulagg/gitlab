@@ -57,7 +57,6 @@ RSpec.describe 'getting Alert Management HTTP Integrations' do
 
   before do
     stub_licensed_features(multiple_alert_http_integrations: true)
-    stub_feature_flags(multiple_http_integrations_custom_mapping: project)
   end
 
   before_all do

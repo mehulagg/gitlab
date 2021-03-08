@@ -47,40 +47,13 @@ RSpec.describe 'Updating an existing HTTP Integration' do
 
   let(:mutation_response) { graphql_mutation_response(:http_integration_update) }
 
-  shared_examples 'ignoring the custom mapping' do
-    it 'updates integration without the custom mapping params' do
-      post_graphql_mutation(mutation, current_user: current_user)
-
-      expect(response).to have_gitlab_http_status(:success)
-      expect(integration.payload_example).to eq({})
-      expect(integration.payload_attribute_mapping).to eq({})
-    end
-  end
-
   before do
     project.add_maintainer(current_user)
 
     stub_licensed_features(multiple_alert_http_integrations: true)
-    stub_feature_flags(multiple_http_integrations_custom_mapping: project)
   end
 
   it_behaves_like 'updating an existing HTTP integration'
   it_behaves_like 'validating the payload_example'
   it_behaves_like 'validating the payload_attribute_mappings'
-
-  context 'with the custom mappings feature unavailable' do
-    before do
-      stub_licensed_features(multiple_alert_http_integrations: false)
-    end
-
-    it_behaves_like 'ignoring the custom mapping'
-  end
-
-  context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
-    before do
-      stub_feature_flags(multiple_http_integrations_custom_mapping: false)
-    end
-
-    it_behaves_like 'ignoring the custom mapping'
-  end
 end
