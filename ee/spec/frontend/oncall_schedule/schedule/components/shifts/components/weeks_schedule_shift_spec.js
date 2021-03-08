@@ -131,12 +131,12 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
 
     it('calculates the correct rotation assignee styles when the shift does not start at the beginning of the time-frame cell', () => {
       /**
-       * Where left should be 70px i.e. ((CELL_WIDTH / HOURS_IN_DAY) * overlapStartDate + dayOffSet)(50 / 24 * 10) + 50;
-       * and width should be 2px ((CELL_WIDTH / HOURS_IN_DAY) * hoursOverlap - ASSIGNEE_SPACER) (((50 / 24) * 2) - 2)
+       * Where left should be 71px i.e. ((CELL_WIDTH / HOURS_IN_DAY) * overlapStartDate + dayOffSet)(50 / 24 * 10) + 51;
+       * and width should be 4px ((CELL_WIDTH / HOURS_IN_DAY) * hoursOverlap - ASSIGNEE_SPACER) (((50 / 24) * 2))
        */
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
-        left: '70px',
-        width: '2px',
+        left: '71px',
+        width: '4px',
       });
     });
   });
