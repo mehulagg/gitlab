@@ -3,19 +3,14 @@
 module Mutations
   module IncidentManagement
     module OncallRotation
-      class Create < Base
+      class Update < Base
         include ResolvesProject
 
-        graphql_name 'OncallRotationCreate'
+        graphql_name 'OncallRotationUpdate'
 
-        argument :project_path, GraphQL::ID_TYPE,
+        argument :id, ::Types::GlobalIDType[::IncidentManagement::OncallRotation],
                  required: true,
-                 description: 'The project to create the on-call schedule in.'
-
-        argument :schedule_iid, GraphQL::STRING_TYPE,
-                 required: true,
-                 description: 'The IID of the on-call schedule to create the on-call rotation in.',
-                 as: :iid
+                 description: 'The ID of the on-call schedule to create the on-call rotation in.'
 
         argument :name, GraphQL::STRING_TYPE,
                  required: true,
@@ -42,28 +37,26 @@ module Mutations
                  required: true,
                  description: 'The usernames of users participating in the on-call rotation.'
 
-        def resolve(iid:, project_path:, participants:, **args)
-          project = Project.find_by_full_path(project_path)
+        def resolve(id:, participants:, **args)
+          rotation = authorized_find!(id: id)
 
-          raise_project_not_found unless project
-
-          schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iid)
-                                                                .execute
-                                                                .first
-
-          raise_schedule_not_found unless schedule
-
-          result = ::IncidentManagement::OncallRotations::CreateService.new(
-            schedule,
-            project,
+          result = ::IncidentManagement::OncallRotations::EditService.new(
+            rotation,
             current_user,
-            service_params(schedule, participants, args)
+            service_params(rotation.schedule, participants, args)
           ).execute
 
           response(result)
+        end
 
-        rescue ActiveRecord::RecordInvalid => e
-          raise Gitlab::Graphql::Errors::ArgumentError, e.message
+        private
+
+        def find_object(id:)
+          GitlabSchema.object_from_id(id, expected_type: ::IncidentManagement::OncallRotation)
+        end
+
+        def raise_rotation_not_found
+          raise Gitlab::Graphql::Errors::ArgumentError, 'The rotation could not be found'
         end
       end
     end
