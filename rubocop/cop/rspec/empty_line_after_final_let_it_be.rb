@@ -5,26 +5,28 @@ require 'rubocop-rspec'
 module RuboCop
   module Cop
     module RSpec
-      class EmptyLineAfterFinalLetItBe < RuboCop::Cop::RSpec::Base
-        MSG = 'Add an empty line after the last `%<let>s`.'
+      class EmptyLineAfterFinalLetItBe < RuboCop::Cop::Base
+        extend RuboCop::Cop::AutoCorrector
+        include RuboCop::RSpec::EmptyLineSeparation
+        include RuboCop::RSpec::Language::NodePattern
+
+        MSG = 'Add an empty line after the last `let_it_be`.'
 
         def_node_matcher :let_it_be?, <<-PATTERN
           {
-            #{block_pattern('#Helpers.all')}
-            (send #rspec? #Helpers.all _ block_pass)
+            (block (send #rspec? :let_it_be ...) ...)
+            (send #rspec? :let_it_be _ block_pass)
           }
         PATTERN
 
         def on_block(node)
           return unless example_group_with_body?(node)
 
-          final_let = node.body.child_nodes.reverse.find { |child| let_it_be?(child) }
+          final_let_it_be = node.body.child_nodes.reverse.find { |child| let_it_be?(child) }
 
-          return if final_let.nil?
+          return if final_let_it_be.nil?
 
-          missing_separating_line_offense(final_let) do |method|
-            format(MSG, let: method)
-          end
+          missing_separating_line_offense(final_let_it_be) { MSG }
         end
       end
     end

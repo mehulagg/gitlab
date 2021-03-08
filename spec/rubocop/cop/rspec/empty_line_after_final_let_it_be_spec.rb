@@ -61,7 +61,7 @@ RSpec.describe RuboCop::Cop::RSpec::EmptyLineAfterFinalLetItBe do
           <<~SRC
             RSpec.describe Something do
               let_it_be(:foo) { :bar }
-              ^^^^^^^^^^^^^^^^^^^^^^^^^ Add an empty line after the last `let_it_be`.
+              ^^^^^^^^^^^^^^^^^^^^^^^^ Add an empty line after the last `let_it_be`.
               before do
                 do_something_important!
               end
