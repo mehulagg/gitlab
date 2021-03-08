@@ -19,8 +19,6 @@ describe('SubscriptionTable component', () => {
   let store;
   let wrapper;
 
-  const defaultFlags = { saasAddSeatsButton: false };
-
   const findAddSeatsButton = () => wrapper.findByTestId('add-seats-button');
   const findManageButton = () => wrapper.findByTestId('manage-button');
   const findRenewButton = () => wrapper.findByTestId('renew-button');
@@ -45,7 +43,6 @@ describe('SubscriptionTable component', () => {
           planName,
           ...provide,
           glFeatures: {
-            defaultFlags,
             ...featureFlags,
           },
         },
@@ -120,7 +117,7 @@ describe('SubscriptionTable component', () => {
       ${null}     | ${false} | ${'does not render the button'}
       ${'free'}   | ${false} | ${'does not render the button'}
     `(
-      'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
+      'given a plan with state: planCode = $planCode',
       ({ planCode, upgradable, expected, testDescription }) => {
         beforeEach(() => {
           createComponentWithStore({
@@ -170,19 +167,15 @@ describe('SubscriptionTable component', () => {
 
   describe('Add seats button', () => {
     describe.each`
-      planCode    | featureFlag | expected | testDescription
-      ${'silver'} | ${true}     | ${true}  | ${'renders the button'}
-      ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
-      ${null}     | ${true}     | ${false} | ${'does not render the button'}
-      ${null}     | ${false}    | ${false} | ${'does not render the button'}
-      ${'free'}   | ${true}     | ${false} | ${'does not render the button'}
-      ${'free'}   | ${false}    | ${false} | ${'does not render the button'}
+      planCode    | expected | testDescription
+      ${'silver'} | ${true}  | ${'renders the button'}
+      ${null}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false} | ${'does not render the button'}
     `(
-      'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
-      ({ planCode, featureFlag, expected, testDescription }) => {
+      'given a plan with state: planCode = $planCode',
+      ({ planCode, expected, testDescription }) => {
         beforeEach(() => {
           createComponentWithStore({
-            featureFlags: { saasAddSeatsButton: featureFlag },
             state: {
               isLoadingSubscription: false,
               plan: {
