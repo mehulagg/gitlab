@@ -45,6 +45,11 @@ module Elastic
       !!load_state&.dig('halted')
     end
 
+    def halt!(additional_options)
+      state = { halted: true, halted_indexing_unpaused: false }.merge(additional_options)
+      save_state!(state)
+    end
+
     def name_for_key
       name.underscore
     end

@@ -159,7 +159,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
           end
 
           it 'halts the migration if there is not enough space' do
-            allow(helper).to receive(:cluster_free_size_bytes).and_return(0)
+            allow(helper).to receive(:cluster_free_size_bytes).and_return(5)
             expect(migration).to receive(:save_state!).with(halted: true)
             expect(migration).not_to receive(:migrate)
 
