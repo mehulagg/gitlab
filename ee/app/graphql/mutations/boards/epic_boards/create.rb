@@ -6,6 +6,7 @@ module Mutations
       class Create < ::Mutations::BaseMutation
         include Mutations::ResolvesGroup
         include Mutations::Boards::CommonMutationArguments
+        prepend Mutations::Boards::ScopedBoardMutation
 
         graphql_name 'EpicBoardCreate'
 
