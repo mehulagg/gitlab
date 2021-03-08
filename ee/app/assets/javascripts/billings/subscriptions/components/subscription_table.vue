@@ -43,17 +43,14 @@ export default {
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
     ...mapGetters(['isFreePlan']),
+    isSubscription() {
+      return !this.isFreePlan;
+    },
     subscriptionHeader() {
       const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.planName);
       const suffix = !this.isFreePlan && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
-    },
-    canAddSeats() {
-      return !this.isFreePlan;
-    },
-    canRenew() {
-      return !this.isFreePlan;
     },
     canUpgrade() {
       return this.isFreePlan || this.plan.upgradable;
@@ -62,7 +59,7 @@ export default {
       return !this.isFreePlan && this.planUpgradeHref;
     },
     addSeatsButton() {
-      return this.canAddSeats
+      return this.isSubscription
         ? createButtonProps(
             s__('SubscriptionTable|Add seats'),
             this.addSeatsHref,
@@ -83,7 +80,7 @@ export default {
       return this.canUpgradeEEPlan ? this.planUpgradeHref : this.customerPortalUrl;
     },
     renewButton() {
-      return this.canRenew
+      return this.isSubscription
         ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref, 'renew-button')
         : null;
     },
