@@ -39,6 +39,14 @@ export default () => {
     }
   });
 
+  if (gon?.features?.boardsFilteredSearch) {
+    import('ee/boards/filtered_search')
+      .then(({ default: initFilteredSearch }) => {
+        initFilteredSearch(apolloProvider);
+      })
+      .catch(() => {});
+  }
+
   // eslint-disable-next-line no-new
   new Vue({
     el: $boardApp,

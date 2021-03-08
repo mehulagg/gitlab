@@ -36,6 +36,7 @@ export default {
 
       historyPushState(setUrlParams({ search: itemValue }, window.location.href));
 
+      // for epics perform search shouldnt handle issues and epics
       this.performSearch();
     },
   },

@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import FilteredSearch from '~/boards/components/filtered_search.vue';
+import EpicFilteredSearch from 'ee_component/boards/components/filtered_search.vue';
 import { createStore } from '~/boards/stores';
 import * as commonUtils from '~/lib/utils/common_utils';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
@@ -8,12 +8,12 @@ import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/f
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe('FilteredSearch', () => {
+describe('EpicFilteredSearch', () => {
   let wrapper;
   let store;
 
   const createComponent = () => {
-    wrapper = shallowMount(FilteredSearch, {
+    wrapper = shallowMount(EpicFilteredSearch, {
       localVue,
       propsData: { search: '' },
       store,
