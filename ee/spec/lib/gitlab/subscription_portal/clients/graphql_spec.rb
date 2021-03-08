@@ -123,4 +123,41 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
       end
     end
   end
+
+  describe '#last_term' do
+    it 'returns success' do
+      expect(client).to receive(:execute_graphql_query).and_return(
+        {
+          success: true,
+          data: {
+            "data" => {
+              "subscription" => {
+                "lastTerm" => true
+              }
+            }
+          }
+        }
+      )
+
+      result = client.last_term('namespace-id')
+
+      expect(result).to eq({ last_term: true, success: true })
+    end
+
+    it 'returns failure' do
+      error = { "message" => "some error" }
+      expect(client).to receive(:execute_graphql_query).and_return(
+        {
+          success: false,
+          data: {
+            "errors" => [error]
+          }
+        }
+      )
+
+      result = client.last_term('failing-namespace-id')
+
+      expect(result).to eq({ errors: [error], success: false })
+    end
+  end
 end

@@ -57,6 +57,24 @@ module Gitlab
             end
           end
 
+          def last_term(namespace_id)
+            query = <<~GQL
+              {
+                subscription(namespaceId: "#{namespace_id}") {
+                  lastTerm
+                }
+              }
+            GQL
+
+            response = execute_graphql_query(query)
+
+            if response[:success]
+              { success: true, last_term: response.dig(:data, 'data', 'subscription', 'lastTerm') }
+            else
+              { success: false, errors: response.dig(:data, 'errors') }
+            end
+          end
+
           private
 
           def execute_graphql_query(query)
