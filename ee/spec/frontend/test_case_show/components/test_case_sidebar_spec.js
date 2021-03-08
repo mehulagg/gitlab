@@ -9,7 +9,6 @@ import { keysFor, ISSUABLE_CHANGE_LABEL } from '~/behaviors/shortcuts/keybinding
 import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
-
 import { mockProvide, mockTestCase } from '../mock_data';
 
 const createComponent = ({
