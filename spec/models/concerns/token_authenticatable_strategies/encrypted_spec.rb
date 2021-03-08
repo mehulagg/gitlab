@@ -10,7 +10,7 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
     form_encrypted_token('my-value')
   end
 
-  let(:encrypted_with_static) do
+  let(:encrypted_with_static_iv) do
     Gitlab::CryptoHelper.aes256_gcm_encrypt('my-value')
   end
 
@@ -24,7 +24,7 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
 
       it 'finds the encrypted resource by cleartext' do
         allow(model).to receive(:find_by)
-          .with('some_field_encrypted' => [encrypted, encrypted_with_static])
+          .with('some_field_encrypted' => [encrypted, encrypted_with_static_iv])
           .and_return('encrypted resource')
 
         expect(subject.find_token_authenticatable('my-value'))
@@ -37,7 +37,7 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
 
       it 'finds the encrypted resource by cleartext' do
         allow(model).to receive(:find_by)
-          .with('some_field_encrypted' => [encrypted, encrypted_with_static])
+          .with('some_field_encrypted' => [encrypted, encrypted_with_static_iv])
           .and_return('encrypted resource')
 
         expect(subject.find_token_authenticatable('my-value'))
@@ -50,7 +50,7 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
           .and_return('plaintext resource')
 
         allow(model).to receive(:find_by)
-          .with('some_field_encrypted' => [encrypted, encrypted_with_static])
+          .with('some_field_encrypted' => [encrypted, encrypted_with_static_iv])
           .and_return(nil)
 
         expect(subject.find_token_authenticatable('my-value'))
@@ -82,6 +82,26 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
   end
 
   describe '#get_token' do
+    context 'when using required strategy' do
+      let(:options) { { encrypted: :required } }
+
+      it 'returns decrypted token when an encrypted with static iv token is present' do
+        allow(instance).to receive(:read_attribute)
+          .with('some_field_encrypted')
+          .and_return(Gitlab::CryptoHelper.aes256_gcm_encrypt('my-test-value'))
+
+        expect(subject.get_token(instance)).to eq 'my-test-value'
+      end
+
+      it 'returns decrypted token when an encrypted token is present' do
+        allow(instance).to receive(:read_attribute)
+          .with('some_field_encrypted')
+          .and_return(encrypted)
+
+        expect(subject.get_token(instance)).to eq 'my-value'
+      end
+    end
+
     context 'when using optional strategy' do
       let(:options) { { encrypted: :optional } }
 
@@ -91,6 +111,14 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
           .and_return(encrypted)
 
         expect(subject.get_token(instance)).to eq 'my-value'
+      end
+
+      it 'returns decrypted token when an encrypted with static iv token is present' do
+        allow(instance).to receive(:read_attribute)
+          .with('some_field_encrypted')
+          .and_return(Gitlab::CryptoHelper.aes256_gcm_encrypt('my-test-value'))
+
+        expect(subject.get_token(instance)).to eq 'my-test-value'
       end
 
       it 'returns the plaintext token when encrypted token is not present' do
@@ -136,12 +164,22 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
   end
 
   describe '#set_token' do
+    context 'when using required strategy' do
+      let(:options) { { encrypted: :required } }
+
+      it 'writes encrypted token returns it' do
+        expect(instance).to receive(:[]=)
+          .with('some_field_encrypted', form_encrypted_token('my-value'))
+
+        expect(subject.set_token(instance, 'my-value')).to eq 'my-value'
+      end
+    end
     context 'when using optional strategy' do
       let(:options) { { encrypted: :optional } }
 
       it 'writes encrypted token and removes plaintext token and returns it' do
         expect(instance).to receive(:[]=)
-          .with('some_field_encrypted', any_args)
+          .with('some_field_encrypted', form_encrypted_token('my-value'))
         expect(instance).to receive(:[]=)
           .with('some_field', nil)
 
@@ -154,7 +192,7 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
 
       it 'writes encrypted token and writes plaintext token' do
         expect(instance).to receive(:[]=)
-          .with('some_field_encrypted', any_args)
+          .with('some_field_encrypted', form_encrypted_token('my-value'))
         expect(instance).to receive(:[]=)
           .with('some_field', 'my-value')
 
