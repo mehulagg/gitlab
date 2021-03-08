@@ -50,7 +50,7 @@ export default {
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
     canAddSeats() {
-      return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
+      return !this.isFreePlan;
     },
     canRenew() {
       return !this.isFreePlan;
