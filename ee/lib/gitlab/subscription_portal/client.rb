@@ -74,6 +74,65 @@ module Gitlab
           end
         end
 
+        def plan_data(plan_tags)
+          # CI_1000_MINUTES_PLAN
+          query = <<~GQL
+            {
+              query {
+                plans(planTags: "#{plan_tags}") {
+                  name,
+                  code,
+                  active,
+                  deprecated,
+                  free,
+                  pricePerMonth,
+                  pricePerYear,
+                  features,
+                  aboutPageHref,
+                  hideDeprecatedCard,
+                }
+              }
+            }
+          GQL
+
+          response = http_post("graphql", admin_headers, { query: query }).dig(:data)
+
+          if response['errors'].blank?
+            plans = response.dig('data', 'plans').map do |plan|
+              name = response.dig('data', 'plans', 'name')
+              code = response.dig('data', 'plans', 'code')
+              active = response.dig('data', 'plans', 'active')
+              deprecated = response.dig('data', 'plans', 'deprecated')
+              free = response.dig('data', 'plans', 'free')
+              price_per_month = response.dig('data', 'plans', 'pricePerMonth')
+              price_per_year = response.dig('data', 'plans', 'pricePerYear')
+              features = response.dig('data', 'plans', 'features')
+              about_page_href = response.dig('data', 'plans', 'aboutPageHref')
+              hide_deprecated_card = response.dig('data', 'plans', 'hideDeprecatedCard')
+
+              {
+                name: name,
+                code: code,
+                active: active,
+                deprecated: deprecated,
+                free: free,
+                price_per_month: price_per_month,
+                price_per_year: price_per_year,
+                features: features,
+                about_page_href: about_page_href,
+                hide_deprecated_card: hide_deprecated_card
+              }
+            end
+
+            {
+              success: true,
+              plans: plans
+            }
+          else
+            { success: false }
+          end
+        end
+
         private
 
         def http_get(path, headers)

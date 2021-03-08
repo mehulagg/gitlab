@@ -14,6 +14,11 @@ module EE
                    description: 'Find an iteration by its ID.'
         end
 
+        field :plans, [::Types::Subscriptions::PlanType],
+              null: true,
+              resolver: ::Resolvers::Subscriptions::PlansResolver,
+              description: "Find plans."
+
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
               null: true,
