@@ -69,7 +69,7 @@ export default {
         :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
       />
 
-      <h3 class="gl-font-lg">{{ __('Registry setup') }}</h3>
+      <h3 class="gl-font-lg">{{ n__('PackageRegistry|Registry setup') }}</h3>
       <p>
         <gl-sprintf :message="$options.i18n.setupText">
           <template #code="{ content }">
