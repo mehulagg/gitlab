@@ -71,14 +71,22 @@ module WorkerAttributes
       class_attributes[:urgency] || :low
     end
 
-    def data_consistency(data_consistency)
+    def data_consistency(data_consistency, feature_flag: nil)
       raise "Invalid data consistency: #{data_consistency}" unless VALID_DATA_CONSISTENCIES.include?(data_consistency)
+      raise "Class can't be marked as idempotent if data_consistency is not set to :always" if idempotent? && data_consistency != :always
 
+      class_attributes[:data_consistency_feature_flag] = feature_flag if feature_flag
       class_attributes[:data_consistency] = data_consistency
     end
 
     def get_data_consistency
       class_attributes[:data_consistency] || :always
+    end
+
+    def get_data_consistency_feature_flag_enabled?
+      return true unless class_attributes[:data_consistency_feature_flag]
+
+      Feature.enabled?(class_attributes[:data_consistency_feature_flag], default_enabled: :yaml)
     end
 
     # Set this attribute on a job when it will call to services outside of the
@@ -107,6 +115,8 @@ module WorkerAttributes
     end
 
     def idempotent!
+      raise "Class can't be marked as idempotent if data_consistency is not set to :always" unless get_data_consistency == :always
+
       class_attributes[:idempotent] = true
     end
 

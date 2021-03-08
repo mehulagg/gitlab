@@ -13,17 +13,15 @@ Gitlab.ee do
 
       Gitlab::Database::LoadBalancing.configure_proxy
 
-      if Gitlab::Database::LoadBalancing.load_balancing_for_sidekiq?
-        Sidekiq.configure_server do |config|
-          config.server_middleware do |chain|
-            chain.add(Gitlab::Database::LoadBalancing::SidekiqServerMiddleware)
-          end
+      Sidekiq.configure_server do |config|
+        config.server_middleware do |chain|
+          chain.add(Gitlab::Database::LoadBalancing::SidekiqServerMiddleware)
         end
+      end
 
-        Sidekiq.configure_client do |config|
-          config.client_middleware do |chain|
-            chain.add(Gitlab::Database::LoadBalancing::SidekiqClientMiddleware)
-          end
+      Sidekiq.configure_client do |config|
+        config.client_middleware do |chain|
+          chain.add(Gitlab::Database::LoadBalancing::SidekiqClientMiddleware)
         end
       end
 

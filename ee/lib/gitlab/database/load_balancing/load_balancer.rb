@@ -145,39 +145,7 @@ module Gitlab
         # Returns true if all hosts have caught up to the given transaction
         # write location.
         def all_caught_up?(location)
-          if logging_for_all_caught_up_method?
-            all_caught_up = true
-            caught_up_count = 0
-            @host_list.hosts.each do |host|
-              if host.caught_up?(location)
-                caught_up_count += 1
-              else
-                all_caught_up = false
-              end
-            end
-
-            unless all_caught_up
-              LoadBalancing::Logger.warn(
-                event: :hosts_not_caught_up,
-                message: 'Not all Hosts have caught up to the given transaction write location.',
-                caught_up_count: caught_up_count,
-                sidekiq: Gitlab::Runtime.sidekiq?,
-                web_server: Gitlab::Runtime.web_server?,
-                host_list_length: @host_list.length
-              )
-            end
-
-            all_caught_up
-          else
-            @host_list.hosts.all? { |host| host.caught_up?(location) }
-          end
-        end
-
-        def logging_for_all_caught_up_method?
-          return @logging_for_all_caught_up_method if defined?(@logging_for_all_caught_up_method)
-
-          @logging_for_all_caught_up_method = false
-          @logging_for_all_caught_up_method = ::Feature.enabled?(:logging_for_all_caught_up_method)
+          @host_list.hosts.all? { |host| host.caught_up?(location) }
         end
 
         # Yields a block, retrying it upon error using an exponential backoff.

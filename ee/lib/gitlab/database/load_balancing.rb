@@ -84,21 +84,14 @@ module Gitlab
 
       # Returns true if load balancing is to be enabled.
       def self.enable?
-        return false if program_name == 'rake' || disabled_for_sidekiq?
+        return false if Gitlab::Runtime.rake? || disabled_for_sidekiq
         return false unless self.configured?
 
         true
       end
 
-      def self.disabled_for_sidekiq?
-        Gitlab::Runtime.sidekiq? && !load_balancing_for_sidekiq?
-      end
-
-      def self.load_balancing_for_sidekiq?
-        return @load_balancing_for_sidekiq if defined?(@load_balancing_for_sidekiq)
-
-        @load_balancing_for_sidekiq = false
-        @load_balancing_for_sidekiq = ::Feature.enabled?(:load_balancer_for_sidekiq)
+      def self.disabled_for_sidekiq
+        Gitlab::Runtime.sidekiq? && ENV['ENABLE_LOAD_BALANCING_FOR_SIDEKIQ'] != 'true'
       end
 
       # Returns true if load balancing has been configured. Since
@@ -124,7 +117,6 @@ module Gitlab
         #   -> Set @feature_available  to true
         #   -> return true
         # - Second call: return @feature_available right away
-
         return @feature_available if defined?(@feature_available)
 
         @feature_available = false
@@ -151,7 +143,7 @@ module Gitlab
       # Clear configuration
       def self.clear_configuration
         @proxy = nil
-        remove_instance_variable(:@feature_available)
+        remove_instance_variable(:@feature_available) if defined?(@feature_available)
       end
 
       def self.active_record_models
