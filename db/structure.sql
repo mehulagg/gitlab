@@ -9359,8 +9359,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9370,28 +9368,30 @@ CREATE TABLE application_settings (
     automatic_purchased_storage_allocation boolean DEFAULT false NOT NULL,
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
+    secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
+    secret_detection_token_revocation_url text,
+    encrypted_secret_detection_token_revocation_token text,
+    encrypted_secret_detection_token_revocation_token_iv text,
     container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
     elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
     elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
     elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
     elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
-    secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
-    secret_detection_token_revocation_url text,
-    encrypted_secret_detection_token_revocation_token text,
-    encrypted_secret_detection_token_revocation_token_iv text,
+    new_user_signups_cap integer,
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
-    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
+    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
@@ -9401,8 +9401,7 @@ CREATE TABLE application_settings (
     in_product_marketing_emails_enabled boolean DEFAULT true NOT NULL,
     asset_proxy_whitelist text,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
-    CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -14903,10 +14902,9 @@ CREATE TABLE packages_composer_cache_files (
     updated_at timestamp with time zone NOT NULL,
     delete_at timestamp with time zone,
     namespace_id integer,
-    file_store smallint DEFAULT 1 NOT NULL,
+    file_store smallint,
     file text NOT NULL,
-    file_sha256 bytea NOT NULL,
-    CONSTRAINT check_84f5ba81f5 CHECK ((char_length(file) <= 255))
+    file_sha1 bytea NOT NULL
 );
 
 CREATE SEQUENCE packages_composer_cache_files_id_seq
@@ -15612,9 +15610,9 @@ CREATE TABLE plan_limits (
     nuget_max_file_size bigint DEFAULT 524288000 NOT NULL,
     pypi_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
     generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL,
+    project_feature_flags integer DEFAULT 200 NOT NULL,
     golang_max_file_size bigint DEFAULT 104857600 NOT NULL,
     debian_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
-    project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
@@ -18595,8 +18593,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL,
     subgroup_events boolean DEFAULT false NOT NULL
 );
@@ -22963,7 +22961,7 @@ CREATE UNIQUE INDEX index_ops_strategies_user_lists_on_strategy_id_and_user_list
 
 CREATE INDEX index_packages_build_infos_on_pipeline_id ON packages_build_infos USING btree (pipeline_id);
 
-CREATE UNIQUE INDEX index_packages_composer_cache_namespace_and_sha ON packages_composer_cache_files USING btree (namespace_id, file_sha256);
+CREATE INDEX index_packages_composer_cache_namespace_and_sha ON packages_composer_cache_files USING btree (namespace_id, file_sha1);
 
 CREATE UNIQUE INDEX index_packages_composer_metadata_on_package_id_and_target_sha ON packages_composer_metadata USING btree (package_id, target_sha);
 
@@ -24781,12 +24779,6 @@ ALTER TABLE ONLY issues
 
 ALTER TABLE ONLY issue_links
     ADD CONSTRAINT fk_c900194ff2 FOREIGN KEY (source_id) REFERENCES issues(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY external_approval_rules_protected_branches
-    ADD CONSTRAINT fk_c9a037a926 FOREIGN KEY (external_approval_rule_id) REFERENCES external_approval_rules(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY external_approval_rules_protected_branches
-    ADD CONSTRAINT fk_ca2ffb55e6 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY experiment_subjects
     ADD CONSTRAINT fk_ccc28f8ceb FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
