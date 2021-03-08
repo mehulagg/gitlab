@@ -11,21 +11,21 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
     describe '#last_job' do
       let!(:batched_migration) { create(:batched_background_migration) }
       let!(:batched_job1) { create(:batched_background_migration_job, batched_migration: batched_migration) }
-      let!(:batched_job2) { create(:batched_background_migration_job, batched_migration: batched_migration, created_at: 1.month.ago) }
+      let!(:batched_job2) { create(:batched_background_migration_job, batched_migration: batched_migration) }
 
-      it 'returns the most recently created batch_job' do
-        expect(batched_migration.last_job).to eq(batched_job1)
+      it 'returns the most recent (in order of id) batched job' do
+        expect(batched_migration.last_job).to eq(batched_job2)
       end
     end
   end
 
   describe '.queue_order' do
-    let!(:migration1) { create(:batched_background_migration, created_at: 1.month.ago) }
-    let!(:migration2) { create(:batched_background_migration, created_at: 2.months.ago) }
+    let!(:migration1) { create(:batched_background_migration) }
+    let!(:migration2) { create(:batched_background_migration) }
     let!(:migration3) { create(:batched_background_migration) }
 
-    it 'returns batched_migrations ordered by created_at' do
-      expect(described_class.queue_order.all).to eq([migration2, migration1, migration3])
+    it 'returns batched migrations ordered by their id' do
+      expect(described_class.queue_order.all).to eq([migration1, migration2, migration3])
     end
   end
 

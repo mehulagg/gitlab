@@ -47,7 +47,7 @@ class CreateBackgroundMigrationTrackingTables < ActiveRecord::Migration[6.0]
       t.integer :status, limit: 2, null: false, default: 0
       t.integer :attempts, limit: 2, null: false, default: 0
 
-      t.index [:batched_background_migration_id, :created_at], name: :index_batched_jobs_by_batched_migration_id_created_at
+      t.index [:batched_background_migration_id, :id], name: :index_batched_jobs_by_batched_migration_id_and_id
     end
   end
 

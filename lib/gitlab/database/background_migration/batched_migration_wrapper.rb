@@ -5,21 +5,17 @@ module Gitlab
     module BackgroundMigration
       class BatchedMigrationWrapper
         def perform(batch_tracking_record)
-          return if batch_tracking_record.migration_aborted?
+          start_tracking_execution(batch_tracking_record)
 
-          begin
-            start_tracking_execution(batch_tracking_record)
+          execute_batch(batch_tracking_record)
 
-            execute_batch(batch_tracking_record)
+          batch_tracking_record.status = :succeeded
+        rescue => e
+          batch_tracking_record.status = :failed
 
-            batch_tracking_record.status = :succeeded
-          rescue => e
-            batch_tracking_record.status = :failed
-
-            raise e
-          ensure
-            finish_tracking_execution(batch_tracking_record)
-          end
+          raise e
+        ensure
+          finish_tracking_execution(batch_tracking_record)
         end
 
         private

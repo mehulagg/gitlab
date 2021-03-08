@@ -7,11 +7,11 @@ module Gitlab
         self.table_name = :batched_background_migrations
 
         has_many :batched_jobs, foreign_key: :batched_background_migration_id
-        has_one :last_job, -> { order(created_at: :desc) },
+        has_one :last_job, -> { order(id: :desc) },
           class_name: 'Gitlab::Database::BackgroundMigration::BatchedJob',
           foreign_key: :batched_background_migration_id
 
-        scope :queue_order, -> { order(created_at: :asc) }
+        scope :queue_order, -> { order(id: :asc) }
 
         enum status: {
           paused: 0,

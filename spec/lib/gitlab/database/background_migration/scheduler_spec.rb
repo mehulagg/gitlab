@@ -32,8 +32,8 @@ RSpec.describe Gitlab::Database::BackgroundMigration::Scheduler, '#perform' do
   end
 
   context 'when there are active migrations' do
-    let!(:last_migration) { create(:batched_background_migration, :active, created_at: 1.month.ago) }
-    let!(:first_migration) { create(:batched_background_migration, :active, batch_size: 2, created_at: 2.months.ago) }
+    let!(:first_migration) { create(:batched_background_migration, :active, batch_size: 2) }
+    let!(:last_migration) { create(:batched_background_migration, :active) }
 
     let(:job_relation) do
       Gitlab::Database::BackgroundMigration::BatchedJob.where(batched_background_migration_id: first_migration.id)
