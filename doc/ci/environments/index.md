@@ -116,8 +116,7 @@ In this example:
   use `$CI_ENVIRONMENT_SLUG` instead. The `$CI_ENVIRONMENT_SLUG` variable is guaranteed to be unique.
 
 You do not have to use the same prefix or only slashes (`/`) in the dynamic environment name.
-However, when you use this format, you can use the [grouping similar environments](#grouping-similar-environments)
-feature.
+However, when you use this format, you can [group similar environments](#group-similar-environments).
 
 NOTE:
 Some variables cannot be used as environment names or URLs.
@@ -408,8 +407,6 @@ Due to resource limitations, a background worker for stopping environments only 
 every hour. This means that environments aren't stopped at the exact timestamp specified, but are
 instead stopped when the hourly cron worker detects expired environments.
 
-#### Stop environments example
-
 In the following example, each merge request creates a new Review App environment.
 Each push triggers the `review_app` job and an environment named `review/your-branch-name`
 is created or updated. The environment runs until `stop_review_app` is executed:
@@ -442,21 +439,26 @@ Because `stop_review_app` is set to `auto_stop_in: 1 week`,
 if a merge request is inactive for more than a week,
 GitLab automatically triggers the `stop_review_app` job to stop the environment.
 
-You can also view the expiration date of environments in the GitLab UI. To do so,
-go to **Operations > Environments**. In the top left, next to the environment name,
-the expiration date is displayed.
+#### View a deployment's scheduled stop time
 
-#### Override the defined stop time
-
-You can manually override a deployment's expiration period.
+You can view a deployment's expiration date in the GitLab UI.
 
 1. Go to the project's **Operations > Environments** page.
-1. Select the environment name.
+1. Select the name of the deployment.
+
+In the top left, next to the environment name, the expiration date is displayed.
+
+#### Override a deployment's scheduled stop time
+
+You can manually override a deployment's expiration date.
+
+1. Go to the project's **Operations > Environments** page.
+1. Select the deployment name.
 1. In the top right, select the thumbtack (**{thumbtack}**).
 
-The `auto_stop_in` setting is overwritten and the environment remains active until it's stopped manually.
-
 ![Environment auto stop](img/environment_auto_stop_v13_10.png)
+
+The `auto_stop_in` setting is overwritten and the environment remains active until it's stopped manually.
 
 #### Delete a stopped environment
 
