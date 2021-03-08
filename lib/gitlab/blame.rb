@@ -24,11 +24,11 @@ module Gitlab
           current_group = { commit: commit, lines: [] }
         end
 
-        if highlight
-          current_group[:lines] << highlighted_lines[i].html_safe
-        else
-          current_group[:lines] << line
-        end
+        current_group[:lines] << if highlight
+                                   highlighted_lines[i].html_safe
+                                 else
+                                   line
+                                 end
 
         prev_sha = commit.sha
         i += 1
