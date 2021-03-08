@@ -67,14 +67,6 @@ export default () => {
     boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
   }
 
-  if (gon?.features?.boardsFilteredSearch) {
-    import('~/boards/filtered_search')
-      .then(({ default: initFilteredSearch }) => {
-        initFilteredSearch(apolloProvider);
-      })
-      .catch(() => {});
-  }
-
   // eslint-disable-next-line @gitlab/no-runtime-template-compiler
   issueBoardsApp = new Vue({
     el: $boardApp,

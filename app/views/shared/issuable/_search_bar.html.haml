@@ -67,135 +67,143 @@
                       avatar: { lazy: true, url: '{{avatar_url}}' }
                 #js-dropdown-assignee.filtered-search-input-dropdown-menu.dropdown-menu
                   %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Any')
-                    %li.divider.droplab-item-ignore
-                    - if current_user
-                      = render 'shared/issuable/user_dropdown_item',
-                        user: current_user
-                  %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                     = render 'shared/issuable/user_dropdown_item',
-                      user: User.new(username: '{{username}}', name: '{{name}}'),
-                      avatar: { lazy: true, url: '{{avatar_url}}' }
-                #js-dropdown-reviewer.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Any')
-                    %li.divider.droplab-item-ignore
-                    - if current_user
-                      = render 'shared/issuable/user_dropdown_item',
-                        user: current_user
-                  %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                      user: current_user
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  = render 'shared/issuable/user_dropdown_item',
+                    user: User.new(username: '{{username}}', name: '{{name}}'),
+                    avatar: { lazy: true, url: '{{avatar_url}}' }
+              #js-dropdown-assignee.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Any')
+                  %li.divider.droplab-item-ignore
+                  - if current_user
                     = render 'shared/issuable/user_dropdown_item',
-                      user: User.new(username: '{{username}}', name: '{{name}}'),
-                      avatar: { lazy: true, url: '{{avatar_url}}' }
-                = render_if_exists 'shared/issuable/approver_dropdown'
-                = render_if_exists 'shared/issuable/approved_by_dropdown'
-                #js-dropdown-milestone.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Any')
-                    %li.filter-dropdown-item{ data: { value: 'Upcoming' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Upcoming')
-                    %li.filter-dropdown-item{ data: { value: 'Started' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Started')
-                    %li.divider.droplab-item-ignore
-                  %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
-                    %li.filter-dropdown-item
-                      %button.btn.btn-link.js-data-value{ type: 'button' }
+                      user: current_user
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  = render 'shared/issuable/user_dropdown_item',
+                    user: User.new(username: '{{username}}', name: '{{name}}'),
+                    avatar: { lazy: true, url: '{{avatar_url}}' }
+              #js-dropdown-reviewer.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Any')
+                  %li.divider.droplab-item-ignore
+                  - if current_user
+                    = render 'shared/issuable/user_dropdown_item',
+                      user: current_user
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  = render 'shared/issuable/user_dropdown_item',
+                    user: User.new(username: '{{username}}', name: '{{name}}'),
+                    avatar: { lazy: true, url: '{{avatar_url}}' }
+              = render_if_exists 'shared/issuable/approver_dropdown'
+              = render_if_exists 'shared/issuable/approved_by_dropdown'
+              #js-dropdown-milestone.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Any')
+                  %li.filter-dropdown-item{ data: { value: 'Upcoming' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Upcoming')
+                  %li.filter-dropdown-item{ data: { value: 'Started' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Started')
+                  %li.divider.droplab-item-ignore
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  %li.filter-dropdown-item
+                    %button.btn.btn-link.js-data-value{ type: 'button' }
+                      {{title}}
+              = render_if_exists 'shared/issuable/filter_iteration', type: type
+              #js-dropdown-release.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Any')
+                  %li.divider.droplab-item-ignore
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  %li.filter-dropdown-item
+                    %button.btn.btn-link.js-data-value{ type: 'button' }
+                      {{title}}
+              #js-dropdown-label.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Any')
+                  %li.divider.droplab-item-ignore
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  %li.filter-dropdown-item
+                    %button.btn.btn-link{ type: 'button' }
+                      %span.dropdown-label-box{ style: 'background: {{color}}' }
+                      %span.label-title.js-data-value
                         {{title}}
-                = render_if_exists 'shared/issuable/filter_iteration', type: type
-                #js-dropdown-release.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Any')
-                    %li.divider.droplab-item-ignore
+              #js-dropdown-my-reaction.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Any')
+                  %li.divider.droplab-item-ignore
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  %li.filter-dropdown-item
+                    %button.btn.btn-link{ type: 'button' }
+                      %gl-emoji
+                      %span.js-data-value.gl-ml-3
+                        {{name}}
+              #js-dropdown-wip.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul.filter-dropdown{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'yes', capitalize: true } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Yes')
+                  %li.filter-dropdown-item{ data: { value: 'no', capitalize: true } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('No')
+              #js-dropdown-confidential.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul.filter-dropdown{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'yes', capitalize: true } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Yes')
+                  %li.filter-dropdown-item{ data: { value: 'no', capitalize: true } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('No')
+              - unless disable_target_branch
+                #js-dropdown-target-branch.filtered-search-input-dropdown-menu.dropdown-menu
                   %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                     %li.filter-dropdown-item
-                      %button.btn.btn-link.js-data-value{ type: 'button' }
+                      %button.btn.btn-link.js-data-value.monospace
                         {{title}}
-                #js-dropdown-label.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Any')
-                    %li.divider.droplab-item-ignore
-                  %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
-                    %li.filter-dropdown-item
-                      %button.btn.btn-link{ type: 'button' }
-                        %span.dropdown-label-box{ style: 'background: {{color}}' }
-                        %span.label-title.js-data-value
-                          {{title}}
-                #js-dropdown-my-reaction.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Any')
-                    %li.divider.droplab-item-ignore
-                  %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
-                    %li.filter-dropdown-item
-                      %button.btn.btn-link{ type: 'button' }
-                        %gl-emoji
-                        %span.js-data-value.gl-ml-3
-                          {{name}}
-                #js-dropdown-wip.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul.filter-dropdown{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'yes', capitalize: true } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Yes')
-                    %li.filter-dropdown-item{ data: { value: 'no', capitalize: true } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('No')
-                #js-dropdown-confidential.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul.filter-dropdown{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'yes', capitalize: true } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('Yes')
-                    %li.filter-dropdown-item{ data: { value: 'no', capitalize: true } }
-                      %button.btn.btn-link{ type: 'button' }
-                        = _('No')
-                - unless disable_target_branch
-                  #js-dropdown-target-branch.filtered-search-input-dropdown-menu.dropdown-menu
-                    %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
-                      %li.filter-dropdown-item
-                        %button.btn.btn-link.js-data-value.monospace
-                          {{title}}
-                #js-dropdown-environment.filtered-search-input-dropdown-menu.dropdown-menu
-                  %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
-                    %li.filter-dropdown-item
-                      %button.btn.btn-link.js-data-value{ type: 'button' }
-                        {{title}}
+              #js-dropdown-environment.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                  %li.filter-dropdown-item
+                    %button.btn.btn-link.js-data-value{ type: 'button' }
+                      {{title}}
 
-                = render_if_exists 'shared/issuable/filter_weight', type: type
+              = render_if_exists 'shared/issuable/filter_weight', type: type
 
-                = render_if_exists 'shared/issuable/filter_epic', type: type
+              = render_if_exists 'shared/issuable/filter_epic', type: type
 
-              %button.clear-search.hidden{ type: 'button' }
-                = sprite_icon('close', size: 16, css_class: 'clear-search-icon')
+            %button.clear-search.hidden{ type: 'button' }
+              = sprite_icon('close', size: 16, css_class: 'clear-search-icon')
     .filter-dropdown-container.d-flex.flex-column.flex-md-row
       - if type == :boards
         #js-board-labels-toggle
