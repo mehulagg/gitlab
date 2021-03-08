@@ -9,7 +9,7 @@ import OncallSchedule from './oncall_schedule.vue';
 export const addScheduleModalId = 'addScheduleModal';
 
 export const i18n = {
-  title: s__('OnCallSchedules|On-call schedule'),
+  title: s__('OnCallSchedules|On-call schedules'),
   emptyState: {
     title: s__('OnCallSchedules|Create on-call schedules  in GitLab'),
     description: s__('OnCallSchedules|Route alerts directly to specific members of your team'),
