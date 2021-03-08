@@ -128,25 +128,14 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       end
     end
 
-    context 'stage nav' do
-      it 'displays the list of stages' do
-        expect(page).to have_selector(stage_nav_selector, visible: true)
-      end
-
-      it 'displays the default list of stages' do
-        stage_nav = page.find(stage_nav_selector)
-
-        %w[Issue Plan Code Test Review Staging].each do |item|
-          string_id = "CycleAnalytics|#{item}"
-          expect(stage_nav).to have_content(s_(string_id))
-        end
+    context 'vertical navigation' do
+      it 'shows the vertical stage navigation' do
+        expect(page).to have_selector(stage_nav_selector)
       end
     end
 
-    context 'path nav' do
+    context 'navigation' do
       before do
-        stub_feature_flags(value_stream_analytics_path_navigation: true)
-
         select_group(selected_group)
       end
 
@@ -190,8 +179,21 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       select_group(group)
     end
 
-    it 'shows the path navigation' do
+    it 'does not show the path navigation' do
       expect(page).not_to have_selector(path_nav_selector)
+    end
+
+    it 'shows the vertical stage navigation' do
+      expect(page).to have_selector(stage_nav_selector, visible: true)
+    end
+
+    it 'displays the default list of stages' do
+      stage_nav = page.find(stage_nav_selector)
+
+      %w[Issue Plan Code Test Review Staging].each do |item|
+        string_id = "CycleAnalytics|#{item}"
+        expect(stage_nav).to have_content(s_(string_id))
+      end
     end
   end
 
