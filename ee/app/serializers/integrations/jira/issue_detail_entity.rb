@@ -18,11 +18,13 @@ module Integrations
 
       expose :comments do |jira_issue|
         jira_issue.renderedFields['comment']['comments'].map do |comment|
-          jira_user(comment['author']).merge(
-            note: Banzai::Pipeline::JiraGfmPipeline.call(comment['body'], project: project)[:output].to_html,
+          {
+            id: comment['id'],
+            body_html: Banzai::Pipeline::JiraGfmPipeline.call(comment['body'], project: project)[:output].to_html,
             created_at: comment['created'].to_datetime.utc,
-            updated_at: comment['updated'].to_datetime.utc
-          )
+            updated_at: comment['updated'].to_datetime.utc,
+            author: jira_user(comment['author'])
+          }
         end
       end
     end
