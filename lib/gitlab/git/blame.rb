@@ -38,9 +38,10 @@ module Gitlab
           if line[0, 1] == "\t"
             lines << line[1, line.size]
           elsif m = /^(\w{40}) (\d+) (\d+)/.match(line)
-            commit_id, old_lineno, lineno = m[1], m[2].to_i, m[3].to_i
-            commits[commit_id] = nil unless commits.key?(commit_id)
-            info[lineno] = [commit_id, old_lineno]
+            # Removed these instantiations for performance but keeping them for reference:
+            # commit_id, old_lineno, lineno = m[1], m[2].to_i, m[3].to_i
+            commits[m[1]] = nil unless commits.key?(m[1])
+            info[m[3].to_i] = [m[1], m[2].to_i]
           end
         end
 
@@ -50,8 +51,7 @@ module Gitlab
 
         # get it together
         info.sort.each do |lineno, (commit_id, old_lineno)|
-          commit = commits[commit_id]
-          final << BlameLine.new(lineno, old_lineno, commit, lines[lineno - 1])
+          final << BlameLine.new(lineno, old_lineno, commits[commit_id], lines[lineno - 1])
         end
 
         @lines = final
