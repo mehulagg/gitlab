@@ -7,6 +7,13 @@ module Gitlab
       include ::Spam::SpamConstants
       DEFAULT_TIMEOUT = 5
 
+      VERDICT_MAPPING = {
+        Spamcheck::SpamVerdict::Verdict::ALLOW => ALLOW,
+        Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW => CONDITIONAL_ALLOW,
+        Spamcheck::SpamVerdict::Verdict::DISALLOW => DISALLOW,
+        Spamcheck::SpamVerdict::Verdict::BLOCK => BLOCK_USER
+      }.freeze
+
       def initialize(endpoint_url:)
         @endpoint_url = endpoint_url
         @stub = Spamcheck::SpamcheckService::Stub.new(@endpoint_url,
@@ -31,18 +38,7 @@ module Gitlab
       private
 
       def convert_verdict_to_gitlab_constant(verdict:)
-        case verdict
-        when Spamcheck::SpamVerdict::Verdict::ALLOW
-          ALLLOW
-        when Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW
-          CONDITIONAL_ALLOW
-        when Spamcheck::SpamVerdict::Verdict::DISALLOW
-          DISALLOW
-        when Spamcheck::SpamVerdict::Verdict::BLOCK_USER
-          BLOCK_USER
-        else
-          verdict
-        end
+        VERDICT_MAPPING.fetch(verdict, verdict)
       end
 
       def build_user(user)
