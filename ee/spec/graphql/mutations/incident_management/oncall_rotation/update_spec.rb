@@ -2,15 +2,15 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
+RSpec.describe Mutations::IncidentManagement::OncallRotation::Update do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+  let_it_be_with_reload(:rotation) { create(:incident_management_oncall_rotation, :with_participants, schedule: schedule) }
+
   let(:args) do
     {
-      project_path: project.full_path,
       name: 'On-call rotation',
-      schedule_iid: schedule.iid,
       starts_at: "2020-01-10 09:00".in_time_zone(schedule.timezone),
       rotation_length: {
         length: 1,
@@ -27,7 +27,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
   end
 
   describe '#resolve' do
-    subject(:resolve) { mutation_for(project, current_user).resolve(iid: schedule.iid, project_path: project.full_path, participants: args[:participants], **args) }
+    subject(:resolve) { mutation_for(current_user).resolve(id: rotation.to_global_id, participants: args[:participants], **args) }
 
     context 'user has access to project' do
       before do
@@ -35,12 +35,35 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
         project.add_maintainer(current_user)
       end
 
-      context 'when OncallRotation::CreateService responds with success' do
+      context 'when OncallRotation::UpdateService responds with success' do
         it 'returns the on-call rotation with no errors' do
           expect(resolve).to match(
             oncall_rotation: ::IncidentManagement::OncallRotation.last!,
             errors: be_empty
           )
+        end
+
+        it 'adds the participant to the rotation' do
+          rotation = resolve[:oncall_rotation]
+
+          expect(rotation.participants.not_removed.size).to eq(1)
+          expect(rotation.participants.removed.size).to eq(1)
+
+          first_participant = rotation.participants.not_removed.first
+
+          expect(first_participant.user).to eq(current_user)
+          expect(first_participant.color_weight).to eq('50')
+          expect(first_participant.color_palette).to eq('blue')
+        end
+
+        context 'removing participants' do
+          before do
+            args[:participants] = []
+          end
+
+          it 'returns the on-call rotation with no errors' do
+            expect(resolve[:oncall_rotation].participants.not_removed).to be_empty
+          end
         end
 
         context 'with endsAt arg' do
@@ -66,18 +89,18 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
         end
       end
 
-      context 'when OncallRotations::CreateService responds with an error' do
+      context 'when OncallRotations::UpdateService responds with an error' do
         before do
-          allow_next_instance_of(::IncidentManagement::OncallRotations::CreateService) do |service|
+          allow_next_instance_of(::IncidentManagement::OncallRotations::EditService) do |service|
             allow(service).to receive(:execute)
-              .and_return(ServiceResponse.error(payload: { oncall_rotation: nil }, message: 'An on-call rotation already exists'))
+              .and_return(ServiceResponse.error(payload: { oncall_rotation: nil }, message: 'An error has occurred'))
           end
         end
 
         it 'returns errors' do
           expect(resolve).to eq(
             oncall_rotation: nil,
-            errors: ['An on-call rotation already exists']
+            errors: ['An error has occurred']
           )
         end
       end
@@ -149,16 +172,6 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           end
         end
 
-        context 'project path incorrect' do
-          before do
-            args[:project_path] = "something/incorrect"
-          end
-
-          it 'raises an error' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'The project could not be found')
-          end
-        end
-
         context 'duplicate participants' do
           before do
             args[:participants] << args[:participants].first
@@ -166,14 +179,6 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
 
           it 'raises an error' do
             expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'A duplicate username is included in the participant list')
-          end
-        end
-
-        context 'schedule does not exist' do
-          let(:schedule) { double(iid: non_existing_record_iid, timezone: 'UTC') }
-
-          it 'raises an error' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'The schedule could not be found')
           end
         end
 
@@ -191,14 +196,14 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
 
     context 'when resource is not accessible to the user' do
       it 'raises an error' do
-        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'The schedule could not be found')
+        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, "The resource that you are attempting to access does not exist or you don't have permission to perform this action")
       end
     end
   end
 
   private
 
-  def mutation_for(project, user)
-    described_class.new(object: project, context: { current_user: user }, field: nil)
+  def mutation_for(user)
+    described_class.new(object: nil, context: { current_user: user }, field: nil)
   end
 end
