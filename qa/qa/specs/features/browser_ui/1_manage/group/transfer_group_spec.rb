@@ -36,6 +36,9 @@ module QA
           Page::Group::Settings::General.perform do |general|
             general.transfer_group(target_group.path)
           end
+
+          expect(page).to have_text("Group '#{sub_group_for_transfer.path}' was successfully transferred.")
+          expect(page.driver.current_url).to include("#{target_group.path}/#{sub_group_for_transfer.path}")
         end
       end
     end
