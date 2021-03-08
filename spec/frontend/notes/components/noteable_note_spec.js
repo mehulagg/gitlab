@@ -13,7 +13,7 @@ describe('issue_note', () => {
   let wrapper;
   const findMultilineComment = () => wrapper.find('[data-testid="multiline-comment"]');
 
-  beforeEach(() => {
+  const createWrapper = (props = {}) => {
     store = createStore();
     store.dispatch('setNoteableData', noteableDataMock);
     store.dispatch('setNotesData', notesDataMock);
@@ -23,6 +23,7 @@ describe('issue_note', () => {
       store,
       propsData: {
         note,
+        ...props,
       },
       localVue,
       stubs: [
@@ -33,13 +34,17 @@ describe('issue_note', () => {
         'multiline-comment-form',
       ],
     });
-  });
+  };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('mutiline comments', () => {
+    beforeEach(() => {
+      createWrapper();
+    });
+
     it('should render if has multiline comment', () => {
       const position = {
         line_range: {
@@ -147,80 +152,91 @@ describe('issue_note', () => {
     });
   });
 
-  it('should render user information', () => {
-    const { author } = note;
-    const avatar = wrapper.find(UserAvatarLink);
-    const avatarProps = avatar.props();
-
-    expect(avatarProps.linkHref).toBe(author.path);
-    expect(avatarProps.imgSrc).toBe(author.avatar_url);
-    expect(avatarProps.imgAlt).toBe(author.name);
-    expect(avatarProps.imgSize).toBe(40);
-  });
-
-  it('should render note header content', () => {
-    const noteHeader = wrapper.find(NoteHeader);
-    const noteHeaderProps = noteHeader.props();
-
-    expect(noteHeaderProps.author).toEqual(note.author);
-    expect(noteHeaderProps.createdAt).toEqual(note.created_at);
-    expect(noteHeaderProps.noteId).toEqual(note.id);
-  });
-
-  it('should render note actions', () => {
-    const { author } = note;
-    const noteActions = wrapper.find(NoteActions);
-    const noteActionsProps = noteActions.props();
-
-    expect(noteActionsProps.authorId).toBe(author.id);
-    expect(noteActionsProps.noteId).toBe(note.id);
-    expect(noteActionsProps.noteUrl).toBe(note.noteable_note_url);
-    expect(noteActionsProps.accessLevel).toBe(note.human_access);
-    expect(noteActionsProps.canEdit).toBe(note.current_user.can_edit);
-    expect(noteActionsProps.canAwardEmoji).toBe(note.current_user.can_award_emoji);
-    expect(noteActionsProps.canDelete).toBe(note.current_user.can_edit);
-    expect(noteActionsProps.canReportAsAbuse).toBe(true);
-    expect(noteActionsProps.canResolve).toBe(false);
-    expect(noteActionsProps.reportAbusePath).toBe(note.report_abuse_path);
-    expect(noteActionsProps.resolvable).toBe(false);
-    expect(noteActionsProps.isResolved).toBe(false);
-    expect(noteActionsProps.isResolving).toBe(false);
-    expect(noteActionsProps.resolvedBy).toEqual({});
-  });
-
-  it('should render issue body', () => {
-    const noteBody = wrapper.find(NoteBody);
-    const noteBodyProps = noteBody.props();
-
-    expect(noteBodyProps.note).toEqual(note);
-    expect(noteBodyProps.line).toBe(null);
-    expect(noteBodyProps.canEdit).toBe(note.current_user.can_edit);
-    expect(noteBodyProps.isEditing).toBe(false);
-    expect(noteBodyProps.helpPagePath).toBe('');
-  });
-
-  it('prevents note preview xss', (done) => {
-    const imgSrc = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    const noteBody = `<img src="${imgSrc}" onload="alert(1)" />`;
-    const alertSpy = jest.spyOn(window, 'alert');
-    store.hotUpdate({
-      actions: {
-        updateNote() {},
-        setSelectedCommentPositionHover() {},
-      },
+  describe('rendering', () => {
+    beforeEach(() => {
+      createWrapper();
     });
-    const noteBodyComponent = wrapper.find(NoteBody);
 
-    noteBodyComponent.vm.$emit('handleFormUpdate', noteBody, null, () => {});
+    it('should render user information', () => {
+      const { author } = note;
+      const avatar = wrapper.find(UserAvatarLink);
+      const avatarProps = avatar.props();
 
-    setImmediate(() => {
-      expect(alertSpy).not.toHaveBeenCalled();
-      expect(wrapper.vm.note.note_html).toEqual(escape(noteBody));
-      done();
+      expect(avatarProps.linkHref).toBe(author.path);
+      expect(avatarProps.imgSrc).toBe(author.avatar_url);
+      expect(avatarProps.imgAlt).toBe(author.name);
+      expect(avatarProps.imgSize).toBe(40);
+    });
+
+    it('should render note header content', () => {
+      const noteHeader = wrapper.find(NoteHeader);
+      const noteHeaderProps = noteHeader.props();
+
+      expect(noteHeaderProps.author).toEqual(note.author);
+      expect(noteHeaderProps.createdAt).toEqual(note.created_at);
+      expect(noteHeaderProps.noteId).toEqual(note.id);
+    });
+
+    it('should render note actions', () => {
+      const { author } = note;
+      const noteActions = wrapper.find(NoteActions);
+      const noteActionsProps = noteActions.props();
+
+      expect(noteActionsProps.authorId).toBe(author.id);
+      expect(noteActionsProps.noteId).toBe(note.id);
+      expect(noteActionsProps.noteUrl).toBe(note.noteable_note_url);
+      expect(noteActionsProps.accessLevel).toBe(note.human_access);
+      expect(noteActionsProps.canEdit).toBe(note.current_user.can_edit);
+      expect(noteActionsProps.canAwardEmoji).toBe(note.current_user.can_award_emoji);
+      expect(noteActionsProps.canDelete).toBe(note.current_user.can_edit);
+      expect(noteActionsProps.canReportAsAbuse).toBe(true);
+      expect(noteActionsProps.canResolve).toBe(false);
+      expect(noteActionsProps.reportAbusePath).toBe(note.report_abuse_path);
+      expect(noteActionsProps.resolvable).toBe(false);
+      expect(noteActionsProps.isResolved).toBe(false);
+      expect(noteActionsProps.isResolving).toBe(false);
+      expect(noteActionsProps.resolvedBy).toEqual({});
+    });
+
+    it('should render issue body', () => {
+      const noteBody = wrapper.find(NoteBody);
+      const noteBodyProps = noteBody.props();
+
+      expect(noteBodyProps.note).toEqual(note);
+      expect(noteBodyProps.line).toBe(null);
+      expect(noteBodyProps.canEdit).toBe(note.current_user.can_edit);
+      expect(noteBodyProps.isEditing).toBe(false);
+      expect(noteBodyProps.helpPagePath).toBe('');
+    });
+
+    it('prevents note preview xss', (done) => {
+      const imgSrc =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      const noteBody = `<img src="${imgSrc}" onload="alert(1)" />`;
+      const alertSpy = jest.spyOn(window, 'alert');
+      store.hotUpdate({
+        actions: {
+          updateNote() {},
+          setSelectedCommentPositionHover() {},
+        },
+      });
+      const noteBodyComponent = wrapper.find(NoteBody);
+
+      noteBodyComponent.vm.$emit('handleFormUpdate', noteBody, null, () => {});
+
+      setImmediate(() => {
+        expect(alertSpy).not.toHaveBeenCalled();
+        expect(wrapper.vm.note.note_html).toEqual(escape(noteBody));
+        done();
+      });
     });
   });
 
   describe('cancel edit', () => {
+    beforeEach(() => {
+      createWrapper();
+    });
+
     it('restores content of updated note', (done) => {
       const updatedText = 'updated note text';
       store.hotUpdate({
@@ -249,6 +265,45 @@ describe('issue_note', () => {
         })
         .then(done)
         .catch(done.fail);
+    });
+  });
+
+  describe('formUpdateHandler', () => {
+    const updateNote = jest.fn();
+    const params = ['', null, jest.fn(), ''];
+
+    const updateActions = () => {
+      store.hotUpdate({
+        actions: {
+          updateNote,
+          setSelectedCommentPositionHover() {},
+        },
+      });
+    };
+
+    afterEach(() => updateNote.mockReset());
+
+    it('responds to handleFormUpdate', () => {
+      createWrapper();
+      updateActions();
+      wrapper.findComponent(NoteBody).vm.$emit('handleFormUpdate', ...params);
+      expect(wrapper.emitted('handleUpdateNote')).toBeTruthy();
+    });
+
+    it('does not stringify empty position', () => {
+      createWrapper();
+      updateActions();
+      wrapper.findComponent(NoteBody).vm.$emit('handleFormUpdate', ...params);
+      expect(updateNote.mock.calls[0][1].note.note.position).toBeUndefined();
+    });
+
+    it('stringifies populated position', () => {
+      const position = { test: true };
+      const expectation = JSON.stringify(position);
+      createWrapper({ note: { ...note, position } });
+      updateActions();
+      wrapper.findComponent(NoteBody).vm.$emit('handleFormUpdate', ...params);
+      expect(updateNote.mock.calls[0][1].note.note.position).toEqual(expectation);
     });
   });
 });
