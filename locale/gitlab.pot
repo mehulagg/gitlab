@@ -25333,6 +25333,9 @@ msgstr ""
 msgid "Reports|An error occurred while loading report"
 msgstr ""
 
+msgid "Reports|Base report parsing error:"
+msgstr ""
+
 msgid "Reports|Class"
 msgstr ""
 
@@ -25353,6 +25356,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Reports|Failure"
+msgstr ""
+
+msgid "Reports|Head report parsing error:"
 msgstr ""
 
 msgid "Reports|Identifier"
