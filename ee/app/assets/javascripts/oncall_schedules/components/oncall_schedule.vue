@@ -1,6 +1,5 @@
 <script>
 import {
-  GlSprintf,
   GlCard,
   GlButtonGroup,
   GlButton,
@@ -27,7 +26,6 @@ import ScheduleTimelineSection from './schedule/components/schedule_timeline_sec
 import { getTimeframeForWeeksView, selectedTimezoneFormattedOffset } from './schedule/utils';
 
 export const i18n = {
-  scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
   editScheduleLabel: s__('OnCallSchedules|Edit schedule'),
   deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
   rotationTitle: s__('OnCallSchedules|Rotations'),
@@ -51,7 +49,6 @@ export default {
     GlButton,
     GlButtonGroup,
     GlCard,
-    GlSprintf,
     AddEditRotationModal,
     DeleteScheduleModal,
     EditScheduleModal,
@@ -204,10 +201,7 @@ export default {
         </div>
       </template>
       <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
-        <gl-sprintf :message="$options.i18n.scheduleForTz">
-          <template #timezone>{{ schedule.timezone }}</template>
-        </gl-sprintf>
-        | {{ offset }}
+        {{ schedule.timezone }} | {{ offset }}
       </p>
       <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
         <div class="gl-display-flex gl-align-items-center">

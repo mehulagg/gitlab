@@ -21036,9 +21036,6 @@ msgstr ""
 msgid "OnCallSchedules|On-call schedule"
 msgstr ""
 
-msgid "OnCallSchedules|On-call schedule for the %{timezone}"
-msgstr ""
-
 msgid "OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view."
 msgstr ""
 
