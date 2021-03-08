@@ -70,6 +70,31 @@ GitLab 14.0 will require that you place API fuzzing configuration files (for exa
 repository's root. You can continue using your existing configuration files as they are, but
 starting in GitLab 14.0, GitLab will not check your repository's root for configuration files.
 
+### Configuration form
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299234) in GitLab 13.10.
+
+The API fuzzing configuration form helps you create or modify your project's API fuzzing
+configuration. The form lets you choose values for the most common API fuzzing options and builds
+a YAML snippet that you can paste in your GitLab CI/CD configuration.
+
+To generate an API Fuzzing configuration snippet:
+
+1. From your project's home page, go to **Security & Compliance > Configuration** in the left
+   sidebar.
+1. Select **Configure** in the **API Fuzzing** row.
+1. Complete the form as needed. Read below for more information on available configuration options.
+1. Select **Generate code snippet**.
+
+A modal opens with the YAML snippet corresponding to the options you've selected in the form.
+
+![API Fuzzing configuration snippet](img/api_fuzzing_configuration_snippet_v13.10.png)
+
+Select **Copy code and open `.gitlab-ci.yml` file** to copy the snippet to your clipboard and be redirected
+to your project's `.gitlab-ci.yml` file where you can paste the YAML configuration.
+
+Select **Copy code only** to copy the snippet to your clipboard and close the modal.
+
 ### OpenAPI Specification
 
 The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an
