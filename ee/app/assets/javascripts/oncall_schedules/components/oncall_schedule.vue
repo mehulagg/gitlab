@@ -1,11 +1,5 @@
 <script>
-import {
-  GlCard,
-  GlButtonGroup,
-  GlButton,
-  GlModalDirective,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlCard, GlButtonGroup, GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
 import {
