@@ -1,5 +1,4 @@
 import Mousetrap from 'mousetrap';
-import ShortcutsNavigation from './shortcuts_navigation';
 import {
   keysFor,
   REPO_GRAPH_SCROLL_BOTTOM,
@@ -9,6 +8,7 @@ import {
   REPO_GRAPH_SCROLL_TOP,
   REPO_GRAPH_SCROLL_UP,
 } from './keybindings';
+import ShortcutsNavigation from './shortcuts_navigation';
 
 export default class ShortcutsNetwork extends ShortcutsNavigation {
   constructor(graph) {

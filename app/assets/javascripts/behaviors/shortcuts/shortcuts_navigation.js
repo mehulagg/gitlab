@@ -1,6 +1,5 @@
 import Mousetrap from 'mousetrap';
 import findAndFollowLink from '../../lib/utils/navigation_utility';
-import Shortcuts from './shortcuts';
 import {
   keysFor,
   GO_TO_PROJECT_OVERVIEW,
@@ -21,6 +20,7 @@ import {
   GO_TO_PROJECT_METRICS,
   NEW_ISSUE,
 } from './keybindings';
+import Shortcuts from './shortcuts';
 
 export default class ShortcutsNavigation extends Shortcuts {
   constructor() {

@@ -1,7 +1,7 @@
 import Mousetrap from 'mousetrap';
 import findAndFollowLink from '../../lib/utils/navigation_utility';
-import ShortcutsNavigation from './shortcuts_navigation';
 import { keysFor, EDIT_WIKI_PAGE } from './keybindings';
+import ShortcutsNavigation from './shortcuts_navigation';
 
 export default class ShortcutsWiki extends ShortcutsNavigation {
   constructor() {

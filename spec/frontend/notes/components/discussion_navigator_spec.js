@@ -2,13 +2,13 @@
 import 'mousetrap';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vue from 'vue';
-import DiscussionNavigator from '~/notes/components/discussion_navigator.vue';
-import eventHub from '~/notes/event_hub';
 import {
   keysFor,
   MR_NEXT_UNRESOLVED_DISCUSSION,
   MR_PREVIOUS_UNRESOLVED_DISCUSSION,
 } from '~/behaviors/shortcuts/keybindings';
+import DiscussionNavigator from '~/notes/components/discussion_navigator.vue';
+import eventHub from '~/notes/event_hub';
 
 describe('notes/components/discussion_navigator', () => {
   const localVue = createLocalVue();

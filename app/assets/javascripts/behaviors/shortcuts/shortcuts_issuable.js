@@ -5,7 +5,6 @@ import { getSelectedFragment } from '~/lib/utils/common_utils';
 import { isElementVisible } from '~/lib/utils/dom_utils';
 import Sidebar from '../../right_sidebar';
 import { CopyAsGFM } from '../markdown/copy_as_gfm';
-import Shortcuts from './shortcuts';
 import {
   keysFor,
   ISSUE_MR_CHANGE_ASSIGNEE,
@@ -15,6 +14,7 @@ import {
   ISSUABLE_EDIT_DESCRIPTION,
   MR_COPY_SOURCE_BRANCH_NAME,
 } from './keybindings';
+import Shortcuts from './shortcuts';
 
 export default class ShortcutsIssuable extends Shortcuts {
   constructor() {

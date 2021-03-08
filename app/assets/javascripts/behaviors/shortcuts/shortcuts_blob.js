@@ -1,4 +1,5 @@
 import Mousetrap from 'mousetrap';
+import { keysFor, PROJECT_FILES_GO_TO_PERMALINK } from '~/behaviors/shortcuts/keybindings';
 import {
   getLocationHash,
   updateHistory,
@@ -7,7 +8,6 @@ import {
   getShaFromUrl,
 } from '~/lib/utils/url_utility';
 import { updateRefPortionOfTitle } from '~/repository/utils/title';
-import { keysFor, PROJECT_FILES_GO_TO_PERMALINK } from '~/behaviors/shortcuts/keybindings';
 import Shortcuts from './shortcuts';
 
 const defaults = {
