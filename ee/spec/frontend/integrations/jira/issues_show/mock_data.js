@@ -29,3 +29,14 @@ export const mockJiraIssue = {
   },
   state: 'opened',
 };
+
+export const mockJiraIssueComment = {
+  body_html: '<p>hi</p>',
+  created_at: '"2021-02-01T04:04:40.833Z"',
+  author: {
+    name: 'Justin Ho',
+    web_url: 'http://127.0.0.1:3000/root',
+    avatar_url: 'http://127.0.0.1:3000/uploads/-/system/user/avatar/1/avatar.png?width=90',
+  },
+  id: 10000,
+};

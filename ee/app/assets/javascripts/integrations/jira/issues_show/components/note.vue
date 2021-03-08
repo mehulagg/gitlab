@@ -63,12 +63,12 @@ export default {
 
           <span class="gl-text-gray-500 gl-mx-2">·</span>
 
-          <gl-link class="gl-text-gray-500" :href="noteAnchor">
+          <gl-link class="gl-text-gray-500" :href="noteAnchor" data-testid="time-ago-link">
             <time-ago-tooltip :time="noteCreatedAt" tooltip-placement="bottom" />
           </gl-link>
         </div>
 
-        <div>
+        <div data-testid="badges-container">
           <slot name="badges"></slot>
         </div>
       </div>
