@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 Experiments can be conducted by any GitLab team, most often the teams from the [Growth Sub-department](https://about.gitlab.com/handbook/engineering/development/growth/). Experiments are not tied to releases because they primarily target GitLab.com.
 
-Experiments are run as an A/B/n test and are behind a feature flag to turn the test on or off. Based on the data the experiment generates, the team decides if the experiment had a positive impact and should be made the new default or rolled back.
+Experiments are run as an A/B/n test, and are behind a feature flag to turn the test on or off. Based on the data the experiment generates, the team decides if the experiment had a positive impact and should be made the new default, or rolled back.
 
 ## Experiment tracking issue
 
@@ -49,12 +49,12 @@ Historical Context: `Experimentation Module` was built iteratively with the need
 
 Currently both methods for running experiments are included in the codebase. When considering which to use:
 
-- If you need to record conducted experiments and usage into the database, we currently recommend using the `Experimentation Module`.
-- If you want to conduct a [multivariate](https://en.wikipedia.org/wiki/Multivariate_statistics) experiment, we recommend using `gitlab-experiment`.
+- To record conducted experiments and usage into the database, use the `Experimentation Module`.
+- To conduct a [multivariate](https://en.wikipedia.org/wiki/Multivariate_statistics) experiment, use `gitlab-experiment`.
 
 Otherwise, there is currently no strong suggestion to use one over the other.
 
-### Experiments using `gitlab-experiment`
+### Experiments using `gitlab-experiment` **(FREE SAAS)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/300383) in GitLab 13.7.
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
