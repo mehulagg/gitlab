@@ -30,7 +30,7 @@ module BoardsHelper
     if board.group_board?
       @group.id
     else
-      @project.group.id
+      @project&.group.id
     end
   end
 
