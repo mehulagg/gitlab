@@ -1,9 +1,15 @@
 <script>
 import { mergeUrlParams, redirectTo } from '~/lib/utils/url_utility';
 import { __, s__, sprintf } from '~/locale';
-import { COMMIT_FAILURE, COMMIT_SUCCESS } from '../../constants';
+import {
+  COMMIT_ACTION_CREATE,
+  COMMIT_ACTION_UPDATE,
+  COMMIT_FAILURE,
+  COMMIT_SUCCESS,
+} from '../../constants';
 import commitCIFile from '../../graphql/mutations/commit_ci_file.mutation.graphql';
 import getCommitSha from '../../graphql/queries/client/commit_sha.graphql';
+import getIsNewCiConfigFile from '../../graphql/queries/client/is_new_ci_config_file.graphql';
 
 import CommitForm from './commit_form.vue';
 
@@ -31,15 +37,22 @@ export default {
   data() {
     return {
       commit: {},
+      isNewCiConfigFile: false,
       isSaving: false,
     };
   },
   apollo: {
+    isNewCiConfigFile: {
+      query: getIsNewCiConfigFile,
+    },
     commitSha: {
       query: getCommitSha,
     },
   },
   computed: {
+    action() {
+      return this.isNewCiConfigFile ? COMMIT_ACTION_CREATE : COMMIT_ACTION_UPDATE;
+    },
     defaultCommitMessage() {
       return sprintf(this.$options.i18n.defaultCommitMessage, { sourcePath: this.ciConfigPath });
     },
@@ -66,6 +79,7 @@ export default {
         } = await this.$apollo.mutate({
           mutation: commitCIFile,
           variables: {
+            action: this.action,
             projectPath: this.projectFullPath,
             branch,
             startBranch: this.defaultBranch,
@@ -89,6 +103,11 @@ export default {
           this.redirectToNewMergeRequest(branch);
         } else {
           this.$emit('commit', { type: COMMIT_SUCCESS });
+          if (this.isNewCiConfigFile) {
+            this.$apollo
+              .getClient()
+              .writeQuery({ query: getIsNewCiConfigFile, data: { isNewCiConfigFile: false } });
+          }
         }
       } catch (error) {
         this.$emit('showError', { type: COMMIT_FAILURE, reasons: [error?.message] });

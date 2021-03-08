@@ -9,6 +9,7 @@ import PipelineEditorEmptyState from './components/ui/pipeline_editor_empty_stat
 import { COMMIT_FAILURE, COMMIT_SUCCESS, DEFAULT_FAILURE, LOAD_FAILURE_UNKNOWN } from './constants';
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
+import getIsNewCiConfigFile from './graphql/queries/client/is_new_ci_config_file.graphql';
 import PipelineEditorHome from './pipeline_editor_home.vue';
 
 export default {
@@ -37,7 +38,7 @@ export default {
       failureType: null,
       failureReasons: [],
       showStartScreen: false,
-      isNewConfigFile: false,
+      isNewCiConfigFile: false,
       initialCiFileContent: '',
       lastCommittedContent: '',
       currentCiFileContent: '',
@@ -49,10 +50,12 @@ export default {
   apollo: {
     initialCiFileContent: {
       query: getBlobContent,
-      // If we are working off a new file, we don't want to fetch
-      // the base data as there is nothing to fetch.
-      skip({ isNewConfigFile }) {
-        return isNewConfigFile;
+      // If it's a brand new file, we don't want to fetch the content.
+      // Then when the user commits the first time, the page would reload
+      // to get the initial file content, but we already have it in `lastCommitedContent`
+      // so we skip.
+      skip({ isNewCiConfigFile, lastCommittedContent }) {
+        return isNewCiConfigFile || lastCommittedContent;
       },
       variables() {
         return {
@@ -96,6 +99,9 @@ export default {
       error() {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       },
+    },
+    isNewCiConfigFile: {
+      query: getIsNewCiConfigFile,
     },
   },
   computed: {
@@ -190,8 +196,10 @@ export default {
       this.currentCiFileContent = this.lastCommittedContent;
     },
     setNewEmptyCiConfigFile() {
+      this.$apollo
+        .getClient()
+        .writeQuery({ query: getIsNewCiConfigFile, data: { isNewCiConfigFile: true } });
       this.showStartScreen = false;
-      this.isNewConfigFile = true;
     },
     showErrorAlert({ type, reasons = [] }) {
       this.reportFailure(type, reasons);
