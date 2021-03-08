@@ -32,7 +32,7 @@ GitLab is being translated into many languages.
       [open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization). Notify our Crowdin
       administrators. To do so, open an issue or an MR, and include `@gitlab-org/manage/import`
       in the issue.
-   1. Once the issue is complete, restart this procedure.
+   1. After the issue/Merge Request is complete, restart this procedure.
 1. Next, you can view list of files and folders.
    Select `gitlab.pot` to open the translation editor.
 
