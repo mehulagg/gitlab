@@ -8,9 +8,12 @@ product_category: collection
 value_type: boolean
 status: data_available
 time_frame: none
-data_source:
+data_source: database
 distribution:
+- ee
 - ce
 tier:
 - free
+- premium
+- ultimate
 skip_validation: true
