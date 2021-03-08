@@ -26,7 +26,9 @@ GitLab is being translated into many languages.
    [GitLab Crowdin project](https://crowdin.com/project/gitlab-ee).
    1. If the language that you're looking for is available, proceed
       to the next step.
-   1. If the language you are looking for is not available,
+   - If the language that you're looking for is available, proceed
+     to the next step.
+   - If the language you are looking for is not available,
       [open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization). Notify our Crowdin
       administrators. Open an issue or an MR, and include `@gitlab-org/manage/import` in the issue.
    1. Once the issue is complete, restart this procedure.
