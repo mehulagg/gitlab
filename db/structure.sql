@@ -11023,6 +11023,7 @@ CREATE TABLE cluster_agent_tokens (
     created_by_user_id bigint,
     description text,
     name text,
+    last_used_at timestamp with time zone,
     CONSTRAINT check_2b79dbb315 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_4e4ec5070a CHECK ((char_length(description) <= 1024)),
     CONSTRAINT check_c60daed227 CHECK ((char_length(token_encrypted) <= 255))
