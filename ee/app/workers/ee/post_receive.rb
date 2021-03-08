@@ -26,12 +26,13 @@ module EE
     def process_wiki_changes(post_received, wiki)
       super
 
-      # TODO: Support Geo for group wikis.
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/208147
-      return unless wiki.is_a?(ProjectWiki)
+      return unless ::Gitlab::Geo.primary?
 
-      if ::Gitlab::Geo.primary?
+      if wiki.is_a?(ProjectWiki)
         ::Geo::RepositoryUpdatedService.new(wiki.repository).execute
+      else
+        group_wiki_repository = wiki.group.group_wiki_repository
+        group_wiki_repository.replicator.handle_after_update if group_wiki_repository
       end
     end
 
