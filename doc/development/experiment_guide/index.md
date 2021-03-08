@@ -41,15 +41,15 @@ addressed.
 There are two options to conduct experiments:
 
 1. [GitLab Experiment](https://gitlab.com/gitlab-org/gitlab-experiment/) is a gem included in GitLab.
-1. [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb) is built in the GitLab codebase.
+1. [`Experimentation Module`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb) is built in the GitLab codebase.
 
 Both methods use [experiment](../feature_flags/development.md#experiment-type) feature flags.
 
-Historical Context: `experimentation.rb` was built iteratively with the needs that appeared while implementing Growth sub-department experiments. The `gitlab-experiment` gem was built with the learnings of `experimentation.rb` and an easier to use API.
+Historical Context: `Experimentation Module` was built iteratively with the needs that appeared while implementing Growth sub-department experiments. The `gitlab-experiment` gem was built with the learnings of the `Experimentation Module` and an easier to use API.
 
 Currently both methods for running experiments are included in the codebase. When considering which to use:
 
-- If you need to record conducted experiments and usage into the database, we currently recommend using `experimentation.rb`.
+- If you need to record conducted experiments and usage into the database, we currently recommend using the `Experimentation Module`.
 - If you want to conduct a [multivariate](https://en.wikipedia.org/wiki/Multivariate_statistics) experiment, we recommend using `gitlab-experiment`.
 
 Otherwise, there is currently no strong suggestion to use one over the other.
@@ -63,9 +63,9 @@ Otherwise, there is currently no strong suggestion to use one over the other.
 
 You find out how to conduct experiments using `gitlab-experiment` in the [README](https://gitlab.com/gitlab-org/gitlab-experiment/-/blob/master/README.md).
 
-### Experiments using `experimentation.rb`
+### Experiments using the `Experimentation Module`
 
-1. Add the experiment to the `Gitlab::Experimentation::EXPERIMENTS` hash in [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb):
+1. Add the experiment to the `Gitlab::Experimentation::EXPERIMENTS` hash in the [`Experimentation Module`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb):
 
    ```ruby
    EXPERIMENTS = {
