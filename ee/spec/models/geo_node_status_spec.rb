@@ -1156,6 +1156,12 @@ RSpec.describe GeoNodeStatus, :geo do
     end
   end
 
+  context '#load_secondary_usage_data' do
+    it 'loads the latest data from Geo::SecondaryUsageData'
+
+    it 'reports nil if there is no collected data in Geo::SecondaryUsageData'
+  end
+
   context 'Replicator stats' do
     where(:replicator, :model_factory, :registry_factory) do
       Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry
