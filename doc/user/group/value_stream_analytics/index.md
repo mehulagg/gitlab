@@ -323,11 +323,11 @@ To create a value stream with stages:
 1. Find and select the Value Stream dropdown. Select **Create new Value Stream**.
 1. Select either **Create from default template** or **Create from no template**.
    - Default stages in the value stream can be hidden or re-ordered
-![Default stage actions](img/vsa_default_stage_v13_10.png "Default stage actions")
+     ![Default stage actions](img/vsa_default_stage_v13_10.png "Default stage actions")
    - New stages can be added by clicking the 'Add another stage' button
    - The name, start and end events for the stage can be selected
-![Custom stage actions](img/vsa_custom_stage_v13_10.png "Custom stage actions")
-1. Click the **Create Value Stream** button to save the value stream.
+     ![Custom stage actions](img/vsa_custom_stage_v13_10.png "Custom stage actions")
+1. Select the **Create Value Stream** button to save the value stream.
 
 ![Extended create value stream form](img/extended_value_stream_form_v13_10.png "Extended create value stream form")
 
