@@ -421,10 +421,13 @@ export default {
             selectedFields,
           },
         })
-        .then((e) => {
+        .then(() => {
           createFlash({
-            message: sprintf(__('Your CSV export has started. It will be emailed to %{email} when complete.'), {email: this.currentUserEmail}),
-            type: FLASH_TYPES.NOTICE
+            message: sprintf(
+              __('Your CSV export has started. It will be emailed to %{email} when complete.'),
+              { email: this.currentUserEmail },
+            ),
+            type: FLASH_TYPES.NOTICE,
           });
         })
         .catch((e) => {
