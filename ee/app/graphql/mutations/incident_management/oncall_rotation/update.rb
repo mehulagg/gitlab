@@ -13,11 +13,11 @@ module Mutations
                  description: 'The ID of the on-call schedule to create the on-call rotation in.'
 
         argument :name, GraphQL::STRING_TYPE,
-                 required: true,
+                 required: false,
                  description: 'The name of the on-call rotation.'
 
         argument :starts_at, Types::IncidentManagement::OncallRotationDateInputType,
-                 required: true,
+                 required: false,
                  description: 'The start date and time of the on-call rotation, in the timezone of the on-call schedule.'
 
         argument :ends_at, Types::IncidentManagement::OncallRotationDateInputType,
@@ -25,7 +25,7 @@ module Mutations
                  description: 'The end date and time of the on-call rotation, in the timezone of the on-call schedule.'
 
         argument :rotation_length, Types::IncidentManagement::OncallRotationLengthInputType,
-                 required: true,
+                 required: false,
                  description: 'The rotation length of the on-call rotation.'
 
         argument :active_period, Types::IncidentManagement::OncallRotationActivePeriodInputType,
@@ -34,22 +34,28 @@ module Mutations
 
         argument :participants,
                  [Types::IncidentManagement::OncallUserInputType],
-                 required: true,
+                 required: false,
                  description: 'The usernames of users participating in the on-call rotation.'
 
-        def resolve(id:, participants:, **args)
+        def resolve(id:, **args)
           rotation = authorized_find!(id: id)
 
           result = ::IncidentManagement::OncallRotations::EditService.new(
             rotation,
             current_user,
-            service_params(rotation.schedule, participants, args)
+            edit_service_params(rotation.schedule, args[:participants], args)
           ).execute
 
           response(result)
         end
 
         private
+
+        def edit_service_params(schedule, participants, args)
+          parsed_service_params = parsed_params(schedule, participants, args)
+
+          args.slice(:name).merge(parsed_service_params.slice(*args.keys))
+        end
 
         def find_object(id:)
           GitlabSchema.object_from_id(id, expected_type: ::IncidentManagement::OncallRotation)

@@ -37,15 +37,15 @@ module Mutations
           ::IncidentManagement::OncallRotationsFinder.new(current_user, project, schedule, args).execute.first
         end
 
-        def service_params(schedule, participants, args)
-          rotation_length = args[:rotation_length][:length]
-          rotation_length_unit = args[:rotation_length][:unit]
+        def parsed_params(schedule, participants, args)
+          rotation_length = args.dig(:rotation_length, :length)
+          rotation_length_unit = args.dig(:rotation_length, :unit)
           starts_at = parse_datetime(schedule, args[:starts_at])
           ends_at = parse_datetime(schedule, args[:ends_at]) if args[:ends_at]
 
           active_period_start, active_period_end = active_period_times(args)
 
-          args.slice(:name).merge(
+          {
             length: rotation_length,
             length_unit: rotation_length_unit,
             starts_at: starts_at,
@@ -53,14 +53,17 @@ module Mutations
             participants: find_participants(participants),
             active_period_start: active_period_start,
             active_period_end: active_period_end
-          )
+          }
         end
 
         def parse_datetime(schedule, timestamp)
-          timestamp.asctime.in_time_zone(schedule.timezone)
+          timestamp&.asctime&.in_time_zone(schedule.timezone)
         end
 
         def find_participants(user_array)
+          return if user_array.nil?
+          return [] if user_array == []
+
           raise_too_many_users_error if user_array.size > MAXIMUM_PARTICIPANTS
 
           usernames = user_array.map {|h| h[:username] }

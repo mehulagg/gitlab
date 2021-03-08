@@ -53,6 +53,10 @@ module Types
             null: true,
             description: 'Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.',
             resolver: ::Resolvers::IncidentManagement::OncallShiftsResolver
+
+      def participants
+        object.participants.not_removed
+      end
     end
   end
 end
