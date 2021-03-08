@@ -13,7 +13,7 @@ module IncidentManagement
       # @param params - starts_at [DateTime] The datetime the rotation starts on.
       # @param params - ends_at [DateTime] The datetime the rotation ends on.
       # @param params - participants [Array<hash>] An array of hashes defining participants of the on-call rotations.
-      # @option opts  - participant [User] The user who is part of the rotation
+      # @option opts  - user [User] The user who is part of the rotation
       # @option opts  - color_palette [String] The color palette to assign to the on-call user, for example: "blue".
       # @option opts  - color_weight [String] The color weight to assign to for the on-call user, for example "500". Max 4 chars.
       def initialize(oncall_rotation, user, params)
@@ -39,13 +39,15 @@ module IncidentManagement
           # TODO Recalculate rotation with new params
           # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55570
 
-          raise RotationModificationError.new(error_in_validation(oncall_rotation)) unless oncall_rotation.update(params)
+          oncall_rotation.update!(params)
 
           success(oncall_rotation.reset)
         end
 
-      rescue RotationModificationError => err
-        err.service_response_error
+      rescue InsufficientParticipantPermissionsError => err
+        error(err.message)
+      rescue ActiveRecord::RecordInvalid => err
+        error_in_validation(err.record)
       end
 
       private
@@ -56,10 +58,9 @@ module IncidentManagement
         return if participants_params.nil?
 
         participants = participants_for(oncall_rotation)
-        raise RotationModificationError.new(error_participant_has_no_permission) if participants.nil?
+        raise InsufficientParticipantPermissionsError.new(participant_has_no_permission) if participants.nil?
 
-        first_invalid_participant = participants.find(&:invalid?)
-        raise RotationModificationError.new(error_in_validation(first_invalid_participant)) if first_invalid_participant
+        participants.each(&:validate!)
 
         upsert_participants(participants)
 

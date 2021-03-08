@@ -35,22 +35,22 @@ module IncidentManagement
         return error_duplicate_participants if duplicated_users?
 
         OncallRotation.transaction do
-          @oncall_rotation = schedule.rotations.create(rotation_params)
-          raise RotationModificationError.new(error_in_validation(oncall_rotation)) unless oncall_rotation.persisted?
+          @oncall_rotation = schedule.rotations.create!(rotation_params)
 
           participants = participants_for(oncall_rotation)
-          raise RotationModificationError.new(error_participant_has_no_permission) if participants.nil?
+          raise InsufficientParticipantPermissionsError.new(participant_has_no_permission) if participants.nil?
 
-          first_invalid_participant = participants.find(&:invalid?)
-          raise RotationModificationError.new(error_in_validation(first_invalid_participant)) if first_invalid_participant
+          participants.each(&:validate!)
 
           upsert_participants(participants)
 
           success(oncall_rotation.reset)
         end
 
-      rescue RotationModificationError => err
-        err.service_response_error
+      rescue InsufficientParticipantPermissionsError => err
+        error(err.message)
+      rescue ActiveRecord::RecordInvalid => err
+        error_in_validation(err.record)
       end
 
       private

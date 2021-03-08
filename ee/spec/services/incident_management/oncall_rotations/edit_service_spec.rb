@@ -23,6 +23,7 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
 
     shared_examples 'error response' do |message|
       it 'has an informative message' do
+        expect { execute }.not_to change { oncall_rotation.reload.updated_at }
         expect(execute).to be_error
         expect(execute.message).to eq(message)
       end
@@ -90,6 +91,7 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
       let(:params) { rotation_params(participants: Array.new(described_class::MAXIMUM_PARTICIPANTS + 1, participant_to_add)) }
 
       it 'has an informative error message' do
+        expect { execute }.not_to change { oncall_rotation.reload.updated_at }
         expect(execute).to be_error
         expect(execute.message).to eq("A maximum of #{described_class::MAXIMUM_PARTICIPANTS} participants can be added")
       end

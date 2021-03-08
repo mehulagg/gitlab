@@ -4,13 +4,7 @@ module IncidentManagement
   module OncallRotations
     module SharedRotationLogic
       MAXIMUM_PARTICIPANTS = 100
-      RotationModificationError = Class.new(StandardError) do
-        attr_reader :service_response_error
-
-        def initialize(service_response_error)
-          @service_response_error = service_response_error
-        end
-      end
+      InsufficientParticipantPermissionsError = Class.new(StandardError)
 
       # Merges existing participants with API-provided
       # participants instead of using just the API-provided ones
@@ -82,8 +76,8 @@ module IncidentManagement
         @participant_users ||= participants_params.map { |participant| participant[:user] }
       end
 
-      def error_participant_has_no_permission
-        error('A participant has insufficient permissions to access the project')
+      def participant_has_no_permission
+        _('A participant has insufficient permissions to access the project')
       end
 
       def error_too_many_participants
