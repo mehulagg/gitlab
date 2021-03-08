@@ -195,17 +195,17 @@ export default {
       :svg-path="emptyStateSvgPath"
     />
     <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
+      <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
+        <path-navigation
+          :key="`path_navigation_key_${pathNavigationData.length}`"
+          class="js-path-navigation"
+          :loading="isLoading"
+          :stages="pathNavigationData"
+          :selected-stage="selectedStage"
+          @selected="onStageSelect"
+        />
+      </div>
       <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
-        <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
-          <path-navigation
-            :key="`path_navigation_key_${pathNavigationData.length}`"
-            class="js-path-navigation"
-            :loading="isLoading"
-            :stages="pathNavigationData"
-            :selected-stage="selectedStage"
-            @selected="onStageSelect"
-          />
-        </div>
         <div
           v-if="shouldDisplayFilters"
           class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
