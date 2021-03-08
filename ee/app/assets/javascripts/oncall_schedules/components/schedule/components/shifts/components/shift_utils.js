@@ -175,7 +175,7 @@ export const daysUntilEndOfTimeFrame = (shiftRangeOverlap, timeframeItem, preset
  * @param {String} shiftTimeUnitWidth - the current grid type i.e. Week, Day, Hour.
  * @param {Date} shiftStartsAt - current shift start Date.
  * @param {Date} timeframeItem - the current timeframe start Date.
- * * @param {String} presetType - the current grid type i.e. Week, Day, Hour.
+ * @param {String} presetType - the current grid type i.e. Week, Day, Hour.
  * @returns {Number}
  *
  * @example
@@ -202,7 +202,7 @@ export const weekDisplayShiftLeft = (
   if (shiftUnitIsHour) {
     const hourOffset =
       (shiftTimeUnitWidth / HOURS_IN_DAY) * new Date(shiftRangeOverlap.overlapStartDate).getHours();
-    return dayOffSet + Math.floor(hourOffset);
+    return dayOffSet + Math.round(hourOffset);
   }
 
   if (shiftStartsEarly) {
@@ -236,9 +236,10 @@ export const weekDisplayShiftWidth = (
   shiftTimeUnitWidth,
 ) => {
   if (shiftUnitIsHour) {
-    const SPACER = shiftRangeOverlap.hoursOverlap === 1 ? 1 : ASSIGNEE_SPACER;
+    // If the shift length is less than 8 hours for the week view we remove the spacer for wider shifts
+    const SPACER = shiftRangeOverlap.hoursOverlap <= 8 ? 0 : ASSIGNEE_SPACER;
     return (
-      Math.floor((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) - SPACER
+      Math.round((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) - SPACER
     );
   }
 

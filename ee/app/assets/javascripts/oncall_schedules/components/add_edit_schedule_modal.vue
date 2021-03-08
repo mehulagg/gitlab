@@ -135,6 +135,7 @@ export default {
         });
     },
     editSchedule() {
+      const cachedTimeZone = this.schedule.timezone;
       const { projectPath } = this;
       this.loading = true;
 
@@ -167,6 +168,9 @@ export default {
         })
         .finally(() => {
           this.loading = false;
+          if (cachedTimeZone !== this.schedule.timezone) {
+            window.location.reload();
+          }
         });
     },
     hideErrorAlert() {
