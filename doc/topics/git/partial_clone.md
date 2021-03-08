@@ -29,7 +29,7 @@ or unreliable internet connection.
 
 Using partial clone with a file size filter solves this problem, by excluding
 troublesome large files from clones and fetches. When Git encounters a missing
-file, it isdownloaded on demand.
+file, it's downloaded on demand.
 
 When cloning a repository, use the `--filter=blob:limit=<size>` argument. For example,
 to clone the repository excluding files larger than 1 megabyte:
