@@ -96,19 +96,19 @@ export default {
 
       <template #discussion>
         <note
-          v-for="(comment, idx) in issue.comments"
-          :id="jiraIssueCommentId(idx)"
-          :key="jiraIssueCommentId(idx)"
-          :author-avatar-url="comment.avatarUrl"
-          :author-web-url="comment.webUrl"
-          :author-full-name="comment.name"
-          :note-body-html="comment.note"
+          v-for="comment in issue.comments"
+          :id="jiraIssueCommentId(comment.id)"
+          :key="comment.id"
+          :author-avatar-url="comment.author.avatarUrl"
+          :author-web-url="comment.author.webUrl"
+          :author-name="comment.author.name"
+          :note-body-html="comment.bodyHtml"
           :note-created-at="comment.createdAt"
         >
           <template #badges>
-            <gl-badge v-gl-tooltip="{ title: __('This is a Jira user.') }">{{
-              __('Jira user')
-            }}</gl-badge>
+            <gl-badge v-gl-tooltip="{ title: __('This is a Jira user.') }">
+              {{ __('Jira user') }}
+            </gl-badge>
           </template>
         </note>
       </template>

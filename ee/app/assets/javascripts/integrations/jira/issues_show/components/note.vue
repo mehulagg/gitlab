@@ -25,7 +25,7 @@ export default {
       type: String,
       required: true,
     },
-    authorFullName: {
+    authorName: {
       type: String,
       required: true,
     },
@@ -40,7 +40,7 @@ export default {
   },
   computed: {
     noteAnchor() {
-      return `#${this.$attrs.id}`;
+      return `#${this.$attrs.id || ''}`;
     },
   },
 };
@@ -50,7 +50,7 @@ export default {
   <timeline-entry-item class="gl-p-5">
     <timeline-icon class="gl-mr-5 gl-ml-2">
       <gl-avatar-link target="_blank" :href="authorWebUrl">
-        <gl-avatar :size="32" :src="authorAvatarUrl" :alt="authorFullName" />
+        <gl-avatar :size="32" :src="authorAvatarUrl" :alt="authorName" />
       </gl-avatar-link>
     </timeline-icon>
 
@@ -58,7 +58,7 @@ export default {
       <div class="gl-display-flex gl-justify-content-space-between">
         <div class="gl-display-flex gl-align-items-center gl-mb-3">
           <gl-link :href="authorWebUrl" class="gl-text-black-normal gl-font-weight-bold">
-            {{ authorFullName }}
+            {{ authorName }}
           </gl-link>
 
           <span class="gl-text-gray-500 gl-mx-2">·</span>
