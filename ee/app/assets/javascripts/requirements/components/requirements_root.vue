@@ -421,6 +421,12 @@ export default {
             selectedFields,
           },
         })
+        .then((e) => {
+          createFlash({
+            message: sprintf(__('Your CSV export has started. It will be emailed to %{email} when complete.'), {email: this.currentUserEmail}),
+            type: FLASH_TYPES.NOTICE
+          });
+        })
         .catch((e) => {
           createFlash({
             message: __('Something went wrong while exporting requirements'),
