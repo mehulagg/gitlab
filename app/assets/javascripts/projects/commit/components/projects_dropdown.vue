@@ -10,7 +10,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { I18N_DROPDOWN } from '../constants';
 
 export default {
-  name: 'BranchesDropdown',
+  name: 'ProjectsDropdown',
   components: {
     GlDropdown,
     GlSearchBoxByType,
@@ -32,56 +32,56 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['joinedBranches']),
-    ...mapState(['isFetching', 'branch', 'branches']),
+    ...mapGetters(['joinedProjects']),
+    ...mapState(['isFetching', 'project', 'projects']),
     filteredResults() {
       const lowerCasedSearchTerm = this.searchTerm.toLowerCase();
-      return this.joinedBranches.filter((resultString) =>
+      return this.joinedProjects.filter((resultString) =>
         resultString.toLowerCase().includes(lowerCasedSearchTerm),
       );
     },
   },
   mounted() {
-    this.fetchBranches(this.searchTerm);
+    this.fetchProjects(this.searchTerm);
   },
   methods: {
-    ...mapActions(['fetchBranches']),
-    selectBranch(branch) {
-      this.$emit('selectBranch', branch);
-      this.searchTerm = branch; // enables isSelected to work as expected
+    ...mapActions(['fetchProjects']),
+    selectProject(project) {
+      this.$emit('selectProject', project);
+      this.searchTerm = project; // enables isSelected to work as expected
     },
-    isSelected(selectedBranch) {
-      return selectedBranch === this.branch;
+    isSelected(selectedProject) {
+      return selectedProject === this.project;
     },
     searchTermChanged(value) {
       this.searchTerm = value;
-      this.fetchBranches(value);
+      this.fetchProjects(value);
     },
   },
 };
 </script>
 <template>
-  <gl-dropdown :text="value" :header-text="$options.i18n.branchHeaderTitle">
+  <gl-dropdown :text="value" :header-text="$options.i18n.projectHeaderTitle">
     <gl-search-box-by-type
       :value="searchTerm"
       trim
       autocomplete="off"
       :debounce="250"
-      :placeholder="$options.i18n.branchSearchPlaceholder"
+      :placeholder="$options.i18n.projectSearchPlaceholder"
       data-testid="dropdown-search-box"
       @input="searchTermChanged"
     />
     <gl-dropdown-item
-      v-for="branch in filteredResults"
+      v-for="project in filteredResults"
       v-show="!isFetching"
-      :key="branch"
-      :name="branch"
-      :is-checked="isSelected(branch)"
+      :key="project"
+      :name="project"
+      :is-checked="isSelected(project)"
       is-check-item
       data-testid="dropdown-item"
-      @click="selectBranch(branch)"
+      @click="selectProject(project)"
     >
-      {{ branch }}
+      {{ project }}
     </gl-dropdown-item>
     <gl-dropdown-text v-show="isFetching" data-testid="dropdown-text-loading-icon">
       <gl-loading-icon class="gl-mx-auto" />

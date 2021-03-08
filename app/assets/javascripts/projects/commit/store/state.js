@@ -1,13 +1,18 @@
 export default () => ({
   endpoint: null,
   branchesEndpoint: null,
+  projectsEndpoint: null,
   isFetching: false,
   branches: [],
+  projects: [],
   selectedBranch: '',
+  selectedProject: '',
   pushCode: false,
   branchCollaboration: false,
   modalTitle: '',
   existingBranch: '',
   defaultBranch: '',
+  defaultProject: '',
   branch: '',
+  project: '',
 });

@@ -5,10 +5,12 @@ import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import csrf from '~/lib/utils/csrf';
 import eventHub from '../event_hub';
 import BranchesDropdown from './branches_dropdown.vue';
+import ProjectsDropdown from './projects_dropdown.vue';
 
 export default {
   components: {
     BranchesDropdown,
+    ProjectsDropdown,
     GlModal,
     GlForm,
     GlFormCheckbox,
@@ -54,6 +56,7 @@ export default {
   computed: {
     ...mapState([
       'branch',
+      'project',
       'endpoint',
       'pushCode',
       'branchCollaboration',
@@ -66,7 +69,7 @@ export default {
     eventHub.$on(this.openModal, this.show);
   },
   methods: {
-    ...mapActions(['clearModal', 'setBranch', 'setSelectedBranch']),
+    ...mapActions(['clearModal', 'setBranch', 'setSelectedBranch', 'setProject', 'setSelectedProject']),
     show() {
       this.$root.$emit(BV_SHOW_MODAL, this.modalId);
     },
@@ -100,6 +103,16 @@ export default {
 
     <gl-form ref="form" :action="endpoint" method="post">
       <input type="hidden" name="authenticity_token" :value="$options.csrf.token" />
+
+      <gl-form-group
+        :label="i18n.projectLabel"
+        label-for="start_project"
+        data-testid="dropdown-group"
+      >
+        <input id="start_project" type="hidden" name="start_project" :value="project" />
+
+        <projects-dropdown class="gl-w-half" :value="project" @selectProject="setProject" />
+      </gl-form-group>
 
       <gl-form-group
         :label="i18n.branchLabel"

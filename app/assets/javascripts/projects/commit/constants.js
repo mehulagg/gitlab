@@ -26,6 +26,7 @@ export const I18N_REVERT_MODAL = {
 
 export const I18N_CHERRY_PICK_MODAL = {
   branchLabel: s__('ChangeTypeAction|Pick into branch'),
+  projectLabel: s__('ChangeTypeAction|Pick into project'),
   actionPrimaryText: s__('ChangeTypeAction|Cherry-pick'),
 };
 
@@ -35,8 +36,11 @@ export const PREPENDED_MODAL_TEXT = s__(
 
 export const I18N_DROPDOWN = {
   noResultsMessage: __('No matching results'),
-  headerTitle: s__('ChangeTypeAction|Switch branch'),
-  searchPlaceholder: s__('ChangeTypeAction|Search branches'),
+  branchHeaderTitle: s__('ChangeTypeAction|Switch branch'),
+  branchSearchPlaceholder: s__('ChangeTypeAction|Search branches'),  
+  projectHeaderTitle: s__('ChangeTypeAction|Switch project'),
+  projectSearchPlaceholder: s__('ChangeTypeAction|Search project'),
 };
 
 export const PROJECT_BRANCHES_ERROR = __('Something went wrong while fetching branches');
+export const PROJECTS_FETCH_ERROR = __('Something went wrong while fetching projects');
