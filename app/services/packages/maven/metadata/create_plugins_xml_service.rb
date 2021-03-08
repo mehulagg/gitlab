@@ -56,7 +56,7 @@ module Packages
 
             packages = @package.project.packages
                                        .maven
-                                       .processed
+                                       .displayable
                                        .with_name(package_names)
                                        .has_version
 
