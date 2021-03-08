@@ -156,12 +156,16 @@ module Gitlab
               end
             end
 
-            LoadBalancing::Logger.warn(
-              event: :hosts_not_caught_up,
-              message: 'Not all Hosts have caught up to the given transaction write location.',
-              caught_up_count: caught_up_count,
-              host_list_length: @host_list.length
-            ) unless all_caught_up
+            unless all_caught_up
+              LoadBalancing::Logger.warn(
+                event: :hosts_not_caught_up,
+                message: 'Not all Hosts have caught up to the given transaction write location.',
+                caught_up_count: caught_up_count,
+                sidekiq: Gitlab::Runtime.sidekiq?,
+                web_server: Gitlab::Runtime.web_server?,
+                host_list_length: @host_list.length
+              )
+            end
 
             all_caught_up
           else
@@ -169,7 +173,7 @@ module Gitlab
           end
         end
 
-        def  logging_for_all_caught_up_method?
+        def logging_for_all_caught_up_method?
           return @logging_for_all_caught_up_method if defined?(@logging_for_all_caught_up_method)
 
           @logging_for_all_caught_up_method = false

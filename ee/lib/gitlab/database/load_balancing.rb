@@ -91,9 +91,8 @@ module Gitlab
       end
 
       def self.disabled_for_sidekiq?
-         Gitlab::Runtime.sidekiq? && !load_balancing_for_sidekiq?
+        Gitlab::Runtime.sidekiq? && !load_balancing_for_sidekiq?
       end
-
 
       def self.load_balancing_for_sidekiq?
         return @load_balancing_for_sidekiq if defined?(@load_balancing_for_sidekiq)
