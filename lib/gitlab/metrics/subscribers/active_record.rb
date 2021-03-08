@@ -13,8 +13,9 @@ module Gitlab
 
         DURATION_BUCKET = [0.05, 0.1, 0.25].freeze
 
-        # observe_transaction_duration is called from ActiveRecordBaseTransactionMetrics.transaction and used to
-        # record transaction durations.
+        # This event is published from ActiveRecordBaseTransactionMetrics and
+        # used to record a database transaction duration when calling
+        # ActiveRecord::Base.transaction {} block.
         def transaction(event)
           observe(:gitlab_database_transaction_seconds, event)
         end
