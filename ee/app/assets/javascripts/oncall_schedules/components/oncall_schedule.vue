@@ -93,7 +93,7 @@ export default {
   data() {
     return {
       presetType: this.$options.PRESET_TYPES.WEEKS,
-      timeframeStartDate: getStartOfWeek(new Date(), 4),
+      timeframeStartDate: getStartOfWeek(new Date()),
       rotations: this.schedule.rotations.nodes,
     };
   },
