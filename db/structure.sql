@@ -9803,7 +9803,7 @@ CREATE TABLE batched_background_migrations (
     "interval" smallint NOT NULL,
     status smallint DEFAULT 0 NOT NULL,
     job_class_name text NOT NULL,
-    batch_class_name text DEFAULT 'Gitlab::Database::BackgroundMigration::PrimaryKeyBatchingStrategy'::text NOT NULL,
+    batch_class_name text DEFAULT 'PrimaryKeyBatchingStrategy'::text NOT NULL,
     table_name text NOT NULL,
     column_name text NOT NULL,
     job_arguments jsonb DEFAULT '"[]"'::jsonb NOT NULL,

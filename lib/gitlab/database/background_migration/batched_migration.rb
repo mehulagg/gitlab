@@ -4,6 +4,9 @@ module Gitlab
   module Database
     module BackgroundMigration
       class BatchedMigration < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord
+        JOB_CLASS_MODULE = 'Gitlab::BackgroundMigration'
+        BATCH_CLASS_MODULE = "#{JOB_CLASS_MODULE}::BatchingStrategies".freeze
+
         self.table_name = :batched_background_migrations
 
         has_many :batched_jobs, foreign_key: :batched_background_migration_id
@@ -37,19 +40,19 @@ module Gitlab
         end
 
         def job_class
-          job_class_name.constantize
+          "#{JOB_CLASS_MODULE}::#{job_class_name}".constantize
         end
 
         def batch_class
-          batch_class_name.constantize
+          "#{BATCH_CLASS_MODULE}::#{batch_class_name}".constantize
         end
 
         def job_class_name=(class_name)
-          write_attribute(:job_class_name, self.class.remove_toplevel_prefix(class_name))
+          write_attribute(:job_class_name, class_name.demodulize)
         end
 
         def batch_class_name=(class_name)
-          write_attribute(:batch_class_name, self.class.remove_toplevel_prefix(class_name))
+          write_attribute(:batch_class_name, class_name.demodulize)
         end
       end
     end
