@@ -28,7 +28,7 @@ GitLab is being translated into many languages.
      to the next step.
    - If the language you are looking for is not available,
       [open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization). Notify our Crowdin
-      administrators. To do so, open an issue or an MR, and include `@gitlab-org/manage/import`
+      administrators. To do so, open an issue or a Merge Request, and include `@gitlab-org/manage/import`
       in the issue.
    - After the issue/Merge Request is complete, restart this procedure.
 1. Next, you can view list of files and folders.
