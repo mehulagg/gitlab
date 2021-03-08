@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe FetchSubscriptionPlansService do
+RSpec.describe GitlabSubscriptions::FetchSubscriptionPlansService do
   describe '#execute' do
     subject(:execute_service) { described_class.new(plan: plan).execute }
 

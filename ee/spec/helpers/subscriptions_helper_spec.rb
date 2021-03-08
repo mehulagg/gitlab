@@ -26,7 +26,7 @@ RSpec.describe SubscriptionsHelper do
   before do
     stub_feature_flags(hide_deprecated_billing_plans: false)
     allow(helper).to receive(:params).and_return(plan_id: 'bronze_id', namespace_id: nil)
-    allow_next_instance_of(FetchSubscriptionPlansService) do |instance|
+    allow_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
       allow(instance).to receive(:execute).and_return(raw_plan_data)
     end
   end
