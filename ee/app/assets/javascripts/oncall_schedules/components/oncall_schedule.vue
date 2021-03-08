@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
 import {
   formatDate,
+  getStartOfWeek,
   nWeeksBefore,
   nWeeksAfter,
   nDaysBefore,
@@ -92,7 +93,7 @@ export default {
   data() {
     return {
       presetType: this.$options.PRESET_TYPES.WEEKS,
-      timeframeStartDate: new Date(),
+      timeframeStartDate: getStartOfWeek(new Date(), 4),
       rotations: this.schedule.rotations.nodes,
     };
   },
