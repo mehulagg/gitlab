@@ -40,8 +40,9 @@ module Gitlab
           elsif m = /^(\w{40}) (\d+) (\d+)/.match(line)
             # Removed these instantiations for performance but keeping them for reference:
             # commit_id, old_lineno, lineno = m[1], m[2].to_i, m[3].to_i
-            commits[m[1]] = nil unless commits.key?(m[1])
-            info[m[3].to_i] = [m[1], m[2].to_i]
+            commit_id = m[1]
+            commits[commit_id] = nil unless commits.key?(commit_id)
+            info[m[3].to_i] = [commit_id, m[2].to_i]
           end
         end
 
