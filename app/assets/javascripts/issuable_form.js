@@ -3,6 +3,8 @@ import Pikaday from 'pikaday';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
 import Autosave from './autosave';
 import AutoWidthDropdownSelect from './issuable/auto_width_dropdown_select';
+import axios from './lib/utils/axios_utils';
+import { normalizeHeaders } from './lib/utils/common_utils';
 import { loadCSSFile } from './lib/utils/css_utils';
 import { parsePikadayDate, pikadayToString } from './lib/utils/datetime_utility';
 import { queryToObject, objectToQuery } from './lib/utils/url_utility';
@@ -207,6 +209,27 @@ export default class IssuableForm {
                       text: name,
                     })),
                   };
+                },
+                transport(params, success, failure) {
+                  // eslint-disable-next-line promise/no-nesting
+                  return axios[params.type.toLowerCase()](params.url, {
+                    params: params.data,
+                  })
+                  .then((res) => {
+                    const results = res.data || [];
+                    const headers = normalizeHeaders(res.headers);
+                    const currentPage = parseInt(headers['X-PAGE'], 10) || 0;
+                    const totalPages = parseInt(headers['X-TOTAL-PAGES'], 10) || 0;
+                    const more = currentPage < totalPages;
+
+                    success({
+                      results,
+                      pagination: {
+                        more,
+                      },
+                    });
+                  })
+                  .catch(failure);
                 },
               },
               initSelection(el, callback) {

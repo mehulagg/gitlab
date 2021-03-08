@@ -2,6 +2,8 @@ import '~/pages/admin/application_settings/index';
 import $ from 'jquery';
 import Api from '~/api';
 import groupsSelect from '~/groups_select';
+import axios from '~/lib/utils/axios_utils';
+import { normalizeHeaders } from '~/lib/utils/common_utils';
 import { loadCSSFile } from '~/lib/utils/css_utils';
 import { s__ } from '~/locale';
 
@@ -34,6 +36,27 @@ const getDropdownConfig = (placeholder, apiPath, textProp) => ({
           text: entity[textProp],
         })),
       };
+    },
+    transport(params, success, failure) {
+      // eslint-disable-next-line promise/no-nesting
+      return axios[params.type.toLowerCase()](params.url, {
+        params: params.data,
+      })
+      .then((res) => {
+        const results = res.data || [];
+        const headers = normalizeHeaders(res.headers);
+        const currentPage = parseInt(headers['X-PAGE'], 10) || 0;
+        const totalPages = parseInt(headers['X-TOTAL-PAGES'], 10) || 0;
+        const more = currentPage < totalPages;
+
+        success({
+          results,
+          pagination: {
+            more,
+          },
+        });
+      })
+      .catch(failure);
     },
   },
 });
