@@ -24,8 +24,6 @@ GitLab is being translated into many languages.
 
 1. Find the language that you want to contribute to, in our
    [GitLab Crowdin project](https://crowdin.com/project/gitlab-ee).
-   1. If the language that you're looking for is available, proceed
-      to the next step.
    - If the language that you're looking for is available, proceed
      to the next step.
    - If the language you are looking for is not available,
