@@ -15,6 +15,7 @@ import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { visitUrl, joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
+import { trackFileUploadEvent } from '~/projects/upload_file_experiment_tracking';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 
 const PRIMARY_OPTIONS_TEXT = __('Upload file');
@@ -158,6 +159,7 @@ export default {
           },
         })
         .then((response) => {
+          trackFileUploadEvent('click_upload_modal_form_submit');
           visitUrl(response.data.filePath);
         })
         .catch(() => {
