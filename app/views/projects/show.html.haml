@@ -6,23 +6,27 @@
 = content_for :meta_tags do
   = auto_discovery_link_tag(:atom, project_path(@project, rss_url_options), title: "#{@project.name} activity")
 
-= render partial: 'flash_messages', locals: { project: @project }
+= chunky_cache(expires_in: 10.minutes) do
+  = render partial: 'flash_messages', locals: { project: @project }
 
-= render "projects/last_push"
+  = render "projects/last_push"
 
-= render "home_panel"
+  = render "home_panel"
 
-- if can?(current_user, :download_code, @project) && @project.repository_languages.present?
-  = repository_languages_bar(@project.repository_languages)
+  - if can?(current_user, :download_code, @project) && @project.repository_languages.present?
+    = cache_chunk(@project, :language_bar) do
+      = repository_languages_bar(@project.repository_languages)
 
-= render "archived_notice", project: @project
-= render_if_exists "projects/marked_for_deletion_notice", project: @project
-= render_if_exists "projects/ancestor_group_marked_for_deletion_notice", project: @project
+  = cache_chunk(@project, :archive_partials) do
+    = render "archived_notice", project: @project
+    = render_if_exists "projects/marked_for_deletion_notice", project: @project
+    = render_if_exists "projects/ancestor_group_marked_for_deletion_notice", project: @project
+
+  = cache_chunk(@project, :auto_devops_callout) do
+    - if show_auto_devops_callout?(@project)
+      = render 'shared/auto_devops_callout'
 
 - view_path = @project.default_view
-
-- if show_auto_devops_callout?(@project)
-  = render 'shared/auto_devops_callout'
 
 %div{ class: project_child_container_class(view_path) }
   = render view_path, is_project_overview: true
