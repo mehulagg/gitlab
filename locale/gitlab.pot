@@ -13515,6 +13515,9 @@ msgstr ""
 msgid "From the Kubernetes cluster details view, applications list, install GitLab Runner."
 msgstr ""
 
+msgid "Full"
+msgstr ""
+
 msgid "Full name"
 msgstr ""
 
@@ -13722,6 +13725,9 @@ msgstr ""
 msgid "Geo|%{name} is scheduled for re-verify"
 msgstr ""
 
+msgid "Geo|%{timeAgoStr} (%{pendingEvents} events)"
+msgstr ""
+
 msgid "Geo|%{title} checksum progress"
 msgstr ""
 
@@ -13770,6 +13776,9 @@ msgstr ""
 msgid "Geo|Data replication lag"
 msgstr ""
 
+msgid "Geo|Data type"
+msgstr ""
+
 msgid "Geo|Discover GitLab Geo"
 msgstr ""
 
@@ -13785,7 +13794,13 @@ msgstr ""
 msgid "Geo|Geo Status"
 msgstr ""
 
+msgid "Geo|Geo nodes are paused using a command run on the node"
+msgstr ""
+
 msgid "Geo|Geo sites"
+msgstr ""
+
+msgid "Geo|Git"
 msgstr ""
 
 msgid "Geo|Go to the primary site"
@@ -13896,9 +13911,6 @@ msgstr ""
 msgid "Geo|Replication Details"
 msgstr ""
 
-msgid "Geo|Replication counts"
-msgstr ""
-
 msgid "Geo|Replication details"
 msgstr ""
 
@@ -13938,6 +13950,9 @@ msgstr ""
 msgid "Geo|Secondary site"
 msgstr ""
 
+msgid "Geo|Selective (%{syncLabel})"
+msgstr ""
+
 msgid "Geo|Status"
 msgstr ""
 
@@ -13948,6 +13963,9 @@ msgid "Geo|Synced"
 msgstr ""
 
 msgid "Geo|Synced at"
+msgstr ""
+
+msgid "Geo|Synchronization"
 msgstr ""
 
 msgid "Geo|Synchronization failed - %{error}"
@@ -13990,6 +14008,9 @@ msgid "Geo|Undefined"
 msgstr ""
 
 msgid "Geo|Unknown state"
+msgstr ""
+
+msgid "Geo|Verification"
 msgstr ""
 
 msgid "Geo|Verification failed - %{error}"
@@ -14314,6 +14335,9 @@ msgid "Gitpod|Gitpod URL"
 msgstr ""
 
 msgid "Gitpod|e.g. https://gitpod.example.com"
+msgstr ""
+
+msgid "Git|File"
 msgstr ""
 
 msgid "Given access %{time_ago}"
@@ -22151,6 +22175,9 @@ msgid "Pause Elasticsearch indexing"
 msgstr ""
 
 msgid "Pause replication"
+msgstr ""
+
+msgid "Paused"
 msgstr ""
 
 msgid "Paused runners don't accept new jobs"

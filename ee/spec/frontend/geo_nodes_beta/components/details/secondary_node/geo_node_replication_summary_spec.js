@@ -1,7 +1,10 @@
 import { GlButton } from '@gitlab/ui';
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import GeoNodeReplicationCounts from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_counts.vue';
+import GeoNodeReplicationStatus from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_status.vue';
 import GeoNodeReplicationSummary from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_summary.vue';
+import GeoNodeSyncSettings from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_sync_settings.vue';
 import {
   MOCK_PRIMARY_VERSION,
   MOCK_REPLICABLE_TYPES,
@@ -48,9 +51,9 @@ describe('GeoNodeReplicationSummary', () => {
   });
 
   const findGlButton = () => wrapper.find(GlButton);
-  const findGeoNodeReplicationStatus = () => wrapper.find('[data-testid="replication-status"]');
-  const findGeoNodeReplicationCounts = () => wrapper.find('[data-testid="replication-counts"]');
-  const findGeoNodeSyncSettings = () => wrapper.find('[data-testid="sync-settings"]');
+  const findGeoNodeReplicationStatus = () => wrapper.find(GeoNodeReplicationStatus);
+  const findGeoNodeReplicationCounts = () => wrapper.find(GeoNodeReplicationCounts);
+  const findGeoNodeSyncSettings = () => wrapper.find(GeoNodeSyncSettings);
 
   describe('template', () => {
     describe('always', () => {

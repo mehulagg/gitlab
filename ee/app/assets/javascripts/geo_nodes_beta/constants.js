@@ -1,4 +1,5 @@
 import { helpPagePath } from '~/helpers/help_page_helper';
+import { __ } from '~/locale';
 
 export const GEO_INFO_URL = helpPagePath('administration/geo/index.md');
 
@@ -14,6 +15,9 @@ export const GEO_TROUBLESHOOTING_URL = helpPagePath(
 
 export const HELP_INFO_URL =
   'https://docs.gitlab.com/ee/administration/geo/disaster_recovery/background_verification.html#repository-verification';
+
+export const REPLICATION_PAUSE_URL =
+  'https://docs.gitlab.com/ee/administration/geo/replication/#pausing-and-resuming-replication';
 
 export const HEALTH_STATUS_UI = {
   healthy: {
@@ -38,4 +42,21 @@ export const HEALTH_STATUS_UI = {
   },
 };
 
+export const REPLICATION_STATUS_UI = {
+  enabled: {
+    icon: 'play',
+    color: 'gl-text-green-600',
+    text: __('Enabled'),
+  },
+  disabled: {
+    icon: 'pause',
+    color: 'gl-text-orange-600',
+    text: __('Paused'),
+  },
+};
+
 export const STATUS_DELAY_THRESHOLD_MS = 600000;
+
+export const REPOSITORY = 'repository';
+
+export const BLOB = 'blob';
