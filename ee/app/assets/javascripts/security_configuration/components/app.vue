@@ -68,9 +68,11 @@ export default {
       default: false,
     },
   },
-  data: () => ({
-    autoDevopsAlertDismissed: 'false',
-  }),
+  data() {
+    return {
+      autoDevopsAlertDismissed: 'false',
+    };
+  },
   computed: {
     devopsMessage() {
       return this.autoDevopsEnabled

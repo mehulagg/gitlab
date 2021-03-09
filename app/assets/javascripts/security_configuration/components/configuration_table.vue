@@ -24,10 +24,12 @@ export default {
     GlTable,
     GlAlert,
   },
-  data: () => ({
-    features,
-    errorMessage: '',
-  }),
+  data() {
+    return {
+      features,
+      errorMessage: '',
+    };
+  },
   methods: {
     getFeatureDocumentationLinkLabel(item) {
       return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
