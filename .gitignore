@@ -19,7 +19,6 @@ eslint-report.html
 /.ruby-version
 /.tool-versions
 /.rvmrc
-.sass-cache/
 /.secret
 /.vagrant
 /.yarn-cache
@@ -104,3 +103,4 @@ ee/changelogs/unreleased-ee
 /sitespeed-result
 tags.lock
 tags.temp
+.stylelintcache
