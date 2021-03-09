@@ -18,6 +18,13 @@ module EE
           issuable.project&.group&.feature_available?(:epics)
         end
       end
+
+      expose :request_cve_enabled_for_user, if: ->(issue) { ::Feature.enabled?(:cve_id_request_button, issue.project) } do |issue|
+        ::Gitlab.com? \
+          && can?(current_user, :admin_project, issue.project) \
+          && issue.project.public? \
+          && issue.project.project_setting.cve_id_request_enabled?
+      end
     end
   end
 end

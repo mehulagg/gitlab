@@ -46,6 +46,64 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
     end
   end
 
+  describe 'DevOps adoption link' do
+    let!(:current_user) { create(:user) }
+
+    before do
+      group.add_maintainer(current_user)
+
+      allow(view).to receive(:current_user).and_return(current_user)
+    end
+
+    context 'DevOps adoption feature is available' do
+      before do
+        stub_licensed_features(group_level_devops_adoption: true)
+      end
+
+      it 'is visible' do
+        render
+
+        expect(rendered).to have_text 'DevOps Adoption'
+      end
+
+      context 'feature flag is disabled' do
+        before do
+          stub_feature_flags(group_devops_adoption: false)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'DevOps Adoption'
+        end
+      end
+    end
+
+    context 'DevOps apoption feature is not available' do
+      before do
+        stub_licensed_features(group_level_devops_adoption: false)
+      end
+
+      it 'is not visible' do
+        render
+
+        expect(rendered).not_to have_text 'DevOps Adoption'
+      end
+
+      context 'feature flag is disabled' do
+        before do
+          stub_feature_flags(group_devops_adoption: false)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'DevOps Adoption'
+        end
+      end
+    end
+  end
+
   describe 'contribution analytics tab' do
     let!(:current_user) { create(:user) }
 

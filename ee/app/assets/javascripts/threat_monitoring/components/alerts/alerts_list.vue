@@ -56,7 +56,7 @@ export default {
       },
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
       result({ data }) {
-        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo;
+        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo || {};
       },
       error() {
         this.errored = true;

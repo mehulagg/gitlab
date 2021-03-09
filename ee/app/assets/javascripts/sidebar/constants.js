@@ -45,3 +45,17 @@ export const I18N_DROPDOWN = {
   noneText: s__('Sidebar|None'),
   selectPlaceholderText: s__('Select health status'),
 };
+
+export const CVE_ID_REQUEST_SIDEBAR_I18N = {
+  action: s__('CVE|Request CVE ID'),
+  description: s__('CVE|CVE ID Request'),
+  createRequest: s__('CVE|Create CVE ID Request'),
+  whyRequest: s__('CVE|Why Request a CVE ID?'),
+  whyText1: s__(
+    'CVE|Common Vulnerability Enumeration (CVE) identifiers are used to track distinct vulnerabilities in specific versions of code.',
+  ),
+  whyText2: s__(
+    'CVE|As a maintainer, requesting a CVE for a vulnerability in your project will help your users stay secure and informed.',
+  ),
+  learnMore: __('Learn more'),
+};

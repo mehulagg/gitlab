@@ -393,6 +393,7 @@ class Project < ApplicationRecord
     :wiki_access_level, :snippets_access_level, :builds_access_level,
     :repository_access_level, :pages_access_level, :metrics_dashboard_access_level, :analytics_access_level,
     :operations_enabled?, :operations_access_level, :security_and_compliance_access_level,
+    :container_registry_access_level,
     to: :project_feature, allow_nil: true
   delegate :show_default_award_emojis, :show_default_award_emojis=,
     :show_default_award_emojis?,
@@ -1697,8 +1698,8 @@ class Project < ApplicationRecord
     end
   end
 
-  def any_runners?(&block)
-    active_runners.any?(&block)
+  def any_active_runners?(&block)
+    active_runners_with_tags.any?(&block)
   end
 
   def valid_runners_token?(token)
@@ -2699,6 +2700,12 @@ class Project < ApplicationRecord
 
   def cache_has_external_issue_tracker
     update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
+  end
+
+  def active_runners_with_tags
+    strong_memoize(:active_runners_with_tags) do
+      active_runners.with_tags
+    end
   end
 end
 

@@ -16,5 +16,9 @@ FactoryBot.define do
     trait :removed do
       is_removed { true }
     end
+
+    trait :utc do
+      association :rotation, :utc, factory: :incident_management_oncall_rotation
+    end
   end
 end

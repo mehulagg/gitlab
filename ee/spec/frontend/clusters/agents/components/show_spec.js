@@ -27,6 +27,7 @@ describe('ClusterAgentShow', () => {
     createdByUser: {
       name: 'user-1',
     },
+    name: 'token-1',
     tokens: {
       count: 1,
       nodes: [],

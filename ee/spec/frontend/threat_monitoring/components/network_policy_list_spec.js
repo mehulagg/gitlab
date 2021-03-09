@@ -5,7 +5,7 @@ import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_d
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 import createStore from 'ee/threat_monitoring/store';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { mockPoliciesResponse } from '../mock_data';
+import { mockPoliciesResponse } from '../mocks/mock_data';
 
 const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
 

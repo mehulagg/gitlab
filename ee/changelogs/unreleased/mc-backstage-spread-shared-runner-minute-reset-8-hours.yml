@@ -1,0 +1,5 @@
+---
+title: Spread shared runner minute reset to 8h.
+merge_request: 55802
+author:
+type: performance

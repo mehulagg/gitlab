@@ -6,5 +6,9 @@ FactoryBot.define do
     sequence(:name) { |n| "On-call Schedule ##{n}" }
     description { 'On-call description' }
     timezone { 'Europe/Berlin' }
+
+    trait :utc do
+      timezone { 'Etc/UTC' }
+    end
   end
 end
