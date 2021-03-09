@@ -67,7 +67,6 @@ Browserker can be configured using CI/CD variables.
 The [DAST variables](index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_WEBSITE`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
 `DAST_INCLUDE_ALPHA_VULNERABILITIES`, `DAST_ZAP_CLI_OPTIONS`, and `DAST_ZAP_LOG_CONFIGURATION` are also compatible with Browserker scans.   
 
-
 #### Selectors
 
 Various environment variables are of type `selector`. Selectors have the format `type`:`search string`. Browserker will search for the selector using the search string based on the type.
@@ -103,6 +102,3 @@ The AJAX Crawler is not supported by Browserker.
 ## API Scanning
 
 API scanning is not supported by Browserker.
-
-
-
