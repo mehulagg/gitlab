@@ -45,9 +45,6 @@ export default {
   computed: {
     ...mapGetters(['hasForwardDeploymentFailure']),
     ...mapState(['job', 'stages', 'jobs', 'selectedStage']),
-    retryButtonClass() {
-      return 'btn gl-button btn-confirm';
-    },
     hasArtifact() {
       return !isEmpty(this.job.artifact);
     },
@@ -82,7 +79,6 @@ export default {
           <div class="flex-grow-1 flex-shrink-0 text-right">
             <job-sidebar-retry-button
               v-if="job.retry_path"
-              :class="retryButtonClass"
               :href="job.retry_path"
               :modal-id="$options.forwardDeploymentFailureModalId"
               data-qa-selector="retry_button"
@@ -91,7 +87,7 @@ export default {
             <gl-link
               v-if="job.cancel_path"
               :href="job.cancel_path"
-              class="btn gl-button btn-default gl-text-decoration-none!"
+              class="btn gl-button btn-default"
               data-method="post"
               data-testid="cancel-button"
               rel="nofollow"
