@@ -6,6 +6,7 @@ class StoreSecurityReportsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include SecurityScansQueue
 
+  worker_resource_boundary :cpu
   tags :requires_disk_io
 
   def perform(pipeline_id)
