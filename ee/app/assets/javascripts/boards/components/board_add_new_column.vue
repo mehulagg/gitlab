@@ -21,10 +21,13 @@ export default {
   i18n: {
     listType: __('List type'),
     labelListDescription: __('A label list displays issues with the selected label.'),
+    assigneeListDescription: __('An assignee list displays issues assigned to the selected user'),
     milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
     selectLabel: __('Select label'),
+    selectAssignee: __('Select assignee'),
     selectMilestone: __('Select milestone'),
     searchLabels: __('Search labels'),
+    searchAssignees: __('Search assignees'),
     searchMilestones: __('Search milestones'),
   },
   columnTypes: [
@@ -147,7 +150,7 @@ export default {
       }
 
       if (this.assigneeTypeSelected) {
-        return __('An assignee list displays issues assigned to the selected user');
+        return this.$options.i18n.assigneeListDescription;
       }
 
       if (this.milestoneTypeSelected) {
@@ -163,7 +166,7 @@ export default {
       }
 
       if (this.assigneeTypeSelected) {
-        return __('Select assignee');
+        return this.$options.i18n.selectAssignee;
       }
 
       if (this.milestoneTypeSelected) {
@@ -179,7 +182,7 @@ export default {
       }
 
       if (this.assigneeTypeSelected) {
-        return __('Search assignees');
+        return this.$options.i18n.searchAssignees;
       }
 
       if (this.milestoneTypeSelected) {
