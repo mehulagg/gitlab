@@ -30532,6 +30532,9 @@ msgstr ""
 msgid "This is a \"Ghost User\", created to hold all issues authored by users that have since been deleted. This user cannot be removed."
 msgstr ""
 
+msgid "This is a Jira user."
+msgstr ""
+
 msgid "This is a Premium feature"
 msgstr ""
 
