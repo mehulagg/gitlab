@@ -4,19 +4,19 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Reports::CodequalityReports do
   let(:codequality_report) { described_class.new }
-  let(:degradation_1) { build(:codequality_degradation_1) }
-  let(:degradation_2) { build(:codequality_degradation_2) }
+  let(:major_degradation) { build(:codequality_degradation_1) }
+  let(:minor_degradation) { build(:codequality_degradation_3) }
 
   it { expect(codequality_report.degradations).to eq({}) }
 
   describe '#add_degradation' do
     context 'when there is a degradation' do
       before do
-        codequality_report.add_degradation(degradation_1)
+        codequality_report.add_degradation(major_degradation)
       end
 
       it 'adds degradation to codequality report' do
-        expect(codequality_report.degradations.keys).to eq([degradation_1[:fingerprint]])
+        expect(codequality_report.degradations.keys).to eq([major_degradation[:fingerprint]])
         expect(codequality_report.degradations.values.size).to eq(1)
       end
     end
@@ -55,8 +55,8 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReports do
 
     context 'when there are many degradations' do
       before do
-        codequality_report.add_degradation(degradation_1)
-        codequality_report.add_degradation(degradation_2)
+        codequality_report.add_degradation(major_degradation)
+        codequality_report.add_degradation(minor_degradation)
       end
 
       it 'returns the number of degradations' do
@@ -70,12 +70,27 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReports do
 
     context 'when there are many degradations' do
       before do
-        codequality_report.add_degradation(degradation_1)
-        codequality_report.add_degradation(degradation_2)
+        codequality_report.add_degradation(major_degradation)
+        codequality_report.add_degradation(minor_degradation)
       end
 
       it 'returns all degradations' do
-        expect(all_degradations).to contain_exactly(degradation_1, degradation_2)
+        expect(all_degradations).to contain_exactly(major_degradation, minor_degradation)
+      end
+    end
+  end
+
+  describe '#sorted!' do
+    subject(:report) { codequality_report.sorted! }
+
+    context 'when there are many degradations' do
+      before do
+        codequality_report.add_degradation(minor_degradation)
+        codequality_report.add_degradation(major_degradation)
+      end
+
+      it 'returns degradations sorted by severity' do
+        expect(report.degradations.values).to eq([major_degradation, minor_degradation])
       end
     end
   end

@@ -9,6 +9,39 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
   let(:degradation_1) { build(:codequality_degradation_1) }
   let(:degradation_2) { build(:codequality_degradation_2) }
 
+  describe '#initialize' do
+    subject(:report_comparer) { comparer }
+
+    let(:minor_degradation) { build(:codequality_degradation_3) }
+
+    context 'when head report has some errors' do
+      before do
+        head_report.add_degradation(degradation_1)
+        head_report.add_degradation(minor_degradation)
+      end
+
+      it 'sorts degradations by severity' do
+        expect(report_comparer.head_report.degradations.values).to eq([degradation_1, minor_degradation])
+      end
+    end
+
+    context 'when head report does not exist' do
+      let(:head_report) { nil }
+
+      it 'initializes comparer correctly' do
+        expect(report_comparer).to be_an_instance_of(Gitlab::Ci::Reports::CodequalityReportsComparer)
+      end
+    end
+
+    context 'when base report does not exist' do
+      let(:base_report) { nil }
+
+      it 'initializes comparer correctly' do
+        expect(report_comparer.head_report).to be_an_instance_of(Gitlab::Ci::Reports::CodequalityReports)
+      end
+    end
+  end
+
   describe '#status' do
     subject(:report_status) { comparer.status }
 

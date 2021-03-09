@@ -7,6 +7,7 @@ module Gitlab
         attr_reader :degradations, :error_message
 
         CODECLIMATE_SCHEMA_PATH = Rails.root.join('app', 'validators', 'json_schemas', 'codeclimate.json').to_s
+        SEVERITY_TYPES = %w(blocker critical major minor info).freeze
 
         def initialize
           @degradations = {}.with_indifferent_access
@@ -29,6 +30,11 @@ module Gitlab
           @degradations.values
         end
 
+        def sorted!
+          sort_by_severity!
+          self
+        end
+
         private
 
         def valid_degradation?(degradation)
@@ -36,6 +42,12 @@ module Gitlab
         rescue JSON::Schema::ValidationError => e
           set_error_message("Invalid degradation format: #{e.message}")
           false
+        end
+
+        def sort_by_severity!
+          @degradations = @degradations.sort_by do |_fingerprint, degradation|
+            SEVERITY_TYPES.index(degradation.dig(:severity))
+          end.to_h
         end
       end
     end
