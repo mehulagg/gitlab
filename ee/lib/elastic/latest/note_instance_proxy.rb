@@ -6,10 +6,11 @@ module Elastic
       delegate :noteable, :noteable_type, to: :target
 
       def as_indexed_json(options = {})
-        # Notes on commits should return the commit object when `notable` is called. However, `noteable` can be null
-        # when a commit has been deleted so an error is raised to alert the caller that the document should be deleted
-        # from the index.
-        raise Elastic::Latest::DocumentShouldBeDeletedFromIndexError.new(target.class.name, target.id) if noteable_type == 'Commit' && noteable.nil?
+        # `noteable` can be sometimes be nil (eg. when a commit has been
+        # deleted) or somehow it was left orphaned in the database. In such
+        # cases we want to delete it from the index since there is no value in
+        # having orphaned notes be searchable.
+        raise Elastic::Latest::DocumentShouldBeDeletedFromIndexError.new(target.class.name, target.id) if noteable.nil?
 
         data = {}
 

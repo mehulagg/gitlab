@@ -121,8 +121,8 @@ RSpec.describe Note, :elastic do
       expect(note.__elasticsearch__.as_indexed_json).to eq(expected_hash)
     end
 
-    it 'does raises Elastic::Latest::DocumentShouldBeDeletedFromIndexError when commit is not found and noteable is null' do
-      note = create(:note_on_commit)
+    it 'raises Elastic::Latest::DocumentShouldBeDeletedFromIndexError when noteable is nil' do
+      note = create(:note_on_issue)
       allow(note).to receive(:noteable).and_return(nil)
 
       expect { note.__elasticsearch__.as_indexed_json }.to raise_error(::Elastic::Latest::DocumentShouldBeDeletedFromIndexError)
