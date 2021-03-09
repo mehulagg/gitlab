@@ -3,10 +3,8 @@
 module Ci
   class AbortProjectPipelinesService
     # Danger: Cancels in bulk without callbacks
-    # Only for pipeline abandonment scenarios (current example: project delete)
+    # Only for pipeline abandonment scenarios (examples: project delete, user block)
     def execute(project)
-      return unless Feature.enabled?(:abort_deleted_project_pipelines, default_enabled: :yaml)
-
       pipelines = project.all_pipelines.cancelable
       bulk_abort!(pipelines, status: :canceled)
 

@@ -25,18 +25,4 @@ RSpec.describe Ci::AbortProjectPipelinesService do
       expect { described_class.new.execute(project) }.not_to exceed_query_limit(control_count)
     end
   end
-
-  context 'when feature disabled' do
-    before do
-      stub_feature_flags(abort_deleted_project_pipelines: false)
-    end
-
-    it 'does not abort the pipeline' do
-      result = described_class.new.execute(project)
-
-      expect(result).to be(nil)
-      expect(pipeline.reload).to be_running
-      expect(build.reload).to be_running
-    end
-  end
 end
