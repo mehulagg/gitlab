@@ -6,7 +6,11 @@ import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mu
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
 import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreAfterRotationEdit } from 'ee/oncall_schedules/utils/cache_updates';
-import { isNameFieldValid, getParticipantsForSave } from 'ee/oncall_schedules/utils/common_utils';
+import {
+  isNameFieldValid,
+  getParticipantsForSave,
+  parseRotationDate,
+} from 'ee/oncall_schedules/utils/common_utils';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import searchProjectMembersQuery from '~/graphql_shared/queries/project_user_members_search.query.graphql';
 import { format24HourTimeStringFromInt, formatDate } from '~/lib/utils/datetime_utility';
@@ -36,11 +40,19 @@ export const formEmptyState = {
     date: null,
     time: 0,
   },
+  endDateEnabled: false, // TODO: rename in line with isRestrictedToTime?
   isRestrictedToTime: false,
   restrictedTo: {
     startTime: 0,
     endTime: 0,
   },
+};
+
+const validiationInitialState = {
+  name: true,
+  participants: true,
+  startsAt: true,
+  endsAt: true,
 };
 
 export default {
@@ -95,12 +107,7 @@ export default {
       ptSearchTerm: '',
       form: cloneDeep(formEmptyState),
       error: '',
-      validationState: {
-        name: true,
-        participants: true,
-        startsAt: true,
-        endsAt: true,
-      },
+      validationState: cloneDeep(validiationInitialState),
     };
   },
   computed: {
@@ -274,7 +281,7 @@ export default {
         });
     },
     updateRotationForm({ type, value }) {
-      console.log('type, value', type, value);
+      console.log(__('type, value'), type, value);
       set(this.form, type, value);
       this.validateForm(type);
     },
@@ -295,21 +302,24 @@ export default {
     },
     beforeShowModal() {
       if (this.isEditMode) {
-        // Start and End dates
-        // console.log('this.rotation', this.rotation);
-        // console.log('this.schedule.timezone', this.schedule.timezone);
-        // const options = {
-        //   year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit'
-        // }
-        // const formatter = new Intl.DateTimeFormat(this.schedule.timezone, options)
-        // TODO: Get timezone via this format.
+        const scheduleTimezone = this.schedule.timezone;
 
-        // Participants. Reuse the inner function?
-        const participants = this.rotation?.participants?.nodes?.map(({ user }) => ({ ...user }));
+        // Start and End Dates
+        if (this.rotation.startsAt) {
+          this.form.startsAt = parseRotationDate(this.rotation.startsAt, scheduleTimezone);
+        }
+        if (this.rotation.endsAt) {
+          this.form.endDateEnabled = true;
+          this.form.endsAt = parseRotationDate(this.rotation.endsAt, scheduleTimezone);
+        }
+
+        // Participants.
+        const participants =
+          this.rotation?.participants?.nodes?.map(({ user }) => ({ ...user })) ?? [];
+        this.form.participants = participants;
 
         // The rest
         this.form.name = this.rotation.name;
-        this.form.participants = participants;
         this.form.rotationLength = {
           length: this.rotation.length,
           unit: this.rotation.lengthUnit,
@@ -325,7 +335,12 @@ export default {
       }
     },
     afterCloseModal() {
+      // Clear form
       this.form = cloneDeep(formEmptyState);
+      // Clear validation
+      this.validationState = cloneDeep(validiationInitialState);
+      // Clear errors
+      this.error = '';
     },
   },
 };
