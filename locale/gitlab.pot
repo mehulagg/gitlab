@@ -13912,7 +13912,13 @@ msgstr ""
 msgid "Geo|Could not remove tracking entry for an existing upload."
 msgstr ""
 
+msgid "Geo|Data replication lag"
+msgstr ""
+
 msgid "Geo|Discover GitLab Geo"
+msgstr ""
+
+msgid "Geo|Does not match the primary storage configuration"
 msgstr ""
 
 msgid "Geo|Failed"
@@ -13940,6 +13946,12 @@ msgid "Geo|In sync"
 msgstr ""
 
 msgid "Geo|Internal URL"
+msgstr ""
+
+msgid "Geo|Last event ID from primary"
+msgstr ""
+
+msgid "Geo|Last event ID processed by cursor"
 msgstr ""
 
 msgid "Geo|Last repository check run"
@@ -14026,10 +14038,25 @@ msgstr ""
 msgid "Geo|Replicated data is verified with the secondary node(s) using checksums."
 msgstr ""
 
+msgid "Geo|Replication Details"
+msgstr ""
+
+msgid "Geo|Replication counts"
+msgstr ""
+
+msgid "Geo|Replication details"
+msgstr ""
+
 msgid "Geo|Replication slot WAL"
 msgstr ""
 
 msgid "Geo|Replication slots"
+msgstr ""
+
+msgid "Geo|Replication status"
+msgstr ""
+
+msgid "Geo|Replication summary"
 msgstr ""
 
 msgid "Geo|Resync"
@@ -14050,9 +14077,6 @@ msgstr ""
 msgid "Geo|Review replication status, and resynchronize and reverify items with the primary node."
 msgstr ""
 
-msgid "Geo|Secondary Details"
-msgstr ""
-
 msgid "Geo|Secondary node"
 msgstr ""
 
@@ -14060,6 +14084,9 @@ msgid "Geo|Secondary site"
 msgstr ""
 
 msgid "Geo|Status"
+msgstr ""
+
+msgid "Geo|Storage config"
 msgstr ""
 
 msgid "Geo|Synced"
@@ -14072,6 +14099,9 @@ msgid "Geo|Synchronization failed - %{error}"
 msgstr ""
 
 msgid "Geo|Synchronization of %{itemTitle} is disabled."
+msgstr ""
+
+msgid "Geo|Synchronization settings"
 msgstr ""
 
 msgid "Geo|The database is currently %{db_lag} behind the primary node."
