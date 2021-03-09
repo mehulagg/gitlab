@@ -22,5 +22,9 @@ module Namespaces
       trial: 2,
       team: 3
     }, _suffix: true
+
+    scope :without_track_or_series, -> (track, series) do
+      where.not(track: track).or(where.not(series: series))
+    end
   end
 end

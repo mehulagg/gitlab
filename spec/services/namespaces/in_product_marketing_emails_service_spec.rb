@@ -194,6 +194,6 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
       stub_const("#{described_class}::TRACKS", { bar: :git_write })
     end
 
-    it { expect { subject }.to raise_error(NotImplementedError, 'No ability defined for track foo') }
+    it { expect { subject }.to raise_error(NotImplementedError, 'Track foo not defined') }
   end
 end

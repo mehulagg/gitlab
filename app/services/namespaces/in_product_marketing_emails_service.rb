@@ -28,7 +28,7 @@ module Namespaces
     end
 
     def execute
-      raise NotImplementedError, "No ability defined for track #{track}" unless TRACKS.key?(track)
+      raise NotImplementedError, "Track #{track} not defined" unless TRACKS.key?(track)
 
       groups_for_track.each_batch do |groups|
         groups.each do |group|
@@ -73,12 +73,12 @@ module Namespaces
 
     def users_for_group(group)
       group.users.where(email_opted_in: true)
-      .left_outer_joins(:in_product_marketing_emails)
-      .where.not(id: current_batch_user_ids)
-      .merge(
-        Namespaces::InProductMarketingEmail.where.not(track: track).or(Namespaces::InProductMarketingEmail.where.not(series: series))
-          .or(Namespaces::InProductMarketingEmail.where(track: nil).or(Namespaces::InProductMarketingEmail.where(series: nil)))
-      )
+        .where.not(id: current_batch_user_ids)
+        .left_outer_joins(:in_product_marketing_emails)
+        .merge(
+          Namespaces::InProductMarketingEmail.without_track_or_series(track, series)
+            .or(Namespaces::InProductMarketingEmail.where(id: nil))
+        )
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
