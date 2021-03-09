@@ -57,7 +57,7 @@ The instance then notifies the user.
 > - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-custom-the-gpg-keys-view).
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-the-gpg-keys-view).
 
 The GPG keys view allows you to see all the GPG keys that exist in your GitLab instance as well as the following properties:
 
