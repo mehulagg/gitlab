@@ -767,9 +767,9 @@ export default {
 };
 ```
 
-### Testing
+## Testing
 
-#### Generating the GraphQL schema
+### Generating the GraphQL schema
 
 Some of our tests load the schema JSON files. To generate these files, run:
 
@@ -786,56 +786,19 @@ If you use the RubyMine IDE, and have marked the `tmp` directory as
 `gitlab/tmp/tests/graphql`. This will allow the **JS GraphQL** plugin to
 automatically find and index the schema.
 
-#### Mocking response as component data
+### Mocking response as component data
 
 <!-- vale gitlab.Spelling = NO -->
 
-With [Vue Test Utils](https://vue-test-utils.vuejs.org/) one can quickly test components that
-fetch GraphQL queries. The simplest way is to use `shallowMount` and then set
-the data on the component:
+**Do not** use `setData` or the `data` mounting option to manually set the value of an
+apollo response. This uses component internals to completely skip over the methods used
+to actually setup apollo, significantly weakening the test.
+
+**Do** prefer using the [`createMockApollo` helper](#testing-with-mocked-apollo-client).
 
 <!-- vale gitlab.Spelling = YES -->
 
-```javascript
-it('tests apollo component', () => {
-  const vm = shallowMount(App);
-
-  vm.setData({
-    ...mockData
-  });
-});
-```
-
-#### Testing loading state
-
-To test how a component renders when results from the GraphQL API are still loading, mock a loading state into respective Apollo queries/mutations:
-
-```javascript
-  function createComponent({
-    loading = false,
-  } = {}) {
-    const $apollo = {
-      queries: {
-        designs: {
-          loading,
-        },
-      },
-    };
-
-    wrapper = shallowMount(Index, {
-      sync: false,
-      mocks: { $apollo }
-    });
-  }
-
-  it('renders loading icon', () => {
-  createComponent({ loading: true });
-
-  expect(wrapper.element).toMatchSnapshot();
-})
-```
-
-#### Testing Apollo components
+### Testing Apollo components
 
 If we use `ApolloQuery` or `ApolloMutation` in our components, in order to test their functionality we need to add a stub first:
 
@@ -904,53 +867,51 @@ it('calls mutation on submitting form ', () => {
 
 ### Testing with mocked Apollo Client
 
-To test the logic of Apollo cache updates, we might want to mock an Apollo Client in our unit tests. We use [`mock-apollo-client`](https://www.npmjs.com/package/mock-apollo-client) library to mock Apollo client and [`createMockApollo` helper](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/__helpers__/mock_apollo_helper.js) we created on top of it.
+To test the logic of Apollo cache updates, we should mock the Apollo Client in our unit tests. Use 
+the [`createMockApollo` helper](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/__helpers__/mock_apollo_helper.js) which
+is an adapter for the [`mock-apollo-client`](https://www.npmjs.com/package/mock-apollo-client) library.
 
-To separate tests with mocked client from 'usual' unit tests, create an additional factory and pass the created `mockApollo` as an option to the `createComponent`-factory. This way we only create Apollo Client instance when it's necessary.
+If a component uses Apollo, then create a `createMockApolloProvider` factory which 
+will be called within the `createComponent` factory. Use shared mocks and/or variables which
+will allow nested contexts to configure how the mock apollo provider responds. This greatly
+helps simplify and improve readability of specs.
 
-We need to inject `VueApollo` to the Vue local instance and, likewise, it is recommended to call `localVue.use()` in `createMockApolloProvider()` to only load it when it is necessary.
+We also need to apply `VueApollo` to the Vue local instance.
 
 ```javascript
 import VueApollo from 'vue-apollo';
 import { createLocalVue } from '@vue/test-utils';
+import fooQuery from '~/lib/foo/foo.query.graphql';
 
 const localVue = createLocalVue();
+localVue.use(VueApollo);
 
-function createMockApolloProvider() {
-  localVue.use(VueApollo);
+desribe('foo', () => {
+  let fooQueryMock;
 
-  return createMockApollo(requestHandlers);
-}
-
-function createComponent(options = {}) {
-  const { mockApollo } = options;
-  ...
-  return shallowMount(..., {
-    localVue,
-    apolloProvider: mockApollo,
-    ...
+  beforeEach(() => {
+    // Default value to return...
+    fooQueryMock = jest.fn().mockImplementation(...);
   });
-}
-```
 
-After this, you can control whether you need a variable for `mockApollo` and assign it in the appropriate `describe`-scope:
+  function createMockApolloProvider() {
+    return createMockApollo([
+      [fooQuery, fooQueryMock]
+    ]);
+  }
 
-```javascript
-describe('Some component', () => {
-  let wrapper;
-
-  describe('with Apollo mock', () => {
-    let mockApollo;
-
-    beforeEach(() => {
-      mockApollo = createMockApolloProvider();
-      wrapper = createComponent({ mockApollo });
+  function createComponent() {
+    return shallowMount(Foo, {
+      localVue,
+      apolloProvider: mockApollo,
+      // ...
     });
-  });
+  }
 });
 ```
 
-In the `createMockApolloProvider`-factory, we need to define an array of _handlers_ for every query or mutation:
+In the `createMockApolloProvider`-factory, we need to define an array of _handlers_ for every query or mutation.
+Consider using shared mocks for these handlers so that they can be easily configured.
 
 ```javascript
 import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
@@ -959,57 +920,29 @@ import moveDesignMutation from '~/design_management/graphql/mutations/move_desig
 
 describe('Some component with Apollo mock', () => {
   let wrapper;
-  let mockApollo;
+  let getDesignListQueryMock;
+  let permissionsQueryMock;
+
+  beforeEach(() => {
+    // Default implementation for mocks
+    getDesignListQueryMock = jest.fn().mockImplementation(...);
+    permissionsQueryMock = jest.fn().mockmplementation(...);
+  });
 
   function createMockApolloProvider() {
-    Vue.use(VueApollo);
-
-    const requestHandlers = [
-      [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
-      [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
-    ];
-    ...
-  }
-})
-```
-
-After this, we need to create a mock Apollo Client instance using a helper:
-
-```javascript
-import createMockApollo from 'helpers/mock_apollo_helper';
-
-describe('Some component', () => {
-  let wrapper;
-
-  function createMockApolloProvider() {
-    Vue.use(VueApollo);
-
-    const requestHandlers = [
-      [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
-      [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
-    ];
-
-    return createMockApollo(requestHandlers);
+    return createMockApollo([
+      [getDesignListQuery, getDesignListQueryMock],
+      [permissionsQuery, permissionsQueryMock],
+    ]);
   }
 
-  function createComponent(options = {}) {
-    const { mockApollo } = options;
-
-    return shallowMount(Index, {
-      localVue,
-      apolloProvider: mockApollo,
-    });
-  }
-
-  describe('with Apollo mock', () => {
-    let mockApollo;
-
+  describe('some nexted context', () => {
     beforeEach(() => {
-      mockApollo = createMockApolloProvider();
-      wrapper = createComponent({ mockApollo });
+      // This will be the new implmeentation for the query handler
+      getDesignListQueryMock.mockResolvedValue(...);
     });
   });
-});
+})
 ```
 
 When mocking resolved values, ensure the structure of the response is the same
@@ -1150,6 +1083,36 @@ describe('when query times out', () => {
 });
 ```
 
+#### Testing loading state
+
+To test how a component renders when results from the GraphQL API are still loading, mock a loading state into respective Apollo queries/mutations:
+
+```javascript
+  function createComponent({
+    loading = false,
+  } = {}) {
+    const $apollo = {
+      queries: {
+        designs: {
+          loading,
+        },
+      },
+    };
+
+    wrapper = shallowMount(Index, {
+      sync: false,
+      mocks: { $apollo }
+    });
+  }
+
+  it('renders loading icon', () => {
+  createComponent({ loading: true });
+
+  expect(wrapper.element).toMatchSnapshot();
+})
+```
+
+
 #### Testing `@client` queries
 
 ##### Using mock resolvers
@@ -1198,22 +1161,16 @@ We can use a **mock resolver** that returns data with the
 same shape, while mock the result with a mock function:
 
 ```javascript
-let mockApollo;
-let mockBlobContentData; // mock function, jest.fn();
+let blobContentMock; // mock function, will be set to jest.fn() in beforeEach
 
-const mockResolvers = {
-  Query: {
-    blobContent() {
-      return {
-        __typename: 'BlobContent',
-        rawData: mockBlobContentData(), // the mock function can resolve mock data
-      };
-    },
-  },
-};
-
-const createComponentWithApollo = ({ props = {} } = {}) => {
-  mockApollo = createMockApollo([], mockResolvers); // resolvers are the second parameter
+const createComponent = ({ props = {} } = {}) => {
+  // Resolvers are the 2nd parameter
+  const mockApollo = createMockApollo([], {
+    Query: {
+      // the mock function can resolve mock data
+      blobContent: blobContentMock,
+    }
+  });
 
   wrapper = shallowMount(MyComponent, {
     localVue,
@@ -1229,13 +1186,13 @@ After which, you can resolve or reject the value needed.
 
 ```javascript
 beforeEach(() => {
-  mockBlobContentData = jest.fn();
+  blobContentMock = jest.fn();
 });
 
 it('shows data', async() => {
-  mockBlobContentData.mockResolvedValue(data); // you may resolve or reject to mock the result
+  blobContentMock.mockResolvedValue(data); // you may resolve or reject to mock the result
 
-  createComponentWithApollo();
+  createComponent();
 
   await waitForPromises(); // wait on the resolver mock to execute
 
@@ -1258,15 +1215,15 @@ query fetchLocalUser {
 ```javascript
 import fetchLocalUserQuery from '~/design_management/graphql/queries/fetch_local_user.query.graphql';
 
-function createMockApolloProvider() {
-  Vue.use(VueApollo);
+localVue.use(VueApollo);
 
+function createMockApolloProvider() {
   const requestHandlers = [
     [getDesignListQuery, jest.fn().mockResolvedValue(designListQueryResponse)],
     [permissionsQuery, jest.fn().mockResolvedValue(permissionsQueryResponse)],
   ];
 
-  const mockApollo = createMockApollo(requestHandlers, {});
+  const mockApollo = createMockApollo(requestHandlers);
   mockApollo.clients.defaultClient.cache.writeQuery({
     query: fetchLocalUserQuery,
     data: {
@@ -1280,8 +1237,8 @@ function createMockApolloProvider() {
   return mockApollo;
 }
 
-function createComponent(options = {}) {
-  const { mockApollo } = options;
+function createComponent() {
+  const mockApollo = createMockApolloProvider();
 
   return shallowMount(Index, {
     localVue,
@@ -1295,12 +1252,12 @@ Sometimes it is necessary to control what the local resolver returns and inspect
 ```javascript
 import fetchLocalUserQuery from '~/design_management/graphql/queries/fetch_local_user.query.graphql';
 
-function createMockApolloProvider(options = {}) {
+function createMockApolloProvider() {
   Vue.use(VueApollo);
-  const { fetchLocalUserSpy } = options;
 
   const mockApollo = createMockApollo([], {
     Query: {
+      // fetchLocalUserSpy is defined outside this function
       fetchLocalUser: fetchLocalUserSpy,
     },
   });
@@ -1322,16 +1279,22 @@ describe('My Index test with `createMockApollo`', () => {
   let wrapper;
   let fetchLocalUserSpy;
 
+  beforeEach(() => {
+    // Default handler for fetchLocalUser query
+    fetchLocalUserSpy = jest.fn().mockImplementation(...);
+  });
+
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
-    fetchLocalUserSpy = null;
   });
+
+  // Uses `createMockApolloProvider` and writes to `wrapper`
+  const createComponent = () => { ... };
 
   describe('when loading', () => {
     beforeEach(() => {
-      const mockApollo = createMockApolloProvider();
-      wrapper = createComponent({ mockApollo });
+      createComponent();
     });
 
     it('displays the loader', () => {
@@ -1341,9 +1304,8 @@ describe('My Index test with `createMockApollo`', () => {
 
   describe('with data', () => {
     beforeEach(async () => {
-      fetchLocalUserSpy = jest.fn().mockResolvedValue(localUserQueryResponse);
-      const mockApollo = createMockApolloProvider(fetchLocalUserSpy);
-      wrapper = createComponent({ mockApollo });
+      fetchLocalUserSpy.mockResolvedValue(localUserQueryResponse);
+      createComponent();
       await waitForPromises();
     });
 
@@ -1360,9 +1322,8 @@ describe('My Index test with `createMockApollo`', () => {
     const error = 'Error!';
 
     beforeEach(async () => {
-      fetchLocalUserSpy = jest.fn().mockRejectedValueOnce(error);
-      const mockApollo = createMockApolloProvider(fetchLocalUserSpy);
-      wrapper = createComponent({ mockApollo });
+      fetchLocalUserSpy.mockRejectedValueOnce(error);
+      createComponent();
       await waitForPromises();
     });
 
