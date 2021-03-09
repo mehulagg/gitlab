@@ -88,6 +88,7 @@ export default {
         :feature="item"
         :gitlab-ci-present="gitlabCiPresent"
         :gitlab-ci-history-path="gitlabCiHistoryPath"
+        :auto-devops-enabled="autoDevopsEnabled"
       />
     </template>
 

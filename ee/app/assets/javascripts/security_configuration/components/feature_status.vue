@@ -1,41 +1,31 @@
 <script>
-import { GlLink } from '@gitlab/ui';
+import {
+  REPORT_TYPE_SAST,
+  REPORT_TYPE_DAST_PROFILES,
+} from '~/vue_shared/security_reports/constants';
+import StatusDastProfiles from './status_dast_profiles.vue';
+import StatusGeneric from './status_generic.vue';
+import StatusSast from './status_sast.vue';
+
+const scannerComponentMap = {
+  [REPORT_TYPE_SAST]: StatusSast,
+  [REPORT_TYPE_DAST_PROFILES]: StatusDastProfiles,
+};
 
 export default {
-  components: {
-    GlLink,
-  },
   props: {
-    feature: {
-      type: Object,
-      required: true,
-    },
-    gitlabCiPresent: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    gitlabCiHistoryPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
+    ...StatusGeneric.props,
+    ...StatusSast.props,
+    ...StatusDastProfiles.props,
   },
   computed: {
-    canViewCiHistory() {
-      const { type, configured } = this.feature;
-      return type === 'sast' && configured && this.gitlabCiPresent;
+    statusComponent() {
+      return scannerComponentMap[this.feature.type] ?? StatusGeneric;
     },
   },
 };
 </script>
 
 <template>
-  <div>
-    {{ feature.status }}
-    <template v-if="canViewCiHistory">
-      <br />
-      <gl-link :href="gitlabCiHistoryPath">{{ s__('SecurityConfiguration|View history') }}</gl-link>
-    </template>
-  </div>
+  <component :is="statusComponent" v-bind="$props" />
 </template>

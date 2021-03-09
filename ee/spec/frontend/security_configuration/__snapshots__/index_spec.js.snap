@@ -39,9 +39,9 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
     <table
       aria-busy="false"
       aria-colcount="3"
-      aria-describedby="__BVID__76__caption_"
+      aria-describedby="__BVID__77__caption_"
       class="table b-table gl-table b-table-stacked-md"
-      id="__BVID__76"
+      id="__BVID__77"
       role="table"
     >
       <!---->
@@ -129,9 +129,10 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
+                <div>
+                  Not enabled
+                </div>
+                 
                 <!---->
               </div>
             </div>
@@ -205,10 +206,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -267,10 +265,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Available for on-demand DAST
-  
-                <!---->
+                Available for on-demand DAST
               </div>
             </div>
           </td>
@@ -343,10 +338,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -405,10 +397,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -467,10 +456,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -529,10 +515,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -591,10 +574,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -653,10 +633,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -721,9 +698,9 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
     <table
       aria-busy="false"
       aria-colcount="3"
-      aria-describedby="__BVID__139__caption_"
+      aria-describedby="__BVID__141__caption_"
       class="table b-table gl-table b-table-stacked-md"
-      id="__BVID__139"
+      id="__BVID__141"
       role="table"
     >
       <!---->
@@ -811,9 +788,10 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
+                <div>
+                  Not enabled
+                </div>
+                 
                 <!---->
               </div>
             </div>
@@ -887,10 +865,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -949,10 +924,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Available for on-demand DAST
-  
-                <!---->
+                Available for on-demand DAST
               </div>
             </div>
           </td>
@@ -1025,10 +997,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -1087,10 +1056,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Enabled with Auto DevOps
-  
-                <!---->
+                Enabled with Auto DevOps
               </div>
             </div>
           </td>
@@ -1149,10 +1115,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Enabled with Auto DevOps
-  
-                <!---->
+                Enabled with Auto DevOps
               </div>
             </div>
           </td>
@@ -1211,10 +1174,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -1273,10 +1233,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -1349,10 +1306,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <div>
-                
-  Enabled with Auto DevOps
-  
-                <!---->
+                Enabled with Auto DevOps
               </div>
             </div>
           </td>
@@ -1507,10 +1461,9 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Enabled
-  
-                <br />
+                <div>
+                  Enabled
+                </div>
                  
                 <a
                   class="gl-link"
@@ -1590,10 +1543,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -1652,10 +1602,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Available for on-demand DAST
-  
-                <!---->
+                Available for on-demand DAST
               </div>
             </div>
           </td>
@@ -1728,10 +1675,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Enabled
-  
-                <!---->
+                Enabled
               </div>
             </div>
           </td>
@@ -1790,10 +1734,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Enabled
-  
-                <!---->
+                Enabled
               </div>
             </div>
           </td>
@@ -1852,10 +1793,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Enabled
-  
-                <!---->
+                Enabled
               </div>
             </div>
           </td>
@@ -1914,10 +1852,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -1976,10 +1911,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Not enabled
-  
-                <!---->
+                Not enabled
               </div>
             </div>
           </td>
@@ -2052,10 +1984,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
           >
             <div>
               <div>
-                
-  Enabled
-  
-                <!---->
+                Enabled
               </div>
             </div>
           </td>
