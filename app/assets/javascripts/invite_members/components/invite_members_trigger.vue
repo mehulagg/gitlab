@@ -21,6 +21,11 @@ export default {
       required: false,
       default: '',
     },
+    variant: {
+      type: String,
+      required: false,
+      default: undefined,
+    },
   },
   methods: {
     openModal() {
@@ -34,6 +39,7 @@ export default {
   <gl-button
     :class="classes"
     :icon="icon"
+    :variant="variant"
     data-qa-selector="invite_members_button"
     @click="openModal"
   >
