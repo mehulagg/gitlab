@@ -202,8 +202,6 @@ RSpec.describe TokenAuthenticatableStrategies::Encrypted do
   end
 
   def form_encrypted_token(token)
-    iv = ::Digest::SHA256.hexdigest(token).bytes.take(12).pack('c*')
-    token = Gitlab::CryptoHelper.aes256_gcm_encrypt(token, nonce: iv)
-    "#{described_class::DYNAMIC_NONCE_IDENTIFIER}#{token}#{iv}"
+    TokenAuthenticatableStrategies::EncryptionHelper.form_encrypted_token(token)
   end
 end
