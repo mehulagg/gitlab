@@ -10674,6 +10674,7 @@ CREATE TABLE ci_pipelines (
     external_pull_request_id bigint,
     ci_ref_id bigint,
     locked smallint DEFAULT 1 NOT NULL,
+    dast_profile_id integer,
     CONSTRAINT check_d7e99a025e CHECK ((lock_version IS NOT NULL))
 );
 
@@ -11668,6 +11669,29 @@ CREATE SEQUENCE dast_scanner_profiles_id_seq
     CACHE 1;
 
 ALTER SEQUENCE dast_scanner_profiles_id_seq OWNED BY dast_scanner_profiles.id;
+
+CREATE TABLE dast_site_profile_variables (
+    id bigint NOT NULL,
+    dast_site_profile_id bigint NOT NULL,
+    variable_type smallint DEFAULT 1 NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    key text NOT NULL,
+    encrypted_value text NOT NULL,
+    encrypted_value_iv text NOT NULL,
+    CONSTRAINT check_b6df2f9c3d CHECK ((char_length(key) <= 255))
+);
+
+COMMENT ON TABLE dast_site_profile_variables IS '{"owner":"group::dynamic analysis","description":"Variables used in an DAST on-demand scan"}';
+
+CREATE SEQUENCE dast_site_profile_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE dast_site_profile_variables_id_seq OWNED BY dast_site_profile_variables.id;
 
 CREATE TABLE dast_site_profiles (
     id bigint NOT NULL,
@@ -18990,6 +19014,8 @@ ALTER TABLE ONLY dast_profiles ALTER COLUMN id SET DEFAULT nextval('dast_profile
 
 ALTER TABLE ONLY dast_scanner_profiles ALTER COLUMN id SET DEFAULT nextval('dast_scanner_profiles_id_seq'::regclass);
 
+ALTER TABLE ONLY dast_site_profile_variables ALTER COLUMN id SET DEFAULT nextval('dast_site_profile_variables_id_seq'::regclass);
+
 ALTER TABLE ONLY dast_site_profiles ALTER COLUMN id SET DEFAULT nextval('dast_site_profiles_id_seq'::regclass);
 
 ALTER TABLE ONLY dast_site_tokens ALTER COLUMN id SET DEFAULT nextval('dast_site_tokens_id_seq'::regclass);
@@ -20180,6 +20206,9 @@ ALTER TABLE ONLY dast_profiles
 
 ALTER TABLE ONLY dast_scanner_profiles
     ADD CONSTRAINT dast_scanner_profiles_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY dast_site_profile_variables
+    ADD CONSTRAINT dast_site_profile_variables_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY dast_site_profiles
     ADD CONSTRAINT dast_site_profiles_pkey PRIMARY KEY (id);
@@ -21860,6 +21889,8 @@ CREATE INDEX index_ci_pipelines_on_auto_canceled_by_id ON ci_pipelines USING btr
 
 CREATE INDEX index_ci_pipelines_on_ci_ref_id_and_more ON ci_pipelines USING btree (ci_ref_id, id DESC, source, status) WHERE (ci_ref_id IS NOT NULL);
 
+CREATE INDEX index_ci_pipelines_on_dast_profile_id ON ci_pipelines USING btree (dast_profile_id);
+
 CREATE INDEX index_ci_pipelines_on_external_pull_request_id ON ci_pipelines USING btree (external_pull_request_id) WHERE (external_pull_request_id IS NOT NULL);
 
 CREATE INDEX index_ci_pipelines_on_merge_request_id ON ci_pipelines USING btree (merge_request_id) WHERE (merge_request_id IS NOT NULL);
@@ -22067,6 +22098,10 @@ CREATE INDEX index_dast_profiles_on_dast_site_profile_id ON dast_profiles USING 
 CREATE UNIQUE INDEX index_dast_profiles_on_project_id_and_name ON dast_profiles USING btree (project_id, name);
 
 CREATE UNIQUE INDEX index_dast_scanner_profiles_on_project_id_and_name ON dast_scanner_profiles USING btree (project_id, name);
+
+CREATE INDEX index_dast_site_profile_variables_on_dast_site_profile_id ON dast_site_profile_variables USING btree (dast_site_profile_id);
+
+CREATE UNIQUE INDEX index_dast_site_profile_variables_on_site_profile_id_and_key ON dast_site_profile_variables USING btree (dast_site_profile_id, key);
 
 CREATE INDEX index_dast_site_profiles_on_dast_site_id ON dast_site_profiles USING btree (dast_site_id);
 
@@ -24699,6 +24734,9 @@ ALTER TABLE ONLY alert_management_alerts
 ALTER TABLE ONLY identities
     ADD CONSTRAINT fk_aade90f0fc FOREIGN KEY (saml_provider_id) REFERENCES saml_providers(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_pipelines
+    ADD CONSTRAINT fk_ab78278ad1 FOREIGN KEY (dast_profile_id) REFERENCES dast_profiles(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY ci_sources_pipelines
     ADD CONSTRAINT fk_acd9737679 FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -25328,6 +25366,9 @@ ALTER TABLE ONLY self_managed_prometheus_alert_events
 
 ALTER TABLE ONLY chat_teams
     ADD CONSTRAINT fk_rails_3b543909cb FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_site_profile_variables
+    ADD CONSTRAINT fk_rails_3c8afd0586 FOREIGN KEY (dast_site_profile_id) REFERENCES dast_site_profiles(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_build_needs
     ADD CONSTRAINT fk_rails_3cf221d4ed FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;

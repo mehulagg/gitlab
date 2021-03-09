@@ -9,6 +9,8 @@ module EE
       prepended do
         include UsageStatistics
 
+        belongs_to :dast_profile, class_name: 'Dast::Profile', optional: true
+
         has_many :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :pipeline
         has_many :vulnerability_findings, source: :finding, through: :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::Finding'
 

@@ -4,6 +4,8 @@ class DastSiteProfile < ApplicationRecord
   belongs_to :project
   belongs_to :dast_site
 
+  has_many :variables, class_name: 'Dast::SiteProfileVariable'
+
   validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
   validates :project_id, :dast_site_id, presence: true
   validate :dast_site_project_id_fk

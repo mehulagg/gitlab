@@ -8,6 +8,7 @@ RSpec.describe DastSiteProfile, type: :model do
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:dast_site) }
+    it { is_expected.to have_many(:variables).class_name('Dast::SiteProfileVariable') }
   end
 
   describe 'validations' do
