@@ -15,13 +15,20 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 >   `/` into a description or comment field, all available quick actions are displayed in a scrollable list.
 > - The rebase quick action was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49800) in GitLab 13.8.
 
-Quick actions are text-based shortcuts for common actions that are usually done by selecting buttons or dropdowns in the GitLab user interface. You can enter these commands in the descriptions or comments of issues, epics, merge requests, and commits.
+Quick actions are text-based shortcuts for common actions that are usually done
+by selecting buttons or dropdowns in the GitLab user interface. You can enter
+these commands in the descriptions or comments of issues, epics, merge requests,
+and commits.
 
-Be sure to enter each quick action on a separate line to allow GitLab to properly detect and execute the commands.
+Be sure to enter each quick action on a separate line to allow GitLab to
+properly detect and execute the commands.
 
 ## Parameters
 
-Many quick actions require a parameter. For example, the `/assign` quick action requires a username. GitLab uses [autocomplete characters](autocomplete_characters.md) with quick actions to help users enter parameters, by providing a list of available values.
+Many quick actions require a parameter. For example, the `/assign` quick action
+requires a username. GitLab uses [autocomplete characters](autocomplete_characters.md)
+with quick actions to help users enter parameters, by providing a list of
+available values.
 
 If you manually enter a parameter, it must be enclosed in double quotation marks
 (`"`), unless it contains only these characters:
@@ -35,7 +42,8 @@ of quotation marks, automatically.
 
 ## Issues, merge requests, and epics
 
-The following quick actions are applicable to descriptions, discussions, and threads. Some quick actions may not be available to all subscription tiers.
+The following quick actions are applicable to descriptions, discussions, and
+threads. Some quick actions may not be available to all subscription tiers.
 
 | Command                               | Issue                  | Merge request          | Epic                   | Action |
 |:--------------------------------------|:-----------------------|:-----------------------|:-----------------------|:-------|
