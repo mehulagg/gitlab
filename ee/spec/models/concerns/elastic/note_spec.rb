@@ -121,36 +121,35 @@ RSpec.describe Note, :elastic do
       expect(note.__elasticsearch__.as_indexed_json).to eq(expected_hash)
     end
 
-    it 'does not raise error for notes with null noteable references' do
-      note = create(:note_on_issue)
+    it 'does raises Elastic::Latest::DocumentShouldBeDeletedFromIndexError when commit is not found and noteable is null' do
+      note = create(:note_on_commit)
       allow(note).to receive(:noteable).and_return(nil)
 
-      expect { note.__elasticsearch__.as_indexed_json }.not_to raise_error
+      expect { note.__elasticsearch__.as_indexed_json }.to raise_error(::Elastic::Latest::DocumentShouldBeDeletedFromIndexError)
     end
 
-    where(:note_type, :project_permission, :access_level) do
+    where(:note_type, :project_feature_permission, :access_level) do
       :note_on_issue                              | ProjectFeature::ENABLED      | 'issues_access_level'
       :note_on_project_snippet                    | ProjectFeature::DISABLED     | 'snippets_access_level'
-      :note_on_personal_snippet                   | nil                          | false
+      :note_on_personal_snippet                   | nil                          | nil
       :note_on_merge_request                      | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
       :note_on_commit                             | ProjectFeature::PRIVATE      | 'repository_access_level'
       :diff_note_on_merge_request                 | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
       :diff_note_on_commit                        | ProjectFeature::PRIVATE      | 'repository_access_level'
-      :diff_note_on_design                        | ProjectFeature::ENABLED      | false
+      :diff_note_on_design                        | ProjectFeature::ENABLED      | nil
       :legacy_diff_note_on_merge_request          | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
       :legacy_diff_note_on_commit                 | ProjectFeature::PRIVATE      | 'repository_access_level'
-      :note_on_alert                              | ProjectFeature::PRIVATE      | false
-      :note_on_design                             | ProjectFeature::ENABLED      | false
-      :note_on_epic                               | nil                          | false
-      :note_on_vulnerability                      | ProjectFeature::PRIVATE      | false
-      :discussion_note_on_vulnerability           | ProjectFeature::PRIVATE      | false
+      :note_on_alert                              | ProjectFeature::PRIVATE      | nil
+      :note_on_design                             | ProjectFeature::ENABLED      | nil
+      :note_on_epic                               | nil                          | nil
+      :note_on_vulnerability                      | ProjectFeature::PRIVATE      | nil
+      :discussion_note_on_vulnerability           | ProjectFeature::PRIVATE      | nil
       :discussion_note_on_merge_request           | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
       :discussion_note_on_issue                   | ProjectFeature::ENABLED      | 'issues_access_level'
       :discussion_note_on_project_snippet         | ProjectFeature::DISABLED     | 'snippets_access_level'
-      :discussion_note_on_personal_snippet        | nil                          | false
-      :note_on_merge_request                      | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :discussion_note_on_personal_snippet        | nil                          | nil
       :discussion_note_on_commit                  | ProjectFeature::PRIVATE      | 'repository_access_level'
-      :track_mr_picking_note                      | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :track_mr_picking_note                      | nil                          | nil
     end
 
     with_them do
@@ -160,7 +159,7 @@ RSpec.describe Note, :elastic do
       let(:note_json) { note.__elasticsearch__.as_indexed_json }
 
       before do
-        project.project_feature.update_attribute(access_level.to_sym, project_permission) if access_level.present?
+        project.project_feature.update_attribute(access_level.to_sym, project_feature_permission) if access_level.present?
       end
 
       it 'does not contain permissions if remove_permissions_data_from_notes_documents is not finished' do
@@ -175,15 +174,12 @@ RSpec.describe Note, :elastic do
       it 'contains the correct permissions', :aggregate_failures do
         if access_level
           expect(note_json).to have_key(access_level)
-          expect(note_json[access_level]).to eq(project_permission)
+          expect(note_json[access_level]).to eq(project_feature_permission)
         end
 
-        if project_permission
-          expect(note_json).to have_key('visibility_level')
-          expect(note_json['visibility_level']).to eq(project.visibility_level)
-        else
-          expect(note_json).not_to have_key('visibility_level')
-        end
+        expected_visibility_level = project&.visibility_level || Gitlab::VisibilityLevel::PRIVATE
+        expect(note_json).to have_key('visibility_level')
+        expect(note_json['visibility_level']).to eq(expected_visibility_level)
       end
     end
   end

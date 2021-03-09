@@ -63,6 +63,9 @@ module Gitlab
         op = build_op(ref, proxy)
 
         submit(ref, { index: op }, proxy.as_indexed_json)
+      rescue ::Elastic::Latest::DocumentShouldBeDeletedFromIndexError => error
+        logger.warn(message: error.message, record_id: error.record_id, class_name: error.class_name)
+        delete(ref)
       end
 
       def delete(ref)
