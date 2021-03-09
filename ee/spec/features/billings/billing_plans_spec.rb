@@ -231,7 +231,9 @@ RSpec.describe 'Billing plan pages', :feature do
         page.within('.billing-plans') do
           panels = page.all('.card-wrapper')
 
-          expect(panels[2].find('.card-header')).to have_css('.card-wrapper-has-badge')
+          expect(panels[2]).to have_css('.card-wrapper-has-badge')
+          # expect(panels[2].find('.card-badge')).to be_truthy
+          expect(panels[2].find('.card-badge-text')).to have_content('Upgrade offers available!')
         end
       end
     end

@@ -19,7 +19,8 @@ module BillingPlansHelper
   end
 
   def has_upgrade?(upgrade_offer)
-    upgrade_offer == :upgrade_for_free || upgrade_offer == :upgrade_for_offer
+    # upgrade_offer == :upgrade_for_free || upgrade_offer == :upgrade_for_offer
+    return true
   end
 
   def show_contact_sales_button?(purchase_link_action, upgrade_offer)
