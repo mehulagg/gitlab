@@ -5196,15 +5196,6 @@ msgstr ""
 msgid "CHANGELOG"
 msgstr ""
 
-msgid "CI / CD"
-msgstr ""
-
-msgid "CI / CD Analytics"
-msgstr ""
-
-msgid "CI / CD Settings"
-msgstr ""
-
 msgid "CI Lint"
 msgstr ""
 
@@ -5221,6 +5212,12 @@ msgid "CI will run using the credentials assigned above."
 msgstr ""
 
 msgid "CI/CD"
+msgstr ""
+
+msgid "CI/CD Analytics"
+msgstr ""
+
+msgid "CI/CD Settings"
 msgstr ""
 
 msgid "CI/CD configuration"
@@ -22091,7 +22088,7 @@ msgstr ""
 msgid "PipelineCharts|An unknown error occurred while processing CI/CD analytics."
 msgstr ""
 
-msgid "PipelineCharts|CI / CD Analytics"
+msgid "PipelineCharts|CI/CD Analytics"
 msgstr ""
 
 msgid "PipelineCharts|Failed:"
