@@ -359,8 +359,8 @@ Don't rely on these fields as they will be removed in a later release.
 
 Standard OAuth2 tokens support different degrees of access to GitLab registries, as they:
 
-- Do not allow users to authenticate to the GitLab
-  [Docker registry](../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
+- Do not allow users to authenticate to:
+  - The GitLab [Container registry](../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
+  - Packages listed in the GitLab [Package registry](../user/packages/package_registry/index.md)
 - Allow users to get, list, and delete registries through
-  the [Container registry](container_registry.md)
-- Can not be used for the [npm registry](../user/packages/npm_registry/index.md#authenticate-to-the-package-registry).
+  the [Container registry API](container_registry.md)
