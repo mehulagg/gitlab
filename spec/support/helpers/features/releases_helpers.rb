@@ -66,9 +66,9 @@ module Spec
           end
 
           def fill_asset_link(link)
-            all('.url-field input').last.set(link[:url])
-            all('.link-title-field input').last.set(link[:title])
-            all('.link-type-field select').last.find("option[value=\"#{link[:type]}\"").select_option
+            all('input[name="asset-url"]').last.set(link[:url])
+            all('input[name="asset-link-name"]').last.set(link[:title])
+            all('select[name="asset-type"]').last.find("option[value=\"#{link[:type]}\"").select_option
           end
 
           # Click "Add another link" and tab back to the beginning of the new row
