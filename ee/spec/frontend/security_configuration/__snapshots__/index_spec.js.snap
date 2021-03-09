@@ -1,0 +1,2082 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Security Configuration App given no enabled scanners matches the snapshot 1`] = `
+<body>
+  
+
+  <article>
+    <header>
+      <h4
+        class="my-3"
+      >
+        Security Configuration
+      </h4>
+       
+      <h5
+        class="gl-font-lg mt-5"
+      >
+        Testing & Compliance
+      </h5>
+       
+      <p>
+        The status of the table below only applies to the default branch and is based on the 
+        <a
+          class="gl-link"
+          href="/markrian/qr/-/pipelines/249400518"
+          rel="noopener"
+          target="_blank"
+        >
+          latest pipeline
+        </a>
+        . Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan.
+      </p>
+    </header>
+     
+    <!---->
+     
+    <!---->
+     
+    <table
+      aria-busy="false"
+      aria-colcount="3"
+      aria-describedby="__BVID__76__caption_"
+      class="table b-table gl-table b-table-stacked-md"
+      id="__BVID__76"
+      role="table"
+    >
+      <!---->
+      <!---->
+      <thead
+        class=""
+        role="rowgroup"
+      >
+        <!---->
+        <tr
+          class=""
+          role="row"
+        >
+          <th
+            aria-colindex="1"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Security Control
+          </th>
+          <th
+            aria-colindex="2"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Status
+          </th>
+          <th
+            aria-colindex="3"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Manage
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        role="rowgroup"
+      >
+        <!---->
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Static Application Security Testing (SAST)
+              </div>
+               
+              <div>
+                
+      Analyze your source code for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Static Application Security Testing (SAST)"
+                  class="gl-link"
+                  href="/help/user/application_security/sast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-success btn-md gl-button"
+                data-testid="enableButton"
+                href="/markrian/qr/-/security/configuration/sast"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Enable
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Dynamic Application Security Testing (DAST)
+              </div>
+               
+              <div>
+                
+      Analyze a review version of your web application.
+      
+                <a
+                  aria-label="Feature documentation for Dynamic Application Security Testing (DAST)"
+                  class="gl-link"
+                  href="/help/user/application_security/dast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                DAST Scans
+              </div>
+               
+              <div>
+                
+      Saved scan settings and target site settings which are reusable.
+      
+                <a
+                  aria-label="Feature documentation for DAST Scans"
+                  class="gl-link"
+                  href="/help/user/application_security/dast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Available for on-demand DAST
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-default btn-md gl-button"
+                data-testid="manageButton"
+                href="/markrian/qr/-/security/configuration/dast_profiles"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Manage
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Dependency Scanning
+              </div>
+               
+              <div>
+                
+      Analyze your dependencies for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Dependency Scanning"
+                  class="gl-link"
+                  href="/help/user/application_security/dependency_scanning/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Container Scanning
+              </div>
+               
+              <div>
+                
+      Check your Docker images for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Container Scanning"
+                  class="gl-link"
+                  href="/help/user/application_security/container_scanning/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Secret Detection
+              </div>
+               
+              <div>
+                
+      Analyze your source code and git history for secrets.
+      
+                <a
+                  aria-label="Feature documentation for Secret Detection"
+                  class="gl-link"
+                  href="/help/user/application_security/secret_detection/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Coverage Fuzzing
+              </div>
+               
+              <div>
+                
+      Find bugs in your code with coverage-guided fuzzing.
+      
+                <a
+                  aria-label="Feature documentation for Coverage Fuzzing"
+                  class="gl-link"
+                  href="/help/user/application_security/coverage_fuzzing/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                API Fuzzing
+              </div>
+               
+              <div>
+                
+      Find bugs in your code with API fuzzing.
+      
+                <a
+                  aria-label="Feature documentation for API Fuzzing"
+                  class="gl-link"
+                  href="/help/user/application_security/api_fuzzing/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                License Compliance
+              </div>
+               
+              <div>
+                
+      Search your project dependencies for their licenses and apply policies.
+      
+                <a
+                  aria-label="Feature documentation for License Compliance"
+                  class="gl-link"
+                  href="/help/user/compliance/license_compliance/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <!---->
+        <!---->
+      </tbody>
+      <!---->
+    </table>
+     
+    <!---->
+  </article>
+</body>
+`;
+
+exports[`Security Configuration App given some enabled by ADO matches the snapshot 1`] = `
+<body>
+  
+
+  <article>
+    <header>
+      <h4
+        class="my-3"
+      >
+        Security Configuration
+      </h4>
+       
+      <h5
+        class="gl-font-lg mt-5"
+      >
+        Testing & Compliance
+      </h5>
+       
+      <p>
+        Several security scans are enabled because 
+        <a
+          class="gl-link"
+          href="/help/topics/autodevops/index"
+          rel="noopener"
+          target="_blank"
+        >
+          Auto DevOps
+        </a>
+         is enabled on this project
+      </p>
+    </header>
+     
+    <!---->
+     
+    <!---->
+     
+    <table
+      aria-busy="false"
+      aria-colcount="3"
+      aria-describedby="__BVID__139__caption_"
+      class="table b-table gl-table b-table-stacked-md"
+      id="__BVID__139"
+      role="table"
+    >
+      <!---->
+      <!---->
+      <thead
+        class=""
+        role="rowgroup"
+      >
+        <!---->
+        <tr
+          class=""
+          role="row"
+        >
+          <th
+            aria-colindex="1"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Security Control
+          </th>
+          <th
+            aria-colindex="2"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Status
+          </th>
+          <th
+            aria-colindex="3"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Manage
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        role="rowgroup"
+      >
+        <!---->
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Static Application Security Testing (SAST)
+              </div>
+               
+              <div>
+                
+      Analyze your source code for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Static Application Security Testing (SAST)"
+                  class="gl-link"
+                  href="/help/user/application_security/sast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-success btn-md gl-button"
+                data-testid="enableButton"
+                href="/markrian-test/test-public-project/-/security/configuration/sast"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Enable
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Dynamic Application Security Testing (DAST)
+              </div>
+               
+              <div>
+                
+      Analyze a review version of your web application.
+      
+                <a
+                  aria-label="Feature documentation for Dynamic Application Security Testing (DAST)"
+                  class="gl-link"
+                  href="/help/user/application_security/dast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                DAST Scans
+              </div>
+               
+              <div>
+                
+      Saved scan settings and target site settings which are reusable.
+      
+                <a
+                  aria-label="Feature documentation for DAST Scans"
+                  class="gl-link"
+                  href="/help/user/application_security/dast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Available for on-demand DAST
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-default btn-md gl-button"
+                data-testid="manageButton"
+                href="/markrian-test/test-public-project/-/security/configuration/dast_profiles"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Manage
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Dependency Scanning
+              </div>
+               
+              <div>
+                
+      Analyze your dependencies for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Dependency Scanning"
+                  class="gl-link"
+                  href="/help/user/application_security/dependency_scanning/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Container Scanning
+              </div>
+               
+              <div>
+                
+      Check your Docker images for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Container Scanning"
+                  class="gl-link"
+                  href="/help/user/application_security/container_scanning/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled with Auto DevOps
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Secret Detection
+              </div>
+               
+              <div>
+                
+      Analyze your source code and git history for secrets.
+      
+                <a
+                  aria-label="Feature documentation for Secret Detection"
+                  class="gl-link"
+                  href="/help/user/application_security/secret_detection/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled with Auto DevOps
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Coverage Fuzzing
+              </div>
+               
+              <div>
+                
+      Find bugs in your code with coverage-guided fuzzing.
+      
+                <a
+                  aria-label="Feature documentation for Coverage Fuzzing"
+                  class="gl-link"
+                  href="/help/user/application_security/coverage_fuzzing/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                API Fuzzing
+              </div>
+               
+              <div>
+                
+      Find bugs in your code with API fuzzing.
+      
+                <a
+                  aria-label="Feature documentation for API Fuzzing"
+                  class="gl-link"
+                  href="/help/user/application_security/api_fuzzing/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-success btn-md gl-button"
+                data-testid="enableButton"
+                href="/markrian-test/test-public-project/-/security/configuration/api_fuzzing"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Enable
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                License Compliance
+              </div>
+               
+              <div>
+                
+      Search your project dependencies for their licenses and apply policies.
+      
+                <a
+                  aria-label="Feature documentation for License Compliance"
+                  class="gl-link"
+                  href="/help/user/compliance/license_compliance/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled with Auto DevOps
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <!---->
+        <!---->
+      </tbody>
+      <!---->
+    </table>
+     
+    <!---->
+  </article>
+</body>
+`;
+
+exports[`Security Configuration App given some enabled scanners (gitlab-ui) matches the snapshot 1`] = `
+<body>
+  
+
+  <article>
+    <header>
+      <h4
+        class="my-3"
+      >
+        Security Configuration
+      </h4>
+       
+      <h5
+        class="gl-font-lg mt-5"
+      >
+        Testing & Compliance
+      </h5>
+       
+      <p>
+        The status of the table below only applies to the default branch and is based on the 
+        <a
+          class="gl-link"
+          href="/gitlab-org/gitlab-ui/-/pipelines/263335857"
+          rel="noopener"
+          target="_blank"
+        >
+          latest pipeline
+        </a>
+        . Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan.
+      </p>
+    </header>
+     
+    <!---->
+     
+    <!---->
+     
+    <table
+      aria-busy="false"
+      aria-colcount="3"
+      aria-describedby="__BVID__9__caption_"
+      class="table b-table gl-table b-table-stacked-md"
+      id="__BVID__9"
+      role="table"
+    >
+      <!---->
+      <!---->
+      <thead
+        class=""
+        role="rowgroup"
+      >
+        <!---->
+        <tr
+          class=""
+          role="row"
+        >
+          <th
+            aria-colindex="1"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Security Control
+          </th>
+          <th
+            aria-colindex="2"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Status
+          </th>
+          <th
+            aria-colindex="3"
+            class="gl-text-gray-900 gl-bg-transparent! gl-border-b-1! gl-border-b-solid! gl-border-gray-100!"
+            role="columnheader"
+            scope="col"
+          >
+            Manage
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        role="rowgroup"
+      >
+        <!---->
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Static Application Security Testing (SAST)
+              </div>
+               
+              <div>
+                
+      Analyze your source code for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Static Application Security Testing (SAST)"
+                  class="gl-link"
+                  href="/help/user/application_security/sast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled
+  
+                <br />
+                 
+                <a
+                  class="gl-link"
+                  href="/gitlab-org/gitlab-ui/-/blame/main/.gitlab-ci.yml"
+                >
+                  View history
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-default btn-md gl-button"
+                data-testid="configureButton"
+                href="/gitlab-org/gitlab-ui/-/security/configuration/sast"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Configure
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Dynamic Application Security Testing (DAST)
+              </div>
+               
+              <div>
+                
+      Analyze a review version of your web application.
+      
+                <a
+                  aria-label="Feature documentation for Dynamic Application Security Testing (DAST)"
+                  class="gl-link"
+                  href="/help/user/application_security/dast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                DAST Scans
+              </div>
+               
+              <div>
+                
+      Saved scan settings and target site settings which are reusable.
+      
+                <a
+                  aria-label="Feature documentation for DAST Scans"
+                  class="gl-link"
+                  href="/help/user/application_security/dast/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Available for on-demand DAST
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-default btn-md gl-button"
+                data-testid="manageButton"
+                href="/gitlab-org/gitlab-ui/-/security/configuration/dast_profiles"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Manage
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Dependency Scanning
+              </div>
+               
+              <div>
+                
+      Analyze your dependencies for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Dependency Scanning"
+                  class="gl-link"
+                  href="/help/user/application_security/dependency_scanning/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Container Scanning
+              </div>
+               
+              <div>
+                
+      Check your Docker images for known vulnerabilities.
+      
+                <a
+                  aria-label="Feature documentation for Container Scanning"
+                  class="gl-link"
+                  href="/help/user/application_security/container_scanning/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Secret Detection
+              </div>
+               
+              <div>
+                
+      Analyze your source code and git history for secrets.
+      
+                <a
+                  aria-label="Feature documentation for Secret Detection"
+                  class="gl-link"
+                  href="/help/user/application_security/secret_detection/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                Coverage Fuzzing
+              </div>
+               
+              <div>
+                
+      Find bugs in your code with coverage-guided fuzzing.
+      
+                <a
+                  aria-label="Feature documentation for Coverage Fuzzing"
+                  class="gl-link"
+                  href="/help/user/application_security/coverage_fuzzing/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                API Fuzzing
+              </div>
+               
+              <div>
+                
+      Find bugs in your code with API fuzzing.
+      
+                <a
+                  aria-label="Feature documentation for API Fuzzing"
+                  class="gl-link"
+                  href="/help/user/application_security/api_fuzzing/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Not enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <a
+                class="btn btn-success btn-md gl-button"
+                data-testid="enableButton"
+                href="/gitlab-org/gitlab-ui/-/security/configuration/api_fuzzing"
+              >
+                <!---->
+                 
+                <!---->
+                  
+                <span
+                  class="gl-button-text"
+                >
+                  Enable
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr
+          class=""
+          data-testid="security-scanner-row"
+          role="row"
+        >
+          <td
+            aria-colindex="1"
+            class=""
+            data-label="Security Control"
+            role="cell"
+          >
+            <div>
+              <div
+                class="gl-text-gray-900"
+              >
+                License Compliance
+              </div>
+               
+              <div>
+                
+      Search your project dependencies for their licenses and apply policies.
+      
+                <a
+                  aria-label="Feature documentation for License Compliance"
+                  class="gl-link"
+                  href="/help/user/compliance/license_compliance/index"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  
+        More information
+      
+                </a>
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="2"
+            class=""
+            data-label="Status"
+            role="cell"
+          >
+            <div>
+              <div>
+                
+  Enabled
+  
+                <!---->
+              </div>
+            </div>
+          </td>
+          <td
+            aria-colindex="3"
+            class=""
+            data-label="Manage"
+            role="cell"
+          >
+            <div>
+              <!---->
+            </div>
+          </td>
+        </tr>
+        <!---->
+        <!---->
+      </tbody>
+      <!---->
+    </table>
+     
+    <!---->
+  </article>
+</body>
+`;
