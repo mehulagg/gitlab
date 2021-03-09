@@ -15,6 +15,18 @@ const propsData = {
 
 describe('ConfigurationTable component', () => {
   let wrapper;
+  const mockFeatures = [
+    ...generateFeatures(1, {
+      name: 'foo',
+      description: 'Foo description',
+      helpPath: '/help/foo',
+    }),
+    ...generateFeatures(1, {
+      name: 'bar',
+      description: 'Bar description',
+      helpPath: '/help/bar',
+    }),
+  ];
 
   const createComponent = (props) => {
     wrapper = mount(ConfigurationTable, {
@@ -39,40 +51,25 @@ describe('ConfigurationTable component', () => {
     wrapper.destroy();
   });
 
-  it('passes the expected data to the GlTable', () => {
-    const features = [
-      ...generateFeatures(1, {
-        name: 'foo',
-        description: 'Foo description',
-        helpPath: '/help/foo',
-      }),
-      ...generateFeatures(1, {
-        name: 'bar',
-        description: 'Bar description',
-        helpPath: '/help/bar',
-      }),
-    ];
-
-    createComponent({ features });
+  it.each(mockFeatures)('renders the feature %p correctly', (feature) => {
+    createComponent({ features: [feature] });
 
     expect(wrapper.classes('b-table-stacked-md')).toBeTruthy();
     const rows = getRows();
-    expect(rows).toHaveLength(features.length);
+    expect(rows).toHaveLength(1);
 
-    for (let i = 0; i < features.length; i += 1) {
-      const { description, status, manage } = getRowCells(rows.at(i));
-      expect(description.text()).toMatch(features[i].name);
-      expect(description.text()).toMatch(features[i].description);
-      expect(status.find(FeatureStatus).props()).toEqual({
-        feature: features[i],
-        gitlabCiPresent: propsData.gitlabCiPresent,
-        gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
-      });
-      expect(manage.find(ManageFeature).props()).toEqual({
-        feature: features[i],
-        autoDevopsEnabled: propsData.autoDevopsEnabled,
-      });
-      expect(description.find(GlLink).attributes('href')).toBe(features[i].helpPath);
-    }
+    const { description, status, manage } = getRowCells(rows.at(0));
+    expect(description.text()).toMatch(feature.name);
+    expect(description.text()).toMatch(feature.description);
+    expect(status.find(FeatureStatus).props()).toEqual({
+      feature,
+      gitlabCiPresent: propsData.gitlabCiPresent,
+      gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
+    });
+    expect(manage.find(ManageFeature).props()).toEqual({
+      feature,
+      autoDevopsEnabled: propsData.autoDevopsEnabled,
+    });
+    expect(description.find(GlLink).attributes('href')).toBe(feature.helpPath);
   });
 });
