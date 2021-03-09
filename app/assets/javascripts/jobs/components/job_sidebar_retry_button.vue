@@ -39,12 +39,7 @@ export default {
     variant="confirm"
     >{{ $options.i18n.retryLabel }}</gl-button
   >
-  <gl-link
-    v-else
-    :href="href"
-    class="btn gl-button btn-confirm"
-    data-method="post"
-    rel="nofollow"
+  <gl-link v-else :href="href" class="btn gl-button btn-confirm" data-method="post" rel="nofollow"
     >{{ $options.i18n.retryLabel }}
   </gl-link>
 </template>
