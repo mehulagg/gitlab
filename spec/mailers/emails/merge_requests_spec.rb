@@ -26,11 +26,11 @@ RSpec.describe Emails::MergeRequests do
   describe '#merge_request_unmergeable_email' do
     subject { Notify.merge_request_unmergeable_email(recipient.id, merge_request.id) }
 
-    it_behaves_like 'a multiple recipients email'
     it_behaves_like 'an answer to an existing thread with reply-by-email enabled' do
       let(:model) { merge_request }
     end
 
+    it_behaves_like 'a multiple recipients email'
     it_behaves_like 'it should show Gmail Actions View Merge request link'
     it_behaves_like 'an unsubscribeable thread'
     it_behaves_like 'appearance header and footer enabled'
