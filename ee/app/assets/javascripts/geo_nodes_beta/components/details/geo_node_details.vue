@@ -3,6 +3,8 @@ import { s__ } from '~/locale';
 import GeoNodeCoreDetails from './geo_node_core_details.vue';
 import GeoNodePrimaryOtherInfo from './primary_node/geo_node_primary_other_info.vue';
 import GeoNodeVerificationInfo from './primary_node/geo_node_verification_info.vue';
+import GeoNodeReplicationSummary from './secondary_node/geo_node_replication_summary.vue';
+import GeoNodeSecondaryOtherInfo from './secondary_node/geo_node_secondary_other_info.vue';
 
 export default {
   name: 'GeoNodeDetails',
@@ -14,6 +16,8 @@ export default {
     GeoNodeCoreDetails,
     GeoNodePrimaryOtherInfo,
     GeoNodeVerificationInfo,
+    GeoNodeReplicationSummary,
+    GeoNodeSecondaryOtherInfo,
   },
   props: {
     node: {
@@ -39,7 +43,16 @@ export default {
         <geo-node-primary-other-info class="gl-flex-fill-1 gl-h-full gl-w-full" :node="node" />
       </div>
       <div v-else class="gl-display-flex gl-flex-direction-column gl-h-full gl-w-full">
-        <p data-testid="secondary-node-details">{{ $options.i18n.secondaryDetails }}</p>
+        <div
+          class="gl-display-flex gl-sm-flex-direction-column gl-align-items-flex-start gl-h-full gl-w-full gl-mb-5"
+        >
+          <geo-node-replication-summary
+            class="gl-flex-fill-1 gl-mb-5 gl-md-mb-0 gl-md-mr-5 gl-h-full gl-w-full"
+            :node="node"
+          />
+          <geo-node-secondary-other-info class="gl-flex-fill-1 gl-h-full gl-w-full" :node="node" />
+        </div>
+        <p data-testid="secondary-replication-details">{{ s__('Geo|Replication Details') }}</p>
       </div>
     </div>
   </div>
