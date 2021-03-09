@@ -120,7 +120,7 @@ export default {
       this.autoDevopsAlertDismissed = 'true';
     },
     statusQaSelector(item) {
-      return `${item.type}_status`
+      return `${item.type}_status`;
     },
     getFeatureDocumentationLinkLabel(item) {
       return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {

@@ -23,8 +23,8 @@ export default {
       return this.feature.type === 'dast_profiles';
     },
     featureTypeEnableButton() {
-      return `${this.feature.type}_enable_button`
-    }
+      return `${this.feature.type}_enable_button`;
+    },
   },
 };
 </script>

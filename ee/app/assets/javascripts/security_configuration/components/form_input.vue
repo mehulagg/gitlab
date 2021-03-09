@@ -64,9 +64,9 @@ export default {
     inputSize() {
       return SCHEMA_TO_PROP_SIZE_MAP[this.size];
     },
-    qaSelectorField(){
-      return `${this.field}_field`
-    }
+    qaSelectorField() {
+      return `${this.field}_field`;
+    },
   },
   methods: {
     resetToDefaultValue() {
