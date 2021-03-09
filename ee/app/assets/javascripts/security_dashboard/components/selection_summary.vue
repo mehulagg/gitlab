@@ -4,6 +4,7 @@ import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vu
 import { __, s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
 import StatusDropdown from './status_dropdown.vue';
+import eventHub from '../utils/event_hub';
 
 export default {
   name: 'SelectionSummary',
@@ -72,6 +73,7 @@ export default {
       return Promise.all(promises).then(() => {
         if (fulfilledCount > 0) {
           toast(this.$options.i18n.vulnerabilitiesUpdated(fulfilledCount));
+          eventHub.$emit('vulnerabilities-updated', this);
         }
 
         if (rejected.length > 0) {
