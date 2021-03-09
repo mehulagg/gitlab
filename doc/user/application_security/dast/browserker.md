@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# Browserker **ULTIMATE**
+# Browserker **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/323423) in GitLab 13.10.
 
@@ -26,9 +26,9 @@ The benefit of crawling by following user actions in a browser is that Browserke
 
 Browserker is an extension to the GitLab DAST product. DAST should be included in the CI configuration and Browserker enabled using environment variables:
 
-- Install the DAST [prerequisites](./index.md#prerequisites)
-- Include the [DAST CI template](./index.md#include-the-dast-template)
-- Set the [target website](./index.md#template-options)
+- Install the DAST [prerequisites](index.md#prerequisites)
+- Include the [DAST CI template](index.md#include-the-dast-template)
+- Set the [target website](index.md#template-options)
 - Set the environment variable `DAST_BROWSERKER_SCAN` to `true`
  
 An example configuration might look like the following:
@@ -64,7 +64,7 @@ Browserker can be configured using CI/CD variables.
 | `DAST_SUBMIT_FIELD`                  | selector        | `xpath://input[@value='Login']`   | A selector describing the element that when clicked submits the login form or the password form of a multi-page login process. |
 | `DAST_FIRST_SUBMIT_FIELD`            | selector        | `.submit`                         | A selector describing the element that when clicked submits the username form of a multi-page login process. |
 
-The [DAST variables](./index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_WEBSITE`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
+The [DAST variables](index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_WEBSITE`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
 `DAST_INCLUDE_ALPHA_VULNERABILITIES`, `DAST_ZAP_CLI_OPTIONS`, and `DAST_ZAP_LOG_CONFIGURATION` are also compatible with Browserker scans.   
 
 
