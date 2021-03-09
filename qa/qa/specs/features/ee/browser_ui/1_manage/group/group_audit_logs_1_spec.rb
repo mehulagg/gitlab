@@ -17,7 +17,7 @@ module QA
           # right away so a refresh may be needed.
           # https://gitlab.com/gitlab-org/gitlab/issues/119203
           # TODO: https://gitlab.com/gitlab-org/gitlab/issues/195424
-          Support::Retrier.retry_on_exception(reload_page: page) do
+          Support::Retrier.retry_on_exception(reload_page: page, sleep_interval: 2) do
             expect(page).to have_text(expected_event)
           end
         end
@@ -50,9 +50,11 @@ module QA
         before do
           @event_count = 0
           sign_in
-          Resource::Group.fabricate_via_browser_ui! do |group|
+          group = Resource::Group.fabricate_via_browser_ui! do |group|
             group.name = group_name
-          end.visit!
+          end
+
+          expect(page).to have_text("Group '#{group.path}' was successfully created")
         end
 
         it_behaves_like 'audit event', ['Added group']
