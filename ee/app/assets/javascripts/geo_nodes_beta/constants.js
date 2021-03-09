@@ -59,3 +59,7 @@ export const REPLICATION_STATUS_UI = {
 };
 
 export const STATUS_DELAY_THRESHOLD_MS = 600000;
+
+export const REPOSITORY = 'repository';
+
+export const BLOB = 'blob';
