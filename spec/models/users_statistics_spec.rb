@@ -70,6 +70,19 @@ RSpec.describe UsersStatistics do
     end
   end
 
+  describe '#billable' do
+    it 'sums users statistics values excluding blocked users and bots' do
+      expect(users_statistics.billable).to eq(69)
+    end
+
+    it 'excludes blocked users, bots, guest users, and users without a group or project when there is an ultimate license' do
+      license = create(:license, plan: License::ULTIMATE_PLAN)
+      allow(License).to receive(:current).and_return(license)
+
+      expect(users_statistics.billable).to eq(41)
+    end
+  end
+
   describe '#active' do
     it 'sums users statistics values without the value for blocked' do
       expect(users_statistics.active).to eq(71)
