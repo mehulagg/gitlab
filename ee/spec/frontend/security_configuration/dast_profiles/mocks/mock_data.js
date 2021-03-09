@@ -78,3 +78,12 @@ export const savedScans = [
     editPath: '/2/edit',
   },
 ];
+
+export const failedSiteValidations = [
+  {
+    normalizedTargetUrl: 'http://example.com:80',
+  },
+  {
+    normalizedTargetUrl: 'https://example.com:443',
+  },
+];
