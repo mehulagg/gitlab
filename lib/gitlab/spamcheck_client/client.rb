@@ -32,13 +32,14 @@ module Gitlab
         issue.user = build_user(user)
 
         response = @stub.check_for_spam_issue(issue)
-        [convert_verdict_to_gitlab_constant(verdict: response.verdict), response.error]
+        verdict = convert_verdict_to_gitlab_constant(response.verdict)
+        [verdict, response.error]
       end
 
       private
 
-      def convert_verdict_to_gitlab_constant(verdict:)
-        VERDICT_MAPPING.fetch(verdict, verdict)
+      def convert_verdict_to_gitlab_constant(verdict)
+        VERDICT_MAPPING.fetch(Spamcheck::SpamVerdict::Verdict.resolve(verdict), verdict)
       end
 
       def build_user(user)
