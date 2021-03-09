@@ -142,8 +142,6 @@ export default {
       } = this.form;
 
       const variables = {
-        projectPath: this.projectPath,
-        scheduleIid: this.schedule.iid,
         name,
         startsAt: {
           date: formatDate(startDate, 'yyyy-mm-dd'),
@@ -190,11 +188,15 @@ export default {
   methods: {
     createRotation() {
       this.loading = true;
-
+      const input = {
+        ...this.rotationVariables,
+        projectPath: this.projectPath,
+        scheduleIid: this.schedule.iid,
+      };
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
-          variables: { input: this.rotationVariables },
+          variables: { input },
         })
         .then(
           ({
@@ -226,11 +228,14 @@ export default {
     editRotation() {
       this.loading = true;
       const { projectPath, schedule } = this;
-
+      const input = {
+        ...this.rotationVariables,
+        id: this.rotation.id,
+      };
       this.$apollo
         .mutate({
           mutation: updateOncallScheduleRotationMutation,
-          variables: { input: this.rotationVariables },
+          variables: { input },
           update(store, { data }) {
             updateStoreAfterRotationEdit(
               store,
