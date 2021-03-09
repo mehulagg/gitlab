@@ -1,0 +1,5 @@
+---
+title: Update alerts list to fail gracefully on GraphQL failure
+merge_request: 55817
+author:
+type: fixed

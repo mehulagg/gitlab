@@ -940,11 +940,7 @@ class User < ApplicationRecord
   # Returns the groups a user has access to, either through a membership or a project authorization
   def authorized_groups
     Group.unscoped do
-      if Feature.enabled?(:shared_group_membership_auth, self)
-        authorized_groups_with_shared_membership
-      else
-        authorized_groups_without_shared_membership
-      end
+      authorized_groups_with_shared_membership
     end
   end
 
@@ -1856,6 +1852,10 @@ class User < ApplicationRecord
 
   def created_recently?
     created_at > Devise.confirm_within.ago
+  end
+
+  def find_or_initialize_callout(feature_name)
+    callouts.find_or_initialize_by(feature_name: ::UserCallout.feature_names[feature_name])
   end
 
   protected

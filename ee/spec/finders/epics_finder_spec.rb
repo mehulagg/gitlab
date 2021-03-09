@@ -570,8 +570,9 @@ RSpec.describe EpicsFinder do
 
             # if user is not member of top-level group, we need to check
             # if he can read epics in each subgroup
-            it 'does not execute more than 10 SQL queries' do
-              expect { subject }.not_to exceed_all_query_limit(10)
+            it 'does not execute more than 15 SQL queries' do
+              # The limit here is fragile!
+              expect { subject }.not_to exceed_all_query_limit(15)
             end
 
             it 'checks permission for each subgroup' do

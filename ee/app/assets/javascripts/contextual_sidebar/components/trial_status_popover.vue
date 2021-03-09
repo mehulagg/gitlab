@@ -4,6 +4,7 @@ import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
+import Tracking from '~/tracking';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
 
@@ -76,6 +77,12 @@ export default {
     onResize() {
       this.updateDisabledState();
     },
+    onShown() {
+      Tracking.event(undefined, 'popover_shown', {
+        label: 'trial_status_popover',
+        property: 'experiment:show_trial_status_in_sidebar',
+      });
+    },
     updateDisabledState() {
       this.disabled = ['xs', 'sm'].includes(bp.getBreakpointSize());
     },
@@ -92,6 +99,7 @@ export default {
     placement="rightbottom"
     boundary="viewport"
     :delay="{ hide: 400 }"
+    @shown="onShown"
   >
     <template #title>
       {{ $options.i18n.popoverTitle }}

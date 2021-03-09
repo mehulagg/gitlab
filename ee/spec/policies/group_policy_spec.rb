@@ -1497,4 +1497,51 @@ RSpec.describe GroupPolicy do
       include_context 'compliance framework permissions'
     end
   end
+
+  describe 'view_devops_adoption' do
+    let(:current_user) { owner }
+    let(:policy) { :view_group_devops_adoption }
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(group_devops_adoption: false)
+      end
+
+      it { is_expected.to be_disallowed(policy) }
+    end
+
+    context 'when license does not include the feature' do
+      before do
+        stub_feature_flags(group_devops_adoption: true)
+        stub_licensed_features(group_level_devops_adoption: false)
+      end
+
+      it { is_expected.to be_disallowed(policy) }
+    end
+
+    context 'when feature is enabled and license include the feature' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:role, :allowed) do
+        :admin            | true
+        :owner            | true
+        :maintainer       | true
+        :developer        | true
+        :reporter         | true
+        :guest            | false
+        :non_group_member | false
+      end
+
+      before do
+        stub_feature_flags(group_devops_adoption: true)
+        stub_licensed_features(group_level_devops_adoption: true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
+  end
 end

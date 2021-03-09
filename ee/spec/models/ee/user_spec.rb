@@ -1003,11 +1003,11 @@ RSpec.describe User do
 
   describe '#manageable_groups_eligible_for_subscription' do
     let_it_be(:user) { create(:user) }
-    let_it_be(:licensed_group) { create(:group, gitlab_subscription: create(:gitlab_subscription, :bronze)) }
-    let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
-    let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
+    let_it_be(:licensed_group) { create(:group_with_plan, plan: :bronze_plan) }
+    let_it_be(:free_group_z) { create(:group_with_plan, plan: :free_plan, name: 'AZ') }
+    let_it_be(:free_group_a) { create(:group_with_plan, plan: :free_plan, name: 'AA') }
     let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
-    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :ultimate)) }
+    let_it_be(:trial_group) { create(:group_with_plan, plan: :ultimate_plan, trial_ends_on: Date.current + 1.day, name: 'AB') }
 
     subject { user.manageable_groups_eligible_for_subscription }
 
@@ -1085,10 +1085,10 @@ RSpec.describe User do
 
   describe '#manageable_groups_eligible_for_trial' do
     let_it_be(:user) { create :user }
-    let_it_be(:non_trialed_group_z) { create :group, name: 'Zeta', gitlab_subscription: create(:gitlab_subscription, :free) }
-    let_it_be(:non_trialed_group_a) { create :group, name: 'Alpha', gitlab_subscription: create(:gitlab_subscription, :free) }
-    let_it_be(:trialed_group) { create :group, name: 'Omitted', gitlab_subscription: create(:gitlab_subscription, :free, trial: true) }
-    let_it_be(:non_trialed_subgroup) { create :group, name: 'Sub-group', gitlab_subscription: create(:gitlab_subscription, :free), parent: non_trialed_group_a }
+    let_it_be(:non_trialed_group_z) { create :group_with_plan, name: 'Zeta', plan: :free_plan }
+    let_it_be(:non_trialed_group_a) { create :group_with_plan, name: 'Alpha', plan: :free_plan }
+    let_it_be(:trialed_group) { create :group_with_plan, name: 'Omitted', plan: :free_plan, trial_ends_on: Date.today + 1.day }
+    let_it_be(:non_trialed_subgroup) { create :group_with_plan, name: 'Sub-group', plan: :free_plan, parent: non_trialed_group_a }
 
     subject { user.manageable_groups_eligible_for_trial }
 

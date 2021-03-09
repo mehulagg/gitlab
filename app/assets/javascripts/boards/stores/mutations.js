@@ -32,13 +32,13 @@ export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfter
 
 export default {
   [mutationTypes.SET_INITIAL_BOARD_DATA](state, data) {
-    const { boardType, disabled, boardId, fullPath, boardConfig, isEpicBoard } = data;
+    const { boardType, disabled, boardId, fullPath, boardConfig, issuableType } = data;
     state.boardId = boardId;
     state.fullPath = fullPath;
     state.boardType = boardType;
     state.disabled = disabled;
     state.boardConfig = boardConfig;
-    state.isEpicBoard = isEpicBoard;
+    state.issuableType = issuableType;
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, lists) => {
@@ -60,8 +60,11 @@ export default {
     state.filterParams = filterParams;
   },
 
-  [mutationTypes.CREATE_LIST_FAILURE]: (state) => {
-    state.error = s__('Boards|An error occurred while creating the list. Please try again.');
+  [mutationTypes.CREATE_LIST_FAILURE]: (
+    state,
+    error = s__('Boards|An error occurred while creating the list. Please try again.'),
+  ) => {
+    state.error = error;
   },
 
   [mutationTypes.RECEIVE_LABELS_REQUEST]: (state) => {

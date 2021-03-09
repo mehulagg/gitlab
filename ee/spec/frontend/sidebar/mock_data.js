@@ -86,7 +86,8 @@ export const mockMutationResponse = {
 
 export const issuableQueryResponse = {
   data: {
-    project: {
+    workspace: {
+      __typename: 'Project',
       issuable: {
         __typename: 'Issue',
         id: 'gid://gitlab/Issue/1',
@@ -109,6 +110,13 @@ export const issuableQueryResponse = {
               username: 'francina.skiles',
               webUrl: '/franc',
             },
+            {
+              id: 'gid://gitlab/User/3',
+              avatarUrl: '/avatar',
+              name: 'John Doe',
+              username: 'johndoe',
+              webUrl: '/john',
+            },
           ],
         },
         assignees: {
@@ -130,7 +138,8 @@ export const issuableQueryResponse = {
 
 export const searchQueryResponse = {
   data: {
-    issuable: {
+    workspace: {
+      __typename: 'Project',
       users: {
         nodes: [
           {
@@ -144,8 +153,8 @@ export const searchQueryResponse = {
           },
           {
             user: {
-              id: '3',
-              avatarUrl: '/avatar',
+              id: '2',
+              avatarUrl: '/avatar2',
               name: 'rookie',
               username: 'rookie',
               webUrl: 'rookie',
@@ -159,8 +168,8 @@ export const searchQueryResponse = {
 
 export const updateIssueAssigneesMutationResponse = {
   data: {
-    issueSetAssignees: {
-      issue: {
+    issuableSetAssignees: {
+      issuable: {
         id: 'gid://gitlab/Issue/1',
         iid: '1',
         assignees: {
@@ -202,7 +211,6 @@ export const updateIssueAssigneesMutationResponse = {
         },
         __typename: 'Issue',
       },
-      __typename: 'IssueSetAssigneesPayload',
     },
   },
 };

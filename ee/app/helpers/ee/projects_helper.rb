@@ -19,6 +19,7 @@ module EE
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
+        cluster_agents
         oncall_schedules
       ]
     end
@@ -56,16 +57,29 @@ module EE
 
     override :project_permissions_settings
     def project_permissions_settings(project)
-      super.merge(
+      settings = super.merge(
         requirementsAccessLevel: project.requirements_access_level
       )
+
+      if ::Feature.enabled?(:cve_id_request_button, project)
+        settings[:cveIdRequestEnabled] = project.public? && project.project_setting.cve_id_request_enabled?
+      end
+
+      settings
     end
 
     override :project_permissions_panel_data
     def project_permissions_panel_data(project)
-      super.merge(
+      panel_data = super.merge(
         requirementsAvailable: project.feature_available?(:requirements)
       )
+
+      if ::Feature.enabled?(:cve_id_request_button, project)
+        panel_data[:requestCveAvailable] = ::Gitlab.com?
+        panel_data[:cveIdRequestHelpPath] = help_page_path('user/application_security/cve_id_request')
+      end
+
+      panel_data
     end
 
     override :show_security_and_compliance_toggle?
@@ -183,6 +197,7 @@ module EE
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
         projects/threat_monitoring#alert_details
+        projects/security/policies#show
         projects/audit_events#index
       ]
     end
@@ -358,6 +373,10 @@ module EE
 
       if can?(current_user, :read_threat_monitoring, project)
         nav_tabs << :threat_monitoring
+      end
+
+      if can?(current_user, :security_orchestration_policies, project)
+        nav_tabs << :security_orchestration_policies
       end
 
       if show_audit_events?(project)

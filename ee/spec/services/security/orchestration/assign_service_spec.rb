@@ -29,7 +29,6 @@ RSpec.describe Security::Orchestration::AssignService do
       service
 
       repeated_service = described_class.new(another_project, nil, policy_project_id: policy_project.id).execute
-
       expect(repeated_service).to be_error
     end
 

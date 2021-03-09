@@ -53,7 +53,6 @@ module Projects
         {
           auto_devops_enabled: auto_devops_source?,
           auto_devops_help_page_path: help_page_path('topics/autodevops/index'),
-          create_sast_merge_request_path: project_security_configuration_sast_path(project),
           auto_devops_path: auto_devops_settings_path(project),
           can_enable_auto_devops: can_enable_auto_devops?,
           features: features,
@@ -61,7 +60,7 @@ module Projects
           latest_pipeline_path: latest_pipeline_path,
           auto_fix_enabled: autofix_enabled,
           can_toggle_auto_fix_settings: auto_fix_permission,
-          gitlab_ci_present: gitlab_ci_present?,
+          gitlab_ci_present: project.uses_default_ci_config?,
           gitlab_ci_history_path: gitlab_ci_history_path,
           auto_fix_user_path: '/' # TODO: real link will be updated with https://gitlab.com/gitlab-org/gitlab/-/issues/215669
         }
@@ -88,10 +87,6 @@ module Projects
         feature_available?(:builds, current_user) &&
           can?(current_user, :admin_project, self) &&
           !archived?
-      end
-
-      def gitlab_ci_present?
-        latest_pipeline.try(:config_path) == Gitlab::FileDetector::PATTERNS[:gitlab_ci]
       end
 
       def gitlab_ci_history_path

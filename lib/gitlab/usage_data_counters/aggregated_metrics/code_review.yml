@@ -11,6 +11,7 @@
   operator: OR
   feature_flag: usage_data_code_review_aggregation
   source: redis
+  time_frame: [7d, 28d]
   events: [
     'i_code_review_user_single_file_diffs',
     'i_code_review_user_create_mr',
@@ -46,12 +47,15 @@
     'i_code_review_user_mr_discussion_locked',
     'i_code_review_user_mr_discussion_unlocked',
     'i_code_review_user_time_estimate_changed',
-    'i_code_review_user_time_spent_changed'
+    'i_code_review_user_time_spent_changed',
+    'i_code_review_user_assignees_changed',
+    'i_code_review_user_reviewers_changed'
   ]
 - name: code_review_category_monthly_active_users
   operator: OR
   feature_flag: usage_data_code_review_aggregation
   source: redis
+  time_frame: [7d, 28d]
   events: [
     'i_code_review_user_single_file_diffs',
     'i_code_review_user_create_mr',
@@ -86,12 +90,15 @@
     'i_code_review_user_mr_discussion_locked',
     'i_code_review_user_mr_discussion_unlocked',
     'i_code_review_user_time_estimate_changed',
-    'i_code_review_user_time_spent_changed'
+    'i_code_review_user_time_spent_changed',
+    'i_code_review_user_assignees_changed',
+    'i_code_review_user_reviewers_changed'
   ]
 - name: code_review_extension_category_monthly_active_users
   operator: OR
   feature_flag: usage_data_code_review_aggregation
   source: redis
+  time_frame: [7d, 28d]
   events: [
     'i_code_review_user_vs_code_api_request'
   ]

@@ -24,6 +24,7 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
+    group_level_devops_adoption
     instance_level_devops_adoption
     issuable_default_templates
     issue_weights

@@ -19,6 +19,7 @@ module EE
       def group_analytics_navbar_links(group, current_user)
         super + [
           group_ci_cd_analytics_navbar_link(group, current_user),
+          group_devops_adoption_navbar_link(group, current_user),
           group_repository_analytics_navbar_link(group, current_user),
           contribution_analytics_navbar_link(group, current_user),
           group_insights_navbar_link(group, current_user),
@@ -71,6 +72,16 @@ module EE
           title: _('Value Stream'),
           path: 'groups/analytics/cycle_analytics#show',
           link: group_analytics_cycle_analytics_path(group)
+        )
+      end
+
+      def group_devops_adoption_navbar_link(group, current_user)
+        return unless group_sidebar_link?(:group_devops_adoption)
+
+        navbar_sub_item(
+          title: _('DevOps Adoption'),
+          path: 'groups/analytics/devops_adoption#show',
+          link: group_analytics_devops_adoption_path(group)
         )
       end
 

@@ -49,6 +49,15 @@ RSpec.describe Analytics::CycleAnalytics::ValueStreams::CreateService do
         expect(value_stream.stages.size).to eq(2)
       end
 
+      it 'calculates and sets relative_position for the stages based on the incoming stages array' do
+        incoming_stage_names = params[:stages].map { |stage| stage[:name] }
+
+        value_stream = subject.payload[:value_stream]
+        persisted_stages_sorted_by_relative_position = value_stream.stages.sort_by(&:relative_position).map(&:name)
+
+        expect(persisted_stages_sorted_by_relative_position).to eq(incoming_stage_names)
+      end
+
       context 'when the stage is invalid' do
         it 'propagates validation errors' do
           params[:stages].first[:name] = ''

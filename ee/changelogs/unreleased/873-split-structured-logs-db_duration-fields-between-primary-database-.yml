@@ -1,0 +1,5 @@
+---
+title: Differentiate metrics and logs from replica/primary databases
+merge_request: 54885
+author:
+type: changed

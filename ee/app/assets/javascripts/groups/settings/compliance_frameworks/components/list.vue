@@ -7,6 +7,7 @@ import { s__ } from '~/locale';
 
 import { DANGER, INFO } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
+import { injectIdIntoEditPath } from '../utils';
 import DeleteModal from './delete_modal.vue';
 import EmptyState from './list_empty_state.vue';
 import ListItem from './list_item.vue';
@@ -24,6 +25,10 @@ export default {
   },
   props: {
     addFrameworkPath: {
+      type: String,
+      required: true,
+    },
+    editFrameworkPath: {
       type: String,
       required: true,
     },
@@ -56,10 +61,15 @@ export default {
       update(data) {
         const nodes = data.namespace?.complianceFrameworks?.nodes;
         return (
-          nodes?.map((framework) => ({
-            ...framework,
-            parsedId: getIdFromGraphQLId(framework.id),
-          })) || []
+          nodes?.map((framework) => {
+            const parsedId = getIdFromGraphQLId(framework.id);
+
+            return {
+              ...framework,
+              parsedId,
+              editPath: injectIdIntoEditPath(this.editFrameworkPath, parsedId),
+            };
+          }) || []
         );
       },
       error(error) {
@@ -98,6 +108,9 @@ export default {
     },
   },
   methods: {
+    dismissAlertMessage() {
+      this.message = null;
+    },
     markForDeletion(framework) {
       this.markedForDeletion = framework;
       this.$refs.modal.show();
@@ -140,6 +153,7 @@ export default {
       class="gl-mt-5"
       :variant="alertVariant"
       :dismissible="alertDismissible"
+      @dismiss="dismissAlertMessage"
     >
       {{ alertMessage }}
     </gl-alert>

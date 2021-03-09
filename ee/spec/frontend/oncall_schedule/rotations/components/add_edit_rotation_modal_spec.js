@@ -1,5 +1,5 @@
-import { GlModal, GlAlert } from '@gitlab/ui';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { GlAlert, GlModal } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import AddEditRotationModal, {
@@ -18,6 +18,7 @@ import {
   createRotationResponse,
   createRotationResponseWithErrors,
 } from '../../mocks/apollo_mock';
+import mockRotation from '../../mocks/mock_rotation.json';
 
 jest.mock('~/flash');
 
@@ -102,6 +103,7 @@ describe('AddEditRotationModal', () => {
       propsData: {
         modalId: addRotationModalId,
         schedule,
+        rotation: mockRotation[0],
       },
       apolloProvider: fakeApollo,
       data() {

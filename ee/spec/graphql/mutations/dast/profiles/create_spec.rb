@@ -56,7 +56,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
             actual_url = subject[:pipeline_url]
             pipeline = Ci::Pipeline.find_by(
               project: project,
-              sha: project.repository.commit.sha,
+              sha: project.repository.commits('orphaned-branch', limit: 1)[0].id,
               source: :ondemand_dast_scan,
               config_source: :parameter_source
             )

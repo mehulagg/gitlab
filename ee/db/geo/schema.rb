@@ -63,6 +63,21 @@ ActiveRecord::Schema.define(version: 2021_02_25_200858) do
     t.index ["success"], name: "index_file_registry_on_success"
   end
 
+  create_table "group_wiki_repository_registry", force: :cascade do |t|
+    t.datetime_with_timezone "retry_at"
+    t.datetime_with_timezone "last_synced_at"
+    t.datetime_with_timezone "created_at", null: false
+    t.bigint "group_wiki_repository_id", null: false
+    t.integer "state", limit: 2, default: 0, null: false
+    t.integer "retry_count", limit: 2, default: 0
+    t.text "last_sync_failure"
+    t.boolean "force_to_redownload"
+    t.boolean "missing_on_primary"
+    t.index ["group_wiki_repository_id"], name: "index_g_wiki_repository_registry_on_group_wiki_repository_id", unique: true
+    t.index ["retry_at"], name: "index_group_wiki_repository_registry_on_retry_at"
+    t.index ["state"], name: "index_group_wiki_repository_registry_on_state"
+  end
+
   create_table "job_artifact_registry", id: :serial, force: :cascade do |t|
     t.datetime_with_timezone "created_at"
     t.datetime_with_timezone "retry_at"
