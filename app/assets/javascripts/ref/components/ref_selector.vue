@@ -208,9 +208,9 @@ export default {
         ref="searchBox"
         v-model.trim="query"
         :placeholder="i18n.searchPlaceholder"
+        autocomplete="off"
         @input="onSearchBoxInput"
         @keydown.enter.prevent="onSearchBoxEnter"
-        autocomplete="off"
       />
     </template>
 
