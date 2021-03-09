@@ -16,6 +16,15 @@ import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 export default {
+  i18n: {
+    listType: __('List type'),
+    labelListDescription: __('A label list displays issues with the selected label.'),
+    milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
+    selectLabel: __('Select label'),
+    selectMilestone: __('Select milestone'),
+    searchLabels: __('Search labels'),
+    searchMilestones: __('Search milestones'),
+  },
   columnTypes: [
     { value: ListType.label, text: __('Label') },
     { value: ListType.milestone, text: __('Milestone') },
@@ -107,11 +116,11 @@ export default {
 
     formDescription() {
       if (this.labelTypeSelected) {
-        return __('A label list displays issues with the selected label.');
+        return this.i18n.labelListDescription;
       }
 
       if (this.milestoneTypeSelected) {
-        return __('A milestone list displays issues in the selected milestone.');
+        return this.i18n.milestoneListDescription;
       }
 
       return null;
@@ -119,11 +128,11 @@ export default {
 
     searchLabel() {
       if (this.labelTypeSelected) {
-        return __('Select label');
+        return this.i18n.selectLabel;
       }
 
       if (this.milestoneTypeSelected) {
-        return __('Select milestone');
+        return this.i18n.selectMilestone;
       }
 
       return null;
@@ -131,11 +140,11 @@ export default {
 
     searchPlaceholder() {
       if (this.labelTypeSelected) {
-        return __('Search labels');
+        return this.i18n.searchLabels;
       }
 
       if (this.milestoneTypeSelected) {
-        return __('Search milestones');
+        return this.i18n.searchMilestones;
       }
 
       return null;
@@ -239,7 +248,7 @@ export default {
     <template slot="select-list-type">
       <gl-form-group
         v-if="!isEpicBoard"
-        :label="__('List type')"
+        :label="$options.i18n.listType"
         class="gl-px-5 gl-py-0 gl-mt-5"
         label-for="list-type"
       >
