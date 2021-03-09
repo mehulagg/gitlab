@@ -18,6 +18,15 @@ import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 export default {
+  i18n: {
+    listType: __('List type'),
+    labelListDescription: __('A label list displays issues with the selected label.'),
+    milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
+    selectLabel: __('Select label'),
+    selectMilestone: __('Select milestone'),
+    searchLabels: __('Search labels'),
+    searchMilestones: __('Search milestones'),
+  },
   columnTypes: [
     { value: ListType.label, text: __('Label') },
     { value: ListType.assignee, text: __('Assignee') },
@@ -40,7 +49,7 @@ export default {
   data() {
     return {
       selectedId: null,
-      columnType: 'label',
+      columnType: ListType.label,
     };
   },
   computed: {
@@ -51,9 +60,8 @@ export default {
       'assigneesLoading',
       'milestones',
       'milestonesLoading',
-      'isEpicBoard',
     ]),
-    ...mapGetters(['getListByTypeId', 'shouldUseGraphQL']),
+    ...mapGetters(['getListByTypeId', 'shouldUseGraphQL', 'isEpicBoard']),
 
     items() {
       if (this.labelTypeSelected) {
@@ -135,7 +143,7 @@ export default {
 
     formDescription() {
       if (this.labelTypeSelected) {
-        return __('A label list displays issues with the selected label.');
+        return this.$options.i18n.labelListDescription;
       }
 
       if (this.assigneeTypeSelected) {
@@ -143,7 +151,7 @@ export default {
       }
 
       if (this.milestoneTypeSelected) {
-        return __('A milestone list displays issues in the selected milestone.');
+        return this.$options.i18n.milestoneListDescription;
       }
 
       return null;
@@ -151,7 +159,7 @@ export default {
 
     searchLabel() {
       if (this.labelTypeSelected) {
-        return __('Select label');
+        return this.$options.i18n.selectLabel;
       }
 
       if (this.assigneeTypeSelected) {
@@ -159,7 +167,7 @@ export default {
       }
 
       if (this.milestoneTypeSelected) {
-        return __('Select milestone');
+        return this.$options.i18n.selectMilestone;
       }
 
       return null;
@@ -167,7 +175,7 @@ export default {
 
     searchPlaceholder() {
       if (this.labelTypeSelected) {
-        return __('Search labels');
+        return this.$options.i18n.searchLabels;
       }
 
       if (this.assigneeTypeSelected) {
@@ -175,7 +183,7 @@ export default {
       }
 
       if (this.milestoneTypeSelected) {
-        return __('Search milestones');
+        return this.$options.i18n.searchMilestones;
       }
 
       return null;
@@ -221,11 +229,13 @@ export default {
         // eslint-disable-next-line @gitlab/require-i18n-strings
         this.createList({ [`${this.columnType}Id`]: this.selectedId });
       } else {
+        const { length } = boardsStore.state.lists;
+        const position = this.hideClosed ? length - 1 : length - 2;
         const listObj = {
           // eslint-disable-next-line @gitlab/require-i18n-strings
           [`${this.columnType}Id`]: getIdFromGraphQLId(this.selectedId),
           title: this.selectedItem.title,
-          position: boardsStore.state.lists.length - 2,
+          position,
           list_type: this.columnType,
         };
 
@@ -281,7 +291,7 @@ export default {
     <template slot="select-list-type">
       <gl-form-group
         v-if="!isEpicBoard"
-        :label="__('List type')"
+        :label="$options.i18n.listType"
         class="gl-px-5 gl-py-0 gl-mt-5"
         label-for="list-type"
       >
@@ -310,13 +320,17 @@ export default {
     </template>
 
     <template slot="items">
-      <gl-form-radio-group v-model="selectedId" class="gl-overflow-y-auto gl-px-5 gl-pt-3">
+      <gl-form-radio-group
+        v-if="items.length > 0"
+        v-model="selectedId"
+        class="gl-overflow-y-auto gl-px-5 gl-pt-3"
+      >
         <label
           v-for="item in items"
           :key="item.id"
           class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
         >
-          <gl-form-radio :value="item.id" class="gl-mb-0 gl-mr-3" />
+          <gl-form-radio :value="item.id" class="gl-mb-0" />
           <span
             v-if="labelTypeSelected"
             class="dropdown-label-box gl-top-0"

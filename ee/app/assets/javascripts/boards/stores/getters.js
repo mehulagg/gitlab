@@ -1,5 +1,5 @@
 import { find } from 'lodash';
-import { ListType } from '~/boards/constants';
+import { issuableTypes, ListType } from '~/boards/constants';
 import gettersCE from '~/boards/stores/getters';
 
 export default {
@@ -42,6 +42,10 @@ export default {
 
   getUnassignedIssues: (state, getters) => (listId) => {
     return getters.getBoardItemsByList(listId).filter((i) => Boolean(i.epic) === false);
+  },
+
+  isEpicBoard: (state) => {
+    return state.issuableType === issuableTypes.epic;
   },
 
   shouldUseGraphQL: (state) => {

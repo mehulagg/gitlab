@@ -79,6 +79,32 @@ RSpec.describe 'epic boards', :js do
     end
   end
 
+  context 'when user can admin epic boards' do
+    before do
+      stub_licensed_features(epics: true)
+      group.add_maintainer(user)
+      sign_in(user)
+      visit_epic_boards_page
+    end
+
+    it "shows 'Create list' button" do
+      expect(page).to have_selector('[data-testid="boards-create-list"]')
+    end
+  end
+
+  context 'when user cannot admin epic boards' do
+    before do
+      stub_licensed_features(epics: true)
+      group.add_guest(user)
+      sign_in(user)
+      visit_epic_boards_page
+    end
+
+    it "does not show 'Create list'" do
+      expect(page).not_to have_selector('[data-testid="boards-create-list"]')
+    end
+  end
+
   def visit_epic_boards_page
     visit group_epic_boards_path(group)
     wait_for_requests

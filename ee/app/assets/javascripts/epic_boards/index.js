@@ -12,6 +12,7 @@ import toggleLabels from 'ee_component/boards/toggle_labels';
 import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
+import { issuableTypes } from '~/boards/constants';
 import mountMultipleBoardsSwitcher from '~/boards/mount_multiple_boards_switcher';
 import store from '~/boards/stores';
 import createDefaultClient from '~/lib/graphql';
@@ -84,7 +85,7 @@ export default () => {
         fullPath: $boardApp.dataset.fullPath,
         boardType: this.parent,
         disabled: this.disabled,
-        isEpicBoard: true,
+        issuableType: issuableTypes.epic,
         boardConfig: {
           milestoneId: parseInt($boardApp.dataset.boardMilestoneId, 10),
           milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
@@ -131,6 +132,5 @@ export default () => {
   mountMultipleBoardsSwitcher({
     fullPath: $boardApp.dataset.fullPath,
     rootPath: $boardApp.dataset.boardsEndpoint,
-    isEpicBoard: true,
   });
 };

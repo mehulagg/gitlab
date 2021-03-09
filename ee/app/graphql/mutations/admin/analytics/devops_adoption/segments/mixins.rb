@@ -13,11 +13,7 @@ module Mutations
 
               def ready?(**args)
                 unless License.feature_available?(:instance_level_devops_adoption)
-                  raise ::Gitlab::Graphql::Errors::ResourceNotAvailable, FEATURE_UNAVAILABLE_MESSAGE
-                end
-
-                unless current_user&.admin?
-                  raise Gitlab::Graphql::Errors::ResourceNotAvailable, ADMIN_MESSAGE
+                  raise_resource_not_available_error!(FEATURE_UNAVAILABLE_MESSAGE)
                 end
 
                 super
@@ -32,6 +28,16 @@ module Mutations
                   segment: response.success? ? response.payload.fetch(:segment) : nil,
                   errors: errors_on_object(segment)
                 }
+              end
+
+              def with_authorization_handler
+                yield
+              rescue ::Analytics::DevopsAdoption::Segments::AuthorizationError => e
+                handle_unauthorized!(e)
+              end
+
+              def handle_unauthorized!(_exception)
+                raise_resource_not_available_error!(ADMIN_MESSAGE)
               end
             end
           end

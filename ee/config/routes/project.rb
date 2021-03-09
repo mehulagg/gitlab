@@ -127,6 +127,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :incident_management, path: '' do
           resources :oncall_schedules, only: [:index], path: 'oncall_schedules'
         end
+
+        resources :cluster_agents, only: [:show], param: :name
       end
       # End of the /-/ scope.
 

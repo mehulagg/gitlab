@@ -118,13 +118,17 @@ export default {
     </template>
 
     <template slot="items">
-      <gl-form-radio-group v-model="selectedId" class="gl-overflow-y-auto gl-px-5 gl-pt-3">
+      <gl-form-radio-group
+        v-if="labels.length > 0"
+        v-model="selectedId"
+        class="gl-overflow-y-auto gl-px-5 gl-pt-3"
+      >
         <label
           v-for="label in labels"
           :key="label.id"
           class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
         >
-          <gl-form-radio :value="label.id" class="gl-mb-0 gl-mr-3" />
+          <gl-form-radio :value="label.id" class="gl-mb-0" />
           <span
             class="dropdown-label-box gl-top-0"
             :style="{

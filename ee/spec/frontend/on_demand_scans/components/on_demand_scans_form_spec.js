@@ -528,9 +528,9 @@ describe('OnDemandScansForm', () => {
   describe('site profile summary', () => {
     const [authEnabledProfile] = siteProfiles;
 
-    const selectSiteProfile = (profile) => {
+    const selectSiteProfile = async (profile) => {
       subject.find(SiteProfileSelector).vm.$emit('input', profile.id);
-      return subject.vm.$nextTick();
+      await subject.vm.$nextTick();
     };
 
     beforeEach(() => {

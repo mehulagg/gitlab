@@ -1717,6 +1717,35 @@ RSpec.describe Project do
     end
   end
 
+  describe '#security_reports_up_to_date_for_ref?' do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:merge_request) do
+      create(:ee_merge_request,
+             source_project: project,
+             source_branch: 'feature1',
+             target_branch: project.default_branch)
+    end
+
+    let_it_be(:pipeline) do
+      create(:ee_ci_pipeline,
+             :with_sast_report,
+             project: project,
+             ref: merge_request.target_branch)
+    end
+
+    subject { project.security_reports_up_to_date_for_ref?(merge_request.target_branch) }
+
+    context 'when the target branch security reports are up to date' do
+      it { is_expected.to be true }
+    end
+
+    context 'when the target branch security reports are out of date' do
+      let_it_be(:bad_pipeline) { create(:ee_ci_pipeline, :failed, project: project, ref: merge_request.target_branch) }
+
+      it { is_expected.to be false }
+    end
+  end
+
   describe '#protected_environment_by_name' do
     let_it_be(:project) { create(:project) }
 

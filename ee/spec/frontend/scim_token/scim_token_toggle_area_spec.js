@@ -19,7 +19,6 @@ jest.mock('ee/saml_providers/scim_token_service', () => {
 describe('SCIMTokenToggleArea', () => {
   const FIXTURE = 'groups/saml_providers/show.html';
   let scimTokenToggleArea;
-  preloadFixtures(FIXTURE);
 
   beforeEach(() => {
     loadFixtures(FIXTURE);

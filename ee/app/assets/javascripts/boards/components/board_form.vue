@@ -2,14 +2,14 @@
 // This is a false violation of @gitlab/no-runtime-template-compiler, since it
 // extends a valid Vue single file component.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import BoardFormFoss from '~/boards/components/board_form.vue';
 import createEpicBoardMutation from '../graphql/epic_board_create.mutation.graphql';
 
 export default {
   extends: BoardFormFoss,
   computed: {
-    ...mapState(['isEpicBoard']),
+    ...mapGetters(['isEpicBoard']),
     epicBoardCreateQuery() {
       return createEpicBoardMutation;
     },

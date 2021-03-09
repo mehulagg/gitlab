@@ -120,7 +120,7 @@ describe('DevopsAdoptionDeleteModal', () => {
         expect(mutate).toHaveBeenCalledWith(
           expect.objectContaining({
             variables: {
-              id: devopsAdoptionSegmentsData.nodes[0].id,
+              id: [devopsAdoptionSegmentsData.nodes[0].id],
             },
           }),
         );

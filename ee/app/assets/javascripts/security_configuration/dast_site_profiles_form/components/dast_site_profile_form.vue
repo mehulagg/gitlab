@@ -56,7 +56,7 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = '', requestHeaders = '' } =
+    const { name = '', targetUrl = '', excludedUrls = '', requestHeaders = '', auth = {} } =
       this.siteProfile || {};
 
     const form = {
@@ -76,7 +76,7 @@ export default {
 
     return {
       form,
-      authSection: {},
+      authSection: { fields: auth },
       initialFormValues: serializeFormObject(form.fields),
       isLoading: false,
       hasAlert: false,
@@ -126,7 +126,7 @@ export default {
     onSubmit() {
       const isAuthEnabled =
         this.glFeatures.securityDastSiteProfilesAdditionalFields &&
-        this.authSection.fields.authEnabled.value;
+        this.authSection.fields.enabled.value;
 
       this.form.showValidation = true;
 
@@ -143,7 +143,7 @@ export default {
           fullPath: this.fullPath,
           ...(this.isEdit ? { id: this.siteProfile.id } : {}),
           ...serializeFormObject(this.form.fields),
-          ...(isAuthEnabled ? serializeFormObject(this.authSection.fields) : {}),
+          auth: isAuthEnabled ? serializeFormObject(this.authSection.fields) : {},
         },
       };
 

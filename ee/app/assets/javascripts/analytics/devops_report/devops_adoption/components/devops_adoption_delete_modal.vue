@@ -63,7 +63,7 @@ export default {
         } = await this.$apollo.mutate({
           mutation: deleteDevopsAdoptionSegmentMutation,
           variables: {
-            id,
+            id: [id],
           },
           update(store) {
             deleteSegmentFromCache(store, id);

@@ -8,6 +8,8 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   let(:project) { create(:project, :repository) }
   let(:environment) { create(:environment, project: project) }
 
+  it { is_expected.to have_many(:dora_daily_metrics) }
+
   describe '.deployed_to_cluster' do
     let!(:environment) { create(:environment) }
 

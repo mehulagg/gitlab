@@ -2,7 +2,7 @@ import { GlSprintf, GlLink } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { useFakeDate } from 'helpers/fake_date';
+import { useFixturesFakeDate } from 'helpers/fake_date';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
@@ -21,8 +21,7 @@ const last90DaysData = getJSONFixture(
 );
 
 describe('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue', () => {
-  // Set the current Date to the same value that is used when generating the fixtures
-  useFakeDate(2015, 6, 3, 10);
+  useFixturesFakeDate();
 
   let DeploymentFrequencyCharts;
 
