@@ -170,7 +170,7 @@ export default {
             type="number"
             class="gl-w-12 gl-mr-3"
             min="1"
-            :value="1"
+            :value="form.rotationLength.length"
             @input="$emit('update-rotation-form', { type: 'rotationLength.length', value: $event })"
           />
           <gl-dropdown :text="form.rotationLength.unit.toLowerCase()">

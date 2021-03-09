@@ -279,6 +279,7 @@ export default {
       :modal-id="$options.editRotationModalId"
       :rotation="rotationToUpdate"
       is-edit-mode
+      @fetchRotationShifts="fetchRotationShifts"
     />
   </div>
 </template>
