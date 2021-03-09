@@ -38,9 +38,13 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Update do
       context 'when OncallRotation::UpdateService responds with success' do
         it 'returns the on-call rotation with no errors' do
           expect(resolve).to match(
-            oncall_rotation: ::IncidentManagement::OncallRotation.last!,
+            oncall_rotation: rotation.reload,
             errors: be_empty
           )
+
+          expect(rotation).to have_attributes(args.except(:participants, :rotation_length))
+          expect(rotation.length).to eq(args[:rotation_length][:length])
+          expect(rotation.length_unit).to eq(IncidentManagement::OncallRotation.length_units.key(args[:rotation_length][:unit]))
         end
 
         it 'adds the participant to the rotation' do

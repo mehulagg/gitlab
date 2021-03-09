@@ -54,7 +54,19 @@ module Mutations
         def edit_service_params(schedule, participants, args)
           parsed_service_params = parsed_params(schedule, participants, args)
 
-          args.slice(:name).merge(parsed_service_params.slice(*args.keys))
+          args_to_update = parsed_service_params.slice(*args.keys)
+
+          if args[:rotation_length]
+            args_to_update[:length] = parsed_service_params[:length]
+            args_to_update[:length_unit] = parsed_service_params[:length_unit]
+          end
+
+          if args[:active_period]
+            args_to_update[:active_period_start] = parsed_service_params[:active_period_start]
+            args_to_update[:active_period_end] = parsed_service_params[:active_period_end]
+          end
+
+          args.slice(:name).merge(args_to_update)
         end
 
         def find_object(id:)

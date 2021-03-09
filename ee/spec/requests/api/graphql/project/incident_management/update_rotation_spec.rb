@@ -48,7 +48,7 @@ RSpec.describe 'getting Incident Management on-call shifts' do
   subject(:resolve) { post_graphql_mutation(mutation, current_user: current_user) }
 
   def mutation_response
-     graphql_mutation_response(:oncall_rotation_update)
+    graphql_mutation_response(:oncall_rotation_update)
   end
 
   context 'updating name only' do
@@ -109,7 +109,7 @@ RSpec.describe 'getting Incident Management on-call shifts' do
 
   context 'errors' do
     context 'user cannot be found' do
-      let(:params) { { participants: [ { username: 'unknown' }] } }
+      let(:params) { { participants: [{ username: 'unknown' }] } }
 
       it 'raises an error' do
         resolve
@@ -129,7 +129,7 @@ RSpec.describe 'getting Incident Management on-call shifts' do
     {
       username: participant.user.username,
       colorWeight: 'WEIGHT_500',
-      colorPalette: 'BLUE',
+      colorPalette: 'BLUE'
     }
   end
 
@@ -138,7 +138,7 @@ RSpec.describe 'getting Incident Management on-call shifts' do
       {
         username: participant.user.username,
         colorWeight: "WEIGHT_#{participant.color_weight}",
-        colorPalette: participant.color_palette.upcase,
+        colorPalette: participant.color_palette.upcase
       }
     end
   end
