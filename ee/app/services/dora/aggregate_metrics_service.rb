@@ -32,7 +32,7 @@ module Dora
         return error(_('The after date must be ealier than the before date.'), :bad_request)
       end
 
-      unless project?
+      unless project? || group?
         return error(_('Unsupported container level.'), :bad_request)
       end
 
@@ -59,11 +59,32 @@ module Dora
     end
 
     def environments
-      Environment.for_project(container).for_tier(environment_tier)
+      Environment.for_project(target_projects).for_tier(environment_tier)
+    end
+
+    def target_projects
+      if project?
+        [container]
+      elsif group?
+        # The actor definitely has read permission in all subsequent projects of the group by the following reasons:
+        # - DORA metrics can be read by reporter (or above) at project-level.
+        # - With `read_dora4_analytics` permission check, we make sure that the
+        #   user is at-least reporter role at group-level.
+        # - In the subsequent projects, the assigned role at the group-level
+        #   can't be lowered. For example, if the user is reporter at group-level,
+        #   the user can be developer in subsequent projects, but can't be guest.
+        container.all_projects
+      else
+        []
+      end
     end
 
     def project?
       container.is_a?(Project)
+    end
+
+    def group?
+      container.is_a?(Group)
     end
 
     def after

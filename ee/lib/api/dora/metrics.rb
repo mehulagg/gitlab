@@ -24,6 +24,25 @@ module API
         end
       end
 
+      params do
+        requires :id, type: String, desc: 'The ID of the group'
+      end
+      resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+        namespace ':id/dora/metrics' do
+          desc 'Fetch the group-level DORA metrics'
+          params do
+            requires :metric, type: String, desc: 'The metric type.'
+            optional :after, type: Date, desc: 'Date range to start from.'
+            optional :before, type: Date, desc: 'Date range to end at.'
+            optional :interval, type: String, desc: "The bucketing interval."
+            optional :environment_tier, type: String, desc: "The tier of the environment."
+          end
+          get do
+            fetch!(user_group)
+          end
+        end
+      end
+
       helpers do
         def fetch!(container)
           not_found! unless ::Feature.enabled?(:dora_daily_metrics, container, default_enabled: :yaml)
