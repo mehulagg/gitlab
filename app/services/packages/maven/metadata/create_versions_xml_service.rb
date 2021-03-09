@@ -48,7 +48,7 @@ module Packages
           version_xml_nodes.remove
 
           versions_from_database.each do |version|
-            versions_xml_node.add_child(version_node_for(version))
+            versions_xml_node.add_child(xml_node('version', version))
           end
           true
         end
@@ -120,10 +120,6 @@ module Packages
             versioning_xml_node.xpath(XPATH_LAST_UPDATED)
                                .first
           end
-        end
-
-        def version_node_for(version)
-          Nokogiri::XML::Node.new('version', xml_doc).tap { |node| node.content = version }
         end
 
         def versions_from_xml
