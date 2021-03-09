@@ -141,7 +141,7 @@ page.
 
 GitLab has released Browserker, a new crawler designed to effectively crawl Single Page Applications and web applications that make heavy use of JavaScript.
 
-See the [documentation](./browserker.md) for set up instructions. 
+See the [documentation](browserker.md) for set up instructions. 
 
 ## Deployment options
 
