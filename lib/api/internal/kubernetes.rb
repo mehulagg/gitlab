@@ -61,6 +61,7 @@ module API
         namespace 'kubernetes' do
           before do
             check_agent_token
+            agent_token.heartbeat
           end
 
           desc 'Gets agent info' do
