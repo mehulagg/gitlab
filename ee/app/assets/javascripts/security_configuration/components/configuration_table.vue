@@ -4,6 +4,9 @@ import { s__, sprintf } from '~/locale';
 import FeatureStatus from './feature_status.vue';
 import ManageFeature from './manage_feature.vue';
 
+const borderClasses = 'gl-border-b-1! gl-border-b-solid! gl-border-gray-100!';
+const thClass = `gl-text-gray-900 gl-bg-transparent! ${borderClasses}`;
+
 export default {
   components: {
     GlLink,
@@ -32,30 +35,6 @@ export default {
       default: '',
     },
   },
-  computed: {
-    fields() {
-      const borderClasses = 'gl-border-b-1! gl-border-b-solid! gl-border-gray-100!';
-      const thClass = `gl-text-gray-900 gl-bg-transparent! ${borderClasses}`;
-
-      return [
-        {
-          key: 'description',
-          label: s__('SecurityConfiguration|Security Control'),
-          thClass,
-        },
-        {
-          key: 'status',
-          label: s__('SecurityConfiguration|Status'),
-          thClass,
-        },
-        {
-          key: 'manage',
-          label: s__('SecurityConfiguration|Manage'),
-          thClass,
-        },
-      ];
-    },
-  },
   methods: {
     getFeatureDocumentationLinkLabel(item) {
       return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
@@ -63,13 +42,30 @@ export default {
       });
     },
   },
+  fields: [
+    {
+      key: 'description',
+      label: s__('SecurityConfiguration|Security Control'),
+      thClass,
+    },
+    {
+      key: 'status',
+      label: s__('SecurityConfiguration|Status'),
+      thClass,
+    },
+    {
+      key: 'manage',
+      label: s__('SecurityConfiguration|Manage'),
+      thClass,
+    },
+  ],
 };
 </script>
 
 <template>
   <gl-table
     :items="features"
-    :fields="fields"
+    :fields="$options.fields"
     stacked="md"
     :tbody-tr-attr="{ 'data-testid': 'security-scanner-row' }"
   >
