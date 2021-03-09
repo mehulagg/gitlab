@@ -24,12 +24,7 @@ describe('SubscriptionTable component', () => {
   const findRenewButton = () => wrapper.findByTestId('renew-button');
   const findUpgradeButton = () => wrapper.findByTestId('upgrade-button');
 
-  const createComponentWithStore = ({
-    props = {},
-    featureFlags = {},
-    provide = {},
-    state = {},
-  } = {}) => {
+  const createComponentWithStore = ({ props = {}, provide = {}, state = {} } = {}) => {
     store = new Vuex.Store(initialStore());
     jest.spyOn(store, 'dispatch').mockImplementation();
 
@@ -42,9 +37,6 @@ describe('SubscriptionTable component', () => {
           namespaceName,
           planName,
           ...provide,
-          glFeatures: {
-            ...featureFlags,
-          },
         },
         propsData: props,
       }),

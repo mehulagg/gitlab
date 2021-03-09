@@ -4,7 +4,6 @@ import { escape } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SubscriptionTableRow from './subscription_table_row.vue';
 
 const createButtonProps = (text, href, testId) => ({ text, href, testId });
@@ -16,7 +15,6 @@ export default {
     GlLoadingIcon,
     SubscriptionTableRow,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     planUpgradeHref: {
       default: '',
