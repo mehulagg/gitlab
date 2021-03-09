@@ -206,18 +206,61 @@ RSpec.describe Tooling::Danger::Helper do
 
   describe '#changes_by_category' do
     let(:added_files) { %w[foo foo.md foo.rb foo.js] }
-    let(:modified_files) { %w[db/migrate/foo lib/gitlab/database/foo.rb] }
     let(:renamed_files) { [{ before: '', after: 'qa/foo' }, { before: '', after: 'ee/changelogs/foo.yml' }] }
-
+    let(:modified_files) do
+      [
+        "db/migrate/foo",
+        "lib/gitlab/database/foo.rb",
+        "ee/config/metrics/counts_7d/20210216174919_g_analytics_issues_weekly.yml",
+        "lib/gitlab/usage_data_counters/aggregated_metrics/common.yml",
+        "lib/gitlab/usage_data_counters/hll_redis_counter.rb",
+        "doc/development/usage_ping/dictionary.md",
+        "lib/gitlab/tracking.rb",
+        "spec/lib/gitlab/tracking_spec.rb",
+        "app/helpers/tracking_helper.rb",
+        "spec/helpers/tracking_helper_spec.rb",
+        "lib/generators/rails/usage_metric_definition_generator.rb",
+        "spec/lib/generators/usage_metric_definition_generator_spec.rb",
+        "config/metrics/schema.json",
+        "app/assets/javascripts/tracking.js",
+        "spec/frontend/tracking_spec.js"
+      ]
+    end
+    
     it 'categorizes changed files' do
       expect(helper.changes_by_category).to eq(
-        backend: %w[foo.rb],
         database: %w[db/migrate/foo lib/gitlab/database/foo.rb],
-        frontend: %w[foo.js],
+        docs: %w[doc/development/usage_ping/dictionary.md],
+        frontend: %w[app/assets/javascripts/tracking.js foo.js spec/frontend/tracking_spec.js],
         migration: %w[db/migrate/foo],
         none: %w[ee/changelogs/foo.yml foo.md],
         qa: %w[qa/foo],
-        unknown: %w[foo]
+        unknown: %w[foo],
+        backend: [
+          "app/helpers/tracking_helper.rb",
+          "foo.rb",
+          "lib/generators/rails/usage_metric_definition_generator.rb",
+          "lib/gitlab/tracking.rb",
+          "lib/gitlab/usage_data_counters/hll_redis_counter.rb",
+          "spec/helpers/tracking_helper_spec.rb",
+          "spec/lib/generators/usage_metric_definition_generator_spec.rb",
+          "spec/lib/gitlab/tracking_spec.rb",
+        ],
+        product_intelligence: [
+          "app/assets/javascripts/tracking.js",
+          "app/helpers/tracking_helper.rb",
+          "config/metrics/schema.json",
+          "doc/development/usage_ping/dictionary.md",
+          "ee/config/metrics/counts_7d/20210216174919_g_analytics_issues_weekly.yml",
+          "lib/generators/rails/usage_metric_definition_generator.rb",
+          "lib/gitlab/tracking.rb",
+          "lib/gitlab/usage_data_counters/aggregated_metrics/common.yml",
+          "lib/gitlab/usage_data_counters/hll_redis_counter.rb",
+          "spec/frontend/tracking_spec.js",
+          "spec/helpers/tracking_helper_spec.rb",
+          "spec/lib/generators/usage_metric_definition_generator_spec.rb",
+          "spec/lib/gitlab/tracking_spec.rb",
+        ]
       )
     end
   end
