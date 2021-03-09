@@ -105,3 +105,9 @@ element.appendChild(sanitize(unsafeHtml));
 
 This `sanitize` function takes the same configuration as the
 original.
+
+### Fixing Security Issues
+
+After fixing a security issue it's important to write specs to ensure that we don't introduce regressions that could potentially reintroduce the security issue. On the other hand, it's also important when working on a feature/bug fix/refactor to ensure that we don't remove specs to catch and test security fixes. 
+
+We should mark specs with `#security` in either the descibe or it blocks to communicate to the engineer reading the code that by removing these specs could have severe consequences down the road, and you are removing code that could catch a reintroduction of a security issue.
