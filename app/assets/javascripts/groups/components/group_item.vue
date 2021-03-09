@@ -1,8 +1,9 @@
 <script>
 /* eslint-disable vue/no-v-html */
 import { GlLoadingIcon, GlBadge, GlTooltipDirective } from '@gitlab/ui';
-import { visitUrl } from '../../lib/utils/url_utility';
-import identicon from '../../vue_shared/components/identicon.vue';
+import { visitUrl } from '~/lib/utils/url_utility';
+import identicon from '~/vue_shared/components/identicon.vue';
+import UserAccessRoleBadge from '~/vue_shared/components/user_access_role_badge.vue';
 import { VISIBILITY_TYPE_ICON, GROUP_VISIBILITY_TYPE } from '../constants';
 import eventHub from '../event_hub';
 
@@ -19,6 +20,7 @@ export default {
   components: {
     GlBadge,
     GlLoadingIcon,
+    UserAccessRoleBadge,
     identicon,
     itemCaret,
     itemTypeIcon,
@@ -140,22 +142,23 @@ export default {
               data-testid="group-name"
               :href="group.relativePath"
               :title="group.fullName"
-              class="no-expand gl-mt-3 gl-mr-3 gl-text-gray-900!"
+              class="no-expand gl-mr-3 gl-mt-3 gl-text-gray-900!"
               :itemprop="microdata.nameItemprop"
-              >{{
+            >
+              {{
                 // ending bracket must be by closing tag to prevent
                 // link hover text-decoration from over-extending
                 group.name
-              }}</a
-            >
+              }}
+            </a>
             <item-stats-value
               :icon-name="visibilityIcon"
               :title="visibilityTooltip"
-              css-class="item-visibility d-inline-flex align-items-center gl-mt-3 gl-mr-2 text-secondary"
+              css-class="item-visibility gl-display-inline-flex gl-align-items-center gl-mr-3 gl-mt-3 text-secondary"
             />
-            <span v-if="group.permission" class="user-access-role gl-mt-3">
+            <user-access-role-badge v-if="group.permission" class="gl-mt-3">
               {{ group.permission }}
-            </span>
+            </user-access-role-badge>
           </div>
           <div v-if="group.description" class="description">
             <span
