@@ -295,6 +295,16 @@ module EE
       trial? && trial_ends_on.present? && trial_ends_on >= Date.today
     end
 
+    def trial_extended?
+      false
+      # trial_extension_flag && trial_extension_flag > 0
+    end
+
+    def can_extend?
+      trial_active? && !trial_extended?
+      false
+    end
+
     def never_had_trial?
       trial_ends_on.nil?
     end

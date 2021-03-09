@@ -286,4 +286,25 @@ RSpec.describe TrialsController do
       it { is_expected.not_to set_confirm_warning_for(user.email) }
     end
   end
+
+  describe '#extend_trial' do
+    let_it_be(:namespace) { create(:group, path: 'namespace-test') }
+    let_it_be(:today) { Date.today }
+    let_it_be(:gitlab_subscription) { create(:gitlab_subscription, trial: true, trial_starts_on: today - 1.day, trial_ends_on: today + 1.day, namespace: namespace) }
+
+    let(:put_params) { { namespace_id: namespace.id.to_s } }
+
+    subject do
+      put :extend_trial, params: put_params
+      response
+    end
+
+    before do
+      namespace.add_owner(user)
+    end
+
+    context 'extends trial' do
+      it { is_expected.to have_gitlab_http_status(:ok) }
+    end
+  end
 end

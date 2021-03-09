@@ -8,12 +8,27 @@ class TrialsController < ApplicationController
   before_action :check_if_gl_com_or_dev
   before_action :authenticate_user!
   before_action :find_or_create_namespace, only: :apply
+  before_action :find_namespace, only: :extend_trial
+  before_action :authenticate_owner!, only: :extend_trial
 
   feature_category :purchase
 
   def new
     record_experiment_user(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
     record_experiment_user(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
+  end
+
+  def extend_trial
+    require 'pry'
+    binding.pry
+
+    render_403 && return unless @namespace.can_extend?
+
+    if @namespace.gitlab_subscription.extend_trial
+      head 200
+    else
+      render_403 #403? or other code? error message?
+    end
   end
 
   def select
@@ -67,6 +82,11 @@ class TrialsController < ApplicationController
     redirect_to new_trial_registration_path, alert: I18n.t('devise.failure.unauthenticated')
   end
 
+
+  def authenticate_owner!
+    render_403 unless @namespace.owners.include?(current_user)
+  end
+
   def company_params
     params.permit(:company_name, :company_size, :first_name, :last_name, :phone_number, :number_of_users, :country)
           .merge(extra_params)
@@ -98,6 +118,17 @@ class TrialsController < ApplicationController
                    current_user.namespaces.find_by_id(params[:namespace_id])
                  elsif can_create_group?
                    create_group
+                 end
+
+    render_404 unless @namespace
+  end
+
+  def find_namespace
+    require 'pry'
+    binding.pry
+
+    @namespace = if find_namespace?
+                   current_user.namespaces.find_by_id(params[:namespace_id])
                  end
 
     render_404 unless @namespace

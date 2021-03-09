@@ -123,6 +123,13 @@ class GitlabSubscription < ApplicationRecord
     (trial_days_used / trial_duration.to_f * 100).round(decimal_places)
   end
 
+  def extend_trial
+    self.trial_ends_on += 30
+    # self.trial_extension_flag = 1
+
+    self.save!
+  end
+
   private
 
   def seats_in_use_now
