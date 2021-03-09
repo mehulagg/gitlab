@@ -22,7 +22,10 @@ View pipeline duration history:
 
 ![Pipeline duration](img/pipelines_duration_chart.png)
 
-## DORA4 Metrics
+## DevOps Research and Assessment (DORA) key metrics **(ULTIMATE)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/275991) in GitLab 13.7.
+> - Support [Lead time for changes]() in GitLab 13.10.
 
 Customer experience is a key metric. Users want to measure platform stability and other
 post-deployment performance KPIs, and set targets for customer behavior, experience, and financial
@@ -41,9 +44,18 @@ performance indicators for software development teams:
 - Time to restore service: How long it takes an organization to recover from a failure in
   production.
 
-GitLab plans to add support for all the DORA4 metrics at the project and group levels. GitLab added
-the first metric, deployment frequency, at the project and group scopes for [CI/CD charts](ci_cd_analytics.md#deployment-frequency-charts),
-the [Project API]( ../../api/dora4_project_analytics.md), and the [Group API]( ../../api/dora4_group_analytics.md).
+### Supported metrics in GitLab
+
+| Level           | Metric name               | API                                  | Chart (UI)                                      | Comment                                                                               |
+| --------------- | -----------               | ---------------                      | ----------                                      | -------                                                                               |
+| Project-level   | `deployment_frequency`    | [13.7 ~](../../api/dora/metrics.md)  | [13.8 ~](#deployment-frequency-charts-ultimate) | The [old API endopint](../../api/dora4_project_analytics.md) was deprecated in 13.10. |
+| Group-level     | `deployment_frequency`    | [13.10 ~](../../api/dora/metrics.md) | To be supported  |                                                                                       |
+| Project-level   | `lead_time_for_changes`   | [13.10 ~](../../api/dora/metrics.md) | To be supported  |                                                                                       |
+| Group-level     | `lead_time_for_changes`   | [13.10 ~](../../api/dora/metrics.md) | To be supported  |                                                                                       |
+| Project-level   | `change_failure_rate`     | To be supported                      | To be supported  |                                                                                       |
+| Group-level     | `change_failure_rate`     | To be supported                      | To be supported  |                                                                                       |
+| Project-level   | `time_to_restore_service` | To be supported                      | To be supported  |                                                                                       |
+| Group-level     | `time_to_restore_service` | To be supported                      | To be supported  |                                                                                       |
 
 ## Deployment frequency charts **(ULTIMATE)**
 
