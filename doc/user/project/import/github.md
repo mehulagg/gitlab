@@ -51,7 +51,7 @@ The steps you take depend on whether you are importing from GitHub.com or GitHub
 - If you're importing from GitHub Enterprise to your self-managed GitLab instance, you must first enable
   [GitHub integration](../../../integration/github.md).
   - To import projects from GitHub Enterprise to GitLab.com, use the [Import API](../../../api/import.md).
-- If you're importing from GitHub.com to your self-managed GitLab instance, you do not need to set up GitHub integration.
+- If you're importing from GitHub.com to your self-managed GitLab instance, you do not need to set up GitHub integration. You can use the [Import API](../../../api/import.md).
 
 ## How it works
 
