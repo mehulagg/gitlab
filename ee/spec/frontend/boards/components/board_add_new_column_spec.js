@@ -52,6 +52,7 @@ describe('Board card layout', () => {
           getters: {
             shouldUseGraphQL: () => shouldUseGraphQL,
             getListByTypeId: () => getListByTypeId,
+            isEpicBoard: () => false,
           },
           state: {
             labels,

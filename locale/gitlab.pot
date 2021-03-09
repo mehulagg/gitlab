@@ -1932,6 +1932,9 @@ msgstr ""
 msgid "Add to Slack"
 msgstr ""
 
+msgid "Add to board"
+msgstr ""
+
 msgid "Add to epic"
 msgstr ""
 

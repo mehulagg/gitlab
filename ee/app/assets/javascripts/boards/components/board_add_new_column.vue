@@ -116,11 +116,11 @@ export default {
 
     formDescription() {
       if (this.labelTypeSelected) {
-        return this.i18n.labelListDescription;
+        return this.$options.i18n.labelListDescription;
       }
 
       if (this.milestoneTypeSelected) {
-        return this.i18n.milestoneListDescription;
+        return this.$options.i18n.milestoneListDescription;
       }
 
       return null;
@@ -128,11 +128,11 @@ export default {
 
     searchLabel() {
       if (this.labelTypeSelected) {
-        return this.i18n.selectLabel;
+        return this.$options.i18n.selectLabel;
       }
 
       if (this.milestoneTypeSelected) {
-        return this.i18n.selectMilestone;
+        return this.$options.i18n.selectMilestone;
       }
 
       return null;
@@ -140,11 +140,11 @@ export default {
 
     searchPlaceholder() {
       if (this.labelTypeSelected) {
-        return this.i18n.searchLabels;
+        return this.$options.i18n.searchLabels;
       }
 
       if (this.milestoneTypeSelected) {
-        return this.i18n.searchMilestones;
+        return this.$options.i18n.searchMilestones;
       }
 
       return null;
