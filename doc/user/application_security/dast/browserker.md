@@ -18,11 +18,9 @@ Due to the reliance of modern web applications on JavaScript, handling SPAs or a
 
 Browserker crawls by loading the target application into a specially instrumented browser. A snapshot of the page is taken prior to a search to find any actions that a user might perform,
 such as clicking on a link or filling in a form. For each action found, Browserker will execute it, take a new snapshot and determine what in the page changed from the previous snapshot.
-Crawling continues by taking more snapshots and finding subsequent actions. 
+Crawling continues by taking more snapshots and finding subsequent actions.
 
 The benefit of crawling by following user actions in a browser is that Browserker can interact with the target application much like a real user would, identifying complex flows that traditional web crawlers don’t understand. This results in better coverage of both the user-facing website and their backend APIs.
-
-
 
 ## Enable Browserker
 
@@ -48,25 +46,25 @@ variables:
 
 Browserker can be configured using CI/CD variables.
 
-| CI/CD variable                       | Type    | Example | Description | 
-|--------------------------------------| --------| ------- | ------------|
-| `DAST_BROWSERKER_SCAN` | boolean     | `true` | Configures DAST to use the Browserker crawler engine. |
-| `DAST_BROWSERKER_ALLOWED_HOSTS`      | List of strings | `site.com,another.com` | Hostnames included in this variable are considered in scope when crawled. By default the `DAST_WEBSITE` hostname will be included into the allowed hosts list. |
-| `DAST_BROWSERKER_EXCLUDED_HOSTS`     | List of strings | `site.com,another.com` | Hostnames included in this variable are considered excluded and connections will be forcibly dropped. |
-| `DAST_BROWSERKER_IGNORED_HOSTS`      | List of strings | `site.com,another.com` | Hostnames included in this variable will be allowed to access but not reported against. | 
-| `DAST_BROWSERKER_MAX_ACTIONS`        | number | `10000` | The maximum number of actions (e.g. clicking a link, filling a form) that the crawler will execute. |
-| `DAST_BROWSERKER_MAX_DEPTH`          | number | `10` | The maximum number of chained actions that the crawler will take. For example, `Click -> Form Fill -> Click` would be a depth of three. |
-| `DAST_BROWSERKER_NUMBER_OF_BROWSERS` | number | `3` | The maximum number of concurrent browser instances to use. For shared runners it is recommended to not choose a value over three. Private runners with more resources may benefit from a higher number, but should not exceed seven. |
-| `DAST_BROWSERKER_COOKIES`            | Dictionary of cookie name/value | `abtesting_group:3,region:locked` | A cookie name and value that should be added to every request. |
-| `DAST_AUTH_URL`                      | string | `https://example.com/sign-in` | URL of page that hosts the sign-in form. |
-| `DAST_USERNAME`                      | string  | `user123` | The username to enter into the username field on the sign-in HTML form. |
-| `DAST_PASSWORD`                      | string  | `p@55w0rd` | The password to enter into the password field on the sign-in HTML form. |
-| `DAST_USERNAME_FIELD`                | selector | `id:user` | A selector describing the username field on the sign-in HTML form. |
-| `DAST_PASSWORD_FIELD`                | selector | `css:.password-field` | A selector describing the password field on the sign-in HTML form. | 
-| `DAST_SUBMIT_FIELD`                  | selector | `xpath://input[@value='Login']` | A selector describing the element that when clicked submits the login form or the password form of a multi-page login process. |
-| `DAST_FIRST_SUBMIT_FIELD`            | selector  | `.submit` | A selector describing the element that when clicked submits the username form of a multi-page login process. |
+| CI/CD variable                       | Type            | Example                           | Description | 
+|--------------------------------------| ----------------| --------------------------------- | ------------|
+| `DAST_BROWSERKER_SCAN`               | boolean         | `true`                            | Configures DAST to use the Browserker crawler engine. |
+| `DAST_BROWSERKER_ALLOWED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered in scope when crawled. By default the `DAST_WEBSITE` hostname will be included into the allowed hosts list. |
+| `DAST_BROWSERKER_EXCLUDED_HOSTS`     | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered excluded and connections will be forcibly dropped. |
+| `DAST_BROWSERKER_IGNORED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable will be allowed to access but not reported against. | 
+| `DAST_BROWSERKER_MAX_ACTIONS`        | number          | `10000`                           | The maximum number of actions (e.g. clicking a link, filling a form) that the crawler will execute. |
+| `DAST_BROWSERKER_MAX_DEPTH`          | number          | `10`                              | The maximum number of chained actions that the crawler will take. For example, `Click -> Form Fill -> Click` would be a depth of three. |
+| `DAST_BROWSERKER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners it is recommended to not choose a value over three. Private runners with more resources may benefit from a higher number, but should not exceed seven. |
+| `DAST_BROWSERKER_COOKIES`            | dictionary      | `abtesting_group:3,region:locked` | A cookie name and value that should be added to every request. |
+| `DAST_AUTH_URL`                      | string          | `https://example.com/sign-in`     | URL of page that hosts the sign-in form. |
+| `DAST_USERNAME`                      | string          | `user123`                         | The username to enter into the username field on the sign-in HTML form. |
+| `DAST_PASSWORD`                      | string          | `p@55w0rd`                        | The password to enter into the password field on the sign-in HTML form. |
+| `DAST_USERNAME_FIELD`                | selector        | `id:user`                         | A selector describing the username field on the sign-in HTML form. |
+| `DAST_PASSWORD_FIELD`                | selector        | `css:.password-field`             | A selector describing the password field on the sign-in HTML form. | 
+| `DAST_SUBMIT_FIELD`                  | selector        | `xpath://input[@value='Login']`   | A selector describing the element that when clicked submits the login form or the password form of a multi-page login process. |
+| `DAST_FIRST_SUBMIT_FIELD`            | selector        | `.submit`                         | A selector describing the element that when clicked submits the username form of a multi-page login process. |
 
-The following [DAST variables](./index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_WEBSITE`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
+The [DAST variables](./index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_WEBSITE`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
 `DAST_INCLUDE_ALPHA_VULNERABILITIES`, `DAST_ZAP_CLI_OPTIONS`, and `DAST_ZAP_LOG_CONFIGURATION` are also compatible with Browserker scans.   
 
 
@@ -81,7 +79,30 @@ Various environment variables are of type `selector`. Selectors have the format 
 | `xpath`       | `xpath://*[@id="my-button"]/a` | Searches for a HTML element with the provided XPath. Note that XPath searches are expected to be less performant than other searches. |
 | none provided | `a.click-me`                   | Defaults to searching using a CSS selector. |
 
+## Managing scan time
 
+It is expected that running Browserker compared to the normal GitLab DAST solution will result in better coverage for many web applications.
+This can come at a cost of increased scan time.
+
+The coverage/scan time trade-off can be managed by the user with the following measures:
+
+- Limiting the number of actions executed by the browser. The default is `10,000`.
+- Limiting the page depth that Browserker will check coverage on. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
+- Vertically scaling the runner and using a higher number of browsers. The default is `3`.
+
+## Anti-CSRF tokens
+
+Browserker supports Anti-CSRF tokens while crawling as forms are loaded in the browser in the same way as if a user was viewing the page.
+
+Anti-CSRF tokens do not work for full scans as full scan vulnerability checking is performed by DAST/ZAP outside the context of a browser. It is recommended that test sites with Anti-CSRF capabilities disabled in this case.
+
+## AJAX Crawler
+
+The AJAX Crawler is not supported by Browserker.
+
+## API Scanning
+
+API scanning is not supported by Browserker.
 
 
 
