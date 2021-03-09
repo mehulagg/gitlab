@@ -1,5 +1,6 @@
 import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import FirstClassInstanceVulnerabilities from 'ee/security_dashboard/components/first_class_instance_security_dashboard_vulnerabilities.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
 import { generateVulnerabilities } from './mock_data';
@@ -142,6 +143,14 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
     it('should render the observer component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
     });
+
+    describe('when the filter is changed', () => {
+      it('it should not render the observer component', async () => {
+        await wrapper.setProps({ filters: {} });
+
+        expect(findIntersectionObserver().exists()).toBe(false);
+      });
+    });
   });
 
   describe('when the query is loading and there is another page', () => {
@@ -168,11 +177,17 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
   describe('when filter or sort is changed', () => {
     beforeEach(() => {
-      wrapper = createWrapper({ loading: true });
+      wrapper = createWrapper({
+        loading: true,
+        vulnerabilities: generateVulnerabilities(),
+        pageInfo: {
+          hasNextPage: true,
+        },
+      });
     });
 
-    it('should show the initial loading state when the filter is changed', () => {
-      wrapper.setProps({ filter: {} });
+    it('should show the initial loading state when the filter is changed', async () => {
+      await wrapper.setProps({ filter: {} });
 
       expectLoadingState({ initial: true });
     });
