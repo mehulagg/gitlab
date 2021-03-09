@@ -132,7 +132,7 @@ module EE
         return unless group_sidebar_link?(:group_ci_cd_analytics)
 
         navbar_sub_item(
-          title: _('CI / CD'),
+          title: _('CI/CD'),
           path: 'groups/analytics/ci_cd_analytics#show',
           link: group_analytics_ci_cd_analytics_path(group)
         )
