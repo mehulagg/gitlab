@@ -210,6 +210,7 @@ export default {
         :placeholder="i18n.searchPlaceholder"
         @input="onSearchBoxInput"
         @keydown.enter.prevent="onSearchBoxEnter"
+        autocomplete="off"
       />
     </template>
 
