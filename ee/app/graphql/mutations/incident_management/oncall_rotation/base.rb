@@ -69,12 +69,10 @@ module Mutations
           usernames = user_array.map {|h| h[:username] }
           raise_duplicate_users_error if usernames.size != usernames.uniq.size
 
-          matched_users = UsersFinder.new(current_user, username: usernames).execute.order_by(:username)
+          matched_users = UsersFinder.new(current_user, username: usernames).execute.index_by(&:username)
           raise_user_not_found if matched_users.size != user_array.size
 
-          user_array = user_array.sort_by! { |h| h[:username] }
-
-          user_array.map.with_index { |param, i| param.to_h.merge(user: matched_users[i]) }
+          user_array.map { |param| param.to_h.merge(user: matched_users[param[:username]]) }
         end
 
         def active_period_times(args)
