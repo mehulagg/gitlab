@@ -43,7 +43,7 @@ of quotation marks, automatically.
 ## Issues, merge requests, and epics
 
 The following quick actions are applicable to descriptions, discussions, and
-threads. Some quick actions may not be available to all subscription tiers.
+threads. Some quick actions might not be available to all subscription tiers.
 
 | Command                               | Issue                  | Merge request          | Epic                   | Action |
 |:--------------------------------------|:-----------------------|:-----------------------|:-----------------------|:-------|
