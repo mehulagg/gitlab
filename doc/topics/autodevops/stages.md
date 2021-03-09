@@ -345,8 +345,7 @@ Any load performance test result differences between the source and target branc
 
 ## Auto Deploy
 
-This is an optional step, since many projects don't have a Kubernetes cluster
-available. If the [requirements](requirements.md) are not met, the job is skipped.
+This is an optional step. If the [requirements](requirements.md) are not met, the job is skipped.
 
 After a branch or merge request is merged into the project's default branch (usually
 `master`), Auto Deploy deploys the application to a `production` environment in
