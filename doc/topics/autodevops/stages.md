@@ -348,7 +348,7 @@ Any load performance test result differences between the source and target branc
 > [Introduced](<link-to-issue>) in GitLab 13.6, you no longer need a Kubernetes cluster to use Auto Deploy.
 You can also deploy to [Amazon Elastic Compute Cloud (Amazon EC2)](https://aws.amazon.com/ec2/).
 
-This is an optional step. If the [requirements](requirements.md) are not met, the job is skipped.
+Auto Deploy is an optional step for Auto DevOps. If the [requirements](requirements.md) are not met, the job is skipped.
 
 After a branch or merge request is merged into the project's default branch (usually
 `master`), Auto Deploy deploys the application to a `production` environment in
