@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::JobArtifactsDestroyAsyncService do
+RSpec.describe Ci::JobArtifactsDestroyBatchService do
   describe '.execute' do
     subject { service.execute }
 

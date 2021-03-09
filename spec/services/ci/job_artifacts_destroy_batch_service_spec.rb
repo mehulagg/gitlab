@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::JobArtifactsDestroyAsyncService do
+RSpec.describe Ci::JobArtifactsDestroyBatchService do
   include ExclusiveLeaseHelpers
 
   let(:artifacts) { Ci::JobArtifact.all }
