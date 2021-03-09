@@ -725,4 +725,12 @@ RSpec.describe Epic do
   end
 
   it_behaves_like 'versioned description'
+
+  describe '#usage_ping_record_epic_creation' do
+    it 'records epic creation after saving' do
+      expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_created_action)
+
+      create(:epic)
+    end
+  end
 end

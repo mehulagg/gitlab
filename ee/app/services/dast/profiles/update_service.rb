@@ -44,11 +44,12 @@ module Dast
       end
 
       def dast_profile_params
-        params.slice(:dast_site_profile_id, :dast_scanner_profile_id, :name, :description)
+        params.slice(:dast_site_profile_id, :dast_scanner_profile_id, :name, :description, :branch_name)
       end
 
       def create_scan(dast_profile)
         params = {
+          branch: dast_profile.branch_name,
           dast_site_profile: dast_profile.dast_site_profile,
           dast_scanner_profile: dast_profile.dast_scanner_profile
         }

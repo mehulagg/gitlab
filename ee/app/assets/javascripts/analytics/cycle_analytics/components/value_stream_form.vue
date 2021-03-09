@@ -243,11 +243,25 @@ export default {
       ]);
       Vue.set(this, 'stages', [...this.stages, target]);
     },
-    onAddStage() {
+    lastStage() {
+      const stages = this.$refs.formStages;
+      return stages[stages.length - 1];
+    },
+    async scrollToLastStage() {
+      await this.$nextTick();
+      // Scroll to the new stage we have added
+      this.lastStage().focus();
+      this.lastStage().scrollIntoView({ behavior: 'smooth' });
+    },
+    addNewStage() {
       // validate previous stages only and add a new stage
       this.validate();
       Vue.set(this, 'stages', [...this.stages, { ...defaultCustomStageFields }]);
       Vue.set(this, 'stageErrors', [...this.stageErrors, {}]);
+    },
+    onAddStage() {
+      this.addNewStage();
+      this.scrollToLastStage();
     },
     onFieldInput(activeStageIndex, { field, value }) {
       const updatedStage = { ...this.stages[activeStageIndex], [field]: value };
@@ -320,13 +334,15 @@ export default {
             :state="isValueStreamNameValid"
             required
           />
-          <gl-button
-            v-if="canRestore"
-            class="gl-ml-3"
-            variant="link"
-            @click="handleResetDefaults"
-            >{{ $options.i18n.RESTORE_DEFAULTS }}</gl-button
-          >
+          <transition name="fade">
+            <gl-button
+              v-if="canRestore"
+              class="gl-ml-3"
+              variant="link"
+              @click="handleResetDefaults"
+              >{{ $options.i18n.RESTORE_DEFAULTS }}</gl-button
+            >
+          </transition>
         </div>
       </gl-form-group>
       <gl-form-radio-group
@@ -339,7 +355,11 @@ export default {
         @input="onSelectPreset"
       />
       <div v-if="hasExtendedFormFields" data-testid="extended-form-fields">
-        <div v-for="(stage, activeStageIndex) in stages" :key="stageKey(activeStageIndex)">
+        <div
+          v-for="(stage, activeStageIndex) in stages"
+          ref="formStages"
+          :key="stageKey(activeStageIndex)"
+        >
           <hr class="gl-my-3" />
           <span
             class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"

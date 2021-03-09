@@ -35,12 +35,9 @@ module QA
           Flow::Login.sign_in
           project.visit!
 
-          Page::Project::Menu.perform(&:go_to_general_settings)
+          Flow::MergeRequest.enable_merge_trains
           Page::Project::Settings::Main.perform(&:expand_merge_requests_settings)
-          Page::Project::Settings::MergeRequest.perform do |setting|
-            setting.enable_merge_train
-            setting.enable_merge_if_all_disscussions_are_resolved
-          end
+          Page::Project::Settings::MergeRequest.perform(&:enable_merge_if_all_disscussions_are_resolved)
 
           commit_ci_file
 

@@ -6,7 +6,7 @@ RSpec.describe Mutations::Dast::Profiles::Run do
   let_it_be_with_refind(:project) { create(:project, :repository) }
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+  let_it_be(:dast_profile) { create(:dast_profile, project: project, branch_name: 'orphaned-branch') }
 
   let(:full_path) { project.full_path }
   let(:dast_profile_id) { dast_profile.to_global_id }
@@ -58,6 +58,12 @@ RSpec.describe Mutations::Dast::Profiles::Run do
       context 'when the user can run a dast scan' do
         before do
           project.add_developer(user)
+        end
+
+        it_behaves_like 'it delegates scan creation to another service' do
+          let(:delegated_params) do
+            { branch: dast_profile.branch_name, dast_site_profile: dast_profile.dast_site_profile, dast_scanner_profile: dast_profile.dast_scanner_profile }
+          end
         end
 
         it 'returns a pipeline_url containing the correct path' do

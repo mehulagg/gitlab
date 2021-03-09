@@ -34,10 +34,6 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       expect(auto_fix['container_scanning']).to be_truthy
     end
 
-    it 'includes the path to create a SAST merge request' do
-      expect(subject[:create_sast_merge_request_path]).to eq(project_security_configuration_sast_path(project))
-    end
-
     it 'includes the path to gitlab_ci history' do
       expect(subject[:gitlab_ci_history_path]).to eq(project_blame_path(project, 'master/.gitlab-ci.yml'))
     end
@@ -218,8 +214,9 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           expect(subject[:gitlab_ci_present]).to eq(true)
         end
 
-        it 'expects the gitlab_ci_presence to be false if the file is absent' do
-          allow_any_instance_of(described_class).to receive(:latest_pipeline).and_return(nil)
+        it 'expects the gitlab_ci_presence to be false if the file is customized' do
+          allow(project).to receive(:ci_config_path).and_return('.other-gitlab-ci.yml')
+
           expect(subject[:gitlab_ci_present]).to eq(false)
         end
       end
@@ -266,10 +263,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       "type" => type.to_s,
       "configured" => configured,
       "status" => status_str,
-      "description" => described_class.localized_scan_descriptions[type],
-      "link" => help_page_path(described_class::SCAN_DOCS[type]),
-      "configuration_path" => configuration_path,
-      "name" => described_class.localized_scan_names[type]
+      "configuration_path" => configuration_path
     }
   end
 

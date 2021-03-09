@@ -118,6 +118,8 @@
         %script#js-confidential-issue-data{ type: "application/json" }= { is_confidential: issuable_sidebar[:confidential], is_editable: can_edit_issuable }.to_json.html_safe
         #js-confidential-entry-point
 
+        = render_if_exists 'shared/issuable/sidebar_cve_id_request', issuable_sidebar: issuable_sidebar
+
       %script#js-lock-issue-data{ type: "application/json" }= { is_locked: !!issuable_sidebar[:discussion_locked], is_editable: can_edit_issuable }.to_json.html_safe
       #js-lock-entry-point
 
@@ -163,7 +165,7 @@
               = dropdown_content
               = dropdown_loading
               = dropdown_footer add_content_class: true do
-                %button.gl-button.btn.btn-success.sidebar-move-issue-confirmation-button.js-move-issue-confirmation-button{ type: 'button', disabled: true }
+                %button.gl-button.btn.btn-confirm.sidebar-move-issue-confirmation-button.js-move-issue-confirmation-button{ type: 'button', disabled: true }
                   = _('Move')
                   = loading_icon(css_class: 'gl-vertical-align-text-bottom sidebar-move-issue-confirmation-loading-icon')
 

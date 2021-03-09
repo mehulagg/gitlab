@@ -7,6 +7,9 @@ module Gitlab
 
     Attribute = Struct.new(:name, :type)
 
+    LOG_KEY = Labkit::Context::LOG_KEY
+    KNOWN_KEYS = Labkit::Context::KNOWN_KEYS
+
     APPLICATION_ATTRIBUTES = [
       Attribute.new(:project, Project),
       Attribute.new(:namespace, Namespace),
@@ -22,13 +25,21 @@ module Gitlab
       application_context.use(&block)
     end
 
+    def self.with_raw_context(attributes = {}, &block)
+      Labkit::Context.with_context(attributes, &block)
+    end
+
     def self.push(args)
       application_context = new(**args)
       Labkit::Context.push(application_context.to_lazy_hash)
     end
 
+    def self.current
+      Labkit::Context.current.to_h
+    end
+
     def self.current_context_include?(attribute_name)
-      Labkit::Context.current.to_h.include?(Labkit::Context.log_key(attribute_name))
+      current.include?(Labkit::Context.log_key(attribute_name))
     end
 
     def initialize(**args)

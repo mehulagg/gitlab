@@ -2,6 +2,7 @@
 import * as Sentry from '@sentry/browser';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 
 import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
@@ -104,6 +105,7 @@ export default {
       Sentry.captureException(error);
     },
     setSavingError(error, userFriendlyText) {
+      this.saving = false;
       this.saveErrorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
@@ -133,15 +135,15 @@ export default {
         if (error) {
           this.setSavingError(new Error(error), error);
         } else {
-          this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
         this.setSavingError(e, SAVE_ERROR);
       }
-
-      this.saving = false;
     },
+  },
+  i18n: {
+    submitButtonText: __('Save changes'),
   },
 };
 </script>
@@ -155,6 +157,7 @@ export default {
       :description.sync="formData.description"
       :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
+      :submit-button-text="$options.i18n.submitButtonText"
       @submit="onSubmit"
     />
   </form-status>

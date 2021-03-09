@@ -84,7 +84,7 @@ See also other [features associated to merge requests](reviewing_and_managing_me
 Choose an assignee to designate someone as the person responsible
 for the first [review of the merge request](reviewing_and_managing_merge_requests.md).
 Open the drop down box to search for the user you wish to assign,
-and the merge request will be added to their
+and the merge request is added to their
 [assigned merge request list](../../search/index.md#issues-and-merge-requests).
 
 #### Multiple assignees **(PREMIUM)**
@@ -110,7 +110,7 @@ dropdown menu.
 It is also possible to manage multiple assignees:
 
 - When creating a merge request.
-- Using [quick actions](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
+- Using [quick actions](../quick_actions.md#issues-merge-requests-and-epics).
 
 ### Reviewer
 

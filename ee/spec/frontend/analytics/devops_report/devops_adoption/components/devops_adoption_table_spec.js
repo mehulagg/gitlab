@@ -1,6 +1,7 @@
 import { GlTable, GlButton, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
+import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_delete_modal.vue';
 import DevopsAdoptionTable from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table_cell_flag.vue';
 import { DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS } from 'ee/analytics/devops_report/devops_adoption/constants';
@@ -15,6 +16,7 @@ describe('DevopsAdoptionTable', () => {
     wrapper = mount(DevopsAdoptionTable, {
       propsData: {
         segments: devopsAdoptionSegmentsData.nodes,
+        selectedSegment: devopsAdoptionSegmentsData.nodes[0],
       },
       directives: {
         GlTooltip: createMockDirective(),
@@ -44,6 +46,8 @@ describe('DevopsAdoptionTable', () => {
 
   const findSortByLocalStorageSync = () => wrapper.findAll(LocalStorageSync).at(0);
   const findSortDescLocalStorageSync = () => wrapper.findAll(LocalStorageSync).at(1);
+
+  const findDeleteModal = () => wrapper.find(DevopsAdoptionDeleteModal);
 
   describe('table headings', () => {
     let headers;
@@ -139,6 +143,14 @@ describe('DevopsAdoptionTable', () => {
       expect(button.exists()).toBe(true);
       expect(button.props('icon')).toBe('remove');
       expect(button.props('category')).toBe('tertiary');
+    });
+  });
+
+  describe('delete modal integration', () => {
+    it('re emits trackModalOpenState with the given value', async () => {
+      findDeleteModal().vm.$emit('trackModalOpenState', true);
+
+      expect(wrapper.emitted('trackModalOpenState')).toStrictEqual([[true]]);
     });
   });
 

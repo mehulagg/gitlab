@@ -62,29 +62,24 @@ RSpec.describe EE::TrialHelper do
   end
 
   describe '#namespace_options_for_select' do
-    let_it_be(:user) { create :user }
     let_it_be(:group1) { create :group }
     let_it_be(:group2) { create :group }
 
-    let(:trial_user_namespaces) { [] }
     let(:trial_group_namespaces) { [] }
 
     let(:new_optgroup_regex) { /<optgroup label="New"><option/ }
     let(:groups_optgroup_regex) { /<optgroup label="Groups"><option/ }
-    let(:users_optgroup_regex) { /<optgroup label="Users"><option/ }
 
     before do
       allow(helper).to receive(:trial_group_namespaces).and_return(trial_group_namespaces)
-      allow(helper).to receive(:trial_user_namespaces).and_return(trial_user_namespaces)
     end
 
     subject { helper.namespace_options_for_select }
 
-    context 'when there are no eligible group or user namespaces' do
+    context 'when there is no eligible group' do
       it 'returns just the "New" option group', :aggregate_failures do
         is_expected.to match(new_optgroup_regex)
         is_expected.not_to match(groups_optgroup_regex)
-        is_expected.not_to match(users_optgroup_regex)
       end
     end
 
@@ -94,45 +89,29 @@ RSpec.describe EE::TrialHelper do
       it 'returns the "New" and "Groups" option groups', :aggregate_failures do
         is_expected.to match(new_optgroup_regex)
         is_expected.to match(groups_optgroup_regex)
-        is_expected.not_to match(users_optgroup_regex)
       end
     end
 
-    context 'when only the user namespace is eligible' do
-      let(:trial_user_namespaces) { [user.namespace] }
-
-      it 'returns the "New" and "Users" option groups', :aggregate_failures do
-        is_expected.to match(new_optgroup_regex)
-        is_expected.to match(users_optgroup_regex)
-        is_expected.not_to match(groups_optgroup_regex)
-      end
-    end
-
-    context 'when some group namespaces & the user namespace are eligible' do
+    context 'when some group namespaces are eligible' do
       let(:trial_group_namespaces) { [group1, group2] }
-      let(:trial_user_namespaces) { [user.namespace] }
 
-      it 'returns the "New", "Groups", and "Users" option groups', :aggregate_failures do
+      it 'returns the "New", "Groups" option groups', :aggregate_failures do
         is_expected.to match(new_optgroup_regex)
         is_expected.to match(groups_optgroup_regex)
-        is_expected.to match(users_optgroup_regex)
       end
     end
   end
 
   describe '#trial_selection_intro_text' do
     before do
-      allow(helper).to receive(:any_trial_user_namespaces?).and_return(have_user_namespace)
       allow(helper).to receive(:any_trial_group_namespaces?).and_return(have_group_namespace)
     end
 
     subject { helper.trial_selection_intro_text }
 
-    where(:have_user_namespace, :have_group_namespace, :text) do
-      true  | true  | 'You can apply your trial to a new group, an existing group, or your personal account.'
-      true  | false | 'You can apply your trial to a new group or your personal account.'
-      false | true  | 'You can apply your trial to a new group or an existing group.'
-      false | false | 'Create a new group to start your GitLab Ultimate trial.'
+    where(:have_group_namespace, :text) do
+      true  | 'You can apply your trial to a new group or an existing group.'
+      false | 'Create a new group to start your GitLab Ultimate trial.'
     end
 
     with_them do
@@ -141,22 +120,19 @@ RSpec.describe EE::TrialHelper do
   end
 
   describe '#show_trial_namespace_select?' do
+    let_it_be(:have_group_namespace) { false }
     before do
       allow(helper).to receive(:any_trial_group_namespaces?).and_return(have_group_namespace)
-      allow(helper).to receive(:any_trial_user_namespaces?).and_return(have_user_namespace)
     end
 
     subject { helper.show_trial_namespace_select? }
 
-    where(:have_user_namespace, :have_group_namespace, :result) do
-      true  | true  | true
-      true  | false | true
-      false | true  | true
-      false | false | false
-    end
+    it { is_expected.to eq(false) }
 
-    with_them do
-      it { is_expected.to eq(result) }
+    context 'with some trial group namespaces' do
+      let_it_be(:have_group_namespace) { true }
+
+      it { is_expected.to eq(true) }
     end
   end
 

@@ -16,7 +16,7 @@ RSpec.describe Ci::Minutes::ProjectMonthlyUsage do
     end
 
     it 'does not raise exception if unique index is not violated' do
-      expect { create(:ci_project_monthly_usage, project: project, date: 1.month.ago.utc.beginning_of_month) }
+      expect { create(:ci_project_monthly_usage, project: project, date: described_class.beginning_of_month(1.month.ago)) }
         .to change { described_class.count }.by(1)
     end
   end
@@ -31,7 +31,7 @@ RSpec.describe Ci::Minutes::ProjectMonthlyUsage do
 
           expect(subject.amount_used).to eq(0)
           expect(subject.project).to eq(project)
-          expect(subject.date).to eq(Time.current.beginning_of_month)
+          expect(subject.date).to eq(described_class.beginning_of_month)
         end
       end
     end
@@ -42,7 +42,7 @@ RSpec.describe Ci::Minutes::ProjectMonthlyUsage do
 
     context 'when project usage exists for previous months' do
       before do
-        create(:ci_project_monthly_usage, project: project, date: 2.months.ago.utc.beginning_of_month)
+        create(:ci_project_monthly_usage, project: project, date: described_class.beginning_of_month(2.months.ago))
       end
 
       it_behaves_like 'creates usage record'

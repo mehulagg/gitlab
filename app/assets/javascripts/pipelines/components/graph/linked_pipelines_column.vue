@@ -6,6 +6,7 @@ import LinkedPipeline from './linked_pipeline.vue';
 import {
   getQueryHeaders,
   reportToSentry,
+  serializeLoadErrors,
   toggleQueryPollingByVisibility,
   unwrapPipelineData,
   validateConfigPaths,
@@ -104,7 +105,9 @@ export default {
 
           reportToSentry(
             'linked_pipelines_column',
-            `error type: ${LOAD_FAILURE}, error: ${err}, apollo error type: ${type}`,
+            `error type: ${LOAD_FAILURE}, error: ${serializeLoadErrors(
+              err,
+            )}, apollo error type: ${type}`,
           );
         },
       });

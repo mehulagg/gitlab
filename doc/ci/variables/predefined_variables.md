@@ -72,7 +72,7 @@ There are also [Kubernetes-specific deployment variables](../../user/project/clu
 | `CI_PIPELINE_SOURCE`                     | 10.0   | all    | How the pipeline was triggered. Can be `push`, `web`, `schedule`, `api`, `external`, `chat`, `webide`, `merge_request_event`, `external_pull_request_event`, `parent_pipeline`, [`trigger`, or `pipeline`](../triggers/README.md#authentication-tokens). |
 | `CI_PIPELINE_TRIGGERED`                  | all    | all    | `true` if the job was [triggered](../triggers/README.md). |
 | `CI_PIPELINE_URL`                        | 11.1   | 0.5    | The URL for the pipeline details. |
-| `CI_PROJECT_CONFIG_PATH`                 | 13.8   | all    | The CI/CD configuration path for the project. |
+| `CI_PROJECT_CONFIG_PATH`                 | 13.8   | all    | (Deprecated) The CI configuration path for the project. [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/321334) in GitLab 13.10. [Removal planned](https://gitlab.com/gitlab-org/gitlab/-/issues/322807) for GitLab 14.0. |
 | `CI_PROJECT_DIR`                         | all    | all    | The full path the repository is cloned to, and where the job runs from. If the GitLab Runner `builds_dir` parameter is set, this variable is set relative to the value of `builds_dir`. For more information, see the [Advanced GitLab Runner configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section). |
 | `CI_PROJECT_ID`                          | all    | all    | The ID of the current project. This ID is unique across all projects on the GitLab instance. |
 | `CI_PROJECT_NAME`                        | 8.10   | 0.5    | The name of the directory for the project. For example if the project URL is `gitlab.example.com/group-name/project-1`, `CI_PROJECT_NAME` is `project-1`. |
@@ -135,12 +135,12 @@ These variables are available when:
 | `CI_MERGE_REQUEST_PROJECT_URL`         | 11.6   | all    | The URL of the project of the merge request. For example, `http://192.168.10.15:3000/namespace/awesome-project`. |
 | `CI_MERGE_REQUEST_REF_PATH`            | 11.6   | all    | The ref path of the merge request. For example, `refs/merge-requests/1/head`. |
 | `CI_MERGE_REQUEST_SOURCE_BRANCH_NAME`  | 11.6   | all    | The source branch name of the merge request. |
-| `CI_MERGE_REQUEST_SOURCE_BRANCH_SHA`   | 11.9   | all    | The HEAD SHA of the source branch of the merge request. Only available in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)** |
+| `CI_MERGE_REQUEST_SOURCE_BRANCH_SHA`   | 11.9   | all    | The HEAD SHA of the source branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)** |
 | `CI_MERGE_REQUEST_SOURCE_PROJECT_ID`   | 11.6   | all    | The ID of the source project of the merge request. |
 | `CI_MERGE_REQUEST_SOURCE_PROJECT_PATH` | 11.6   | all    | The path of the source project of the merge request. |
 | `CI_MERGE_REQUEST_SOURCE_PROJECT_URL`  | 11.6   | all    | The URL of the source project of the merge request. |
 | `CI_MERGE_REQUEST_TARGET_BRANCH_NAME`  | 11.6   | all    | The target branch name of the merge request. |
-| `CI_MERGE_REQUEST_TARGET_BRANCH_SHA`   | 11.9   | all    | The HEAD SHA of the target branch of the merge request. Only available in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)** |
+| `CI_MERGE_REQUEST_TARGET_BRANCH_SHA`   | 11.9   | all    | The HEAD SHA of the target branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)** |
 | `CI_MERGE_REQUEST_TITLE`               | 11.9   | all    | The title of the merge request. |
 | `CI_MERGE_REQUEST_EVENT_TYPE`          | 12.3   | all    | The event type of the merge request. Can be `detached`, `merged_result` or `merge_train`. |
 | `CI_MERGE_REQUEST_DIFF_ID`             | 13.7   | all    | The version of the merge request diff. |

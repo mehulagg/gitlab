@@ -191,9 +191,13 @@ class MergeRequest < ApplicationRecord
   end
 
   state_machine :merge_status, initial: :unchecked do
+    event :mark_as_preparing do
+      transition unchecked: :preparing
+    end
+
     event :mark_as_unchecked do
-      transition [:can_be_merged, :checking, :unchecked] => :unchecked
-      transition [:cannot_be_merged, :cannot_be_merged_rechecking, :cannot_be_merged_recheck] => :cannot_be_merged_recheck
+      transition [:preparing, :can_be_merged, :checking] => :unchecked
+      transition [:cannot_be_merged, :cannot_be_merged_rechecking] => :cannot_be_merged_recheck
     end
 
     event :mark_as_checking do
@@ -209,6 +213,7 @@ class MergeRequest < ApplicationRecord
       transition [:unchecked, :cannot_be_merged_recheck, :checking, :cannot_be_merged_rechecking] => :cannot_be_merged
     end
 
+    state :preparing
     state :unchecked
     state :cannot_be_merged_recheck
     state :checking
@@ -237,7 +242,7 @@ class MergeRequest < ApplicationRecord
   # Returns current merge_status except it returns `cannot_be_merged_rechecking` as `checking`
   # to avoid exposing unnecessary internal state
   def public_merge_status
-    cannot_be_merged_rechecking? ? 'checking' : merge_status
+    cannot_be_merged_rechecking? || preparing? ? 'checking' : merge_status
   end
 
   validates :source_project, presence: true, unless: [:allow_broken, :importing?, :closed_or_merged_without_fork?]
@@ -322,7 +327,7 @@ class MergeRequest < ApplicationRecord
   scope :preload_approved_by_users, -> { preload(:approved_by_users) }
   scope :preload_metrics, -> (relation) { preload(metrics: relation) }
   scope :preload_project_and_latest_diff, -> { preload(:source_project, :latest_merge_request_diff) }
-  scope :preload_latest_diff_comment, -> { preload(latest_merge_request_diff: :merge_request_diff_commits) }
+  scope :preload_latest_diff_commit, -> { preload(latest_merge_request_diff: :merge_request_diff_commits) }
   scope :with_web_entity_associations, -> { preload(:author, :target_project) }
 
   scope :with_auto_merge_enabled, -> do
@@ -1861,6 +1866,12 @@ class MergeRequest < ApplicationRecord
       sast: report_type_enabled?(:sast),
       secret_detection: report_type_enabled?(:secret_detection)
     }
+  end
+
+  def includes_ci_config?
+    return false unless diff_stats
+
+    diff_stats.map(&:path).include?(project.ci_config_path_or_default)
   end
 
   private

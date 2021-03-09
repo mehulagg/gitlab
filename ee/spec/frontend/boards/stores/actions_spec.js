@@ -7,6 +7,7 @@ import * as types from 'ee/boards/stores/mutation_types';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 import { formatListIssues, formatBoardLists } from '~/boards/boards_util';
+import { issuableTypes } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
@@ -136,18 +137,20 @@ describe('performSearch', () => {
 });
 
 describe('fetchLists', () => {
-  it('should dispatch fetchIssueLists action when isEpicBoard is false on state', async () => {
+  it('should dispatch fetchIssueLists action when isEpicBoard is false', async () => {
+    const getters = { isEpicBoard: false };
     await testAction({
       action: actions.fetchLists,
-      state: { isEpicBoard: false },
+      state: { issuableType: issuableTypes.issue, ...getters },
       expectedActions: [{ type: 'fetchIssueLists' }],
     });
   });
 
-  it('should dispatch fetchEpicLists action when isEpicBoard is true on state', async () => {
+  it('should dispatch fetchEpicLists action when isEpicBoard is true', async () => {
+    const getters = { isEpicBoard: true };
     await testAction({
       action: actions.fetchLists,
-      state: { isEpicBoard: true },
+      state: { issuableType: issuableTypes.epic, ...getters },
       expectedActions: [{ type: 'fetchEpicLists' }],
     });
   });
@@ -949,15 +952,15 @@ describe('moveIssue', () => {
   });
 
   describe.each`
-    isEpicBoard | dispatchedAction
-    ${false}    | ${'createIssueList'}
-    ${true}     | ${'createEpicList'}
-  `('createList', ({ isEpicBoard, dispatchedAction }) => {
-    it(`should dispatch ${dispatchedAction}  action when isEpicBoard is ${isEpicBoard} on state`, async () => {
+    isEpicBoard | issuableType             | dispatchedAction
+    ${false}    | ${'issuableTypes.issue'} | ${'createIssueList'}
+    ${true}     | ${'issuableTypes.epic'}  | ${'createEpicList'}
+  `('createList', ({ isEpicBoard, issuableType, dispatchedAction }) => {
+    it(`should dispatch ${dispatchedAction}  action when isEpicBoard is ${isEpicBoard}`, async () => {
       await testAction({
         action: actions.createList,
         payload: { backlog: true },
-        state: { isEpicBoard },
+        state: { isEpicBoard, issuableType },
         expectedActions: [{ type: dispatchedAction, payload: { backlog: true } }],
       });
     });
@@ -1026,14 +1029,14 @@ describe('moveIssue', () => {
         data: {
           epicBoardListCreate: {
             list: {},
-            errors: [{ foo: 'bar' }],
+            errors: ['foo'],
           },
         },
       });
 
       await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
 
-      expect(commit).toHaveBeenCalledWith(types.CREATE_LIST_FAILURE);
+      expect(commit).toHaveBeenCalledWith(types.CREATE_LIST_FAILURE, 'foo');
     });
 
     it('highlights list and does not re-query if it already exists', async () => {

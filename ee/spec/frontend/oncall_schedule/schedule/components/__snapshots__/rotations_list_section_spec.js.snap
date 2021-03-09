@@ -80,28 +80,23 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
             class="gl-absolute gl-h-7 gl-mt-3"
             style="left: 0px; width: -2px;"
           >
-            <span
-              class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-blue-500"
-              id="1-12"
+            <div
+              class="gl-h-6 gl-bg-data-viz-blue-500 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-2"
             >
-              <span
-                class="gl-token-content"
+              <div
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <div
-                  class="gl-display-flex gl-text-white gl-font-weight-normal"
-                >
-                  <img
-                    alt="avatar"
-                    class="gl-avatar gl-avatar-circle gl-avatar-s16"
-                    src="/url"
-                  />
-                   
-                  <!---->
-                </div>
+                <img
+                  alt="avatar"
+                  class="gl-avatar gl-avatar-circle gl-avatar-s16"
+                  src="/url"
+                />
                  
                 <!---->
-              </span>
-            </span>
+              </div>
+            </div>
              
             <div
               class="gl-popover"
@@ -125,28 +120,23 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
             class="gl-absolute gl-h-7 gl-mt-3"
             style="left: 0px; width: -2px;"
           >
-            <span
-              class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-orange-500"
-              id="2-17"
+            <div
+              class="gl-h-6 gl-bg-data-viz-orange-500 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-3"
             >
-              <span
-                class="gl-token-content"
+              <div
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <div
-                  class="gl-display-flex gl-text-white gl-font-weight-normal"
-                >
-                  <img
-                    alt="avatar"
-                    class="gl-avatar gl-avatar-circle gl-avatar-s16"
-                    src="/url"
-                  />
-                   
-                  <!---->
-                </div>
+                <img
+                  alt="avatar"
+                  class="gl-avatar gl-avatar-circle gl-avatar-s16"
+                  src="/url"
+                />
                  
                 <!---->
-              </span>
-            </span>
+              </div>
+            </div>
              
             <div
               class="gl-popover"

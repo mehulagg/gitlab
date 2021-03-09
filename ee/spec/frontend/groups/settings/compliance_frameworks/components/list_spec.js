@@ -1,6 +1,7 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 
 import DeleteModal from 'ee/groups/settings/compliance_frameworks/components/delete_modal.vue';
@@ -26,14 +27,14 @@ describe('List', () => {
   const fetchLoading = jest.fn().mockResolvedValue(new Promise(() => {}));
   const fetchWithErrors = jest.fn().mockRejectedValue(sentryError);
 
-  const findAlert = () => wrapper.find(GlAlert);
+  const findAlert = () => wrapper.findComponent(GlAlert);
   const findDeleteModal = () => wrapper.findComponent(DeleteModal);
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findEmptyState = () => wrapper.find(EmptyState);
-  const findTabs = () => wrapper.findAll(GlTab);
-  const findAddBtn = () => wrapper.find(GlButton);
-  const findTabsContainer = () => wrapper.find(GlTabs);
-  const findListItems = () => wrapper.findAll(ListItem);
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findEmptyState = () => wrapper.findComponent(EmptyState);
+  const findTabs = () => wrapper.findAllComponents(GlTab);
+  const findAddBtn = () => wrapper.findComponent(GlButton);
+  const findTabsContainer = () => wrapper.findComponent(GlTabs);
+  const findListItems = () => wrapper.findAllComponents(ListItem);
 
   function createMockApolloProvider(resolverMock) {
     localVue.use(VueApollo);
@@ -49,6 +50,7 @@ describe('List', () => {
       apolloProvider: createMockApolloProvider(resolverMock),
       propsData: {
         addFrameworkPath: 'group/framework/new',
+        editFrameworkPath: 'group/framework/id/edit',
         emptyStateSvgPath: 'dir/image.svg',
         groupPath: 'group-1',
       },
@@ -169,7 +171,7 @@ describe('List', () => {
       expect(findListItems()).toHaveLength(2);
 
       findListItems().wrappers.forEach((item) =>
-        expect(item.props()).toEqual(
+        expect(item.props()).toStrictEqual(
           expect.objectContaining({
             framework: {
               id: expect.stringContaining('gid://gitlab/ComplianceManagement::Framework/'),
@@ -180,6 +182,7 @@ describe('List', () => {
                 PIPELINE_CONFIGURATION_PATH_FORMAT,
               ),
               color: expect.stringMatching(/^#([0-9A-F]{3}){1,2}$/i),
+              editPath: expect.stringMatching(/^group\/framework\/[0-9+]\/edit$/i),
             },
             loading: false,
           }),
@@ -255,6 +258,14 @@ describe('List', () => {
             expect(findAlert().props('dismissible')).toBe(true);
             expect(findAlert().props('variant')).toBe('info');
             expect(findAlert().text()).toBe('Compliance framework deleted successfully');
+          });
+
+          it('can dismiss the alert message', async () => {
+            findAlert().vm.$emit('dismiss');
+
+            await nextTick();
+
+            expect(findAlert().exists()).toBe(false);
           });
         });
       });

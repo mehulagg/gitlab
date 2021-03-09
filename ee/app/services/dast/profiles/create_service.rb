@@ -10,6 +10,7 @@ module Dast
           project: container,
           name: params.fetch(:name),
           description: params.fetch(:description),
+          branch_name: params[:branch_name],
           dast_site_profile: dast_site_profile,
           dast_scanner_profile: dast_scanner_profile
         )
@@ -20,6 +21,7 @@ module Dast
           container: container,
           current_user: current_user,
           params: {
+            branch: dast_profile.branch_name,
             dast_site_profile: dast_site_profile,
             dast_scanner_profile: dast_scanner_profile
           }

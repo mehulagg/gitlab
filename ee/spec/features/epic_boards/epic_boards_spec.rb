@@ -10,8 +10,8 @@ RSpec.describe 'epic boards', :js do
   let_it_be(:label) { create(:group_label, group: group, name: 'Label1') }
   let_it_be(:label2) { create(:group_label, group: group, name: 'Label2') }
   let_it_be(:label_list) { create(:epic_list, epic_board: epic_board, label: label, position: 0) }
-  let_it_be(:backlog_list) { create(:epic_list, epic_board: epic_board, list_type: :closed) }
-  let_it_be(:closed_list) { create(:epic_list, epic_board: epic_board, list_type: :backlog) }
+  let_it_be(:backlog_list) { create(:epic_list, epic_board: epic_board, list_type: :backlog) }
+  let_it_be(:closed_list) { create(:epic_list, epic_board: epic_board, list_type: :closed) }
 
   let_it_be(:epic1) { create(:epic, group: group, labels: [label], title: 'Epic1') }
   let_it_be(:epic2) { create(:epic, group: group, title: 'Epic2') }
@@ -38,6 +38,8 @@ RSpec.describe 'epic boards', :js do
     end
 
     it 'displays two epics in Open list' do
+      expect(list_header(backlog_list)).to have_content('2')
+
       page.within("[data-board-type='backlog']") do
         expect(page).to have_selector('.board-card', count: 2)
         page.within(first('.board-card')) do
@@ -51,6 +53,8 @@ RSpec.describe 'epic boards', :js do
     end
 
     it 'displays one epic in Label list' do
+      expect(list_header(label_list)).to have_content('1')
+
       page.within("[data-board-type='label']") do
         expect(page).to have_selector('.board-card', count: 1)
         page.within(first('.board-card')) do
@@ -75,8 +79,38 @@ RSpec.describe 'epic boards', :js do
     end
   end
 
+  context 'when user can admin epic boards' do
+    before do
+      stub_licensed_features(epics: true)
+      group.add_maintainer(user)
+      sign_in(user)
+      visit_epic_boards_page
+    end
+
+    it "shows 'Create list' button" do
+      expect(page).to have_selector('[data-testid="boards-create-list"]')
+    end
+  end
+
+  context 'when user cannot admin epic boards' do
+    before do
+      stub_licensed_features(epics: true)
+      group.add_guest(user)
+      sign_in(user)
+      visit_epic_boards_page
+    end
+
+    it "does not show 'Create list'" do
+      expect(page).not_to have_selector('[data-testid="boards-create-list"]')
+    end
+  end
+
   def visit_epic_boards_page
     visit group_epic_boards_path(group)
     wait_for_requests
+  end
+
+  def list_header(list)
+    find(".board[data-id='gid://gitlab/Boards::EpicList/#{list.id}'] .board-header")
   end
 end

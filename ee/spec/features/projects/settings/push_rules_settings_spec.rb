@@ -20,7 +20,7 @@ RSpec.describe 'Project settings > [EE] repository' do
         visit project_settings_repository_path(project)
 
         fill_in input_id, with: commit_message
-        click_button 'Save Push Rules'
+        click_button 'Save push rules'
       end
 
       it 'displays the new value in the form' do

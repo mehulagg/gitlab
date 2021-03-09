@@ -1,5 +1,13 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.9.3 (2021-03-08)
+
+- No changes.
+
+## 13.9.2 (2021-03-04)
+
+- No changes.
+
 ## 13.9.1 (2021-02-23)
 
 - No changes.
@@ -158,6 +166,10 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Review UI text - repo push rules settings. !52797
 
 
+## 13.8.5 (2021-03-04)
+
+- No changes.
+
 ## 13.8.4 (2021-02-11)
 
 ### Security (1 change)
@@ -299,6 +311,10 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Update what's new UI text. !51422
 - Enable DevOps Adoption Report feature flag if any Segments already exist. !51602
 
+
+## 13.7.8 (2021-03-04)
+
+- No changes.
 
 ## 13.7.7 (2021-02-11)
 

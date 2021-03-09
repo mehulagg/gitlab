@@ -9,32 +9,54 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
   let_it_be(:jira_service) { create(:jira_service, project: project, url: 'http://jira.com', api_url: 'http://api.jira.com') }
 
   let(:reporter) do
-    double(
+    {
       'displayName' => 'reporter',
       'avatarUrls' => { '48x48' => 'http://reporter.avatar' },
-      'name' => double
-    )
+      'name' => 'reporter@reporter.com'
+    }
   end
 
   let(:assignee) do
-    double(
+    {
       'displayName' => 'assignee',
       'avatarUrls' => { '48x48' => 'http://assignee.avatar' },
-      'name' => double
-    )
+      'name' => 'assignee@assignee.com'
+    }
+  end
+
+  let(:comment_author) do
+    {
+      'displayName' => 'comment_author',
+      'avatarUrls' => { '48x48' => 'http://comment_author.avatar' },
+      'name' => 'comment@author.com'
+    }
   end
 
   let(:jira_issue) do
     double(
       summary: 'Title',
-      renderedFields: { 'description' => '<p>Description</p>' },
+      renderedFields: {
+        'description' => '<p>Description</p>',
+        'comment' => {
+          'comments' => [
+            {
+              'author' => comment_author,
+              'body' => '<p>Comment</p>',
+              'created' => '2020-06-25T15:50:00.000+0000',
+              'updated' => '2020-06-25T15:51:00.000+0000'
+            }
+          ]
+        }
+      },
       created: '2020-06-25T15:39:30.000+0000',
       updated: '2020-06-26T15:38:32.000+0000',
       duedate: '2020-06-27T15:40:30.000+0000',
       resolutiondate: '2020-06-27T13:23:51.000+0000',
       labels: ['backend'],
-      reporter: reporter,
-      assignee: assignee,
+      fields: {
+        'reporter' => reporter,
+        'assignee' => assignee
+      },
       project: double(key: 'GL'),
       key: 'GL-5',
       status: double(name: 'To Do')
@@ -64,29 +86,37 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       ],
       author: hash_including(
         name: 'reporter',
+        username: 'reporter@reporter.com',
         avatar_url: 'http://reporter.avatar'
       ),
       assignees: [
         hash_including(
           name: 'assignee',
+          username: 'assignee@assignee.com',
           avatar_url: 'http://assignee.avatar'
         )
       ],
       web_url: 'http://jira.com/browse/GL-5',
       references: { relative: 'GL-5' },
-      external_tracker: 'jira'
+      external_tracker: 'jira',
+      comments: [
+        hash_including(
+          name: 'comment_author',
+          username: 'comment@author.com',
+          avatar_url: 'http://comment_author.avatar',
+          note: "<p dir=\"auto\">Comment</p>",
+          created_at: '2020-06-25T15:50:00.000+0000'.to_datetime.utc,
+          updated_at: '2020-06-25T15:51:00.000+0000'.to_datetime.utc
+        )
+      ]
     )
   end
 
   context 'with Jira Server configuration' do
-    before do
-      allow(reporter).to receive(:name).and_return('reporter@reporter.com')
-      allow(assignee).to receive(:name).and_return('assignee@assignee.com')
-    end
-
     it 'returns the Jira Server profile URL' do
       expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
       expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee@assignee.com')
+      expect(subject[:comments].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=comment@author.com')
     end
 
     context 'with only url' do
@@ -104,20 +134,20 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
 
   context 'with Jira Cloud configuration' do
     before do
-      allow(reporter).to receive(:accountId).and_return('12345')
-      allow(assignee).to receive(:accountId).and_return('67890')
+      reporter['accountId'] = '12345'
+      assignee['accountId'] = '67890'
+      comment_author['accountId'] = '54321'
     end
 
     it 'returns the Jira Cloud profile URL' do
       expect(subject[:author]).to include(web_url: 'http://jira.com/people/12345')
       expect(subject[:assignees].first).to include(web_url: 'http://jira.com/people/67890')
+      expect(subject[:comments].first).to include(web_url: 'http://jira.com/people/54321')
     end
   end
 
   context 'without assignee' do
-    before do
-      allow(jira_issue).to receive(:assignee).and_return(nil)
-    end
+    let(:assignee) { nil }
 
     it 'returns an empty array' do
       expect(subject).to include(assignees: [])

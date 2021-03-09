@@ -13,7 +13,8 @@ export const summaryStatus = (state) => {
 };
 
 export const metrics = (state) => [
+  ...state.changedMetrics,
   ...state.newMetrics.map((metric) => ({ ...metric, isNew: true })),
-  ...state.existingMetrics,
   ...state.removedMetrics.map((metric) => ({ ...metric, wasRemoved: true })),
+  ...state.unchangedMetrics,
 ];

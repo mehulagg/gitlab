@@ -179,6 +179,7 @@ When the user is authenticated and `simple` is not set this returns something li
       "packages_size": 0,
       "snippets_size": 0
     },
+    "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-client",
     "_links": {
       "self": "http://example.com/api/v4/projects",
       "issues": "http://example.com/api/v4/projects/1/issues",
@@ -284,6 +285,7 @@ When the user is authenticated and `simple` is not set this returns something li
       "packages_size": 0,
       "snippets_size": 0
     },
+    "container_registry_image_prefix": "registry.example.com/brightbox/puppet",
     "_links": {
       "self": "http://example.com/api/v4/projects",
       "issues": "http://example.com/api/v4/projects/1/issues",
@@ -439,6 +441,7 @@ GET /users/:user_id/projects
       "packages_size": 0,
       "snippets_size": 0
     },
+    "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-client",
     "_links": {
       "self": "http://example.com/api/v4/projects",
       "issues": "http://example.com/api/v4/projects/1/issues",
@@ -544,6 +547,7 @@ GET /users/:user_id/projects
       "packages_size": 0,
       "snippets_size": 0
     },
+    "container_registry_image_prefix": "registry.example.com/brightbox/puppet",
     "_links": {
       "self": "http://example.com/api/v4/projects",
       "issues": "http://example.com/api/v4/projects/1/issues",
@@ -658,6 +662,7 @@ Example response:
       "lfs_objects_size": 0,
       "job_artifacts_size": 0
     },
+    "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-client",
     "_links": {
       "self": "http://example.com/api/v4/projects",
       "issues": "http://example.com/api/v4/projects/1/issues",
@@ -758,6 +763,7 @@ Example response:
       "lfs_objects_size": 0,
       "job_artifacts_size": 0
     },
+    "container_registry_image_prefix": "registry.example.com/brightbox/puppet",
     "_links": {
       "self": "http://example.com/api/v4/projects",
       "issues": "http://example.com/api/v4/projects/1/issues",
@@ -921,6 +927,7 @@ GET /projects/:id
     "packages_size": 0,
     "snippets_size": 0
   },
+  "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-client",
   "_links": {
     "self": "http://example.com/api/v4/projects",
     "issues": "http://example.com/api/v4/projects/1/issues",
@@ -998,6 +1005,20 @@ If the project is a fork, and you provide a valid token to authenticate, the
 }
 ```
 
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/)
+can also see the `issues_template` and `merge_requests_template` parameters:
+[introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55718)
+in GitLab 13.10.
+
+```json
+{
+  "id": 3,
+  "issues_template": null,
+  "merge_requests_template": null,
+  ...
+}
+```
+
 ## Get project users
 
 Get the users list of a project.
@@ -1029,6 +1050,43 @@ GET /projects/:id/users
     "state": "blocked",
     "avatar_url": "http://gravatar.com/../e32131cd8.jpeg",
     "web_url": "http://localhost:3000/jack_smith"
+  }
+]
+```
+
+## List a project's groups
+
+Get a list of ancestor groups for this project.
+
+```plaintext
+GET /projects/:id/groups
+```
+
+| Attribute                   | Type              | Required               | Description |
+|-----------------------------|-------------------|------------------------|-------------|
+| `id`                        | integer/string    | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
+| `search`                    | string            | **{dotted-circle}** No | Search for specific groups. |
+| `skip_groups`               | array of integers | **{dotted-circle}** No | Skip the group IDs passed. |
+| `with_shared`               | boolean           | **{dotted-circle}** No | Include projects shared with this group. Default is `false`. |
+| `shared_min_access_level`   | integer           | **{dotted-circle}** No | Limit to shared groups with at least this [access level](members.md#valid-access-levels). |
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Foobar Group",
+    "avatar_url": "http://localhost:3000/uploads/group/avatar/1/foo.jpg",
+    "web_url": "http://localhost:3000/groups/foo-bar",
+    "full_name": "Foobar Group",
+    "full_path": "foo-bar",
+  },
+  {
+    "id": 2,
+    "name": "Shared Group",
+    "avatar_url": "http://gitlab.example.com/uploads/group/avatar/1/bar.jpg",
+    "web_url": "http://gitlab.example.com/groups/foo/bar",
+    "full_name": "Shared Group",
+    "full_path": "foo/shared",
   }
 ]
 ```
@@ -1259,6 +1317,8 @@ PUT /projects/:id
 | `visibility`                                                | string         | **{dotted-circle}** No | See [project visibility level](#project-visibility-level). |
 | `wiki_access_level`                                         | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `wiki_enabled`                                              | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable wiki for this project. Use `wiki_access_level` instead. |
+| `issues_template` **(PREMIUM)**                             | string         | **{dotted-circle}** No | Default description for Issues. Description is parsed with GitLab Flavored Markdown. |
+| `merge_requests_template` **(PREMIUM)**                     | string         | **{dotted-circle}** No | Default description for Merge Requests. Description is parsed with GitLab Flavored Markdown.  |
 
 ## Fork project
 
@@ -1373,6 +1433,7 @@ Example responses:
     "merge_method": "merge",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
+    "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
     "_links": {
       "self": "http://example.com/api/v4/projects",
       "issues": "http://example.com/api/v4/projects/1/issues",
@@ -1467,6 +1528,7 @@ Example response:
   "merge_method": "merge",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
     "issues": "http://example.com/api/v4/projects/1/issues",
@@ -1559,6 +1621,7 @@ Example response:
   "merge_method": "merge",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
     "issues": "http://example.com/api/v4/projects/1/issues",
@@ -1745,6 +1808,7 @@ Example response:
   "merge_method": "merge",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
     "issues": "http://example.com/api/v4/projects/1/issues",
@@ -1858,6 +1922,7 @@ Example response:
   "merge_method": "merge",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
+  "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
   "_links": {
     "self": "http://example.com/api/v4/projects",
     "issues": "http://example.com/api/v4/projects/1/issues",
@@ -1878,7 +1943,7 @@ This endpoint:
   merge requests).
 - From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) on
   [Premium or higher](https://about.gitlab.com/pricing/) tiers, group
-  admins can [configure](../user/group/index.md#enabling-delayed-project-removal)
+  admins can [configure](../user/group/index.md#enable-delayed-project-removal)
   projects within a group to be deleted after a delayed period. When enabled,
   actual deletion happens after the number of days specified in the
   [default deletion delay](../user/admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
@@ -1886,7 +1951,7 @@ This endpoint:
 WARNING:
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935)
 in GitLab 12.6 was changed to [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382)
-in GitLab 13.2, as discussed in [Enabling delayed project removal](../user/group/index.md#enabling-delayed-project-removal).
+in GitLab 13.2, as discussed in [Enable delayed project removal](../user/group/index.md#enable-delayed-project-removal).
 
 ```plaintext
 DELETE /projects/:id
@@ -2354,6 +2419,7 @@ Example response:
     "avatar_url": null,
     "web_url": "https://gitlab.example.com/groups/cute-cats"
   },
+  "container_registry_image_prefix": "registry.example.com/cute-cats/hello-world",
   "_links": {
     "self": "https://gitlab.example.com/api/v4/projects/7",
     "issues": "https://gitlab.example.com/api/v4/projects/7/issues",

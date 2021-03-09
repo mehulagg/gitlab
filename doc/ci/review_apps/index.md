@@ -56,7 +56,7 @@ After adding Review Apps to your workflow, you follow the branched Git flow. Tha
 
 ## Configuring Review Apps
 
-Review Apps are built on [dynamic environments](../environments/index.md#configuring-dynamic-environments), which allow you to dynamically create a new environment for each branch.
+Review Apps are built on [dynamic environments](../environments/index.md#create-a-dynamic-environment), which allow you to dynamically create a new environment for each branch.
 
 The process of configuring Review Apps is as follows:
 
@@ -89,7 +89,7 @@ you can copy and paste into `.gitlab-ci.yml` as a starting point. To do so:
 
 ## Review Apps auto-stop
 
-See how to [configure Review Apps environments to expire and auto-stop](../environments/index.md#environments-auto-stop)
+See how to [configure Review Apps environments to expire and auto-stop](../environments/index.md#stop-an-environment-after-a-certain-time-period)
 after a given period of time.
 
 ## Review Apps examples
@@ -321,7 +321,3 @@ the user must enter a [personal access token](../../user/profile/personal_access
 with `api` scope before submitting feedback.
 
 This same method can be used to require authentication for any public projects.
-
-## Limitations
-
-Review App limitations are the same as [environments limitations](../environments/index.md#limitations).

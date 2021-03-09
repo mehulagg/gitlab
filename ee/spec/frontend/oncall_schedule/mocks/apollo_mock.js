@@ -10,6 +10,7 @@ export const participants = [
     name: 'test',
     avatar: '',
     avatarUrl: '',
+    webUrl: '',
   },
   {
     id: '2',
@@ -17,6 +18,7 @@ export const participants = [
     name: 'hello',
     avatar: '',
     avatarUrl: '',
+    webUrl: '',
   },
 ];
 
@@ -138,9 +140,14 @@ export const createRotationResponse = {
       oncallRotation: {
         id: '44',
         name: 'Test',
-        startsAt: '2020-12-17T12:00:00Z',
+        startsAt: '2020-12-20T12:00:00Z',
+        endsAt: '2021-03-17T12:00:00Z',
         length: 5,
         lengthUnit: 'WEEKS',
+        activePeriod: {
+          startTime: '02:00',
+          endTime: '10:00',
+        },
         participants: {
           nodes: [
             {
@@ -171,9 +178,14 @@ export const createRotationResponseWithErrors = {
       oncallRotation: {
         id: '44',
         name: 'Test',
-        startsAt: '2020-12-17T12:00:00Z',
+        startsAt: '2020-12-20T12:00:00Z',
+        endsAt: '2021-03-17T12:00:00Z',
         length: 5,
         lengthUnit: 'WEEKS',
+        activePeriod: {
+          startTime: '02:00',
+          endTime: '10:00',
+        },
         participants: {
           nodes: [
             {

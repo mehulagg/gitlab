@@ -225,6 +225,10 @@ export default {
         </div>
       </template>
     </gl-table>
-    <devops-adoption-delete-modal v-if="selectedSegment" :segment="selectedSegment" />
+    <devops-adoption-delete-modal
+      v-if="selectedSegment"
+      :segment="selectedSegment"
+      @trackModalOpenState="$emit('trackModalOpenState', $event)"
+    />
   </div>
 </template>

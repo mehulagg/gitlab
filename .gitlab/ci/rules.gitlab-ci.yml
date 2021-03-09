@@ -193,6 +193,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
 
 .qa-patterns: &qa-patterns
   - ".dockerignore"
@@ -215,6 +216,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
   # Backstage changes
   - "Dangerfile"
   - "danger/**/*"
@@ -240,6 +242,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
   # QA changes
   - ".dockerignore"
   - "qa/**/*"
@@ -261,6 +264,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
   # Backstage changes
   - "Dangerfile"
   - "danger/**/*"
@@ -446,6 +450,8 @@
 
 .frontend:rules:bundle-size-review:
   rules:
+    - <<: *if-not-canonical-namespace
+      when: never
     - if: '$DANGER_GITLAB_API_TOKEN && $CI_MERGE_REQUEST_IID && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main")'
       changes: *frontend-patterns
       allow_failure: true
@@ -604,10 +610,9 @@
     - <<: *if-merge-request
       changes: ["config/**/*"]
 
-.rails:rules:default-refs-code-backstage-qa:
+.rails:rules:code-backstage-qa:
   rules:
-    - <<: *if-default-refs
-      changes: *code-backstage-qa-patterns
+    - changes: *code-backstage-qa-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-only-migration:
@@ -819,8 +824,7 @@
 
 .rails:rules:detect-tests:
   rules:
-    - <<: *if-default-refs
-      changes: *code-backstage-patterns
+    - changes: *code-backstage-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:rspec-foss-impact:
@@ -1133,8 +1137,7 @@
 #######################
 .test-metadata:rules:retrieve-tests-metadata:
   rules:
-    - <<: *if-default-refs
-      changes: *code-backstage-patterns
+    - changes: *code-backstage-patterns
       when: on_success
     - <<: *if-merge-request-title-run-all-rspec
 

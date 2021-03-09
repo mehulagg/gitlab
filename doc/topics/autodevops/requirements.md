@@ -101,7 +101,7 @@ If you don't have Kubernetes or Prometheus installed, then
 [Auto Deploy](stages.md#auto-deploy), and [Auto Monitoring](stages.md#auto-monitoring)
 are skipped.
 
-After all requirements are met, you can [enable Auto DevOps](index.md#enablingdisabling-auto-devops).
+After all requirements are met, you can [enable Auto DevOps](index.md#enable-or-disable-auto-devops).
 
 ## Auto DevOps requirements for Amazon ECS
 
@@ -112,7 +112,7 @@ You can choose to target [AWS ECS](../../ci/cloud_deployment/index.md) as a depl
 To get started on Auto DevOps to AWS ECS, you must add a specific CI/CD variable.
 To do so, follow these steps:
 
-1. In your project, go to **Settings > CI / CD** and expand the **Variables**
+1. In your project, go to **Settings > CI/CD** and expand the **Variables**
    section.
 
 1. Specify which AWS platform to target during the Auto DevOps deployment

@@ -655,6 +655,7 @@ RSpec.describe Vulnerabilities::Finding do
     let(:confirmed_finding) { create(:vulnerabilities_finding, :confirmed) }
     let(:resolved_finding) { create(:vulnerabilities_finding, :resolved) }
     let(:dismissed_finding) { create(:vulnerabilities_finding, :dismissed) }
+    let(:detected_finding) { create(:vulnerabilities_finding, :detected) }
     let(:finding_with_issue) { create(:vulnerabilities_finding, :with_issue_feedback) }
 
     it 'returns the expected state for a unresolved finding' do
@@ -671,6 +672,10 @@ RSpec.describe Vulnerabilities::Finding do
 
     it 'returns the expected state for a dismissed finding' do
       expect(dismissed_finding.state).to eq 'dismissed'
+    end
+
+    it 'returns the expected state for a detected finding' do
+      expect(detected_finding.state).to eq 'detected'
     end
 
     context 'when a vulnerability present for a dismissed finding' do

@@ -19,11 +19,10 @@ const getQueryHeaders = (etagResource) => {
     headers: {
       'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
       'X-GITLAB-GRAPHQL-RESOURCE-ETAG': etagResource,
-      'X-REQUESTED_WITH': 'XMLHttpRequest',
+      'X-Requested-With': 'XMLHttpRequest',
     },
   };
 };
-/* eslint-enable @gitlab/require-i18n-strings */
 
 const reportToSentry = (component, failureType) => {
   Sentry.withScope((scope) => {
@@ -31,6 +30,39 @@ const reportToSentry = (component, failureType) => {
     Sentry.captureException(failureType);
   });
 };
+
+const serializeGqlErr = (gqlError) => {
+  const { locations, message, path } = gqlError;
+
+  return `
+    ${message}.
+    Locations: ${locations
+      .flatMap((loc) => Object.entries(loc))
+      .flat(2)
+      .join(' ')}.
+    Path: ${path.join(', ')}.
+  `;
+};
+
+const serializeLoadErrors = (errors) => {
+  const { gqlError, graphQLErrors, networkError, message } = errors;
+
+  if (graphQLErrors) {
+    return graphQLErrors.map((err) => serializeGqlErr(err)).join('; ');
+  }
+
+  if (gqlError) {
+    return serializeGqlErr(gqlError);
+  }
+
+  if (networkError) {
+    return `Network error: ${networkError.message}`;
+  }
+
+  return message;
+};
+
+/* eslint-enable @gitlab/require-i18n-strings */
 
 const toggleQueryPollingByVisibility = (queryRef, interval = 10000) => {
   const stopStartQuery = (query) => {
@@ -82,6 +114,8 @@ const validateConfigPaths = (value) => value.graphqlResourceEtag?.length > 0;
 export {
   getQueryHeaders,
   reportToSentry,
+  serializeGqlErr,
+  serializeLoadErrors,
   toggleQueryPollingByVisibility,
   unwrapPipelineData,
   validateConfigPaths,

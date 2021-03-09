@@ -1,6 +1,6 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
@@ -21,9 +21,30 @@ export const i18n = {
   cancel: __('Cancel'),
 };
 
+export const formEmptyState = {
+  name: '',
+  participants: [],
+  rotationLength: {
+    length: 1,
+    unit: LENGTH_ENUM.days,
+  },
+  startsAt: {
+    date: null,
+    time: 0,
+  },
+  endsAt: {
+    date: null,
+    time: 0,
+  },
+  isRestrictedToTime: false,
+  restrictedTo: {
+    startTime: 0,
+    endTime: 0,
+  },
+};
+
 export default {
   i18n,
-  LENGTH_ENUM,
   components: {
     GlModal,
     GlAlert,
@@ -67,31 +88,13 @@ export default {
       participants: [],
       loading: false,
       ptSearchTerm: '',
-      form: {
-        name: '',
-        participants: [],
-        rotationLength: {
-          length: 1,
-          unit: this.$options.LENGTH_ENUM.days,
-        },
-        startsAt: {
-          date: null,
-          time: 0,
-        },
-        endsOn: {
-          date: null,
-          time: 0,
-        },
-        restrictedTo: {
-          from: 0,
-          to: 0,
-        },
-      },
+      form: cloneDeep(formEmptyState),
       error: '',
       validationState: {
         name: true,
         participants: true,
         startsAt: true,
+        endsAt: true,
       },
     };
   },
@@ -129,26 +132,54 @@ export default {
         name,
         rotationLength,
         participants,
-        startsAt: { date, time },
+        startsAt: { date: startDate, time: startTime },
+        endsAt: { date: endDate, time: endTime },
       } = this.form;
 
-      return {
+      const variables = {
         projectPath: this.projectPath,
         scheduleIid: this.schedule.iid,
         name,
         startsAt: {
-          date: formatDate(date, 'yyyy-mm-dd'),
-          time: format24HourTimeStringFromInt(time),
+          date: formatDate(startDate, 'yyyy-mm-dd'),
+          time: format24HourTimeStringFromInt(startTime),
         },
+        endsAt: endDate
+          ? {
+              date: formatDate(endDate, 'yyyy-mm-dd'),
+              time: format24HourTimeStringFromInt(endTime),
+            }
+          : null,
         rotationLength: {
           ...rotationLength,
           length: parseInt(rotationLength.length, 10),
         },
         participants: getParticipantsForSave(participants),
       };
+      if (this.form.isRestrictedToTime) {
+        variables.activePeriod = {
+          startTime: format24HourTimeStringFromInt(this.form.restrictedTo.startTime),
+          endTime: format24HourTimeStringFromInt(this.form.restrictedTo.endTime),
+        };
+      }
+      return variables;
     },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
+    },
+    isEndDateValid() {
+      const startsAt = this.form.startsAt.date?.getTime();
+      const endsAt = this.form.endsAt.date?.getTime();
+
+      if (!startsAt || !endsAt) {
+        // If start or end is not present, we consider the end date valid
+        return true;
+      } else if (startsAt < endsAt) {
+        return true;
+      } else if (startsAt === endsAt) {
+        return this.form.startsAt.time < this.form.endsAt.time;
+      }
+      return false;
     },
   },
   methods: {
@@ -244,9 +275,15 @@ export default {
         this.validationState.name = isNameFieldValid(this.form.name);
       } else if (key === 'participants') {
         this.validationState.participants = this.form.participants.length > 0;
-      } else if (key === 'startsAt.date') {
+      } else if (key === 'startsAt.date' || key === 'startsAt.time') {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
+        this.validationState.endsAt = this.isEndDateValid;
+      } else if (key === 'endsAt.date' || key === 'endsAt.time') {
+        this.validationState.endsAt = this.isEndDateValid;
       }
+    },
+    afterCloseModal() {
+      this.form = cloneDeep(formEmptyState);
     },
   },
 };
@@ -261,6 +298,7 @@ export default {
     :action-cancel="actionsProps.cancel"
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
+    @hide="afterCloseModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}

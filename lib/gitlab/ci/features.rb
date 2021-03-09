@@ -38,10 +38,6 @@ module Gitlab
         ::Feature.enabled?(:ci_disallow_to_create_merge_request_pipelines_in_target_project, target_project)
       end
 
-      def self.project_transactionless_destroy?(project)
-        Feature.enabled?(:project_transactionless_destroy, project, default_enabled: false)
-      end
-
       def self.trace_overwrite?
         ::Feature.enabled?(:ci_trace_overwrite, type: :ops, default_enabled: false)
       end
@@ -66,6 +62,10 @@ module Gitlab
 
       def self.display_codequality_backend_comparison?(project)
         ::Feature.enabled?(:codequality_backend_comparison, project, default_enabled: :yaml)
+      end
+
+      def self.multiple_cache_per_job?
+        ::Feature.enabled?(:multiple_cache_per_job, default_enabled: :yaml)
       end
     end
   end

@@ -58,10 +58,12 @@ describe('Agents', () => {
       {
         id: '1',
         name: 'agent-1',
+        webPath: '/agent-1',
       },
       {
         id: '2',
         name: 'agent-2',
+        webPath: '/agent-2',
       },
     ];
 
@@ -84,7 +86,7 @@ describe('Agents', () => {
 
     it('should pass agent and folder info to table component', () => {
       expect(findAgentTable().props('agents')).toEqual([
-        { id: '1', name: 'agent-1', configFolder: undefined },
+        { id: '1', name: 'agent-1', webPath: '/agent-1', configFolder: undefined },
         {
           id: '2',
           name: 'agent-2',
@@ -93,6 +95,7 @@ describe('Agents', () => {
             path: '.gitlab/agents/agent-2',
             webPath: '/project/path/.gitlab/agents/agent-2',
           },
+          webPath: '/agent-2',
         },
       ]);
     });

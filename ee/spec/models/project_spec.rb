@@ -363,6 +363,19 @@ RSpec.describe Project do
 
       it { is_expected.to eq([project_2, project_3, project_1]) }
     end
+
+    describe '.with_code_coverage' do
+      let_it_be(:project_1) { create(:project) }
+      let_it_be(:project_2) { create(:project) }
+      let_it_be(:project_3) { create(:project) }
+
+      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1) }
+      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_2) }
+
+      subject { described_class.with_code_coverage }
+
+      it { is_expected.to contain_exactly(project_1, project_2) }
+    end
   end
 
   describe 'validations' do
@@ -998,11 +1011,11 @@ RSpec.describe Project do
       end
 
       it 'has a shared runner' do
-        expect(project.any_runners?).to be_truthy
+        expect(project.any_active_runners?).to be_truthy
       end
 
       it 'checks the presence of shared runner' do
-        expect(project.any_runners? { |runner| runner == shared_runner }).to be_truthy
+        expect(project.any_active_runners? { |runner| runner == shared_runner }).to be_truthy
       end
 
       context 'with used pipeline minutes' do
@@ -1014,7 +1027,7 @@ RSpec.describe Project do
         end
 
         it 'does not have a shared runner' do
-          expect(project.any_runners?).to be_falsey
+          expect(project.any_active_runners?).to be_falsey
         end
       end
     end
@@ -1701,6 +1714,35 @@ RSpec.describe Project do
       it 'returns nothing' do
         is_expected.to be_nil
       end
+    end
+  end
+
+  describe '#security_reports_up_to_date_for_ref?' do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:merge_request) do
+      create(:ee_merge_request,
+             source_project: project,
+             source_branch: 'feature1',
+             target_branch: project.default_branch)
+    end
+
+    let_it_be(:pipeline) do
+      create(:ee_ci_pipeline,
+             :with_sast_report,
+             project: project,
+             ref: merge_request.target_branch)
+    end
+
+    subject { project.security_reports_up_to_date_for_ref?(merge_request.target_branch) }
+
+    context 'when the target branch security reports are up to date' do
+      it { is_expected.to be true }
+    end
+
+    context 'when the target branch security reports are out of date' do
+      let_it_be(:bad_pipeline) { create(:ee_ci_pipeline, :failed, project: project, ref: merge_request.target_branch) }
+
+      it { is_expected.to be false }
     end
   end
 

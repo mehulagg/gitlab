@@ -81,7 +81,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
             select2 group_to_share_with.id, from: '#link_group_id'
             page.find('body').click
-            find('.btn-success').click
+            find('.btn-confirm').click
 
             click_link 'Groups'
 
@@ -123,7 +123,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
             select2 group_to_share_with.id, from: '#link_group_id'
             page.find('body').click
-            find('.btn-success').click
+            find('.btn-confirm').click
 
             click_link 'Groups'
 

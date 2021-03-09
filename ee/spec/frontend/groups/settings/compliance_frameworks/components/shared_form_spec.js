@@ -10,7 +10,11 @@ import { GlFormGroup, GlFormInput } from '../stubs';
 
 describe('SharedForm', () => {
   let wrapper;
-  const defaultPropsData = { groupEditPath: 'group-1', pipelineConfigurationFullPathEnabled: true };
+  const defaultPropsData = {
+    groupEditPath: 'group-1',
+    pipelineConfigurationFullPathEnabled: true,
+    submitButtonText: 'Save changes',
+  };
 
   const findForm = () => wrapper.findComponent(GlForm);
   const findNameGroup = () => wrapper.find('[data-testid="name-input-group"]');
@@ -63,6 +67,12 @@ describe('SharedForm', () => {
       wrapper = createComponent();
 
       expect(findNameGroup().text()).toContain('Use :: to create a scoped set (eg. SOX::AWS)');
+    });
+
+    it('sets the submit button text from the property', () => {
+      wrapper = createComponent();
+
+      expect(findSubmitBtn().text()).toBe(defaultPropsData.submitButtonText);
     });
 
     it.each([true, false])(
@@ -212,6 +222,20 @@ describe('SharedForm', () => {
       await findForm().vm.$emit('submit', { preventDefault: () => {} });
 
       expect(wrapper.emitted('submit')).toHaveLength(1);
+    });
+  });
+
+  describe('On pipeline configuration path input', () => {
+    it('updates the pipelineConfigurationFullPath value', async () => {
+      jest.spyOn(Utils, 'fetchPipelineConfigurationFileExists').mockResolvedValue(true);
+
+      wrapper = createComponent();
+
+      await findPipelineConfigurationInput().vm.$emit('input', 'foo.yaml@bar/baz');
+
+      expect(wrapper.emitted('update:pipelineConfigurationFullPath')[0][0]).toBe(
+        'foo.yaml@bar/baz',
+      );
     });
   });
 });

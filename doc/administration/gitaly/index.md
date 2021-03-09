@@ -126,6 +126,11 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
+The following digraph illustrates communication between Gitaly servers and GitLab Rails showing
+the default ports for HTTP and HTTPs communication.
+
+![Gitaly network architecture diagram](img/gitaly_network_13_9.png)
+
 WARNING:
 Gitaly servers must not be exposed to the public internet as Gitaly's network traffic is unencrypted
 by default. The use of firewall is highly recommended to restrict access to the Gitaly server.
@@ -235,6 +240,7 @@ Method 2:
 ### Configure Gitaly servers
 
 On the Gitaly servers, you must configure storage paths and enable the network listener.
+The Gitaly server must be able to read, write, and set permissions on the configured path.
 
 If you want to reduce the risk of downtime when you enable authentication, you can temporarily
 disable enforcement. For more information, see the documentation on configuring
@@ -250,8 +256,6 @@ disable enforcement. For more information, see the documentation on configuring
    -->
 
    ```ruby
-   # /etc/gitlab/gitlab.rb
-
    # Avoid running unnecessary services on the Gitaly server
    postgresql['enable'] = false
    redis['enable'] = false
@@ -284,6 +288,10 @@ disable enforcement. For more information, see the documentation on configuring
    # balancer.
    # Don't forget to copy `/etc/gitlab/gitlab-secrets.json` from Gitaly client to Gitaly server.
    gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
+
+   # Authentication token to ensure only authorized servers can communicate with
+   # Gitaly server
+   gitaly['auth_token'] = 'AUTH_TOKEN'
 
    # Make Gitaly accept connections on all network interfaces. You must use
    # firewalls to restrict access to this address/port.
@@ -387,10 +395,10 @@ if previously enabled manually.
 Gitaly makes the following assumptions:
 
 - Your `gitaly1.internal` Gitaly server can be reached at `gitaly1.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read, write, and set permissions on `/mnt/gitlab/default` and
-  `/mnt/gitlab/storage1`.
+  clients, and that Gitaly server can read, write, and set permissions on `/var/opt/gitlab/git-data` and
+  `/mnt/gitlab/git-data`.
 - Your `gitaly2.internal` Gitaly server can be reached at `gitaly2.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read, write, and set permissions on `/mnt/gitlab/storage2`.
+  clients, and that Gitaly server can read, write, and set permissions on `/srv/gitlab/git-data`.
 - Your `gitaly1.internal` and `gitaly2.internal` Gitaly servers can reach each other.
 
 You can't define Gitaly servers with some as a local Gitaly server
@@ -595,7 +603,8 @@ To configure Gitaly with TLS:
    ```
 
 1. Copy all Gitaly server certificates (or their certificate authority) to
-   `/etc/gitlab/trusted-certs` so that Gitaly servers trust the certificate when calling into themselves
+   `/etc/gitlab/trusted-certs` on all Gitaly servers and clients
+   so that Gitaly servers and clients trust the certificate when calling into themselves
    or other Gitaly servers:
 
    ```shell
@@ -1198,7 +1207,7 @@ Confirm the following are all true:
   successfully creates the project, but doesn't create the README.
 - When [tailing the logs](https://docs.gitlab.com/omnibus/settings/logs.html#tail-logs-in-a-console-on-the-server)
   on a Gitaly client and reproducing the error, you get `401` errors
-  when reaching the `/api/v4/internal/allowed` endpoint:
+  when reaching the [`/api/v4/internal/allowed`](../../development/internal_api.md) endpoint:
 
   ```shell
   # api_json.log

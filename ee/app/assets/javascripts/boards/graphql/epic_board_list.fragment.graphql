@@ -5,6 +5,8 @@ fragment EpicBoardListFragment on EpicList {
   title
   position
   listType
+  collapsed
+  epicsCount
   label {
     ...Label
   }

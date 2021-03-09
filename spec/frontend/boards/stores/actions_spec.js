@@ -293,7 +293,7 @@ describe('createIssueList', () => {
         data: {
           boardListCreate: {
             list: {},
-            errors: [{ foo: 'bar' }],
+            errors: ['foo'],
           },
         },
       }),
@@ -301,7 +301,7 @@ describe('createIssueList', () => {
 
     await actions.createIssueList({ getters, state, commit, dispatch }, { backlog: true });
 
-    expect(commit).toHaveBeenCalledWith(types.CREATE_LIST_FAILURE);
+    expect(commit).toHaveBeenCalledWith(types.CREATE_LIST_FAILURE, 'foo');
   });
 
   it('highlights list and does not re-query if it already exists', async () => {
@@ -449,6 +449,22 @@ describe('updateList', () => {
       [],
       done,
     );
+  });
+});
+
+describe('toggleListCollapsed', () => {
+  it('should commit TOGGLE_LIST_COLLAPSED mutation', async () => {
+    const payload = { listId: 'gid://gitlab/List/1', collapsed: true };
+    await testAction({
+      action: actions.toggleListCollapsed,
+      payload,
+      expectedMutations: [
+        {
+          type: types.TOGGLE_LIST_COLLAPSED,
+          payload,
+        },
+      ],
+    });
   });
 });
 

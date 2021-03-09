@@ -10,7 +10,6 @@ module EE
           argument :assignee_id,
                    ::Types::GlobalIDType[::User],
                    required: false,
-                   loads: ::Types::UserType,
                    description: 'The ID of user to be assigned to the board.'
 
           # Cannot pre-load ::Types::MilestoneType because we are also assigning values like:

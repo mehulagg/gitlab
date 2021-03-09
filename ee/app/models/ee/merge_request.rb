@@ -270,6 +270,10 @@ module EE
       end
     end
 
+    def security_reports_up_to_date?
+      project.security_reports_up_to_date_for_ref?(target_branch)
+    end
+
     private
 
     def has_approved_license_check?

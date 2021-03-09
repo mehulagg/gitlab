@@ -272,7 +272,7 @@ class User < ApplicationRecord
   enum layout: { fixed: 0, fluid: 1 }
 
   # User's Dashboard preference
-  enum dashboard: { projects: 0, stars: 1, project_activity: 2, starred_project_activity: 3, groups: 4, todos: 5, issues: 6, merge_requests: 7, operations: 8 }
+  enum dashboard: { projects: 0, stars: 1, project_activity: 2, starred_project_activity: 3, groups: 4, todos: 5, issues: 6, merge_requests: 7, operations: 8, followed_user_activity: 9 }
 
   # User's Project preference
   enum project_view: { readme: 0, activity: 1, files: 2 }
@@ -940,11 +940,7 @@ class User < ApplicationRecord
   # Returns the groups a user has access to, either through a membership or a project authorization
   def authorized_groups
     Group.unscoped do
-      if Feature.enabled?(:shared_group_membership_auth, self)
-        authorized_groups_with_shared_membership
-      else
-        authorized_groups_without_shared_membership
-      end
+      authorized_groups_with_shared_membership
     end
   end
 
@@ -1708,6 +1704,10 @@ class User < ApplicationRecord
     can?(:read_all_resources)
   end
 
+  def can_admin_all_resources?
+    can?(:admin_all_resources)
+  end
+
   def update_two_factor_requirement
     periods = expanded_groups_requiring_two_factor_authentication.pluck(:two_factor_grace_period)
 
@@ -1856,6 +1856,10 @@ class User < ApplicationRecord
 
   def created_recently?
     created_at > Devise.confirm_within.ago
+  end
+
+  def find_or_initialize_callout(feature_name)
+    callouts.find_or_initialize_by(feature_name: ::UserCallout.feature_names[feature_name])
   end
 
   protected

@@ -17,10 +17,6 @@ export default {
       type: Object,
       required: true,
     },
-    lastTestReportManuallyCreated: {
-      type: Boolean,
-      required: true,
-    },
     elementType: {
       type: String,
       required: false,
@@ -51,15 +47,6 @@ export default {
         tooltipTitle: '',
       };
     },
-    hideTestReportBadge() {
-      // User can manually indicate that a requirement has not been satisfied
-      // Internally, we create a test report with FAILED state with null build_id
-      // (this type of test report with null build id is said to be manually created).
-      // In this case, we do not show 'failed' badge.
-      return (
-        this.testReport.state === TestReportStatus.Failed && this.lastTestReportManuallyCreated
-      );
-    },
   },
   methods: {
     getTestReportBadgeTarget() {
@@ -70,7 +57,7 @@ export default {
 </script>
 
 <template>
-  <component :is="elementType" v-if="!hideTestReportBadge" class="requirement-status-badge">
+  <component :is="elementType" class="requirement-status-badge">
     <gl-badge ref="testReportBadge" :variant="testReportBadge.variant">
       <gl-icon :name="testReportBadge.icon" class="mr-1" />
       {{ testReportBadge.text }}

@@ -1,6 +1,7 @@
 import { union, unionBy } from 'lodash';
 import Vue from 'vue';
 import { moveIssueListHelper } from '~/boards/boards_util';
+import { issuableTypes } from '~/boards/constants';
 import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
 import { s__ } from '~/locale';
 import { ErrorMessages } from '../constants';
@@ -84,7 +85,10 @@ export default {
   },
 
   [mutationTypes.RECEIVE_ITEMS_FOR_LIST_FAILURE]: (state, listId) => {
-    state.error = state.isEpicBoard ? ErrorMessages.fetchEpicsError : ErrorMessages.fetchIssueError;
+    state.error =
+      state.issuableType === issuableTypes.epic
+        ? ErrorMessages.fetchEpicsError
+        : ErrorMessages.fetchIssueError;
     Vue.set(state.listsFlags, listId, { isLoading: false, isLoadingMore: false });
   },
 

@@ -339,6 +339,14 @@
   :weight: 3
   :idempotent: true
   :tags: []
+- :name: dora_metrics:dora_daily_metrics_refresh
+  :feature_category: :dora_metrics
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: epics:epics_update_epics_dates
   :feature_category: :epics
   :has_external_dependencies:

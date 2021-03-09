@@ -9,6 +9,7 @@ import PipelineEditorEmptyState from './components/ui/pipeline_editor_empty_stat
 import { COMMIT_FAILURE, COMMIT_SUCCESS, DEFAULT_FAILURE, LOAD_FAILURE_UNKNOWN } from './constants';
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
+import getCurrentBranch from './graphql/queries/client/current_branch.graphql';
 import PipelineEditorHome from './pipeline_editor_home.vue';
 
 export default {
@@ -23,9 +24,6 @@ export default {
     ciConfigPath: {
       default: '',
     },
-    defaultBranch: {
-      default: null,
-    },
     projectFullPath: {
       default: '',
     },
@@ -36,7 +34,8 @@ export default {
       // Success and failure state
       failureType: null,
       failureReasons: [],
-      hasNoCiConfigFile: false,
+      showStartScreen: false,
+      isNewConfigFile: false,
       initialCiFileContent: '',
       lastCommittedContent: '',
       currentCiFileContent: '',
@@ -48,11 +47,16 @@ export default {
   apollo: {
     initialCiFileContent: {
       query: getBlobContent,
+      // If we are working off a new file, we don't want to fetch
+      // the base data as there is nothing to fetch.
+      skip({ isNewConfigFile }) {
+        return isNewConfigFile;
+      },
       variables() {
         return {
           projectPath: this.projectFullPath,
           path: this.ciConfigPath,
-          ref: this.defaultBranch,
+          ref: this.currentBranch,
         };
       },
       update(data) {
@@ -90,6 +94,9 @@ export default {
       error() {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       },
+    },
+    currentBranch: {
+      query: getCurrentBranch,
     },
   },
   computed: {
@@ -157,7 +164,7 @@ export default {
         response?.status === httpStatusCodes.NOT_FOUND ||
         response?.status === httpStatusCodes.BAD_REQUEST
       ) {
-        this.hasNoCiConfigFile = true;
+        this.showStartScreen = true;
       } else {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       }
@@ -183,6 +190,10 @@ export default {
     resetContent() {
       this.currentCiFileContent = this.lastCommittedContent;
     },
+    setNewEmptyCiConfigFile() {
+      this.showStartScreen = false;
+      this.isNewConfigFile = true;
+    },
     showErrorAlert({ type, reasons = [] }) {
       this.reportFailure(type, reasons);
     },
@@ -202,7 +213,10 @@ export default {
 <template>
   <div class="gl-mt-4 gl-relative">
     <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
-    <pipeline-editor-empty-state v-else-if="hasNoCiConfigFile" />
+    <pipeline-editor-empty-state
+      v-else-if="showStartScreen"
+      @createEmptyConfigFile="setNewEmptyCiConfigFile"
+    />
     <div v-else>
       <gl-alert v-if="showSuccessAlert" :variant="success.variant" @dismiss="dismissSuccess">
         {{ success.text }}

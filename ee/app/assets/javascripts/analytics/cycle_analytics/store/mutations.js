@@ -16,7 +16,7 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
   },
-  [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
+  [types.REQUEST_VALUE_STREAM_DATA](state) {
     state.isLoading = true;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state) {
@@ -67,8 +67,7 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    const transformedStages = transformRawStages(stages);
-    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
+    state.stages = transformRawStages(stages);
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
@@ -85,7 +84,7 @@ export default {
   [types.RECEIVE_REMOVE_STAGE_RESPONSE](state) {
     state.isLoading = false;
   },
-  [types.INITIALIZE_CYCLE_ANALYTICS](
+  [types.INITIALIZE_VSA](
     state,
     {
       group = null,
@@ -104,7 +103,7 @@ export default {
     state.endDate = endDate;
     state.defaultStageConfig = defaultStageConfig;
   },
-  [types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS](state) {
+  [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;
   },
   [types.REQUEST_REORDER_STAGE](state) {
