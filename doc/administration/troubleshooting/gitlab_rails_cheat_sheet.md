@@ -1051,11 +1051,11 @@ Geo::RepositorySyncService.new(project).execute
 - `Terraform::StateVersion`
 - `MergeRequestDiff`
 
-`Packages::PackageFile` is used in the examples below, but things generally work the same for the other Blob types.
+`Packages::PackageFile` is used in the following examples, but things generally work the same for the other Blob types.
 
 #### The Replicator
 
-The main kinds of classes are Registry, Model, and Replicator. If you have an instance of one of these classes, you can get the others. The Registry and Model mostly manage PostgreSQL DB state. The Replicator knows how to replicate/verify (or it can call a service to do it).
+The main kinds of classes are Registry, Model, and Replicator. If you have an instance of one of these classes, you can get the others. The Registry and Model mostly manage PostgreSQL DB state. The Replicator knows how to replicate/verify (or it can call a service to do it):
 
 ```ruby
 model_record = Packages::PackageFile.last
