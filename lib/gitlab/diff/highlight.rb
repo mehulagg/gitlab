@@ -51,13 +51,7 @@ module Gitlab
       def highlight_line(diff_line)
         return unless diff_file && diff_file.diff_refs
 
-        rich_line =
-          if diff_line.unchanged? || diff_line.added?
-            new_lines[diff_line.new_pos - 1]&.html_safe
-          elsif diff_line.removed?
-            old_lines[diff_line.old_pos - 1]&.html_safe
-          end
-
+        rich_line = syntax_highlighter(diff_line).highlight(diff_line.text[1..], context: { line_number: diff_line.line })&.html_safe
         # Only update text if line is found. This will prevent
         # issues with submodules given the line only exists in diff content.
         if rich_line
@@ -70,19 +64,15 @@ module Gitlab
         @inline_diffs ||= InlineDiff.for_lines(@raw_lines, project: project)
       end
 
-      def old_lines
-        @old_lines ||= highlighted_blob_lines(diff_file.old_blob)
-      end
+      def syntax_highlighter(diff_line)
+        path = diff_line.removed? ? diff_file.old_path : diff_file.new_path
 
-      def new_lines
-        @new_lines ||= highlighted_blob_lines(diff_file.new_blob)
-      end
-
-      def highlighted_blob_lines(blob)
-        return [] unless blob
-
-        blob.load_all_data!
-        blob.present.highlight.lines
+        @syntax_highlighter ||= {}
+        @syntax_highlighter[path] ||= Gitlab::Highlight.new(
+          path,
+          @raw_lines,
+          language: repository&.gitattribute(path, 'gitlab-language')
+        )
       end
     end
   end

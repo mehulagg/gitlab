@@ -9,7 +9,7 @@ module Rouge
       #
       # [+tag+]     The tag (language) of the lexer used to generate the formatted tokens
       def initialize(options = {})
-        @line_number = 1
+        @line_number = options[:line_number] || 1
         @tag = options[:tag]
       end
 
