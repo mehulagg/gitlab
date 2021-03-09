@@ -33,6 +33,9 @@ export default {
     checkboxQaSelector() {
       return `${this.entity.name}_checkbox`;
     },
+    labelQaSelector() {
+      return `${this.entity.name}_label`;
+    },
   },
   methods: {
     onToggle(enabled) {
@@ -55,7 +58,7 @@ export default {
       :data-qa-selector="checkboxQaSelector"
       @input="onToggle"
     >
-      <span class="gl-font-weight-bold">{{ entity.label }}</span>
+      <span class="gl-font-weight-bold" :data-qa-selector="labelQaSelector">{{ entity.label }}</span>
       <span v-if="entity.description" class="gl-text-gray-500">({{ entity.description }})</span>
     </gl-form-checkbox>
 

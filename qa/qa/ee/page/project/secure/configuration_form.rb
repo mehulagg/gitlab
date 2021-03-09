@@ -41,7 +41,9 @@ module QA
             end
 
             def unselect_dynamic_checkbox(checkbox_name)
-              uncheck_element("#{checkbox_name}_checkbox")
+              # Click label until https://gitlab.com/gitlab-org/gitlab/-/issues/323297 is resolved
+              #uncheck_element("#{checkbox_name}_checkbox")
+              click_element("#{checkbox_name}_label")
             end
 
             def has_sast_status?(status_text)
