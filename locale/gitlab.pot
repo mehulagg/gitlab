@@ -13626,6 +13626,9 @@ msgstr ""
 msgid "From the Kubernetes cluster details view, applications list, install GitLab Runner."
 msgstr ""
 
+msgid "Full"
+msgstr ""
+
 msgid "Full name"
 msgstr ""
 
@@ -13833,6 +13836,9 @@ msgstr ""
 msgid "Geo|%{name} is scheduled for re-verify"
 msgstr ""
 
+msgid "Geo|%{timeAgoStr} (%{pendingEvents} events)"
+msgstr ""
+
 msgid "Geo|%{title} checksum progress"
 msgstr ""
 
@@ -13894,6 +13900,9 @@ msgid "Geo|Filter by status"
 msgstr ""
 
 msgid "Geo|Geo Status"
+msgstr ""
+
+msgid "Geo|Geo nodes are paused using a command run on the node"
 msgstr ""
 
 msgid "Geo|Geo sites"
@@ -14047,6 +14056,9 @@ msgid "Geo|Secondary node"
 msgstr ""
 
 msgid "Geo|Secondary site"
+msgstr ""
+
+msgid "Geo|Selective (%{syncLabel})"
 msgstr ""
 
 msgid "Geo|Status"
@@ -22312,6 +22324,9 @@ msgid "Pause Elasticsearch indexing"
 msgstr ""
 
 msgid "Pause replication"
+msgstr ""
+
+msgid "Paused"
 msgstr ""
 
 msgid "Paused runners don't accept new jobs"
