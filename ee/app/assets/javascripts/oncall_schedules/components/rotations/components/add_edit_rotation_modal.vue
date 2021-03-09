@@ -269,6 +269,7 @@ export default {
         });
     },
     updateRotationForm({ type, value }) {
+      console.log('type, value', type, value);
       set(this.form, type, value);
       this.validateForm(type);
     },
@@ -288,13 +289,34 @@ export default {
       }
     },
     beforeShowModal() {
-      if (this.rotation?.activePeriod?.startTime) {
-        const { activePeriod } = this.rotation;
-        // If a startTime exists, rotation restriction must be set to true.
-        this.form.isRestrictedToTime = true;
-        // Parse startTimes
-        this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
-        this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
+      if (this.isEditMode) {
+        // Start and End dates
+        // console.log('this.rotation', this.rotation);
+        // console.log('this.schedule.timezone', this.schedule.timezone);
+        // const options = {
+        //   year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit'
+        // }
+        // const formatter = new Intl.DateTimeFormat(this.schedule.timezone, options)
+        // TODO: Get timezone via this format.
+
+        // Participants. Reuse the inner function?
+        const participants = this.rotation?.participants?.nodes?.map(({ user }) => ({ ...user }));
+
+        // The rest
+        this.form.name = this.rotation.name;
+        this.form.participants = participants;
+        this.form.rotationLength = {
+          length: this.rotation.length,
+          unit: this.rotation.lengthUnit,
+        };
+        if (this.rotation?.activePeriod?.startTime) {
+          const { activePeriod } = this.rotation;
+          // If a startTime exists, rotation restriction must be set to true.
+          this.form.isRestrictedToTime = true;
+          // Parse startTimes
+          this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
+          this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
+        }
       }
     },
     afterCloseModal() {

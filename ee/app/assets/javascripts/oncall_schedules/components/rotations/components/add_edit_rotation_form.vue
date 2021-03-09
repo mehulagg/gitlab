@@ -121,7 +121,8 @@ export default {
       >
         <gl-form-input
           id="rotation-name"
-          @blur="$emit('update-rotation-form', { type: 'name', value: $event.target.value })"
+          :value="form.name"
+          @change="$emit('update-rotation-form', { type: 'name', value: $event.target.value })"
         />
       </gl-form-group>
 
@@ -133,14 +134,20 @@ export default {
         :state="validationState.participants"
       >
         <gl-token-selector
-          v-model="participantsArr"
+          :selected-tokens="form.participants"
           :dropdown-items="participants"
           :loading="isLoading"
           container-class="gl-h-13! gl-overflow-y-auto"
           menu-class="gl-overflow-y-auto"
           @text-input="$emit('filter-participants', $event)"
-          @blur="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
-          @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
+          @blur="
+            /* Trigger validation */
+            $emit('update-rotation-form', {
+              type: 'participants',
+              value: form.participants,
+            })
+          "
+          @input="$emit('update-rotation-form', { type: 'participants', value: $event })"
         >
           <template #token-content="{ token }">
             <gl-avatar v-if="token.avatarUrl" :src="token.avatarUrl" :size="16" />
