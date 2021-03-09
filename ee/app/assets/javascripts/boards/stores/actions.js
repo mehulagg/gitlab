@@ -605,14 +605,14 @@ export default {
       });
   },
 
-  fetchAssignees({ state, commit }, searchTerm) {
+  fetchAssignees({ state, commit }, search) {
     commit(types.RECEIVE_ASSIGNEES_REQUEST);
 
     const { fullPath, boardType } = state;
 
     const variables = {
       fullPath,
-      searchTerm,
+      search,
     };
 
     let query;

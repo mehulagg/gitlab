@@ -14,7 +14,15 @@ import { issuableTypes } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { mockLists, mockIssue, mockIssue2, mockEpic, rawIssue, mockMilestones } from '../mock_data';
+import {
+  mockLists,
+  mockIssue,
+  mockIssue2,
+  mockEpic,
+  rawIssue,
+  mockMilestones,
+  mockAssignees,
+} from '../mock_data';
 
 Vue.use(Vuex);
 
@@ -1142,6 +1150,87 @@ describe('fetchMilestones', () => {
 
       expect(store.state.milestonesLoading).toBe(false);
       expect(store.state.error).toBe('Failed to load milestones.');
+    });
+  });
+});
+
+describe('fetchAssignees', () => {
+  const queryResponse = {
+    data: {
+      project: {
+        projectMembers: {
+          nodes: mockAssignees.map((assignee) => ({ user: assignee })),
+        },
+      },
+    },
+  };
+
+  const queryErrors = {
+    data: {
+      project: {
+        errors: ['You cannot view these assignees'],
+        assignees: {},
+      },
+    },
+  };
+
+  function createStore({
+    state = {
+      boardType: 'project',
+      fullPath: 'gitlab-org/gitlab',
+      assignees: [],
+      assigneesLoading: false,
+    },
+  } = {}) {
+    return new Vuex.Store({
+      state,
+      mutations,
+    });
+  }
+
+  it('throws error if state.boardType is not group or project', () => {
+    const store = createStore({
+      state: {
+        boardType: 'invalid',
+      },
+    });
+
+    expect(() => actions.fetchAssignees(store)).toThrow(new Error('Unknown board type'));
+  });
+
+  it('sets assigneesLoading to true', async () => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    const store = createStore();
+
+    actions.fetchAssignees(store);
+
+    expect(store.state.assigneesLoading).toBe(true);
+  });
+
+  describe('success', () => {
+    it('sets state.assignees from query result', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+      const store = createStore();
+
+      await actions.fetchAssignees(store);
+
+      expect(store.state.assigneesLoading).toBe(false);
+      expect(store.state.assignees).toEqual(expect.objectContaining(mockAssignees));
+    });
+  });
+
+  describe('failure', () => {
+    it('sets state.assignees from query result', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryErrors);
+
+      const store = createStore();
+
+      await expect(actions.fetchAssignees(store)).rejects.toThrow();
+
+      expect(store.state.assigneesLoading).toBe(false);
+      expect(store.state.error).toBe('Failed to load assignees.');
     });
   });
 });
