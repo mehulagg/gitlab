@@ -9,6 +9,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
   let(:name) { SecureRandom.hex }
+  let(:branch_name) { 'orphaned-branch' }
   let(:description) { SecureRandom.hex }
   let(:run_after_create) { false }
 
@@ -28,7 +29,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         full_path: project.full_path,
         name: name,
         description: description,
-        branch_name: 'orphaned-branch',
+        branch_name: branch_name,
         dast_site_profile_id: dast_site_profile.to_global_id.to_s,
         dast_scanner_profile_id: dast_scanner_profile.to_global_id.to_s,
         run_after_create: run_after_create
@@ -52,11 +53,13 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         context 'when run_after_create=true' do
           let(:run_after_create) { true }
 
+          it_behaves_like 'a mutation that checks branch permissions'
+
           it 'returns the pipeline_url' do
             actual_url = subject[:pipeline_url]
             pipeline = Ci::Pipeline.find_by(
               project: project,
-              sha: project.repository.commits('orphaned-branch', limit: 1)[0].id,
+              sha: project.repository.commits(branch_name, limit: 1)[0].id,
               source: :ondemand_dast_scan,
               config_source: :parameter_source
             )
@@ -68,7 +71,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
           end
         end
 
-        context "when branch_name='orphaned_branch'" do
+        context "when branch_name is specified" do
           context 'when the feature flag dast_branch_selection is disabled' do
             it 'does not set the branch_name' do
               stub_feature_flags(dast_branch_selection: false)
@@ -79,7 +82,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
 
           context 'when the feature flag dast_branch_selection is enabled' do
             it 'sets the branch_name' do
-              expect(subject[:dast_profile].branch_name).to eq('orphaned-branch')
+              expect(subject[:dast_profile].branch_name).to eq(branch_name)
             end
           end
         end

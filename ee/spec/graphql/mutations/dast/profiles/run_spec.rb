@@ -66,6 +66,10 @@ RSpec.describe Mutations::Dast::Profiles::Run do
           end
         end
 
+        it_behaves_like 'a mutation that checks branch permissions' do
+          let(:branch_name) { dast_profile.branch_name }
+        end
+
         it 'returns a pipeline_url containing the correct path' do
           actual_url = subject[:pipeline_url]
           pipeline = Ci::Pipeline.last

@@ -60,6 +60,17 @@ RSpec.describe Dast::Profile, type: :model do
         end
       end
     end
+
+    context 'when the branch_name does not exist' do
+      subject { build(:dast_profile, branch_name: SecureRandom.hex) }
+
+      it 'is not valid' do
+        aggregate_failures do
+          expect(subject.valid?).to be_falsey
+          expect(subject.errors.full_messages).to include('Branch name can\'t reference a branch that does not exist')
+        end
+      end
+    end
   end
 
   describe 'scopes' do
