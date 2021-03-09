@@ -16,6 +16,7 @@ import {
   FilterState,
   AvailableSortOptions,
   TestReportStatus,
+  TestReportStatusToValue,
   DEFAULT_PAGE_SIZE,
 } from '../constants';
 import createRequirement from '../queries/createRequirement.mutation.graphql';
@@ -30,6 +31,8 @@ import RequirementItem from './requirement_item.vue';
 import RequirementsEmptyState from './requirements_empty_state.vue';
 import RequirementsLoading from './requirements_loading.vue';
 import RequirementsTabs from './requirements_tabs.vue';
+
+import StatusToken from './tokens/status_token.vue';
 
 export default {
   DEFAULT_PAGE_SIZE,
@@ -70,6 +73,11 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    initialStatus: {
+      type: String,
+      required: false,
+      default: '',
     },
     initialRequirementsCount: {
       type: Object,
@@ -145,6 +153,10 @@ export default {
           queryVariables.authorUsernames = this.authorUsernames;
         }
 
+        if (this.status) {
+          queryVariables.status = TestReportStatusToValue[this.status];
+        }
+
         if (this.sortBy) {
           queryVariables.sortBy = this.sortBy;
         }
@@ -202,6 +214,7 @@ export default {
       filterBy: this.initialFilterBy,
       textSearch: this.initialTextSearch,
       authorUsernames: this.initialAuthorUsernames,
+      status: this.initialStatus,
       sortBy: this.initialSortBy,
       showRequirementCreateDrawer: false,
       showRequirementViewDrawer: false,
@@ -233,11 +246,7 @@ export default {
       return this.$apollo.queries.requirements.loading;
     },
     requirementsListEmpty() {
-      return (
-        !this.$apollo.queries.requirements.loading &&
-        !this.requirements.list.length &&
-        this.requirementsCount[this.filterBy] === 0
-      );
+      return !this.$apollo.queries.requirements.loading && !this.requirementsList.length;
     },
     totalRequirementsForCurrentTab() {
       return this.requirementsCount[this.filterBy];
@@ -279,6 +288,14 @@ export default {
           fetchPath: this.projectPath,
           fetchAuthors: Api.projectUsers.bind(Api),
         },
+        {
+          type: 'status',
+          icon: 'status',
+          title: __('Status'),
+          unique: true,
+          token: StatusToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+        },
       ];
     },
     getFilteredSearchValue() {
@@ -287,8 +304,18 @@ export default {
         value: { data: author },
       }));
 
+      if (this.status) {
+        value.push({
+          type: 'status',
+          value: { data: this.status },
+        });
+      }
+
       if (this.textSearch) {
-        value.push(this.textSearch);
+        value.push({
+          type: 'filtered-search-term',
+          value: { data: this.textSearch },
+        });
       }
 
       return value;
@@ -307,6 +334,7 @@ export default {
         nextPageCursor,
         textSearch,
         authorUsernames,
+        status,
         sortBy,
       } = this;
 
@@ -345,6 +373,12 @@ export default {
       delete queryParams.author_username;
       if (authorUsernames.length) {
         queryParams['author_username[]'] = authorUsernames;
+      }
+
+      if (status) {
+        queryParams.status = status;
+      } else {
+        delete queryParams.status;
       }
 
       // We want to replace the history state so that back button
@@ -570,23 +604,35 @@ export default {
     },
     handleFilterRequirements(filters = []) {
       const authors = [];
-      let textSearch = '';
+      let status = '';
+      const textSearch = [];
 
       filters.forEach((filter) => {
-        if (typeof filter === 'string') {
-          textSearch = filter;
-        } else if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
-          authors.push(filter.value.data);
+        switch (filter.type) {
+          case 'author_username':
+            if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
+              authors.push(filter.value.data);
+            }
+            break;
+          case 'status':
+            status = filter.value.data;
+            break;
+          case 'filtered-search-term':
+            if (filter.value.data) textSearch.push(filter.value.data);
+            break;
+          default:
+            break;
         }
       });
 
       this.authorUsernames = [...authors];
-      this.textSearch = textSearch;
+      this.status = status;
+      this.textSearch = textSearch.join(' ');
       this.currentPage = 1;
       this.prevPageCursor = '';
       this.nextPageCursor = '';
 
-      if (textSearch || authors.length) {
+      if (textSearch.length || authors.length || status) {
         this.track('filter', {
           property: JSON.stringify(filters),
         });

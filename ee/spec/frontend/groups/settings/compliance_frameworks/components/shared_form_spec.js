@@ -224,4 +224,18 @@ describe('SharedForm', () => {
       expect(wrapper.emitted('submit')).toHaveLength(1);
     });
   });
+
+  describe('On pipeline configuration path input', () => {
+    it('updates the pipelineConfigurationFullPath value', async () => {
+      jest.spyOn(Utils, 'fetchPipelineConfigurationFileExists').mockResolvedValue(true);
+
+      wrapper = createComponent();
+
+      await findPipelineConfigurationInput().vm.$emit('input', 'foo.yaml@bar/baz');
+
+      expect(wrapper.emitted('update:pipelineConfigurationFullPath')[0][0]).toBe(
+        'foo.yaml@bar/baz',
+      );
+    });
+  });
 });

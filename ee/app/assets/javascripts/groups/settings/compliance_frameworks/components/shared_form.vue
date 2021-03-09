@@ -116,9 +116,9 @@ export default {
       this.$emit('submit');
     },
     async updatePipelineConfiguration(path) {
-      this.pipelineConfigurationFileExists = await fetchPipelineConfigurationFileExists(path);
-
       this.$emit('update:pipelineConfigurationFullPath', path);
+
+      this.pipelineConfigurationFileExists = await fetchPipelineConfigurationFileExists(path);
     },
   },
   i18n: {

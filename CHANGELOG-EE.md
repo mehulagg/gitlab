@@ -1,5 +1,9 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.9.3 (2021-03-08)
+
+- No changes.
+
 ## 13.9.2 (2021-03-04)
 
 - No changes.

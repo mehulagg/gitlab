@@ -55,13 +55,12 @@ There are several components that work in concert for the Agent to accomplish Gi
   Agent which repositories to synchronize with the cluster.
 - A manifest repository that contains manifest files. Any changes to manifest files are applied to the cluster.
 
-These repositories might be the same GitLab project or separate projects.
+You can use the same GitLab project or separate projects for configuration and manifest files, as follows:
 
-NOTE:
-GitLab recommends you use the same GitLab project for the agent configuration
-and manifest repositories. Our backlog contains issues for adding support for
+- Single GitLab project (recommended): when you use a single repository to hold both the manifest and the configuration files, these projects can be either private or public, as you prefer.
+- Two GitLab projects: when you opt to use two different GitLab projects, one for manifest files, and another for configuration files, the manifests project must be private, while the configuration project can be either private or public. Our backlog contains issues for adding support for
 [private manifest repositories outside of the configuration project](https://gitlab.com/gitlab-org/gitlab/-/issues/220912) and
-[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885).
+[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885) in the future.
 
 For more details, please refer to our [full architecture documentation](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/architecture.md#high-level-architecture) in the Agent project.
 
@@ -94,11 +93,9 @@ The available `agentk` and `kas` versions can be found in
 
 ### Install the Kubernetes Agent Server
 
-The GitLab Kubernetes Agent Server (KAS) can be deployed using [Omnibus
-GitLab](https://docs.gitlab.com/omnibus/) or the [GitLab
-chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
-GitLab installed, please refer to our [installation
-documentation](https://docs.gitlab.com/ee/install/README.html).
+The GitLab Kubernetes Agent Server (KAS) can be deployed using [Omnibus GitLab](https://docs.gitlab.com/omnibus/) or the
+[GitLab chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
+GitLab installed, please refer to our [installation documentation](../../../install/index.md).
 
 NOTE:
 GitLab plans to include the KAS on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834).
@@ -231,7 +228,7 @@ the Agent in subsequent steps. You can create an Agent record either:
 
 ### Install the Agent into the cluster
 
-Next, install the in-cluster component of the Agent. 
+Next, install the in-cluster component of the Agent.
 
 #### One-liner installation
 
@@ -470,7 +467,7 @@ The following example projects can help you get started with the Kubernetes Agen
 ### Deploying GitLab Runner with the Agent
 
 You can use the Kubernetes Agent to
-[deploy GitLab Runner in a Kubernetes cluster](http://docs.gitlab.com/runner/install/kubernetes-agent.html).
+[deploy GitLab Runner in a Kubernetes cluster](https://docs.gitlab.com/runner/install/kubernetes-agent.html).
 
 ## Kubernetes Network Security Alerts
 

@@ -35,11 +35,7 @@ module QA
       ]
 
       before(:all) do
-        admin = QA::Resource::User.new.tap do |user|
-          user.username = QA::Runtime::User.admin_username
-          user.password = QA::Runtime::User.admin_password
-        end
-        @api_client = Runtime::API::Client.new(:gitlab, user: admin)
+        @api_client = Runtime::API::Client.as_admin
         @api_client.personal_access_token
 
         @group = Resource::Group.fabricate_via_api! do |group|

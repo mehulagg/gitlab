@@ -23,7 +23,7 @@ RSpec.describe Gitlab::Checks::MatchingMergeRequest do
 
     context 'with load balancing disabled', :request_store, :redis do
       before do
-        expect(::Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(false)
+        expect(::Gitlab::Database::LoadBalancing).to receive(:enable?).at_least(:once).and_return(false)
         expect(::Gitlab::Database::LoadBalancing::Sticking).not_to receive(:unstick_or_continue_sticking)
       end
 
@@ -43,7 +43,7 @@ RSpec.describe Gitlab::Checks::MatchingMergeRequest do
       let(:all_caught_up) { true }
 
       before do
-        expect(::Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(true)
+        expect(::Gitlab::Database::LoadBalancing).to receive(:enable?).at_least(:once).and_return(true)
         expect(::Gitlab::Database::LoadBalancing::Sticking).to receive(:unstick_or_continue_sticking).and_call_original
         allow(::Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?).and_return(all_caught_up)
       end

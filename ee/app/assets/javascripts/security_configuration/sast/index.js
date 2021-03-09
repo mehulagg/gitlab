@@ -18,7 +18,6 @@ export default function init() {
 
   const {
     securityConfigurationPath,
-    createSastMergeRequestPath,
     projectPath,
     sastAnalyzersDocumentationPath,
     sastDocumentationPath,
@@ -29,7 +28,6 @@ export default function init() {
     apolloProvider,
     provide: {
       securityConfigurationPath,
-      createSastMergeRequestPath,
       projectPath,
       sastAnalyzersDocumentationPath,
       sastDocumentationPath,

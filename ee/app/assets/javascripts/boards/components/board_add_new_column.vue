@@ -16,6 +16,15 @@ import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 export default {
+  i18n: {
+    listType: __('List type'),
+    labelListDescription: __('A label list displays issues with the selected label.'),
+    milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
+    selectLabel: __('Select label'),
+    selectMilestone: __('Select milestone'),
+    searchLabels: __('Search labels'),
+    searchMilestones: __('Search milestones'),
+  },
   columnTypes: [
     { value: ListType.label, text: __('Label') },
     { value: ListType.milestone, text: __('Milestone') },
@@ -35,7 +44,7 @@ export default {
   data() {
     return {
       selectedId: null,
-      columnType: 'label',
+      columnType: ListType.label,
     };
   },
   computed: {
@@ -107,23 +116,23 @@ export default {
 
     formDescription() {
       if (this.labelTypeSelected) {
-        return __('A label list displays issues with the selected label.');
+        return this.$options.i18n.labelListDescription;
       }
 
       if (this.milestoneTypeSelected) {
-        return __('A milestone list displays issues in the selected milestone.');
+        return this.$options.i18n.milestoneListDescription;
       }
 
       return null;
     },
 
-    noneSelected() {
+    searchLabel() {
       if (this.labelTypeSelected) {
-        return __('No label selected');
+        return this.$options.i18n.selectLabel;
       }
 
       if (this.milestoneTypeSelected) {
-        return __('No milestone selected');
+        return this.$options.i18n.selectMilestone;
       }
 
       return null;
@@ -131,11 +140,11 @@ export default {
 
     searchPlaceholder() {
       if (this.labelTypeSelected) {
-        return __('Search labels');
+        return this.$options.i18n.searchLabels;
       }
 
       if (this.milestoneTypeSelected) {
-        return __('Search milestones');
+        return this.$options.i18n.searchMilestones;
       }
 
       return null;
@@ -231,6 +240,7 @@ export default {
     :loading="loading"
     :form-description="formDescription"
     :none-selected="noneSelected"
+    :search-label="searchLabel"
     :search-placeholder="searchPlaceholder"
     :selected-id="selectedId"
     @filter-items="filterItems"
@@ -239,7 +249,7 @@ export default {
     <template slot="select-list-type">
       <gl-form-group
         v-if="!isEpicBoard"
-        :label="__('List type')"
+        :label="$options.i18n.listType"
         class="gl-px-5 gl-py-0 gl-mt-5"
         label-for="list-type"
       >
@@ -268,13 +278,17 @@ export default {
     </template>
 
     <template slot="items">
-      <gl-form-radio-group v-model="selectedId" class="gl-overflow-y-auto gl-px-5 gl-pt-3">
+      <gl-form-radio-group
+        v-if="items.length > 0"
+        v-model="selectedId"
+        class="gl-overflow-y-auto gl-px-5 gl-pt-3"
+      >
         <label
           v-for="item in items"
           :key="item.id"
-          class="gl-display-flex gl-flex-align-items-center gl-mb-3 gl-font-weight-normal"
+          class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
         >
-          <gl-form-radio :value="item.id" class="gl-mb-0 gl-mr-3" />
+          <gl-form-radio :value="item.id" class="gl-mb-0" />
           <span
             v-if="labelTypeSelected"
             class="dropdown-label-box gl-top-0"

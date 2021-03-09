@@ -25,6 +25,9 @@ module Registrations
       if @project.saved?
         learn_gitlab_project = create_learn_gitlab_project
 
+        experiment(:registrations_group_invite, actor: current_user)
+          .track(:signup_successful, property: @project.namespace_id.to_s)
+
         if helpers.in_trial_onboarding_flow?
           trial_onboarding_context = {
             namespace_id: learn_gitlab_project.namespace_id,
@@ -34,9 +37,6 @@ module Registrations
 
           record_experiment_user(:trial_onboarding_issues, trial_onboarding_context)
           record_experiment_conversion_event(:trial_onboarding_issues)
-
-          experiment(:registrations_group_invite, actor: @project.group)
-            .track(:signup_successful, property: @project.namespace_id)
 
           redirect_to trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: learn_gitlab_project.id)
         else

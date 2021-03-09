@@ -21,6 +21,8 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:pipeline_configuration_full_path).to(:compliance_management_framework) }
 
+    it { is_expected.to delegate_method(:prevent_merge_without_jira_issue).to(:project_setting) }
+
     it { is_expected.to belong_to(:deleting_user) }
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
@@ -1011,11 +1013,11 @@ RSpec.describe Project do
       end
 
       it 'has a shared runner' do
-        expect(project.any_runners?).to be_truthy
+        expect(project.any_active_runners?).to be_truthy
       end
 
       it 'checks the presence of shared runner' do
-        expect(project.any_runners? { |runner| runner == shared_runner }).to be_truthy
+        expect(project.any_active_runners? { |runner| runner == shared_runner }).to be_truthy
       end
 
       context 'with used pipeline minutes' do
@@ -1027,7 +1029,7 @@ RSpec.describe Project do
         end
 
         it 'does not have a shared runner' do
-          expect(project.any_runners?).to be_falsey
+          expect(project.any_active_runners?).to be_falsey
         end
       end
     end

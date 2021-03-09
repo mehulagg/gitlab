@@ -159,6 +159,21 @@ describe('DevopsAdoptionSegmentModal', () => {
     });
   });
 
+  describe.each`
+    state        | action    | expected
+    ${'opening'} | ${'show'} | ${true}
+    ${'closing'} | ${'hide'} | ${false}
+  `('$state the modal', ({ action, expected }) => {
+    beforeEach(() => {
+      createComponent();
+      findModal().vm.$emit(action);
+    });
+
+    it(`emits trackModalOpenState as ${expected}`, () => {
+      expect(wrapper.emitted('trackModalOpenState')).toStrictEqual([[expected]]);
+    });
+  });
+
   it.each`
     selectedGroupId | disabled | values        | state
     ${null}         | ${true}  | ${'checkbox'} | ${'disables'}

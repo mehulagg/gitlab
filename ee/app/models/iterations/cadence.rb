@@ -10,7 +10,9 @@ module Iterations
     validates :title, presence: true
     validates :start_date, presence: true
     validates :group_id, presence: true
-    validates :active, presence: true
-    validates :automatic, presence: true
+    validates :duration_in_weeks, presence: true
+    validates :iterations_in_advance, presence: true
+    validates :active, inclusion: [true, false]
+    validates :automatic, inclusion: [true, false]
   end
 end
