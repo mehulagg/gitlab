@@ -400,7 +400,6 @@ You can set environments to stop automatically after a certain time period.
 
 In your `.gitlab-ci.yml` file, specify the [`environment:auto_stop_in`](../yaml/README.md#environmentauto_stop_in)
 keyword. You can specify a human-friendly date as the value, such as `1 hour and 30 minutes` or `1 day`.
-   
 After the time period passes, GitLab automatically triggers a job to stop the environment.
 
 Due to resource limitations, a background worker for stopping environments only runs once
