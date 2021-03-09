@@ -640,7 +640,10 @@ export default {
         if (errors?.[0]) {
           throw new Error(errors[0]);
         }
-        commit(types.RECEIVE_ASSIGNEES_SUCCESS, assignees);
+        commit(
+          types.RECEIVE_ASSIGNEES_SUCCESS,
+          assignees.map(({ user }) => user),
+        );
       })
       .catch((e) => {
         commit(types.RECEIVE_ASSIGNEES_FAILURE);

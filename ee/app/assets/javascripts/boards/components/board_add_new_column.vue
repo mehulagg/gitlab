@@ -70,6 +70,9 @@ export default {
       if (this.labelTypeSelected) {
         return this.labels;
       }
+      if (this.assigneeTypeSelected) {
+        return this.assignees;
+      }
       if (this.milestoneTypeSelected) {
         return this.milestones;
       }
@@ -333,7 +336,7 @@ export default {
           :key="item.id"
           class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
         >
-          <gl-form-radio :value="item.id" class="gl-mb-0" />
+          <gl-form-radio :value="item.id" class="gl-mb-0 gl-align-self-center" />
           <span
             v-if="labelTypeSelected"
             class="dropdown-label-box gl-top-0"
