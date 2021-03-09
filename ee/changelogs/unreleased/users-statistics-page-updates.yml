@@ -1,0 +1,5 @@
+---
+title: Correct billable users calculation on users statistics page
+merge_request: 56152
+author:
+type: fixed
