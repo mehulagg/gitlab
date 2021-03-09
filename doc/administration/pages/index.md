@@ -805,6 +805,8 @@ or report an issue.
 API-based configuration uses a caching mechanism to improve performance and reliability of serving Pages.
 The cache behavior can be modified by changing the cache settings.
 However, the recommended values are set for you and should only be modified if needed.
+Incorrect configuration of these values may result in Pages Daemon serving old content,
+intermittent or persistent errors.
 
 NOTE:
 Expiry, interval and timeout flags use [Golang's duration formatting](https://golang.org/pkg/time/#ParseDuration).
@@ -816,11 +818,11 @@ Examples:
 
 - Increasing `gitlab_cache_expiry` will allow items to exist in the cache longer.
 This setting might be useful if the communication between GitLab Pages and GitLab Rails
-is not stable or the content served by Pages does not change frequently.
+is not stable.
 
 - Increasing `gitlab_cache_refresh` will reduce the frequency at which GitLab Pages
 requests a domain's configuration from GitLab Rails. This setting might be useful
-for content that does not change frequently.
+GitLab Pages generates too many requests to GitLab API and content does not change frequently.
 
 - Decreasing `gitlab_cache_cleanup` will remove expired items from the cache more frequently,
 reducing the memory usage of your Pages node.
