@@ -16,6 +16,20 @@ describe('Utils', () => {
     mock.restore();
   });
 
+  describe('injectIdIntoEditPath', () => {
+    it.each`
+      path                          | id           | output
+      ${'group/framework/abc/edit'} | ${1}         | ${''}
+      ${'group/framework/id/edit'}  | ${undefined} | ${''}
+      ${'group/framework/id/edit'}  | ${null}      | ${''}
+      ${'group/framework/id/edit'}  | ${'abc'}     | ${''}
+      ${'group/framework/id/edit'}  | ${'1'}       | ${'group/framework/1/edit'}
+      ${'group/framework/id/edit'}  | ${1}         | ${'group/framework/1/edit'}
+    `('should return $output when $path and $id are given', ({ path, id, output }) => {
+      expect(Utils.injectIdIntoEditPath(path, id)).toStrictEqual(output);
+    });
+  });
+
   describe('initialiseFormData', () => {
     it('returns the initial form data object', () => {
       expect(Utils.initialiseFormData()).toStrictEqual({

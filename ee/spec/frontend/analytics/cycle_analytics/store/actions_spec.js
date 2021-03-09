@@ -789,9 +789,9 @@ describe('Value Stream Analytics actions', () => {
     });
 
     describe('with only group in initialData', () => {
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+      it('commits "INITIALIZE_VSA"', async () => {
         await actions.initializeCycleAnalytics(store, { group });
-        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', { group });
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', { group });
       });
 
       it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
@@ -818,20 +818,20 @@ describe('Value Stream Analytics actions', () => {
         expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
       });
 
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+      it('commits "INITIALIZE_VSA"', async () => {
         await actions.initializeCycleAnalytics(store, initialData);
-        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', initialData);
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', initialData);
       });
     });
   });
 
   describe('initializeCycleAnalyticsSuccess', () => {
-    it(`commits the ${types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS} mutation`, () =>
+    it(`commits the ${types.INITIALIZE_VALUE_STREAM_SUCCESS} mutation`, () =>
       testAction(
         actions.initializeCycleAnalyticsSuccess,
         null,
         state,
-        [{ type: types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS }],
+        [{ type: types.INITIALIZE_VALUE_STREAM_SUCCESS }],
         [],
       ));
   });

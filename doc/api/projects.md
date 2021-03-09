@@ -1005,6 +1005,20 @@ If the project is a fork, and you provide a valid token to authenticate, the
 }
 ```
 
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/)
+can also see the `issues_template` and `merge_requests_template` parameters:
+[introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55718)
+in GitLab 13.10.
+
+```json
+{
+  "id": 3,
+  "issues_template": null,
+  "merge_requests_template": null,
+  ...
+}
+```
+
 ## Get project users
 
 Get the users list of a project.
@@ -1036,6 +1050,43 @@ GET /projects/:id/users
     "state": "blocked",
     "avatar_url": "http://gravatar.com/../e32131cd8.jpeg",
     "web_url": "http://localhost:3000/jack_smith"
+  }
+]
+```
+
+## List a project's groups
+
+Get a list of ancestor groups for this project.
+
+```plaintext
+GET /projects/:id/groups
+```
+
+| Attribute                   | Type              | Required               | Description |
+|-----------------------------|-------------------|------------------------|-------------|
+| `id`                        | integer/string    | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
+| `search`                    | string            | **{dotted-circle}** No | Search for specific groups. |
+| `skip_groups`               | array of integers | **{dotted-circle}** No | Skip the group IDs passed. |
+| `with_shared`               | boolean           | **{dotted-circle}** No | Include projects shared with this group. Default is `false`. |
+| `shared_min_access_level`   | integer           | **{dotted-circle}** No | Limit to shared groups with at least this [access level](members.md#valid-access-levels). |
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Foobar Group",
+    "avatar_url": "http://localhost:3000/uploads/group/avatar/1/foo.jpg",
+    "web_url": "http://localhost:3000/groups/foo-bar",
+    "full_name": "Foobar Group",
+    "full_path": "foo-bar",
+  },
+  {
+    "id": 2,
+    "name": "Shared Group",
+    "avatar_url": "http://gitlab.example.com/uploads/group/avatar/1/bar.jpg",
+    "web_url": "http://gitlab.example.com/groups/foo/bar",
+    "full_name": "Shared Group",
+    "full_path": "foo/shared",
   }
 ]
 ```
@@ -1266,6 +1317,8 @@ PUT /projects/:id
 | `visibility`                                                | string         | **{dotted-circle}** No | See [project visibility level](#project-visibility-level). |
 | `wiki_access_level`                                         | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `wiki_enabled`                                              | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable wiki for this project. Use `wiki_access_level` instead. |
+| `issues_template` **(PREMIUM)**                             | string         | **{dotted-circle}** No | Default description for Issues. Description is parsed with GitLab Flavored Markdown. |
+| `merge_requests_template` **(PREMIUM)**                     | string         | **{dotted-circle}** No | Default description for Merge Requests. Description is parsed with GitLab Flavored Markdown.  |
 
 ## Fork project
 

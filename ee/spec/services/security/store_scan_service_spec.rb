@@ -25,6 +25,9 @@ RSpec.describe Security::StoreScanService do
   end
 
   describe '#execute' do
+    let_it_be(:unique_finding_uuid) { artifact.security_report.findings[0].uuid }
+    let_it_be(:duplicate_finding_uuid) { artifact.security_report.findings[5].uuid }
+
     let(:deduplicate) { false }
     let(:service_object) { described_class.new(artifact, known_keys, deduplicate) }
     let(:finding_key) do
@@ -52,13 +55,13 @@ RSpec.describe Security::StoreScanService do
       let_it_be(:unique_security_finding) do
         create(:security_finding,
                scan: security_scan,
-               position: 0)
+               uuid: unique_finding_uuid)
       end
 
       let_it_be(:duplicated_security_finding) do
         create(:security_finding,
                scan: security_scan,
-               position: 5)
+               uuid: duplicate_finding_uuid)
       end
 
       it 'does not create a new security scan' do
@@ -90,11 +93,11 @@ RSpec.describe Security::StoreScanService do
 
     context 'when the security scan does not exist for the artifact' do
       let(:unique_finding_attribute) do
-        -> { Security::Finding.by_position(0).first&.deduplicated }
+        -> { Security::Finding.by_uuid(unique_finding_uuid).first&.deduplicated }
       end
 
       let(:duplicated_finding_attribute) do
-        -> { Security::Finding.by_position(5).first&.deduplicated }
+        -> { Security::Finding.by_uuid(duplicate_finding_uuid).first&.deduplicated }
       end
 
       before do

@@ -37,6 +37,11 @@ module EE
         @subject.feature_available?(:group_activity_analytics)
       end
 
+      condition(:group_devops_adoption_available) do
+        ::Feature.enabled?(:group_devops_adoption, @subject, default_enabled: :yaml) &&
+          @subject.feature_available?(:group_level_devops_adoption)
+      end
+
       condition(:dora4_analytics_available) do
         @subject.feature_available?(:dora4_analytics)
       end
@@ -191,6 +196,10 @@ module EE
         enable :view_group_ci_cd_analytics
       end
 
+      rule { reporter & group_devops_adoption_available }.policy do
+        enable :view_group_devops_adoption
+      end
+
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do
         enable :change_prevent_group_forking
       end
@@ -201,11 +210,15 @@ module EE
         enable :read_epic_board_list
       end
 
-      rule { can?(:read_group) & iterations_available }.enable :read_iteration
+      rule { can?(:read_group) & iterations_available }.policy do
+        enable :read_iteration
+        enable :read_iteration_cadence
+      end
 
       rule { developer & iterations_available }.policy do
         enable :create_iteration
         enable :admin_iteration
+        enable :create_iteration_cadence
       end
 
       rule { reporter & epics_available }.policy do

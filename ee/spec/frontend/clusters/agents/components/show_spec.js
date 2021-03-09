@@ -1,4 +1,4 @@
-import { GlAlert, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlKeysetPagination, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import ClusterAgentShow from 'ee/clusters/agents/components/show.vue';
@@ -27,9 +27,11 @@ describe('ClusterAgentShow', () => {
     createdByUser: {
       name: 'user-1',
     },
+    name: 'token-1',
     tokens: {
       count: 1,
       nodes: [],
+      pageInfo: null,
     },
   };
 
@@ -46,23 +48,50 @@ describe('ClusterAgentShow', () => {
     });
   };
 
-  const findCreatedText = () => wrapper.find('[data-testid="cluster-agent-create-info"]').text();
-  const findTokenCount = () => wrapper.find('[data-testid="cluster-agent-token-count"]').text();
+  const createWrapperWithoutApollo = ({ clusterAgent, loading = false }) => {
+    const $apollo = { queries: { clusterAgent: { loading } } };
 
-  beforeEach(() => {
-    return createWrapper({ clusterAgent: defaultClusterAgent });
-  });
+    wrapper = shallowMount(ClusterAgentShow, {
+      propsData,
+      mocks: { $apollo, clusterAgent },
+    });
+  };
+
+  const findCreatedText = () => wrapper.find('[data-testid="cluster-agent-create-info"]').text();
+  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
+  const findPaginationButtons = () => wrapper.find(GlKeysetPagination);
+  const findTokenCount = () => wrapper.find('[data-testid="cluster-agent-token-count"]').text();
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  it('displays the agent name', () => {
-    expect(wrapper.text()).toContain(propsData.agentName);
-  });
+  describe('default behaviour', () => {
+    beforeEach(() => {
+      return createWrapper({ clusterAgent: defaultClusterAgent });
+    });
 
-  it('displays agent create information', () => {
-    expect(findCreatedText()).toMatchInterpolatedText('Created by user-1 2 days ago');
+    it('displays the agent name', () => {
+      expect(wrapper.text()).toContain(propsData.agentName);
+    });
+
+    it('displays agent create information', () => {
+      expect(findCreatedText()).toMatchInterpolatedText('Created by user-1 2 days ago');
+    });
+
+    it('displays token count', () => {
+      expect(findTokenCount()).toMatchInterpolatedText(
+        `${ClusterAgentShow.i18n.tokens} ${defaultClusterAgent.tokens.count}`,
+      );
+    });
+
+    it('renders token table', () => {
+      expect(wrapper.find(TokenTable).exists()).toBe(true);
+    });
+
+    it('should not render pagination buttons when there are no additional pages', () => {
+      expect(findPaginationButtons().exists()).toBe(false);
+    });
   });
 
   describe('when create user is unknown', () => {
@@ -80,12 +109,6 @@ describe('ClusterAgentShow', () => {
     });
   });
 
-  it('displays token count', () => {
-    expect(findTokenCount()).toMatchInterpolatedText(
-      `${ClusterAgentShow.i18n.tokens} ${defaultClusterAgent.tokens.count}`,
-    );
-  });
-
   describe('when token count is missing', () => {
     const missingTokens = {
       ...defaultClusterAgent,
@@ -101,20 +124,59 @@ describe('ClusterAgentShow', () => {
     });
   });
 
-  it('renders token table', () => {
-    expect(wrapper.find(TokenTable).exists()).toBe(true);
+  describe('when the token list has additional pages', () => {
+    const pageInfo = {
+      hasNextPage: true,
+      hasPreviousPage: false,
+      startCursor: 'prev',
+      endCursor: 'next',
+    };
+
+    const tokenPagination = {
+      ...defaultClusterAgent,
+      tokens: {
+        ...defaultClusterAgent.tokens,
+        pageInfo,
+      },
+    };
+
+    beforeEach(() => {
+      return createWrapper({ clusterAgent: tokenPagination });
+    });
+
+    it('should render pagination buttons', () => {
+      expect(findPaginationButtons().exists()).toBe(true);
+    });
+
+    it('should pass pageInfo to the pagination component', () => {
+      expect(findPaginationButtons().props()).toMatchObject(pageInfo);
+    });
   });
 
   describe('when the agent query is loading', () => {
-    beforeEach(() => {
-      return createWrapper({
-        clusterAgent: null,
-        queryResponse: jest.fn().mockReturnValue(new Promise(() => {})),
+    describe('when the clusterAgent is missing', () => {
+      beforeEach(() => {
+        return createWrapper({
+          clusterAgent: null,
+          queryResponse: jest.fn().mockReturnValue(new Promise(() => {})),
+        });
+      });
+
+      it('displays a loading icon and hides the token tab', () => {
+        expect(findLoadingIcon().exists()).toBe(true);
+        expect(wrapper.text()).not.toContain(ClusterAgentShow.i18n.tokens);
       });
     });
 
-    it('displays a loading icon', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    describe('when the clusterAgent is present', () => {
+      beforeEach(() => {
+        createWrapperWithoutApollo({ clusterAgent: defaultClusterAgent, loading: true });
+      });
+
+      it('displays a loading icon and token tab', () => {
+        expect(findLoadingIcon().exists()).toBe(true);
+        expect(wrapper.text()).toContain(ClusterAgentShow.i18n.tokens);
+      });
     });
   });
 

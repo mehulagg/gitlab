@@ -79,6 +79,7 @@ module Integrations
       def jira_user(user)
         {
           name: user['displayName'],
+          username: user['name'],
           web_url: jira_web_url(user),
           avatar_url: user['avatarUrls']['48x48']
         }

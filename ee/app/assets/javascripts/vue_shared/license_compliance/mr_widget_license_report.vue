@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlIcon } from '@gitlab/ui';
+import { GlLink, GlIcon, GlButton } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
@@ -16,6 +16,7 @@ export default {
   componentNames,
   store,
   components: {
+    GlButton,
     GlLink,
     ReportItem,
     ReportSection,
@@ -176,26 +177,27 @@ export default {
           </gl-link>
         </div>
       </template>
-      <template v-if="showActionButtons" #action-buttons>
-        <div class="gl-display-flex gl-mr-3">
-          <a
-            v-if="licenseManagementSettingsPath"
-            :class="{ 'gl-mr-3': fullReportPath }"
-            :href="licenseManagementSettingsPath"
-            class="btn btn-default btn-sm js-manage-licenses"
-            data-qa-selector="manage_licenses_button"
-          >
-            {{ s__('ciReport|Manage licenses') }}
-          </a>
-          <a
-            v-if="fullReportPath"
-            :href="fullReportPath"
-            target="_blank"
-            class="btn btn-default btn-sm js-full-report"
-          >
-            {{ s__('ciReport|View full report') }} <gl-icon :size="16" name="external-link" />
-          </a>
-        </div>
+      <template v-if="showActionButtons" #action-buttons="{ isCollapsible }">
+        <gl-button
+          v-if="fullReportPath"
+          :href="fullReportPath"
+          target="_blank"
+          data-testid="full-report-button"
+          class="gl-mr-3"
+          icon="external-link"
+        >
+          {{ s__('ciReport|View full report') }}
+        </gl-button>
+        <gl-button
+          v-if="licenseManagementSettingsPath"
+          data-testid="manage-licenses-button"
+          size="small"
+          :class="{ 'gl-mr-3': isCollapsible }"
+          :href="licenseManagementSettingsPath"
+          data-qa-selector="manage_licenses_button"
+        >
+          {{ s__('ciReport|Manage licenses') }}
+        </gl-button>
       </template>
     </report-section>
   </div>

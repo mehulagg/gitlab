@@ -595,7 +595,7 @@ to restrict connections to and from selected pods, namespaces, and the internet.
 
 As the default network plugin for Kubernetes (`kubenet`)
 [does not implement](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet)
-support for it, you must have [Cilium](https://docs.cilium.io/en/v1.8/intro/) as your Kubernetes network plugin. 
+support for it, you must have [Cilium](https://docs.cilium.io/en/v1.8/intro/) as your Kubernetes network plugin.
 
 The [Cilium](https://cilium.io/) network plugin can be
 installed as a [cluster application](../../user/clusters/applications.md#install-cilium-using-gitlab-cicd)
@@ -635,7 +635,7 @@ ciliumNetworkPolicy:
 #### Enabling Alerts
 
 You can also enable alerts. Network policies with alerts are considered only if
-[GitLab Kubernetes Agent](https://docs.gitlab.com/13.6/ee/user/clusters/agent/)
+[GitLab Kubernetes Agent](../../user/clusters/agent/index.md)
 has been integrated.
 
 You can enable alerts as follows:
@@ -737,7 +737,7 @@ GitLab provides some initial alerts for you after you install Prometheus:
 To use Auto Monitoring:
 
 1. [Install and configure the Auto DevOps requirements](requirements.md).
-1. [Enable Auto DevOps](index.md#enablingdisabling-auto-devops), if you haven't done already.
+1. [Enable Auto DevOps](index.md#enable-or-disable-auto-devops), if you haven't done already.
 1. Navigate to your project's **{rocket}** **CI/CD > Pipelines** and click **Run Pipeline**.
 1. After the pipeline finishes successfully, open the
    [monitoring dashboard for a deployed environment](../../ci/environments/index.md#monitoring-environments)

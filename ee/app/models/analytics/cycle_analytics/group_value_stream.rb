@@ -3,7 +3,7 @@
 class Analytics::CycleAnalytics::GroupValueStream < ApplicationRecord
   belongs_to :group
 
-  has_many :stages, class_name: 'Analytics::CycleAnalytics::GroupStage', index_errors: true
+  has_many :stages, -> { ordered }, class_name: 'Analytics::CycleAnalytics::GroupStage', index_errors: true
 
   validates :group, :name, presence: true
   validates :name, length: { minimum: 3, maximum: 100, allow_nil: false }, uniqueness: { scope: :group_id }

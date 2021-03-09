@@ -6,7 +6,7 @@ import {
   ALL_ENVIRONMENT_NAME,
 } from 'ee/threat_monitoring/constants';
 import createStore from 'ee/threat_monitoring/store';
-import { mockEnvironmentsResponse } from '../mock_data';
+import { mockEnvironmentsResponse } from '../mocks/mock_data';
 
 const mockEnvironments = mockEnvironmentsResponse.environments;
 const currentEnvironment = mockEnvironments[1];

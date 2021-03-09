@@ -64,12 +64,14 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :dashboard, only: [:index], controller: :dashboard
           resources :vulnerability_report, only: [:index], controller: :vulnerability_report
 
-          resource :policy, only: [:show]
+          resource :policy, only: [:show] do
+            post :assign
+          end
 
           resource :configuration, only: [], controller: :configuration do
             post :auto_fix, on: :collection
             resource :corpus_management, only: [:show], controller: :corpus_management
-            resource :sast, only: [:show, :create], controller: :sast_configuration
+            resource :sast, only: [:show], controller: :sast_configuration
             resource :api_fuzzing, only: :show, controller: :api_fuzzing_configuration
             resource :dast_profiles, only: [:show] do
               resources :dast_site_profiles, only: [:new, :edit]

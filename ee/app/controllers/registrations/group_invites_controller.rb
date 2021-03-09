@@ -15,7 +15,7 @@ module Registrations
       result = Members::CreateService.new(current_user, invite_params).execute(group)
 
       if result[:status] == :success
-        experiment(:registrations_group_invite, actor: :user)
+        experiment(:registrations_group_invite, actor: current_user)
           .track(:invites_sent, property: group.id.to_s, value: group.members.invite.size)
       end
 
