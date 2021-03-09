@@ -17,7 +17,7 @@ module Spec
         module ReleasesHelpers
           def select_new_tag_name(tag_name)
             page.within '[data-testid="tag-name-field"]' do
-              find('button.gl-dropdown-toggle').click
+              find('button').click
 
               wait_for_all_requests
 
@@ -31,7 +31,7 @@ module Spec
 
           def select_create_from(branch_name)
             page.within '[data-testid="create-from-field"]' do
-              find('button.gl-dropdown-toggle').click
+              find('button').click
 
               wait_for_all_requests
 
@@ -49,7 +49,7 @@ module Spec
 
           def select_milestone(milestone_title)
             page.within '[data-testid="milestones-field"]' do
-              find('button.gl-dropdown-toggle').click
+              find('button').click
 
               wait_for_all_requests
 
