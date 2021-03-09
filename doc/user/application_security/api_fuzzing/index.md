@@ -206,7 +206,8 @@ target API to test:
      FUZZAPI_PROFILE: Quick-10
    ```
 
-1. Add the `FUZZAPI_HAR` variable and set it to the HAR file's location:
+1. Provide the location of the HAR specification. You can provide the specification as a file
+   or URL. Specify the location by adding the `FUZZAPI_HAR` variable:
 
    ```yaml
    include:
@@ -297,7 +298,8 @@ information about the target API to test:
      FUZZAPI_PROFILE: Quick-10
    ```
 
-1. Add the `FUZZAPI_POSTMAN_COLLECTION` variable and set it to the Postman Collection's location:
+1. Provide the location of the Postman Collection specification. You can provide the specification as a file
+   or URL. Specify the location by adding the `FUZZAPI_POSTMAN_COLLECTION` variable:
 
    ```yaml
    include:
