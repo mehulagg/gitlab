@@ -51,6 +51,12 @@ RSpec.describe NewEpicWorker do
         end
       end
 
+      context 'when the new epic author is not confirmed' do
+        let_it_be(:user) { create(:user, :unconfirmed) }
+
+        it_behaves_like 'a new epic where the current user cannot trigger notifications'
+      end
+
       context 'when the new epic author is blocked' do
         let_it_be(:user) { create(:user, :blocked) }
 

@@ -665,6 +665,12 @@ RSpec.describe EE::NotificationService, :mailer do
         end
       end
 
+      context 'when author is not confirmed' do
+        let(:current_user) { create(:user, :unconfirmed) }
+
+        include_examples 'is not able to send notifications'
+      end
+
       context 'when author is blocked' do
         let(:current_user) { create(:user, :blocked) }
 
