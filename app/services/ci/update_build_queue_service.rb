@@ -17,7 +17,7 @@ module Ci
       runners.each do |runner|
         metrics.increment_runner_tick(runner)
 
-        runner.pick_build!(build)
+        Ci::Queueing.fabricate!(runner).enqueue(build)
       end
     end
   end
