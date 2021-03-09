@@ -104,3 +104,5 @@ ee/changelogs/unreleased-ee
 /sitespeed-result
 tags.lock
 tags.temp
+doc/api/graphql/reference/gitlab_schema.graphql
+doc/api/graphql/reference/gitlab_schema.json
