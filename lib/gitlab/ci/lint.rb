@@ -85,13 +85,11 @@ module Gitlab
         jobs = []
         return jobs unless result.valid?
 
-        result.stages.each do |stage_name|
-          result.builds.each do |job|
-            next unless job[:stage] == stage_name
-
+        result.stages_attributes.each do |stage_attributes|
+          stage_attributes.fetch(:builds).each do |job|
             jobs << {
               name: job[:name],
-              stage: stage_name,
+              stage: stage_attributes[:name],
               before_script: job.dig(:options, :before_script).to_a,
               script: job.dig(:options, :script).to_a,
               after_script: job.dig(:options, :after_script).to_a,

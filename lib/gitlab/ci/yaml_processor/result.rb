@@ -26,23 +26,19 @@ module Gitlab
           end
         end
 
-        def builds
-          jobs.map do |name, _|
-            build_attributes(name)
-          end
-        end
-
-        def stage_builds_attributes(stage)
-          jobs.values
-            .select { |job| job[:stage] == stage }
-            .map { |job| build_attributes(job[:name]) }
-        end
-
         def workflow_attributes
           {
             rules: hash_config.dig(:workflow, :rules),
             yaml_variables: transform_to_yaml_variables(variables)
           }
+        end
+
+        private
+
+        def stage_builds_attributes(stage)
+          jobs.values
+            .select { |job| job[:stage] == stage }
+            .map { |job| build_attributes(job[:name]) }
         end
 
         def jobs
