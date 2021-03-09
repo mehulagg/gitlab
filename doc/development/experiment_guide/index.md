@@ -47,12 +47,15 @@ Both methods use [experiment](../feature_flags/development.md#experiment-type) f
 
 Historical Context: `Experimentation Module` was built iteratively with the needs that appeared while implementing Growth sub-department experiments. The `gitlab-experiment` gem was built with the learnings of the `Experimentation Module` and an easier to use API.
 
-Currently both methods for running experiments are included in the codebase. When considering which to use:
+Currently both methods for running experiments are included in the codebase. The features are slightly different:
 
-- To record conducted experiments and usage into the database, use the `Experimentation Module`.
-- To conduct a [multivariate](https://en.wikipedia.org/wiki/Multivariate_statistics) experiment, use `gitlab-experiment`.
+| Feature | Experiment Module | gitlab-experiment |
+| ------ | ------ | ------ |
+| Record user grouping | Yes | No (not natively) |
+| Uses feature flags | Yes | Yes |
+| Multivariate | No | Yes |
 
-Otherwise, there is currently no strong suggestion to use one over the other.
+However, there is currently no strong suggestion to use one over the other.
 
 ### Experiments using `gitlab-experiment` **(FREE SAAS)**
 
