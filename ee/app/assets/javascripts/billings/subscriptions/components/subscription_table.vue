@@ -48,7 +48,7 @@ export default {
     },
     subscriptionHeader() {
       const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.planName);
-      const suffix = !this.isFreePlan && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
+      const suffix = this.isSubscription && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
@@ -56,7 +56,7 @@ export default {
       return this.isFreePlan || this.plan.upgradable;
     },
     canUpgradeEEPlan() {
-      return !this.isFreePlan && this.planUpgradeHref;
+      return this.isSubscription && this.planUpgradeHref;
     },
     addSeatsButton() {
       return this.isSubscription
@@ -85,7 +85,7 @@ export default {
         : null;
     },
     manageButton() {
-      return !this.isFreePlan
+      return this.isSubscription
         ? createButtonProps(
             s__('SubscriptionTable|Manage'),
             this.customerPortalUrl,
