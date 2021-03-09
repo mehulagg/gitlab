@@ -529,3 +529,6 @@ gem 'webauthn', '~> 2.3'
 gem 'ipaddress', '~> 0.8.3'
 
 gem 'parslet', '~> 1.8'
+
+# Caching utilities
+gem 'chunky_cache', '~> 0.1.2'
