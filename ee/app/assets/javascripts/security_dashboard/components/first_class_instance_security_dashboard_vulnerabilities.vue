@@ -52,7 +52,9 @@ export default {
           ...this.filters,
         };
       },
-      update: ({ vulnerabilities }) => vulnerabilities.nodes,
+      update: (data) => {
+        return data.vulnerabilities.nodes;
+      },
       result({ data }) {
         this.pageInfo = preparePageInfo(data?.vulnerabilities?.pageInfo);
       },
@@ -65,6 +67,7 @@ export default {
     filters() {
       // Clear out the existing vulnerabilities so that the skeleton loader is shown.
       this.vulnerabilities = [];
+      this.pageInfo = {};
     },
     sort() {
       // Clear out the existing vulnerabilities so that the skeleton loader is shown.
@@ -83,7 +86,7 @@ export default {
             return produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.vulnerabilities.nodes = [
-                ...previousResult.vulnerabilities.nodes,
+                ...(previousResult ? previousResult.vulnerabilities.nodes : {}),
                 ...draftData.vulnerabilities.nodes,
               ];
             });
