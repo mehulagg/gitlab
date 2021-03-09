@@ -2634,6 +2634,13 @@ that are [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed
 To follow progress on support for GitLab-managed clusters, see the
 [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/38054).
 
+#### `environment:tier`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27630) in GitLab 13.10.
+
+Use the `tier` keyword to explicitly specify the tier of the environment.
+You can see the [available environment tiers](../environments/index.md).
+
 #### Dynamic environments
 
 Use CI/CD [variables](../variables/README.md) to dynamically name environments.

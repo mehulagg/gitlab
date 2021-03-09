@@ -124,6 +124,38 @@ Some variables cannot be used as environment names or URLs.
 For more information about the `environment` keywords, see
 [the `.gitlab-ci.yml` keyword reference](../yaml/README.md#environment).
 
+## Tier of environments (**Core**)
+
+> [Introduced](link) in GitLab 13.10.
+
+Based on the [Deployment environment](https://en.wikipedia.org/wiki/Deployment_environment)
+definition, you can set tiers for environments. Here is the available tiers:
+
+| Tier           | Examples                                |
+| ----           | --------                                |
+| `production`   | Production, Live                        |
+| `staging`      | Staging, Model, Pre, Demo               |
+| `testing`      | Test, QC                                |
+| `development`  | Dev, [Review apps](#review-apps), Trunk |
+| `other`        |                                         |
+
+By default, a corresponding tier is autoamtically set by GitLab based on the environment name.
+
+### Specify the tier of environment
+
+In some cases, the tier that automatically set by GitLab might not be correct.
+In this case, you can explicitly specify the tier of environment via `.gitlab-ci.yml`:
+
+To do so, you can use [`environment:tier:` keyword](../yaml/README.md). For example,
+
+```yaml
+deploy:
+  script: echo
+  environment:
+    name: customer-portal
+    tier: production
+```
+
 ## Configure manual deployments
 
 You can create a job that requires someone to manually start the deployment.
