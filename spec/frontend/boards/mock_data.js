@@ -125,7 +125,7 @@ export const labels = [
 export const rawIssue = {
   title: 'Issue 1',
   id: 'gid://gitlab/Issue/436',
-  iid: 27,
+  iid: '27',
   dueDate: null,
   timeEstimate: 0,
   weight: null,
@@ -152,7 +152,7 @@ export const rawIssue = {
 
 export const mockIssue = {
   id: 'gid://gitlab/Issue/436',
-  iid: 27,
+  iid: '27',
   title: 'Issue 1',
   dueDate: null,
   timeEstimate: 0,

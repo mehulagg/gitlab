@@ -456,7 +456,7 @@ export default {
     commit(typesCE.UPDATE_ISSUE_BY_ID, {
       issueId: getters.activeIssue.id,
       prop: 'epic',
-      value: epic ? { id: epic.id, iid: epic.iid } : null,
+      value: epic ? { id: epic.id, iid: epic.iid, webUrl: epic.webUrl } : null,
     });
     commit(types.SET_EPIC_FETCH_IN_PROGRESS, false);
   },

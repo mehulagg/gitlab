@@ -17,7 +17,7 @@ export default {
       gon.features?.graphqlBoardLists || gon.features?.epicBoards
         ? BoardColumn
         : BoardColumnDeprecated,
-    BoardContentSidebar: () => import('ee_component/boards/components/board_content_sidebar.vue'),
+    BoardContentSidebar: () => import('~/boards/components/board_content_sidebar.vue'),
     EpicsSwimlanes: () => import('ee_component/boards/components/epics_swimlanes.vue'),
     GlAlert,
   },

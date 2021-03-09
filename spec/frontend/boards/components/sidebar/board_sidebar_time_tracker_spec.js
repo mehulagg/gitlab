@@ -7,7 +7,7 @@
 */
 
 import { shallowMount } from '@vue/test-utils';
-import BoardSidebarTimeTracker from 'ee/boards/components/sidebar/board_sidebar_time_tracker.vue';
+import BoardSidebarTimeTracker from '~/boards/components/sidebar/board_sidebar_time_tracker.vue';
 import { createStore } from '~/boards/stores';
 import IssuableTimeTracker from '~/sidebar/components/time_tracking/time_tracker.vue';
 

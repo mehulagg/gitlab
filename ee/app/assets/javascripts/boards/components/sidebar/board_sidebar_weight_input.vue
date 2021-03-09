@@ -74,7 +74,11 @@ export default {
   >
     <template v-if="hasWeight" #collapsed>
       <div class="gl-display-flex gl-align-items-center">
-        <strong class="gl-text-gray-900">{{ activeIssue.weight }}</strong>
+        <strong
+          class="gl-text-gray-900 js-weight-weight-label-value"
+          data-qa-selector="weight_label_value"
+          >{{ activeIssue.weight }}</strong
+        >
         <span class="gl-mx-2">-</span>
         <gl-button
           variant="link"

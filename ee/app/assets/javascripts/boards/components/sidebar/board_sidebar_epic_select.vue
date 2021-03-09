@@ -99,11 +99,12 @@ export default {
     ref="sidebarItem"
     :title="$options.i18n.epic"
     :loading="epicFetchInProgress"
+    data-testid="sidebar-epic"
     @open="handleOpen"
     @close="handleClose"
   >
     <template v-if="epicData.title" #collapsed>
-      <a class="gl-text-gray-900! gl-font-weight-bold" href="#">
+      <a class="gl-text-gray-900! gl-font-weight-bold" :href="epic.webUrl" data-testid="epic-title">
         {{ epicData.title }}
       </a>
     </template>

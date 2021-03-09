@@ -142,10 +142,10 @@ export default {
 
     if (existingList) {
       dispatch('highlightList', existingList.id);
-      return;
+      return Promise.resolve();
     }
 
-    gqlClient
+    return gqlClient
       .mutate({
         mutation: createBoardListMutation,
         variables: {

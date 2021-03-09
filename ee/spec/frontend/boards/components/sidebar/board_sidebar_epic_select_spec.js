@@ -69,6 +69,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   const findEpicSelect = () => wrapper.find({ ref: 'epicSelect' });
   const findItemWrapper = () => wrapper.find({ ref: 'sidebarItem' });
   const findCollapsed = () => wrapper.find('[data-testid="collapsed-content"]');
+  const findEpicTitle = () => wrapper.find('[data-testid="epic-title"]');
   const findBoardEditableItem = () => wrapper.find(BoardEditableItem);
 
   describe('when not editing', () => {
@@ -173,7 +174,8 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(findCollapsed().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicTitle().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicTitle().attributes('href')).toBe(mockAssignedEpic.webUrl);
     });
   });
 
@@ -211,9 +213,10 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       expect(wrapper.vm.setActiveIssueEpic).toHaveBeenCalledTimes(1);
     });
 
-    it('collapses sidebar and renders epic title', () => {
+    it('collapses sidebar and renders epic title with link', () => {
       expect(findCollapsed().isVisible()).toBe(true);
-      expect(findCollapsed().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicTitle().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicTitle().attributes('href')).toBe(mockAssignedEpic.webUrl);
     });
 
     describe('when the selected epic did not change', () => {
