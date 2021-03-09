@@ -139,26 +139,6 @@ Run 'rails runner -h' for help.
 hello world
 ```
 
-In case you encouter a similar error to this:
-
-```plaintext
-[root ~]# sudo gitlab-rails runner get_pository.rb 
-Please specify a valid ruby command or the path of a script to run.
-Run 'rails runner -h' for help.
-
-undefined local variable or method `get_pository' for main:Object
-```
-
-You can either move the file to the `/tmp` directory or create a new directory onwed by the user `git` and save the script in that directory as illustrated below:
-
-```plaintext
-[root ~]# mkdir /scripts
-[root ~]# mv /script_path/get_pository.rb /scripts
-[root ~]# chown -R git:git /scripts
-[root ~]# chmod 700 /scripts
-[root ~]# sudo gitlab-rails runner /scripts/get_pository.rb
-```
-
 A meaningful error should be generated if the directory can be accessed, but the file cannot:
 
 ```plaintext
@@ -167,4 +147,24 @@ A meaningful error should be generated if the directory can be accessed, but the
 Traceback (most recent call last):
       [traceback removed]
 /opt/gitlab/..../runner_command.rb:42:in `load': cannot load such file -- /tmp/helloworld.rb (LoadError)
+```
+
+In case you encouter a similar error to this:
+
+```plaintext
+[root ~]# sudo gitlab-rails runner helloworld.rb 
+Please specify a valid ruby command or the path of a script to run.
+Run 'rails runner -h' for help.
+
+undefined local variable or method `helloworld' for main:Object
+```
+
+You can either move the file to the `/tmp` directory or create a new directory onwed by the user `git` and save the script in that directory as illustrated below:
+
+```plaintext
+[root ~]# mkdir /scripts
+[root ~]# mv /script_path/helloworld.rb /scripts
+[root ~]# chown -R git:git /scripts
+[root ~]# chmod 700 /scripts
+[root ~]# sudo gitlab-rails runner /scripts/helloworld.rb
 ```
