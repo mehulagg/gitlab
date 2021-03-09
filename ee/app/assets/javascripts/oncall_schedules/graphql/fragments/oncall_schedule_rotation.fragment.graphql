@@ -7,6 +7,10 @@ fragment OnCallRotation on IncidentManagementOncallRotation {
   endsAt
   length
   lengthUnit
+  activePeriod {
+    startTime
+    endTime
+  }
   participants {
     nodes {
       ...OnCallParticipant

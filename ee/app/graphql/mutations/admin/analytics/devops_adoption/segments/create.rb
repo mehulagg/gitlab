@@ -22,11 +22,14 @@ module Mutations
             def resolve(namespace_id:, **)
               namespace = namespace_id.find
 
-              response = ::Analytics::DevopsAdoption::Segments::CreateService
-                .new(current_user: current_user, params: { namespace: namespace })
-                .execute
+              with_authorization_handler do
+                service = ::Analytics::DevopsAdoption::Segments::CreateService
+                  .new(current_user: current_user, params: { namespace: namespace })
 
-              resolve_segment(response)
+                response = service.execute
+
+                resolve_segment(response)
+              end
             end
           end
         end

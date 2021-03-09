@@ -301,6 +301,10 @@ module EE
       all_pipelines.newest_first(ref: default_branch).with_reports(reports).take
     end
 
+    def security_reports_up_to_date_for_ref?(ref)
+      latest_pipeline_with_security_reports(only_successful: true) == ci_pipelines.newest_first(ref: ref).take
+    end
+
     def ensure_external_webhook_token
       return if external_webhook_token.present?
 

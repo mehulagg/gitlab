@@ -29,12 +29,13 @@ RSpec.describe Analytics::DevopsAdoption::Segments::DeleteService do
     end
   end
 
-  context 'when the user is not admin' do
-    let(:user) { build(:user) }
+  context 'for non-admins' do
+    let_it_be(:user) { build(:user) }
 
-    it 'returns error response' do
-      expect(subject).to be_error
-      expect(subject.message).to eq('Forbidden')
+    it 'returns forbidden error' do
+      expect do
+        subject
+      end.to raise_error(Analytics::DevopsAdoption::Segments::AuthorizationError)
     end
   end
 end

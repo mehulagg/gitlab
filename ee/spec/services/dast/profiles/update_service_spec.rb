@@ -5,17 +5,18 @@ require 'spec_helper'
 RSpec.describe Dast::Profiles::UpdateService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project) }
+  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project, branch_name: 'orphaned-branch') }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
   let(:default_params) do
     {
+      name: SecureRandom.hex,
+      description: SecureRandom.hex,
+      branch_name: 'orphaned-branch',
       dast_profile: dast_profile,
       dast_site_profile_id: dast_site_profile.id,
-      dast_scanner_profile_id: dast_scanner_profile.id,
-      name: SecureRandom.hex,
-      description: SecureRandom.hex
+      dast_scanner_profile_id: dast_scanner_profile.id
     }
   end
 
@@ -92,12 +93,10 @@ RSpec.describe Dast::Profiles::UpdateService do
         context 'when param run_after_update: true' do
           let(:params) { default_params.merge(run_after_update: true) }
 
-          it 'calls DastOnDemandScans::CreateService' do
-            params = { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile }
-
-            expect(DastOnDemandScans::CreateService).to receive(:new).with(hash_including(params: params)).and_call_original
-
-            subject
+          it_behaves_like 'it delegates scan creation to another service' do
+            let(:delegated_params) do
+              { branch: dast_profile.branch_name, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile }
+            end
           end
 
           it 'creates a ci_pipeline' do

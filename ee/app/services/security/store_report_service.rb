@@ -33,7 +33,15 @@ module Security
     end
 
     def create_all_vulnerabilities!
-      @report.findings.map { |finding| create_vulnerability_finding(finding)&.id }.compact.uniq
+      # Look for existing Findings using UUID
+      finding_uuids = @report.findings.map(&:uuid)
+      vulnerability_findings_by_uuid = project.vulnerability_findings
+        .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
+        .to_h { |vf| [vf.uuid, vf] }
+
+      @report.findings.map do |finding|
+        create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
+      end.compact.uniq
     end
 
     def mark_as_resolved_except(vulnerability_ids)
@@ -43,7 +51,7 @@ module Security
              .update_all(resolved_on_default_branch: true)
     end
 
-    def create_vulnerability_finding(finding)
+    def create_vulnerability_finding(vulnerability_findings_by_uuid, finding)
       unless finding.valid?
         put_warning_for(finding)
         return
@@ -51,7 +59,9 @@ module Security
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
-      vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
+      # Vulnerabilities::Finding (`vulnerability_occurrences`)
+      vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
+        create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       update_vulnerability_scanner(finding)
 
@@ -73,7 +83,7 @@ module Security
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def create_or_find_vulnerability_finding(finding, create_params)
+    def create_new_vulnerability_finding(finding, create_params)
       find_params = {
         scanner: scanners_objects[finding.scanner.key],
         primary_identifier: identifiers_objects[finding.primary_identifier.key],
@@ -81,21 +91,15 @@ module Security
       }
 
       begin
-        # Look for existing Findings using UUID
-        vulnerability_finding = project.vulnerability_findings.find_by(uuid: finding.uuid)
-
         # If there's no Finding then we're dealing with one of two cases:
         # 1. The Finding is a new one
         # 2. The Finding is already saved but has UUIDv4
-        unless vulnerability_finding
-          vulnerability_finding = project.vulnerability_findings
-            .create_with(create_params)
-            .find_or_initialize_by(find_params)
-          vulnerability_finding.uuid = finding.uuid
+        project.vulnerability_findings
+          .create_with(create_params)
+          .find_or_initialize_by(find_params).tap do |f|
+          f.uuid = finding.uuid
+          f.save!
         end
-
-        vulnerability_finding.save!
-        vulnerability_finding
       rescue ActiveRecord::RecordNotUnique => e
         # This might happen if we're processing another report in parallel and it finds the same Finding
         # faster. In that case we need to perform the lookup again

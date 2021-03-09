@@ -30,9 +30,6 @@ export default {
       'sidebarCollapsed',
     ]),
     ...mapGetters(['isUserSignedIn']),
-    sidebarStatusClass() {
-      return this.sidebarCollapsed ? 'right-sidebar-collapsed' : 'right-sidebar-expanded';
-    },
   },
 };
 </script>

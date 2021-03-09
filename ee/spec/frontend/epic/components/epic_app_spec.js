@@ -1,46 +1,23 @@
-import MockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
-
+import { shallowMount } from '@vue/test-utils';
 import EpicApp from 'ee/epic/components/epic_app.vue';
-import createStore from 'ee/epic/store';
-
-import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
-import { initialRequest } from 'jest/issue_show/mock_data';
-import { TEST_HOST } from 'spec/test_constants';
-import axios from '~/lib/utils/axios_utils';
-import { mockEpicMeta, mockEpicData } from '../mock_data';
+import EpicBody from 'ee/epic/components/epic_body.vue';
+import EpicHeader from 'ee/epic/components/epic_header.vue';
 
 describe('EpicAppComponent', () => {
-  useMockIntersectionObserver();
+  let wrapper;
 
-  let vm;
-  let mock;
-
-  beforeEach(() => {
-    mock = new MockAdapter(axios);
-    mock.onGet(`${TEST_HOST}/realtime_changes`).reply(200, initialRequest);
-
-    const Component = Vue.extend(EpicApp);
-    const store = createStore();
-    store.dispatch('setEpicMeta', mockEpicMeta);
-    store.dispatch('setEpicData', mockEpicData);
-
-    vm = mountComponentWithStore(Component, {
-      store,
-    });
-
-    jest.advanceTimersByTime(2);
-  });
+  const createComponent = () => {
+    wrapper = shallowMount(EpicApp);
+  };
 
   afterEach(() => {
-    mock.restore();
-    vm.$destroy();
+    wrapper.destroy();
   });
 
-  describe('template', () => {
-    it('renders component container element with class `epic-page-container`', () => {
-      expect(vm.$el.classList.contains('epic-page-container')).toBe(true);
-    });
+  it('renders epic header and epic body', () => {
+    createComponent();
+
+    expect(wrapper.findComponent(EpicHeader).exists()).toBe(true);
+    expect(wrapper.findComponent(EpicBody).exists()).toBe(true);
   });
 });

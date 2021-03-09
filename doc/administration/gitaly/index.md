@@ -126,6 +126,11 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
+The following digraph illustrates communication between Gitaly servers and GitLab Rails showing
+the default ports for HTTP and HTTPs communication.
+
+![Gitaly network architecture diagram](img/gitaly_network_13_9.png)
+
 WARNING:
 Gitaly servers must not be exposed to the public internet as Gitaly's network traffic is unencrypted
 by default. The use of firewall is highly recommended to restrict access to the Gitaly server.
@@ -1198,7 +1203,7 @@ Confirm the following are all true:
   successfully creates the project, but doesn't create the README.
 - When [tailing the logs](https://docs.gitlab.com/omnibus/settings/logs.html#tail-logs-in-a-console-on-the-server)
   on a Gitaly client and reproducing the error, you get `401` errors
-  when reaching the `/api/v4/internal/allowed` endpoint:
+  when reaching the [`/api/v4/internal/allowed`](../../development/internal_api.md) endpoint:
 
   ```shell
   # api_json.log
