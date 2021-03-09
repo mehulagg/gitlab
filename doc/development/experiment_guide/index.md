@@ -49,7 +49,7 @@ Historical Context: `Experimentation Module` was built iteratively with the need
 
 Currently both methods for running experiments are included in the codebase. The features are slightly different:
 
-| Feature | Experiment Module | gitlab-experiment |
+| Feature | `Experiment Module` | `gitlab-experiment` |
 | ------ | ------ | ------ |
 | Record user grouping | Yes | No (not natively) |
 | Uses feature flags | Yes | Yes |
