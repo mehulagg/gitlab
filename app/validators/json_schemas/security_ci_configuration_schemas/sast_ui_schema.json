@@ -7,7 +7,7 @@
             "default_value": "",
             "value": "",
             "size": "LARGE",
-            "description": "Analyzer image's registry prefix (or name of the registry providing the analyzers' image)"
+            "description": "Analyzer image's registry prefix (or name of the registry providing the analyzers' image)",
         },
         {
             "field" : "SAST_EXCLUDED_PATHS",

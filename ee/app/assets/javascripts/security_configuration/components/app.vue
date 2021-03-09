@@ -119,6 +119,9 @@ export default {
     dismissAutoDevopsAlert() {
       this.autoDevopsAlertDismissed = 'true';
     },
+    statusQaSelector(item) {
+      return `${item.type}_status`
+    },
     getFeatureDocumentationLinkLabel(item) {
       return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
         featureName: item.name,
@@ -193,6 +196,7 @@ export default {
           :feature="item"
           :gitlab-ci-present="gitlabCiPresent"
           :gitlab-ci-history-path="gitlabCiHistoryPath"
+          :data-qa-selector="statusQaSelector(item)"
         />
       </template>
 
