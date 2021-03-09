@@ -28,4 +28,5 @@ export const mockJiraIssue = {
     relative: 'FE-2',
   },
   state: 'opened',
+  status: 'In Progress',
 };
