@@ -93,6 +93,7 @@ overrides:
       - 'config/**/*'
       - 'scripts/**/*'
       - '*.config.js'
+      - 'jest.*.js'
     rules:
       '@gitlab/require-i18n-strings': off
       import/no-extraneous-dependencies: off
