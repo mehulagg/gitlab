@@ -260,8 +260,16 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    namespace = user? ? self : self_and_descendants
-    Project.where(namespace: namespace)
+    if Feature.enabled?(:recursive_namesapce_lookup_as_inner_join)
+      if user?
+        Project.where(namespace: self)
+      else
+        Project.joins("INNER JOIN (#{self_and_descendants.select(:id).to_sql}) namespaces on namespaces.id=projects.namespace_id")
+      end
+    else
+      namespace = user? ? self : self_and_descendants
+      Project.where(namespace: namespace)
+    end
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups
