@@ -1,4 +1,4 @@
-import { GlDropdownItem, GlSegmentedControl } from '@gitlab/ui';
+import { GlDropdownItem, GlSegmentedControl, GlSprintf } from '@gitlab/ui';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
@@ -56,6 +56,7 @@ function createComponent({ props = {}, mountFn = shallowMount } = {}) {
     },
     stubs: {
       LabelsSelector,
+      GlSprintf,
     },
   });
 }

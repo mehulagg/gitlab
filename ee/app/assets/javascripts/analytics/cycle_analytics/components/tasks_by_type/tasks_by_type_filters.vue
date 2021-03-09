@@ -1,5 +1,5 @@
 <script>
-import { GlDropdownDivider, GlSegmentedControl, GlIcon } from '@gitlab/ui';
+import { GlDropdownDivider, GlSegmentedControl, GlIcon, GlSprintf } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, n__, sprintf } from '~/locale';
 import {
@@ -18,6 +18,7 @@ export default {
     GlDropdownDivider,
     GlIcon,
     LabelsSelector,
+    GlSprintf,
   },
   props: {
     selectedLabelIds: {
@@ -45,30 +46,14 @@ export default {
         value,
       }));
     },
-    selectedFiltersText() {
-      const { subjectFilter, selectedLabelIds } = this;
-      const selectedLabelsCount = selectedLabelIds.length;
-      const subjectFilterText = TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
+    selectedSubjectFilter() {
+      const { subjectFilter } = this;
+      return TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
         ? TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
         : TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[TASKS_BY_TYPE_SUBJECT_ISSUE];
-      return sprintf(
-        n__(
-          'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} label',
-          'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels',
-          selectedLabelsCount,
-        ),
-        {
-          subjectFilterText,
-          selectedLabelsCount,
-        },
-      );
     },
-    selectedLabelLimitText() {
-      const { selectedLabelIds, maxLabels } = this;
-      return sprintf(s__('CycleAnalytics|%{selectedLabelsCount} selected (%{maxLabels} max)'), {
-        selectedLabelsCount: selectedLabelIds.length,
-        maxLabels,
-      });
+    selectedLabelsCount() {
+      return this.selectedLabelIds.length;
     },
     maxLabelsSelected() {
       return this.selectedLabelIds.length >= this.maxLabels;
@@ -102,7 +87,20 @@ export default {
   >
     <div class="flex-column">
       <h4>{{ s__('CycleAnalytics|Tasks by type') }}</h4>
-      <p v-if="hasData">{{ selectedFiltersText }}</p>
+      <p v-if="hasData">
+        <gl-sprintf
+          :message="
+            n__(
+              'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} label',
+              'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels',
+              selectedLabelsCount,
+            )
+          "
+        >
+          <template #selectedLabelsCount>{{ selectedLabelsCount }}</template>
+          <template #subjectFilterText>{{ selectedSubjectFilter }}</template>
+        </gl-sprintf>
+      </p>
     </div>
     <div class="flex-column">
       <labels-selector
@@ -137,7 +135,16 @@ export default {
           <div class="mb-3 px-3">
             <p class="font-weight-bold text-left my-2">
               {{ s__('CycleAnalytics|Select labels') }}
-              <br /><small>{{ selectedLabelLimitText }}</small>
+              <br /><small>
+                <gl-sprintf
+                  :message="
+                    s__('CycleAnalytics|%{selectedLabelsCount} selected (%{maxLabels} max)')
+                  "
+                >
+                  <template #selectedLabelsCount>{{ selectedLabelsCount }}</template>
+                  <template #maxLabels>{{ maxLabels }}</template>
+                </gl-sprintf>
+              </small>
             </p>
           </div>
         </template>
