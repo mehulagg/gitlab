@@ -107,6 +107,18 @@ RSpec.describe Tooling::Danger::Teammate do
         end
       end
 
+      context 'when role is Backend Engineer, Product Intelligence' do
+        let(:role) { 'Backend Engineer, Product Intelligence' }
+
+        it '#reviewer? returns true' do
+          expect(subject.reviewer?(project, :product_intelligence, labels)).to be_truthy
+        end
+
+        it '#maintainer? returns true' do
+          expect(subject.maintainer?(project, :product_intelligence, labels)).to be_falsey
+        end
+      end
+
       context 'when role is Backend Engineer, Engineering Productivity' do
         let(:role) { 'Backend Engineer, Engineering Productivity' }
 

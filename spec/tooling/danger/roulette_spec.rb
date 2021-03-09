@@ -81,6 +81,17 @@ RSpec.describe Tooling::Danger::Roulette do
     )
   end
 
+  let(:product_intelligence_reviewer) do
+    Tooling::Danger::Teammate.new(
+      'username' => 'product-intelligence-reviewer',
+      'name' => 'PI engineer',
+      'role' => 'Backend Engineer, Product Intelligence',
+      'projects' => { 'gitlab' => 'reviewer backend' },
+      'available' => true,
+      'tz_offset_hours' => 2.0
+    )
+  end
+
   let(:teammates) do
     [
       backend_maintainer.to_h,
@@ -88,7 +99,8 @@ RSpec.describe Tooling::Danger::Roulette do
       frontend_reviewer.to_h,
       software_engineer_in_test.to_h,
       engineering_productivity_reviewer.to_h,
-      ci_template_reviewer.to_h
+      ci_template_reviewer.to_h,
+      product_intelligence_reviewer.to_h
     ]
   end
 
@@ -202,6 +214,14 @@ RSpec.describe Tooling::Danger::Roulette do
 
         it 'assigns Engineering Productivity reviewer and fallback to backend maintainer' do
           expect(spins).to eq([described_class::Spin.new(:engineering_productivity, engineering_productivity_reviewer, backend_maintainer, false, false)])
+        end
+      end
+
+      context 'when change contains Product Intelligence category' do
+        let(:categories) { [:product_intelligence] }
+
+        it 'assigns Product Intelligence reviewer' do
+          expect(spins).to eq([described_class::Spin.new(:product_intelligence, product_intelligence_reviewer, nil, :maintainer, false)])
         end
       end
 

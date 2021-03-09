@@ -102,6 +102,9 @@ module Tooling
           return true if capabilities(project).include?("#{kind} engineering_productivity")
 
           capabilities(project).include?("#{kind} backend")
+        when :product_intelligence
+          return false unless role[/Product Intelligence/]
+          kind == :reviewer && capabilities(project).any? # any reviewer of project from Product Intelligence team can review MR
         else
           capabilities(project).include?("#{kind} #{category}")
         end

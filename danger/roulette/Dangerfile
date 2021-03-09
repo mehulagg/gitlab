@@ -78,6 +78,9 @@ categories = changes.keys - [:unknown]
 # Ensure to spin for database reviewer/maintainer when ~database is applied (e.g. to review SQL queries)
 categories << :database if helper.gitlab_helper&.mr_labels&.include?('database') && !categories.include?(:database)
 
+# Ensure to spin for Product Intelligence reviewer when ~"product intelligence::review pending" is applied
+categories << :product_intelligence if helper.gitlab_helper&.mr_labels&.include?("product intelligence::review pending") && !categories.include?(:product_intelligence)
+
 if changes.any?
   project = helper.project_name
 

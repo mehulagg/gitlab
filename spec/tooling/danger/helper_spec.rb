@@ -226,7 +226,7 @@ RSpec.describe Tooling::Danger::Helper do
         "spec/frontend/tracking_spec.js"
       ]
     end
-    
+
     it 'categorizes changed files' do
       expect(helper.changes_by_category).to eq(
         database: %w[db/migrate/foo lib/gitlab/database/foo.rb],
