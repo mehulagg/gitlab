@@ -235,7 +235,7 @@ export default {
     </div>
     <div class="gl-display-inline-block">
       <gl-toggle
-        :value="form.endDateEnabled"
+        :value="form.isEndDateEnabled"
         :label="$options.i18n.fields.endsAt.enableToggle"
         label-position="left"
         class="gl-mb-5"
@@ -243,7 +243,7 @@ export default {
       />
 
       <gl-card
-        v-if="form.endDateEnabled"
+        v-if="form.isEndDateEnabled"
         data-testid="rotation-ends-on"
         class="gl-border-gray-400 gl-bg-gray-10"
       >

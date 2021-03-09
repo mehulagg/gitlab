@@ -40,7 +40,7 @@ export const formEmptyState = {
     date: null,
     time: 0,
   },
-  endDateEnabled: false, // TODO: rename in line with isRestrictedToTime?
+  isEndDateEnabled: false, // TODO: rename in line with isRestrictedToTime?
   isRestrictedToTime: false,
   restrictedTo: {
     startTime: 0,
@@ -281,7 +281,6 @@ export default {
         });
     },
     updateRotationForm({ type, value }) {
-      console.log(__('type, value'), type, value);
       set(this.form, type, value);
       this.validateForm(type);
     },
@@ -302,45 +301,48 @@ export default {
     },
     beforeShowModal() {
       if (this.isEditMode) {
-        const scheduleTimezone = this.schedule.timezone;
-
-        // Start and End Dates
-        if (this.rotation.startsAt) {
-          this.form.startsAt = parseRotationDate(this.rotation.startsAt, scheduleTimezone);
-        }
-        if (this.rotation.endsAt) {
-          this.form.endDateEnabled = true;
-          this.form.endsAt = parseRotationDate(this.rotation.endsAt, scheduleTimezone);
-        }
-
-        // Participants.
-        const participants =
-          this.rotation?.participants?.nodes?.map(({ user }) => ({ ...user })) ?? [];
-        this.form.participants = participants;
-
-        // The rest
-        this.form.name = this.rotation.name;
-        this.form.rotationLength = {
-          length: this.rotation.length,
-          unit: this.rotation.lengthUnit,
-        };
-        if (this.rotation?.activePeriod?.startTime) {
-          const { activePeriod } = this.rotation;
-          // If a startTime exists, rotation restriction must be set to true.
-          this.form.isRestrictedToTime = true;
-          // Parse startTimes
-          this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
-          this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
-        }
+        this.parseData();
       }
     },
-    afterCloseModal() {
+    resetModal() {
       // Clear form
       this.form = cloneDeep(formEmptyState);
       // Clear validation
       this.validationState = cloneDeep(validiationInitialState);
       // Clear errors
       this.error = '';
+    },
+    parseData() {
+      const scheduleTimezone = this.schedule.timezone;
+
+      // Start and End Dates
+      if (this.rotation.startsAt) {
+        this.form.startsAt = parseRotationDate(this.rotation.startsAt, scheduleTimezone);
+      }
+      if (this.rotation.endsAt) {
+        this.form.isEndDateEnabled = true;
+        this.form.endsAt = parseRotationDate(this.rotation.endsAt, scheduleTimezone);
+      }
+
+      // Participants.
+      const participants =
+        this.rotation?.participants?.nodes?.map(({ user }) => ({ ...user })) ?? [];
+      this.form.participants = participants;
+
+      // The rest
+      this.form.name = this.rotation.name;
+      this.form.rotationLength = {
+        length: this.rotation.length,
+        unit: this.rotation.lengthUnit,
+      };
+      if (this.rotation?.activePeriod?.startTime) {
+        const { activePeriod } = this.rotation;
+        // If a startTime exists, rotation restriction must be set to true.
+        this.form.isRestrictedToTime = true;
+        // Parse startTimes
+        this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
+        this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
+      }
     },
   },
 };
@@ -356,7 +358,7 @@ export default {
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
     @show="beforeShowModal"
-    @hide="afterCloseModal"
+    @hide="resetModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}
