@@ -891,6 +891,9 @@ msgstr[1] ""
 msgid "%{text} is available"
 msgstr ""
 
+msgid "%{timeAgoStr} (%{pendingEvents} events)"
+msgstr ""
+
 msgid "%{timebox_name} should belong either to a project or a group."
 msgstr ""
 
@@ -9640,6 +9643,12 @@ msgstr ""
 msgid "Data is still calculating..."
 msgstr ""
 
+msgid "Data replication lag"
+msgstr ""
+
+msgid "Data type"
+msgstr ""
+
 msgid "Database update failed"
 msgstr ""
 
@@ -10830,6 +10839,9 @@ msgid "Documentation pages URL"
 msgstr ""
 
 msgid "Documents reindexed: %{processed_documents} (%{percentage}%%)"
+msgstr ""
+
+msgid "Does not match the primary storage configuration"
 msgstr ""
 
 msgid "Domain"
@@ -13402,6 +13414,9 @@ msgstr ""
 msgid "From the Kubernetes cluster details view, applications list, install GitLab Runner."
 msgstr ""
 
+msgid "Full"
+msgstr ""
+
 msgid "Full name"
 msgstr ""
 
@@ -13768,6 +13783,9 @@ msgstr ""
 msgid "Geo|Replicated data is verified with the secondary node(s) using checksums"
 msgstr ""
 
+msgid "Geo|Replication Details"
+msgstr ""
+
 msgid "Geo|Replication slot WAL"
 msgstr ""
 
@@ -13790,9 +13808,6 @@ msgid "Geo|Reverify all"
 msgstr ""
 
 msgid "Geo|Review replication status, and resynchronize and reverify items with the primary node."
-msgstr ""
-
-msgid "Geo|Secondary Details"
 msgstr ""
 
 msgid "Geo|Secondary node"
@@ -17641,6 +17656,12 @@ msgid "Last edited %{date}"
 msgstr ""
 
 msgid "Last edited by %{link_start}%{avatar} %{name}%{link_end}"
+msgstr ""
+
+msgid "Last event ID from primary"
+msgstr ""
+
+msgid "Last event ID processed by cursor"
 msgstr ""
 
 msgid "Last item before this page loaded in your browser:"
@@ -21977,6 +21998,9 @@ msgstr ""
 msgid "Pause replication"
 msgstr ""
 
+msgid "Paused"
+msgstr ""
+
 msgid "Paused runners don't accept new jobs"
 msgstr ""
 
@@ -25320,6 +25344,12 @@ msgstr ""
 msgid "Replication paused"
 msgstr ""
 
+msgid "Replication status"
+msgstr ""
+
+msgid "Replication summary"
+msgstr ""
+
 msgid "Reply by email"
 msgstr ""
 
@@ -27098,6 +27128,9 @@ msgstr ""
 msgid "Selecting a GitLab user will add a link to the GitLab user in the descriptions of issues and comments (e.g. \"By %{link_open}@johnsmith%{link_close}\"). It will also associate and/or assign these issues and comments with the selected user."
 msgstr ""
 
+msgid "Selective (%{syncLabel})"
+msgstr ""
+
 msgid "Selective synchronization"
 msgstr ""
 
@@ -28701,6 +28734,9 @@ msgstr ""
 msgid "Storage"
 msgstr ""
 
+msgid "Storage config"
+msgstr ""
+
 msgid "Storage nodes for new repositories"
 msgstr ""
 
@@ -29092,6 +29128,9 @@ msgid "Sync now"
 msgstr ""
 
 msgid "Synced"
+msgstr ""
+
+msgid "Synchronization"
 msgstr ""
 
 msgid "Synchronization disabled"
@@ -32984,6 +33023,9 @@ msgid "Various localization settings."
 msgstr ""
 
 msgid "Various settings that affect GitLab performance."
+msgstr ""
+
+msgid "Verification"
 msgstr ""
 
 msgid "Verification concurrency limit"
