@@ -267,6 +267,7 @@ export default {
             }
 
             this.$refs.addEditScheduleRotationModal.hide();
+            this.$emit('fetchRotationShifts');
             return createFlash({
               message: this.$options.i18n.editedRotation,
               type: FLASH_TYPES.SUCCESS,
