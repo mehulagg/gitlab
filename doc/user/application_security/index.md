@@ -222,10 +222,10 @@ Follow these steps to view details of a fuzzing fault:
 For each security vulnerability in a merge request or [Vulnerability Report](vulnerability_report/index.md),
 you can:
 
-- [Dismiss the vulnerability](#dismissing-a-vulnerability).
+- [Dismiss the vulnerability](#dismiss-a-vulnerability).
 - Create a [confidential](../project/issues/confidential_issues.md)
   [issue](vulnerabilities/index.md#create-a-gitlab-issue-for-a-vulnerability).
-- Apply an [automatically remediation](#automatic-remediation-for-vulnerabilities).
+- Apply an [automatically remediation](#apply-an-automatic-remediation-for-a-vulnerability).
 
 ### Dismiss a vulnerability
 
@@ -305,7 +305,7 @@ To manually apply the patch that GitLab generated for a vulnerability:
 
 In some cases, you can create a merge request that automatically remediates the
 vulnerability. Any vulnerability that has a
-[solution](#automatic-remediation-for-vulnerabilities) can have a merge
+[solution](#apply-an-automatic-remediation-for-a-vulnerability) can have a merge
 request created to automatically solve the issue.
 
 If this action is available:
