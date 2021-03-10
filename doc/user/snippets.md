@@ -57,8 +57,8 @@ To discover all snippets visible to you in GitLab, you can:
 - **Explore all public snippets**: In the top navigation bar of your GitLab
   instance, go to **More > Snippets** and select **Explore snippets** to view
   [all public snippets](https://gitlab.com/explore/snippets).
-- **View a project's snippets**: Go to your project's page, and in the left
-  navigation menu, select **(snippet)** **Snippets** .
+- **View a project's snippets**: In your project,
+  go to **Snippets**.
 
 ## Change default visibility of snippets
 
