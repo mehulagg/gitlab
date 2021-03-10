@@ -1,5 +1,5 @@
 <script>
-import { GlFormGroup, GlFormInput, GlFormRadioGroup, GlModal, GlAlert, GlIcon } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlFormCheckboxTree, GlModal, GlAlert, GlIcon } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
@@ -12,7 +12,7 @@ export default {
     GlModal,
     GlFormGroup,
     GlFormInput,
-    GlFormRadioGroup,
+    GlFormCheckboxTree,
     GlAlert,
     GlIcon,
   },
@@ -21,11 +21,16 @@ export default {
       type: Array,
       required: true,
     },
+    selectedGroups: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   i18n: DEVOPS_ADOPTION_STRINGS.modal,
   data() {
     return {
-      selectedGroupId: null,
+      checkboxValues: [],
       filter: '',
       loading: false,
       errors: [],
@@ -33,7 +38,7 @@ export default {
   },
   computed: {
     checkboxOptions() {
-      return this.groups.map(({ id, full_name }) => ({ text: full_name, value: id }));
+      return this.groups.map(({ id, full_name }) => ({ label: full_name, value: id }));
     },
     cancelOptions() {
       return {
@@ -60,7 +65,7 @@ export default {
       };
     },
     canSubmit() {
-      return Boolean(this.selectedGroupId);
+      return Boolean(this.checkboxValues.length);
     },
     displayError() {
       return this.errors[0];
@@ -71,7 +76,7 @@ export default {
     filteredOptions() {
       return this.filter
         ? this.checkboxOptions.filter((option) =>
-            option.text.toLowerCase().includes(this.filter.toLowerCase()),
+            option.label.toLowerCase().includes(this.filter.toLowerCase()),
           )
         : this.checkboxOptions;
     },
@@ -87,7 +92,7 @@ export default {
         } = await this.$apollo.mutate({
           mutation: createDevopsAdoptionSegmentMutation,
           variables: {
-            namespaceId: convertToGraphQLId(TYPE_GROUP, this.selectedGroupId),
+            namespaceId: convertToGraphQLId(TYPE_GROUP, this.checkboxValues),
           },
           update: (store, { data }) => {
             const {
@@ -154,10 +159,10 @@ export default {
       />
     </gl-form-group>
     <gl-form-group class="gl-mb-0">
-      <gl-form-radio-group
+      <gl-form-checkbox-tree
         v-if="filteredOptions.length"
         :key="filteredOptions.length"
-        v-model="selectedGroupId"
+        v-model="checkboxValues"
         data-testid="groups"
         :options="filteredOptions"
         :hide-toggle-all="true"

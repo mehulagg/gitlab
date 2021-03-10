@@ -29,7 +29,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
       text: s__(
         'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
-      button: s__('DevopsAdoption|Add Group'),
+      button: s__('DevopsAdoption|Add / remove groups'),
       buttonTooltip: sprintf(s__('DevopsAdoption|Maximum %{maxSegments} groups allowed'), {
         maxSegments: MAX_SEGMENTS,
       }),
@@ -43,9 +43,8 @@ export const DEVOPS_ADOPTION_STRINGS = {
     button: s__('DevopsAdoption|Add Group'),
   },
   modal: {
-    addingTitle: s__('DevopsAdoption|Add Group'),
-    addingButton: s__('DevopsAdoption|Add Group'),
-    editingButton: s__('DevopsAdoption|Save changes'),
+    addingTitle: s__('DevopsAdoption|Add / remove groups'),
+    addingButton: s__('DevopsAdoption|Save changes'),
     cancel: __('Cancel'),
     namePlaceholder: s__('DevopsAdoption|My group'),
     filterPlaceholder: s__('DevopsAdoption|Filter by name'),
