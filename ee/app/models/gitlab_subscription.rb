@@ -125,7 +125,7 @@ class GitlabSubscription < ApplicationRecord
 
   def extend_trial
     self.trial_ends_on += 30
-    # self.trial_extension_flag = 1
+    self.trial_extension_flag = 1
 
     self.save!
   end

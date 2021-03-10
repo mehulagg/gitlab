@@ -89,7 +89,7 @@ module EE
                                 less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
       delegate :trial?, :trial_ends_on, :trial_starts_on, :trial_days_remaining,
-        :trial_percentage_complete, :upgradable?,
+        :trial_percentage_complete, :upgradable?, :trial_extension_flag,
         to: :gitlab_subscription, allow_nil: true
 
       before_create :sync_membership_lock_with_parent
@@ -296,13 +296,11 @@ module EE
     end
 
     def trial_extended?
-      false
-      # trial_extension_flag && trial_extension_flag > 0
+      trial_extension_flag && trial_extension_flag > 0
     end
 
     def can_extend?
       trial_active? && !trial_extended?
-      false
     end
 
     def never_had_trial?
