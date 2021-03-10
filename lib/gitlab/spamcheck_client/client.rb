@@ -24,7 +24,7 @@ module Gitlab
       end
 
       def issue_spam?(spam_issue:, user:, context: nil)
-        issue = build_issue_pb(issue: spam_issue, user: user, contexxt: context)
+        issue = build_issue_pb(issue: spam_issue, user: user, context: context)
 
         response = @stub.check_for_spam_issue(issue)
         verdict = convert_verdict_to_gitlab_constant(response.verdict)
