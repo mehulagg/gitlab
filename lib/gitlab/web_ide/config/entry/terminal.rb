@@ -51,14 +51,16 @@ module Gitlab
           private
 
           def to_hash
-            { tag_list: tags || [],
-              yaml_variables: yaml_variables,
+            {
+              tag_list: tags || [],
+              yaml_variables: yaml_variables, # https://gitlab.com/gitlab-org/gitlab/-/issues/300581
               options: {
                 image: image_value,
                 services: services_value,
                 before_script: before_script_value,
                 script: script_value || DEFAULT_SCRIPT
-              }.compact }
+              }.compact
+            }.merge(job_variables)
           end
 
           def yaml_variables
@@ -67,6 +69,12 @@ module Gitlab
             variables_value.map do |key, value|
               { key: key.to_s, value: value, public: true }
             end
+          end
+
+          def job_variables
+            return {} unless ::Feature.enabled?(:ci_workflow_rules_variables, default_enabled: :yaml)
+
+            { job_variables: yaml_variables }
           end
         end
       end

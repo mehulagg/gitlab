@@ -11,12 +11,15 @@ module Gitlab
 
           delegate :dig, to: :@seed_attributes
 
-          def initialize(pipeline, attributes, previous_stages)
-            @pipeline = pipeline
+          def initialize(context, attributes, previous_stages)
+            @context = context
+            @pipeline = context.pipeline
             @seed_attributes = attributes
             @previous_stages = previous_stages
             @needs_attributes = dig(:needs_attributes)
             @resource_group_key = attributes.delete(:resource_group_key)
+            @job_variables = @seed_attributes.delete(:job_variables)
+            @variable_inheritance = @seed_attributes.delete(:variable_inheritance) { true }
 
             @using_rules  = attributes.key?(:rules)
             @using_only   = attributes.key?(:only)
@@ -32,12 +35,14 @@ module Gitlab
             if multiple_cache_per_job?
               cache = Array.wrap(attributes.delete(:cache))
               @cache = cache.map do |cache|
-                Seed::Build::Cache.new(pipeline, cache)
+                Seed::Build::Cache.new(@pipeline, cache)
               end
             else
               @cache = Seed::Build::Cache
-                .new(pipeline, attributes.delete(:cache))
+                .new(@pipeline, attributes.delete(:cache))
             end
+
+            recalculate_yaml_variables!
           end
 
           def name
@@ -231,6 +236,22 @@ module Gitlab
             return {} unless @seed_attributes.dig(:options, :allow_failure_criteria)
 
             { options: { allow_failure_criteria: nil } }
+          end
+
+          def recalculate_yaml_variables!
+            return unless ::Feature.enabled?(:ci_workflow_rules_variables, default_enabled: :yaml)
+
+            @seed_attributes[:yaml_variables] = Gitlab::Ci::Variables::Helpers.merge_variables(
+              inherited_root_variables, @job_variables
+            )
+          end
+
+          def inherited_root_variables
+            case @variable_inheritance
+            when true then @context.root_variables
+            when false then {}
+            when Array then @context.root_variables.select { |var| @variable_inheritance.include?(var[:key]) }
+            end
           end
         end
       end

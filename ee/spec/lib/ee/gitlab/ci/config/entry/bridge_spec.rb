@@ -48,6 +48,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
                                       variables: {},
+                                      job_variables: {},
+                                      variable_inheritance: true,
                                       scheduling_type: :stage)
         end
       end
@@ -69,6 +71,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
                                       variables: {},
+                                      job_variables: {},
+                                      variable_inheritance: true,
                                       scheduling_type: :dag)
         end
       end

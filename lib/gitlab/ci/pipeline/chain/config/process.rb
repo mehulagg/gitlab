@@ -24,8 +24,10 @@ module Gitlab
 
               if result.valid?
                 @command.yaml_processor_result = result
+                @command.root_variables = result.workflow_attributes[:yaml_variables]
               else
                 error(result.errors.first, config_error: true)
+                @command.root_variables = []
               end
 
               @pipeline.merged_yaml = result.merged_yaml

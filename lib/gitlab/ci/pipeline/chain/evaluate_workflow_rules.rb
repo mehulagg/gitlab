@@ -9,7 +9,11 @@ module Gitlab
           include Chain::Helpers
 
           def perform!
-            error('Pipeline filtered out by workflow rules.') unless workflow_passed?
+            if workflow_passed?
+              apply_rules
+            else
+              error('Pipeline filtered out by workflow rules.')
+            end
           end
 
           def break?
@@ -18,9 +22,21 @@ module Gitlab
 
           private
 
+          def apply_rules
+            return unless ::Feature.enabled?(:ci_workflow_rules_variables, default_enabled: :yaml)
+
+            @command.root_variables = ::Gitlab::Ci::Variables::Helpers.merge_variables(
+              @command.root_variables, workflow_rules_result.variables
+            )
+          end
+
           def workflow_passed?
-            strong_memoize(:workflow_passed) do
-              workflow_rules.evaluate(@pipeline, global_context).pass?
+            workflow_rules_result.pass?
+          end
+
+          def workflow_rules_result
+            strong_memoize(:workflow_rules_result) do
+              workflow_rules.evaluate(@pipeline, global_context)
             end
           end
 

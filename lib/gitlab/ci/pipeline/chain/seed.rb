@@ -38,8 +38,12 @@ module Gitlab
           def pipeline_seed
             strong_memoize(:pipeline_seed) do
               stages_attributes = @command.yaml_processor_result.stages_attributes
-              Gitlab::Ci::Pipeline::Seed::Pipeline.new(pipeline, stages_attributes)
+              Gitlab::Ci::Pipeline::Seed::Pipeline.new(context, stages_attributes)
             end
+          end
+
+          def context
+            Gitlab::Ci::Pipeline::Seed::Context.new(pipeline, @command.root_variables)
           end
         end
       end
