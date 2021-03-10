@@ -22,6 +22,7 @@ RSpec.describe Emails::MergeRequests do
   end
 
   let(:recipient) { assignee }
+  let(:current_user_sanitized) { 'www_example_com' }
 
   describe '#merge_request_unmergeable_email' do
     subject { Notify.merge_request_unmergeable_email(recipient.id, merge_request.id) }
