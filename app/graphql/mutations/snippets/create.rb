@@ -6,6 +6,8 @@ module Mutations
       include ServiceCompatibility
       include CanMutateSpammable
 
+      Spam = Class.new(GraphQL::ExecutionError)
+
       authorize :create_snippet
 
       graphql_name 'CreateSnippet'
@@ -56,15 +58,22 @@ module Mutations
         end
 
         snippet = service_response.payload[:snippet]
-        with_spam_action_response_fields(snippet) do
-          {
-            snippet: service_response.success? ? snippet : nil,
-            errors: errors_on_object(snippet)
-          }
-        end
+        check_spam!(snippet)
+
+        {
+          snippet: service_response.success? ? snippet : nil,
+          errors: errors_on_object(snippet)
+        }
       end
 
       private
+
+      def check_spam!(snippet)
+        spam_fields = spam_action_response_fields(snippet)
+        return unless spam_fields.delete(:spam)
+
+        raise Spam.new(errors_on_object(snippet), extensions: spam_fields)
+      end
 
       def find_object(full_path)
         Project.find_by_full_path(full_path)
