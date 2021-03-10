@@ -17434,6 +17434,9 @@ msgstr ""
 msgid "KeyboardKey|Ctrl+"
 msgstr ""
 
+msgid "KeyboardShortcuts|Commit (when editing commit message)"
+msgstr ""
+
 msgid "KeyboardShortcuts|Global Shortcuts"
 msgstr ""
 
@@ -17441,6 +17444,9 @@ msgid "KeyboardShortcuts|Toggle GitLab Next"
 msgstr ""
 
 msgid "KeyboardShortcuts|Toggle the Performance Bar"
+msgstr ""
+
+msgid "KeyboardShortcuts|Web IDE"
 msgstr ""
 
 msgid "Keys"
