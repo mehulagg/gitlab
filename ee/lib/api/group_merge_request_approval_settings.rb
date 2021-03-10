@@ -32,6 +32,18 @@ module API
         end
         params do
           optional :allow_author_approval, type: Boolean, desc: 'Allow authors to self-approve merge requests'
+          optional :allow_committer_approval, type: Boolean, desc: 'Allow committers to approve merge requests'
+          optional :allow_overrides_to_approver_list_per_merge_request,
+                   type: Boolean, desc: 'Allow overrides to approver list per merge request'
+          optional :retain_approvals_on_push, type: Boolean, desc: 'Retain approval count on a new push'
+          optional :require_password_to_approve,
+                   type: Boolean, desc: 'Require approver to authenticate before approving'
+
+          at_least_one_of :allow_author_approval,
+                          :allow_committer_approval,
+                          :allow_overrides_to_approver_list_per_merge_request,
+                          :retain_approvals_on_push,
+                          :require_password_to_approve
         end
         put do
           authorize! :admin_merge_request_approval_settings, user_group

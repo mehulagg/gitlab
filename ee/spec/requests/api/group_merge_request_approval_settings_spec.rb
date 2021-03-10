@@ -40,6 +40,10 @@ RSpec.describe API::GroupMergeRequestApprovalSettings do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['allow_author_approval']).to eq(false)
+          expect(json_response['allow_committer_approval']).to eq(false)
+          expect(json_response['allow_overrides_to_approver_list_per_merge_request']).to eq(false)
+          expect(json_response['retain_approvals_on_push']).to eq(false)
+          expect(json_response['require_password_to_approve']).to eq(false)
         end
 
         it 'matches the response schema' do
