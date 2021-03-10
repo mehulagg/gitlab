@@ -18,8 +18,6 @@ export default () => ({
   boardConfig: {},
   labelsLoading: false,
   labels: [],
-  assignees: [],
-  assigneesLoading: false,
   highlightedLists: [],
   selectedBoardItems: [],
   groupProjects: [],
