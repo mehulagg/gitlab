@@ -39,14 +39,6 @@ RSpec.describe IncidentManagement::OncallRotationsFinder do
           end
         end
 
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it { is_expected.to eq(IncidentManagement::OncallRotation.none) }
-        end
-
         context 'schedule is nil' do
           let(:oncall_schedule) { nil }
 
