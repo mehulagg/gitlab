@@ -9,8 +9,8 @@ RSpec.describe RedisTracking do
     include RedisTracking
 
     skip_before_action :authenticate_user!, only: :show
-    track_redis_hll_event :index, :show, name: 'g_compliance_approval_rules',
-      if: [:custom_condition_one?, :custom_condition_two?]
+    track_redis_hll_event(:index, :show, name: 'g_compliance_approval_rules',
+      if: [:custom_condition_one?, :custom_condition_two?]) { 'custom_id' }
 
     def index
       render html: 'index'
@@ -102,6 +102,12 @@ RSpec.describe RedisTracking do
     it 'tracks the event' do
       cookies[:visitor_id] = { value: visitor_id, expires: 24.months }
 
+      expect_tracking
+
+      get :show
+    end
+
+    it 'tracks when no visitor id but use custom id' do
       expect_tracking
 
       get :show
