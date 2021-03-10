@@ -40,7 +40,7 @@ module Mutations
         argument :participants,
                  [Types::IncidentManagement::OncallUserInputType],
                  required: true,
-                 description: 'The usernames of users participating in the on-call rotation.'
+                 description: 'The usernames of users participating in the on-call rotation. A maximum limit of 100 participants applies.'
 
         def resolve(iid:, project_path:, participants:, **args)
           project = Project.find_by_full_path(project_path)

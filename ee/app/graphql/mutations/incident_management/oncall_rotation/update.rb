@@ -35,7 +35,7 @@ module Mutations
         argument :participants,
                  [Types::IncidentManagement::OncallUserInputType],
                  required: false,
-                 description: 'The usernames of users participating in the on-call rotation.'
+                 description: 'The usernames of users participating in the on-call rotation. A maximum limit of 100 participants applies.'
 
         def resolve(id:, **args)
           rotation = authorized_find!(id: id)
