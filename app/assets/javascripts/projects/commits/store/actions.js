@@ -16,7 +16,6 @@ export default {
     createFlash(__('An error occurred fetching the project authors.'));
   },
   fetchAuthors({ dispatch, state }, author = null) {
-    // here
     const { projectId } = state;
     return axios
       .get(joinPaths(gon.relative_url_root || '', '/-/autocomplete/users.json'), {
