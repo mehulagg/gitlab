@@ -165,6 +165,7 @@ To embed a snippet:
    ```html
    <script src="https://gitlab.com/namespace/project/snippets/SNIPPET_ID.js"></script>
    ```
+
 1. Add your script to your file.
 
 Embedded snippets display a header that shows:
