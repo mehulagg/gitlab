@@ -9,7 +9,7 @@ import httpStatus from '~/lib/utils/http_status';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 
-import { mockPoliciesResponse } from '../../../mock_data';
+import { mockPoliciesResponse } from '../../../mocks/mock_data';
 
 jest.mock('~/flash');
 

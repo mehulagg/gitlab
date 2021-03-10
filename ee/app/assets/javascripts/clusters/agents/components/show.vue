@@ -1,7 +1,16 @@
 <script>
-import { GlAlert, GlBadge, GlLoadingIcon, GlSprintf, GlTab, GlTabs } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlBadge,
+  GlKeysetPagination,
+  GlLoadingIcon,
+  GlSprintf,
+  GlTab,
+  GlTabs,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import { MAX_LIST_COUNT } from '../constants';
 import getClusterAgentQuery from '../graphql/queries/get_cluster_agent.query.graphql';
 import TokenTable from './token_table.vue';
 
@@ -19,6 +28,7 @@ export default {
         return {
           agentName: this.agentName,
           projectPath: this.projectPath,
+          ...this.cursor,
         };
       },
       update: (data) => data?.project?.clusterAgent,
@@ -30,6 +40,7 @@ export default {
   components: {
     GlAlert,
     GlBadge,
+    GlKeysetPagination,
     GlLoadingIcon,
     GlSprintf,
     GlTab,
@@ -47,6 +58,14 @@ export default {
       type: String,
     },
   },
+  data() {
+    return {
+      cursor: {
+        first: MAX_LIST_COUNT,
+        last: null,
+      },
+    };
+  },
   computed: {
     createdAt() {
       return this.clusterAgent?.createdAt;
@@ -57,11 +76,33 @@ export default {
     isLoading() {
       return this.$apollo.queries.clusterAgent.loading;
     },
+    showPagination() {
+      return this.tokenPageInfo.hasPreviousPage || this.tokenPageInfo.hasNextPage;
+    },
     tokenCount() {
       return this.clusterAgent?.tokens?.count;
     },
+    tokenPageInfo() {
+      return this.clusterAgent?.tokens?.pageInfo || {};
+    },
     tokens() {
       return this.clusterAgent?.tokens?.nodes || [];
+    },
+  },
+  methods: {
+    nextPage() {
+      this.cursor = {
+        first: MAX_LIST_COUNT,
+        last: null,
+        afterToken: this.tokenPageInfo.endCursor,
+      };
+    },
+    prevPage() {
+      this.cursor = {
+        first: null,
+        last: MAX_LIST_COUNT,
+        beforeToken: this.tokenPageInfo.startCursor,
+      };
     },
   },
 };
@@ -71,7 +112,7 @@ export default {
   <section>
     <h2>{{ agentName }}</h2>
 
-    <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
+    <gl-loading-icon v-if="isLoading && clusterAgent == null" size="lg" class="gl-m-3" />
 
     <div v-else-if="clusterAgent">
       <p data-testid="cluster-agent-create-info">
@@ -98,7 +139,15 @@ export default {
             </span>
           </template>
 
-          <TokenTable :tokens="tokens" />
+          <gl-loading-icon v-if="isLoading" size="md" class="gl-m-3" />
+
+          <div v-else>
+            <TokenTable :tokens="tokens" />
+
+            <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
+              <gl-keyset-pagination v-bind="tokenPageInfo" @prev="prevPage" @next="nextPage" />
+            </div>
+          </div>
         </gl-tab>
       </gl-tabs>
     </div>

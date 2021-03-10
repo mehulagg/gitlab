@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::ApplicationContext do
   describe '#to_lazy_hash' do
     let(:user) { build(:user) }
-    let(:project) { build(:project) }
+    let(:project) { create(:project) }
     let(:namespace) { create(:group) }
     let(:subgroup) { create(:group, parent: namespace) }
 

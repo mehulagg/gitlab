@@ -1,0 +1,13 @@
+#import "~/graphql_shared/fragments/user.fragment.graphql"
+
+query GroupBoardAssignees($fullPath: ID!, $search: String) {
+  group(fullPath: $fullPath) {
+    groupMembers(search: $search) {
+      nodes {
+        user {
+          ...User
+        }
+      }
+    }
+  }
+}

@@ -25,10 +25,12 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    isPreparingCsvExport: false,
-    showPopover: localStorage.getItem(STORAGE_KEY) !== 'true',
-  }),
+  data() {
+    return {
+      isPreparingCsvExport: false,
+      showPopover: localStorage.getItem(STORAGE_KEY) !== 'true',
+    };
+  },
   computed: {
     buttonProps() {
       const { isPreparingCsvExport } = this;

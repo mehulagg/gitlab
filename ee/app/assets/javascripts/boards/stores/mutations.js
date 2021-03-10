@@ -217,4 +217,18 @@ export default {
     state.iterationsLoading = false;
     state.error = __('Failed to load iterations.');
   },
+
+  [mutationTypes.RECEIVE_ASSIGNEES_REQUEST](state) {
+    state.assigneesLoading = true;
+  },
+
+  [mutationTypes.RECEIVE_ASSIGNEES_SUCCESS](state, assignees) {
+    state.assignees = assignees;
+    state.assigneesLoading = false;
+  },
+
+  [mutationTypes.RECEIVE_ASSIGNEES_FAILURE](state) {
+    state.assigneesLoading = false;
+    state.error = __('Failed to load assignees.');
+  },
 };

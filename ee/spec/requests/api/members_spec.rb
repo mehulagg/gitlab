@@ -351,7 +351,7 @@ RSpec.describe API::Members do
     end
   end
 
-  describe "GET /groups/:id/billable_members" do
+  context 'billable member endpoints' do
     let_it_be(:owner) { create(:user) }
     let_it_be(:maintainer) { create(:user) }
     let_it_be(:group) do
@@ -368,136 +368,185 @@ RSpec.describe API::Members do
       end
     end
 
-    let(:url) { "/groups/#{group.id}/billable_members" }
-    let(:params) { {} }
+    describe 'GET /groups/:id/billable_members' do
+      let(:url) { "/groups/#{group.id}/billable_members" }
+      let(:params) { {} }
 
-    subject do
-      get api(url, owner), params: params
-      json_response
-    end
-
-    context 'with sub group and projects' do
-      let!(:project_user) { create(:user) }
-      let!(:project) do
-        create(:project, :public, group: nested_group) do |project|
-          project.add_developer(project_user)
-        end
+      subject(:get_billable_members) do
+        get api(url, owner), params: params
+        json_response
       end
 
-      let!(:linked_group_user) { create(:user, name: 'Scott McNeil') }
-      let!(:linked_group) do
-        create(:group) do |linked_group|
-          linked_group.add_developer(linked_group_user)
-        end
-      end
-
-      let!(:project_group_link) { create(:project_group_link, project: project, group: linked_group) }
-
-      it 'returns paginated billable users' do
-        subject
-
-        expect_paginated_array_response(*[owner, maintainer, nested_user, project_user, linked_group_user].map(&:id))
-      end
-
-      context 'when the current user does not have the :admin_group_member ability' do
-        it 'is a bad request' do
-          not_an_owner = create(:user)
-
-          get api(url, not_an_owner), params: params
-
-          expect(response).to have_gitlab_http_status(:bad_request)
-        end
-      end
-
-      context 'with seach params provided' do
-        let(:params) { { search: nested_user.name } }
-
-        it 'returns the relevant billable users' do
-          subject
-
-          expect_paginated_array_response([nested_user.id])
-        end
-      end
-
-      context 'with search and sort params provided' do
-        it 'accepts only sorting options defined in a list' do
-          EE::API::Helpers::MembersHelpers.member_sort_options.each do |sorting|
-            get api(url, owner), params: { search: 'name', sort: sorting }
-            expect(response).to have_gitlab_http_status(:ok)
+      context 'with sub group and projects' do
+        let_it_be(:project_user) { create(:user) }
+        let_it_be(:project) do
+          create(:project, :public, group: nested_group) do |project|
+            project.add_developer(project_user)
           end
         end
 
-        it 'does not accept query string not defined in a list' do
-          defined_query_strings = EE::API::Helpers::MembersHelpers.member_sort_options
-          sorting = 'fake_sorting'
-
-          get api(url, owner), params: { search: 'name', sort: sorting }
-
-          expect(defined_query_strings).not_to include(sorting)
-          expect(response).to have_gitlab_http_status(:bad_request)
+        let_it_be(:linked_group_user) { create(:user, name: 'Scott McNeil') }
+        let_it_be(:linked_group) do
+          create(:group) do |linked_group|
+            linked_group.add_developer(linked_group_user)
+          end
         end
 
-        context 'when a specific sorting is provided' do
-          let(:params) { { search: 'Scott', sort: 'name_desc' } }
+        let_it_be(:project_group_link) { create(:project_group_link, project: project, group: linked_group) }
+
+        it 'returns paginated billable users' do
+          get_billable_members
+
+          expect_paginated_array_response(*[owner, maintainer, nested_user, project_user, linked_group_user].map(&:id))
+        end
+
+        context 'when the current user does not have the :admin_group_member ability' do
+          it 'is a bad request' do
+            not_an_owner = create(:user)
+
+            get api(url, not_an_owner), params: params
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        context 'with search params provided' do
+          let(:params) { { search: nested_user.name } }
 
           it 'returns the relevant billable users' do
-            subject
+            get_billable_members
 
-            expect_paginated_array_response(*[linked_group_user, nested_user].map(&:id))
+            expect_paginated_array_response([nested_user.id])
+          end
+        end
+
+        context 'with search and sort params provided' do
+          it 'accepts only sorting options defined in a list' do
+            EE::API::Helpers::MembersHelpers.member_sort_options.each do |sorting|
+              get api(url, owner), params: { search: 'name', sort: sorting }
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+          end
+
+          it 'does not accept query string not defined in a list' do
+            defined_query_strings = EE::API::Helpers::MembersHelpers.member_sort_options
+            sorting = 'fake_sorting'
+
+            get api(url, owner), params: { search: 'name', sort: sorting }
+
+            expect(defined_query_strings).not_to include(sorting)
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+
+          context 'when a specific sorting is provided' do
+            let(:params) { { search: 'Scott', sort: 'name_desc' } }
+
+            it 'returns the relevant billable users' do
+              get_billable_members
+
+              expect_paginated_array_response(*[linked_group_user, nested_user].map(&:id))
+            end
           end
         end
       end
-    end
 
-    context 'with non owner' do
-      it 'returns error' do
-        get api(url, maintainer)
+      context 'with non owner' do
+        it 'returns error' do
+          get api(url, maintainer)
 
-        expect(response).to have_gitlab_http_status(:bad_request)
-      end
-    end
-
-    context 'when group can not be found' do
-      let(:url) { "/groups/foo/billable_members" }
-
-      it 'returns error' do
-        get api(url, owner)
-
-        expect(response).to have_gitlab_http_status(:not_found)
-        expect(json_response['message']).to eq('404 Group Not Found')
-      end
-    end
-
-    context 'with non-root group' do
-      let(:child_group) { create :group, parent: group }
-      let(:url) { "/groups/#{child_group.id}/billable_members" }
-
-      it 'returns error' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-      end
-    end
-
-    context 'email' do
-      before do
-        group.add_owner(owner)
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
       end
 
-      include_context 'group managed account with group members'
+      context 'when group can not be found' do
+        let(:url) { "/groups/foo/billable_members" }
 
-      context 'when members have a public_email' do
+        it 'returns error' do
+          get api(url, owner)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(json_response['message']).to eq('404 Group Not Found')
+        end
+      end
+
+      context 'with non-root group' do
+        let(:child_group) { create :group, parent: group }
+        let(:url) { "/groups/#{child_group.id}/billable_members" }
+
+        it 'returns error' do
+          get_billable_members
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+      end
+
+      context 'email' do
         before do
-          allow_next_found_instance_of(User) do |instance|
-            allow(instance).to receive(:public_email).and_return('public@email.com')
-          end
+          group.add_owner(owner)
         end
 
-        it { is_expected.to include(a_hash_including('email' => 'public@email.com')) }
+        include_context 'group managed account with group members'
+
+        context 'when members have a public_email' do
+          before do
+            allow_next_found_instance_of(User) do |instance|
+              allow(instance).to receive(:public_email).and_return('public@email.com')
+            end
+          end
+
+          it { is_expected.to include(a_hash_including('email' => 'public@email.com')) }
+        end
+
+        context 'when members have no public_email' do
+          it { is_expected.to include(a_hash_including('email' => '')) }
+        end
+      end
+    end
+
+    describe 'DELETE /groups/:id/billable_members/:user_id' do
+      context 'when the current user has insufficient rights' do
+        it 'returns 400' do
+          not_an_owner = create(:user)
+
+          delete api("/groups/#{group.id}/billable_members/#{maintainer.id}", not_an_owner)
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
       end
 
-      context 'when members have no public_email' do
-        it { is_expected.to include(a_hash_including('email' => '')) }
+      shared_examples 'successful deletion' do
+        it 'deletes the member' do
+          expect(group.member?(user)).to be is_group_member
+
+          expect do
+            delete api("/groups/#{group.id}/billable_members/#{user.id}", owner)
+
+            expect(response).to have_gitlab_http_status(:no_content)
+          end.to change { source.members.count }.by(-1)
+        end
+      end
+
+      context 'when authenticated as an owner' do
+        context 'with a user that is a GroupMember' do
+          let(:user) { maintainer }
+          let(:is_group_member) { true }
+          let(:source) { group }
+
+          it_behaves_like 'successful deletion'
+        end
+
+        context 'with a user that is only a ProjectMember' do
+          let(:user) { create(:user) }
+          let(:is_group_member) { false }
+          let(:source) { project }
+          let(:project) do
+            create(:project, group: group) do |project|
+              project.add_developer(user)
+            end
+          end
+
+          it_behaves_like 'successful deletion'
+        end
       end
     end
   end

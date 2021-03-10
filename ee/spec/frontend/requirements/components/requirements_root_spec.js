@@ -15,7 +15,6 @@ import { TEST_HOST } from 'helpers/test_constants';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import createFlash from '~/flash';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 
 import {
   FilterState,
@@ -23,6 +22,8 @@ import {
   mockRequirementsCount,
   mockPageInfo,
   mockFilters,
+  mockAuthorToken,
+  mockStatusToken,
 } from '../mock_data';
 
 jest.mock('ee/requirements/constants', () => ({
@@ -106,7 +107,7 @@ describe('RequirementsRoot', () => {
         wrapperLoading.destroy();
       });
 
-      it('returns `false` when `requirements.list` is empty', () => {
+      it('returns `true` when `requirements.list` is empty', () => {
         wrapper.setData({
           requirements: {
             list: [],
@@ -114,7 +115,7 @@ describe('RequirementsRoot', () => {
         });
 
         return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.requirementsListEmpty).toBe(false);
+          expect(wrapper.vm.requirementsListEmpty).toBe(true);
         });
       });
 
@@ -272,6 +273,7 @@ describe('RequirementsRoot', () => {
       it('returns array containing applied filter search values', () => {
         wrapper.setData({
           authorUsernames: ['root', 'john.doe'],
+          status: 'satisfied',
           textSearch: 'foo',
         });
 
@@ -828,31 +830,35 @@ describe('RequirementsRoot', () => {
         wrapper.vm.handleFilterRequirements(mockFilters);
 
         expect(wrapper.vm.authorUsernames).toEqual(['root', 'john.doe']);
+        expect(wrapper.vm.status).toBe('satisfied');
         expect(wrapper.vm.textSearch).toBe('foo');
         expect(wrapper.vm.currentPage).toBe(1);
         expect(wrapper.vm.prevPageCursor).toBe('');
         expect(wrapper.vm.nextPageCursor).toBe('');
         expect(global.window.location.href).toBe(
-          `${TEST_HOST}/?page=1&state=opened&search=foo&sort=created_desc&author_username%5B%5D=root&author_username%5B%5D=john.doe`,
+          `${TEST_HOST}/?page=1&state=opened&search=foo&sort=created_desc&author_username%5B%5D=root&author_username%5B%5D=john.doe&status=satisfied`,
         );
         expect(trackingSpy).toHaveBeenCalledWith(undefined, 'filter', {
           property: JSON.stringify([
             { type: 'author_username', value: { data: 'root' } },
             { type: 'author_username', value: { data: 'john.doe' } },
-            'foo',
+            { type: 'status', value: { data: 'satisfied' } },
+            { type: 'filtered-search-term', value: { data: 'foo' } },
           ]),
         });
       });
 
       it('updates props `textSearch` and `authorUsernames` with empty values when passed filters param is empty', () => {
         wrapper.setData({
-          authorUsernames: ['foo'],
-          textSearch: 'bar',
+          authorUsernames: ['root'],
+          status: 'satisfied',
+          textSearch: 'foo',
         });
 
         wrapper.vm.handleFilterRequirements([]);
 
         expect(wrapper.vm.authorUsernames).toEqual([]);
+        expect(wrapper.vm.status).toBe('');
         expect(wrapper.vm.textSearch).toBe('');
         expect(trackingSpy).not.toHaveBeenCalled();
       });
@@ -934,17 +940,8 @@ describe('RequirementsRoot', () => {
         'Search requirements',
       );
       expect(wrapper.find(FilteredSearchBarRoot).props('tokens')).toEqual([
-        {
-          type: 'author_username',
-          icon: 'user',
-          title: 'Author',
-          unique: false,
-          symbol: '@',
-          token: AuthorToken,
-          operators: [{ value: '=', description: 'is', default: 'true' }],
-          fetchPath: 'gitlab-org/gitlab-shell',
-          fetchAuthors: expect.any(Function),
-        },
+        mockAuthorToken,
+        mockStatusToken,
       ]);
       expect(wrapper.find(FilteredSearchBarRoot).props('recentSearchesStorageKey')).toBe(
         'requirements',

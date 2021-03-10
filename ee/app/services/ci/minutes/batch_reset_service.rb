@@ -111,9 +111,10 @@ module Ci
       end
 
       def reset_ci_minutes_notifications!(namespaces)
-        namespaces.update_all(
+        namespaces.without_last_ci_minutes_notification.update_all(
           last_ci_minutes_notification_at: nil,
-          last_ci_minutes_usage_notification_level: nil)
+          last_ci_minutes_usage_notification_level: nil
+        )
       end
     end
   end

@@ -236,6 +236,10 @@ module EE
       feature_available?(:multiple_group_issue_boards)
     end
 
+    def multiple_iteration_cadences_available?
+      feature_available?(:multiple_iteration_cadences)
+    end
+
     def group_project_template_available?
       feature_available?(:group_project_templates)
     end
@@ -464,6 +468,10 @@ module EE
 
     def repository_storage
       group_wiki_repository&.shard_name || ::Repository.pick_storage_shard
+    end
+
+    def iteration_cadences_feature_flag_enabled?
+      ::Feature.enabled?(:iteration_cadences, self, default_enabled: :yaml)
     end
 
     private

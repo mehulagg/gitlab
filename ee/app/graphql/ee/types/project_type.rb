@@ -132,6 +132,12 @@ module EE
               null: true,
               description: 'API fuzzing configuration for the project.',
               feature_flag: :api_fuzzing_configuration_ui
+
+        field :push_rules,
+              ::Types::PushRulesType,
+              null: true,
+              description: "The project's push rules settings.",
+              method: :push_rule
       end
 
       def api_fuzzing_ci_configuration

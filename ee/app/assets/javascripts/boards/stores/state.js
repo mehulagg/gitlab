@@ -16,4 +16,6 @@ export default () => ({
   milestonesLoading: false,
   iterations: [],
   iterationsLoading: false,
+  assignees: [],
+  assigneesLoading: false,
 });

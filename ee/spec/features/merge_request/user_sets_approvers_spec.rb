@@ -87,10 +87,12 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
       it 'allows setting groups as approvers' do
         group = create :group
+        group_project = create :project, :repository, group: group
+
+        group.add_developer(user)
         group.add_developer(other_user)
 
-        visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature' })
-
+        visit project_new_merge_request_path(group_project, merge_request: { target_branch: 'master', source_branch: 'feature' })
         open_modal(text: 'Add approval rule')
         open_approver_select
 
@@ -156,9 +158,13 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
       it 'allows setting groups as approvers' do
         group = create :group
+        group_project = create :project, :repository, group: group
+        group_project_merge_request = create :merge_request, source_project: group_project
+
+        group.add_developer(user)
         group.add_developer(other_user)
 
-        visit edit_project_merge_request_path(project, merge_request)
+        visit edit_project_merge_request_path(group_project, group_project_merge_request)
 
         open_modal(text: 'Add approval rule')
         open_approver_select

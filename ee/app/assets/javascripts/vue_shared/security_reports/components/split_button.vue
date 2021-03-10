@@ -18,9 +18,11 @@ export default {
       default: false,
     },
   },
-  data: () => ({
-    selectedButton: {},
-  }),
+  data() {
+    return {
+      selectedButton: {},
+    };
+  },
   created() {
     this.setButton(this.buttons[0]);
   },
