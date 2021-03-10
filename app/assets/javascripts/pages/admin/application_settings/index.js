@@ -5,9 +5,7 @@ import selfMonitor from '~/self_monitor';
 import initSettingsPanels from '~/settings_panels';
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (gon.features?.ciInstanceVariablesUi) {
-    initVariableList('js-instance-variables');
-  }
+  initVariableList('js-instance-variables');
   selfMonitor();
   // Initialize expandable settings panels
   initSettingsPanels();
