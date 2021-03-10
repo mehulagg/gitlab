@@ -496,6 +496,12 @@ RSpec.describe Epic do
     it 'changes the state to closed' do
       expect { epic.close }.to change { epic.state }.from('opened').to('closed')
     end
+
+    it 'records epic closing' do
+      expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_closed_action)
+
+      epic.close
+    end
   end
 
   describe '#reopen' do
@@ -511,6 +517,12 @@ RSpec.describe Epic do
 
     it 'changes the state to opened' do
       expect { epic.reopen }.to change { epic.state }.from('closed').to('opened')
+    end
+
+    it 'records epic reopening' do
+      expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_reopened_action)
+
+      epic.reopen
     end
   end
 

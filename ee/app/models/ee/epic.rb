@@ -33,12 +33,14 @@ module EE
         return if opened?
 
         update(state: :opened, closed_at: nil, closed_by: nil)
+        usage_ping_record_epic_reopen
       end
 
       def close
         return if closed?
 
         update(state: :closed, closed_at: Time.zone.now)
+        usage_ping_record_epic_close
       end
 
       belongs_to :assignee, class_name: "User"
@@ -165,6 +167,14 @@ module EE
 
       def usage_ping_record_epic_creation
         ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_created_action(author: author)
+      end
+
+      def usage_ping_record_epic_close
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_closed_action(author: author)
+      end
+
+      def usage_ping_record_epic_reopen
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_reopened_action(author: author)
       end
     end
 
