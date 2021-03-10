@@ -40,8 +40,10 @@ module Spam
       @options = {}
     end
 
+    # rubocop:disable Metrics/AbcSize
     def execute(spam_params:)
       if request
+        spam_params.with_request_headers!(request.headers)
         options[:ip_address] = request.env['action_dispatch.remote_ip'].to_s
         options[:user_agent] = request.env['HTTP_USER_AGENT']
         options[:referrer] = request.env['HTTP_REFERRER']
@@ -58,19 +60,20 @@ module Spam
       )
 
       if recaptcha_verified
-        # If it's a request which is already verified through captcha,
+        # If it's a request which is already verified through CAPTCHA,
         # update the spam log accordingly.
         SpamLog.verify_recaptcha!(user_id: user.id, id: spam_params.spam_log_id)
-        ServiceResponse.success(message: "Captcha was successfully verified")
+        ServiceResponse.success(message: "CAPTCHA was successfully verified")
       else
         return ServiceResponse.success(message: 'Skipped spam check because user was allowlisted') if allowlisted?(user)
         return ServiceResponse.success(message: 'Skipped spam check because request was not present') unless request
         return ServiceResponse.success(message: 'Skipped spam check because it was not required') unless check_for_spam?
 
         perform_spam_service_check(spam_params.api)
-        ServiceResponse.success(message: "Spam check performed, check #{target.class.name} spammable model for any errors or captcha requirement")
+        ServiceResponse.success(message: "Spam check performed, check #{target.class.name} spammable model for any errors or CAPTCHA requirement")
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     delegate :check_for_spam?, to: :target
 
