@@ -57,19 +57,13 @@ module Mutations
             schedule,
             project,
             current_user,
-            create_service_params(schedule, participants, args)
+            parsed_params(schedule, participants, args)
           ).execute
 
           response(result)
 
         rescue ActiveRecord::RecordInvalid => e
           raise Gitlab::Graphql::Errors::ArgumentError, e.message
-        end
-
-        private
-
-        def create_service_params(schedule, participants, args)
-          args.slice(:name).merge(parsed_params(schedule, participants, args))
         end
       end
     end

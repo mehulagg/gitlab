@@ -38,22 +38,28 @@ module Mutations
         end
 
         def parsed_params(schedule, participants, args)
-          rotation_length = args.dig(:rotation_length, :length)
-          rotation_length_unit = args.dig(:rotation_length, :unit)
-          starts_at = parse_datetime(schedule, args[:starts_at])
-          ends_at = parse_datetime(schedule, args[:ends_at]) if args[:ends_at]
+          params = args.slice(:name)
 
-          active_period_start, active_period_end = active_period_times(args)
+          params[:participants] = find_participants(participants)
+          params[:starts_at] = parse_datetime(schedule, args[:starts_at]) if args[:starts_at]
+          params[:ends_at] = parse_datetime(schedule, args[:ends_at]) if args[:ends_at]
 
-          {
-            length: rotation_length,
-            length_unit: rotation_length_unit,
-            starts_at: starts_at,
-            ends_at: ends_at,
-            participants: find_participants(participants),
-            active_period_start: active_period_start,
-            active_period_end: active_period_end
-          }
+          if args[:rotation_length]
+            params.merge!(
+              length: args.dig(:rotation_length, :length),
+              length_unit: args.dig(:rotation_length, :unit)
+            )
+          end
+
+          if args[:active_period].present?
+            active_period_start, active_period_end = active_period_times(args)
+            params.merge!(
+              active_period_start: active_period_start,
+              active_period_end: active_period_end
+            )
+          end
+
+          params
         end
 
         def parse_datetime(schedule, timestamp)
