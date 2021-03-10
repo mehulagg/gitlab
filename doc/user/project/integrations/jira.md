@@ -242,7 +242,7 @@ with a link to the commit that resolved the issue.
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3622) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
 
-You can browse and search issues from a selected Jira project directly in GitLab. This requires [configuration](#configure-gitlab) in GitLab by an administrator.
+You can browse, search and view issues from a selected Jira project directly in GitLab. This requires [configuration](#configure-gitlab) in GitLab by an administrator.
 
 ![Jira issues integration enabled](img/jira/open_jira_issues_list_v13.2.png)
 
@@ -276,6 +276,38 @@ labels are listed. `/-/integrations/jira/issues?labels[]=backend&labels[]=featur
 
 - To filter issues by `assignee`, specify their Jira display name for the
 `assignee_username` parameter in the URL. `/-/integrations/jira/issues?assignee_username=John Smith`
+
+#### Jira issue detail view
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-Jira-issue-detail-view). **(PREMIUM)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+To view a Jira issue in GitLab, select the issue from issues list.
+
+### Enable or disable Jira issue detail view
+
+Jira issue detail view is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:jira_issues_show_integration)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:jira_issues_show_integration)
+```
 
 ## Troubleshooting
 
