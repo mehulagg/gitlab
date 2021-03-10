@@ -29,11 +29,13 @@ export default {
       default: () => [],
     },
   },
-  data: () => ({
-    isRunningScan: null,
-    hasRunScanError: false,
-    runScanErrors: [],
-  }),
+  data() {
+    return {
+      isRunningScan: null,
+      hasRunScanError: false,
+      runScanErrors: [],
+    };
+  },
   computed: {
     error() {
       if (this.hasRunScanError) {

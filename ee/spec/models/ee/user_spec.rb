@@ -265,6 +265,14 @@ RSpec.describe User do
     end
   end
 
+  describe '#can_admin_all_resources?' do
+    it 'returns false for auditor user' do
+      user = build(:user, :auditor)
+
+      expect(user.can_admin_all_resources?).to be_falsy
+    end
+  end
+
   describe '#forget_me!' do
     subject { create(:user, remember_created_at: Time.current) }
 

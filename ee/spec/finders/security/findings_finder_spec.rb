@@ -8,8 +8,8 @@ RSpec.describe Security::FindingsFinder do
   let_it_be(:build_sast) { create(:ci_build, :success, name: 'sast', pipeline: pipeline) }
   let_it_be(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds) }
   let_it_be(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast) }
-  let_it_be(:report_ds) { create(:ci_reports_security_report, type: :dependency_scanning) }
-  let_it_be(:report_sast) { create(:ci_reports_security_report, type: :sast) }
+  let_it_be(:report_ds) { create(:ci_reports_security_report, pipeline: pipeline, type: :dependency_scanning) }
+  let_it_be(:report_sast) { create(:ci_reports_security_report, pipeline: pipeline, type: :sast) }
 
   let(:severity_levels) { nil }
   let(:confidence_levels) { nil }
@@ -55,6 +55,7 @@ RSpec.describe Security::FindingsFinder do
                    severity: finding.severity,
                    confidence: finding.confidence,
                    project_fingerprint: finding.project_fingerprint,
+                   uuid: finding.uuid,
                    deduplicated: true,
                    position: index,
                    scan: scan)

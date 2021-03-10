@@ -32,7 +32,7 @@ RSpec.describe 'Activate a subscription' do
   end
 
   before do
-    allow(Gitlab::SubscriptionPortal::Client).to receive(:http_post).and_return(remote_response)
+    allow(Gitlab::SubscriptionPortal::Client).to receive(:execute_graphql_query).and_return(remote_response)
   end
 
   it 'persists authentication token' do

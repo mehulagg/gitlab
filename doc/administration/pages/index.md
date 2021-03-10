@@ -239,7 +239,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `gitlab_secret`                         | The OAuth application secret. Leave blank to automatically fill when Pages authenticates with GitLab. |
 | `auth_scope`                            | The OAuth application scope to use for authentication. Must match GitLab Pages OAuth application settings. Leave blank to use `api` scope by default. |
 | `gitlab_server`                         | Server to use for authentication when access control is enabled; defaults to GitLab `external_url`. |
-| `headers`                               | Specify any additional http headers that should be sent to the client with each response. |
+| `headers`                               | Specify any additional http headers that should be sent to the client with each response. Multiple headers can be given as an array, header and value as one string, for example `['my-header: myvalue', 'my-other-header: my-other-value']` |
 | `inplace_chroot`                        | On [systems that don't support bind-mounts](index.md#additional-configuration-for-docker-container), this instructs GitLab Pages to `chroot` into its `pages_path` directory. Some caveats exist when using in-place `chroot`; refer to the GitLab Pages [README](https://gitlab.com/gitlab-org/gitlab-pages/blob/master/README.md#caveats) for more information. |
 | `insecure_ciphers`                      | Use default list of cipher suites, may contain insecure ones like 3DES and RC4. |
 | `internal_gitlab_server`                | Internal GitLab server address used exclusively for API requests. Useful if you want to send that traffic over an internal load balancer. Defaults to GitLab `external_url`. |
@@ -351,7 +351,7 @@ When adding a custom domain, users are required to prove they own it by
 adding a GitLab-controlled verification code to the DNS records for that domain.
 
 If your user base is private or otherwise trusted, you can disable the
-verification requirement. Navigate to **Admin Area > Settings > Preferences** and
+verification requirement. Go to **Admin Area > Settings > Preferences** and
 uncheck **Require users to prove ownership of custom domains** in the **Pages** section.
 This setting is enabled by default.
 
@@ -366,7 +366,7 @@ sites served under a custom domain.
 To enable it, you must:
 
 1. Choose an email address on which you want to receive notifications about expiring domains.
-1. Navigate to your instance's **Admin Area > Settings > Preferences** and expand **Pages** settings.
+1. Go to your instance's **Admin Area > Settings > Preferences** and expand **Pages** settings.
 1. Enter the email address for receiving notifications and accept Let's Encrypt's Terms of Service as shown below.
 1. Click **Save changes**.
 
@@ -420,7 +420,7 @@ The scope to use for authentication must match the GitLab Pages OAuth applicatio
 pre-existing applications must modify the GitLab Pages OAuth application. Follow these steps to do
 this:
 
-1. Navigate to your instance's **Admin Area > Settings > Applications** and expand **GitLab Pages**
+1. Go to your instance's **Admin Area > Settings > Applications** and expand **GitLab Pages**
    settings.
 1. Clear the `api` scope's checkbox and select the desired scope's checkbox (for example,
    `read_api`).
@@ -438,7 +438,7 @@ This can be useful to preserve information published with Pages websites to the 
 of your instance only.
 To do that:
 
-1. Navigate to your instance's **Admin Area > Settings > Preferences** and expand **Pages** settings.
+1. Go to your instance's **Admin Area > Settings > Preferences** and expand **Pages** settings.
 1. Check the **Disable public access to Pages sites** checkbox.
 1. Click **Save changes**.
 
@@ -624,13 +624,13 @@ The default is 100MB.
 
 To override the global maximum pages size for a specific project:
 
-1. Navigate to your project's **Settings > Pages** page.
+1. Go to your project's **Settings > Pages** page.
 1. Edit the **Maximum size of pages**.
 1. Click **Save changes**.
 
 To override the global maximum pages size for a specific group:
 
-1. Navigate to your group's **Settings > General** page and expand **Pages**.
+1. Go to your group's **Settings > General** page and expand **Pages**.
 1. Edit the **Maximum size of pages**.
 1. Click **Save changes**.
 

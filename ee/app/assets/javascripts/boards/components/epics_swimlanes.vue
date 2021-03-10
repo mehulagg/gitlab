@@ -2,9 +2,9 @@
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { isListDraggable } from '~/boards/boards_util';
-import BoardAddNewColumn from '~/boards/components/board_add_new_column.vue';
 import { n__ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import { DRAGGABLE_TAG } from '../constants';
@@ -48,10 +48,9 @@ export default {
       return (listId) => this.getUnassignedIssues(listId);
     },
     unassignedIssuesCount() {
-      return this.lists.reduce(
-        (total, list) => total + this.listsFlags[list.id]?.unassignedIssuesCount || 0,
-        0,
-      );
+      return this.lists.reduce((total, list) => {
+        return total + (this.listsFlags[list.id]?.unassignedIssuesCount || 0);
+      }, 0);
     },
     unassignedIssuesCountTooltipText() {
       return n__(`%d unassigned issue`, `%d unassigned issues`, this.unassignedIssuesCount);

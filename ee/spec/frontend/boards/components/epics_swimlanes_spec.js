@@ -86,7 +86,7 @@ describe('EpicsSwimlanes', () => {
     });
 
     it('displays BoardListHeader components for lists', () => {
-      expect(wrapper.findAll(BoardListHeader)).toHaveLength(2);
+      expect(wrapper.findAll(BoardListHeader)).toHaveLength(4);
     });
 
     it('displays EpicLane components for epic', () => {

@@ -150,6 +150,7 @@ export default {
           <gl-icon
             name="warning"
             :size="18"
+            use-deprecated-sizes
             class="cluster-deployments-warning mr-2 align-self-center flex-shrink-0"
           />
           <span>

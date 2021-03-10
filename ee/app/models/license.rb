@@ -111,6 +111,7 @@ class License < ApplicationRecord
     multiple_alert_http_integrations
     multiple_approval_rules
     multiple_group_issue_boards
+    multiple_iteration_cadences
     object_storage
     operations_dashboard
     package_forwarding
@@ -426,9 +427,6 @@ class License < ApplicationRecord
 
   def feature_available?(feature)
     return false if trial? && expired?
-
-    # This feature might not be behind a feature flag at all, so default to true
-    return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
 
     features.include?(feature)
   end

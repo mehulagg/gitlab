@@ -21,6 +21,8 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:pipeline_configuration_full_path).to(:compliance_management_framework) }
 
+    it { is_expected.to delegate_method(:prevent_merge_without_jira_issue).to(:project_setting) }
+
     it { is_expected.to belong_to(:deleting_user) }
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
@@ -882,14 +884,6 @@ RSpec.describe Project do
 
                 it 'returns true' do
                   is_expected.to eq(true)
-                end
-
-                context 'when feature is disabled by a feature flag' do
-                  it 'returns false' do
-                    stub_feature_flags(feature => false)
-
-                    is_expected.to eq(false)
-                  end
                 end
               end
 

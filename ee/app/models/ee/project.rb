@@ -211,6 +211,8 @@ module EE
       delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
       alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
 
+      delegate :prevent_merge_without_jira_issue, to: :project_setting
+
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
       validates :max_pages_size,
@@ -784,9 +786,6 @@ module EE
     end
 
     def licensed_feature_available?(feature, user = nil)
-      # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, user, type: :licensed, default_enabled: true)
-
       available_features = strong_memoize(:licensed_feature_available) do
         Hash.new do |h, f|
           h[f] = load_licensed_feature_available(f)

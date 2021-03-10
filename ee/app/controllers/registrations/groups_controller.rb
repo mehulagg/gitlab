@@ -57,10 +57,8 @@ module Registrations
     def apply_trial_for_trial_onboarding_flow
       if apply_trial
         record_experiment_user(:remove_known_trial_form_fields, namespace_id: @group.id)
-        record_experiment_user(:trial_registration_with_social_signin, namespace_id: @group.id)
         record_experiment_user(:trial_onboarding_issues, namespace_id: @group.id)
         record_experiment_conversion_event(:remove_known_trial_form_fields)
-        record_experiment_conversion_event(:trial_registration_with_social_signin)
         record_experiment_conversion_event(:trial_onboarding_issues)
 
         experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|

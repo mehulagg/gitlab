@@ -1,9 +1,9 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlCard } from '@gitlab/ui';
 
 export default {
   name: 'SolutionCard',
-  components: { GlIcon },
+  components: { GlIcon, GlCard },
   props: {
     solution: {
       type: String,
@@ -42,29 +42,33 @@ export default {
 };
 </script>
 <template>
-  <div class="card my-4">
-    <div v-if="solutionText" class="card-body d-flex align-items-center">
-      <div
-        class="col-auto d-flex align-items-center pl-0"
-        :class="{ 'col-md-2': !isStandaloneVulnerability }"
-      >
-        <div class="circle-icon-container pr-3" aria-hidden="true"><gl-icon name="bulb" /></div>
-        <strong class="text-right flex-grow-1">{{ s__('ciReport|Solution') }}:</strong>
-      </div>
-      <span class="flex-shrink-1 pl-0" :class="{ 'col-md-10': !isStandaloneVulnerability }">{{
-        solutionText
-      }}</span>
-    </div>
-    <template v-if="showCreateMergeRequestMsg">
-      <div class="card-footer" :class="{ 'border-0': !solutionText }">
-        <em class="text-secondary">
-          {{
-            s__(
-              'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
-            )
-          }}
-        </em>
+  <gl-card
+    class="gl-my-6"
+    :body-class="{ 'gl-p-0': !solutionText }"
+    :footer-class="{ 'gl-border-0': !solutionText }"
+  >
+    <template v-if="solutionText" #default>
+      <div class="gl-display-flex gl-align-items-center">
+        <div
+          class="col-auto gl-display-flex gl-align-items-center gl-justify-content-end gl-pl-0"
+          :class="{ 'col-md-2': !isStandaloneVulnerability }"
+        >
+          <gl-icon class="gl-mr-5" name="bulb" />
+          <strong>{{ s__('ciReport|Solution') }}:</strong>
+        </div>
+        <span class="flex-shrink-1 gl-pl-0" :class="{ 'col-md-10': !isStandaloneVulnerability }">{{
+          solutionText
+        }}</span>
       </div>
     </template>
-  </div>
+    <template v-if="showCreateMergeRequestMsg" #footer>
+      <em class="gl-text-gray-500" data-testid="merge-request-solution">
+        {{
+          s__(
+            'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
+          )
+        }}
+      </em>
+    </template>
+  </gl-card>
 </template>

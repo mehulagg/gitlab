@@ -12,4 +12,6 @@ export default () => ({
   epicsCacheById: {},
   epicFetchInProgress: false,
   epicsFlags: {},
+  milestones: [],
+  milestonesLoading: false,
 });

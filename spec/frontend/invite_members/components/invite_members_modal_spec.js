@@ -10,7 +10,7 @@ const name = 'test name';
 const isProject = false;
 const inviteeType = 'members';
 const accessLevels = { Guest: 10, Reporter: 20, Developer: 30, Maintainer: 40, Owner: 50 };
-const defaultAccessLevel = '10';
+const defaultAccessLevel = 10;
 const helpLink = 'https://example.com';
 
 const user1 = { id: 1, name: 'Name One', username: 'one_1', avatar_url: '' };
@@ -129,7 +129,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteMembersToProjectWrapper();
 
-          expect(findIntroText()).toBe("You're inviting members to the TEST NAME project");
+          expect(findIntroText()).toBe("You're inviting members to the test name project.");
         });
       });
 
@@ -137,7 +137,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteGroupToProjectWrapper();
 
-          expect(findIntroText()).toBe("You're inviting a group to the TEST NAME project");
+          expect(findIntroText()).toBe("You're inviting a group to the test name project.");
         });
       });
     });
@@ -147,7 +147,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteMembersToGroupWrapper();
 
-          expect(wrapper.html()).toContain("You're inviting members to the TEST NAME group");
+          expect(findIntroText()).toBe("You're inviting members to the test name group.");
         });
       });
 
@@ -155,7 +155,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteGroupToGroupWrapper();
 
-          expect(wrapper.html()).toContain("You're inviting a group to the TEST NAME group");
+          expect(findIntroText()).toBe("You're inviting a group to the test name group.");
         });
       });
     });
@@ -167,7 +167,7 @@ describe('InviteMembersModal', () => {
     describe('when inviting an existing user to group by user ID', () => {
       const postData = {
         user_id: '1',
-        access_level: '10',
+        access_level: defaultAccessLevel,
         expires_at: undefined,
         format: 'json',
       };
@@ -238,7 +238,7 @@ describe('InviteMembersModal', () => {
 
     describe('when inviting a new user by email address', () => {
       const postData = {
-        access_level: '10',
+        access_level: defaultAccessLevel,
         expires_at: undefined,
         email: 'email@example.com',
         format: 'json',
@@ -287,7 +287,7 @@ describe('InviteMembersModal', () => {
 
     describe('when inviting members and non-members in same click', () => {
       const postData = {
-        access_level: '10',
+        access_level: defaultAccessLevel,
         expires_at: undefined,
         format: 'json',
       };
@@ -348,7 +348,7 @@ describe('InviteMembersModal', () => {
       describe('when sharing the group is successful', () => {
         const groupPostData = {
           group_id: sharedGroup.id,
-          group_access: '10',
+          group_access: defaultAccessLevel,
           expires_at: undefined,
           format: 'json',
         };

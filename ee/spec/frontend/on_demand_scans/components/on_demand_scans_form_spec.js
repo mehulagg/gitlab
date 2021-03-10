@@ -14,6 +14,7 @@ import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import createApolloProvider from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
 import { redirectTo, setUrlParams } from '~/lib/utils/url_utility';
+import RefSelector from '~/ref/components/ref_selector.vue';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import * as responses from '../mocks/apollo_mocks';
 import { scannerProfiles, siteProfiles } from '../mocks/mock_data';
@@ -40,6 +41,7 @@ const [passiveScannerProfile, activeScannerProfile] = scannerProfiles;
 const [nonValidatedSiteProfile, validatedSiteProfile] = siteProfiles;
 const dastScan = {
   id: 1,
+  branch: { name: 'dev' },
   name: 'My daily scan',
   description: 'Tests for SQL injections',
   scannerProfileId: passiveScannerProfile.id,
@@ -64,10 +66,14 @@ describe('OnDemandScansForm', () => {
   const GlFormInputStub = stubComponent(GlFormInput, {
     template: '<input />',
   });
+  const RefSelectorStub = stubComponent(RefSelector, {
+    template: '<input />',
+  });
 
   const findForm = () => subject.find(GlForm);
   const findByTestId = (testId) => subject.find(`[data-testid="${testId}"]`);
   const findNameInput = () => findByTestId('dast-scan-name-input');
+  const findBranchInput = () => findByTestId('dast-scan-branch-input');
   const findDescriptionInput = () => findByTestId('dast-scan-description-input');
   const findScannerProfilesSelector = () => subject.find(ScannerProfileSelector);
   const findSiteProfilesSelector = () => subject.find(SiteProfileSelector);
@@ -79,12 +85,13 @@ describe('OnDemandScansForm', () => {
 
   const setValidFormData = () => {
     findNameInput().vm.$emit('input', 'My daily scan');
+    findBranchInput().vm.$emit('input', 'some-other-branch');
     findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
     findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
     return subject.vm.$nextTick();
   };
   const setupSuccess = ({ edit = false } = {}) => {
-    jest.spyOn(subject.vm.$apollo, 'mutate').mockResolvedValue({
+    subject.vm.$apollo.mutate.mockResolvedValue({
       data: {
         [edit ? 'dastProfileUpdate' : 'dastProfileCreate']: {
           dastProfile: { editPath },
@@ -146,10 +153,12 @@ describe('OnDemandScansForm', () => {
             newSiteProfilePath,
             glFeatures: {
               dastSavedScans: true,
+              dastBranchSelection: true,
             },
           },
           stubs: {
             GlFormInput: GlFormInputStub,
+            RefSelector: RefSelectorStub,
             LocalStorageSync,
           },
         },
@@ -181,34 +190,43 @@ describe('OnDemandScansForm', () => {
     localStorage.clear();
   });
 
-  it('renders properly', () => {
-    mountSubject();
-    expect(subject.text()).toContain('New on-demand DAST scan');
-  });
+  describe('when creating a new scan', () => {
+    it('renders properly', () => {
+      mountSubject();
 
-  it.each`
-    scannerProfilesLoading | siteProfilesLoading | isLoading
-    ${true}                | ${true}             | ${true}
-    ${false}               | ${true}             | ${true}
-    ${true}                | ${false}            | ${true}
-    ${false}               | ${false}            | ${false}
-  `(
-    'sets loading state to $isLoading if scanner profiles loading is $scannerProfilesLoading and site profiles loading is $siteProfilesLoading',
-    ({ scannerProfilesLoading, siteProfilesLoading, isLoading }) => {
-      mountShallowSubject({
-        mocks: {
-          $apollo: {
-            queries: {
-              scannerProfiles: { loading: scannerProfilesLoading },
-              siteProfiles: { loading: siteProfilesLoading },
+      expect(subject.text()).toContain('New on-demand DAST scan');
+    });
+
+    it('populates the branch input with the default branch', () => {
+      mountSubject();
+
+      expect(findBranchInput().props('value')).toBe(defaultBranch);
+    });
+
+    it.each`
+      scannerProfilesLoading | siteProfilesLoading | isLoading
+      ${true}                | ${true}             | ${true}
+      ${false}               | ${true}             | ${true}
+      ${true}                | ${false}            | ${true}
+      ${false}               | ${false}            | ${false}
+    `(
+      'sets loading state to $isLoading if scanner profiles loading is $scannerProfilesLoading and site profiles loading is $siteProfilesLoading',
+      ({ scannerProfilesLoading, siteProfilesLoading, isLoading }) => {
+        mountShallowSubject({
+          mocks: {
+            $apollo: {
+              queries: {
+                scannerProfiles: { loading: scannerProfilesLoading },
+                siteProfiles: { loading: siteProfilesLoading },
+              },
             },
           },
-        },
-      });
+        });
 
-      expect(subject.find(GlSkeletonLoader).exists()).toBe(isLoading);
-    },
-  );
+        expect(subject.find(GlSkeletonLoader).exists()).toBe(isLoading);
+      },
+    );
+  });
 
   describe('when editing an existing scan', () => {
     beforeEach(() => {
@@ -225,6 +243,7 @@ describe('OnDemandScansForm', () => {
 
     it('populates the fields with passed values', () => {
       expect(findNameInput().attributes('value')).toBe(dastScan.name);
+      expect(findBranchInput().props('value')).toBe(dastScan.branch.name);
       expect(findDescriptionInput().attributes('value')).toBe(dastScan.description);
       expect(findScannerProfilesSelector().attributes('value')).toBe(dastScan.scannerProfileId);
       expect(findSiteProfilesSelector().attributes('value')).toBe(dastScan.siteProfileId);
@@ -324,6 +343,7 @@ describe('OnDemandScansForm', () => {
               variables: {
                 input: {
                   name: 'My daily scan',
+                  branchName: 'some-other-branch',
                   dastScannerProfileId: passiveScannerProfile.id,
                   dastSiteProfileId: nonValidatedSiteProfile.id,
                   fullPath: projectPath,
@@ -362,6 +382,7 @@ describe('OnDemandScansForm', () => {
                 input: {
                   id: 1,
                   name: 'My daily scan',
+                  branchName: 'some-other-branch',
                   description: 'Tests for SQL injections',
                   dastScannerProfileId: passiveScannerProfile.id,
                   dastSiteProfileId: nonValidatedSiteProfile.id,
@@ -387,7 +408,7 @@ describe('OnDemandScansForm', () => {
     describe('on top-level error', () => {
       beforeEach(async () => {
         mountShallowSubject();
-        jest.spyOn(subject.vm.$apollo, 'mutate').mockRejectedValue();
+        subject.vm.$apollo.mutate.mockRejectedValue();
         await setValidFormData();
         submitForm();
       });
@@ -408,9 +429,9 @@ describe('OnDemandScansForm', () => {
 
       beforeEach(async () => {
         mountShallowSubject();
-        jest
-          .spyOn(subject.vm.$apollo, 'mutate')
-          .mockResolvedValue({ data: { dastProfileCreate: { pipelineUrl: null, errors } } });
+        subject.vm.$apollo.mutate.mockResolvedValue({
+          data: { dastProfileCreate: { pipelineUrl: null, errors } },
+        });
         await setValidFormData();
         submitForm();
       });
@@ -452,9 +473,9 @@ describe('OnDemandScansForm', () => {
           },
         },
       });
-      jest
-        .spyOn(subject.vm.$apollo, 'mutate')
-        .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
+      subject.vm.$apollo.mutate.mockResolvedValue({
+        data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } },
+      });
       subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile.id);
       subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile.id);
       submitForm();
@@ -465,6 +486,7 @@ describe('OnDemandScansForm', () => {
         mutation: dastOnDemandScanCreateMutation,
         variables: {
           input: {
+            branchName: defaultBranch,
             dastScannerProfileId: passiveScannerProfile.id,
             dastSiteProfileId: nonValidatedSiteProfile.id,
             fullPath: projectPath,
@@ -607,6 +629,101 @@ describe('OnDemandScansForm', () => {
 
       expect(findScannerProfilesSelector().attributes('value')).toBe(scannerProfile.id);
       expect(findSiteProfilesSelector().attributes('value')).toBe(siteProfile.id);
+    });
+  });
+
+  describe('dastBranchSelection feature flag disabled', () => {
+    describe.each`
+      action      | actionFunction | runAfter
+      ${'submit'} | ${submitForm}  | ${true}
+      ${'save'}   | ${saveScan}    | ${false}
+    `('on $action', ({ actionFunction, runAfter }) => {
+      describe('when creating a new scan', () => {
+        beforeEach(async () => {
+          mountShallowSubject({
+            provide: {
+              glFeatures: {
+                dastBranchSelection: false,
+              },
+            },
+          });
+          subject.vm.$apollo.mutate.mockResolvedValue({
+            data: {
+              dastProfileCreate: {
+                dastProfile: { editPath },
+                pipelineUrl,
+                errors: [],
+              },
+            },
+          });
+          findNameInput().vm.$emit('input', 'My daily scan');
+          findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
+          findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
+          await subject.vm.$nextTick();
+          actionFunction();
+        });
+
+        it(`triggers dastProfileCreateMutation mutation without the branch name and runAfterCreate set to ${runAfter}`, async () => {
+          expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+            mutation: dastProfileCreateMutation,
+            variables: {
+              input: {
+                name: 'My daily scan',
+                dastScannerProfileId: passiveScannerProfile.id,
+                dastSiteProfileId: nonValidatedSiteProfile.id,
+                fullPath: projectPath,
+                runAfterCreate: runAfter,
+              },
+            },
+          });
+        });
+      });
+
+      describe('when editing an existing scan', () => {
+        beforeEach(async () => {
+          mountShallowSubject({
+            propsData: {
+              dastScan,
+            },
+            provide: {
+              glFeatures: {
+                dastBranchSelection: false,
+              },
+            },
+          });
+          subject.vm.$apollo.mutate.mockResolvedValue({
+            data: {
+              dastProfileUpdate: {
+                dastProfile: { editPath },
+                pipelineUrl,
+                errors: [],
+              },
+            },
+          });
+          findNameInput().vm.$emit('input', 'My daily scan');
+          findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
+          findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
+          await subject.vm.$nextTick();
+          actionFunction();
+        });
+
+        it(`triggers dastProfileUpdateMutation mutation without the branch name and runAfterUpdate set to ${runAfter}`, async () => {
+          expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+            mutation: dastProfileUpdateMutation,
+            variables: {
+              input: {
+                id: 1,
+                name: 'My daily scan',
+                description: 'Tests for SQL injections',
+                dastScannerProfileId: passiveScannerProfile.id,
+                dastSiteProfileId: nonValidatedSiteProfile.id,
+                fullPath: projectPath,
+                runAfterUpdate: runAfter,
+              },
+            },
+          });
+        });
+      });
     });
   });
 });

@@ -91,6 +91,12 @@ class Packages::Package < ApplicationRecord
     joins(:conan_metadatum).where(packages_conan_metadata: { package_username: package_username })
   end
 
+  scope :with_debian_codename, -> (codename) do
+    debian
+      .joins(:debian_distribution)
+      .where(Packages::Debian::ProjectDistribution.table_name => { codename: codename })
+  end
+  scope :preload_debian_file_metadata, -> { preload(package_files: :debian_file_metadatum) }
   scope :with_composer_target, -> (target) do
     includes(:composer_metadatum)
       .joins(:composer_metadatum)
@@ -216,6 +222,12 @@ class Packages::Package < ApplicationRecord
     strong_memoize(:package_settings) do
       project.namespace.package_settings
     end
+  end
+
+  def sync_maven_metadata(user)
+    return unless maven? && version? && user
+
+    ::Packages::Maven::Metadata::SyncWorker.perform_async(user.id, project.id, name)
   end
 
   private

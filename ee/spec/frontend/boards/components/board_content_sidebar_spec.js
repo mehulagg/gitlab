@@ -2,15 +2,15 @@ import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
-import BoardSidebarIterationSelect from 'ee_component/boards/components/sidebar/board_sidebar_iteration_select.vue';
+import SidebarIterationWidget from 'ee_component/sidebar/components/sidebar_iteration_widget';
 import { stubComponent } from 'helpers/stub_component';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
-import { ISSUABLE } from '~/boards/constants';
-import { mockIssue } from '../mock_data';
+import { ISSUABLE, issuableTypes } from '~/boards/constants';
+import { mockIssue, mockIssueGroupPath, mockIssueProjectPath } from '../mock_data';
 
 describe('ee/BoardContentSidebar', () => {
   let wrapper;
@@ -22,9 +22,12 @@ describe('ee/BoardContentSidebar', () => {
         sidebarType: ISSUABLE,
         issues: { [mockIssue.id]: mockIssue },
         activeId: mockIssue.id,
+        issuableType: issuableTypes.issue,
       },
       getters: {
         activeIssue: () => mockIssue,
+        projectPathForActiveIssue: () => mockIssueProjectPath,
+        groupPathForActiveIssue: () => mockIssueGroupPath,
         isSidebarOpen: () => true,
         ...mockGetters,
       },
@@ -102,8 +105,8 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(BoardSidebarMilestoneSelect).exists()).toBe(true);
   });
 
-  it('renders BoardSidebarIterationSelect', () => {
-    expect(wrapper.find(BoardSidebarIterationSelect).exists()).toBe(true);
+  it('renders SidebarIterationWidget', () => {
+    expect(wrapper.find(SidebarIterationWidget).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

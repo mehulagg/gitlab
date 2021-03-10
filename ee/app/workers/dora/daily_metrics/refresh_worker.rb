@@ -8,7 +8,7 @@ module Dora
       deduplicate :until_executing
       idempotent!
       queue_namespace :dora_metrics
-      feature_category :dora_metrics
+      feature_category :continuous_delivery
 
       def perform(environment_id, date)
         Environment.find_by_id(environment_id).try do |environment|

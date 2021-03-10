@@ -3,7 +3,7 @@ import Vue from 'vue';
 import { moveIssueListHelper } from '~/boards/boards_util';
 import { issuableTypes } from '~/boards/constants';
 import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 import { ErrorMessages } from '../constants';
 import * as mutationTypes from './mutation_types';
 
@@ -188,5 +188,19 @@ export default {
     if (epic) {
       Vue.set(epic, 'userPreferences', userPreferences);
     }
+  },
+
+  [mutationTypes.RECEIVE_MILESTONES_REQUEST](state) {
+    state.milestonesLoading = true;
+  },
+
+  [mutationTypes.RECEIVE_MILESTONES_SUCCESS](state, milestones) {
+    state.milestones = milestones;
+    state.milestonesLoading = false;
+  },
+
+  [mutationTypes.RECEIVE_MILESTONES_FAILURE](state) {
+    state.milestonesLoading = false;
+    state.error = __('Failed to load milestones.');
   },
 };
