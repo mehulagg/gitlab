@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::JobArtifactsDestroyAsyncService do
+RSpec.describe Ci::JobArtifactsDestroyBatchService do
   include ExclusiveLeaseHelpers
 
   let(:artifacts) { Ci::JobArtifact.all }
@@ -43,18 +43,6 @@ RSpec.describe Ci::JobArtifactsDestroyAsyncService do
         end
 
         execute
-      end
-    end
-
-    context 'when job artifact relation is larger than the max size' do
-      let(:artifacts) { Ci::JobArtifact.all }
-
-      before do
-        allow(artifacts).to receive(:count).and_return(10_001)
-      end
-
-      it 'raises and argument error' do
-        expect { execute }.to raise_error(ArgumentError)
       end
     end
 

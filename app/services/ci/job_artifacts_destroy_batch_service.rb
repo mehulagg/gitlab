@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 module Ci
-  class JobArtifactsDestroyAsyncService
+  class JobArtifactsDestroyBatchService
     include BaseServiceUtility
     include ::Gitlab::Utils::StrongMemoize
 
-    MAX_JOB_ARTIFACT_BATCH_SIZE = 10_000
+    # Danger: Private - Should only be called in Ci Services that pass a batch of job artifacts
+    # Not for use outsie of the ci namespace
 
     # Adds the passed batch of job artifacts to the `ci_deleted_objects` table
     # for asyncronous destruction of the objects in Object Storage via the `Ci::DeleteObjectsService`
@@ -16,17 +17,13 @@ module Ci
     # Returns:
     # +Hash+:: A hash with status and destroyed_artifacts_count keys
     def initialize(job_artifacts, pick_up_at: nil)
-      @artifacts_count = job_artifacts.count
-
-      raise ArgumentError if @artifacts_count > MAX_JOB_ARTIFACT_BATCH_SIZE
-
       @job_artifacts = job_artifacts.with_destroy_preloads.to_a
       @pick_up_at = pick_up_at
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
     def execute
-      return success(destroyed_artifacts_count: @artifacts_count) if @job_artifacts.empty?
+      return success(destroyed_artifacts_count: artifacts_count) if @job_artifacts.empty?
 
       Ci::DeletedObject.transaction do
         Ci::DeletedObject.bulk_import(@job_artifacts, @pick_up_at)
@@ -36,9 +33,9 @@ module Ci
 
       # This is executed outside of the transaction because it depends on Redis
       update_project_statistics
-      increment_monitoring_statistics(@artifacts_count)
+      increment_monitoring_statistics(artifacts_count)
 
-      success(destroyed_artifacts_count: @artifacts_count)
+      success(destroyed_artifacts_count: artifacts_count)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -63,7 +60,13 @@ module Ci
     def metrics
       @metrics ||= ::Gitlab::Ci::Artifacts::Metrics.new
     end
+
+    def artifacts_count
+      strong_memoize(:artifacts_count) do
+        @job_artifacts.count
+      end
+    end
   end
 end
 
-Ci::JobArtifactsDestroyAsyncService.prepend_if_ee('EE::Ci::JobArtifactsDestroyAsyncService')
+Ci::JobArtifactsDestroyBatchService.prepend_if_ee('EE::Ci::JobArtifactsDestroyBatchService')

@@ -46,7 +46,7 @@ module Ci
     end
 
     def destroy_batch_async(artifacts)
-      Ci::JobArtifactsDestroyAsyncService.new(artifacts).execute
+      Ci::JobArtifactsDestroyBatchService.new(artifacts).execute
     end
 
     def loop_timeout?(start_at)
