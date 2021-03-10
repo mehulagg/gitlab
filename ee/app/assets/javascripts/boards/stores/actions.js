@@ -165,7 +165,7 @@ export default {
       'setFilters',
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
     );
-    // debugger;
+    // this needs to be abstracted out
     if (getters.isSwimlanesOn) {
       dispatch('resetEpics');
       dispatch('resetIssues');
