@@ -350,7 +350,7 @@ Example response:
 
 ## Create a release
 
-Create a release. Developer level access to the project is required to create a release.
+Create a release. Maintainer level access to the project is required to create a release.
 
 ```plaintext
 POST /projects/:id/releases
@@ -524,7 +524,7 @@ Example response:
 
 ## Update a release
 
-Update a release. Developer level access to the project is required to update a release.
+Update a release. Maintainer level access to the project is required to update a release.
 
 ```plaintext
 PUT /projects/:id/releases/:tag_name

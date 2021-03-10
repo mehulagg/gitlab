@@ -340,8 +340,6 @@ class ProjectPolicy < BasePolicy
     enable :destroy_environment
     enable :create_deployment
     enable :update_deployment
-    enable :create_release
-    enable :update_release
     enable :daily_statistics
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
@@ -393,6 +391,8 @@ class ProjectPolicy < BasePolicy
     enable :update_cluster
     enable :admin_cluster
     enable :create_environment_terminal
+    enable :create_release
+    enable :update_release
     enable :destroy_release
     enable :destroy_artifacts
     enable :admin_operations
