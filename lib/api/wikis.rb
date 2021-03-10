@@ -111,7 +111,7 @@ module API
           if response.success?
             no_content!
           else
-            render_api_error!(reponse.message)
+            render_api_error!(response.message)
           end
         end
 
