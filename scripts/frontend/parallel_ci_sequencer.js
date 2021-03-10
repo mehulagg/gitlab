@@ -18,7 +18,7 @@ class ParallelCISequencer extends Sequencer {
   }
 
   sort(tests) {
-    const sortedTests = tests.sort(sortByPath);
+    const sortedTests = [...tests].sort(sortByPath);
     const testsForThisRunner = this.distributeAcrossCINodes(sortedTests);
 
     console.log(`CI_NODE_INDEX: ${this.ciNodeIndex}`);
