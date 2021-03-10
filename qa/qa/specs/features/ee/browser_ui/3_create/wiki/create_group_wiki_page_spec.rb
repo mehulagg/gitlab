@@ -4,8 +4,8 @@ module QA
   RSpec.describe 'Create' do
     context 'Wiki' do
       describe 'Creating pages in Group Wikis' do
-        let(:wiki_title) { "New Wiki page" }
-        let(:wiki_content) { "New Wiki content" }
+        let(:wiki_title) { 'New Wiki page' }
+        let(:wiki_content) { 'New Wiki content' }
 
         before do
           Flow::Login.sign_in

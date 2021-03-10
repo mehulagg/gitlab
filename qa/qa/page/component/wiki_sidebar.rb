@@ -32,7 +32,7 @@ module QA
         end
 
         def click_page_link(page_title)
-          click_element :wiki_page_link, page_name: page_title
+          click_element(:wiki_page_link, page_name: page_title)
         end
 
         def has_page_listed?(page_title)

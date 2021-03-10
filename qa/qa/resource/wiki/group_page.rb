@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 module QA
   module Resource
     module Wiki
@@ -35,9 +37,9 @@ module QA
 
         def api_post_body
           {
-              id: group.id,
-              content: content,
-              title: title
+            id: group.id,
+            content: content,
+            title: title
           }
         end
       end

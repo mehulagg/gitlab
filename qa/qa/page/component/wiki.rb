@@ -35,10 +35,10 @@ module QA
           # webdriver to miss the hit so we wait for the svg to load before
           # clicking the button.
           within_element(:svg_content) do
-            has_element? :js_lazy_loaded
+            has_element?(:js_lazy_loaded)
           end
 
-          click_element :create_first_page_link
+          click_element(:create_first_page_link)
         end
 
         def click_new_page
@@ -66,7 +66,7 @@ module QA
         end
 
         def has_no_page?
-          has_element? :create_first_page_link
+          has_element?(:create_first_page_link)
         end
       end
     end
