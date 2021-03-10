@@ -634,11 +634,11 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const errors = data[boardType]?.errors;
+        const [firstError] = data[boardType]?.errors || [];
         const assignees = data[boardType]?.[`${boardType}Members`].nodes;
 
-        if (errors?.[0]) {
-          throw new Error(errors[0]);
+        if (firstError) {
+          throw new Error(firstError);
         }
         commit(
           types.RECEIVE_ASSIGNEES_SUCCESS,

@@ -1,7 +1,6 @@
 <script>
 import {
   GlAvatarLabeled,
-  GlAvatarLink,
   GlFormGroup,
   GlFormRadio,
   GlFormRadioGroup,
@@ -38,7 +37,6 @@ export default {
   components: {
     BoardAddNewColumnForm,
     GlAvatarLabeled,
-    GlAvatarLink,
     GlFormGroup,
     GlFormRadio,
     GlFormRadioGroup,
@@ -253,7 +251,10 @@ export default {
             id: getIdFromGraphQLId(this.selectedMilestone.id),
           };
         } else if (this.assigneeTypeSelected) {
-          listObj.assignee = this.selectedAssignee;
+          listObj.assignee = {
+            ...this.selectedAssignee,
+            id: getIdFromGraphQLId(this.selectedAssignee.id),
+          };
         }
 
         boardsStore.new(listObj);
@@ -346,14 +347,13 @@ export default {
               backgroundColor: item.color,
             }"
           ></span>
-          <gl-avatar-link v-if="assigneeTypeSelected">
-            <gl-avatar-labeled
-              :size="32"
-              :label="item.name"
-              :sub-label="item.username"
-              :src="item.avatarUrl"
-            />
-          </gl-avatar-link>
+          <gl-avatar-labeled
+            v-if="assigneeTypeSelected"
+            :size="32"
+            :label="item.name"
+            :sub-label="item.username"
+            :src="item.avatarUrl"
+          />
           <span>{{ item.title }}</span>
         </label>
       </gl-form-radio-group>

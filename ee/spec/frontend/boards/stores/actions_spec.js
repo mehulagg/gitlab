@@ -1222,7 +1222,7 @@ describe('fetchAssignees', () => {
   });
 
   describe('failure', () => {
-    it('sets state.assignees from query result', async () => {
+    it('throws an error and displays an error message', async () => {
       jest.spyOn(gqlClient, 'query').mockResolvedValue(queryErrors);
 
       const store = createStore();
