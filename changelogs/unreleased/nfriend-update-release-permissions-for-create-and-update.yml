@@ -1,0 +1,5 @@
+---
+title: Raise permissions to create/edit releases from Developer to Maintainer
+merge_request: 56259
+author:
+type: changed
