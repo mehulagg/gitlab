@@ -33,11 +33,11 @@ function importMermaidModule() {
       let theme = 'neutral';
       const ideDarkThemes = ['dark', 'solarized-dark', 'monokai'];
 
-      if (
-        ideDarkThemes.includes(window.gon?.user_color_scheme) &&
-        // if on the Web IDE page
-        document.querySelector('.ide')
-      ) {
+      const darkModeEnabled = document.body.classList.contains('gl-dark');
+      const darkModeWebIde =
+        ideDarkThemes.includes(window.gon?.user_color_scheme) && document.querySelector('.ide');
+
+      if (darkModeEnabled || darkModeWebIde) {
         theme = 'dark';
       }
 
