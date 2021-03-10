@@ -84,16 +84,23 @@ export default {
         <gl-dropdown class="gl-px-5" no-flip @shown="setFocus">
           <template #button-content>
             <slot name="selected">
-              <div class="gl-text-gray-500">{{ noneSelected }}</div>
+              <div class="gl-text-gray-900">{{ noneSelected }}</div>
             </slot>
             <gl-icon class="dropdown-chevron" name="chevron-down" />
           </template>
 
+          <!-- reduce margin at top to 8px -->
+          <!--  add overflow fade tobttom  -->
+          <!-- make dropdown close on select -->
+          <!-- clear search on close -->
+          <!-- selected: style like in the dropdown (swatch _ thing) -->
+          <!-- this should stick -->
           <gl-search-box-by-type
             id="board-available-column-entities"
             ref="searchBox"
             v-model="searchValue"
             debounce="250"
+            class="gl-mt-0 gl-sticky gl-position-sticky gl-top-0 gl-bg-white"
             :placeholder="searchPlaceholder"
             @input="$emit('filter-items', $event)"
           />
@@ -106,9 +113,10 @@ export default {
             </gl-skeleton-loader>
           </div>
 
-        <slot v-else name="items">
-          <p class="gl-mx-5">{{ $options.i18n.noResults }}</p>
-        </slot>
+          <slot v-else name="items">
+            <p class="gl-mx-5">{{ $options.i18n.noResults }}</p>
+          </slot>
+        </gl-dropdown>
       </div>
       <div
         class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-10 gl-rounded-bottom-left-base gl-rounded-bottom-right-base"

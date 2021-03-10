@@ -239,7 +239,6 @@ export default {
   <board-add-new-column-form
     :loading="loading"
     :form-description="formDescription"
-    :none-selected="noneSelected"
     :search-label="searchLabel"
     :search-placeholder="searchPlaceholder"
     :selected-id="selectedId"
@@ -253,6 +252,7 @@ export default {
         class="gl-px-5 gl-py-0 gl-mt-5"
         label-for="list-type"
       >
+        <!-- change to radio buttons -->
         <gl-form-select
           id="list-type"
           v-model="columnType"
@@ -281,12 +281,12 @@ export default {
       <gl-form-radio-group
         v-if="items.length > 0"
         v-model="selectedId"
-        class="gl-overflow-y-auto gl-px-5 gl-pt-3"
+        class="gl-overflow-y-auto gl-px-5"
       >
         <label
           v-for="item in items"
           :key="item.id"
-          class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
+          class="gl-display-flex gl-flex-align-items-center gl-mt-3 gl-font-weight-normal"
         >
           <gl-form-radio :value="item.id" class="gl-mb-0" />
           <span
