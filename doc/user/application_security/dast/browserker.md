@@ -54,7 +54,7 @@ Browserker can be configured using CI/CD variables.
 | `DAST_BROWSERKER_IGNORED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable will be allowed to access but not reported against. | 
 | `DAST_BROWSERKER_MAX_ACTIONS`        | number          | `10000`                           | The maximum number of actions (e.g. clicking a link, filling a form) that the crawler will execute. |
 | `DAST_BROWSERKER_MAX_DEPTH`          | number          | `10`                              | The maximum number of chained actions that the crawler will take. For example, `Click -> Form Fill -> Click` would be a depth of three. |
-| `DAST_BROWSERKER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners it is recommended to not choose a value over three. Private runners with more resources may benefit from a higher number, but should not exceed seven. |
+| `DAST_BROWSERKER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners on GitLab.com it is recommended to not choose a value over three. Private runners with more resources may benefit from a higher number, but will likely produce little benefit after five to seven instances. |
 | `DAST_BROWSERKER_COOKIES`            | dictionary      | `abtesting_group:3,region:locked` | A cookie name and value that should be added to every request. |
 | `DAST_AUTH_URL`                      | string          | `https://example.com/sign-in`     | URL of page that hosts the sign-in form. |
 | `DAST_USERNAME`                      | string          | `user123`                         | The username to enter into the username field on the sign-in HTML form. |
@@ -73,10 +73,24 @@ Various environment variables are of type `selector`. Selectors have the format 
 
 | Selector type | Example                        | Description |
 | ------------- | ------------------------------ | ----------- |
-| `css`         | `css:.password-field`          | Searches for a HTML element having the supplied CSS selector. |
-| `id`          | `id:element`                   | Searches for a HTML element with the provided ID. |
+| `css`         | `css:.password-field`          | Searches for a HTML element having the supplied CSS selector. Selectors should be as specific as possible for performance reasons. |
+| `id`          | `id:element`                   | Searches for a HTML element with the provided element ID. |
+| `name`        | `name:element`                 | Searches for a HTML element with the provided element name. |
 | `xpath`       | `xpath://*[@id="my-button"]/a` | Searches for a HTML element with the provided XPath. Note that XPath searches are expected to be less performant than other searches. |
 | none provided | `a.click-me`                   | Defaults to searching using a CSS selector. |
+
+## Vulnerability detection
+
+While Browserker provides users with a efficient crawler of modern web applications, vulnerability detection is still managed by the standard DAST/Zed Attack Proxy (ZAP) solution.
+
+Browserker runs the target website in a browser with DAST/ZAP configured as the proxy server. This ensures that all requests and responses made by the browser are passively scanned by DAST/ZAP.
+When running a full scan, active vulnerability checks executed by DAST/ZAP do not use a browser. Depending on the target website, this may require additional configuration from users to ensure the scan works as intended.
+
+For example, for a target website that contains forms with Anti-CSRF tokens, a passive scan will scan as intended because the browser displays pages/forms as if a user is viewing the page.
+However, active vulnerability checks run in a full scan will not be able to submit forms containing Anti-CSRF tokens. It is recommended in cases such as this to disable Anti-CSRF tokens when running a full scan.
+
+The DAST team is looking into full scan limitations with a solution set to be identified in the product roadmap.
+ 
 
 ## Managing scan time
 
@@ -88,12 +102,6 @@ The coverage/scan time trade-off can be managed by the user with the following m
 - Limiting the number of actions executed by the browser. The default is `10,000`.
 - Limiting the page depth that Browserker will check coverage on. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
 - Vertically scaling the runner and using a higher number of browsers. The default is `3`.
-
-## Anti-CSRF tokens
-
-Browserker supports Anti-CSRF tokens while crawling as forms are loaded in the browser in the same way as if a user was viewing the page.
-
-Anti-CSRF tokens do not work for full scans as full scan vulnerability checking is performed by DAST/ZAP outside the context of a browser. It is recommended that test sites with Anti-CSRF capabilities disabled in this case.
 
 ## AJAX Crawler
 
