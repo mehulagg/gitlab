@@ -44,3 +44,16 @@ in the [`repocheck.log` file](logs.md#repochecklog) on disk:
 If the periodic repository check causes false alarms, you can clear all repository check states by
 going to **Admin Area > Settings > Repository**
 (`/admin/application_settings/repository`) and clicking **Clear all repository checks**.
+
+## Running a check manually
+
+`git fsck` is a read-only check, which you can run manually against the repository on the
+Gitaly server.
+
+- For Omnibus GitLab installations, repositories are stored by default in `/var/opt/gitlab/git-data/repositories`
+- [Identify the subdirectory that contains the repository that you need to check](repository_storage_types.md#from-project-name-to-hashed-path).
+- Run the fsck:
+
+```
+sudo /opt/gitlab/embedded/bin/git -C /var/opt/gitlab/git-data/repositories/@hashed/0b/91/0b91...f9.git fsck
+```
