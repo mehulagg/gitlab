@@ -1,6 +1,12 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 import Mousetrap from 'mousetrap';
+import {
+  keysFor,
+  ISSUABLE_CHANGE_LABEL,
+  ISSUABLE_COMMENT_OR_REPLY,
+  ISSUABLE_EDIT_DESCRIPTION,
+} from '~/behaviors/shortcuts/keybindings';
 import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
@@ -10,11 +16,11 @@ export default class ShortcutsEpic extends ShortcutsIssuable {
 
     const $issuableSidebar = $('.js-issuable-update');
 
-    Mousetrap.bind('l', () =>
+    Mousetrap.bind(keysFor(ISSUABLE_CHANGE_LABEL), () =>
       ShortcutsEpic.openSidebarDropdown($issuableSidebar.find('.js-labels-block')),
     );
-    Mousetrap.bind('r', ShortcutsIssuable.replyWithSelectedText);
-    Mousetrap.bind('e', ShortcutsIssuable.editIssue);
+    Mousetrap.bind(keysFor(ISSUABLE_COMMENT_OR_REPLY), ShortcutsIssuable.replyWithSelectedText);
+    Mousetrap.bind(keysFor(ISSUABLE_EDIT_DESCRIPTION), ShortcutsIssuable.editIssue);
   }
 
   static openSidebarDropdown($block) {
