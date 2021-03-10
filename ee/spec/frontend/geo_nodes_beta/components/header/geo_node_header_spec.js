@@ -44,7 +44,6 @@ describe('GeoNodeHeader', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findHeaderCollapseButton = () => wrapper.find(GlButton);

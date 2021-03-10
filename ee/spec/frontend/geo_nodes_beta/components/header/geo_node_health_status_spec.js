@@ -37,7 +37,6 @@ describe('GeoNodeHealthStatus', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGeoStatusBadge = () => wrapper.find(GlBadge);

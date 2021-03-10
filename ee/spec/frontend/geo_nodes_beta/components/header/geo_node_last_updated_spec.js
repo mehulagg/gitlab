@@ -46,10 +46,9 @@ describe('GeoNodeLastUpdated', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
-  const findMainText = () => wrapper.find('[data-testid="lastUpdatedMainText"]');
+  const findMainText = () => wrapper.find('[data-testid="last-updated-main-text"]');
   const findGlIcon = () => wrapper.find(GlIcon);
   const findGlPopover = () => wrapper.find(GlPopover);
   const findPopoverText = () => findGlPopover().find('p');
@@ -85,26 +84,18 @@ describe('GeoNodeLastUpdated', () => {
       });
     });
 
-    describe('when sync is not stale', () => {
-      beforeEach(() => {
-        createComponent(null, { statusCheckTimestamp: nonStaleStatusTime });
-      });
+    it('when sync is stale popover link renders correctly', () => {
+      createComponent();
 
-      it('renders popover link correctly', () => {
-        expect(findPopoverLink().text()).toBe('Learn more about Geo node statuses');
-        expect(findPopoverLink().attributes('href')).toBe(HELP_NODE_HEALTH_URL);
-      });
+      expect(findPopoverLink().text()).toBe('Consult Geo troubleshooting information');
+      expect(findPopoverLink().attributes('href')).toBe(GEO_TROUBLESHOOTING_URL);
     });
 
-    describe('when sync is stale', () => {
-      beforeEach(() => {
-        createComponent();
-      });
+    it('when sync is not stale popover link renders correctly', () => {
+      createComponent(null, { statusCheckTimestamp: nonStaleStatusTime });
 
-      it('renders popover link correctly', () => {
-        expect(findPopoverLink().text()).toBe('Consult Geo troubleshooting information');
-        expect(findPopoverLink().attributes('href')).toBe(GEO_TROUBLESHOOTING_URL);
-      });
+      expect(findPopoverLink().text()).toBe('Learn more about Geo node statuses');
+      expect(findPopoverLink().attributes('href')).toBe(HELP_NODE_HEALTH_URL);
     });
   });
 });

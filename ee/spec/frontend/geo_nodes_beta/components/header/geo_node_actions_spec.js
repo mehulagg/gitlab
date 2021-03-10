@@ -36,17 +36,16 @@ describe('GeoNodeActions', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGeoMobileActionsDropdown = () => wrapper.find(GlDropdown);
   const findGeoMobileActionsDropdownItems = () => wrapper.findAll(GlDropdownItem);
   const findGeoMobileActionsRemoveDropdownItem = () =>
-    wrapper.find('[data-testid="geoMobileRemoveAction"]');
-  const findGeoDesktopActions = () => wrapper.find('[data-testid="geoDesktopActions"]');
+    wrapper.find('[data-testid="geo-mobile-remove-action"]');
+  const findGeoDesktopActions = () => wrapper.find('[data-testid="geo-desktop-actions"]');
   const findGeoDesktopActionsButtons = () => wrapper.findAll(GlButton);
   const findGeoDesktopActionsRemoveButton = () =>
-    wrapper.find('[data-testid="geoDesktopRemoveAction"]');
+    wrapper.find('[data-testid="geo-desktop-remove-action"]');
 
   describe('template', () => {
     describe('always', () => {

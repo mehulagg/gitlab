@@ -1,11 +1,15 @@
 <script>
 import { GlButton, GlBadge } from '@gitlab/ui';
+import { __ } from '~/locale';
 import GeoNodeActions from './geo_node_actions.vue';
 import GeoNodeHealthStatus from './geo_node_health_status.vue';
 import GeoNodeLastUpdated from './geo_node_last_updated.vue';
 
 export default {
   name: 'GeoNodeHeader',
+  i18n: {
+    currentNodeLabel: __('Current'),
+  },
   components: {
     GlButton,
     GlBadge,
@@ -28,6 +32,9 @@ export default {
     chevronIcon() {
       return this.collapsed ? 'chevron-right' : 'chevron-down';
     },
+    statusCheckTimestamp() {
+      return this.node.lastSuccessfulStatusCheckTimestamp * 1000;
+    },
   },
 };
 </script>
@@ -49,16 +56,13 @@ export default {
       >
         <div class="gl-display-flex gl-align-items-center gl-flex-fill-1">
           <gl-badge v-if="node.current" variant="info" class="gl-mr-2">{{
-            __('Current')
+            $options.i18n.currentNodeLabel
           }}</gl-badge>
           <h4 class="gl-font-lg">{{ node.name }}</h4>
         </div>
         <div class="gl-display-flex gl-align-items-center gl-flex-fill-2">
           <geo-node-health-status :status="node.healthStatus" />
-          <geo-node-last-updated
-            class="gl-ml-2"
-            :status-check-timestamp="node.lastSuccessfulStatusCheckTimestamp * 1000"
-          />
+          <geo-node-last-updated class="gl-ml-2" :status-check-timestamp="statusCheckTimestamp" />
         </div>
       </div>
     </div>

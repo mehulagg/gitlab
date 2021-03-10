@@ -54,7 +54,7 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-align-items-center">
-    <span class="gl-text-gray-500" data-testid="lastUpdatedMainText">{{
+    <span class="gl-text-gray-500" data-testid="last-updated-main-text">{{
       syncTimeAgo.mainText
     }}</span>
     <gl-icon
