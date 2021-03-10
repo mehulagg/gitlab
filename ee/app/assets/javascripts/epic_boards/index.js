@@ -40,7 +40,7 @@ export default () => {
   });
 
   if (gon?.features?.boardsFilteredSearch) {
-    import('ee/boards/filtered_search')
+    import('ee/boards/epic_filtered_search')
       .then(({ default: initFilteredSearch }) => {
         initFilteredSearch(apolloProvider);
       })
