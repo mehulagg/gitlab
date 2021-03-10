@@ -38,7 +38,7 @@ export default {
   only:
     - branches
   except:
-    - master`,
+    - main`,
     title: s__('ReviewApp|Enable Review App'),
   },
 };
@@ -90,7 +90,7 @@ export default {
           <strong>{{ content }}</strong>
         </template>
         <template #link="{ content }">
-          <gl-link href="blob/master/.gitlab-ci.yml" target="_blank">{{ content }}</gl-link>
+          <gl-link href="blob/main/.gitlab-ci.yml" target="_blank">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
     </p>
