@@ -90,7 +90,6 @@ For example, for a target website that contains forms with Anti-CSRF tokens, a p
 However, active vulnerability checks run in a full scan will not be able to submit forms containing Anti-CSRF tokens. It is recommended in cases such as this to disable Anti-CSRF tokens when running a full scan.
 
 The DAST team is looking into full scan limitations with a solution set to be identified in the product roadmap.
- 
 
 ## Managing scan time
 
