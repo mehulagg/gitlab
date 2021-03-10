@@ -350,7 +350,11 @@ class User < ApplicationRecord
     # this state transition object in order to do a rollback.
     # For this reason the tradeoff is to disable this cop.
     after_transition any => :blocked do |user|
-      Ci::CancelUserPipelinesService.new.execute(user)
+      if Feature.enabled?(:abort_user_pipelines_on_block, user)
+        Ci::AbortPipelinesService.new.execute(user.pipelines)
+      else
+        Ci::CancelUserPipelinesService.new.execute(user)
+      end
     end
     # rubocop: enable CodeReuse/ServiceClass
   end
