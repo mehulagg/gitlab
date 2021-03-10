@@ -40,6 +40,16 @@ RSpec.describe Boards::EpicBoardPosition do
         expect(described_class.order_relative_position).to eq([first, second])
       end
     end
+
+    describe '.for_board_and_epic' do
+      it 'returns an empty array if no record is found' do
+        expect(described_class.for_board_and_epic(non_existing_record_id, epic_board.id)).to be_empty
+      end
+
+      it 'returns the correct records' do
+        expect(described_class.for_board_and_epic(epic.id, epic_board.id)).to eq([epic_board_position])
+      end
+    end
   end
 
   context 'relative positioning' do

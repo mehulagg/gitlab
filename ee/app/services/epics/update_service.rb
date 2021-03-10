@@ -10,6 +10,8 @@ module Epics
     ].freeze
 
     def execute(epic)
+      reposition_on_board(epic)
+
       # start_date and end_date columns are no longer writable by users because those
       # are composite fields managed by the system.
       params.extract!(:start_date, :end_date)
@@ -50,6 +52,27 @@ module Epics
     end
 
     private
+
+    def reposition_on_board(epic)
+      return unless params[:move_between_ids]
+      return unless params[positioning_scope_key]
+
+      epic_board_position = issuable_for_positioning(epic.id, params[positioning_scope_key])
+
+      handle_move_between_ids(epic_board_position)
+
+      epic_board_position.save
+    end
+
+    def issuable_for_positioning(id, board_id)
+      return unless id
+
+      Boards::EpicBoardPosition.for_board_and_epic(id, board_id).first
+    end
+
+    def positioning_scope_key
+      :board_id
+    end
 
     def saved_change_to_epic_dates?(epic)
       (epic.saved_changes.keys.map(&:to_sym) & EPIC_DATE_FIELDS).present?

@@ -84,6 +84,72 @@ RSpec.describe Epics::UpdateService do
       end
     end
 
+    context 'when repositioning an epic on a board' do
+      let(:epic1) { create(:epic, group: group) }
+      let(:epic2) { create(:epic, group: group) }
+
+      let!(:epic_position) { create(:epic_board_position, epic: epic, epic_board: board, relative_position: 10) }
+      let!(:epic1_position) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
+      let!(:epic2_position) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 30) }
+
+      context 'with invalid params' do
+        context 'with board from another group' do
+          let(:board) { create(:epic_board) }
+
+          it 'does not move the epic' do
+            expect { update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id) }
+              .not_to change { epic_position.reload.relative_position}
+          end
+        end
+
+        context 'with one epic from another group' do
+          let(:board) { create(:epic_board, group: group) }
+
+          before do
+            epic1.update_column(:group_id, create(:group).id)
+          end
+
+          it 'does not move the epic' do
+            expect { update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id) }
+              .not_to change { epic_position.reload.relative_position}
+          end
+        end
+      end
+
+      context 'with valid params' do
+        let(:board) { create(:epic_board, group: group) }
+
+        context 'when moving beetween 2 epics on the board' do
+          it 'moves the epic correctly' do
+            update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id)
+
+            expect(epic_position.reload.relative_position)
+              .to be_between(epic1_position.relative_position, epic2_position.relative_position)
+          end
+        end
+
+        context 'when moving the epic to the end' do
+          it 'moves the epic correctly' do
+            update_epic(move_between_ids: [nil, epic2.id], board_id: board.id)
+
+            expect(epic_position.reload.relative_position).to be > epic2_position.relative_position
+          end
+        end
+
+        context 'when moving the epic to the beginning' do
+          before do
+            epic_position.update_column(:relative_position, 25)
+          end
+
+          it 'moves the epic correctly' do
+            update_epic(move_between_ids: [epic1.id, nil], board_id: board.id)
+
+            expect(epic_position.reload.relative_position).to be < epic1_position.relative_position
+          end
+        end
+      end
+    end
+
     context 'after_save callback to store_mentions' do
       let(:user2) { create(:user) }
       let(:epic) { create(:epic, group: group, description: "simple description") }

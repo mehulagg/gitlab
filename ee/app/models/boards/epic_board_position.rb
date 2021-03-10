@@ -13,6 +13,9 @@ module Boards
     scope :order_relative_position, -> do
       reorder('relative_position ASC', 'id DESC')
     end
+    scope :for_board_and_epic, ->(epic_id, board_id) do
+      where(epic_id: epic_id, epic_board_id: board_id)
+    end
 
     def self.relative_positioning_query_base(position)
       where(epic_board_id: position.epic_board_id)
