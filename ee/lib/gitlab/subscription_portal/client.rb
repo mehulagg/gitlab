@@ -8,6 +8,10 @@ module Gitlab
           http_post("trials", admin_headers, params)
         end
 
+        def extend_trial(params)
+          http_put("extend_trials", admin_headers, params)
+        end
+
         def create_customer(params)
           http_post("api/customers", admin_headers, params)
         end

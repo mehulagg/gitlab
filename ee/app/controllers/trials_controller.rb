@@ -22,13 +22,24 @@ class TrialsController < ApplicationController
     require 'pry'
     binding.pry
 
-    render_403 && return unless @namespace.can_extend?
+    return render_403 unless @namespace.can_extend?
 
-    if @namespace.gitlab_subscription.extend_trial
+    return render_403 if @namespace.invalid?
+
+    @result = GitlabSubscriptions::ExtendTrialService.new.execute(extend_trial_params)
+
+    if @result&.dig(:success)
       head 200
+      # redirect_to group_url(@namespace, { trial: true })
     else
-      render_403 #403? or other code? error message?
+      render_403
     end
+
+    # if @namespace.gitlab_subscription.extend_trial
+    #   head 200
+    # else
+    #   render_403 #403? or other code? error message?
+    # end
   end
 
   def select
@@ -105,6 +116,19 @@ class TrialsController < ApplicationController
   end
 
   def apply_trial_params
+    require 'pry'
+    binding.pry
+
+    gl_com_params = { gitlab_com_trial: true, sync_to_gl: true }
+
+    {
+      trial_user: params.permit(:namespace_id, :trial_entity, :glm_source, :glm_content).merge(gl_com_params),
+      uid: current_user.id
+    }
+  end
+
+  def extend_trial_params
+    # TODO: which params are available? only `namespace_id`?
     gl_com_params = { gitlab_com_trial: true, sync_to_gl: true }
 
     {
