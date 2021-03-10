@@ -53,9 +53,9 @@ To discover all snippets visible to you in GitLab, you can:
 
 - **View all snippets visible to you**: In the top navigation bar of your GitLab
   instance, go to **More > Snippets** to view your snippets dashboard.
-- **Visit [GitLab Snippets](http://snippets.gitlab.com/)** for your snippets on GitLab.com.
+- **Visit [GitLab snippets](http://snippets.gitlab.com/)** for your snippets on GitLab.com.
 - **Explore all public snippets**: In the top navigation bar of your GitLab
-  instance, go to **More > Snippets** and select **Explore Snippets** to view
+  instance, go to **More > Snippets** and select **Explore snippets** to view
   [all public snippets](https://gitlab.com/explore/snippets).
 - **View a project's snippets**: Go to your project's page, and in the left
   navigation menu, select **(snippet)** **Snippets** .
@@ -72,7 +72,7 @@ default visibility:
    everyone, or only project members.
 1. Click **Save changes**.
 
-## Versioned Snippets
+## Versioned snippets
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/239) in GitLab 13.0.
 
@@ -120,7 +120,7 @@ A single snippet can support up to 10 files, which helps keep related files toge
   used to bootstrap a project and manage its dependencies.
 
 You can manage these via Git (because they're [versioned](#versioned-snippets)
-by a Git repository), through the [Snippets API](../api/snippets.md), or in the GitLab UI.
+by a Git repository), through the [Snippets API](../api/snippets.md), and in the GitLab UI.
 
 To add a new file to your snippet through the GitLab UI:
 
@@ -144,7 +144,7 @@ Instead of copying a snippet to a local file, you may want to clone a snippet to
 preserve its relationship with the repository, so you can receive or make updates
 as needed. Click the **Clone** button on a snippet to display the URLs to clone with SSH or HTTPS:
 
-![Clone Snippet](img/snippet_clone_button_v13_0.png)
+![Clone snippet](img/snippet_clone_button_v13_0.png)
 
 You can commit changes to a cloned snippet, and push the changes to GitLab.
 
@@ -187,7 +187,7 @@ snippet was created using the GitLab web interface the original line ending is W
 
 ## Comment on snippets
 
-With GitLab Snippets you engage in a conversation about that piece of code,
+With snippets, you engage in a conversation about that piece of code,
 encouraging user collaboration.
 
 ## Troubleshooting
@@ -208,7 +208,7 @@ encouraging user collaboration.
 
 ### Reduce snippets repository size
 
-Because versioned Snippets are considered as part of the [namespace storage size](../user/admin_area/settings/account_and_limit_settings.md),
+Because versioned snippets are considered as part of the [namespace storage size](../user/admin_area/settings/account_and_limit_settings.md),
 it's recommended to keep snippets' repositories as compact as possible.
 
 For more information about tools to compact repositories,
