@@ -29,6 +29,7 @@ describe('Timeago component', () => {
 
   const duration = () => wrapper.find('.duration');
   const finishedAt = () => wrapper.find('.finished-at');
+  const findInProgress = () => wrapper.find('[data-testid="pipeline-in-progress"]');
 
   describe('with duration', () => {
     beforeEach(() => {
@@ -75,6 +76,20 @@ describe('Timeago component', () => {
 
     it('should not render time and calendar icon', () => {
       expect(finishedAt().exists()).toBe(false);
+    });
+  });
+
+  describe('in progress', () => {
+    it('shows in progress state when pipeline has not finished running', () => {
+      createComponent({ duration: '', finished_at: '' });
+
+      expect(findInProgress().exists()).toBe(true);
+    });
+
+    it('does not show in progress state when pipeline has finished running', () => {
+      createComponent({ duration: 10, finished_at: '2017-04-26T12:40:23.277Z' });
+
+      expect(findInProgress().exists()).toBe(false);
     });
   });
 });
