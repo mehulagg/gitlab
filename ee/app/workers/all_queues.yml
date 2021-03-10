@@ -340,7 +340,7 @@
   :idempotent: true
   :tags: []
 - :name: dora_metrics:dora_daily_metrics_refresh
-  :feature_category: :dora_metrics
+  :feature_category: :continuous_delivery
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
