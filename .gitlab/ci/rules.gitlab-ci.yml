@@ -516,6 +516,8 @@
   rules:
     - changes: *db-patterns
     - <<: *if-merge-request-title-run-all-rspec
+    - <<: *if-merge-request
+      changes: *ci-patterns
 
 .rails:rules:ee-and-foss-migration:minimal:
   rules:
