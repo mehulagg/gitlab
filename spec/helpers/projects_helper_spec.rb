@@ -401,7 +401,6 @@ RSpec.describe ProjectsHelper do
 
     context 'Security & Compliance tabs' do
       before do
-        stub_feature_flags(secure_security_and_compliance_configuration_page_on_ce: feature_flag_enabled)
         allow(helper).to receive(:can?).with(user, :read_security_configuration, project).and_return(can_read_security_configuration)
       end
 
