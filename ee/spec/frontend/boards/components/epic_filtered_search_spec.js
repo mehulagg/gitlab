@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import EpicFilteredSearch from 'ee_component/boards/components/filtered_search.vue';
+import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 import { createStore } from '~/boards/stores';
 import * as commonUtils from '~/lib/utils/common_utils';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
