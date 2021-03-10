@@ -252,6 +252,8 @@ export default {
             ...this.selectedMilestone,
             id: getIdFromGraphQLId(this.selectedMilestone.id),
           };
+        } else if (this.assigneeTypeSelected) {
+          listObj.assignee = this.selectedAssignee;
         }
 
         boardsStore.new(listObj);

@@ -32,6 +32,7 @@ RSpec.describe 'User adds milestone lists', :js do
   with_them do
     before do
       stub_licensed_features(board_milestone_lists: true)
+      stub_licensed_features(board_assignee_lists: true)
       sign_in(user)
 
       set_cookie('sidebar_collapsed', 'true')

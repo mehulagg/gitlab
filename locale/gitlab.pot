@@ -3206,6 +3206,9 @@ msgstr ""
 msgid "An application called %{link_to_client} is requesting access to your GitLab account."
 msgstr ""
 
+msgid "An assignee list displays issues assigned to the selected user"
+msgstr ""
+
 msgid "An email notification was recently sent from the admin panel. Please wait %{wait_time_in_words} before attempting to send another message."
 msgstr ""
 
@@ -12564,6 +12567,9 @@ msgid "Failed to get ref."
 msgstr ""
 
 msgid "Failed to install."
+msgstr ""
+
+msgid "Failed to load assignees."
 msgstr ""
 
 msgid "Failed to load assignees. Please try again."
@@ -26318,6 +26324,9 @@ msgid "Search a group"
 msgstr ""
 
 msgid "Search an environment spec"
+msgstr ""
+
+msgid "Search assignees"
 msgstr ""
 
 msgid "Search authors"
