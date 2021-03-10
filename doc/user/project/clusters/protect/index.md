@@ -27,3 +27,6 @@ The following capabilities are available to protect deployed applications in Kub
 - Container Host Security
   - [Overview](container_host_security/index.md)
   - [Installation guide](container_host_security/quick_start_guide.md)
+- Security Orchestration
+  - [Overview](security_orchestration/index.md)
+  - [Installation guide](security_orchestration/quick_start_guide.md)
