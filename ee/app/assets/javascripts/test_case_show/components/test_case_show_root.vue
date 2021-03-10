@@ -39,6 +39,7 @@ export default {
     'projectFullPath',
     'testCaseNewPath',
     'testCaseId',
+    'updatePath',
     'canEditTestCase',
     'descriptionPreviewPath',
     'descriptionHelpPath',
@@ -143,6 +144,8 @@ export default {
       :edit-form-visible="editTestCaseFormVisible"
       :description-preview-path="descriptionPreviewPath"
       :description-help-path="descriptionHelpPath"
+      :task-completion-status="testCase.taskCompletionStatus"
+      :task-list-update-path="updatePath"
       @edit-issuable="handleEditTestCase"
     >
       <template #status-badge>

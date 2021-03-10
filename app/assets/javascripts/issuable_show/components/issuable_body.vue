@@ -1,7 +1,14 @@
 <script>
 import { GlLink } from '@gitlab/ui';
 
+import createFlash from '~/flash';
+import { s__, sprintf } from '~/locale';
+import TaskList from '~/task_list';
+import '~/behaviors/markdown/render_gfm';
+
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+
+import { IssuableTypeText } from '../constants';
 
 import IssuableDescription from './issuable_description.vue';
 import IssuableEditForm from './issuable_edit_form.vue';
@@ -56,6 +63,10 @@ export default {
       type: String,
       required: true,
     },
+    taskListUpdatePath: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     isUpdated() {
@@ -65,7 +76,35 @@ export default {
       return this.issuable.updatedBy;
     },
   },
+  mounted() {
+    if (this.enableEdit && this.taskListUpdatePath) {
+      this.initTaskList();
+    }
+  },
   methods: {
+    initTaskList() {
+      this.taskList = new TaskList({
+        dataType: 'issue', // Only `issue` types can have task lists.
+        fieldName: 'description',
+        lockVersion: this.issuable.lockVersion || 1,
+        selector: '.detail-page-description',
+        onError: this.handleTaskListUpdateFailure.bind(this),
+      });
+    },
+    handleTaskListUpdateFailure() {
+      createFlash(
+        sprintf(
+          s__(
+            'Someone edited this %{issueType} at the same time you did. The description has been updated and you will need to make your changes again.',
+          ),
+          {
+            issueType: IssuableTypeText[this.issuable.type],
+          },
+        ),
+      );
+
+      this.$emit('task-list-update-fail');
+    },
     handleKeydownTitle(e, issuableMeta) {
       this.$emit('keydown-title', e, issuableMeta);
     },
@@ -106,7 +145,12 @@ export default {
             <slot name="status-badge"></slot>
           </template>
         </issuable-title>
-        <issuable-description v-if="issuable.descriptionHtml" :issuable="issuable" />
+        <issuable-description
+          v-if="issuable.descriptionHtml"
+          :issuable="issuable"
+          :can-edit="enableEdit"
+          :task-list-update-path="taskListUpdatePath"
+        />
         <small v-if="isUpdated" class="edited-text gl-font-sm!">
           {{ __('Edited') }}
           <time-ago-tooltip :time="issuable.updatedAt" tooltip-placement="bottom" />

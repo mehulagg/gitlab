@@ -60,6 +60,16 @@ export default {
       required: false,
       default: '',
     },
+    taskCompletionStatus: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    taskListUpdatePath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   methods: {
     handleKeydownTitle(e, issuableMeta) {
@@ -81,6 +91,7 @@ export default {
       :confidential="issuable.confidential"
       :created-at="issuable.createdAt"
       :author="issuable.author"
+      :task-completion-status="taskCompletionStatus"
     >
       <template #status-badge>
         <slot name="status-badge"></slot>
@@ -100,7 +111,9 @@ export default {
       :show-field-title="showFieldTitle"
       :description-preview-path="descriptionPreviewPath"
       :description-help-path="descriptionHelpPath"
+      :task-list-update-path="taskListUpdatePath"
       @edit-issuable="$emit('edit-issuable', $event)"
+      @task-list-update-fail="$emit('task-list-update-fail')"
       @keydown-title="handleKeydownTitle"
       @keydown-description="handleKeydownDescription"
     >

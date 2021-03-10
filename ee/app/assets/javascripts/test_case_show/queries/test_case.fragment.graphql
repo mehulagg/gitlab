@@ -8,6 +8,7 @@ fragment TestCase on Issue {
   description
   descriptionHtml
   state
+  type
   createdAt
   updatedAt
   updatedBy {
@@ -33,5 +34,9 @@ fragment TestCase on Issue {
       id
       state
     }
+  }
+  taskCompletionStatus {
+    count
+    completedCount
   }
 }
