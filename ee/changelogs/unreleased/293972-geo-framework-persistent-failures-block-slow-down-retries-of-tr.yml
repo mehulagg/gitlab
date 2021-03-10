@@ -1,5 +1,5 @@
 ---
-title: 'Geo Framework: Persistent failures block'
+title: 'Geo: Prioritize resyncing new failures over persistent failures'
 merge_request: 54585
 author:
 type: fixed
