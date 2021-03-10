@@ -10,7 +10,7 @@ type: reference
 With GitLab snippets, you can store and share bits of code and text with other users.
 You can [comment on](#comment-on-snippets), [clone](#clone-snippets), and
 [use version control](#versioned-snippets) in snippets. They can
-[contain multiple files](#multiple-files-by-snippet). They also support
+[contain multiple files](#add-or-remove-multiple-files). They also support
 [syntax highlighting](#filenames), [embedding](#embed-snippets), [downloading](#download-snippets),
 and you can maintain your snippets with the [snippets API](../api/snippets.md).
 
@@ -44,7 +44,7 @@ You can create snippets in multiple ways, depending on whether you want to creat
 1. (Optional) Add [multiple files](#add-or-remove-multiple-files) to your snippet.
 1. Select a visibility level, and click **Create snippet**.
 
-After you create a snippet, you can still [add more files to it](#multiple-files-by-snippet).
+After you create a snippet, you can still [add more files to it](#add-or-remove-multiple-files).
 In GitLab versions 13.0 and later, snippets are [versioned by default](#versioned-snippets).
 
 ## Discover snippets
