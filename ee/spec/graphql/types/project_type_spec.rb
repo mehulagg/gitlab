@@ -222,6 +222,12 @@ RSpec.describe GitlabSchema.types['Project'] do
     end
   end
 
+  describe 'push rules field' do
+    subject { described_class.fields['pushRules'] }
+
+    it { is_expected.to have_graphql_type(Types::PushRulesType) }
+  end
+
   private
 
   def query_for_project(project)
