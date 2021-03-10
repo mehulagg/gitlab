@@ -1,5 +1,6 @@
 import storageCounter from 'ee/storage_counter';
 import LinkedTabs from '~/lib/utils/bootstrap_linked_tabs';
+import initSearchSettings from '~/search_settings';
 
 if (document.querySelector('#js-storage-counter-app')) {
   storageCounter();
@@ -11,3 +12,5 @@ if (document.querySelector('#js-storage-counter-app')) {
     hashedTabs: true,
   });
 }
+
+initSearchSettings();
