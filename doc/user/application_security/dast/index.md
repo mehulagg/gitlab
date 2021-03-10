@@ -942,8 +942,6 @@ The site profile is created.
 
 #### Edit a site profile
 
-> **Note:** If a site profile is linked to a security policy, a user will not have the ability to edit the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
-
 To edit an existing site profile:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
@@ -952,11 +950,11 @@ To edit an existing site profile:
 1. In the profile's row select the **More actions** (**{ellipsis_v}**) menu, then select **Edit**.
 1. Edit the fields then select **Save profile**.
 
-The site profile is updated with the edited details.
+If a site profile is linked to a security policy, a user cannot edit the profile from this page. See
+[Security Orchestration](../../project/clusters/protect/security_orchestration/index.md)
+for more information.
 
 #### Delete a site profile
-
-> **Note:** If a site profile is linked to a security policy, a user will not have the ability to delete the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
 
 To delete an existing site profile:
 
@@ -966,7 +964,9 @@ To delete an existing site profile:
 1. In the profile's row select the **More actions** (**{ellipsis_v}**) menu, then select **Delete**.
 1. Select **Delete** to confirm the deletion.
 
-The site profile is deleted.
+If a site profile is linked to a security policy, a user cannot delete the profile from this page. See
+[Security Orchestration](../../project/clusters/protect/security_orchestration/index.md)
+for more information.
 
 #### Validate a site profile
 
@@ -1079,8 +1079,6 @@ To create a scanner profile:
 
 #### Edit a scanner profile
 
-> **Note:** If a site profile is linked to a security policy, a user will not have the ability to edit the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
-
 To edit a scanner profile:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
@@ -1090,11 +1088,11 @@ To edit a scanner profile:
 1. Edit the form.
 1. Select **Save profile**.
 
-The scanner profile is updated with the edited details.
+If a scanner profile is linked to a security policy, a user cannot edit the profile from this page. See
+[Security Orchestration](../../project/clusters/protect/security_orchestration/index.md)
+for more information.
 
 #### Delete a scanner profile
-
-> **Note:** If a scanner profile is linked to a security policy, a user will not have the ability to delete the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
 
 To delete a scanner profile:
 
@@ -1104,7 +1102,9 @@ To delete a scanner profile:
 1. In the scanner's row select the **More actions** (**{ellipsis_v}**) menu, then select **Delete**.
 1. Select **Delete**.
 
-The scanner profile is deleted.
+If a scanner profile is linked to a security policy, a user cannot delete the profile from this page. See
+[Security Orchestration](../../project/clusters/protect/security_orchestration/index.md)
+for more information.
 
 ## Reports
 
