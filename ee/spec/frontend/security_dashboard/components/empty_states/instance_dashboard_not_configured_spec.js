@@ -30,7 +30,6 @@ describe('first class instance security dashboard empty state', () => {
   it('contains a GlEmptyState with the expected props', () => {
     const { title, description, primaryButtonText, secondaryButtonText } = wrapper.vm.$options.i18n;
 
-    expect(findGlEmptyState().exists()).toBe(true);
     expect(findGlEmptyState().props()).toMatchObject({
       title,
       svgPath: emptyStateSvgPath,

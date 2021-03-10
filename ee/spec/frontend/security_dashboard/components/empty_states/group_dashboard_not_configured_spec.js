@@ -29,7 +29,7 @@ describe('first class group security dashboard empty state', () => {
   it('contains a GlEmptyState with the expected props', () => {
     const { title, description } = wrapper.vm.$options.i18n;
 
-    expect(findGlEmptyState().props()).toMatchObject({
+    expect(findGlEmptyState().props()).toEqual({
       title,
       description,
       svgPath: emptyStateSvgPath,
