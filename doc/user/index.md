@@ -85,7 +85,7 @@ There are several types of users in GitLab:
 
 ## User activity
 
-You can follow or unfollow other users from their [user profiles](profile/index.md#user-profile).
+You can follow or unfollow other users from their [user profiles](profile/index.md#access-your-user-profile).
 To see their activity in the top-level Activity view, select Follow or Unfollow, and select
 the Followed Users tab:
 

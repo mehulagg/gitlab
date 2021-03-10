@@ -59,7 +59,7 @@ To change your username:
 1. In the **Change username** section, enter a new username as the path.
 1. Select **Update username**.
 
-## Hide information from your user profile page
+## Make your user profile page private
 
 You can make your user profile visible to only you and GitLab administrators.
 
@@ -111,7 +111,7 @@ To show private contributions:
 You can provide a custom status message for your user profile along with an emoji that describes it.
 This may be helpful when you are out of office or otherwise not available.
 
-Your status is publicly visible even if your [profile is private](#private-profile).
+Your status is publicly visible even if your [profile is private](#make-your-user-profile-page-private).
 
 To set your current status:
 
