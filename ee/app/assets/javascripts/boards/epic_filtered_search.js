@@ -1,7 +1,7 @@
 import Vue from 'vue';
+import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 import store from '~/boards/stores';
 import { queryToObject } from '~/lib/utils/url_utility';
-import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 
 export default () => {
   const queryParams = queryToObject(window.location.search);
@@ -9,7 +9,7 @@ export default () => {
 
   return new Vue({
     el,
-    store,
+    store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider: {},
     render: (createElement) =>
       createElement(EpicFilteredSearch, {
