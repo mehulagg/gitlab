@@ -1,4 +1,4 @@
-const baseConfig = require('./jest.config.base');
+const baseConfig = require('./jest.base.config');
 
 module.exports = {
   ...baseConfig('spec/frontend'),

@@ -15,7 +15,7 @@
     "prejest": "yarn check-dependencies",
     "jest": "jest --config jest.config.js",
     "jest-debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "jest:integration": "jest --config jest.config.integration.js",
+    "jest:integration": "jest --config jest.integration.config.js",
     "jsdoc": "jsdoc -c config/jsdocs.config.js",
     "prekarma": "yarn check-dependencies",
     "karma": "BABEL_ENV=${BABEL_ENV:=karma} karma start --single-run true config/karma.config.js",
