@@ -111,6 +111,12 @@ had on the project you imported from are retained.
 
 ## Invite people using their e-mail address
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247208) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - It replaces the members page form with buttons to open a modal.
+
 If a user you want to give access to doesn't have an account on your GitLab
 instance, you can invite them just by typing their e-mail address in the
 user search field.

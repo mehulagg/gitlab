@@ -116,6 +116,12 @@ Follow the same process to create any subsequent groups.
 
 ## Membership
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247208) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - It replaces the members page form with buttons to open a modal.
+
 When you add a member to a group, that member is also added to all subgroups.
 Permission level is inherited from the group’s parent. This model allows access to
 subgroups if you have membership in one of its parents.

@@ -17,6 +17,12 @@ members.
 
 ## Sharing a project with a group of users
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247208) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - It replaces the members page form with buttons to open a modal.
+
 The primary mechanism to give a group of users, say 'Engineering', access to a project,
 say 'Project Acme', in GitLab is to make the 'Engineering' group the owner of 'Project
 Acme'. But what if 'Project Acme' already belongs to another group, say 'Open Source'?

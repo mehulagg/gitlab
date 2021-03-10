@@ -303,6 +303,12 @@ Similarly to [sharing a project with a group](#sharing-a-project-with-a-group),
 you can share a group with another group to give direct group members access
 to the shared group. This is not valid for inherited members.
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247208) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - It replaces the members page form with buttons to open a modal.
+
 To share a given group, for example, 'Frontend' with another group, for example,
 'Engineering':
 
