@@ -102,10 +102,7 @@ export const loadEmptyBranch = ({ commit, state }, { projectId, branchId }) => {
 export const loadFile = ({ dispatch, state }, { basePath }) => {
   if (basePath) {
     const path = basePath.slice(-1) === '/' ? basePath.slice(0, -1) : basePath;
-    const treeEntryKey = Object.keys(state.entries).find(
-      (key) => key === path && !state.entries[key].pending,
-    );
-    const treeEntry = state.entries[treeEntryKey];
+    const treeEntry = state.entries[path];
 
     if (treeEntry) {
       dispatch('handleTreeEntryAction', treeEntry);

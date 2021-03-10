@@ -6,7 +6,7 @@ import {
   WEBIDE_MEASURE_FETCH_FILE_DATA,
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
-import { viewerTypes, stageKeys, commitActionTypes } from '../../constants';
+import { stageKeys, commitActionTypes, viewerTypes } from '../../constants';
 import eventHub from '../../eventhub';
 import service from '../../services';
 import * as types from '../mutation_types';
@@ -21,28 +21,16 @@ export const closeFile = ({ commit, state, dispatch, getters }, file) => {
     const nextIndexToOpen = indexOfClosedFile === 0 ? 1 : indexOfClosedFile - 1;
     const nextFileToOpen = state.openFiles[nextIndexToOpen];
 
-    if (nextFileToOpen.pending) {
-      dispatch('updateViewer', viewerTypes.diff);
-      dispatch('openPendingTab', {
-        file: nextFileToOpen,
-        keyPrefix: nextFileToOpen.staged ? 'staged' : 'unstaged',
-      });
-    } else {
-      dispatch('setFileActive', nextFileToOpen.path);
-      dispatch('router/push', getters.getUrlForPath(nextFileToOpen.path), { root: true });
-    }
+    dispatch('setFileActive', nextFileToOpen.path);
+    dispatch('router/push', getters.getUrlForPath(nextFileToOpen.path), { root: true });
   } else if (state.openFiles.length === 1) {
     dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
       root: true,
     });
   }
 
-  if (file.pending) {
-    commit(types.REMOVE_PENDING_TAB, file);
-  } else {
-    commit(types.TOGGLE_FILE_OPEN, path);
-    commit(types.SET_FILE_ACTIVE, { path, active: false });
-  }
+  commit(types.TOGGLE_FILE_OPEN, path);
+  commit(types.SET_FILE_ACTIVE, { path, active: false });
 
   eventHub.$emit(`editor.update.model.dispose.${file.key}`);
 };
@@ -249,10 +237,7 @@ export const stageChange = ({ commit, dispatch, getters }, path) => {
   const file = getters.getStagedFile(path);
 
   if (openFile && openFile.active && file) {
-    dispatch('openPendingTab', {
-      file,
-      keyPrefix: stageKeys.staged,
-    });
+    dispatch('openPendingTab', file.path);
   }
 };
 
@@ -264,31 +249,25 @@ export const unstageChange = ({ commit, dispatch, getters }, path) => {
   const file = getters.getChangedFile(path);
 
   if (openFile && openFile.active && file) {
-    dispatch('openPendingTab', {
-      file,
-      keyPrefix: stageKeys.unstaged,
-    });
+    dispatch('openPendingTab', file.path);
   }
 };
 
-export const openPendingTab = ({ commit, dispatch, getters, state }, { file, keyPrefix }) => {
-  if (getters.activeFile && getters.activeFile.key === `${keyPrefix}-${file.key}`) return false;
+export const openPendingTab = ({ commit, dispatch, state }, path) => {
+  // Do nothing if it doesn't exist
+  if (!path || !state.entries[path]) {
+    return;
+  }
 
-  state.openFiles.forEach((f) => eventHub.$emit(`editor.update.model.dispose.${f.key}`));
+  commit(types.SET_ACTIVE_COMMIT_FILE, path);
 
-  commit(types.ADD_PENDING_TAB, { file, keyPrefix });
-
-  dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
-    root: true,
-  });
-
-  return true;
-};
-
-export const removePendingTab = ({ commit }, file) => {
-  commit(types.REMOVE_PENDING_TAB, file);
-
-  eventHub.$emit(`editor.update.model.dispose.${file.key}`);
+  dispatch(
+    'router/push',
+    `/project/${state.currentProjectId}/tree/${state.currentBranchId}/-/${path}`,
+    {
+      root: true,
+    },
+  );
 };
 
 export const triggerFilesChange = (ctx, payload = {}) => {

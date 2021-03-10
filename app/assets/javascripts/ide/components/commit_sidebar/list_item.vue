@@ -3,7 +3,6 @@ import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import getCommitIconMap from '../../commit_icon';
-import { viewerTypes } from '../../constants';
 
 export default {
   components: {
@@ -58,16 +57,7 @@ export default {
   methods: {
     ...mapActions(['discardFileChanges', 'updateViewer', 'openPendingTab']),
     openFileInEditor() {
-      if (this.file.type === 'tree') return null;
-
-      return this.openPendingTab({
-        file: this.file,
-        keyPrefix: this.keyPrefix,
-      }).then((changeViewer) => {
-        if (changeViewer) {
-          this.updateViewer(viewerTypes.diff);
-        }
-      });
+      this.openPendingTab(this.file.path);
     },
   },
 };

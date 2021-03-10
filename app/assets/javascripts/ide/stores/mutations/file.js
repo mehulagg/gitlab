@@ -9,14 +9,6 @@ export default {
       active,
       lastOpenedAt: new Date().getTime(),
     });
-
-    if (active && !state.entries[path].pending) {
-      Object.assign(state, {
-        openFiles: state.openFiles.map((f) =>
-          Object.assign(f, { active: f.pending ? false : f.active }),
-        ),
-      });
-    }
   },
   [types.TOGGLE_FILE_OPEN](state, path) {
     const entry = state.entries[path];
@@ -56,10 +48,6 @@ export default {
     });
   },
   [types.SET_FILE_RAW_DATA](state, { file, raw, fileDeletedAndReadded = false }) {
-    const openPendingFile = state.openFiles.find(
-      (f) =>
-        f.path === file.path && f.pending && !(f.tempFile && !f.prevPath && !fileDeletedAndReadded),
-    );
     const stagedFile = state.stagedFiles.find((f) => f.path === file.path);
 
     if (file.tempFile && file.content === '' && !fileDeletedAndReadded) {
@@ -68,16 +56,6 @@ export default {
       Object.assign(stagedFile, { raw });
     } else {
       Object.assign(state.entries[file.path], { raw });
-    }
-
-    if (!openPendingFile) return;
-
-    if (!openPendingFile.tempFile) {
-      openPendingFile.raw = raw;
-    } else if (openPendingFile.tempFile && !fileDeletedAndReadded) {
-      openPendingFile.content = raw;
-    } else if (fileDeletedAndReadded) {
-      Object.assign(stagedFile, { raw });
     }
   },
   [types.SET_FILE_BASE_RAW_DATA](state, { file, baseRaw }) {
@@ -202,30 +180,8 @@ export default {
       changed,
     });
   },
-  [types.ADD_PENDING_TAB](state, { file, keyPrefix = 'pending' }) {
-    state.entries[file.path].opened = false;
-    state.entries[file.path].active = false;
-    state.entries[file.path].lastOpenedAt = new Date().getTime();
-    state.openFiles.forEach((f) =>
-      Object.assign(f, {
-        opened: false,
-        active: false,
-      }),
-    );
-    state.openFiles = [
-      {
-        ...file,
-        key: `${keyPrefix}-${file.key}`,
-        pending: true,
-        opened: true,
-        active: true,
-      },
-    ];
-  },
-  [types.REMOVE_PENDING_TAB](state, file) {
-    Object.assign(state, {
-      openFiles: state.openFiles.filter((f) => f.key !== file.key),
-    });
+  [types.SET_ACTIVE_COMMIT_FILE](state, path) {
+    state.activeCommitFile = path;
   },
   [types.REMOVE_FILE_FROM_STAGED_AND_CHANGED](state, file) {
     Object.assign(state, {

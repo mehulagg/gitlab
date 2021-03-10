@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { stageKeys } from '../constants';
+import { stageKeys, viewerTypes } from '../constants';
 import EmptyState from './commit_sidebar/empty_state.vue';
 import CommitFilesList from './commit_sidebar/list.vue';
 
@@ -10,7 +10,7 @@ export default {
     EmptyState,
   },
   computed: {
-    ...mapState(['changedFiles', 'stagedFiles', 'lastCommitMsg']),
+    ...mapState(['changedFiles', 'stagedFiles', 'lastCommitMsg', 'activeCommitFile']),
     ...mapState('commit', ['commitMessage', 'submitCommitLoading']),
     ...mapGetters(['lastOpenedFile', 'someUncommittedChanges', 'activeFile']),
     ...mapGetters('commit', ['discardDraftButtonDisabled']),
@@ -30,25 +30,20 @@ export default {
   methods: {
     ...mapActions(['openPendingTab', 'updateViewer', 'updateActivityBarView']),
     initialize() {
+      this.$nextTick(() => {
+        this.updateViewer(viewerTypes.diff);
+      });
+
+      this.openPendingTab(this.getInitializationPath());
+    },
+    // We do not want caching, so we use a method instead of a computed here.
+    getInitializationPath() {
       const file =
         this.lastOpenedFile && this.lastOpenedFile.type !== 'tree'
           ? this.lastOpenedFile
           : this.activeFile;
 
-      if (!file) return;
-
-      this.openPendingTab({
-        file,
-        keyPrefix: file.staged ? stageKeys.staged : stageKeys.unstaged,
-      })
-        .then((changeViewer) => {
-          if (changeViewer) {
-            this.updateViewer('diff');
-          }
-        })
-        .catch((e) => {
-          throw e;
-        });
+      return file?.path || this.activeCommitFile || Object.values(this.stagedFiles)[0];
     },
   },
   stageKeys,

@@ -9,7 +9,6 @@ import { commitActionTypes } from '../constants';
 export const dataStructure = () => ({
   id: '',
   // Key will contain a mixture of ID and path
-  // it can also contain a prefix `pending-` for files opened in review mode
   key: '',
   type: '',
   name: '',

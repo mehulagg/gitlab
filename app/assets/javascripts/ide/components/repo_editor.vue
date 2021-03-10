@@ -137,10 +137,6 @@ export default {
   },
   watch: {
     file(newVal, oldVal) {
-      if (oldVal.pending) {
-        this.removePendingTab(oldVal);
-      }
-
       // Compare key to allow for files opened in review mode to be cached differently
       if (oldVal.key !== this.file.key) {
         this.isEditorLoading = true;
@@ -162,9 +158,8 @@ export default {
     },
     viewer() {
       this.isEditorLoading = false;
-      if (!this.file.pending) {
-        this.createEditorInstance();
-      }
+
+      this.createEditorInstance();
     },
     panelResizing() {
       if (!this.panelResizing) {
@@ -194,6 +189,7 @@ export default {
     },
   },
   beforeDestroy() {
+    this.modelManager.dispose();
     this.globalEditor.dispose();
   },
   mounted() {
@@ -213,7 +209,6 @@ export default {
       'getFileData',
       'getRawFileData',
       'changeFileContent',
-      'removePendingTab',
       'triggerFilesChange',
       'addTempImage',
     ]),

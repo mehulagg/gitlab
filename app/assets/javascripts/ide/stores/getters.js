@@ -10,7 +10,13 @@ import {
 } from '../constants';
 import { getChangesCountForFiles, filePathMatches } from './utils';
 
-export const activeFile = (state) => state.openFiles.find((file) => file.active) || null;
+export const activeFile = (state, getters) => {
+  if (getters.isCommitModeActive) {
+    return state.entries[state.activeCommitFile] || null;
+  }
+
+  return state.openFiles.find((file) => file.active) || null;
+};
 
 export const addedFiles = (state) => state.changedFiles.filter((f) => f.tempFile);
 

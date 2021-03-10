@@ -13,6 +13,8 @@
  *
  * Hence... This helper function...
  */
+import { pathsAreEqual } from './stores/utils';
+
 export const syncRouterAndStore = (router, store) => {
   const disposables = [];
 
@@ -23,7 +25,7 @@ export const syncRouterAndStore = (router, store) => {
     store.watch(
       (state) => state.router.fullPath,
       (fullPath) => {
-        if (currentPath === fullPath) {
+        if (pathsAreEqual(currentPath, fullPath)) {
           return;
         }
 
@@ -37,11 +39,12 @@ export const syncRouterAndStore = (router, store) => {
   // sync router to store
   disposables.push(
     router.afterEach((to) => {
-      if (currentPath === to.fullPath) {
+      if (pathsAreEqual(currentPath, to.fullPath)) {
         return;
       }
 
       currentPath = to.fullPath;
+
       store.dispatch('router/push', currentPath, { root: true });
     }),
   );

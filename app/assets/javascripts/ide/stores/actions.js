@@ -101,25 +101,6 @@ export const scrollToTab = () => {
   });
 };
 
-export const stageAllChanges = ({ state, commit, dispatch, getters }) => {
-  const openFile = state.openFiles[0];
-
-  commit(types.SET_LAST_COMMIT_MSG, '');
-
-  state.changedFiles.forEach((file) =>
-    commit(types.STAGE_CHANGE, { path: file.path, diffInfo: getters.getDiffInfo(file.path) }),
-  );
-
-  const file = getters.getStagedFile(openFile.path);
-
-  if (file) {
-    dispatch('openPendingTab', {
-      file,
-      keyPrefix: stageKeys.staged,
-    });
-  }
-};
-
 export const unstageAllChanges = ({ state, commit, dispatch, getters }) => {
   const openFile = state.openFiles[0];
 
@@ -130,10 +111,7 @@ export const unstageAllChanges = ({ state, commit, dispatch, getters }) => {
   const file = getters.getChangedFile(openFile.path);
 
   if (file) {
-    dispatch('openPendingTab', {
-      file,
-      keyPrefix: stageKeys.unstaged,
-    });
+    dispatch('openPendingTab', file.path);
   }
 };
 

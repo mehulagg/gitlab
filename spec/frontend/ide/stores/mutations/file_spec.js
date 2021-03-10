@@ -531,7 +531,7 @@ describe('IDE store file mutations', () => {
     });
   });
 
-  describe('ADD_PENDING_TAB', () => {
+  describe('SET_ACTIVE_COMMIT_FILE', () => {
     beforeEach(() => {
       const f = { ...file('openFile'), path: 'openFile', active: true, opened: true };
 
@@ -540,7 +540,7 @@ describe('IDE store file mutations', () => {
     });
 
     it('adds file into openFiles as pending', () => {
-      mutations.ADD_PENDING_TAB(localState, {
+      mutations.SET_ACTIVE_COMMIT_FILE(localState, {
         file: localFile,
       });
 
@@ -553,29 +553,18 @@ describe('IDE store file mutations', () => {
       const newFile = file('test');
       localState.entries[newFile.path] = newFile;
 
-      mutations.ADD_PENDING_TAB(localState, {
+      mutations.SET_ACTIVE_COMMIT_FILE(localState, {
         file: localFile,
       });
 
       expect(localState.openFiles.length).toBe(1);
 
-      mutations.ADD_PENDING_TAB(localState, {
+      mutations.SET_ACTIVE_COMMIT_FILE(localState, {
         file: file('test'),
       });
 
       expect(localState.openFiles.length).toBe(1);
       expect(localState.openFiles[0].name).toBe('test');
-    });
-  });
-
-  describe('REMOVE_PENDING_TAB', () => {
-    it('removes pending tab from openFiles', () => {
-      localFile.key = 'testing';
-      localState.openFiles.push(localFile);
-
-      mutations.REMOVE_PENDING_TAB(localState, localFile);
-
-      expect(localState.openFiles.length).toBe(0);
     });
   });
 });

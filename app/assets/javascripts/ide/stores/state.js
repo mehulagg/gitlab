@@ -11,6 +11,7 @@ export default () => ({
   lastCommitMsg: '',
   loading: false,
   openFiles: [],
+  activeCommitFile: null,
   trees: {},
   projects: {},
   panelResizing: false,

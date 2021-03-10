@@ -38,11 +38,7 @@ export default {
 
       if (!this.activeFile) return;
 
-      if (this.activeFile.pending && !this.activeFile.deleted) {
-        this.$router.push(this.getUrlForPath(this.activeFile.path), () => {
-          this.updateViewer(viewerTypes.edit);
-        });
-      } else if (this.activeFile.deleted) {
+      if (this.activeFile.deleted) {
         this.resetOpenFiles();
       }
     },

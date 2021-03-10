@@ -113,26 +113,21 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
   // During some of the pre and post commit processing
   const { shouldCreateMR, shouldHideNewMrOption, isCreatingNewBranch, branchName } = getters;
   const newBranch = state.commitAction !== COMMIT_TO_CURRENT_BRANCH;
-  const stageFilesPromise = rootState.stagedFiles.length
-    ? Promise.resolve()
-    : dispatch('stageAllChanges', null, { root: true });
 
   commit(types.CLEAR_ERROR);
   commit(types.UPDATE_LOADING, true);
 
-  return stageFilesPromise
-    .then(() => {
-      const payload = createCommitPayload({
-        branch: branchName,
-        newBranch,
-        getters,
-        state,
-        rootState,
-        rootGetters,
-      });
+  const payload = createCommitPayload({
+    branch: branchName,
+    newBranch,
+    getters,
+    state,
+    rootState,
+    rootGetters,
+  });
 
-      return service.commit(rootState.currentProjectId, payload);
-    })
+  return service
+    .commit(rootState.currentProjectId, payload)
     .catch((e) => {
       commit(types.UPDATE_LOADING, false);
       commit(types.SET_ERROR, parseCommitError(e));
