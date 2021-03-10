@@ -134,7 +134,7 @@ export default {
     <template v-if="shouldShowEmptyState" #empty-state>
       <dashboard-not-configured :help-path="helpPath" />
     </template>
-    <template v-else-if="shouldShowCharts">
+    <template v-else-if="shouldShowCharts" #default>
       <gl-line-chart
         class="gl-mt-6"
         :width="chartWidth"

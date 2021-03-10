@@ -71,7 +71,7 @@ export default {
 
     <template #header>
       <div v-if="shouldShowDashboard">
-        <header class="gl-my-6 gl-display-flex gl-align-items-center">
+        <header class="gl-my-6 gl-display-flex gl-align-items-center" data-testid="header">
           <h2 class="gl-flex-grow-1 gl-my-0">
             {{ s__('SecurityReports|Vulnerability Report') }}
           </h2>
