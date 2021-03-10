@@ -91,8 +91,6 @@ module API
       end
 
       params :optional_update_params_ee do
-        optional :issues_template, type: String, desc: 'Default description for Issues'
-        optional :merge_requests_template, type: String, desc: 'Default description for Merge Requests'
       end
 
       params :optional_update_params do
