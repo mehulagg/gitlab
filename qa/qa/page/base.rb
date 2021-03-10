@@ -142,7 +142,7 @@ module QA
         end
 
         retry_until(sleep_interval: 1) do
-          page.driver.browser.action.move_to(find_element(name, visible: false).native).click.perform
+          click_element(checkbox)
           checked = checkbox.checked?
 
           QA::Runtime::Logger.debug(checked ? "#{name} was checked" : "#{name} was not checked")
@@ -161,7 +161,7 @@ module QA
         end
 
         retry_until(sleep_interval: 1) do
-          page.driver.browser.action.move_to(find_element(name, visible: false).native).click.perform
+          click_element(checkbox)
           unchecked = !checkbox.checked?
 
           QA::Runtime::Logger.debug(unchecked ? "#{name} was unchecked" : "#{name} was not unchecked")
