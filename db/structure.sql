@@ -10219,8 +10219,12 @@ CREATE TABLE bulk_import_trackers (
     relation text NOT NULL,
     next_page text,
     has_next_page boolean DEFAULT false NOT NULL,
+    jid text,
+    stage smallint DEFAULT 0 NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
     CONSTRAINT check_2d45cae629 CHECK ((char_length(relation) <= 255)),
     CONSTRAINT check_40aeaa600b CHECK ((char_length(next_page) <= 255)),
+    CONSTRAINT check_603f91cb06 CHECK ((char_length(jid) <= 255)),
     CONSTRAINT check_next_page_requirement CHECK (((has_next_page IS FALSE) OR (next_page IS NOT NULL)))
 );
 
@@ -21503,6 +21507,8 @@ CREATE UNIQUE INDEX any_approver_merge_request_rule_type_unique_index ON approva
 CREATE UNIQUE INDEX any_approver_project_rule_type_unique_index ON approval_project_rules USING btree (project_id) WHERE (rule_type = 3);
 
 CREATE INDEX approval_mr_rule_index_merge_request_id ON approval_merge_request_rules USING btree (merge_request_id);
+
+CREATE UNIQUE INDEX bulk_import_trackers_on_entity_id_relation_stage_unique ON bulk_import_trackers USING btree (bulk_import_entity_id, relation, stage);
 
 CREATE UNIQUE INDEX bulk_import_trackers_uniq_relation_by_entity ON bulk_import_trackers USING btree (bulk_import_entity_id, relation);
 

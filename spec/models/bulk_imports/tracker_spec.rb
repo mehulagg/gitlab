@@ -12,11 +12,16 @@ RSpec.describe BulkImports::Tracker, type: :model do
       create(:bulk_import_tracker)
     end
 
-    it { is_expected.to validate_presence_of(:relation) }
-    it { is_expected.to validate_uniqueness_of(:relation).scoped_to(:bulk_import_entity_id) }
+    it { is_expected.to validate_presence_of(:stage) }
+    it { is_expected.to validate_presence_of(:pipeline_name) }
+    it do
+      is_expected
+        .to validate_uniqueness_of(:pipeline_name)
+        .scoped_to([:bulk_import_entity_id, :stage])
+    end
 
     context 'when has_next_page is true' do
-      it "validates presence of `next_page`" do
+      it 'validates presence of `next_page`' do
         tracker = build(:bulk_import_tracker, has_next_page: true)
 
         expect(tracker).not_to be_valid
