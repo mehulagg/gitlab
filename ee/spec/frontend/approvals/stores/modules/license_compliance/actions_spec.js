@@ -3,7 +3,7 @@ import { mapApprovalSettingsResponse } from 'ee/approvals/mappers';
 import * as baseMutationTypes from 'ee/approvals/stores/modules/base/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/license_compliance/actions';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
