@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class Geo::LfsObjectRegistry < Geo::BaseRegistry
+  include ::Geo::ReplicableRegistry
   include ::ShaAttribute
-  include ::Geo::Syncable
+  # include ::Geo::Syncable #TODO: This breaks due to scopes from Syncable overwriting behavior from ReplicableRegistry
 
   MODEL_CLASS = ::LfsObject
   MODEL_FOREIGN_KEY = :lfs_object_id
