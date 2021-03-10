@@ -117,13 +117,13 @@ To set your current status:
 
 1. In the top-right corner, select your avatar.
 1. Select **Set status** or, if you have already set a status, **Edit status**.
-1. Set the desired emoji and status message. Status messages must be plain text and fewer than 100 characters.
+1. Set the desired emoji and status message. Status messages must be plain text and 100 characters or less.
    They can also contain emoji codes like, `I'm on vacation :palm_tree:`.
 1. Select **Set status**. Alternatively, you can select **Remove status** to remove your user status entirely.
 
 You can also set your current status by [using the API](../../api/users.md#user-status).
 
-If you select the **Busy** checkbox, remember to deselect it when you become available again.
+If you select the **Busy** checkbox, remember to clear it when you become available again.
 
 ## Set a busy status indicator
 
