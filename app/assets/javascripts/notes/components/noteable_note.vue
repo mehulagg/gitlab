@@ -288,7 +288,7 @@ export default {
 
       // Stringifying an empty object yields `{}` which breaks graphql queries
       // https://gitlab.com/gitlab-org/gitlab/-/issues/298827
-      if (position && !isEmpty(position)) data.note.note.position = JSON.stringify(position);
+      if (!isEmpty(position)) data.note.note.position = JSON.stringify(position);
       this.isRequesting = true;
       this.oldContent = this.note.note_html;
       // eslint-disable-next-line vue/no-mutating-props

@@ -97,7 +97,7 @@ export const updateDraft = (
   };
   // Stringifying an empty object yields `{}` which breaks graphql queries
   // https://gitlab.com/gitlab-org/gitlab/-/issues/298827
-  if (position && !isEmpty(position)) params.position = JSON.stringify(position);
+  if (!isEmpty(position)) params.position = JSON.stringify(position);
 
   return service
     .update(getters.getNotesData.draftsPath, params)
