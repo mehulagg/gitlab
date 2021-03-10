@@ -55,7 +55,8 @@ See the [Rails guides](https://guides.rubyonrails.org/action_mailer_basics.html#
      enabled: true
 
      # The email address including the `%{key}` placeholder that will be replaced to reference the item being replied to.
-     # The placeholder can be omitted but if present, it must appear in the "user" part of the address (before the `@`).
+     # The placeholder must appear in the "user" part of the address (before the `@`). It can be omitted but some features,
+     # including Service Desk, may not work properly.
      address: "gitlab-incoming+%{key}@gmail.com"
 
      # Email account username
