@@ -16,11 +16,11 @@ and you can maintain your snippets with the [snippets API](../api/snippets.md).
 
 GitLab provides two types of snippets:
 
-- **Personal snippets**: Personal snippets are not related to any project and, can be
-  created completely independently. You can set a [visibility level](../public_access/public_access.md)
+- **Personal snippets**: Created independent of any project.
+  You can set a [visibility level](../public_access/public_access.md)
   for your snippet: public, internal, or private.
-- **Project snippets**: Project snippets are always related to a specific project.
-  Read [Project features](project/index.md#project-features) for more information. Project snippets can be visible only to group members, or public.
+- **Project snippets**: Always related to a specific project.
+  Project snippets can be visible publicly or to only group members.
 
 ## Create snippets
 
@@ -28,16 +28,16 @@ You can create snippets in multiple ways, depending on whether you want to creat
 
 1. Select the kind of snippet you want to create:
    - **To create a personal snippet**:
-     - *If you're on a project's page,* Click the plus icon (**{plus-square-o}**)
+     - *If you're on a project's page,* click the plus icon (**{plus-square-o}**)
        in the top navigation bar, then select **New snippet** from the **GitLab** (for GitLab.com)
        or **Your Instance** (self-managed) section of the same dropdown menu.
-     - *For all other pages,* Click the plus icon (**{plus-square-o}**)
+     - *For all other pages,* click the plus icon (**{plus-square-o}**)
        in the top navigation bar, then select **New snippet** from the dropdown menu.
    - **To create a project snippet**: Go to your project's page. Click the plus icon
      (**{plus-square-o}**), then select **New snippet** from the **This project** section
      of the dropdown menu.
 1. Add a **Title** and **Description**.
-1. Name your **File** with an appropriate extension, such as `example.rb`, `index.html`.
+1. Name your **File** with an appropriate extension, such as `example.rb` or `index.html`.
    Filenames with appropriate extensions display [syntax highlighting](#filenames).
    Failure to add a filename can cause a known
    [copy-pasting bug](https://gitlab.com/gitlab-org/gitlab/-/issues/22870). If you don't provide a filename, GitLab [creates a name for you](#filenames).
@@ -65,8 +65,8 @@ To discover all snippets visible to you in GitLab, you can:
 Project snippets are enabled and available by default. To change their
 default visibility:
 
-1. Go to your project's page.
-1. In the left navigation bar, select **Settings**.
+1. In your project,
+   go to **Settings**.
 1. Expand the **Visibility, project features, permissions** section, and scroll to **Snippets**.
 1. Toggle the default visibility, and select whether snippets can be viewed by
    everyone, or only project members.
@@ -119,7 +119,7 @@ A single snippet can support up to 10 files, which helps keep related files toge
 - A `gulpfile.js` file and a `package.json` file, which together can be
   used to bootstrap a project and manage its dependencies.
 
-You can manage these via Git (because they're [versioned](#versioned-snippets)
+You can manage these by using Git (because they're [versioned](#versioned-snippets)
 by a Git repository), through the [Snippets API](../api/snippets.md), and in the GitLab UI.
 
 To add a new file to your snippet through the GitLab UI:
@@ -150,7 +150,7 @@ You can commit changes to a cloned snippet, and push the changes to GitLab.
 
 ## Embed snippets
 
-Public snippets can be shared, and embedded on any website. You can reuse a GitLab snippet in multiple places, and any change to the source
+Public snippets can be shared and embedded on any website. You can reuse a GitLab snippet in multiple places, and any change to the source
 is reflected in the embedded snippets. When embedded, users can download it, or view the snippet in raw format.
 
 To embed a snippet:
@@ -189,14 +189,14 @@ snippet was created using the GitLab web interface the original line ending is W
 ## Comment on snippets
 
 With snippets, you engage in a conversation about that piece of code,
-encouraging user collaboration.
+which can encourage user collaboration.
 
 ## Troubleshooting
 
 ### Snippet limitations
 
 - Binary files are not supported.
-- Creating or deleting branches is not supported. Only a default `master` branch is used.
+- Creating or deleting branches is not supported. Only the default branch is used.
 - Git tags are not supported in snippet repositories.
 - Snippets' repositories are limited to 10 files. Attempting to push more
   than 10 files results in an error.
