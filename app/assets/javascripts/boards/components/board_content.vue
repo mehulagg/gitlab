@@ -49,7 +49,7 @@ export default {
         : this.lists;
     },
     canDragColumns() {
-      return this.glFeatures.graphqlBoardLists && this.canAdminList;
+      return !this.isEpicBoard && this.glFeatures.graphqlBoardLists && this.canAdminList;
     },
     boardColumnWrapper() {
       return this.canDragColumns ? Draggable : 'div';

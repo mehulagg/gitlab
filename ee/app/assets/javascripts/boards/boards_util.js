@@ -31,6 +31,10 @@ export function fullEpicBoardId(epicBoardId) {
   return `gid://gitlab/Boards::EpicBoard/${epicBoardId}`;
 }
 
+export function fullEpicListId(epicListId) {
+  return `gid://gitlab/Boards::EpicList/${epicListId}`;
+}
+
 export function formatListEpics(listEpics) {
   const boardItems = {};
   let listItemsCount;

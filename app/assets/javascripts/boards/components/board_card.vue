@@ -69,9 +69,9 @@ export default {
       'is-active': isActive,
     }"
     :index="index"
-    :data-issue-id="issue.id"
-    :data-issue-iid="issue.iid"
-    :data-issue-path="issue.referencePath"
+    :data-item-id="issue.id"
+    :data-item-iid="issue.iid"
+    :data-item-path="issue.referencePath"
     data-testid="board_card"
     class="board-card gl-p-5 gl-rounded-base"
     @mouseup="toggleIssue($event)"
