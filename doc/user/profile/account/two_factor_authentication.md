@@ -351,7 +351,7 @@ request and you're automatically signed in.
 If you ever need to disable 2FA:
 
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#access-your-user-settings.
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Go to **Account**.
 1. Click **Disable**, under **Two-Factor Authentication**.
 
