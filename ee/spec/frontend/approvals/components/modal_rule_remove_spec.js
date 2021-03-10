@@ -1,6 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ModalRuleRemove from 'ee/approvals/components/modal_rule_remove.vue';
+import { stubComponent } from 'helpers/stub_component';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 const MODAL_MODULE = 'deleteModal';
@@ -42,6 +43,11 @@ describe('Approvals ModalRuleRemove', () => {
       localVue,
       store,
       propsData,
+      stubs: {
+        GlModalVuex: stubComponent(GlModalVuex, {
+          props: ['modalModule', 'modalId', 'actionPrimary', 'actionCancel'],
+        }),
+      },
     });
   };
 
@@ -64,6 +70,11 @@ describe('Approvals ModalRuleRemove', () => {
       expect.objectContaining({
         modalModule: MODAL_MODULE,
         modalId: TEST_MODAL_ID,
+        actionPrimary: {
+          text: 'Remove approvers',
+          attributes: [{ variant: 'danger' }],
+        },
+        actionCancel: { text: 'Cancel' },
       }),
     );
   });

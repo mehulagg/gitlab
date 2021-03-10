@@ -2,7 +2,7 @@
 /* eslint-disable vue/no-v-html */
 import { escape } from 'lodash';
 import { mapActions, mapState } from 'vuex';
-import { sprintf, n__, s__ } from '~/locale';
+import { sprintf, n__, s__, __ } from '~/locale';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 export default {
@@ -54,6 +54,15 @@ export default {
       this.deleteRule(this.rule.id);
     },
   },
+  modalProps: {
+    primaryAction: {
+      text: __('Remove approvers'),
+      attributes: [{ variant: 'danger' }],
+    },
+    cancelAction: {
+      text: __('Cancel'),
+    },
+  },
 };
 </script>
 
@@ -62,9 +71,8 @@ export default {
     modal-module="deleteModal"
     :modal-id="modalId"
     :title="__('Remove approvers?')"
-    :ok-title="__('Remove approvers')"
-    ok-variant="remove"
-    :cancel-title="__('Cancel')"
+    :action-primary="$options.modalProps.primaryAction"
+    :action-cancel="$options.modalProps.cancelAction"
     @ok.prevent="submit"
   >
     <p v-html="message"></p>
