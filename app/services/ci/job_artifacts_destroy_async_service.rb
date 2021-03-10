@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 module Ci
-  class JobArtifactsDestroyBatchService
+  class JobArtifactsDestroyAsyncService
     include BaseServiceUtility
     include ::Gitlab::Utils::StrongMemoize
 
-    MAX_JOB_ARTIFACT_BATCH_SIZE = 1_000
+    MAX_JOB_ARTIFACT_BATCH_SIZE = 10_000
 
-    # Danger: Not for direct use and is meant to be called from a service that sends job_artifacts in batches
-    #
     # Adds the passed batch of job artifacts to the `ci_deleted_objects` table
     # for asyncronous destruction of the objects in Object Storage via the `Ci::DeleteObjectsService`
     # and then deletes the batch of related `ci_job_artifacts` records.
@@ -24,12 +22,11 @@ module Ci
 
       @job_artifacts = job_artifacts.with_destroy_preloads.to_a
       @pick_up_at = pick_up_at
-      @destroyed_artifacts_count = 0
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
     def execute
-      return success_response if @job_artifacts.empty?
+      return success(destroyed_artifacts_count: @artifacts_count) if @job_artifacts.empty?
 
       Ci::DeletedObject.transaction do
         Ci::DeletedObject.bulk_import(@job_artifacts, @pick_up_at)
@@ -41,7 +38,7 @@ module Ci
       update_project_statistics
       increment_monitoring_statistics(@artifacts_count)
 
-      success_response
+      success(destroyed_artifacts_count: @artifacts_count)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -66,11 +63,7 @@ module Ci
     def metrics
       @metrics ||= ::Gitlab::Ci::Artifacts::Metrics.new
     end
-
-    def success_response
-      success(destroyed_artifacts_count: @artifacts_count)
-    end
   end
 end
 
-Ci::JobArtifactsDestroyBatchService.prepend_if_ee('EE::Ci::JobArtifactsDestroyBatchService')
+Ci::JobArtifactsDestroyAsyncService.prepend_if_ee('EE::Ci::JobArtifactsDestroyAsyncService')

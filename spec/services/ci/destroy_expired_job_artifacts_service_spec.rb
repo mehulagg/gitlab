@@ -170,7 +170,7 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
       end
 
       it 'reports the number of destroyed artifacts' do
-        is_expected.to eq(destroyed_artifacts_count: 1, status: :success)
+        is_expected.to eq(1)
       end
     end
 
@@ -189,7 +189,7 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
       end
 
       it 'reports the number of destroyed artifacts' do
-        is_expected.to eq(destroyed_artifacts_count: 1, status: :success)
+        is_expected.to eq(1)
       end
     end
 
@@ -203,7 +203,7 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
       end
 
       it 'reports the number of destroyed artifacts' do
-        is_expected.to eq(destroyed_artifacts_count: 0, status: :success)
+        is_expected.to eq(0)
       end
     end
 
@@ -221,7 +221,7 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
       end
 
       it 'reports the number of destroyed artifacts' do
-        is_expected.to eq(destroyed_artifacts_count: 2, status: :success)
+        is_expected.to eq(2)
       end
     end
 
