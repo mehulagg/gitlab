@@ -942,6 +942,8 @@ The site profile is created.
 
 #### Edit a site profile
 
+> **Note:** If a site profile is linked to a security policy, a user will not have the ability to edit the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
+
 To edit an existing site profile:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
@@ -953,6 +955,8 @@ To edit an existing site profile:
 The site profile is updated with the edited details.
 
 #### Delete a site profile
+
+> **Note:** If a site profile is linked to a security policy, a user will not have the ability to delete the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
 
 To delete an existing site profile:
 
@@ -1075,6 +1079,8 @@ To create a scanner profile:
 
 #### Edit a scanner profile
 
+> **Note:** If a site profile is linked to a security policy, a user will not have the ability to edit the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
+
 To edit a scanner profile:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
@@ -1087,6 +1093,8 @@ To edit a scanner profile:
 The scanner profile is updated with the edited details.
 
 #### Delete a scanner profile
+
+> **Note:** If a scanner profile is linked to a security policy, a user will not have the ability to delete the profile from this page. Please look at the [Security Orchestration](../../project/clusters/protect/security_orchestration/index.md) section for more information
 
 To delete a scanner profile:
 
