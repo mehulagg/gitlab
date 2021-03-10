@@ -28,7 +28,7 @@ module Projects
       flush_caches(project)
 
       if Feature.enabled?(:abort_deleted_project_pipelines, default_enabled: :yaml)
-        ::Ci::AbortProjectPipelinesService.new.execute(project)
+        ::Ci::AbortPipelinesService.new.execute(project.all_pipelines)
       end
 
       Projects::UnlinkForkService.new(project, current_user).execute

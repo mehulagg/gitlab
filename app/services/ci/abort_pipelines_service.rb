@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 module Ci
-  class AbortProjectPipelinesService
+  class AbortPipelinesService
     # Danger: Cancels in bulk without callbacks
     # Only for pipeline abandonment scenarios (examples: project delete, user block)
-    def execute(project)
-      pipelines = project.all_pipelines.cancelable
-      bulk_abort!(pipelines, status: :canceled)
+    def execute(pipelines)
+      bulk_abort!(pipelines.cancelable, status: :canceled)
 
       ServiceResponse.success(message: 'Pipelines canceled')
     end
