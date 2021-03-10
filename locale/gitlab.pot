@@ -1315,9 +1315,6 @@ msgstr ""
 msgid "A file with '%{file_name}' already exists in %{branch} branch"
 msgstr ""
 
-msgid "A fork is a copy of a project."
-msgstr ""
-
 msgid "A group is a collection of several projects"
 msgstr ""
 
@@ -1346,6 +1343,9 @@ msgid "A merge request approval is required when the license compliance report c
 msgstr ""
 
 msgid "A merge request hasn't yet been merged"
+msgstr ""
+
+msgid "A milestone list displays issues in the selected milestone."
 msgstr ""
 
 msgid "A new Auto DevOps pipeline has been created, go to %{pipelines_link_start}Pipelines page%{pipelines_link_end} for details"
@@ -1927,6 +1927,9 @@ msgid "Add system hook"
 msgstr ""
 
 msgid "Add to Slack"
+msgstr ""
+
+msgid "Add to board"
 msgstr ""
 
 msgid "Add to epic"
@@ -7958,9 +7961,6 @@ msgid_plural "ContainerRegistry|%{count} Tags"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "ContainerRegistry|%{imageName} tags"
-msgstr ""
-
 msgid "ContainerRegistry|%{strongStart}Disabled%{strongEnd} - Tags will not be automatically deleted."
 msgstr ""
 
@@ -8063,6 +8063,9 @@ msgstr ""
 msgid "ContainerRegistry|Image repository will be deleted"
 msgstr ""
 
+msgid "ContainerRegistry|Image repository with no name located at the project URL."
+msgstr ""
+
 msgid "ContainerRegistry|Image tags"
 msgstr ""
 
@@ -8126,6 +8129,9 @@ msgid "ContainerRegistry|Remove tags older than:"
 msgstr ""
 
 msgid "ContainerRegistry|Remove these tags"
+msgstr ""
+
+msgid "ContainerRegistry|Root image"
 msgstr ""
 
 msgid "ContainerRegistry|Run cleanup:"
@@ -8740,6 +8746,9 @@ msgid "Create requirement"
 msgstr ""
 
 msgid "Create snippet"
+msgstr ""
+
+msgid "Create tag %{tagName}"
 msgstr ""
 
 msgid "Create wildcard: %{searchTerm}"
@@ -12587,6 +12596,9 @@ msgstr ""
 msgid "Failed to load labels. Please try again."
 msgstr ""
 
+msgid "Failed to load milestones."
+msgstr ""
+
 msgid "Failed to load milestones. Please try again."
 msgstr ""
 
@@ -13303,6 +13315,9 @@ msgstr ""
 msgid "Fork project?"
 msgstr ""
 
+msgid "ForkProject|A fork is a copy of a project."
+msgstr ""
+
 msgid "ForkProject|Cancel"
 msgstr ""
 
@@ -13310,6 +13325,9 @@ msgid "ForkProject|Create a group"
 msgstr ""
 
 msgid "ForkProject|Fork project"
+msgstr ""
+
+msgid "ForkProject|Forking a repository allows you to make changes without affecting the original project."
 msgstr ""
 
 msgid "ForkProject|Internal"
@@ -13325,6 +13343,9 @@ msgid "ForkProject|Public"
 msgstr ""
 
 msgid "ForkProject|Select a namespace"
+msgstr ""
+
+msgid "ForkProject|Select a namespace to fork the project"
 msgstr ""
 
 msgid "ForkProject|The project can be accessed by any logged in user."
@@ -13343,9 +13364,6 @@ msgid "ForkedFromProjectPath|Forked from"
 msgstr ""
 
 msgid "ForkedFromProjectPath|Forked from an inaccessible project"
-msgstr ""
-
-msgid "Forking a repository allows you to make changes without affecting the original project."
 msgstr ""
 
 msgid "Forking in progress"
@@ -16675,16 +16693,16 @@ msgstr ""
 msgid "InviteMembersModal|Some of the members could not be added"
 msgstr ""
 
-msgid "InviteMembersModal|You're inviting a group to the %{name} group"
+msgid "InviteMembersModal|You're inviting a group to the %{strongStart}%{name}%{strongEnd} group."
 msgstr ""
 
-msgid "InviteMembersModal|You're inviting a group to the %{name} project"
+msgid "InviteMembersModal|You're inviting a group to the %{strongStart}%{name}%{strongEnd} project."
 msgstr ""
 
-msgid "InviteMembersModal|You're inviting members to the %{name} group"
+msgid "InviteMembersModal|You're inviting members to the %{strongStart}%{name}%{strongEnd} group."
 msgstr ""
 
-msgid "InviteMembersModal|You're inviting members to the %{name} project"
+msgid "InviteMembersModal|You're inviting members to the %{strongStart}%{name}%{strongEnd} project."
 msgstr ""
 
 msgid "InviteMembers|Invite a group"
@@ -18168,6 +18186,9 @@ msgid "List settings"
 msgstr ""
 
 msgid "List the merge requests that must be merged before this one."
+msgstr ""
+
+msgid "List type"
 msgstr ""
 
 msgid "List view"
@@ -20647,6 +20668,9 @@ msgid "No starrers matched your search"
 msgstr ""
 
 msgid "No start date"
+msgstr ""
+
+msgid "No tag selected"
 msgstr ""
 
 msgid "No template"
@@ -26356,6 +26380,9 @@ msgstr ""
 msgid "Search milestones"
 msgstr ""
 
+msgid "Search or create tag"
+msgstr ""
+
 msgid "Search or filter results..."
 msgstr ""
 
@@ -26925,9 +26952,6 @@ msgid "Select a group to invite"
 msgstr ""
 
 msgid "Select a label"
-msgstr ""
-
-msgid "Select a namespace to fork the project"
 msgstr ""
 
 msgid "Select a new namespace"
@@ -30946,9 +30970,6 @@ msgstr ""
 msgid "ThreatMonitoring|The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
 msgstr ""
 
-msgid "ThreatMonitoring|The graph below is an overview of traffic coming to your application as tracked by the Web Application Firewall (WAF). View the docs for instructions on how to access the WAF logs to see what type of malicious traffic is trying to access your app. The docs link is also accessible by clicking the \"?\" icon next to the title below."
-msgstr ""
-
 msgid "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear."
 msgstr ""
 
@@ -32225,6 +32246,9 @@ msgid "Upload"
 msgstr ""
 
 msgid "Upload CSV file"
+msgstr ""
+
+msgid "Upload File"
 msgstr ""
 
 msgid "Upload License"
@@ -34456,6 +34480,9 @@ msgstr ""
 msgid "You must set up incoming email before it becomes active."
 msgstr ""
 
+msgid "You must solve the CAPTCHA in order to submit"
+msgstr ""
+
 msgid "You must upload a file with the same file name when dropping onto an existing design."
 msgstr ""
 
@@ -35282,6 +35309,15 @@ msgstr ""
 msgid "created"
 msgstr ""
 
+msgid "created %{timeAgoString} by %{email} via %{user}"
+msgstr ""
+
+msgid "created %{timeAgoString} by %{user}"
+msgstr ""
+
+msgid "created %{timeAgoString} by %{user} in Jira"
+msgstr ""
+
 msgid "created %{timeAgo}"
 msgstr ""
 
@@ -36053,15 +36089,6 @@ msgid "on track"
 msgstr ""
 
 msgid "open issue"
-msgstr ""
-
-msgid "opened %{timeAgoString} by %{email} via %{user}"
-msgstr ""
-
-msgid "opened %{timeAgoString} by %{user}"
-msgstr ""
-
-msgid "opened %{timeAgoString} by %{user} in Jira"
 msgstr ""
 
 msgid "opened %{timeAgo}"

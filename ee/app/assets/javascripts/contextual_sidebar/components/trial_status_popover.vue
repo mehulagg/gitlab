@@ -45,9 +45,11 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    disabled: false,
-  }),
+  data() {
+    return {
+      disabled: false,
+    };
+  },
   i18n: {
     compareAllButtonTitle: s__('Trials|Compare all plans'),
     popoverTitle: s__('Trials|Hey there'),

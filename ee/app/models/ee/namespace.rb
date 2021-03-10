@@ -69,6 +69,11 @@ module EE
         where("EXISTS (?)", matcher)
       end
 
+      scope :without_last_ci_minutes_notification, -> do
+        where.not(last_ci_minutes_notification_at: nil)
+          .or(where.not(last_ci_minutes_usage_notification_level: nil))
+      end
+
       delegate :shared_runners_seconds, :shared_runners_seconds_last_reset, to: :namespace_statistics, allow_nil: true
 
       delegate :additional_purchased_storage_size, :additional_purchased_storage_size=,

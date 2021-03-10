@@ -1,4 +1,5 @@
-import { issuableTypes } from '~/boards/constants';
+import { find } from 'lodash';
+import { issuableTypes, ListType } from '~/boards/constants';
 import gettersCE from '~/boards/stores/getters';
 
 export default {
@@ -7,6 +8,32 @@ export default {
   isSwimlanesOn: (state) => {
     return Boolean(gon?.features?.swimlanes && state.isShowingEpicsSwimlanes);
   },
+
+  getListByTypeId: (state) => ({ assigneeId, labelId, milestoneId }) => {
+    if (assigneeId) {
+      return find(
+        state.boardLists,
+        (l) => l.listType === ListType.assignee && l.assignee?.id === assigneeId,
+      );
+    }
+
+    if (labelId) {
+      return find(
+        state.boardLists,
+        (l) => l.listType === ListType.label && l.label?.id === labelId,
+      );
+    }
+
+    if (milestoneId) {
+      return find(
+        state.boardLists,
+        (l) => l.listType === ListType.milestone && l.milestone?.id === milestoneId,
+      );
+    }
+
+    return null;
+  },
+
   getIssuesByEpic: (state, getters) => (listId, epicId) => {
     return getters
       .getBoardItemsByList(listId)

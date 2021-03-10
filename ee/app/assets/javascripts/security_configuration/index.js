@@ -11,7 +11,6 @@ export const initSecurityConfiguration = (el) => {
     autoDevopsHelpPagePath,
     autoDevopsPath,
     features,
-    helpPagePath,
     latestPipelinePath,
     autoFixEnabled,
     autoFixHelpPath,
@@ -33,7 +32,6 @@ export const initSecurityConfiguration = (el) => {
           autoDevopsHelpPagePath,
           autoDevopsPath,
           features: JSON.parse(features),
-          helpPagePath,
           latestPipelinePath,
           ...parseBooleanDataAttributes(el, [
             'autoDevopsEnabled',

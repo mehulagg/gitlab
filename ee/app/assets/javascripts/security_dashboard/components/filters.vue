@@ -10,9 +10,11 @@ export default {
     StandardFilter,
     GlToggle,
   },
-  data: () => ({
-    filterConfigs: [severityFilter, scannerFilter],
-  }),
+  data() {
+    return {
+      filterConfigs: [severityFilter, scannerFilter],
+    };
+  },
   computed: {
     ...mapState('filters', ['filters']),
     hideDismissed: {

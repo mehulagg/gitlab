@@ -57,10 +57,12 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    localDismissalComment: '',
-    dismissalCommentErrorMessage: '',
-  }),
+  data() {
+    return {
+      localDismissalComment: '',
+      dismissalCommentErrorMessage: '',
+    };
+  },
   computed: {
     canCreateIssueForThisVulnerability() {
       return Boolean(!this.isResolved && !this.vulnerability.hasIssue && this.canCreateIssue);

@@ -3,6 +3,7 @@
 module EE
   SUBSCRIPTIONS_URL = ::Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL
   SUBSCRIPTIONS_COMPARISON_URL = "https://about.gitlab.com/pricing/gitlab-com/feature-comparison".freeze
+  SUBSCRIPTIONS_GRAPHQL_URL = "#{SUBSCRIPTIONS_URL}/graphql".freeze
   SUBSCRIPTIONS_MORE_MINUTES_URL = "#{SUBSCRIPTIONS_URL}/buy_pipeline_minutes".freeze
   SUBSCRIPTIONS_MORE_STORAGE_URL = "#{SUBSCRIPTIONS_URL}/buy_storage".freeze
   SUBSCRIPTIONS_PLANS_URL = "#{SUBSCRIPTIONS_URL}/plans".freeze

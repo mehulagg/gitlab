@@ -44,7 +44,6 @@ Graphql/Descriptions:
 # WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/267606
 FactoryBot/InlineAssociation:
   Exclude:
-    - 'ee/spec/factories/geo/event_log.rb'
     - 'ee/spec/factories/merge_request_blocks.rb'
     - 'ee/spec/factories/vulnerabilities/feedback.rb'
     - 'spec/factories/atlassian_identities.rb'
@@ -2279,6 +2278,7 @@ Gitlab/NamespacedClass:
     - 'ee/app/policies/instance_security_dashboard_policy.rb'
     - 'ee/app/policies/issuable_metric_image_policy.rb'
     - 'ee/app/policies/iteration_policy.rb'
+    - 'ee/app/policies/push_rule_policy.rb'
     - 'ee/app/policies/saml_provider_policy.rb'
     - 'ee/app/policies/timelog_policy.rb'
     - 'ee/app/policies/vulnerability_policy.rb'

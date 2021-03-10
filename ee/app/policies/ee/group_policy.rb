@@ -210,11 +210,15 @@ module EE
         enable :read_epic_board_list
       end
 
-      rule { can?(:read_group) & iterations_available }.enable :read_iteration
+      rule { can?(:read_group) & iterations_available }.policy do
+        enable :read_iteration
+        enable :read_iteration_cadence
+      end
 
       rule { developer & iterations_available }.policy do
         enable :create_iteration
         enable :admin_iteration
+        enable :create_iteration_cadence
       end
 
       rule { reporter & epics_available }.policy do
