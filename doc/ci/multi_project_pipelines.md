@@ -325,8 +325,8 @@ number of upstream pipeline subscriptions is 2 by default, for both the upstream
 downstream projects. This [application limit](../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) can be changed on self-managed instances by a GitLab administrator.
 
 The upstream project needs to be [public](../public_access/public_access.md)
-and the user should be an owner of the upstream public project
-for pipeline subscription to work.
+and the user must have [owner permissions](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions)
+for the upstream project.
 
 ## Downstream private projects confidentiality concern
 
