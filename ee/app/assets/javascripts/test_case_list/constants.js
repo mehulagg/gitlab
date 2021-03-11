@@ -11,7 +11,7 @@ export const TestCaseTabs = [
     id: 'state-opened',
     name: TestCaseStates.Opened,
     title: __('Open'),
-    titleTooltip: __('Filter by test cases that are currently opened.'),
+    titleTooltip: __('Filter by test cases that are currently open.'),
   },
   {
     id: 'state-archived',
