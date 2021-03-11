@@ -6368,6 +6368,18 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
+### `g_project_management_epic_confidential_monthly`
+
+Count of MAU making epics confidential
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210310203049_g_product_planning_epic_confidential_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `g_project_management_epic_created_monthly`
 
 Count of MAU creating epics
@@ -6385,6 +6397,42 @@ Tiers: `premium`, `ultimate`
 Count of WAU creating epics
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210305145820_g_product_planning_epic_created_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `g_project_management_epic_moveed_weekly`
+
+Count of WAU making epics confidential
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210310203225_g_product_planning_epic_confidential_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `g_project_management_epic_visible_monthly`
+
+Count of MAU making epics visible
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312093611_g_product_planning_epic_visible_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `g_project_management_epic_visible_weekly`
+
+Count of WAU making epics visible
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312093243_g_product_planning_epic_visible_weekly.yml)
 
 Group: `group::product planning`
 

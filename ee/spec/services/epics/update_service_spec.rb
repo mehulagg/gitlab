@@ -217,10 +217,38 @@ RSpec.describe Epics::UpdateService do
         end
       end
 
-      it 'schedules deletion of todos when epic becomes confidential' do
-        expect(TodosDestroyer::ConfidentialEpicWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, epic.id)
+      context 'when the epic becomes confidential' do
+        it 'schedules deletion of todos' do
+          expect(TodosDestroyer::ConfidentialEpicWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, epic.id)
 
-        update_epic(confidential: true)
+          update_epic(confidential: true)
+        end
+
+        it 'tracks the epic becoming confidential' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+            .to receive(:track_epic_confidential_action).with(author: user)
+
+          update_epic(confidential: true)
+        end
+      end
+
+      context 'when the epic becomes visible' do
+        before do
+          epic.update_column(:confidential, true)
+        end
+
+        it 'does not schedule deletion of todos' do
+          expect(TodosDestroyer::ConfidentialEpicWorker).not_to receive(:perform_in)
+
+          update_epic(confidential: false)
+        end
+
+        it 'tracks the epic becoming visible' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+            .to receive(:track_epic_visible_action).with(author: user)
+
+          update_epic(confidential: false)
+        end
       end
     end
 
