@@ -3206,6 +3206,9 @@ msgstr ""
 msgid "An application called %{link_to_client} is requesting access to your GitLab account."
 msgstr ""
 
+msgid "An assignee list displays issues assigned to the selected user"
+msgstr ""
+
 msgid "An email notification was recently sent from the admin panel. Please wait %{wait_time_in_words} before attempting to send another message."
 msgstr ""
 
@@ -3588,6 +3591,9 @@ msgid "An issue can be a bug, a todo or a feature request that needs to be discu
 msgstr ""
 
 msgid "An issue title is required"
+msgstr ""
+
+msgid "An iteration list displays issues in the selected iteration."
 msgstr ""
 
 msgid "An unauthenticated user"
@@ -12566,6 +12572,9 @@ msgstr ""
 msgid "Failed to install."
 msgstr ""
 
+msgid "Failed to load assignees."
+msgstr ""
+
 msgid "Failed to load assignees. Please try again."
 msgstr ""
 
@@ -12591,6 +12600,9 @@ msgid "Failed to load group activity metrics. Please try again."
 msgstr ""
 
 msgid "Failed to load groups, users and deploy keys."
+msgstr ""
+
+msgid "Failed to load iterations."
 msgstr ""
 
 msgid "Failed to load labels. Please try again."
@@ -26320,6 +26332,9 @@ msgstr ""
 msgid "Search an environment spec"
 msgstr ""
 
+msgid "Search assignees"
+msgstr ""
+
 msgid "Search authors"
 msgstr ""
 
@@ -26369,6 +26384,9 @@ msgid "Search for this text"
 msgstr ""
 
 msgid "Search forks"
+msgstr ""
+
+msgid "Search iterations"
 msgstr ""
 
 msgid "Search labels"
@@ -35309,6 +35327,15 @@ msgstr ""
 msgid "created"
 msgstr ""
 
+msgid "created %{timeAgoString} by %{email} via %{user}"
+msgstr ""
+
+msgid "created %{timeAgoString} by %{user}"
+msgstr ""
+
+msgid "created %{timeAgoString} by %{user} in Jira"
+msgstr ""
+
 msgid "created %{timeAgo}"
 msgstr ""
 
@@ -36080,15 +36107,6 @@ msgid "on track"
 msgstr ""
 
 msgid "open issue"
-msgstr ""
-
-msgid "opened %{timeAgoString} by %{email} via %{user}"
-msgstr ""
-
-msgid "opened %{timeAgoString} by %{user}"
-msgstr ""
-
-msgid "opened %{timeAgoString} by %{user} in Jira"
 msgstr ""
 
 msgid "opened %{timeAgo}"

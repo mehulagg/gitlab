@@ -1,5 +1,6 @@
 <script>
 import {
+  GlAvatarLabeled,
   GlFormGroup,
   GlFormRadio,
   GlFormRadioGroup,
@@ -19,18 +20,24 @@ export default {
   i18n: {
     listType: __('List type'),
     labelListDescription: __('A label list displays issues with the selected label.'),
+    assigneeListDescription: __('An assignee list displays issues assigned to the selected user'),
     milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
     selectLabel: __('Select label'),
+    selectAssignee: __('Select assignee'),
     selectMilestone: __('Select milestone'),
     searchLabels: __('Search labels'),
+    searchAssignees: __('Search assignees'),
     searchMilestones: __('Search milestones'),
   },
   columnTypes: [
     { value: ListType.label, text: __('Label') },
+    { value: ListType.assignee, text: __('Assignee') },
     { value: ListType.milestone, text: __('Milestone') },
+    { value: ListType.iteration, text: __('Iteration') },
   ],
   components: {
     BoardAddNewColumnForm,
+    GlAvatarLabeled,
     GlFormGroup,
     GlFormRadio,
     GlFormRadioGroup,
@@ -48,15 +55,30 @@ export default {
     };
   },
   computed: {
-    ...mapState(['labels', 'labelsLoading', 'milestones', 'milestonesLoading']),
+    ...mapState([
+      'labels',
+      'labelsLoading',
+      'milestones',
+      'milestonesLoading',
+      'iterations',
+      'iterationsLoading',
+      'assignees',
+      'assigneesLoading',
+    ]),
     ...mapGetters(['getListByTypeId', 'shouldUseGraphQL', 'isEpicBoard']),
 
     items() {
       if (this.labelTypeSelected) {
         return this.labels;
       }
+      if (this.assigneeTypeSelected) {
+        return this.assignees;
+      }
       if (this.milestoneTypeSelected) {
         return this.milestones;
+      }
+      if (this.iterationTypeSelected) {
+        return this.iterations;
       }
       return [];
     },
@@ -64,8 +86,14 @@ export default {
     labelTypeSelected() {
       return this.columnType === ListType.label;
     },
+    assigneeTypeSelected() {
+      return this.columnType === ListType.assignee;
+    },
     milestoneTypeSelected() {
       return this.columnType === ListType.milestone;
+    },
+    iterationTypeSelected() {
+      return this.columnType === ListType.iteration;
     },
 
     selectedLabel() {
@@ -74,11 +102,23 @@ export default {
       }
       return this.labels.find(({ id }) => id === this.selectedId);
     },
+    selectedAssignee() {
+      if (!this.assigneeTypeSelected) {
+        return null;
+      }
+      return this.assignees.find(({ id }) => id === this.selectedId);
+    },
     selectedMilestone() {
       if (!this.milestoneTypeSelected) {
         return null;
       }
       return this.milestones.find(({ id }) => id === this.selectedId);
+    },
+    selectedIteration() {
+      if (!this.iterationTypeSelected) {
+        return null;
+      }
+      return this.iterations.find(({ id }) => id === this.selectedId);
     },
     selectedItem() {
       if (!this.selectedId) {
@@ -87,8 +127,14 @@ export default {
       if (this.labelTypeSelected) {
         return this.selectedLabel;
       }
+      if (this.assigneeTypeSelected) {
+        return this.selectedAssignee;
+      }
       if (this.milestoneTypeSelected) {
         return this.selectedMilestone;
+      }
+      if (this.iterationTypeSelected) {
+        return this.selectedIteration;
       }
       return null;
     },
@@ -105,11 +151,17 @@ export default {
     },
 
     loading() {
-      if (this.columnType === ListType.label) {
+      if (this.labelTypeSelected) {
         return this.labelsLoading;
       }
-      if (this.columnType === ListType.milestone) {
+      if (this.assigneeTypeSelected) {
+        return this.assigneesLoading;
+      }
+      if (this.milestoneTypeSelected) {
         return this.milestonesLoading;
+      }
+      if (this.iterationTypeSelected) {
+        return this.iterationsLoading;
       }
       return false;
     },
@@ -119,8 +171,16 @@ export default {
         return this.$options.i18n.labelListDescription;
       }
 
+      if (this.assigneeTypeSelected) {
+        return this.$options.i18n.assigneeListDescription;
+      }
+
       if (this.milestoneTypeSelected) {
         return this.$options.i18n.milestoneListDescription;
+      }
+
+      if (this.iterationTypeSelected) {
+        return __('An iteration list displays issues in the selected iteration.');
       }
 
       return null;
@@ -131,8 +191,16 @@ export default {
         return this.$options.i18n.selectLabel;
       }
 
+      if (this.assigneeTypeSelected) {
+        return this.$options.i18n.selectAssignee;
+      }
+
       if (this.milestoneTypeSelected) {
         return this.$options.i18n.selectMilestone;
+      }
+
+      if (this.iterationTypeSelected) {
+        return __('Select iteration');
       }
 
       return null;
@@ -143,8 +211,16 @@ export default {
         return this.$options.i18n.searchLabels;
       }
 
+      if (this.assigneeTypeSelected) {
+        return this.$options.i18n.searchAssignees;
+      }
+
       if (this.milestoneTypeSelected) {
         return this.$options.i18n.searchMilestones;
+      }
+
+      if (this.iterationTypeSelected) {
+        return __('Search iterations');
       }
 
       return null;
@@ -159,6 +235,8 @@ export default {
       'fetchLabels',
       'highlightList',
       'setAddColumnFormVisibility',
+      'fetchAssignees',
+      'fetchIterations',
       'fetchMilestones',
     ]),
     highlight(listId) {
@@ -206,6 +284,16 @@ export default {
             ...this.selectedMilestone,
             id: getIdFromGraphQLId(this.selectedMilestone.id),
           };
+        } else if (this.iterationTypeSelected) {
+          listObj.iteration = {
+            ...this.selectedIteration,
+            id: getIdFromGraphQLId(this.selectedIteration.id),
+          };
+        } else if (this.assigneeTypeSelected) {
+          listObj.assignee = {
+            ...this.selectedAssignee,
+            id: getIdFromGraphQLId(this.selectedAssignee.id),
+          };
         }
 
         boardsStore.new(listObj);
@@ -214,8 +302,14 @@ export default {
 
     filterItems(searchTerm) {
       switch (this.columnType) {
+        case ListType.iteration:
+          this.fetchIterations(searchTerm);
+          break;
         case ListType.milestone:
           this.fetchMilestones(searchTerm);
+          break;
+        case ListType.assignee:
+          this.fetchAssignees(searchTerm);
           break;
         case ListType.label:
         default:
@@ -227,7 +321,8 @@ export default {
       return this.scopedLabelsAvailable && isScopedLabel(label);
     },
 
-    setColumnType() {
+    setColumnType(type) {
+      this.columnType = type;
       this.selectedId = null;
       this.filterItems();
     },
@@ -275,6 +370,9 @@ export default {
       <div v-else-if="selectedMilestone" class="gl-text-truncate">
         {{ selectedMilestone.title }}
       </div>
+      <div v-else-if="selectedIteration" class="gl-text-truncate">
+        {{ selectedIteration.title }}
+      </div>
     </template>
 
     <template slot="items">
@@ -288,7 +386,7 @@ export default {
           :key="item.id"
           class="gl-display-flex gl-flex-align-items-center gl-mt-3 gl-font-weight-normal"
         >
-          <gl-form-radio :value="item.id" class="gl-mb-0" />
+          <gl-form-radio :value="item.id" class="gl-mb-0 gl-align-self-center" />
           <span
             v-if="labelTypeSelected"
             class="dropdown-label-box gl-top-0"
@@ -296,7 +394,15 @@ export default {
               backgroundColor: item.color,
             }"
           ></span>
-          <span>{{ item.title }}</span>
+
+          <gl-avatar-labeled
+            v-if="assigneeTypeSelected"
+            :size="32"
+            :label="item.name"
+            :sub-label="item.username"
+            :src="item.avatarUrl"
+          />
+          <span v-else>{{ item.title }}</span>
         </label>
       </gl-form-radio-group>
     </template>
