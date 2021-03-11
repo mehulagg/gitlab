@@ -22,6 +22,11 @@ export default {
       required: false,
       default: () => [],
     },
+    dropdownClass: {
+      type: [Array, String, Object],
+      required: false,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -68,6 +73,7 @@ export default {
       ref="dropdown"
       :toggle-class="toggleClass"
       :boundary="getBoundaryElement()"
+      :class="dropdownClass"
       menu-class="dropdown-extended-height"
       no-flip
       right
