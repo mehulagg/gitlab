@@ -8,6 +8,39 @@ RSpec.describe Users::BuildService do
       { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass' }
     end
 
+    context 'with non admin user' do
+      let(:non_admin) { create(:user) }
+
+      context 'when authorization is skipped' do
+        let(:skip_authorization) { true }
+
+        context 'user signup cap' do
+          before do
+            allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+          end
+
+          context 'when user signup cap is set' do
+            let(:new_user_signups_cap) { 10 }
+
+            it 'sets the user state to blocked_pending_approval for human users' do
+              service = described_class.new(non_admin, params)
+              user = service.execute(skip_authorization: skip_authorization)
+
+              expect(user).to be_blocked_pending_approval
+            end
+
+            it 'does not set the user state to blocked_pending_approval for non human users' do
+              params = { name: 'Project Bot', email: 'project_bot@example.com', username: 'project_bot', user_type: 'project_bot', skip_confirmation: true }
+              service = described_class.new(non_admin, params)
+              user = service.execute(skip_authorization: skip_authorization)
+
+              expect(user).to be_active
+            end
+          end
+        end
+      end
+    end
+
     context 'with an admin user' do
       let!(:admin_user) { create(:admin) }
       let(:service) { described_class.new(admin_user, ActionController::Parameters.new(params).permit!) }
