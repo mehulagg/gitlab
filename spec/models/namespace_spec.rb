@@ -873,7 +873,17 @@ RSpec.describe Namespace do
     end
   end
 
-  it_behaves_like 'recursive namespace traversal'
+  context 'when use_traversal_ids feature flag is true' do
+    it_behaves_like 'namespace traversal'
+  end
+
+  context 'when use_traversal_ids feature flag is false' do
+    before do
+      stub_feature_flags(use_traversal_ids: false)
+    end
+
+    it_behaves_like 'namespace traversal'
+  end
 
   describe '#users_with_descendants' do
     let(:user_a) { create(:user) }
