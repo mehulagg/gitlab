@@ -131,6 +131,10 @@ module BillingPlansHelper
     "http://192.168.0.64:3000/-/trials/extend_trial"
   end
 
+  def reactivate_trial_url(group, plan)
+    "http://192.168.0.64:3000/-/trials/reactivate_trial"
+  end
+
   private
 
   def add_seats_url(group)

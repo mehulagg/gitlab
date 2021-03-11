@@ -8,8 +8,8 @@ class TrialsController < ApplicationController
   before_action :check_if_gl_com_or_dev
   before_action :authenticate_user!
   before_action :find_or_create_namespace, only: :apply
-  before_action :find_namespace, only: :extend_trial
-  before_action :authenticate_owner!, only: :extend_trial
+  before_action :find_namespace, only: [:extend_trial, :reactivate_trial]
+  before_action :authenticate_owner!, only: [:extend_trial, :reactivate_trial]
 
   feature_category :purchase
 
@@ -33,7 +33,7 @@ class TrialsController < ApplicationController
 
     return render_403 if @namespace.invalid?
 
-    @result = GitlabSubscriptions::ExtendTrialService.new.execute(extend_trial_params)
+    @result = GitlabSubscriptions::ExtendTrialService.new.execute(extend_reactivate_trial_params)
 
 
     pp @result
@@ -51,6 +51,41 @@ class TrialsController < ApplicationController
     #   render_403 #403? or other code? error message?
     # end
   end
+
+  def reactivate_trial
+    # return redirect_to "http://192.168.0.64:3000"
+    # return head 200
+    # return
+
+    # require 'pry'
+    # binding.pry
+    puts "X" * 100
+    pp @namespace.can_reactivate?
+    pp @namespace.invalid?
+
+    return render_403 unless @namespace.can_reactivate?
+
+    return render_403 if @namespace.invalid?
+
+    @result = GitlabSubscriptions::ReactivateTrialService.new.execute(extend_reactivate_trial_params)
+
+
+    pp @result
+
+    if @result&.dig(:success)
+      head 200
+      # redirect_to group_url(@namespace, { trial: true })
+    else
+      render_403
+    end
+
+    # if @namespace.gitlab_subscription.extend_trial
+    #   head 200
+    # else
+    #   render_403 #403? or other code? error message?
+    # end
+  end
+
 
   def select
   end
@@ -142,7 +177,7 @@ class TrialsController < ApplicationController
     }
   end
 
-  def extend_trial_params
+  def extend_reactivate_trial_params
     # TODO: which params are available? only `namespace_id`?
     gl_com_params = { gitlab_com_trial: true, sync_to_gl: true }
 
