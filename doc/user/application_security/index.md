@@ -229,7 +229,7 @@ you can:
 
 ### Dismiss a vulnerability
 
-> Introduced dismissal reason in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.0.
+> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.0, a dismissal reason.
 
 You can dismiss a vulnerability for the entire project.
 
