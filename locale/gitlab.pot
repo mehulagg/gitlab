@@ -1447,6 +1447,12 @@ msgstr ""
 msgid "API Token"
 msgstr ""
 
+msgid "API key"
+msgstr ""
+
+msgid "API version"
+msgstr ""
+
 msgid "APIFuzzing|API Fuzzing Configuration"
 msgstr ""
 
@@ -4634,6 +4640,9 @@ msgid "BambooService|A user with API access, if applicable"
 msgstr ""
 
 msgid "BambooService|Atlassian Bamboo CI"
+msgstr ""
+
+msgid "BambooService|Bamboo URL"
 msgstr ""
 
 msgid "BambooService|Bamboo build plan key like KEY"
@@ -12524,6 +12533,9 @@ msgstr ""
 msgid "ExternalWikiService|External Wiki"
 msgstr ""
 
+msgid "ExternalWikiService|External Wiki URL"
+msgstr ""
+
 msgid "ExternalWikiService|Replaces the link to the internal wiki with a link to an external wiki."
 msgstr ""
 
@@ -17302,6 +17314,9 @@ msgstr ""
 msgid "JiraService|e.g. AB"
 msgstr ""
 
+msgid "JiraService|password or API token"
+msgstr ""
+
 msgid "JiraService|transition ids can have only numbers which can be split with , or ;"
 msgstr ""
 
@@ -17947,6 +17962,9 @@ msgid "Leave Admin Mode"
 msgstr ""
 
 msgid "Leave blank for no limit. Once set, existing personal access tokens may be revoked."
+msgstr ""
+
+msgid "Leave blank to use your current %{field}"
 msgstr ""
 
 msgid "Leave edit mode? All unsaved changes will be lost."
@@ -23663,6 +23681,9 @@ msgstr ""
 msgid "ProjectService|%{service_title}: status on"
 msgstr ""
 
+msgid "ProjectService|Drone URL"
+msgstr ""
+
 msgid "ProjectService|Event will be triggered by a push to the repository"
 msgstr ""
 
@@ -23699,7 +23720,22 @@ msgstr ""
 msgid "ProjectService|Event will be triggered when someone adds a comment on a confidential issue"
 msgstr ""
 
+msgid "ProjectService|Issue URL"
+msgstr ""
+
+msgid "ProjectService|Jenkins URL"
+msgstr ""
+
+msgid "ProjectService|Mock Service URL"
+msgstr ""
+
+msgid "ProjectService|New issue URL"
+msgstr ""
+
 msgid "ProjectService|Perform common operations on GitLab project: %{project_name}"
+msgstr ""
+
+msgid "ProjectService|TeamCity URL"
 msgstr ""
 
 msgid "ProjectService|To set up this service:"
