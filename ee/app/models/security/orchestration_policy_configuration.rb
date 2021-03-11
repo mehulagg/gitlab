@@ -14,7 +14,7 @@ module Security
     belongs_to :security_policy_management_project, class_name: 'Project', foreign_key: 'security_policy_management_project_id'
 
     validates :project, presence: true, uniqueness: true
-    validates :security_policy_management_project, presence: true, uniqueness: true
+    validates :security_policy_management_project, presence: true
 
     def enabled?
       ::Feature.enabled?(:security_orchestration_policies_configuration, project)

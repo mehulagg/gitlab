@@ -25,11 +25,19 @@ RSpec.describe Security::Orchestration::AssignService do
       expect(project.security_orchestration_policy_configuration.security_policy_management_project_id).to eq(new_policy_project.id)
     end
 
-    it 'returns error when same policy is assigned to different projects' do
+    it 'assigns same policy to different projects' do
       service
 
       repeated_service = described_class.new(another_project, nil, policy_project_id: policy_project.id).execute
-      expect(repeated_service).to be_error
+      expect(repeated_service).to be_success
+    end
+
+    it 'unassigns project' do
+      service
+
+      described_class.new(project, nil, policy_project_id: nil).execute
+
+      expect(project.reload.security_orchestration_policy_configuration).to be_nil
     end
 
     it 'returns error when db has problem' do
