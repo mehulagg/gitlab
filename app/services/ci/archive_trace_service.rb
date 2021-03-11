@@ -23,7 +23,9 @@ module Ci
                             job_id: job.id)
       end
     rescue ::Gitlab::Ci::Trace::AlreadyArchivedError
-      # It's already archived, thus we can safely ignore this exception.
+      # It's already archived, yet live traces are still present. Remove them in order
+      # to prevent the ArchiveTracesCronWorker from picking this job up again.
+      job.trace_chunks.fast_destroy_all
     rescue => e
       # Tracks this error with application logs, Sentry, and Prometheus.
       # If `archive!` keeps failing for over a week, that could incur data loss.

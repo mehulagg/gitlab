@@ -55,6 +55,15 @@ RSpec.describe Ci::ArchiveTraceService, '#execute' do
         subject
       end
     end
+
+    context 'when job failed to archive because an archive already exists' do
+      let(:ci_build_trace_chunk) { create(:ci_build_trace_chunk) }
+      let(:job) { create(:ci_build, :success, :trace_artifact, trace_chunks: [ci_build_trace_chunk]) }
+
+      it 'removes the trace chunks' do
+        expect { subject }.to change { job.trace_chunks.count }
+      end
+    end
   end
 
   context 'when job is running' do
