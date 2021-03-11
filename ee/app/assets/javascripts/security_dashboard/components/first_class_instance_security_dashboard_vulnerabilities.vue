@@ -65,6 +65,7 @@ export default {
     filters() {
       // Clear out the existing vulnerabilities so that the skeleton loader is shown.
       this.vulnerabilities = [];
+      this.pageInfo = {};
     },
     sort() {
       // Clear out the existing vulnerabilities so that the skeleton loader is shown.

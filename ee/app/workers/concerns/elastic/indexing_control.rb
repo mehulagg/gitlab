@@ -51,7 +51,7 @@ module Elastic
     end
 
     def current_context
-      Gitlab::ApplicationContext.current
+      Labkit::Context.current.to_h
     end
   end
 end

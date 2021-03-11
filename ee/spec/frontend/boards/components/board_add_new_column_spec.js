@@ -174,13 +174,11 @@ describe('BoardAddNewColumn', () => {
     });
 
     it('sets assignee placeholder text in form', async () => {
-      expect(findForm().props()).toEqual(
-        expect.objectContaining({
-          formDescription: BoardAddNewColumn.i18n.assigneeListDescription,
-          searchLabel: BoardAddNewColumn.i18n.selectAssignee,
-          searchPlaceholder: BoardAddNewColumn.i18n.searchAssignees,
-        }),
-      );
+      expect(findForm().props()).toMatchObject({
+        formDescription: BoardAddNewColumn.i18n.assigneeListDescription,
+        searchLabel: BoardAddNewColumn.i18n.selectAssignee,
+        searchPlaceholder: BoardAddNewColumn.i18n.searchAssignees,
+      });
     });
 
     it('shows list of assignees', () => {
@@ -188,13 +186,11 @@ describe('BoardAddNewColumn', () => {
 
       const [firstUser] = mockAssignees;
 
-      expect(userList.length).toEqual(mockAssignees.length);
-      expect(userList.at(0).props()).toEqual(
-        expect.objectContaining({
-          label: firstUser.name,
-          subLabel: firstUser.username,
-        }),
-      );
+      expect(userList).toHaveLength(mockAssignees.length);
+      expect(userList.at(0).props()).toMatchObject({
+        label: firstUser.name,
+        subLabel: firstUser.username,
+      });
     });
   });
 });

@@ -6,7 +6,7 @@ export default {
   ...gettersCE,
 
   isSwimlanesOn: (state) => {
-    return Boolean(gon?.features?.swimlanes && state.isShowingEpicsSwimlanes);
+    return Boolean(gon?.licensed_features?.swimlanes && state.isShowingEpicsSwimlanes);
   },
 
   getListByTypeId: (state) => ({ assigneeId, labelId, milestoneId }) => {

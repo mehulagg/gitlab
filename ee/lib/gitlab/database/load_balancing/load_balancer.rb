@@ -18,7 +18,7 @@ module Gitlab
         # hosts - The hostnames/addresses of the additional databases.
         def initialize(hosts = [])
           @host_list = HostList.new(hosts.map { |addr| Host.new(addr, self) })
-          @connection_db_roles = {}
+          @connection_db_roles = {}.compare_by_identity
         end
 
         # Yields a connection that can be used for reads.
@@ -34,11 +34,11 @@ module Gitlab
 
             begin
               connection = host.connection
-              @connection_db_roles[connection.object_id] = ROLE_REPLICA
+              @connection_db_roles[connection] = ROLE_REPLICA
 
               return yield connection
             rescue => error
-              @connection_db_roles.delete(connection.object_id) if connection.present?
+              @connection_db_roles.delete(connection) if connection.present?
 
               if serialization_failure?(error)
                 # This error can occur when a query conflicts. See
@@ -83,7 +83,7 @@ module Gitlab
 
           read_write(&block)
         ensure
-          @connection_db_roles.delete(connection.object_id) if connection.present?
+          @connection_db_roles.delete(connection) if connection.present?
         end
 
         # Yields a connection that can be used for both reads and writes.
@@ -94,19 +94,19 @@ module Gitlab
           # a few times.
           retry_with_backoff do
             connection = ActiveRecord::Base.retrieve_connection
-            @connection_db_roles[connection.object_id] = ROLE_PRIMARY
+            @connection_db_roles[connection] = ROLE_PRIMARY
 
             yield connection
           end
         ensure
-          @connection_db_roles.delete(connection.object_id) if connection.present?
+          @connection_db_roles.delete(connection) if connection.present?
         end
 
         # Recognize the role (primary/replica) of the database this connection
         # is connecting to. If the connection is not issued by this load
         # balancer, return nil
         def db_role_for_connection(connection)
-          @connection_db_roles[connection.object_id]
+          @connection_db_roles[connection]
         end
 
         # Returns a host to use for queries.

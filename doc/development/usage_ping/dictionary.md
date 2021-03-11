@@ -2818,7 +2818,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ldap_group_links`
 
-Number of groups that are synced via LDAP group sync `https://docs.gitlab.com/ee/user/group/index.html#manage-group-memberships-via-ldap-starter-only`
+Number of groups that are synced via LDAP group sync `https://docs.gitlab.com/ee/user/group/index.html#manage-group-memberships-via-ldap`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174822_ldap_group_links.yml)
 
@@ -2830,7 +2830,7 @@ Tiers: `premium`, `ultimate`
 
 ### `counts.ldap_keys`
 
-Number of keys synced as part of LDAP `https://docs.gitlab.com/ee/administration/auth/ldap/#ldap-sync-configuration-settings-starter-only`
+Number of keys synced as part of LDAP `https://docs.gitlab.com/ee/administration/auth/ldap/#ldap-sync-configuration-settings`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174824_ldap_keys.yml)
 
@@ -9524,6 +9524,222 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_issue_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on a confidential issue by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152233_i_ecosystem_slack_service_confidential_issue_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_issue_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on a confidential issue by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104814_i_ecosystem_slack_service_confidential_issue_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_note_notification_monthly`
+
+Calculated unique users to trigger a Slack message by creating a confidential note by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152144_i_ecosystem_slack_service_confidential_note_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_note_notification_weekly`
+
+Calculated unique users to trigger a Slack message by creating a confidential note by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104556_i_ecosystem_slack_service_confidential_note_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_deployment_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing a deployment by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150912_i_ecosystem_slack_service_deployment_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_deployment_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing a deployment by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103755_i_ecosystem_slack_service_deployment_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_issue_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on an issue by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150507_i_ecosystem_slack_service_issue_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_issue_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on an issue by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103002_i_ecosystem_slack_service_issue_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_merge_request_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on a merge request by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151831_i_ecosystem_slack_service_merge_request_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_merge_request_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on a merge request by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104007_i_ecosystem_slack_service_merge_request_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_note_notification_monthly`
+
+Calculated unique users to trigger a Slack message by creating a note by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151946_i_ecosystem_slack_service_note_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_note_notification_weekly`
+
+Calculated unique users to trigger a Slack message by creating a note by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104047_i_ecosystem_slack_service_note_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_push_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing a Git push by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150654_i_ecosystem_slack_service_push_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_push_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing a Git push by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103629_i_ecosystem_slack_service_push_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_tag_push_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing a tag push by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152049_i_ecosystem_slack_service_tag_push_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_tag_push_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing a tag push by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104144_i_ecosystem_slack_service_tag_push_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_wiki_page_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on a wiki page by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151609_i_ecosystem_slack_service_wiki_page_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_wiki_page_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on a wiki page by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103907_i_ecosystem_slack_service_wiki_page_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.ide_edit.g_edit_by_sfe_monthly`
 
 Missing description
@@ -14158,7 +14374,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.ldap_admin_sync_enabled`
 
-Has the instance configured LDAP Admin Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync-starter-only`?
+Has the instance configured LDAP Admin Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync`?
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180811_ldap_admin_sync_enabled.yml)
 
@@ -14170,7 +14386,7 @@ Tiers:
 
 ### `usage_activity_by_stage.manage.ldap_group_sync_enabled`
 
-Has the instance configured LDAP Group Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync-starter-only`?
+Has the instance configured LDAP Group Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync`?
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180809_ldap_group_sync_enabled.yml)
 
@@ -14194,7 +14410,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.ldap_servers`
 
-Number of LDAP servers configured for the instance `https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers-starter-only`
+Number of LDAP servers configured for the instance `https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180807_ldap_servers.yml)
 

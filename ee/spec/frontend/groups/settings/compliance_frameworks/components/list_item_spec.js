@@ -50,11 +50,6 @@ describe('ListItem', () => {
     expect(button.attributes('aria-label')).toBe(ariaLabel);
   };
 
-  const disablesTheButton = (button) => {
-    expect(button.props('disabled')).toBe(true);
-    expect(button.props('loading')).toBe(true);
-  };
-
   it('displays the description defined by the framework', () => {
     createComponent();
 
@@ -115,11 +110,17 @@ describe('ListItem', () => {
     });
 
     it('disables the delete button and shows loading', () => {
-      disablesTheButton(findDeleteButton());
+      const button = findDeleteButton();
+
+      expect(button.props('disabled')).toBe(true);
+      expect(button.props('loading')).toBe(true);
     });
 
-    it('disables the edit button and shows loading', () => {
-      disablesTheButton(findEditButton());
+    it('disables the edit button and does not show loading', () => {
+      const button = findEditButton();
+
+      expect(button.props('disabled')).toBe(true);
+      expect(button.props('loading')).toBe(false);
     });
   });
 });

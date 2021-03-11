@@ -44,7 +44,7 @@ import listsEpicsQuery from '../graphql/lists_epics.query.graphql';
 import projectBoardAssigneesQuery from '../graphql/project_board_assignees.query.graphql';
 import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
-import updateBoardEpicUserPreferencesMutation from '../graphql/updateBoardEpicUserPreferences.mutation.graphql';
+import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
 
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';

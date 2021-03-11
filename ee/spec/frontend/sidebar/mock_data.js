@@ -7,13 +7,6 @@ export const mockIssue = {
   groupPath: mockGroupPath,
 };
 
-// This mock issue has a different format b/c
-// it is used in board_sidebar_iteration_select_spec.js (swimlane sidebar)
-export const mockIssue2 = {
-  referencePath: `${mockProjectPath}#1`,
-  iid: '1',
-};
-
 export const mockIssueId = 'gid://gitlab/Issue/1';
 
 export const mockIteration1 = {
@@ -32,9 +25,9 @@ export const mockIteration2 = {
   state: 'opened',
 };
 
-export const mockIterationsResponse = {
+export const mockGroupIterationsResponse = {
   data: {
-    group: {
+    workspace: {
       iterations: {
         nodes: [mockIteration1, mockIteration2],
       },
@@ -44,9 +37,9 @@ export const mockIterationsResponse = {
   },
 };
 
-export const emptyIterationsResponse = {
+export const emptyGroupIterationsResponse = {
   data: {
-    group: {
+    workspace: {
       iterations: {
         nodes: [],
       },
@@ -58,8 +51,8 @@ export const emptyIterationsResponse = {
 
 export const noCurrentIterationResponse = {
   data: {
-    project: {
-      issue: { id: mockIssueId, iteration: null, __typename: 'Issue' },
+    workspace: {
+      issuable: { id: mockIssueId, iteration: null, __typename: 'Issue' },
       __typename: 'Project',
     },
   },
@@ -67,9 +60,9 @@ export const noCurrentIterationResponse = {
 
 export const mockMutationResponse = {
   data: {
-    issueSetIteration: {
+    issuableSetIteration: {
       errors: [],
-      issue: {
+      issuable: {
         id: mockIssueId,
         iteration: {
           id: 'gid://gitlab/Iteration/2',

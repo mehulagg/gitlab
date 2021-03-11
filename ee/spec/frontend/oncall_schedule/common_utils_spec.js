@@ -3,7 +3,7 @@ import {
   getFormattedTimezone,
   getParticipantsForSave,
 } from 'ee/oncall_schedules/utils/common_utils';
-import mockTimezones from './mocks/mockTimezones.json';
+import mockTimezones from './mocks/mock_timezones.json';
 
 describe('getFormattedTimezone', () => {
   it('formats the timezone', () => {

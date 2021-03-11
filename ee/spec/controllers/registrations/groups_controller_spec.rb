@@ -142,10 +142,8 @@ RSpec.describe Registrations::GroupsController do
                 expect(service).to receive(:execute).with(apply_trial_params).and_return({ success: true })
               end
               expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, namespace_id: group.id)
-              expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, namespace_id: group.id)
               expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues, namespace_id: group.id)
               expect(controller).to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
-              expect(controller).to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)
               expect(controller).to receive(:record_experiment_conversion_event).with(:trial_onboarding_issues)
             end
 

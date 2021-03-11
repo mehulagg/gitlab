@@ -1084,7 +1084,6 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { public_send(role) if role }
 
         before do
-          stub_feature_flags(feature => true)
           stub_licensed_features(feature => true)
           enable_admin_mode!(current_user) if admin_mode
         end
@@ -1094,14 +1093,6 @@ RSpec.describe ProjectPolicy do
         context 'when feature is not available' do
           before do
             stub_licensed_features(feature => false)
-          end
-
-          it { is_expected.to be_disallowed(policy) }
-        end
-
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(feature => false)
           end
 
           it { is_expected.to be_disallowed(policy) }

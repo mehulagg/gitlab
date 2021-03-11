@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.ldap_servers
-description: Number of LDAP servers configured for the instance `https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers-starter-only`
+description: Number of LDAP servers configured for the instance `https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers`
 product_section: dev
 product_stage:
 product_group: group::manage

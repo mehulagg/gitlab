@@ -1,9 +1,12 @@
 <script>
 import { labelsFilterParam } from 'ee/integrations/jira/issues_show/constants';
 
+import { __ } from '~/locale';
+
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import Assignee from './assignee.vue';
 import IssueDueDate from './issue_due_date.vue';
+import IssueField from './issue_field.vue';
 import IssueReference from './issue_reference.vue';
 
 export default {
@@ -11,6 +14,7 @@ export default {
   components: {
     Assignee,
     IssueDueDate,
+    IssueField,
     IssueReference,
     LabelsSelect,
   },
@@ -39,6 +43,9 @@ export default {
     },
   },
   labelsFilterParam,
+  i18n: {
+    statusTitle: __('Status'),
+  },
 };
 </script>
 
@@ -47,6 +54,7 @@ export default {
     <assignee class="block" :assignee="assignee" />
 
     <issue-due-date :due-date="issue.dueDate" />
+    <issue-field icon="progress" :title="$options.i18n.statusTitle" :value="issue.status" />
 
     <labels-select
       :selected-labels="issue.labels"

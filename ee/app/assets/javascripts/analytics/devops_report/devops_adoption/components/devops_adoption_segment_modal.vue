@@ -144,7 +144,12 @@ export default {
       {{ displayError }}
     </gl-alert>
     <gl-form-group class="gl-mb-3" data-testid="filter">
-      <gl-icon name="search" :size="18" class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3" />
+      <gl-icon
+        name="search"
+        :size="18"
+        use-deprecated-sizes
+        class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3"
+      />
       <gl-form-input
         v-model="filter"
         class="gl-pl-7!"

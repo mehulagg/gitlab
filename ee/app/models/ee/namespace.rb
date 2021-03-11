@@ -143,9 +143,6 @@ module EE
     # being licensed.
     override :feature_available?
     def feature_available?(feature)
-      # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
-
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
           h[f] = load_feature_available(f)

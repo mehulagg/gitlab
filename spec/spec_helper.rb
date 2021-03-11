@@ -246,6 +246,12 @@ RSpec.configure do |config|
 
       stub_feature_flags(unified_diff_components: false)
 
+      # Disable this feature flag as we iterate and
+      # refactor filtered search to use gitlab ui
+      # components to meet feature parody. More details found
+      # https://gitlab.com/groups/gitlab-org/-/epics/5501
+      stub_feature_flags(boards_filtered_search: false)
+
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
@@ -304,10 +310,10 @@ RSpec.configure do |config|
     RequestStore.clear!
   end
 
-  config.around(:example, :context_aware) do |example|
+  config.around do |example|
     # Wrap each example in it's own context to make sure the contexts don't
     # leak
-    Gitlab::ApplicationContext.with_raw_context { example.run }
+    Labkit::Context.with_context { example.run }
   end
 
   config.around do |example|

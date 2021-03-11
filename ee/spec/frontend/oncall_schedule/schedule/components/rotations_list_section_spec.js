@@ -8,6 +8,7 @@ import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import { useFakeDate } from 'helpers/fake_date';
 import { scheduleIid } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
+import mockTimezones from '../../mocks/mock_timezones.json';
 
 describe('RotationsListSectionComponent', () => {
   let wrapper;
@@ -28,6 +29,7 @@ describe('RotationsListSectionComponent', () => {
       },
       provide: {
         projectPath,
+        selectedTimezone: mockTimezones[0],
       },
       stubs: {
         GlCard,

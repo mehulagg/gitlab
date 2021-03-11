@@ -141,16 +141,19 @@ export const rawIssue = {
   },
 };
 
+export const mockIssueGroupPath = 'gitlab-org';
+export const mockIssueProjectPath = `${mockIssueGroupPath}/gitlab-test`;
+
 export const mockIssue = {
   id: '436',
   iid: '27',
   title: 'Issue 1',
-  referencePath: '#27',
+  referencePath: `${mockIssueProjectPath}#27`,
   dueDate: null,
   timeEstimate: 0,
   weight: null,
   confidential: false,
-  path: '/gitlab-org/gitlab-test/-/issues/27',
+  path: `/${mockIssueProjectPath}/-/issues/27`,
   assignees: mockAssignees,
   labels,
   epic: {

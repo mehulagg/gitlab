@@ -226,7 +226,7 @@ describe('SharedForm', () => {
   });
 
   describe('On pipeline configuration path input', () => {
-    it('updates the pipelineConfigurationFullPath value', async () => {
+    it('updates the pipelineConfigurationFullPath value and validates the path', async () => {
       jest.spyOn(Utils, 'fetchPipelineConfigurationFileExists').mockResolvedValue(true);
 
       wrapper = createComponent();
@@ -236,6 +236,12 @@ describe('SharedForm', () => {
       expect(wrapper.emitted('update:pipelineConfigurationFullPath')[0][0]).toBe(
         'foo.yaml@bar/baz',
       );
+      /* TODO: Test that debounce is called. Right now this isn't possible
+       * because the lodash debounce function is mocked. We need to update the
+       * mock to enable us to assert that a method is debounced.
+       * https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56013#note_524874122
+       */
+      expect(Utils.fetchPipelineConfigurationFileExists).toHaveBeenCalledWith('foo.yaml@bar/baz');
     });
   });
 });
