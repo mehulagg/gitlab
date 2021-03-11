@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-msgid " %{project_name}#%{issuable_iid} &middot; opened %{issuable_created} by %{author} &middot; updated %{issuable_updated}"
+msgid " %{project_name}#%{issuable_iid} &middot; created %{issuable_created} by %{author} &middot; updated %{issuable_updated}"
 msgstr ""
 
 msgid " %{start} to %{end}"
@@ -542,7 +542,7 @@ msgstr ""
 msgid "%{group_name} uses group managed accounts. You need to create a new GitLab account which will be managed by %{group_name}."
 msgstr ""
 
-msgid "%{group_name}&%{epic_iid} &middot; opened %{epic_created} by %{author}"
+msgid "%{group_name}&%{epic_iid} &middot; created %{epic_created} by %{author}"
 msgstr ""
 
 msgid "%{hook_type} was deleted"
@@ -8961,6 +8961,9 @@ msgstr ""
 msgid "Created"
 msgstr ""
 
+msgid "Created %{epicTimeagoDate}"
+msgstr ""
+
 msgid "Created %{timestamp}"
 msgstr ""
 
@@ -13170,10 +13173,10 @@ msgstr ""
 msgid "Filter by %{issuable_type} that are currently closed."
 msgstr ""
 
-msgid "Filter by %{issuable_type} that are currently opened."
+msgid "Filter by %{issuable_type} that are currently open."
 msgstr ""
 
-msgid "Filter by %{page_context_word} that are currently opened."
+msgid "Filter by %{page_context_word} that are currently open."
 msgstr ""
 
 msgid "Filter by Git revision"
@@ -13206,7 +13209,7 @@ msgstr ""
 msgid "Filter by test cases that are currently archived."
 msgstr ""
 
-msgid "Filter by test cases that are currently opened."
+msgid "Filter by test cases that are currently open."
 msgstr ""
 
 msgid "Filter by two-factor authentication"
@@ -21449,9 +21452,6 @@ msgid "Open: %{open}"
 msgstr ""
 
 msgid "Opened"
-msgstr ""
-
-msgid "Opened %{epicTimeagoDate}"
 msgstr ""
 
 msgid "Opened MRs"
