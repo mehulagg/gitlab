@@ -41,7 +41,8 @@ module Gitlab
           @paths ||= [Rails.root.join('config', 'metrics', '**', '*.yml')]
         end
 
-        def definitions
+        def definitions(skip_validation: false)
+          @@skip_validation = skip_validation
           @definitions ||= load_all!
         end
 
@@ -87,7 +88,7 @@ module Gitlab
       end
 
       def skip_validation?
-        !!attributes[:skip_validation]
+        !!attributes[:skip_validation] || @@skip_validation
       end
     end
   end
