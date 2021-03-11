@@ -61,7 +61,7 @@ GitLab Administrators can also configure a new default branch name at the
 > - It's enabled on GitLab.com.
 > - It cannot be enabled or disabled per-project.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-custom-initial-branch-name). **(FREE SELF)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-custom-initial-branch-name).
 
 GitLab [administrators](../../../permissions.md) of self-managed instances can
 customize the initial branch for projects hosted on that instance. Individual
@@ -131,7 +131,7 @@ renames a Git repository's (`example`) default branch from `old` to `new`.
    git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/new
    ```
 
-1. Sign in to the GitLab UI as an [administrator](../../../permissions.md) and follow
+1. Sign in to GitLab as an [administrator](../../../permissions.md) and follow
    the instructions to
    [change the default branch for this project](#change-the-default-branch-name-for-a-project).
    Select `new` as your new default branch.
