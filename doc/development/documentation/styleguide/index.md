@@ -1612,7 +1612,7 @@ the section. The version information must:
 
 - Be surrounded by blank lines.
 - Start with `>`. If there are multiple bullets, each line must start with `> -`.
-- The string must include these words in this order (case does not matter):
+- The string must include these words in this order (capitalization doesn't matter):
   - `introduced`, `deprecated`, `moved`
   - `in` or `to`
   - `GitLab`
