@@ -105,6 +105,7 @@ The coverage/scan time trade-off can be managed by the user with the following m
 ## Example Application
 
 To assist users we have created an [example application](https://gitlab.com/gitlab-org/security-products/demos/browserker-dast/dvwa) to scan the purposely vulnerable application DVWA.
+
 ## AJAX Crawler
 
 The AJAX Crawler is not supported by Browserker.
