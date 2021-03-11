@@ -1,4 +1,4 @@
 ---
 title: Sanitize issue description in search result
 author:
-type: security
+type: fixed
