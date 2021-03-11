@@ -45,8 +45,7 @@ export default {
       <div class="gl-display-flex ml-lg-auto p-2">
         <slot name="buttons"></slot>
         <div class="pl-md-6">
-          <strong>{{ s__('SecurityReports|Hide dismissed') }}</strong>
-          <gl-toggle v-model="hideDismissed" class="gl-mt-2 js-toggle" />
+          <gl-toggle v-model="hideDismissed" :label="s__('SecurityReports|Hide dismissed')" />
         </div>
       </div>
     </div>

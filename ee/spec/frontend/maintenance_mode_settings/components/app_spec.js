@@ -77,6 +77,12 @@ describe('MaintenanceModeSettingsApp', () => {
   });
 
   describe('GlToggle', () => {
+    it('has label', () => {
+      createComponent();
+
+      expect(findGlToggle().props('label')).toBe('Enable maintenance mode');
+    });
+
     describe('onChange', () => {
       beforeEach(() => {
         createComponent();

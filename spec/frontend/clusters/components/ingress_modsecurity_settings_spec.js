@@ -59,6 +59,10 @@ describe('IngressModsecuritySettings', () => {
         });
       });
 
+      it('renders toggle with label', () => {
+        expect(findModSecurityToggle().props('label')).toBe('ModSecurity enabled');
+      });
+
       it('renders save and cancel buttons', () => {
         expect(findSaveButton().exists()).toBe(true);
         expect(findCancelButton().exists()).toBe(true);

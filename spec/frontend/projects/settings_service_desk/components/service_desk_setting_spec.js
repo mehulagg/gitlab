@@ -40,7 +40,7 @@ describe('ServiceDeskSetting', () => {
         });
 
         it('should see activation checkbox', () => {
-          expect(findToggle().exists()).toBe(true);
+          expect(findToggle().props('label')).toBe('Activate Service Desk');
         });
 
         it('should see main panel with the email info', () => {

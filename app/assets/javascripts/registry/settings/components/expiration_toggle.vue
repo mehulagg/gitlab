@@ -39,7 +39,13 @@ export default {
 <template>
   <gl-form-group id="expiration-policy-toggle-group" label-for="expiration-policy-toggle">
     <div class="gl-display-flex">
-      <gl-toggle id="expiration-policy-toggle" v-model="enabled" :disabled="disabled" />
+      <gl-toggle
+        id="expiration-policy-toggle"
+        v-model="enabled"
+        :label="s__('ContainerRegistry|Enable expiration policy')"
+        label-position="hidden"
+        :disabled="disabled"
+      />
       <span class="gl-ml-5 gl-line-height-24" data-testid="description">
         <gl-sprintf :message="toggleText">
           <template #strong="{ content }">

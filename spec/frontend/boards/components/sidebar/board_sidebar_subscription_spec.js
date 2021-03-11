@@ -45,6 +45,12 @@ describe('~/boards/components/sidebar/board_sidebar_subscription_spec.vue', () =
       expect(findNotificationHeader().text()).toBe('Notifications');
     });
 
+    it('renders toggle with label', () => {
+      createComponent();
+
+      expect(findToggle().props('label')).toBe('Notifications');
+    });
+
     it('renders toggle as "off" when currently not subscribed', () => {
       createComponent();
 

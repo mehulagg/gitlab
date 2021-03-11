@@ -111,12 +111,9 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
     <div
       class="col-md-auto"
     >
-      <gl-form-group-stub
-        label="Policy status"
-        label-for="policyStatus"
-      >
+      <gl-form-group-stub>
         <gl-toggle-stub
-          id="policyStatus"
+          label="Policy status"
           labelposition="top"
         />
       </gl-form-group-stub>

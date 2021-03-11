@@ -138,6 +138,8 @@ export default {
               v-if="featureFlag.update_path"
               :value="featureFlag.active"
               :disabled="statusToggleDisabled(featureFlag)"
+              :label="__('Feature flag status')"
+              label-position="hidden"
               data-testid="feature-flag-status-toggle"
               data-track-event="click_button"
               data-track-label="feature_flag_toggle"

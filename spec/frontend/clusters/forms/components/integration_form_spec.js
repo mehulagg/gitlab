@@ -45,8 +45,12 @@ describe('ClusterIntegrationForm', () => {
     beforeEach(() => createWrapper());
 
     it('enables toggle if editable is true', () => {
-      expect(findGlToggle().props('disabled')).toBe(false);
+      expect(findGlToggle().props()).toMatchObject({
+        disabled: false,
+        label: "Enable or disable GitLab's connection to your Kubernetes cluster.",
+      });
     });
+
     it('sets the envScope to default', () => {
       expect(wrapper.find('[id="cluster_environment_scope"]').attributes('value')).toBe('*');
     });

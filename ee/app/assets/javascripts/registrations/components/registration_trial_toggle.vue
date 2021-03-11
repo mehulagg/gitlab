@@ -30,5 +30,12 @@ export default {
 };
 </script>
 <template>
-  <gl-toggle v-model="trial" name="trial" data-testid="trial" @change="toggleTrial" />
+  <gl-toggle
+    v-model="trial"
+    name="trial"
+    :label="s__('Trial|GitLab Ultimate trial (optional)')"
+    label-position="hidden"
+    data-testid="trial"
+    @change="toggleTrial"
+  />
 </template>

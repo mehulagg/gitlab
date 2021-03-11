@@ -202,7 +202,12 @@ export default {
             </strong>
           </p>
           <div class="form-check form-check-inline mt-3">
-            <gl-toggle v-model="modSecurityEnabled" :disabled="saveButtonDisabled" />
+            <gl-toggle
+              v-model="modSecurityEnabled"
+              :disabled="saveButtonDisabled"
+              :label="s__('ClusterIntegration|ModSecurity enabled')"
+              label-position="hidden"
+            />
           </div>
           <div
             v-if="ingress.modsecurity_enabled"

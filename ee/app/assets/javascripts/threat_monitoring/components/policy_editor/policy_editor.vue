@@ -253,8 +253,8 @@ export default {
     </div>
     <div class="row">
       <div class="col-md-auto">
-        <gl-form-group :label="s__('NetworkPolicies|Policy status')" label-for="policyStatus">
-          <gl-toggle id="policyStatus" v-model="policy.isEnabled" />
+        <gl-form-group>
+          <gl-toggle v-model="policy.isEnabled" :label="s__('NetworkPolicies|Policy status')" />
         </gl-form-group>
       </div>
     </div>
