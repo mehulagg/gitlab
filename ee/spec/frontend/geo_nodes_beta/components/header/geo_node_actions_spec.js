@@ -1,7 +1,8 @@
-import { GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GeoNodeActions from 'ee/geo_nodes_beta/components/header/geo_node_actions.vue';
+import GeoNodeActionsDesktop from 'ee/geo_nodes_beta/components/header/geo_node_actions_desktop.vue';
+import GeoNodeActionsMobile from 'ee/geo_nodes_beta/components/header/geo_node_actions_mobile.vue';
 import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
 
 const localVue = createLocalVue();
@@ -38,77 +39,25 @@ describe('GeoNodeActions', () => {
     wrapper.destroy();
   });
 
-  const findGeoMobileActionsDropdown = () => wrapper.find(GlDropdown);
-  const findGeoMobileActionsDropdownItems = () => wrapper.findAll(GlDropdownItem);
-  const findGeoMobileActionsRemoveDropdownItem = () =>
-    wrapper.find('[data-testid="geo-mobile-remove-action"]');
-  const findGeoDesktopActions = () => wrapper.find('[data-testid="geo-desktop-actions"]');
-  const findGeoDesktopActionsButtons = () => wrapper.findAll(GlButton);
-  const findGeoDesktopActionsRemoveButton = () =>
-    wrapper.find('[data-testid="geo-desktop-remove-action"]');
+  const findGeoMobileActions = () => wrapper.find(GeoNodeActionsMobile);
+  const findGeoDesktopActions = () => wrapper.find(GeoNodeActionsDesktop);
 
   describe('template', () => {
-    describe('always', () => {
-      beforeEach(() => {
-        createComponent();
-      });
-
-      describe('for Mobile Actions', () => {
-        it('renders Dropdown with correct visibility class', () => {
-          expect(findGeoMobileActionsDropdown().exists()).toBe(true);
-          expect(findGeoMobileActionsDropdown().classes()).toStrictEqual(['gl-lg-display-none']);
-        });
-
-        it('renders an Edit and Remove dropdown item', () => {
-          expect(findGeoMobileActionsDropdownItems().wrappers.map((w) => w.text())).toStrictEqual([
-            'Edit',
-            'Remove',
-          ]);
-        });
-      });
-
-      describe('for Desktop Actions', () => {
-        it('renders container with correct visibility class', () => {
-          expect(findGeoDesktopActions().exists()).toBe(true);
-          expect(findGeoDesktopActions().classes()).toStrictEqual([
-            'gl-display-none',
-            'gl-lg-display-flex',
-          ]);
-        });
-
-        it('renders an Edit and Remove button', () => {
-          expect(findGeoDesktopActionsButtons().wrappers.map((w) => w.text())).toStrictEqual([
-            'Edit',
-            'Remove',
-          ]);
-        });
-      });
+    beforeEach(() => {
+      createComponent();
     });
 
-    describe.each`
-      primary  | disabled     | dropdownClass
-      ${true}  | ${'true'}    | ${'gl-text-gray-400'}
-      ${false} | ${undefined} | ${'gl-text-red-500'}
-    `(`conditionally`, ({ primary, disabled, dropdownClass }) => {
-      beforeEach(() => {
-        createComponent(null, { primary });
-      });
+    it('renders mobile actions with correct visibility class always', () => {
+      expect(findGeoMobileActions().exists()).toBe(true);
+      expect(findGeoMobileActions().classes()).toStrictEqual(['gl-lg-display-none']);
+    });
 
-      describe(`when primary is ${primary}`, () => {
-        it('disables the Mobile Remove dropdown item', () => {
-          expect(findGeoMobileActionsRemoveDropdownItem().attributes('disabled')).toBe(disabled);
-        });
-
-        it('adds disabled class to the Mobile Remove dropdown item', () => {
-          expect(findGeoMobileActionsRemoveDropdownItem().find('span').classes(dropdownClass)).toBe(
-            true,
-          );
-        });
-
-        it('disables the Desktop Remove button', () => {
-          expect(findGeoDesktopActionsRemoveButton().attributes('disabled')).toBe(disabled);
-        });
-      });
+    it('renders desktop actions with correct visibility class always', () => {
+      expect(findGeoDesktopActions().exists()).toBe(true);
+      expect(findGeoDesktopActions().classes()).toStrictEqual([
+        'gl-display-none',
+        'gl-lg-display-flex',
+      ]);
     });
   });
 });

@@ -4,11 +4,13 @@ export const GEO_INFO_URL = helpPagePath('administration/geo/index.md');
 
 export const GEO_FEATURE_URL = 'https://about.gitlab.com/features/gitlab-geo/';
 
-export const HELP_NODE_HEALTH_URL =
-  'https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html#check-the-health-of-the-secondary-node';
+export const HELP_NODE_HEALTH_URL = helpPagePath(
+  'administration/geo/replication/troubleshooting.html#check-the-health-of-the-secondary-node',
+);
 
-export const GEO_TROUBLESHOOTING_URL =
-  'https://docs.gitlab.com/ee/administration/geo/replication/troubleshooting.html';
+export const GEO_TROUBLESHOOTING_URL = helpPagePath(
+  'administration/geo/replication/troubleshooting.html',
+);
 
 export const HEALTH_STATUS_UI = {
   healthy: {
