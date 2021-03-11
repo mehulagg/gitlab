@@ -15,7 +15,7 @@ module BulkImports
       end
 
       def next_page
-        @page_info['end_cursor']
+        @page_info['end_cursor'] || @page_info['next_page']
       end
 
       def each(&block)
