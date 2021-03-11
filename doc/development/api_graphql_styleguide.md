@@ -1137,9 +1137,10 @@ When using resolvers, they can and should serve as the SSoT for field metadata.
 All field options (apart from the field name) can be declared on the resolver.
 These include:
 
-- `type` (this is particularly important, and is planned to be mandatory)
+- `type` (this is required - all resolvers must include a type annotation)
 - `extras`
 - `description`
+- Gitaly annotations (with `calls_gitaly!`)
 
 Example:
 
@@ -1149,6 +1150,7 @@ module Resolvers
     type Types::MyType, null: true
     extras [:lookahead]
     description 'Retrieve a single MyType'
+    calls_gitaly!
   end
 end
 ```
