@@ -62,10 +62,6 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
       Namespace.update_all(traversal_ids: [])
     end
 
-    before do
-      Namespace.update_all(traversal_ids: [])
-    end
-
     it { is_expected.to match_array Namespace.all }
 
     context 'when lock is true' do

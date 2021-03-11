@@ -192,7 +192,6 @@ RSpec.describe Gitlab::ObjectHierarchy do
     it_behaves_like 'Gitlab::ObjectHierarchy test cases'
 
     it 'calls DISTINCT' do
-      expect(parent.self_and_descendants.to_sql).to include("DISTINCT")
       expect(child2.self_and_ancestors.to_sql).to include("DISTINCT")
     end
   end
@@ -205,7 +204,6 @@ RSpec.describe Gitlab::ObjectHierarchy do
     it_behaves_like 'Gitlab::ObjectHierarchy test cases'
 
     it 'does not call DISTINCT' do
-      expect(parent.self_and_descendants.to_sql).not_to include("DISTINCT")
       expect(child2.self_and_ancestors.to_sql).not_to include("DISTINCT")
     end
   end
