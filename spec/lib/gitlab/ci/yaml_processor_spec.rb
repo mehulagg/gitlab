@@ -44,7 +44,7 @@ module Gitlab
               when: "on_success",
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -77,7 +77,7 @@ module Gitlab
               when: 'on_success',
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -117,7 +117,7 @@ module Gitlab
               when: "on_success",
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true
+              variables_inheritance: true
             })
           end
         end
@@ -165,7 +165,7 @@ module Gitlab
               when: "on_success",
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -356,7 +356,7 @@ module Gitlab
                   when: "on_success",
                   yaml_variables: [],
                   job_variables: [],
-                  variable_inheritance: true,
+                  variables_inheritance: true,
                   scheduling_type: :stage,
                   options: { script: ["rspec"] },
                   only: { refs: ["branches"] } }] },
@@ -370,7 +370,7 @@ module Gitlab
                   when: "on_success",
                   yaml_variables: [],
                   job_variables: [],
-                  variable_inheritance: true,
+                  variables_inheritance: true,
                   scheduling_type: :stage,
                   options: { script: ["cap prod"] },
                   only: { refs: ["tags"] } }] },
@@ -866,7 +866,7 @@ module Gitlab
               when: "on_success",
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -901,7 +901,7 @@ module Gitlab
               when: "on_success",
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -932,7 +932,7 @@ module Gitlab
               when: "on_success",
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -961,7 +961,7 @@ module Gitlab
               when: "on_success",
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -974,7 +974,7 @@ module Gitlab
         let(:build) { subject.builds.first }
         let(:yaml_variables) { build[:yaml_variables] }
         let(:job_variables) { build[:job_variables] }
-        let(:variable_inheritance) { build[:variable_inheritance] }
+        let(:variables_inheritance) { build[:variables_inheritance] }
 
         context 'when global variables are defined' do
           let(:variables) do
@@ -995,7 +995,7 @@ module Gitlab
               { key: 'VAR2', value: 'value2', public: true }
             )
             expect(job_variables).to eq([])
-            expect(variable_inheritance).to eq(true)
+            expect(variables_inheritance).to eq(true)
           end
         end
 
@@ -1030,7 +1030,7 @@ module Gitlab
                 { key: 'VAR1', value: 'value1', public: true },
                 { key: 'VAR2', value: 'value2', public: true }
               )
-              expect(variable_inheritance).to eq(true)
+              expect(variables_inheritance).to eq(true)
             end
           end
 
@@ -1046,7 +1046,7 @@ module Gitlab
                 { key: 'VAR1', value: 'value1', public: true },
                 { key: 'VAR2', value: 'value2', public: true }
               )
-              expect(variable_inheritance).to eq(false)
+              expect(variables_inheritance).to eq(false)
             end
           end
 
@@ -1063,7 +1063,7 @@ module Gitlab
                 { key: 'VAR1', value: 'value1', public: true },
                 { key: 'VAR2', value: 'value2', public: true }
               )
-              expect(variable_inheritance).to eq(%w[VAR1 VAR4])
+              expect(variables_inheritance).to eq(%w[VAR1 VAR4])
             end
           end
         end
@@ -1090,7 +1090,7 @@ module Gitlab
                 { key: 'VAR1', value: 'value1', public: true },
                 { key: 'VAR2', value: 'value2', public: true }
               )
-              expect(variable_inheritance).to eq(true)
+              expect(variables_inheritance).to eq(true)
             end
           end
 
@@ -1117,7 +1117,7 @@ module Gitlab
                 expect(yaml_variables).to be_empty
 
                 expect(job_variables).to eq([])
-                expect(variable_inheritance).to eq(true)
+                expect(variables_inheritance).to eq(true)
               end
             end
           end
@@ -1136,7 +1136,7 @@ module Gitlab
             expect(yaml_variables).to be_empty
 
             expect(job_variables).to eq([])
-            expect(variable_inheritance).to eq(true)
+            expect(variables_inheritance).to eq(true)
           end
         end
       end
@@ -1769,7 +1769,7 @@ module Gitlab
             allow_failure: false,
             yaml_variables: [],
             job_variables: [],
-            variable_inheritance: true,
+            variables_inheritance: true,
             scheduling_type: :stage
           })
         end
@@ -2134,7 +2134,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             )
             expect(subject.builds[4]).to eq(
@@ -2151,7 +2151,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :dag
             )
           end
@@ -2180,7 +2180,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             )
             expect(subject.builds[4]).to eq(
@@ -2199,7 +2199,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :dag
             )
           end
@@ -2224,7 +2224,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :dag
             )
           end
@@ -2257,7 +2257,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :dag
             )
           end
@@ -2457,7 +2457,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end
@@ -2506,7 +2506,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
             expect(subject.second).to eq({
@@ -2521,7 +2521,7 @@ module Gitlab
               allow_failure: false,
               yaml_variables: [],
               job_variables: [],
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
           end

@@ -19,7 +19,7 @@ module Gitlab
             @needs_attributes = dig(:needs_attributes)
             @resource_group_key = attributes.delete(:resource_group_key)
             @job_variables = @seed_attributes.delete(:job_variables)
-            @variable_inheritance = @seed_attributes.delete(:variable_inheritance) { true }
+            @variables_inheritance = @seed_attributes.delete(:variables_inheritance) { true }
 
             @using_rules  = attributes.key?(:rules)
             @using_only   = attributes.key?(:only)
@@ -247,10 +247,10 @@ module Gitlab
           end
 
           def inherited_root_variables
-            case @variable_inheritance
+            case @variables_inheritance
             when true then @context.root_variables
             when false then {}
-            when Array then @context.root_variables.select { |var| @variable_inheritance.include?(var[:key]) }
+            when Array then @context.root_variables.select { |var| @variables_inheritance.include?(var[:key]) }
             end
           end
         end

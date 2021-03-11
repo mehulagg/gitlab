@@ -312,7 +312,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
                            { key: 'VAR3', value: 'var 3', public: true }],
           job_variables: [{ key: 'VAR2', value: 'var 2', public: true },
                           { key: 'VAR3', value: 'var 3', public: true }],
-          variable_inheritance: variable_inheritance }
+          variables_inheritance: variables_inheritance }
       end
 
       context 'when the pipeline has variables' do
@@ -323,8 +323,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
            { key: 'VAR4', value: 'new var pipeline 4', public: true }]
         end
 
-        context 'when variable_inheritance is true' do
-          let(:variable_inheritance) { true }
+        context 'when variables_inheritance is true' do
+          let(:variables_inheritance) { true }
 
           it 'returns calculated yaml variables' do
             expect(subject[:yaml_variables]).to match_array(
@@ -349,8 +349,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
           end
         end
 
-        context 'when variable_inheritance is false' do
-          let(:variable_inheritance) { false }
+        context 'when variables_inheritance is false' do
+          let(:variables_inheritance) { false }
 
           it 'returns job variables' do
             expect(subject[:yaml_variables]).to match_array(
@@ -360,8 +360,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
           end
         end
 
-        context 'when variable_inheritance is an array' do
-          let(:variable_inheritance) { %w(VAR1 VAR2 VAR3) }
+        context 'when variables_inheritance is an array' do
+          let(:variables_inheritance) { %w(VAR1 VAR2 VAR3) }
 
           it 'returns calculated yaml variables' do
             expect(subject[:yaml_variables]).to match_array(
@@ -374,7 +374,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       end
 
       context 'when the pipeline has not a variable' do
-        let(:variable_inheritance) { true }
+        let(:variables_inheritance) { true }
 
         it 'returns seed yaml variables' do
           expect(subject[:yaml_variables]).to match_array(
@@ -390,11 +390,11 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
           ref: 'master',
           yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true }],
           job_variables: [{ key: 'VAR1', value: 'var 1', public: true }],
-          variable_inheritance: variable_inheritance,
+          variables_inheritance: variables_inheritance,
           rules: rules }
       end
 
-      let(:variable_inheritance) { true }
+      let(:variables_inheritance) { true }
 
       context 'when the rules use job variables' do
         let(:rules) do
@@ -421,8 +421,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
                                                               { key: 'VAR2', value: 'overridden var 2', public: true })
         end
 
-        context 'when the variable_inheritance is false' do
-          let(:variable_inheritance) { false }
+        context 'when the variables_inheritance is false' do
+          let(:variables_inheritance) { false }
 
           it 'does not recalculate the variables' do
             expect(subject[:yaml_variables]).to contain_exactly({ key: 'VAR1', value: 'var 1', public: true })

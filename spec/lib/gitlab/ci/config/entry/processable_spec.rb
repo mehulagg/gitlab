@@ -384,7 +384,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             expect(entry.value).to include(
               variables: { 'A' => 'job', 'B' => 'job' },
               job_variables: { 'A' => 'job', 'B' => 'job' },
-              variable_inheritance: true
+              variables_inheritance: true
             )
           end
         end
@@ -394,12 +394,12 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             stub_feature_flags(ci_workflow_rules_variables: false)
           end
 
-          it 'does not return job_variables and variable_inheritance' do
+          it 'does not return job_variables and variables_inheritance' do
             expect(entry.value).to include(
               variables: { 'A' => 'job', 'B' => 'job' }
             )
             expect(entry.value).not_to have_key(:job_variables)
-            expect(entry.value).not_to have_key(:variable_inheritance)
+            expect(entry.value).not_to have_key(:variables_inheritance)
           end
         end
 
@@ -414,7 +414,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             expect(entry.value).to include(
               variables: { 'A' => 'job', 'B' => 'job', 'C' => 'root', 'D' => 'root' },
               job_variables: { 'A' => 'job', 'B' => 'job' },
-              variable_inheritance: true
+              variables_inheritance: true
             )
           end
 
@@ -430,7 +430,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
               expect(entry.value).to include(
                 variables: { 'A' => 'job', 'B' => 'job' },
                 job_variables: { 'A' => 'job', 'B' => 'job' },
-                variable_inheritance: false
+                variables_inheritance: false
               )
             end
           end
@@ -447,7 +447,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
               expect(entry.value).to include(
                 variables: { 'A' => 'job', 'B' => 'job', 'D' => 'root' },
                 job_variables: { 'A' => 'job', 'B' => 'job' },
-                variable_inheritance: ['D']
+                variables_inheritance: ['D']
               )
             end
           end
@@ -517,7 +517,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             only: { refs: %w[branches tags] },
             variables: {},
             job_variables: {},
-            variable_inheritance: true
+            variables_inheritance: true
           )
         end
 
@@ -526,7 +526,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             stub_feature_flags(ci_workflow_rules_variables: false)
           end
 
-          it 'does not return job_variables and variable_inheritance' do
+          it 'does not return job_variables and variables_inheritance' do
             expect(entry.value).to eq(
               name: :rspec,
               stage: 'test',

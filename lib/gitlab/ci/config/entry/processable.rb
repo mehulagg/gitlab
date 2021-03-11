@@ -126,7 +126,7 @@ module Gitlab
               rules: rules_value,
               variables: root_and_job_variables_value, # https://gitlab.com/gitlab-org/gitlab/-/issues/300581
               job_variables: job_variables,
-              variable_inheritance: variable_inheritance,
+              variables_inheritance: variables_inheritance,
               only: only_value,
               except: except_value,
               resource_group: resource_group }.compact
@@ -147,7 +147,7 @@ module Gitlab
             variables_value.to_h
           end
 
-          def variable_inheritance
+          def variables_inheritance
             return unless ::Feature.enabled?(:ci_workflow_rules_variables, default_enabled: :yaml)
 
             inherit_entry&.variables_entry&.value

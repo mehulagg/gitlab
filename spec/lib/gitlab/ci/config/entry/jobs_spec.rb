@@ -101,7 +101,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
               trigger: { project: 'my/project' },
               variables: {},
               job_variables: {},
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             },
             regular_job: {
@@ -112,7 +112,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
               stage: 'test',
               variables: {},
               job_variables: {},
-              variable_inheritance: true,
+              variables_inheritance: true,
               scheduling_type: :stage
             })
         end

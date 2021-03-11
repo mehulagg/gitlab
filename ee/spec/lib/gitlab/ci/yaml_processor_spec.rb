@@ -30,7 +30,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           allow_failure: false,
           yaml_variables: [],
           job_variables: [],
-          variable_inheritance: true,
+          variables_inheritance: true,
           scheduling_type: :stage
         )
         expect(subject.builds[1]).to eq(
@@ -45,7 +45,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           allow_failure: false,
           yaml_variables: [],
           job_variables: [],
-          variable_inheritance: true,
+          variables_inheritance: true,
           scheduling_type: :stage
         )
       end
@@ -68,7 +68,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           allow_failure: false,
           yaml_variables: [],
           job_variables: [],
-          variable_inheritance: true,
+          variables_inheritance: true,
           scheduling_type: :stage
         )
         expect(subject.builds[1]).to eq(
@@ -86,7 +86,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           allow_failure: false,
           yaml_variables: [],
           job_variables: [],
-          variable_inheritance: true,
+          variables_inheritance: true,
           scheduling_type: :stage
         )
       end
@@ -162,7 +162,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           allow_failure: false,
           yaml_variables: [],
           job_variables: [],
-          variable_inheritance: true,
+          variables_inheritance: true,
           scheduling_type: :dag
         )
       end
