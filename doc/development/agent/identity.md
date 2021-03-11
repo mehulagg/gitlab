@@ -95,7 +95,7 @@ GitLab provides the following information in its response for a given Agent acce
 
 ## Creating an agent
 
-You can create an agent by following the user documentation](../../user/clusters/agent/index.md#create-an-agent-record-in-gitlab), or via Rails console:
+You can create an agent by following the [user documentation](../../user/clusters/agent/index.md#create-an-agent-record-in-gitlab), or via Rails console:
 
 ```ruby
 project = ::Project.find_by_full_path("path-to/your-configuration-project")
