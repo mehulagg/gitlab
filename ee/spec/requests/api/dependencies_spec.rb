@@ -19,7 +19,10 @@ RSpec.describe API::Dependencies do
 
     context 'with an authorized user with proper permissions' do
       before do
-        create(:ee_ci_pipeline, :with_dependency_list_report, project: project)
+        pipeline = create(:ee_ci_pipeline, :with_dependency_list_report, project: project)
+        finding = create(:vulnerabilities_finding, :with_dependency_scanning_metadata)
+        create(:vulnerabilities_finding_pipeline, finding: finding, pipeline: pipeline)
+
         project.add_developer(user)
         request
       end
@@ -32,10 +35,10 @@ RSpec.describe API::Dependencies do
       end
 
       it 'returns vulnerabilities info' do
-        vulnerability = json_response.select { |dep| dep['name'] == 'debug' }[0]['vulnerabilities'][0]
+        vulnerability = json_response.select { |dep| dep['name'] == 'nokogiri' }[0]['vulnerabilities'][0]
 
-        expect(vulnerability['name']).to eq('Regular Expression Denial of Service in debug')
-        expect(vulnerability['severity']).to eq('unknown')
+        expect(vulnerability['name']).to eq('Vulnerabilities in libxml2 in nokogiri')
+        expect(vulnerability['severity']).to eq('high')
       end
 
       context 'with nil package_manager' do

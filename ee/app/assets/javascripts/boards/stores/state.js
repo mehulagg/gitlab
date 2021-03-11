@@ -14,4 +14,6 @@ export default () => ({
   epicsFlags: {},
   milestones: [],
   milestonesLoading: false,
+  assignees: [],
+  assigneesLoading: false,
 });

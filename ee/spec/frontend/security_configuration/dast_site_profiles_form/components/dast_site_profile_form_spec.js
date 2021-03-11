@@ -168,6 +168,11 @@ describe('DastSiteProfileForm', () => {
       expect(findExcludedUrlsInput().exists()).toBe(true);
       expect(findRequestHeadersInput().exists()).toBe(true);
     });
+
+    it('should have maxlength constraint', () => {
+      expect(findExcludedUrlsInput().attributes('maxlength')).toBe('2048');
+      expect(findRequestHeadersInput().attributes('maxlength')).toBe('2048');
+    });
   });
 
   describe.each`

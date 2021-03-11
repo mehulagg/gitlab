@@ -928,7 +928,9 @@ appear to be associated to any of the services running, because they all appear 
 WARNING:
 This feature is intended solely for internal GitLab use.
 
-To add data for aggregated metrics into Usage Ping payload you should add corresponding definition in [`aggregated_metrics`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/). Each aggregate definition includes following parts:
+To add data for aggregated metrics into Usage Ping payload you should add corresponding definition at [`lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/) for metrics available at Community Edition and at [`ee/lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/usage_data_counters/aggregated_metrics/) for Enterprise Edition ones.
+ 
+Each aggregate definition includes following parts:
 
 - `name`: Unique name under which the aggregate metric is added to the Usage Ping payload.
 - `operator`: Operator that defines how the aggregated metric data is counted. Available operators are:
@@ -945,7 +947,7 @@ To add data for aggregated metrics into Usage Ping payload you should add corres
   relay on the same data source. Additional data source requirements are described in the
   [Database sourced aggregated metrics](#database-sourced-aggregated-metrics) and
   [Redis sourced aggregated metrics](#redis-sourced-aggregated-metrics) sections.
-- `feature_flag`: Name of [development feature flag](../feature_flags/development.md#development-type)
+- `feature_flag`: Name of [development feature flag](../feature_flags/index.md#development-type)
   that is checked before metrics aggregation is performed. Corresponding feature flag
   should have `default_enabled` attribute set to `false`. The `feature_flag` attribute
   is optional and can be omitted. When `feature_flag` is missing, no feature flag is checked.

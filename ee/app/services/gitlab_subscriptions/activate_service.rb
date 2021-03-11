@@ -17,10 +17,12 @@ module GitlabSubscriptions
 
       return response unless response[:success]
 
-      if application_settings.update(cloud_license_auth_token: response[:authentication_token])
-        response
+      license = License.new(data: response[:license_key])
+
+      if license.save
+        { success: true }
       else
-        error(application_settings.errors.full_messages)
+        error(license.errors.full_messages)
       end
     rescue => e
       error(e.message)

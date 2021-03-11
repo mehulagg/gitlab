@@ -15,7 +15,7 @@ import {
   updateScheduleResponse,
   updateScheduleResponseWithErrors,
 } from './mocks/apollo_mock';
-import mockTimezones from './mocks/mockTimezones.json';
+import mockTimezones from './mocks/mock_timezones.json';
 
 describe('AddScheduleModal', () => {
   let wrapper;

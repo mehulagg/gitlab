@@ -69,6 +69,10 @@ export const savedScans = [
     dastSiteProfile: siteProfiles[0],
     dastScannerProfile: scannerProfiles[0],
     editPath: '/1/edit',
+    branch: {
+      name: 'main',
+      exists: true,
+    },
   },
   {
     id: 'gid://gitlab/DastProfile/2',
@@ -76,5 +80,9 @@ export const savedScans = [
     dastSiteProfile: siteProfiles[1],
     dastScannerProfile: scannerProfiles[1],
     editPath: '/2/edit',
+    branch: {
+      name: 'feature-branch',
+      exists: false,
+    },
   },
 ];

@@ -15,7 +15,8 @@ RSpec.describe 'User adds milestone lists', :js do
 
   let_it_be(:group_backlog_list) { create(:backlog_list, board: group_board) }
 
-  let_it_be(:issue) { create(:issue, project: project, milestone: milestone) }
+  let_it_be(:issue_with_milestone) { create(:issue, project: project, milestone: milestone) }
+  let_it_be(:issue_with_assignee) { create(:issue, project: project, assignees: [user]) }
 
   before_all do
     project.add_maintainer(user)
@@ -31,7 +32,10 @@ RSpec.describe 'User adds milestone lists', :js do
 
   with_them do
     before do
-      stub_licensed_features(board_milestone_lists: true)
+      stub_licensed_features(
+        board_milestone_lists: true,
+        board_assignee_lists: true
+      )
       sign_in(user)
 
       set_cookie('sidebar_collapsed', 'true')
@@ -51,28 +55,31 @@ RSpec.describe 'User adds milestone lists', :js do
     end
 
     it 'creates milestone column' do
-      click_button button_text
-      wait_for_all_requests
-
-      select('Milestone', from: 'List type')
-
-      add_milestone_list(milestone)
-
-      wait_for_all_requests
+      add_list('Milestone', milestone.title)
 
       expect(page).to have_selector('.board', text: milestone.title)
-      expect(find('.board:nth-child(2) .board-card')).to have_content(issue.title)
+      expect(find('.board:nth-child(2) .board-card')).to have_content(issue_with_milestone.title)
+    end
+
+    it 'creates assignee column' do
+      add_list('Assignee', user.name)
+
+      expect(page).to have_selector('.board', text: user.name)
+      expect(find('.board:nth-child(2) .board-card')).to have_content(issue_with_assignee.title)
     end
   end
 
-  def add_milestone_list(milestone)
+  def add_list(list_type, title)
+    click_button 'Create list'
+    wait_for_all_requests
+
+    select(list_type, from: 'List type')
+
     page.within('.board-add-new-list') do
-      find('label', text: milestone.title).click
+      find('label', text: title).click
       click_button 'Add'
     end
-  end
 
-  def button_text
-    'Create list'
+    wait_for_all_requests
   end
 end

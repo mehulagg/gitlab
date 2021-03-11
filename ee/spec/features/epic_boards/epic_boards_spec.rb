@@ -3,6 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe 'epic boards', :js do
+  include DragTo
+  include MobileHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
 
@@ -63,7 +66,7 @@ RSpec.describe 'epic boards', :js do
       end
     end
 
-    it 'creates new column for label containing labeled issue' do
+    it 'creates new column for label containing labeled epic' do
       click_button 'Create list'
       wait_for_all_requests
 
@@ -76,6 +79,16 @@ RSpec.describe 'epic boards', :js do
 
       expect(page).to have_selector('.board', text: label2.title)
       expect(find('.board:nth-child(3) .board-card')).to have_content(epic3.title)
+    end
+
+    it 'moves epic between lists' do
+      expect(find('.board:nth-child(1)')).to have_content(epic3.title)
+
+      drag(list_from_index: 0, list_to_index: 1)
+      wait_for_all_requests
+
+      expect(find('.board:nth-child(1)')).not_to have_content(epic3.title)
+      expect(find('.board:nth-child(2)')).to have_content(epic3.title)
     end
   end
 
@@ -112,5 +125,18 @@ RSpec.describe 'epic boards', :js do
 
   def list_header(list)
     find(".board[data-id='gid://gitlab/Boards::EpicList/#{list.id}'] .board-header")
+  end
+
+  def drag(selector: '.board-list', list_from_index: 0, from_index: 0, to_index: 0, list_to_index: 0, perform_drop: true)
+    # ensure there is enough horizontal space for four lists
+    resize_window(2000, 800)
+
+    drag_to(selector: selector,
+            scrollable: '#board-app',
+            list_from_index: list_from_index,
+            from_index: from_index,
+            to_index: to_index,
+            list_to_index: list_to_index,
+            perform_drop: perform_drop)
   end
 end

@@ -46,6 +46,7 @@ export default {
             class="ml-2 text-warning-500"
             name="warning"
             :size="18"
+            use-deprecated-sizes
             :title="
               s__(
                 'GeoNodes|You have configured Geo nodes using an insecure HTTP connection. We recommend the use of HTTPS.',

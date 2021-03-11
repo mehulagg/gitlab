@@ -61,7 +61,6 @@ RSpec.describe 'Updating an existing HTTP Integration' do
     project.add_maintainer(current_user)
 
     stub_licensed_features(multiple_alert_http_integrations: true)
-    stub_feature_flags(multiple_http_integrations_custom_mapping: project)
   end
 
   it_behaves_like 'updating an existing HTTP integration'
@@ -71,14 +70,6 @@ RSpec.describe 'Updating an existing HTTP Integration' do
   context 'with the custom mappings feature unavailable' do
     before do
       stub_licensed_features(multiple_alert_http_integrations: false)
-    end
-
-    it_behaves_like 'ignoring the custom mapping'
-  end
-
-  context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
-    before do
-      stub_feature_flags(multiple_http_integrations_custom_mapping: false)
     end
 
     it_behaves_like 'ignoring the custom mapping'

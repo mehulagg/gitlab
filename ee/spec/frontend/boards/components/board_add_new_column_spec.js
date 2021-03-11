@@ -1,18 +1,19 @@
-import { GlSearchBoxByType } from '@gitlab/ui';
+import { GlAvatarLabeled, GlSearchBoxByType, GlFormSelect } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 import BoardAddNewColumn from 'ee/boards/components/board_add_new_column.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
+import { ListType } from '~/boards/constants';
 import defaultState from '~/boards/stores/state';
-import { mockLists } from '../mock_data';
+import { mockAssignees, mockLists } from '../mock_data';
 
 const mockLabelList = mockLists[1];
 
 Vue.use(Vuex);
 
-describe('Board card layout', () => {
+describe('BoardAddNewColumn', () => {
   let wrapper;
   let shouldUseGraphQL;
 
@@ -30,6 +31,7 @@ describe('Board card layout', () => {
   const mountComponent = ({
     selectedId,
     labels = [],
+    assignees = [],
     getListByTypeId = jest.fn(),
     actions = {},
   } = {}) => {
@@ -57,6 +59,8 @@ describe('Board card layout', () => {
           state: {
             labels,
             labelsLoading: false,
+            assignees,
+            assigneesLoading: false,
           },
         }),
         provide: {
@@ -71,10 +75,12 @@ describe('Board card layout', () => {
     wrapper = null;
   });
 
+  const findForm = () => wrapper.findComponent(BoardAddNewColumnForm);
   const formTitle = () => wrapper.findByTestId('board-add-column-form-title').text();
   const findSearchInput = () => wrapper.find(GlSearchBoxByType);
   const cancelButton = () => wrapper.findByTestId('cancelAddNewColumn');
   const submitButton = () => wrapper.findByTestId('addNewColumnButton');
+  const listTypeSelect = () => wrapper.findComponent(GlFormSelect);
 
   beforeEach(() => {
     shouldUseGraphQL = true;
@@ -150,6 +156,41 @@ describe('Board card layout', () => {
 
       expect(highlightList).toHaveBeenCalledWith(expect.anything(), mockLabelList.id);
       expect(createList).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('assignee list', () => {
+    beforeEach(async () => {
+      mountComponent({
+        assignees: mockAssignees,
+        actions: {
+          fetchAssignees: jest.fn(),
+        },
+      });
+
+      listTypeSelect().vm.$emit('change', ListType.assignee);
+
+      await nextTick();
+    });
+
+    it('sets assignee placeholder text in form', async () => {
+      expect(findForm().props()).toMatchObject({
+        formDescription: BoardAddNewColumn.i18n.assigneeListDescription,
+        searchLabel: BoardAddNewColumn.i18n.selectAssignee,
+        searchPlaceholder: BoardAddNewColumn.i18n.searchAssignees,
+      });
+    });
+
+    it('shows list of assignees', () => {
+      const userList = wrapper.findAllComponents(GlAvatarLabeled);
+
+      const [firstUser] = mockAssignees;
+
+      expect(userList).toHaveLength(mockAssignees.length);
+      expect(userList.at(0).props()).toMatchObject({
+        label: firstUser.name,
+        subLabel: firstUser.username,
+      });
     });
   });
 });

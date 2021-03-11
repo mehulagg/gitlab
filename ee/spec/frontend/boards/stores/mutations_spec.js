@@ -327,6 +327,40 @@ describe('MOVE_ISSUE', () => {
   });
 });
 
+describe('MOVE_EPIC', () => {
+  it('updates boardItemsByListId, moving epic between lists', () => {
+    const listIssues = {
+      'gid://gitlab/List/1': [mockEpic.id, mockEpics[1].id],
+      'gid://gitlab/List/2': [],
+    };
+
+    const epics = {
+      1: mockEpic,
+      2: mockEpics[1],
+    };
+
+    state = {
+      ...state,
+      boardItemsByListId: listIssues,
+      boardLists: initialBoardListsState,
+      boardItems: epics,
+    };
+
+    mutations.MOVE_EPIC(state, {
+      originalEpic: mockEpics[1],
+      fromListId: 'gid://gitlab/List/1',
+      toListId: 'gid://gitlab/List/2',
+    });
+
+    const updatedListEpics = {
+      'gid://gitlab/List/1': [mockEpic.id],
+      'gid://gitlab/List/2': [mockEpics[1].id],
+    };
+
+    expect(state.boardItemsByListId).toEqual(updatedListEpics);
+  });
+});
+
 describe('SET_BOARD_EPIC_USER_PREFERENCES', () => {
   it('should replace userPreferences on the given epic', () => {
     state = {

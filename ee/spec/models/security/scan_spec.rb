@@ -12,6 +12,28 @@ RSpec.describe Security::Scan do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:build_id) }
     it { is_expected.to validate_presence_of(:scan_type) }
+
+    describe 'info' do
+      let(:scan) { build(:security_scan, info: info) }
+
+      subject { scan.errors.details[:info] }
+
+      before do
+        scan.validate
+      end
+
+      context 'when the value for info field is valid' do
+        let(:info) { { errors: [{ type: 'Foo', message: 'Message' }] } }
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'when the value for info field is invalid' do
+        let(:info) { { errors: [{ type: 'Foo' }] } }
+
+        it { is_expected.not_to be_empty }
+      end
+    end
   end
 
   describe '#project' do

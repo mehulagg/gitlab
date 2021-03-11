@@ -813,4 +813,63 @@ RSpec.describe Packages::Package, type: :model do
       expect(package.package_settings).to eq(group.package_settings)
     end
   end
+
+  describe '#sync_maven_metadata' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:package) { create(:maven_package) }
+
+    subject { package.sync_maven_metadata(user) }
+
+    shared_examples 'not enqueuing a sync worker job' do
+      it 'does not enqueue a sync worker job' do
+        expect(::Packages::Maven::Metadata::SyncWorker)
+          .not_to receive(:perform_async)
+
+        subject
+      end
+    end
+
+    it 'enqueues a sync worker job' do
+      expect(::Packages::Maven::Metadata::SyncWorker)
+        .to receive(:perform_async).with(user.id, package.project.id, package.name)
+
+      subject
+    end
+
+    context 'with no user' do
+      let(:user) { nil }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a versionless maven package' do
+      let_it_be(:package) { create(:maven_package, version: nil) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a non maven package' do
+      let_it_be(:package) { create(:npm_package) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+  end
+
+  context 'destroying a composer package' do
+    let_it_be(:package_name) { 'composer-package-name' }
+    let_it_be(:json) { { 'name' => package_name } }
+    let_it_be(:project) { create(:project, :custom_repo, files: { 'composer.json' => json.to_json } ) }
+    let!(:package) { create(:composer_package, :with_metadatum, project: project, name: package_name, version: '1.0.0', json: json) }
+
+    before do
+      Gitlab::Composer::Cache.new(project: project, name: package_name).execute
+      package.composer_metadatum.reload
+    end
+
+    it 'schedule the update job' do
+      expect(::Packages::Composer::CacheUpdateWorker).to receive(:perform_async).with(project.id, package_name, package.composer_metadatum.version_cache_sha)
+
+      package.destroy!
+    end
+  end
 end

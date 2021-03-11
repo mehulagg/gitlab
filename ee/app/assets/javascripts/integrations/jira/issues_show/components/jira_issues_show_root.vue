@@ -1,10 +1,11 @@
 <script>
-import { GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
+import { GlAlert, GlSprintf, GlLink, GlBadge, GlTooltipDirective as GlTooltip } from '@gitlab/ui';
 import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
 import JiraIssueSidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import Note from './note.vue';
 
 export default {
   name: 'JiraIssuesShow',
@@ -12,8 +13,13 @@ export default {
     GlAlert,
     GlSprintf,
     GlLink,
+    GlBadge,
     IssuableShow,
     JiraIssueSidebar,
+    Note,
+  },
+  directives: {
+    GlTooltip,
   },
   inject: {
     issuesShowPath: {
@@ -45,6 +51,11 @@ export default {
       deep: true,
     });
     this.isLoading = false;
+  },
+  methods: {
+    jiraIssueCommentId(id) {
+      return `jira_note_${id}`;
+    },
   },
 };
 </script>
@@ -81,6 +92,26 @@ export default {
 
       <template #right-sidebar-items="{ sidebarExpanded }">
         <jira-issue-sidebar :sidebar-expanded="sidebarExpanded" :issue="issue" />
+      </template>
+
+      <template #discussion>
+        <note
+          v-for="comment in issue.comments"
+          :id="jiraIssueCommentId(comment.id)"
+          :key="comment.id"
+          :author-avatar-url="comment.author.avatarUrl"
+          :author-web-url="comment.author.webUrl"
+          :author-name="comment.author.name"
+          :author-username="comment.author.username"
+          :note-body-html="comment.bodyHtml"
+          :note-created-at="comment.createdAt"
+        >
+          <template #badges>
+            <gl-badge v-gl-tooltip="{ title: __('This is a Jira user.') }">
+              {{ __('Jira user') }}
+            </gl-badge>
+          </template>
+        </note>
       </template>
     </issuable-show>
   </div>

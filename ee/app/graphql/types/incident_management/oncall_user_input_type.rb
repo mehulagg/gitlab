@@ -16,7 +16,7 @@ module Types
 
       argument :color_weight, ::Types::DataVisualizationPalette::WeightEnum,
                 required: false,
-                description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user.'
+                description: 'A value of DataVisualizationWeightEnum. The color weight to assign to for the on-call user. Note: To view on-call schedules in GitLab, do not provide a value below 500. A value between 500 and 950 ensures sufficient contrast.'
     end
   end
 end
