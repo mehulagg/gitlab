@@ -41,4 +41,29 @@ RSpec.describe Gitlab::WordDiff::ChunkCollection do
       expect(collection.content).to eq('')
     end
   end
+
+  describe '#marker_ranges' do
+    let(:chunks) do
+      [
+        Gitlab::WordDiff::Segments::Chunk.new(' Hello '),
+        Gitlab::WordDiff::Segments::Chunk.new('-World'),
+        Gitlab::WordDiff::Segments::Chunk.new('+GitLab'),
+        Gitlab::WordDiff::Segments::Chunk.new('+!!!')
+      ]
+    end
+
+    before do
+      chunks.each { |chunk| collection.add(chunk) }
+    end
+
+    it 'returns marker ranges for every chunk with changes' do
+      expect(collection.marker_ranges).to match_array(
+        [
+          Gitlab::MarkerRange.new(6, 10, mode: :deletion),
+          Gitlab::MarkerRange.new(11, 16, mode: :addition),
+          Gitlab::MarkerRange.new(17, 19, mode: :addition)
+        ]
+      )
+    end
+  end
 end
