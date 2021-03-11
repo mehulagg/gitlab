@@ -46,7 +46,7 @@ describe('issue_note', () => {
       createWrapper();
     });
 
-    it('should render if has multiline comment', () => {
+    it('should render if has multiline comment', async () => {
       const position = {
         line_range: {
           start: {
@@ -75,9 +75,8 @@ describe('issue_note', () => {
         line,
       });
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findMultilineComment().text()).toEqual('Comment on lines 1 to 2');
-      });
+      await wrapper.vm.$nextTick();
+      expect(findMultilineComment().text()).toBe('Comment on lines 1 to 2');
     });
 
     it('should only render if it has everything it needs', () => {
@@ -173,9 +172,9 @@ describe('issue_note', () => {
       const noteHeader = wrapper.findComponent(NoteHeader);
       const noteHeaderProps = noteHeader.props();
 
-      expect(noteHeaderProps.author).toEqual(note.author);
-      expect(noteHeaderProps.createdAt).toEqual(note.created_at);
-      expect(noteHeaderProps.noteId).toEqual(note.id);
+      expect(noteHeaderProps.author).toBe(note.author);
+      expect(noteHeaderProps.createdAt).toBe(note.created_at);
+      expect(noteHeaderProps.noteId).toBe(note.id);
     });
 
     it('should render note actions', () => {
@@ -203,7 +202,7 @@ describe('issue_note', () => {
       const noteBody = wrapper.findComponent(NoteBody);
       const noteBodyProps = noteBody.props();
 
-      expect(noteBodyProps.note).toEqual(note);
+      expect(noteBodyProps.note).toBe(note);
       expect(noteBodyProps.line).toBe(null);
       expect(noteBodyProps.canEdit).toBe(note.current_user.can_edit);
       expect(noteBodyProps.isEditing).toBe(false);
@@ -227,7 +226,7 @@ describe('issue_note', () => {
 
       await waitForPromises();
       expect(alertSpy).not.toHaveBeenCalled();
-      expect(wrapper.vm.note.note_html).toEqual(escape(noteBody));
+      expect(wrapper.vm.note.note_html).toBe(escape(noteBody));
     });
   });
 
