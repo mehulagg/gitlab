@@ -157,6 +157,10 @@ RSpec.describe Namespace do
   describe 'delegate' do
     it { is_expected.to delegate_method(:name).to(:owner).with_prefix.with_arguments(allow_nil: true) }
     it { is_expected.to delegate_method(:avatar_url).to(:owner).with_arguments(allow_nil: true) }
+
+    it { is_expected.to delegate_method(:delayed_project_removal).to(:namespace_settings) }
+    it { is_expected.to delegate_method(:delayed_project_removal?).to(:namespace_settings) }
+    it { is_expected.to delegate_method(:delayed_project_removal=).to(:namespace_settings) }
   end
 
   describe "Respond to" do
@@ -168,28 +172,6 @@ RSpec.describe Namespace do
   describe 'inclusions' do
     it { is_expected.to include_module(Gitlab::VisibilityLevel) }
     it { is_expected.to include_module(Namespaces::Traversal::Recursive) }
-  end
-
-  describe 'callbacks' do
-    describe 'before_save :ensure_delayed_project_removal_assigned_to_namespace_settings' do
-      it 'sets the matching value in namespace_settings' do
-        expect { namespace.update!(delayed_project_removal: true) }.to change {
-          namespace.namespace_settings.delayed_project_removal
-        }.from(false).to(true)
-      end
-
-      context 'when the feature flag is disabled' do
-        before do
-          stub_feature_flags(migrate_delayed_project_removal: false)
-        end
-
-        it 'does not set the matching value in namespace_settings' do
-          expect { namespace.update!(delayed_project_removal: true) }.not_to change {
-            namespace.namespace_settings.delayed_project_removal
-          }
-        end
-      end
-    end
   end
 
   describe '#visibility_level_field' do
