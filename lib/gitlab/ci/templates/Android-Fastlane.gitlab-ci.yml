@@ -113,9 +113,9 @@ promoteBeta:
 promoteProduction:
   extends: .promote_job
   stage: production
-  # We only allow production promotion on `master` because
-  # it has its own production scoped secret variables
-  only:
-    - master
+  # We only allow production promotion on the default branch because
+  # it has its own production scoped CI/CD variables
+  rules:
+    if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
     - bundle exec fastlane promote_beta_to_production
