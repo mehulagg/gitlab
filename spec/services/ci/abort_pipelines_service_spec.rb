@@ -16,6 +16,7 @@ RSpec.describe Ci::AbortPipelinesService do
 
         expect(result).to be_success
         expect(pipeline.reload).to be_canceled
+        expect(pipeline.stages).to all(be_canceled)
         expect(build.reload).to be_canceled
       end
 
@@ -41,6 +42,8 @@ RSpec.describe Ci::AbortPipelinesService do
 
         expect(result).to be_success
         expect(cancelable_pipeline.reload).to be_canceled
+        expect(cancelable_pipeline.stages).to all(be_canceled)
+
         expect(manual_pipeline.reload).not_to be_canceled
         expect(unrelated_pipeline.reload).not_to be_canceled
         expect(build.reload).to be_canceled
