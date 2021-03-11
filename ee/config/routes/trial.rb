@@ -6,5 +6,6 @@ resources :trials, only: [:new] do
     get :select
     post :apply
     put :extend_trial
+    # post :extend_trial
   end
 end

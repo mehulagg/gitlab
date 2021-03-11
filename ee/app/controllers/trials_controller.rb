@@ -19,14 +19,24 @@ class TrialsController < ApplicationController
   end
 
   def extend_trial
-    require 'pry'
-    binding.pry
+    # return redirect_to "http://192.168.0.64:3000"
+    # return head 200
+    # return
+
+    # require 'pry'
+    # binding.pry
+    puts "X" * 100
+    pp @namespace.can_extend?
+    pp @namespace.invalid?
 
     return render_403 unless @namespace.can_extend?
 
     return render_403 if @namespace.invalid?
 
     @result = GitlabSubscriptions::ExtendTrialService.new.execute(extend_trial_params)
+
+
+    pp @result
 
     if @result&.dig(:success)
       head 200
@@ -95,6 +105,11 @@ class TrialsController < ApplicationController
 
 
   def authenticate_owner!
+    require 'prettyprint'
+    pp @namespace.owners
+    pp current_user
+    pp @namespace.owners.include?(current_user)
+
     render_403 unless @namespace.owners.include?(current_user)
   end
 
@@ -116,8 +131,8 @@ class TrialsController < ApplicationController
   end
 
   def apply_trial_params
-    require 'pry'
-    binding.pry
+    # require 'pry'
+    # binding.pry
 
     gl_com_params = { gitlab_com_trial: true, sync_to_gl: true }
 
@@ -148,12 +163,18 @@ class TrialsController < ApplicationController
   end
 
   def find_namespace
-    require 'pry'
-    binding.pry
+    # require 'pry'
+    # binding.pry
 
     @namespace = if find_namespace?
                    current_user.namespaces.find_by_id(params[:namespace_id])
                  end
+
+    puts "T" * 100
+    pp params
+    pp @namespace
+    pp @namespace.gitlab_subscription
+    raise 'failed to find namespace from method `find_namespace`' unless @namespace
 
     render_404 unless @namespace
   end

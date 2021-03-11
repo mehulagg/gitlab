@@ -127,6 +127,10 @@ module BillingPlansHelper
     end
   end
 
+  def extend_trial_url(group, plan)
+    "http://192.168.0.64:3000/-/trials/extend_trial"
+  end
+
   private
 
   def add_seats_url(group)

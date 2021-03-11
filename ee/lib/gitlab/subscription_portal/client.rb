@@ -9,7 +9,7 @@ module Gitlab
         end
 
         def extend_trial(params)
-          http_put("extend_trials", admin_headers, params)
+          http_put("trial_extend", admin_headers, params)
         end
 
         def create_customer(params)
@@ -96,6 +96,14 @@ module Gitlab
           { success: false, data: { errors: e.message } }
         end
 
+        def http_put(path, headers, params = {})
+          response = Gitlab::HTTP.put("#{base_url}/#{path}", body: params.to_json, headers: headers)
+
+          parse_response(response)
+        rescue *Gitlab::HTTP::HTTP_ERRORS => e
+          { success: false, data: { errors: e.message } }
+        end
+
         def base_url
           EE::SUBSCRIPTIONS_URL
         end
@@ -112,6 +120,7 @@ module Gitlab
             {
               'X-Admin-Email' => EE::SUBSCRIPTION_PORTAL_ADMIN_EMAIL,
               'X-Admin-Token' => EE::SUBSCRIPTION_PORTAL_ADMIN_TOKEN
+              # 'X-Admin-Token' => 'wrong admin token'
             }
           )
         end

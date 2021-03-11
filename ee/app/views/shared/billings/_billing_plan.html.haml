@@ -69,6 +69,12 @@
       - show_upgrade_button = show_upgrade_button?(purchase_link.action, plan_offer_type)
       - show_contact_sales_button = show_contact_sales_button?(purchase_link.action, plan_offer_type)
       .gl-min-h-7.gl-display-flex.gl-flex-wrap.gl-justify-content-end
+        - if true
+          -# = link_to 'extend_trial', extend_trial_url(namespace, plan)
+          = form_tag extend_trial_url(namespace, plan), :method => :put do
+            = text_field_tag "accountName", ""
+            = text_field_tag "namespace_id", "#{namespace.id}"
+            = submit_tag "Submit"
         - if show_contact_sales_button
           = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: [("btn gl-button"), (show_upgrade_button ? "btn-success-secondary" : "btn-success")], data: { **experiment_tracking_data_for_button_click('contact_sales') }
         - if show_upgrade_button
