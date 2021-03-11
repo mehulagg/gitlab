@@ -25,7 +25,7 @@ module QA
           end
 
           view 'app/views/projects/issues/import_csv/_button.html.haml' do
-            element :import_issues_button
+            element :import_issues_dropdown
             element :import_from_jira_link
           end
 
@@ -60,7 +60,7 @@ module QA
           def click_import_issues_dropdown
             # When there are no issues, the image that loads causes the buttons to jump
             has_loaded_all_images?
-            click_element(:import_issues_button)
+            click_element(:import_issues_dropdown)
           end
 
           def export_issues_modal
