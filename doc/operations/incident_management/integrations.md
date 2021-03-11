@@ -68,8 +68,6 @@ and you can [customize the payload](#customize-the-alert-payload-outside-of-gitl
       1. _(Optional)_ To generate a test alert to test the new integration, or to map
       fields from your monitoring tool's alert to GitLab fields, enter a sample payload
       and click **Parse payload for custom mapping**. Valid JSON is required.
-
-      NOTE:
       If you update a sample payload, you must also remap the fields.
 
    1. _(Optional)_ If you provided a valid sample payload, select each value in
