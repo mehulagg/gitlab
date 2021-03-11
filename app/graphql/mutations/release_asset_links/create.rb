@@ -3,6 +3,8 @@
 module Mutations
   module ReleaseAssetLinks
     class Create < BaseMutation
+      include FindsProject
+
       graphql_name 'ReleaseAssetLinkCreate'
 
       authorize :create_release
