@@ -6,6 +6,7 @@ import NoteHeader from '~/notes/components/note_header.vue';
 import issueNote from '~/notes/components/noteable_note.vue';
 import createStore from '~/notes/stores';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import { noteableDataMock, notesDataMock, note } from '../mock_data';
 
 describe('issue_note', () => {
@@ -209,26 +210,24 @@ describe('issue_note', () => {
       expect(noteBodyProps.helpPagePath).toBe('');
     });
 
-    it('prevents note preview xss', (done) => {
-      const imgSrc =
-        'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-      const noteBody = `<img src="${imgSrc}" onload="alert(1)" />`;
-      const alertSpy = jest.spyOn(window, 'alert');
+    it('prevents note preview xss', async () => {
+      const noteBody =
+        '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="alert(1)" />';
+      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+      const noteBodyComponent = wrapper.find(NoteBody);
+
       store.hotUpdate({
         actions: {
           updateNote() {},
           setSelectedCommentPositionHover() {},
         },
       });
-      const noteBodyComponent = wrapper.find(NoteBody);
 
       noteBodyComponent.vm.$emit('handleFormUpdate', noteBody, null, () => {});
 
-      setImmediate(() => {
-        expect(alertSpy).not.toHaveBeenCalled();
-        expect(wrapper.vm.note.note_html).toEqual(escape(noteBody));
-        done();
-      });
+      await waitForPromises();
+      expect(alertSpy).not.toHaveBeenCalled();
+      expect(wrapper.vm.note.note_html).toEqual(escape(noteBody));
     });
   });
 
@@ -237,7 +236,7 @@ describe('issue_note', () => {
       createWrapper();
     });
 
-    it('restores content of updated note', (done) => {
+    it('restores content of updated note', async () => {
       const updatedText = 'updated note text';
       store.hotUpdate({
         actions: {
@@ -249,22 +248,17 @@ describe('issue_note', () => {
 
       noteBody.vm.$emit('handleFormUpdate', updatedText, null, () => {});
 
-      wrapper.vm
-        .$nextTick()
-        .then(() => {
-          const noteBodyProps = noteBody.props();
+      await wrapper.vm.$nextTick();
+      let noteBodyProps = noteBody.props();
 
-          expect(noteBodyProps.note.note_html).toBe(updatedText);
-          noteBody.vm.$emit('cancelForm');
-        })
-        .then(() => wrapper.vm.$nextTick())
-        .then(() => {
-          const noteBodyProps = noteBody.props();
+      expect(noteBodyProps.note.note_html).toBe(updatedText);
 
-          expect(noteBodyProps.note.note_html).toBe(note.note_html);
-        })
-        .then(done)
-        .catch(done.fail);
+      noteBody.vm.$emit('cancelForm');
+      await wrapper.vm.$nextTick();
+
+      noteBodyProps = noteBody.props();
+
+      expect(noteBodyProps.note.note_html).toBe(note.note_html);
     });
   });
 
