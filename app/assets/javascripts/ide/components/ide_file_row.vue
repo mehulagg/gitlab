@@ -25,7 +25,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['getUrlForPath']),
+    ...mapGetters(['getUrlForPath', 'isActiveFile']),
   },
   methods: {
     toggleDropdown(val) {
@@ -39,6 +39,7 @@ export default {
   <file-row
     :file="file"
     :file-url="getUrlForPath(file.path)"
+    :is-active="isActiveFile(file)"
     v-bind="$attrs"
     @mouseleave="toggleDropdown(false)"
     v-on="$listeners"

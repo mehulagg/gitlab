@@ -4,11 +4,8 @@ import * as types from '../mutation_types';
 import { sortTree } from '../utils';
 
 export default {
-  [types.SET_FILE_ACTIVE](state, { path, active }) {
-    Object.assign(state.entries[path], {
-      active,
-      lastOpenedAt: new Date().getTime(),
-    });
+  [types.SET_FILE_ACTIVE](state, path) {
+    state.activeEditFile = path;
   },
   [types.TOGGLE_FILE_OPEN](state, path) {
     const entry = state.entries[path];
@@ -151,7 +148,6 @@ export default {
       Object.assign(state.entries[path], {
         ...stagedFile,
         key: state.entries[path].key,
-        active: state.entries[path].active,
         opened: state.entries[path].opened,
         changed: true,
       });

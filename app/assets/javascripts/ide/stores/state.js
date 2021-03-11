@@ -12,6 +12,7 @@ export default () => ({
   loading: false,
   openFiles: [],
   activeCommitFile: null,
+  activeEditFile: null,
   trees: {},
   projects: {},
   panelResizing: false,

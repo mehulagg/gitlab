@@ -27,7 +27,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['getUrlForPath']),
+    ...mapGetters(['getUrlForPath', 'isActiveFile']),
     closeLabel() {
       if (this.fileHasChanged) {
         return sprintf(__('%{tabname} changed'), { tabname: this.tab.name });
@@ -45,7 +45,7 @@ export default {
   methods: {
     ...mapActions(['closeFile', 'updateDelayViewerUpdated']),
     clickFile(tab) {
-      if (tab.active) return;
+      if (this.isActiveFile(tab)) return;
 
       this.updateDelayViewerUpdated(true);
 
@@ -67,7 +67,7 @@ export default {
 
 <template>
   <gl-tab
-    :active="tab.active"
+    :active="isActiveFile(tab)"
     :title="tab.name"
     @click="clickFile(tab)"
     @mouseover="mouseOverTab"

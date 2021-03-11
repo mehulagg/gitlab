@@ -78,6 +78,7 @@ export default {
       'getStagedFile',
       'isEditModeActive',
       'isCommitModeActive',
+      'isActiveFile',
       'currentBranch',
       'getJsonSchemaForPath',
     ]),
@@ -316,7 +317,7 @@ export default {
 
       this.model.onChange((model) => {
         const { file } = model;
-        if (!file.active) return;
+        if (!this.isActiveFile(file)) return;
 
         const monacoModel = model.getModel();
         const content = monacoModel.getValue();
@@ -411,7 +412,7 @@ export default {
       // Looks like our model wrapper `.dispose` causes the monaco editor to emit some position changes after
       // when disposing. We want to ignore these by only capturing editor changes that happen to the currently active
       // file.
-      if (!this.file.active) {
+      if (!this.isActiveFile(this.file)) {
         return;
       }
 

@@ -6,7 +6,7 @@ import {
   WEBIDE_MEASURE_FETCH_FILE_DATA,
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
-import { stageKeys, commitActionTypes, viewerTypes } from '../../constants';
+import { commitActionTypes } from '../../constants';
 import eventHub from '../../eventhub';
 import service from '../../services';
 import * as types from '../mutation_types';
@@ -15,7 +15,7 @@ import { setPageTitleForFile } from '../utils';
 export const closeFile = ({ commit, state, dispatch, getters }, file) => {
   const { path } = file;
   const indexOfClosedFile = state.openFiles.findIndex((f) => f.key === file.key);
-  const fileWasActive = file.active;
+  const fileWasActive = getters.isActiveFile(file);
 
   if (state.openFiles.length > 1 && fileWasActive) {
     const nextIndexToOpen = indexOfClosedFile === 0 ? 1 : indexOfClosedFile - 1;
@@ -30,26 +30,16 @@ export const closeFile = ({ commit, state, dispatch, getters }, file) => {
   }
 
   commit(types.TOGGLE_FILE_OPEN, path);
-  commit(types.SET_FILE_ACTIVE, { path, active: false });
 
   eventHub.$emit(`editor.update.model.dispose.${file.key}`);
 };
 
-export const setFileActive = ({ commit, state, getters, dispatch }, path) => {
-  const file = state.entries[path];
-  const currentActiveFile = getters.activeFile;
+export const setFileActive = ({ commit, dispatch }, path) => {
+  commit(types.SET_FILE_ACTIVE, path);
 
-  if (file.active) return;
-
-  if (currentActiveFile) {
-    commit(types.SET_FILE_ACTIVE, {
-      path: currentActiveFile.path,
-      active: false,
-    });
+  if (path) {
+    dispatch('scrollToTab');
   }
-
-  commit(types.SET_FILE_ACTIVE, { path, active: true });
-  dispatch('scrollToTab');
 };
 
 export const getFileData = (
@@ -236,7 +226,7 @@ export const stageChange = ({ commit, dispatch, getters }, path) => {
 
   const file = getters.getStagedFile(path);
 
-  if (openFile && openFile.active && file) {
+  if (openFile && getters.isActiveFile(openFile) && file) {
     dispatch('openPendingTab', file.path);
   }
 };
@@ -248,7 +238,7 @@ export const unstageChange = ({ commit, dispatch, getters }, path) => {
 
   const file = getters.getChangedFile(path);
 
-  if (openFile && openFile.active && file) {
+  if (openFile && getters.isActiveFile(openFile) && file) {
     dispatch('openPendingTab', file.path);
   }
 };
