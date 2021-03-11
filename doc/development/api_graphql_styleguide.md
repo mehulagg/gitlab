@@ -392,6 +392,28 @@ field :blob, type: Types::Snippets::BlobType,
 
 This will increment the [`complexity` score](#field-complexity) of the field by `1`.
 
+If a resolver calls Gitaly, it can be annotated with
+`BaseResolver.calls_gitaly!`. Doing this will pass `calls_gitaly: true` to any
+field that uses this resolver.
+
+For example:
+
+```ruby
+class BranchResolver < BaseResolver
+  type ::Types::BranchType, null: true
+  calls_gitaly!
+
+  argument name: ::GraphQL::STRING_TYPE, required: true
+
+  def resolve(name:)
+    object.branch(name)
+  end
+end
+```
+
+Then when we use it, any field that uses `BaseResolver` will have the correct
+value for `calls_gitaly:`.
+
 ### Exposing permissions for a type
 
 To expose permissions the current user has on a resource, you can call
