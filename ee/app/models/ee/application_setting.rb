@@ -203,6 +203,14 @@ module EE
       end
     end
 
+    def elasticsearch_replicas
+      raise NotImplementedError
+    end
+
+    def elasticsearch_shards
+      raise NotImplementedError
+    end
+
     def invalidate_elasticsearch_indexes_cache!
       ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:project)
       ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:namespace)

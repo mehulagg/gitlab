@@ -73,7 +73,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
     let(:expected_default_settings) do
       {
         refresh_interval: refresh_interval,
-        number_of_replicas: Gitlab::CurrentSettings.elasticsearch_replicas,
+        number_of_replicas: Elastic::Setting.number_of_replicas[subtask.alias_name],
         translog: { durability: 'request' }
       }
     end

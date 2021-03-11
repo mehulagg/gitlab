@@ -19,13 +19,13 @@ module Elastic
 
       def number_of_shards
         current.number_of_shards.with_indifferent_access.tap do |hash|
-          hash.default = DEFAULT_SHARDS
+          hash.default = hash[:default]
         end
       end
 
       def number_of_replicas
         current.number_of_replicas.with_indifferent_access.tap do |hash|
-          hash.default = DEFAULT_REPLICAS
+          hash.default = hash[:default]
         end
       end
     end
