@@ -27,8 +27,8 @@ using the GitLab default only if no customizations are set:
 1. A [group-level](#group-level-custom-initial-branch-name) custom default branch name.
 1. An [instance-level](#instance-level-custom-initial-branch-name) custom default branch name. **(FREE SELF)**
 1. If no custom default branch name is set at any level, GitLab defaults to:
-   - `main`, for projects created after GitLab 14.0.
-   - `master`, for projects created before GitLab 14.0.
+   - `main`: Projects created with GitLab 14.0 or later.
+   - `master`: Projects created before GitLab 14.0.
 
 In the GitLab UI, you can change the defaults at any level. GitLab also provides
 the [Git commands you need](#update-the-default-branch-name-in-your-repository) to update your copy of the repository.
@@ -40,17 +40,17 @@ To update the default branch name for an individual [project](../../index.md):
 1. Sign in to GitLab as a user with [Administrator](../../../permissions.md) permissions.
 1. In the left navigation menu, go to **Settings > Repository**.
 1. Expand **Default branch**, and select a new default branch.
-1. (Optional) Select **Auto-close referenced issues on default branch** to close
+1. (Optional) Select the **Auto-close referenced issues on default branch** check box to close
    issues when a merge request
    [uses a closing pattern](../../issues/managing_issues.md#closing-issues-automatically).
-1. Click **Save changes**.
+1. Select **Save changes**.
 
 API users can also use the `default_branch` attribute of the
 [Projects API](../../../../api/projects.md) when creating or editing a project.
 
 ## Change the default branch name for an instance or group
 
-GitLab Administrators can also configure a new default branch name at the
+GitLab administrators can configure a new default branch name at the
 [instance level](#instance-level-custom-initial-branch-name) or
 [group level](#group-level-custom-initial-branch-name).
 
@@ -70,7 +70,7 @@ groups and subgroups can override this instance-wide setting for their projects.
 1. Go to **Admin Area > Settings > Repository**.
 1. Expand **Default initial branch name**.
 1. Change the default initial branch to a custom name of your choice.
-1. Click **Save changes**.
+1. Select **Save changes**.
 
 Projects created on this instance after you change the setting use the
 custom branch name, unless a group-level or subgroup-level configuration
@@ -85,7 +85,7 @@ Administrators of groups and subgroups can configure the default branch name for
 1. Go to the group **Settings > Repository**.
 1. Expand **Default initial branch name**.
 1. Change the default initial branch to a custom name of your choice.
-1. **Save Changes**.
+1. Select **Save changes**.
 
 Projects created in this group after you change the setting use the custom branch name,
 unless a subgroup configuration overrides it.
@@ -138,7 +138,7 @@ renames a Git repository's (`example`) default branch from `old` to `new`.
 1. Protect your new `new` branch as described in the [protected branches documentation](../../protected_branches.md).
 1. (Optional) If you want to delete the `old` branch:
    1. Verify that nothing is pointing to the `old` branch.
-   1. Delete the o`old` branch on the remote:
+   1. Delete the `old` branch on the remote:
 
       ```plaintext
       git push origin --delete old
