@@ -44,7 +44,9 @@ Please note that `toMatchObject` actually changes the nature of the assertion an
 
 ## `core-js` errors when running scripts within the GitLab repository
 
-When running scripts within the GitLab repository, e.g. code transformations, you might run into issues with `core-js` like this:
+The following command assumes you've set up the GitLab repository in the
+`~/workspace/gdk` directory. When running scripts within the GitLab repository,
+such as code transformations, you might run into issues with `core-js` like this:
 
 ```shell
 ~/workspace/gdk/gitlab/node_modules/core-js/modules/es.global-this.js:7
@@ -63,4 +65,4 @@ TypeError: $ is not a function
     at Object.<anonymous> (~/workspace/gdk/gitlab/node_modules/core-js/modules/esnext.global-this.js:2:1)
 ```
 
-**Remedy - Try running moving the script into its own repository and point to it to files in the GitLab repository**
+**Remedy - Try moving the script into a separate repository and point to it to files in the GitLab repository**
