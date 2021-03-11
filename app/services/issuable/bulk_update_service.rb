@@ -13,9 +13,12 @@ module Issuable
     def execute(type)
       ids = params.delete(:issuable_ids).split(",")
       set_update_params(type)
-      items = update_issuables(type, ids)
+      updated_issues_count = update_issuables(type, ids)
+      if updated_issues_count > 0 && requires_issues_count_cache_refresh?(type)
+        update_group_cached_counts
+      end
 
-      response_success(payload: { count: items.count })
+      response_success(payload: { count: updated_issues_count })
     rescue ArgumentError => e
       response_error(e.message, 422)
     end
@@ -54,7 +57,7 @@ module Issuable
         update_class.new(issuable.issuing_parent, current_user, params).execute(issuable)
       end
 
-      items
+      items.size
     end
 
     def find_issuables(parent, model_class, ids)
@@ -71,6 +74,18 @@ module Issuable
 
     def response_error(message, http_status)
       ServiceResponse.error(message: message, http_status: http_status)
+    end
+
+    def requires_issues_count_cache_refresh?(type)
+      type == 'issue' && params.include?(:state_event)
+    end
+
+    def group
+      parent.is_a?(Group) ? parent : parent&.group
+    end
+
+    def update_group_cached_counts
+      group&.update_group_issues_counter_cache(current_user)
     end
   end
 end

@@ -28,13 +28,17 @@ module Groups
       cached_count = Rails.cache.read(cache_key)
       return cached_count unless cached_count.blank?
 
-      refreshed_count = uncached_count
-      update_cache_for_key(cache_key) { refreshed_count } if refreshed_count > CACHED_COUNT_THRESHOLD
-      refreshed_count
+      refresh_cache_over_threshold
     end
 
-    def cache_key(key = nil)
+    def cache_key
       ['groups', 'open_issues_count_service', VERSION, group.id, cache_key_name]
+    end
+
+    def refresh_cache_over_threshold
+      new_count = uncached_count
+      update_cache_for_key(cache_key) { new_count } if new_count > CACHED_COUNT_THRESHOLD
+      new_count
     end
 
     private

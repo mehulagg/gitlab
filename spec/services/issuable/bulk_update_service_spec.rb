@@ -280,6 +280,62 @@ RSpec.describe Issuable::BulkUpdateService do
         expect(issue2.reload.assignees).to be_empty
       end
     end
+
+    context 'when project belongs to a group' do
+      let_it_be(:project2) { create(:project, :repository, group: create(:group)) }
+      let_it_be(:open_issues) { create_list(:issue, 2, project: project2) }
+      let(:parent) { project2 }
+      let(:count_service) { Groups::OpenIssuesCountService }
+
+      before do
+        project2.add_reporter(user)
+        allow_next_instance_of(count_service) do |instance|
+          allow(instance).to receive(:update_cache_for_key)
+        end
+      end
+
+      shared_examples 'refreshing cached open issues count with state updates' do |state|
+        context 'when issues count is over cache threshold' do
+          before do
+            stub_const("#{count_service}::CACHED_COUNT_THRESHOLD", (issues.size - 1))
+          end
+
+          it 'refreshes issues counts cache' do
+            expect_next_instance_of(count_service) do |service|
+              expect(service).to receive(:update_cache_for_key).and_return(true)
+            end
+
+            bulk_update(issues, state_event: state)
+          end
+        end
+
+        context 'when issues count is under cache threshold' do
+          before do
+            stub_const("#{count_service}::CACHED_COUNT_THRESHOLD", (issues.size + 2))
+          end
+
+          it 'does not refresh issues counts cache' do
+            expect_next_instance_of(count_service) do |service|
+              expect(service).not_to receive(:update_cache_for_key)
+            end
+
+            bulk_update(issues, state_event: state)
+          end
+        end
+      end
+
+      context 'when closing issues' do
+        let_it_be(:issues) { create_list(:issue, 2, project: project2) }
+
+        it_behaves_like 'refreshing cached open issues count with state updates', 'closed'
+      end
+
+      context 'when reopening issues' do
+        let_it_be(:issues) { create_list(:issue, 2, :closed, project: project2) }
+
+        it_behaves_like 'refreshing cached open issues count with state updates', 'reopened'
+      end
+    end
   end
 
   context 'with issuables at a group level' do

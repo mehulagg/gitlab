@@ -2068,4 +2068,17 @@ RSpec.describe Group do
 
     it_behaves_like 'model with Debian distributions'
   end
+
+  describe '#update_group_issues_counter_cache' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:user) { create(:user) }
+
+    it 'updates group issues count cache if over threshold' do
+      expect_any_instance_of(Groups::OpenIssuesCountService)
+        .to receive(:refresh_cache_over_threshold)
+        .and_call_original
+
+      group.update_group_issues_counter_cache(user)
+    end
+  end
 end
