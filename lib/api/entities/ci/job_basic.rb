@@ -4,7 +4,7 @@ module API
   module Entities
     module Ci
       class JobBasic < Grape::Entity
-        expose :id, :status, :stage, :name, :ref, :tag, :coverage, :allow_failure
+        expose :id, :status, :stage, :name, :project_id, :ref, :tag, :coverage, :allow_failure
         expose :created_at, :started_at, :finished_at
         expose :duration
         expose :user, with: ::API::Entities::User

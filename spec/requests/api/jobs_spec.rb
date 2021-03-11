@@ -54,6 +54,7 @@ RSpec.describe API::Jobs do
     it 'returns common job data' do
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['id']).to eq(jobx.id)
+      expect(json_response['project_id']).to eq jobx.project_id
       expect(json_response['status']).to eq(jobx.status)
       expect(json_response['stage']).to eq(jobx.stage)
       expect(json_response['name']).to eq(jobx.name)
