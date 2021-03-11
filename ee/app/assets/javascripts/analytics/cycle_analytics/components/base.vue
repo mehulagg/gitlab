@@ -96,7 +96,7 @@ export default {
       return !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && this.selectedStageReady;
+      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError;
     },
     shouldDisplayVerticalNavigation() {
       return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
@@ -195,17 +195,16 @@ export default {
       :svg-path="emptyStateSvgPath"
     />
     <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
-      <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
-        <path-navigation
-          :key="`path_navigation_key_${pathNavigationData.length}`"
-          class="js-path-navigation"
-          :loading="isLoading"
-          :stages="pathNavigationData"
-          :selected-stage="selectedStage"
-          @selected="onStageSelect"
-        />
-      </div>
-      <div class="gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
+      <path-navigation
+        v-if="shouldDisplayPathNavigation"
+        :key="`path_navigation_key_${pathNavigationData.length}`"
+        class="js-path-navigation gl-w-full gl-pb-2"
+        :loading="isLoading"
+        :stages="pathNavigationData"
+        :selected-stage="selectedStage"
+        @selected="onStageSelect"
+      />
+      <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
         <filter-bar
           v-if="shouldDisplayFilters"
           class="js-filter-bar filtered-search-box gl-display-flex gl-mb-2 gl-mr-3 gl-border-none"
