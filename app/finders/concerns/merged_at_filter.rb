@@ -10,7 +10,7 @@ module MergedAtFilter
     mr_metrics_scope = mr_metrics_scope.merged_after(merged_after) if merged_after.present?
     mr_metrics_scope = mr_metrics_scope.merged_before(merged_before) if merged_before.present?
 
-    items.join_metrics.merge(mr_metrics_scope)
+    join_metrics(items, mr_metrics_scope)
   end
 
   def merged_after
@@ -20,4 +20,19 @@ module MergedAtFilter
   def merged_before
     params[:merged_before]
   end
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def join_metrics(items, mr_metrics_scope)
+    scope = if project_id = items.where_values_hash["target_project_id"]
+              # removing the original merge_requests.target_project_id condition
+              items = items.unscope(where: :target_project_id)
+              # adds the target_project_id condition to merge_request_metrics
+              items.join_metrics(project_id)
+            else
+              items.join_metrics
+            end
+
+    scope.merge(mr_metrics_scope)
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
 end

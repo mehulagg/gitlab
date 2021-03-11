@@ -156,6 +156,12 @@ RSpec.describe MergeRequestsFinder do
 
           it { is_expected.to eq([merge_request2]) }
         end
+
+        context 'when project_id is given' do
+          subject { described_class.new(user, merged_after: 15.days.ago, merged_before: 6.days.ago, project_id: merge_request2.project).execute }
+
+          it { is_expected.to eq([merge_request2]) }
+        end
       end
 
       context 'filtering by group' do

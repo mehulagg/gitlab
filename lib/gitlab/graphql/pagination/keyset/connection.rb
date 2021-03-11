@@ -59,6 +59,7 @@ module Gitlab
             end
           end
 
+          # rubocop: disable CodeReuse/ActiveRecord
           def has_next_page
             strong_memoize(:has_next_page) do
               if before
@@ -74,13 +75,15 @@ module Gitlab
                 else
                   # If we count the number of requested items plus one (`limit_value + 1`),
                   # then if we get `limit_value + 1` then we know there is a next page
-                  relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
+                  # relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
+                  sliced_nodes.limit(1).offset(limit_value).any?
                 end
               else
                 false
               end
             end
           end
+          # rubocop: enable CodeReuse/ActiveRecord
           # rubocop: enable Naming/PredicateName
 
           def cursor_for(node)
