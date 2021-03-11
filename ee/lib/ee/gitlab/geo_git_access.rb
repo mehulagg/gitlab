@@ -8,7 +8,7 @@ module EE
       include GrapePathHelpers::NamedRouteMatcher
       extend ::Gitlab::Utils::Override
 
-      GEO_SERVER_DOCS_URL = 'https://docs.gitlab.com/ee/administration/geo/replication/using_a_geo_server.html'.freeze
+      GEO_SERVER_DOCS_URL = 'https://docs.gitlab.com/ee/administration/geo/replication/usage.html'.freeze
 
       private
 
