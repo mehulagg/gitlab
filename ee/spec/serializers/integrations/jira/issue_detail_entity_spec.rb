@@ -86,13 +86,11 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       ],
       author: hash_including(
         name: 'reporter',
-        username: 'reporter@reporter.com',
         avatar_url: 'http://reporter.avatar'
       ),
       assignees: [
         hash_including(
           name: 'assignee',
-          username: 'assignee@assignee.com',
           avatar_url: 'http://assignee.avatar'
         )
       ],
@@ -102,7 +100,6 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       comments: [
         hash_including(
           name: 'comment_author',
-          username: 'comment@author.com',
           avatar_url: 'http://comment_author.avatar',
           note: "<p dir=\"auto\">Comment</p>",
           created_at: '2020-06-25T15:50:00.000+0000'.to_datetime.utc,
