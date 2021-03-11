@@ -169,4 +169,37 @@ module CycleAnalyticsHelpers
       branch_update
     end
   end
+
+  # custom value stream helpers
+  def toggle_value_stream_dropdown
+    page.find('[data-testid="dropdown-value-streams"]').click
+  end
+
+  def add_custom_stage_to_form
+    page.find_button(s_('CreateValueStreamForm|Add another stage')).click
+
+    index = page.all('[data-testid="value-stream-stage-fields"]').length
+    last_stage = page.all('[data-testid="value-stream-stage-fields"]').last
+
+    within last_stage do
+      find('[name*="custom-stage-name-"]').fill_in with: "Cool custom stage - name #{index}"
+      select_dropdown_option_by_value "custom-stage-start-event-", :merge_request_created
+      select_dropdown_option_by_value "custom-stage-end-event-", :merge_request_merged
+    end
+  end
+
+  def create_value_stream(name)
+    fill_in 'create-value-stream-name', with: name
+
+    page.find_button(_('Create Value Stream')).click
+    wait_for_requests
+  end
+
+  def create_custom_value_stream(name)
+    toggle_value_stream_dropdown
+    page.find_button(_('Create new Value Stream')).click
+
+    add_custom_stage_to_form
+    create_value_stream(name)
+  end
 end
