@@ -288,22 +288,23 @@ For example, to add support for files referenced by a `Widget` model with a
              t.boolean :checksum_mismatch
              t.binary :verification_checksum
              t.binary :verification_checksum_mismatched
-             t.string :verification_failure, limit: 255
+             t.text :verification_failure
              t.text :last_sync_failure
 
              t.index :widget_id, name: :index_widget_registry_on_widget_id, unique: true
              t.index :retry_at
              t.index :state
              # To optimize performance of WidgetRegistry.verification_failed_batch
-             t.index :verification_retry_at, name:  :widget_registry_failed_verification, order: "NULLS FIRST",  where: "((state = 2) AND (verification_state = 3))"
+             t.index :verification_retry_at, name: :widget_registry_failed_verification, order: "NULLS FIRST",  where: "((state = 2) AND (verification_state = 3))"
              # To optimize performance of WidgetRegistry.needs_verification_count
-             t.index :verification_state, name:  :widget_registry_needs_verification, where: "((state = 2)  AND (verification_state = ANY (ARRAY[0, 3])))"
+             t.index :verification_state, name: :widget_registry_needs_verification, where: "((state = 2)  AND (verification_state = ANY (ARRAY[0, 3])))"
              # To optimize performance of WidgetRegistry.verification_pending_batch
              t.index :verified_at, name: :widget_registry_pending_verification, order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
            end
          end
        end
 
+       add_text_limit :widget_registry, :verification_failure, 255
        add_text_limit :widget_registry, :last_sync_failure, 255
      end
 
