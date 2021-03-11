@@ -35,6 +35,7 @@ class GitlabSchema < GraphQL::Schema
       kwargs[:max_complexity] ||= max_query_complexity(kwargs[:context])
 
       queries.each do |query|
+        query[:max_complexity] ||= max_query_complexity(kwargs[:context])
         query[:max_depth] = max_query_depth(kwargs[:context])
       end
 
