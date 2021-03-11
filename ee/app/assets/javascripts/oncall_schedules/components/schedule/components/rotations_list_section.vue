@@ -40,6 +40,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   props: {
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     presetType: {
       type: String,
       required: true,
@@ -48,18 +53,13 @@ export default {
       type: Array,
       required: true,
     },
-    timeframe: {
-      type: Array,
-      required: true,
-    },
     scheduleIid: {
       type: String,
       required: true,
     },
-    loading: {
-      type: Boolean,
-      required: false,
-      default: false,
+    timeframe: {
+      type: Array,
+      required: true,
     },
   },
   data() {

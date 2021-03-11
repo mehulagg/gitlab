@@ -4,6 +4,7 @@ import { uniqueId } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
+import { selectedTimezoneFormattedOffset } from '../../schedule/utils';
 
 export const SHIFT_WIDTHS = {
   md: 140,
@@ -12,6 +13,7 @@ export const SHIFT_WIDTHS = {
 };
 
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
+export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
 
 export default {
   ROTATION_CENTER_CLASS,
@@ -19,6 +21,7 @@ export default {
     GlAvatar,
     GlPopover,
   },
+  inject: ['selectedTimezone'],
   props: {
     assignee: {
       type: Object,
@@ -54,7 +57,9 @@ export default {
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)} ${
+          this.timezoneOffset
+        }`,
       });
     },
     rotationAssigneeUniqueID() {
@@ -65,8 +70,13 @@ export default {
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)} ${
+          this.timezoneOffset
+        }`,
       });
+    },
+    timezoneOffset() {
+      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
   },
 };
@@ -93,8 +103,12 @@ export default {
       triggers="hover"
       placement="top"
     >
-      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>
-      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">{{ endsAt }}</p>
+      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">
+        {{ startsAt }}
+      </p>
+      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">
+        {{ endsAt }}
+      </p>
     </gl-popover>
   </div>
 </template>

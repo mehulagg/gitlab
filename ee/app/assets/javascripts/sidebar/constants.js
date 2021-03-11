@@ -1,4 +1,8 @@
+import { IssuableType } from '~/issue_show/constants';
 import { s__, __ } from '~/locale';
+import groupIterationsQuery from './queries/group_iterations.query.graphql';
+import projectIssueIterationMutation from './queries/project_issue_iteration.mutation.graphql';
+import projectIssueIterationQuery from './queries/project_issue_iteration.query.graphql';
 
 export const healthStatus = {
   ON_TRACK: 'onTrack',
@@ -58,4 +62,17 @@ export const CVE_ID_REQUEST_SIDEBAR_I18N = {
     'CVE|As a maintainer, requesting a CVE for a vulnerability in your project will help your users stay secure and informed.',
   ),
   learnMore: __('Learn more'),
+};
+
+export const issuableIterationQueries = {
+  [IssuableType.Issue]: {
+    query: projectIssueIterationQuery,
+    mutation: projectIssueIterationMutation,
+  },
+};
+
+export const iterationsQueries = {
+  [IssuableType.Issue]: {
+    query: groupIterationsQuery,
+  },
 };

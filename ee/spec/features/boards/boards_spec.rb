@@ -215,7 +215,7 @@ RSpec.describe 'issue boards', :js do
       login_as(user)
     end
 
-    context 'When license is available' do
+    context 'when license is available' do
       let!(:label) { create(:label, project: project, name: 'Brount') }
       let!(:list) { create(:list, board: board, label: label, position: 1) }
 
@@ -346,7 +346,7 @@ RSpec.describe 'issue boards', :js do
       end
     end
 
-    context 'When license is not available' do
+    context 'when license is not available' do
       before do
         stub_licensed_features(wip_limits: false)
         visit project_boards_path(project)

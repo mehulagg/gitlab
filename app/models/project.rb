@@ -493,10 +493,22 @@ class Project < ApplicationRecord
       { column: arel_table["description"], multiplier: 0.2 }
     ])
 
-    query = reorder(order_expression.desc, arel_table['id'].desc)
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'similarity',
+        column_expression: order_expression,
+        order_expression: order_expression.desc,
+        order_direction: :desc,
+        distinct: false,
+        add_to_projections: true
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'id',
+        order_expression: Project.arel_table[:id].desc
+      )
+    ])
 
-    query = query.select(*query.arel.projections, order_expression.as('similarity')) if include_in_select
-    query
+    order.apply_cursor_conditions(reorder(order))
   end
 
   scope :with_packages, -> { joins(:packages) }
@@ -2026,10 +2038,10 @@ class Project < ApplicationRecord
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       break variables unless Gitlab.config.dependency_proxy.enabled
 
-      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}")
+      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port)
       variables.append(
         key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
-        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+        value: "#{Gitlab.host_with_port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
       )
     end
   end

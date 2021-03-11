@@ -1,5 +1,6 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import $ from 'jquery';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
+import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import Vuex from 'vuex';
 import Api from 'ee/api';
 import BranchesSelect from 'ee/approvals/components/branches_select.vue';
@@ -12,9 +13,6 @@ const TEST_PROTECTED_BRANCHES = [
   { id: 2, name: 'development' },
 ];
 const TEST_BRANCHES_SELECTIONS = [TEST_DEFAULT_BRANCH, ...TEST_PROTECTED_BRANCHES];
-const waitForEvent = ($input, event) => new Promise((resolve) => $input.one(event, resolve));
-const select2Container = () => document.querySelector('.select2-container');
-const select2DropdownOptions = () => document.querySelectorAll('.result-name');
 const branchNames = () => TEST_BRANCHES_SELECTIONS.map((branch) => branch.name);
 const protectedBranchNames = () => TEST_PROTECTED_BRANCHES.map((branch) => branch.name);
 const localVue = createLocalVue();
@@ -24,10 +22,13 @@ localVue.use(Vuex);
 describe('Branches Select', () => {
   let wrapper;
   let store;
-  let $input;
 
-  const createComponent = async (props = {}) => {
-    wrapper = shallowMount(localVue.extend(BranchesSelect), {
+  const findDropdown = () => wrapper.findComponent(GlDropdown);
+  const findDropdownItems = () => wrapper.findAllComponents(GlDropdownItem);
+  const findSearch = () => wrapper.findComponent(GlSearchBoxByType);
+
+  const createComponent = (props = {}, mountFn = shallowMount) => {
+    wrapper = mountFn(BranchesSelect, {
       propsData: {
         projectId: '1',
         ...props,
@@ -36,14 +37,6 @@ describe('Branches Select', () => {
       store: new Vuex.Store(store),
       attachTo: document.body,
     });
-
-    await waitForPromises();
-
-    $input = $(wrapper.vm.$refs.input);
-  };
-
-  const search = (term = '') => {
-    $input.select2('search', term);
   };
 
   beforeEach(() => {
@@ -56,94 +49,87 @@ describe('Branches Select', () => {
     wrapper.destroy();
   });
 
-  it('renders select2 input', async () => {
-    expect(select2Container()).toBe(null);
+  it('renders dropdown', async () => {
+    createComponent();
+    await waitForPromises();
 
-    await createComponent();
-
-    expect(select2Container()).not.toBe(null);
+    expect(findDropdown().exists()).toBe(true);
   });
 
-  it('displays all the protected branches and any branch', async (done) => {
-    await createComponent();
-    waitForEvent($input, 'select2-loaded')
-      .then(() => {
-        const nodeList = select2DropdownOptions();
-        const names = [...nodeList].map((el) => el.textContent);
+  it('sets the initially selected item', async () => {
+    createComponent(
+      {
+        initRule: {
+          protectedBranches: [
+            {
+              id: 1,
+              name: 'master',
+            },
+          ],
+        },
+      },
+      mount,
+    );
+    await waitForPromises();
 
-        expect(names).toEqual(branchNames());
-      })
-      .then(done)
-      .catch(done.fail);
-    search();
+    expect(findDropdown().props('text')).toBe('master');
+    expect(
+      findDropdownItems()
+        .filter((item) => item.text() === 'master')
+        .at(0)
+        .props('isChecked'),
+    ).toBe(true);
+  });
+
+  it('displays all the protected branches and any branch', async () => {
+    createComponent();
+    await nextTick();
+    expect(findDropdown().props('loading')).toBe(true);
+    await waitForPromises();
+
+    expect(findDropdownItems()).toHaveLength(branchNames().length);
+    expect(findDropdown().props('loading')).toBe(false);
   });
 
   describe('with search term', () => {
     beforeEach(() => {
-      return createComponent();
+      createComponent({}, mount);
+      return waitForPromises();
     });
 
-    it('fetches protected branches with search term', (done) => {
+    it('fetches protected branches with search term', async () => {
       const term = 'lorem';
-      waitForEvent($input, 'select2-loaded')
-        .then(() => {})
-        .then(done)
-        .catch(done.fail);
 
-      search(term);
+      findSearch().vm.$emit('input', term);
+      await nextTick();
+      expect(findSearch().props('isLoading')).toBe(true);
+      await waitForPromises();
 
       expect(Api.projectProtectedBranches).toHaveBeenCalledWith(TEST_PROJECT_ID, term);
+      expect(findSearch().props('isLoading')).toBe(false);
     });
 
-    it('fetches protected branches with no any branch if there is search', (done) => {
-      waitForEvent($input, 'select2-loaded')
-        .then(() => {
-          const nodeList = select2DropdownOptions();
-          const names = [...nodeList].map((el) => el.textContent);
+    it('fetches protected branches with no any branch if there is a search', async () => {
+      findSearch().vm.$emit('input', 'master');
+      await waitForPromises();
 
-          expect(names).toEqual(protectedBranchNames());
-        })
-        .then(done)
-        .catch(done.fail);
-      search('master');
+      expect(findDropdownItems()).toHaveLength(protectedBranchNames().length);
     });
 
-    it('fetches protected branches with any branch if search contains term "any"', (done) => {
-      waitForEvent($input, 'select2-loaded')
-        .then(() => {
-          const nodeList = select2DropdownOptions();
-          const names = [...nodeList].map((el) => el.textContent);
+    it('fetches protected branches with any branch if search contains term "any"', async () => {
+      findSearch().vm.$emit('input', 'any');
+      await waitForPromises();
 
-          expect(names).toEqual(branchNames());
-        })
-        .then(done)
-        .catch(done.fail);
-      search('any');
+      expect(findDropdownItems()).toHaveLength(branchNames().length);
     });
   });
 
-  it('emits input when data changes', async (done) => {
-    await createComponent();
+  it('when the branch is changed it sets the isChecked property and emits the input event', async () => {
+    createComponent({}, mount);
+    await waitForPromises();
+    await findDropdownItems().at(1).vm.$emit('click');
 
-    const selectedIndex = 1;
-    const selectedId = TEST_BRANCHES_SELECTIONS[selectedIndex].id;
-    const expected = [[selectedId]];
-
-    waitForEvent($input, 'select2-loaded')
-      .then(() => {
-        const options = select2DropdownOptions();
-        $(options[selectedIndex]).trigger('mouseup');
-      })
-      .then(done)
-      .catch(done.fail);
-
-    waitForEvent($input, 'change')
-      .then(() => {
-        expect(wrapper.emitted().input).toEqual(expected);
-      })
-      .then(done)
-      .catch(done.fail);
-
-    search();
+    expect(findDropdownItems().at(1).props('isChecked')).toBe(true);
+    expect(wrapper.emitted().input).toStrictEqual([[1]]);
   });
 });

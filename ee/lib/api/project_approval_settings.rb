@@ -21,7 +21,7 @@ module API
           optional :target_branch, type: String, desc: 'Branch that scoped approval rules apply to'
         end
         get do
-          authorize_create_merge_request_in_project
+          authorize_read_project_approval_rule!
 
           present(
             user_project,

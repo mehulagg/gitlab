@@ -6,7 +6,6 @@ RSpec.describe ::Gitlab::Metrics::Subscribers::ActiveRecord do
   using RSpec::Parameterized::TableSyntax
 
   let(:env) { {} }
-  let(:transaction) { Gitlab::Metrics::WebTransaction.new(env) }
   let(:subscriber) { described_class.new }
   let(:connection) { double(:connection) }
   let(:payload) { { sql: 'SELECT * FROM users WHERE id = 10', connection: connection } }
@@ -49,8 +48,6 @@ RSpec.describe ::Gitlab::Metrics::Subscribers::ActiveRecord do
 
       before do
         allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(true)
-        allow(subscriber).to receive(:current_transaction)
-          .and_return(transaction)
       end
 
       context 'query using a connection to a replica' do

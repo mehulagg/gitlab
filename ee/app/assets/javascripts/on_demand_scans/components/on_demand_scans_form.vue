@@ -23,6 +23,8 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
 import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import RefSelector from '~/ref/components/ref_selector.vue';
+import { REF_TYPE_BRANCHES } from '~/ref/constants';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -68,9 +70,11 @@ const createProfilesApolloOptions = (name, field, { fetchQuery, fetchError }) =>
 
 export default {
   SCAN_TYPE_LABEL,
+  REF_TYPE_BRANCHES,
   saveAndRunScanBtnId: 'scan-submit-button',
   saveScanBtnId: 'scan-save-button',
   components: {
+    RefSelector,
     ProfileSelectorSummaryCell,
     ScannerProfileSelector,
     SiteProfileSelector,
@@ -156,6 +160,7 @@ export default {
       ...savedScansFields,
       scannerProfiles: [],
       siteProfiles: [],
+      selectedBranch: this.dastScan?.branch?.name ?? this.defaultBranch,
       selectedScannerProfileId: this.dastScan?.scannerProfileId || null,
       selectedSiteProfileId: this.dastScan?.siteProfileId || null,
       loading: false,
@@ -276,6 +281,9 @@ export default {
           ...serializeFormObject(this.form.fields),
           [this.isEdit ? 'runAfterUpdate' : 'runAfterCreate']: runAfter,
         };
+      }
+      if (this.glFeatures.dastBranchSelection) {
+        input.branchName = this.selectedBranch;
       }
 
       this.$apollo
@@ -431,6 +439,21 @@ export default {
           />
         </gl-form-group>
       </template>
+
+      <gl-form-group v-if="glFeatures.dastBranchSelection" :label="__('Branch')">
+        <ref-selector
+          v-model="selectedBranch"
+          data-testid="dast-scan-branch-input"
+          no-flip
+          :enabled-ref-types="[$options.REF_TYPE_BRANCHES]"
+          :project-id="projectPath"
+          :translations="{
+            dropdownHeader: __('Select a branch'),
+            searchPlaceholder: __('Search'),
+          }"
+        />
+      </gl-form-group>
+
       <scanner-profile-selector
         v-model="selectedScannerProfileId"
         class="gl-mb-5"
