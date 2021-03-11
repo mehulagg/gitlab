@@ -9,7 +9,7 @@ import {
   WEBIDE_MEASURE_FETCH_BRANCH_DATA,
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
-import { stageKeys, commitActionTypes } from '../constants';
+import { commitActionTypes } from '../constants';
 import eventHub from '../eventhub';
 import { decorateFiles } from '../lib/files';
 import service from '../services';
@@ -184,8 +184,6 @@ export const deleteEntry = ({ commit, dispatch, state }, path) => {
 
   dispatch('triggerFilesChange');
 };
-
-export const resetOpenFiles = ({ commit }) => commit(types.RESET_OPEN_FILES);
 
 export const renameEntry = ({ dispatch, commit, state, getters }, { path, name, parentPath }) => {
   const entry = state.entries[path];

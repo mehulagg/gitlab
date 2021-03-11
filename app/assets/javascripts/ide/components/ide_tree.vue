@@ -24,7 +24,7 @@ export default {
     this.initialize();
   },
   methods: {
-    ...mapActions(['updateViewer', 'createTempEntry', 'resetOpenFiles']),
+    ...mapActions(['updateViewer', 'createTempEntry', 'updateRouteWithActiveFile']),
     createNewFile() {
       this.$refs.newModal.open(modalTypes.blob);
     },
@@ -36,11 +36,7 @@ export default {
         this.updateViewer(viewerTypes.edit);
       });
 
-      if (!this.activeFile) return;
-
-      if (this.activeFile.deleted) {
-        this.resetOpenFiles();
-      }
+      this.updateRouteWithActiveFile();
     },
   },
 };

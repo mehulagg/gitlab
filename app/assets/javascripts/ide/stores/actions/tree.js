@@ -26,6 +26,12 @@ export const showTreeEntry = ({ commit, dispatch, state }, path) => {
 };
 
 export const handleTreeEntryAction = ({ commit, dispatch }, row) => {
+  // We can't enter into anything deleted. Sometimes we can end up here if
+  // the commit tab has visited a deleted file.
+  if (row.deleted) {
+    return;
+  }
+
   if (row.type === 'tree') {
     dispatch('toggleTreeOpen', row.path);
   } else if (row.type === 'blob') {

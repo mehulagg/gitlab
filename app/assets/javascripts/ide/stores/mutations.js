@@ -156,9 +156,6 @@ export default {
   [types.CLEAR_PROJECTS](state) {
     Object.assign(state, { projects: {}, trees: {} });
   },
-  [types.RESET_OPEN_FILES](state) {
-    Object.assign(state, { openFiles: [] });
-  },
   [types.SET_ERROR_MESSAGE](state, errorMessage) {
     Object.assign(state, { errorMessage });
   },

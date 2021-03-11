@@ -191,6 +191,16 @@ export const restoreOriginalFile = ({ dispatch, state, commit }, path) => {
   }
 };
 
+export const updateRouteWithActiveFile = async ({ dispatch, getters }) => {
+  const file = getters.activeFile;
+
+  if (!file) {
+    return;
+  }
+
+  await dispatch('router/push', getters.getUrlForPath(file.path), { root: true });
+};
+
 export const discardFileChanges = ({ dispatch, state, commit, getters }, path) => {
   const file = state.entries[path];
   const isDestructiveDiscard = file.tempFile || file.prevPath;

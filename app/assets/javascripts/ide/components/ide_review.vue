@@ -29,19 +29,13 @@ export default {
     this.initialize();
   },
   methods: {
-    ...mapActions(['updateViewer', 'resetOpenFiles']),
+    ...mapActions(['updateViewer', 'updateRouteWithActiveFile']),
     initialize() {
       this.$nextTick(() => {
         this.updateViewer(this.currentMergeRequestId ? viewerTypes.mr : viewerTypes.diff);
       });
 
-      if (!this.activeFile) {
-        return;
-      }
-
-      if (this.activeFile.deleted) {
-        this.resetOpenFiles();
-      }
+      this.updateRouteWithActiveFile();
     },
   },
 };
