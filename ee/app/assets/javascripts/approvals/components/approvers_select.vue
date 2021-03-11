@@ -138,7 +138,7 @@ export default {
       const hasTerm = term.trim().length > 0;
 
       return Api.projectGroups(this.projectId, {
-        skip_groups: this.skipGroupIds,
+        skip_groups: this.skipGroupIds, with_shared: true,
         ...(hasTerm ? { search: term } : {}),
       });
     },
