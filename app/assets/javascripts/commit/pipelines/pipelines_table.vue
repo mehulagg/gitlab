@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import SvgBlankState from '~/pipelines/components/pipelines_list/blank_state.vue';
 import PipelinesTableComponent from '~/pipelines/components/pipelines_list/pipelines_table.vue';
@@ -19,7 +20,7 @@ export default {
     TablePagination,
     SvgBlankState,
   },
-  mixins: [PipelinesMixin],
+  mixins: [PipelinesMixin, glFeatureFlagMixin()],
   props: {
     endpoint: {
       type: String,
@@ -89,6 +90,9 @@ export default {
      */
     canRenderPipelineButton() {
       return this.latestPipelineDetachedFlag;
+    },
+    pipelineButtonClass() {
+      return !this.glFeatures.newPipelinesTable ? 'gl-md-display-none' : 'gl-lg-display-none';
     },
     isForkMergeRequest() {
       return this.sourceProjectFullPath !== this.targetProjectFullPath;
@@ -192,7 +196,8 @@ export default {
       <gl-button
         v-if="canRenderPipelineButton"
         block
-        class="gl-mt-3 gl-mb-3 gl-md-display-none"
+        class="gl-mt-3 gl-mb-3"
+        :class="pipelineButtonClass"
         variant="success"
         data-testid="run_pipeline_button_mobile"
         :loading="state.isRunningMergeRequestPipeline"

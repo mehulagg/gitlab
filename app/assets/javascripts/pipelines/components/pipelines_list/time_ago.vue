@@ -60,14 +60,7 @@ export default {
       {{ s__('Pipeline|Duration') }}
     </div>
     <div :class="legacyTableMobileClass">
-      <span
-        v-if="showInProgress"
-        v-gl-tooltip
-        :title="__('This pipeline has not finished running yet')"
-        data-placement="top"
-        data-container="body"
-        data-testid="pipeline-in-progress"
-      >
+      <span v-if="showInProgress" data-testid="pipeline-in-progress">
         <gl-icon name="hourglass" class="gl-vertical-align-baseline! gl-mr-2" :size="12" />
         {{ __('In progress') }}
       </span>

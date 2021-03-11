@@ -30792,9 +30792,6 @@ msgstr ""
 msgid "This page sends a payload. Go back to the events page to see a newly created event."
 msgstr ""
 
-msgid "This pipeline has not finished running yet"
-msgstr ""
-
 msgid "This pipeline makes use of a predefined CI/CD configuration enabled by %{b_open}Auto DevOps.%{b_close}"
 msgstr ""
 
