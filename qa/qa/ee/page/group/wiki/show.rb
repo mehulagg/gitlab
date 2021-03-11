@@ -9,6 +9,7 @@ module QA
             include QA::Page::Component::Wiki
             include QA::Page::Component::WikiSidebar
             include QA::Page::Component::LazyLoader
+            include QA::Page::Component::LegacyClonePanel
           end
         end
       end
