@@ -634,8 +634,8 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const [firstError] = data[boardType]?.errors || [];
-        const assignees = data[boardType]?.[`${boardType}Members`].nodes;
+        const [firstError] = data.workspace.errors || [];
+        const assignees = data.workspace.assignees.nodes;
 
         if (firstError) {
           throw new Error(firstError);

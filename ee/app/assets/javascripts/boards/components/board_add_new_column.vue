@@ -279,7 +279,8 @@ export default {
       return this.scopedLabelsAvailable && isScopedLabel(label);
     },
 
-    setColumnType() {
+    setColumnType(type) {
+      this.columnType = type;
       this.selectedId = null;
       this.filterItems();
     },
@@ -347,6 +348,7 @@ export default {
               backgroundColor: item.color,
             }"
           ></span>
+
           <gl-avatar-labeled
             v-if="assigneeTypeSelected"
             :size="32"
@@ -354,7 +356,7 @@ export default {
             :sub-label="item.username"
             :src="item.avatarUrl"
           />
-          <span>{{ item.title }}</span>
+          <span v-else>{{ item.title }}</span>
         </label>
       </gl-form-radio-group>
     </template>

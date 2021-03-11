@@ -1157,8 +1157,8 @@ describe('fetchMilestones', () => {
 describe('fetchAssignees', () => {
   const queryResponse = {
     data: {
-      project: {
-        projectMembers: {
+      workspace: {
+        assignees: {
           nodes: mockAssignees.map((assignee) => ({ user: assignee })),
         },
       },
