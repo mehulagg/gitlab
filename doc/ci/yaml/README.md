@@ -252,6 +252,9 @@ workflow:
         IS_A_FEATURE: "true"                  # Define a new variable.
 ```
 
+TODO: I think it would be good to have an example of what happens also when we have job:variables as well as top-level variables and workflow:rules:variables.
+Can we describe what the variables would be when each condition is met?
+
 ##### Enable or disable workflow:rules:variables **(CORE ONLY)**
 
 rules:variables is under development and not ready for production use.
