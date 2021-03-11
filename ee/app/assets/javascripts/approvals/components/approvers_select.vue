@@ -139,6 +139,7 @@ export default {
 
       return Api.projectGroups(this.projectId, {
         skip_groups: this.skipGroupIds,
+        with_shared: true,
         ...(hasTerm ? { search: term } : {}),
       });
     },
