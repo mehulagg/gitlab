@@ -151,10 +151,13 @@ module API
               header 'X-GitLab-Last-Update', new_update
               no_content!
             end
-          else
+          elsif result.stale?
             # We received build that is invalid due to concurrency conflict
-            Gitlab::Metrics.add_event(:build_invalid)
+            Gitlab::Metrics.add_event(:build_conflicted)
             conflict!
+          else
+            Gitlab::Metrics.add_event(:build_invalid)
+            render_validation_error!(result.build)
           end
         end
 

@@ -23,7 +23,7 @@ module EE
           if !db_all_caught_up && !result.build
             metrics.increment_queue_operation(:queue_replication_lag)
 
-            return ::Ci::RegisterJobService::Result.new(nil, false) # rubocop:disable Cop/AvoidReturnFromBlocks
+            return ::Ci::RegisterJobService::Result.new(nil, nil, :stale) # rubocop:disable Cop/AvoidReturnFromBlocks
           end
         end
       end

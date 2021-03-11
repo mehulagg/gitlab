@@ -16,23 +16,25 @@ RSpec.describe Ci::RegisterJobService do
         project.update!(shared_runners_enabled: false)
       end
 
-      it 'result is valid if replica did caught-up' do
+      it 'result is not conflict if replica did caught-up' do
         allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
           .and_return(true)
 
         expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
           .with(:runner, shared_runner.id) { true }
 
+        expect(subject).not_to be_stale
         expect(subject).to be_valid
       end
 
-      it 'result is invalid if replica did not caught-up' do
+      it 'result is conflict if replica did not caught-up' do
         allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
           .and_return(true)
 
         expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
           .with(:runner, shared_runner.id) { false }
 
+        expect(subject).to be_stale
         expect(subject).not_to be_valid
       end
     end

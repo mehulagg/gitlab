@@ -247,49 +247,83 @@ module Ci
           end
         end
 
-        context 'when first build is stalled' do
+        context 'when a conflicted schedule is made' do
           before do
             allow_any_instance_of(Ci::RegisterJobService).to receive(:assign_runner!).and_call_original
-            allow_any_instance_of(Ci::RegisterJobService).to receive(:assign_runner!)
-              .with(pending_job, anything).and_raise(ActiveRecord::StaleObjectError)
           end
 
           subject { described_class.new(specific_runner).execute }
 
-          context 'with multiple builds are in queue' do
-            let!(:other_build) { create :ci_build, pipeline: pipeline }
+          shared_examples 'reports conflicts' do
+            context 'with multiple builds are in queue' do
+              let!(:other_build) { create :ci_build, pipeline: pipeline }
 
-            before do
-              allow_any_instance_of(Ci::RegisterJobService).to receive(:builds_for_project_runner)
-                .and_return(Ci::Build.where(id: [pending_job, other_build]))
+              before do
+                allow_any_instance_of(Ci::RegisterJobService).to receive(:builds_for_project_runner)
+                  .and_return(Ci::Build.where(id: [pending_job, other_build]))
+              end
+
+              it 'receives second build from the queue' do
+                expect(subject).not_to be_stale
+                expect(subject).to be_valid
+                expect(subject.build).to eq(other_build)
+              end
             end
 
-            it "receives second build from the queue" do
-              expect(subject).to be_valid
-              expect(subject.build).to eq(other_build)
+            context 'when single build is in queue' do
+              before do
+                allow_any_instance_of(Ci::RegisterJobService).to receive(:builds_for_project_runner)
+                  .and_return(Ci::Build.where(id: pending_job))
+              end
+
+              it 'does receive a conflict result' do
+                expect(subject).to be_stale
+                expect(subject).not_to be_valid
+              end
+            end
+
+            context 'when there is no build in queue' do
+              before do
+                allow_any_instance_of(Ci::RegisterJobService).to receive(:builds_for_project_runner)
+                  .and_return(Ci::Build.none)
+              end
+
+              it "does not receive builds but result is not a conflict" do
+                expect(subject).not_to be_stale
+                expect(subject).to be_valid
+                expect(subject.build).to be_nil
+              end
             end
           end
 
-          context 'when single build is in queue' do
+          context 'when first build is stalled' do
             before do
-              allow_any_instance_of(Ci::RegisterJobService).to receive(:builds_for_project_runner)
-                .and_return(Ci::Build.where(id: pending_job))
+              allow_any_instance_of(Ci::RegisterJobService).to receive(:assign_runner!)
+                .with(pending_job, anything).and_raise(ActiveRecord::StaleObjectError)
             end
 
-            it "does not receive any valid result" do
-              expect(subject).not_to be_valid
-            end
+            it_behaves_like 'reports conflicts'
           end
 
-          context 'when there is no build in queue' do
+          context 'when state machine transition is invalid' do
             before do
-              allow_any_instance_of(Ci::RegisterJobService).to receive(:builds_for_project_runner)
-                .and_return(Ci::Build.none)
+              allow_any_instance_of(Ci::RegisterJobService).to receive(:assign_runner!)
+                .with(pending_job, anything)
+                .and_raise(StateMachines::InvalidTransition.new(pending_job, Ci::Build.state_machines[:status], :run))
             end
 
-            it "does not receive builds but result is valid" do
-              expect(subject).to be_valid
-              expect(subject.build).to be_nil
+            it_behaves_like 'reports conflicts'
+
+            context "when it's caused by validation error" do
+              before do
+                allow_any_instance_of(Ci::Build).to receive(:valid?).and_return(false)
+              end
+
+              it 'returns an invalid result' do
+                expect(subject).not_to be_stale
+                expect(subject).not_to be_valid
+                expect(subject.build).not_to be_nil
+              end
             end
           end
         end

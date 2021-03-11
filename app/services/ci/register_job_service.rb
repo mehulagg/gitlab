@@ -8,7 +8,19 @@ module Ci
 
     TEMPORARY_LOCK_TIMEOUT = 3.seconds
 
-    Result = Struct.new(:build, :build_json, :valid?)
+    Result = Struct.new(:build, :build_json, :state) do
+      def stale?
+        state == :stale
+      end
+
+      def invalid?
+        state == :invalid
+      end
+
+      def valid?
+        !stale? && !invalid?
+      end
+    end
 
     MAX_QUEUE_DEPTH = 50
 
@@ -28,7 +40,8 @@ module Ci
     private
 
     def process_queue(params)
-      valid = true
+      state = :valid
+      found_build = nil
       depth = 0
 
       each_build(params) do |build|
@@ -38,7 +51,8 @@ module Ci
         if depth > max_queue_depth
           @metrics.increment_queue_operation(:queue_depth_limit)
 
-          valid = false
+          state = :stale
+          found_build = nil
 
           break
         end
@@ -53,7 +67,8 @@ module Ci
           # We failed to acquire lock
           # - our queue is not complete as some resources are locked temporarily
           # - we need to re-process it again to ensure that all builds are handled
-          valid = false
+          state = :stale
+          found_build = nil
 
           next
         end
@@ -69,16 +84,19 @@ module Ci
         else
           # The usage of valid: is described in
           # handling of ActiveRecord::StaleObjectError
-          valid = false
+          state = result.state
+          found_build = result.build
         end
       end
 
-      @metrics.increment_queue_operation(:queue_conflict) unless valid
-      @metrics.observe_queue_depth(:conflict, depth) unless valid
-      @metrics.observe_queue_depth(:not_found, depth) if valid
+      result = Result.new(found_build, nil, state)
+
+      @metrics.increment_queue_operation(:queue_conflict) unless result.valid?
+      @metrics.observe_queue_depth(:conflict, depth) unless result.valid?
+      @metrics.observe_queue_depth(:not_found, depth) if result.valid?
       @metrics.register_failure
 
-      Result.new(nil, nil, valid)
+      result
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -152,11 +170,20 @@ module Ci
       # to make sure that this is properly handled by runner.
       @metrics.increment_queue_operation(:build_conflict_lock)
 
-      Result.new(nil, nil, false)
+      Result.new(nil, nil, :stale)
     rescue StateMachines::InvalidTransition
       @metrics.increment_queue_operation(:build_conflict_transition)
 
-      Result.new(nil, nil, false)
+      # StateMachines::InvalidTransition may also be a symptom of a conflicting
+      # situation. But it may be also returned, when a validation error happens.
+      # In that case, instead of looping, we should return a 400 Bad Request response
+      # to the Runner.
+      # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4360#note_200280465 for a context
+      if build.valid?
+        return Result.new(nil, nil, :stale)
+      end
+
+      Result.new(build, nil, :invalid)
     rescue => ex
       @metrics.increment_queue_operation(:build_conflict_exception)
 
@@ -185,7 +212,7 @@ module Ci
       # may fail, and we need to ensure the response has been generated.
       presented_build = ::Ci::BuildRunnerPresenter.new(build) # rubocop:disable CodeReuse/Presenter
       build_json = ::API::Entities::JobRequest::Response.new(presented_build).to_json
-      Result.new(build, build_json, true)
+      Result.new(build, build_json, :valid)
     end
 
     def assign_runner!(build, params)
