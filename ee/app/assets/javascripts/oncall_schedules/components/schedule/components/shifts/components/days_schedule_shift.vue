@@ -78,8 +78,11 @@ export default {
       const baseWidth =
         this.shiftEndsAt.getTime() >= this.currentTimeframeEndsAt.getTime()
           ? HOURS_IN_DAY
-          : this.shiftRangeOverlap.hoursOverlap;
+          : this.shiftRangeOverlap.hoursOverlap + this.shiftOffset;
       return this.shiftTimeUnitWidth * baseWidth - ASSIGNEE_SPACER;
+    },
+    shiftOffset() {
+      return (this.shiftStartsAt.getTimezoneOffset() - this.shiftEndsAt.getTimezoneOffset()) / 60;
     },
   },
 };

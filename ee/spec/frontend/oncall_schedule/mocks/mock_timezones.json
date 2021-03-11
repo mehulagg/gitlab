@@ -22,5 +22,11 @@
     "name": "Hawaii",
     "abbr": "HST",
     "formatted_offset": "-10:00"
+  },
+  {
+    "abbr":"EST",
+    "formatted_offset":"-05:00",
+    "identifier":"America/New_York",
+    "name":"Eastern Time (US & Canada)"
   }
 ]
