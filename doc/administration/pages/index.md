@@ -1109,3 +1109,18 @@ gitlab_pages['env'] = {'TMPDIR' => '<new_tmp_path>'}
 
 Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
 `sudo gitlab-ctl restart`.
+
+### 404 error when accessing a GitLab Pages site URL
+
+This problem most likely results from a missing `index.html` file in the public directory. If after deploying a Pages site,
+a 404 is encountered, confirm that the public directory contains an `index.html` file. If the file contains a different name
+such as `test.html`, the Pages site can still be accessed, but the full path would be needed. For example: `https//group-name.pages.example.com/project-name/test.html`
+
+The contents of the public directory can be confirmed by browsing the artifacts from the latest pipeline. To view the
+artifacts, navigate to **Project -> CI/CD -> Jobs**. Then click on the latest job, then under **Job artifacts** click **Browse**.
+
+Files listed under the public directory can be accessed through the Pages URL for the project.
+
+A 404 can also be related to incorrect permissions. If [Pages Access Control](#access-control) is enabled, and a user
+navigates to the Pages URL and receives a 404 reponse, it is possible that the user does not have permission to view the site.
+To fix this, verify that the user is a member of the project.
