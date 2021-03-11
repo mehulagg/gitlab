@@ -10,8 +10,8 @@ test:
   script:
     - pip install hyde
     - hyde gen
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
 
 pages:
   stage: deploy
@@ -21,5 +21,5 @@ pages:
   artifacts:
     paths:
       - public
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
