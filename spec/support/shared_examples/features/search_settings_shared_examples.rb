@@ -7,9 +7,7 @@ RSpec.shared_examples 'cannot search settings' do
 end
 
 RSpec.shared_examples 'can search settings' do |search_term, non_match_section|
-  it 'has search settings field' do
-    expect(page).to have_field(placeholder: SearchHelpers::INPUT_PLACEHOLDER)
-  end
+  it_behaves_like 'can highlight results', search_term
 
   it 'hides unmatching sections on search' do
     expect(page).to have_content(non_match_section)
@@ -18,6 +16,16 @@ RSpec.shared_examples 'can search settings' do |search_term, non_match_section|
 
     expect(page).to have_content(search_term)
     expect(page).not_to have_content(non_match_section)
+  end
+end
+
+RSpec.shared_examples 'can highlight results' do |search_term|
+  it 'has search settings field' do
+    expect(page).to have_field(placeholder: SearchHelpers::INPUT_PLACEHOLDER)
+  end
+
+  it 'highlights the search terms' do
+    expect(page.find_all('.gl-bg-orange-50')).to have_content(search_term)
   end
 end
 
