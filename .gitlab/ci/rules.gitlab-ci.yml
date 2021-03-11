@@ -92,6 +92,11 @@
   - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*"
 
+.ci-pattern-changes:
+  changes:
+    - ".gitlab-ci.yml"
+    - ".gitlab/ci/**/*"
+
 .ci-build-images-patterns: &ci-build-images-patterns
   - ".gitlab-ci.yml"
   - ".gitlab/ci/build-images.gitlab-ci.yml"
@@ -162,6 +167,17 @@
   - "{,ee/}spec/support/helpers/database/**/*"
   - "config/prometheus/common_metrics.yml"  # Used by Gitlab::DatabaseImporters::CommonMetrics::Importer
   - "{,ee/}app/models/project_statistics.rb"  # Used to calculate sizes in migration specs
+
+.db-pattern-changes:
+  changes:
+    - "{,ee/}{,spec/}{db,migrations}/**/*"
+    - "{,ee/}{,spec/}lib/{,ee/}gitlab/database/**/*"
+    - "{,ee/}{,spec/}lib/{,ee/}gitlab/database{,_spec}.rb"
+    - "{,ee/}{,spec/}lib/{,ee/}gitlab/background_migration/**/*"
+    - "{,ee/}{,spec/}lib/{,ee/}gitlab/background_migration{,_spec}.rb"
+    - "{,ee/}spec/support/helpers/database/**/*"
+    - "config/prometheus/common_metrics.yml"  # Used by Gitlab::DatabaseImporters::CommonMetrics::Importer
+    - "{,ee/}app/models/project_statistics.rb"  # Used to calculate sizes in migration specs
 
 .db-library-patterns: &db-library-patterns
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/database/**/*"
@@ -514,7 +530,9 @@
 ###############
 .rails:rules:ee-and-foss-migration:
   rules:
-    - changes: *db-patterns
+    - changes:
+      - !reference [.ci-pattern-changes, changes]
+      - !reference [.db-pattern-changes, changes]
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-and-foss-migration:minimal:
