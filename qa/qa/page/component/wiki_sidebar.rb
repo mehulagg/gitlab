@@ -36,11 +36,11 @@ module QA
         end
 
         def has_page_listed?(page_title)
-          has_element? :wiki_page_link, page_name: page_title
+          has_element?(:wiki_page_link, page_name: page_title)
         end
 
         def has_directory?(directory)
-          has_element? :wiki_directory_content, text: directory
+          has_element?(:wiki_directory_content, text: directory)
         end
       end
     end

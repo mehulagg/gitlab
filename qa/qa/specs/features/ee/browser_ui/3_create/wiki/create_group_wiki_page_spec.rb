@@ -23,9 +23,8 @@ module QA
             EE::Page::Group::Wiki::Edit.perform do |edit|
               edit.set_title(wiki_title)
               edit.set_content(wiki_content)
+              edit.click_create_page
             end
-
-            EE::Page::Group::Wiki::Edit.perform(&:click_create_page)
 
             EE::Page::Group::Wiki::Show.perform do |wiki|
               expect(wiki).to have_title(wiki_title)
@@ -49,9 +48,8 @@ module QA
             EE::Page::Group::Wiki::Edit.perform do |edit|
               edit.set_title(wiki_title)
               edit.set_content(wiki_content)
+              edit.click_create_page
             end
-
-            EE::Page::Group::Wiki::Edit.perform(&:click_create_page)
 
             EE::Page::Group::Wiki::Show.perform do |wiki|
               expect(wiki).to have_title(wiki_title)
