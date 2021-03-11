@@ -1,4 +1,4 @@
-import { GlAvatarLabeled, GlSearchBoxByType, GlFormSelect } from '@gitlab/ui';
+import { GlAvatarLabeled, GlSearchBoxByType, GlFormRadio, GlFormSelect } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
@@ -7,7 +7,7 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
 import { ListType } from '~/boards/constants';
 import defaultState from '~/boards/stores/state';
-import { mockAssignees, mockLists } from '../mock_data';
+import { mockAssignees, mockLists, mockIterations } from '../mock_data';
 
 const mockLabelList = mockLists[1];
 
@@ -32,6 +32,7 @@ describe('BoardAddNewColumn', () => {
     selectedId,
     labels = [],
     assignees = [],
+    iterations = [],
     getListByTypeId = jest.fn(),
     actions = {},
   } = {}) => {
@@ -61,6 +62,8 @@ describe('BoardAddNewColumn', () => {
             labelsLoading: false,
             assignees,
             assigneesLoading: false,
+            iterations,
+            iterationsLoading: false,
           },
         }),
         provide: {
@@ -191,6 +194,37 @@ describe('BoardAddNewColumn', () => {
         label: firstUser.name,
         subLabel: firstUser.username,
       });
+    });
+  });
+
+  describe('iteration list', () => {
+    beforeEach(async () => {
+      mountComponent({
+        iterations: mockIterations,
+        actions: {
+          fetchIterations: jest.fn(),
+        },
+      });
+
+      listTypeSelect().vm.$emit('change', ListType.iteration);
+
+      await nextTick();
+    });
+
+    it('sets iteration placeholder text in form', async () => {
+      expect(findForm().props()).toMatchObject({
+        formDescription: BoardAddNewColumn.i18n.iterationListDescription,
+        searchLabel: BoardAddNewColumn.i18n.selectIteration,
+        searchPlaceholder: BoardAddNewColumn.i18n.searchIterations,
+      });
+    });
+
+    it('shows list of iterations', () => {
+      const itemList = wrapper.findAllComponents(GlFormRadio);
+
+      expect(itemList).toHaveLength(mockIterations.length);
+      expect(itemList.at(0).attributes('value')).toEqual(mockIterations[0].id);
+      expect(itemList.at(1).attributes('value')).toEqual(mockIterations[1].id);
     });
   });
 });
