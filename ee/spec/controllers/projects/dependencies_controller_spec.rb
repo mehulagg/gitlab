@@ -145,6 +145,13 @@ RSpec.describe Projects::DependenciesController do
                 it 'return vulnerable dependencies' do
                   expect(json_response['dependencies'].length).to eq(2)
                 end
+
+                it 'returns id and url of vulnerability' do
+                  vulnerability = json_response['dependencies'].first['vulnerabilities'].first
+
+                  expect(vulnerability['id']).to eq('1')
+                  expect(vulnerability['url']).to eq('1')
+                end
               end
             end
 
