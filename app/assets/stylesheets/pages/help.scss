@@ -1,37 +1,18 @@
 .shortcut-mappings {
-  font-size: 12px;
-  color: $gray-700;
+  max-height: 80vh;
 
-  tbody:first-child tr:first-child {
-    padding-top: 0;
-  }
-
-  th {
-    padding-top: 15px;
-    line-height: 1.5;
-    color: $help-shortcut-header-color;
-    text-align: left;
-  }
-
-  td {
-    padding-top: 3px;
-    padding-bottom: 3px;
-    vertical-align: top;
-    line-height: 20px;
+  section {
+    width: 33%;
   }
 
   .shortcut {
-    padding-right: 10px;
     color: $gray-300;
-    text-align: right;
-    white-space: nowrap;
   }
 
-  .key {
-    @extend .badge.badge-pill;
-    background-color: $label-inverse-bg;
-    font: 11px Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    padding: 3px 5px;
+  kbd {
+    margin: 0.1rem 0;
+    line-height: unset;
+    font-size: unset;
   }
 }
 

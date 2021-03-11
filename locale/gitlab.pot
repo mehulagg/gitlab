@@ -5510,9 +5510,6 @@ msgstr ""
 msgid "Certificate Subject"
 msgstr ""
 
-msgid "Change assignee"
-msgstr ""
-
 msgid "Change assignee(s)"
 msgstr ""
 
@@ -5520,12 +5517,6 @@ msgid "Change assignee(s)."
 msgstr ""
 
 msgid "Change branches"
-msgstr ""
-
-msgid "Change label"
-msgstr ""
-
-msgid "Change milestone"
 msgstr ""
 
 msgid "Change path"
@@ -7493,9 +7484,6 @@ msgstr ""
 msgid "Comment on lines %{startLine} to %{endLine}"
 msgstr ""
 
-msgid "Comment/Reply (quoting selected text)"
-msgstr ""
-
 msgid "Commenting on files that replace or are replaced by symbolic links is currently not supported."
 msgstr ""
 
@@ -7511,9 +7499,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Commit %{commit_id}"
-msgstr ""
-
-msgid "Commit (when editing commit message)"
 msgstr ""
 
 msgid "Commit Message"
@@ -8435,9 +8420,6 @@ msgid "Copy reference"
 msgstr ""
 
 msgid "Copy secret"
-msgstr ""
-
-msgid "Copy source branch name"
 msgstr ""
 
 msgid "Copy the code below to implement tracking in your application:"
@@ -11033,9 +11015,6 @@ msgstr ""
 msgid "Edit comment"
 msgstr ""
 
-msgid "Edit description"
-msgstr ""
-
 msgid "Edit environment"
 msgstr ""
 
@@ -11084,19 +11063,10 @@ msgstr ""
 msgid "Edit title and description"
 msgstr ""
 
-msgid "Edit wiki page"
-msgstr ""
-
-msgid "Edit your most recent comment in a thread (from an empty textarea)"
-msgstr ""
-
 msgid "Edited"
 msgstr ""
 
 msgid "Edited %{timeago}"
-msgstr ""
-
-msgid "Editing"
 msgstr ""
 
 msgid "Editor Lite instance is required to set up an extension."
@@ -11817,9 +11787,6 @@ msgid "Epics and Issues"
 msgstr ""
 
 msgid "Epics let you manage your portfolio of projects more efficiently and with less effort"
-msgstr ""
-
-msgid "Epics, Issues, and Merge Requests"
 msgstr ""
 
 msgid "Epics|%{startDate} – %{dueDate}"
@@ -14167,9 +14134,6 @@ msgstr ""
 msgid "Given epic is already related to this epic."
 msgstr ""
 
-msgid "Global Shortcuts"
-msgstr ""
-
 msgid "Global notification settings"
 msgstr ""
 
@@ -14180,9 +14144,6 @@ msgid "Go Micro is a framework for micro service development"
 msgstr ""
 
 msgid "Go back"
-msgstr ""
-
-msgid "Go back (while searching for files)"
 msgstr ""
 
 msgid "Go back to %{tagStart}Open issues%{tagEnd} and select some issues to add to your board."
@@ -14197,49 +14158,13 @@ msgstr ""
 msgid "Go to Webhooks"
 msgstr ""
 
-msgid "Go to commits"
-msgstr ""
-
 msgid "Go to definition"
-msgstr ""
-
-msgid "Go to environments"
 msgstr ""
 
 msgid "Go to epic"
 msgstr ""
 
-msgid "Go to file"
-msgstr ""
-
-msgid "Go to file permalink (while viewing a file)"
-msgstr ""
-
-msgid "Go to files"
-msgstr ""
-
-msgid "Go to find file"
-msgstr ""
-
 msgid "Go to fork"
-msgstr ""
-
-msgid "Go to issue boards"
-msgstr ""
-
-msgid "Go to issues"
-msgstr ""
-
-msgid "Go to jobs"
-msgstr ""
-
-msgid "Go to kubernetes"
-msgstr ""
-
-msgid "Go to merge requests"
-msgstr ""
-
-msgid "Go to metrics"
 msgstr ""
 
 msgid "Go to parent"
@@ -14248,52 +14173,7 @@ msgstr ""
 msgid "Go to project"
 msgstr ""
 
-msgid "Go to releases"
-msgstr ""
-
-msgid "Go to repository charts"
-msgstr ""
-
-msgid "Go to repository graph"
-msgstr ""
-
-msgid "Go to snippets"
-msgstr ""
-
-msgid "Go to the activity feed"
-msgstr ""
-
-msgid "Go to the milestone list"
-msgstr ""
-
-msgid "Go to the project's activity feed"
-msgstr ""
-
-msgid "Go to the project's overview page"
-msgstr ""
-
-msgid "Go to wiki"
-msgstr ""
-
-msgid "Go to your To-Do list"
-msgstr ""
-
 msgid "Go to your fork"
-msgstr ""
-
-msgid "Go to your groups"
-msgstr ""
-
-msgid "Go to your issues"
-msgstr ""
-
-msgid "Go to your merge requests"
-msgstr ""
-
-msgid "Go to your projects"
-msgstr ""
-
-msgid "Go to your snippets"
 msgstr ""
 
 msgid "Goal of the changes and what reviewers should be aware of"
@@ -16966,9 +16846,6 @@ msgstr ""
 msgid "Issues Rate Limits"
 msgstr ""
 
-msgid "Issues and Merge Requests"
-msgstr ""
-
 msgid "Issues can be bugs, tasks or ideas to be discussed. Also, issues are searchable and filterable."
 msgstr ""
 
@@ -17432,6 +17309,18 @@ msgid "Keyboard shortcuts"
 msgstr ""
 
 msgid "KeyboardKey|Ctrl+"
+msgstr ""
+
+msgid "KeyboardKey|ctrl"
+msgstr ""
+
+msgid "KeyboardKey|enter"
+msgstr ""
+
+msgid "KeyboardKey|esc"
+msgstr ""
+
+msgid "KeyboardKey|shift"
 msgstr ""
 
 msgid "KeyboardShortcuts|Alerts"
@@ -19118,9 +19007,6 @@ msgstr ""
 msgid "Merge Request Approvals"
 msgstr ""
 
-msgid "Merge Request Commits"
-msgstr ""
-
 msgid "Merge Requests"
 msgstr ""
 
@@ -20046,12 +19932,6 @@ msgstr ""
 msgid "Move issue from one column of the board to another"
 msgstr ""
 
-msgid "Move selection down"
-msgstr ""
-
-msgid "Move selection up"
-msgstr ""
-
 msgid "Move test case"
 msgstr ""
 
@@ -20659,15 +20539,6 @@ msgid "Newly registered users will by default be external"
 msgstr ""
 
 msgid "Next"
-msgstr ""
-
-msgid "Next commit"
-msgstr ""
-
-msgid "Next file in diff"
-msgstr ""
-
-msgid "Next unresolved discussion"
 msgstr ""
 
 msgid "Nickname"
@@ -21576,9 +21447,6 @@ msgid "Open API"
 msgstr ""
 
 msgid "Open API specification file path"
-msgstr ""
-
-msgid "Open Selection"
 msgstr ""
 
 msgid "Open comment type dropdown"
@@ -23126,15 +22994,6 @@ msgstr ""
 msgid "Previous Artifacts"
 msgstr ""
 
-msgid "Previous commit"
-msgstr ""
-
-msgid "Previous file in diff"
-msgstr ""
-
-msgid "Previous unresolved discussion"
-msgstr ""
-
 msgid "Primary"
 msgstr ""
 
@@ -23631,9 +23490,6 @@ msgid "Project Audit Events"
 msgstr ""
 
 msgid "Project Badges"
-msgstr ""
-
-msgid "Project Files"
 msgstr ""
 
 msgid "Project ID"
@@ -25769,9 +25625,6 @@ msgstr ""
 msgid "Repository Analytics"
 msgstr ""
 
-msgid "Repository Graph"
-msgstr ""
-
 msgid "Repository Settings"
 msgstr ""
 
@@ -26533,22 +26386,10 @@ msgstr ""
 msgid "Scopes: %{scope_list}"
 msgstr ""
 
-msgid "Scroll down"
-msgstr ""
-
-msgid "Scroll left"
-msgstr ""
-
-msgid "Scroll right"
-msgstr ""
-
 msgid "Scroll to bottom"
 msgstr ""
 
 msgid "Scroll to top"
-msgstr ""
-
-msgid "Scroll up"
 msgstr ""
 
 msgid "Search"
@@ -28726,9 +28567,6 @@ msgid "Start merge train"
 msgstr ""
 
 msgid "Start merge train when pipeline succeeds"
-msgstr ""
-
-msgid "Start search"
 msgstr ""
 
 msgid "Start thread"
@@ -31655,12 +31493,6 @@ msgstr ""
 msgid "Today"
 msgstr ""
 
-msgid "Toggle GitLab Next"
-msgstr ""
-
-msgid "Toggle Markdown preview"
-msgstr ""
-
 msgid "Toggle Sidebar"
 msgstr ""
 
@@ -31695,12 +31527,6 @@ msgid "Toggle project select"
 msgstr ""
 
 msgid "Toggle sidebar"
-msgstr ""
-
-msgid "Toggle the Performance Bar"
-msgstr ""
-
-msgid "Toggle this dialog"
 msgstr ""
 
 msgid "Toggle thread"
