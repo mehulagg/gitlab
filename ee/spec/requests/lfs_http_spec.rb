@@ -6,10 +6,6 @@ RSpec.describe 'Git LFS API and storage' do
   include WorkhorseHelpers
   include EE::GeoHelpers
 
-  before do
-    stub_feature_flags(geo_lfs_object_replication_ssf: false)
-  end
-
   let(:user) { create(:user) }
   let!(:lfs_object) { create(:lfs_object, :with_file) }
 

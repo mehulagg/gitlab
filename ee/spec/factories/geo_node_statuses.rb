@@ -11,10 +11,14 @@ FactoryBot.define do
       attachments_failed_count { 13 }
       attachments_synced_count { 141 }
       attachments_synced_missing_on_primary_count { 89 }
-      lfs_objects_count { 256 }
-      lfs_objects_failed_count { 12 }
-      lfs_objects_synced_count { 123 }
-      lfs_objects_synced_missing_on_primary_count { 90 }
+
+      if Feature.disabled?(:geo_lfs_object_replication_ssf)
+        lfs_objects_count { 256 }
+        lfs_objects_failed_count { 12 }
+        lfs_objects_synced_count { 123 }
+        lfs_objects_synced_missing_on_primary_count { 90 }
+      end
+
       job_artifacts_count { 580 }
       job_artifacts_failed_count { 3 }
       job_artifacts_synced_count { 577 }

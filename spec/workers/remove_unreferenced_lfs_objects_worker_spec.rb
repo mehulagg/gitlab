@@ -5,10 +5,6 @@ require 'spec_helper'
 RSpec.describe RemoveUnreferencedLfsObjectsWorker do
   let(:worker) { described_class.new }
 
-  before do
-    stub_feature_flags(geo_lfs_object_replication_ssf: false)
-  end
-
   describe '#perform' do
     let!(:unreferenced_lfs_object1) { create(:lfs_object, oid: '1') }
     let!(:unreferenced_lfs_object2) { create(:lfs_object, oid: '2') }

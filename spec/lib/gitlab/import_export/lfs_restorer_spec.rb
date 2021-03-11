@@ -13,7 +13,6 @@ RSpec.describe Gitlab::ImportExport::LfsRestorer do
   subject(:restorer) { described_class.new(project: project, shared: shared) }
 
   before do
-    stub_feature_flags(geo_lfs_object_replication_ssf: false)
     allow(Gitlab::ImportExport).to receive(:storage_path).and_return(export_path)
     FileUtils.mkdir_p(shared.export_path)
   end

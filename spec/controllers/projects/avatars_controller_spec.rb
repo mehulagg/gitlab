@@ -53,10 +53,6 @@ RSpec.describe Projects::AvatarsController do
         let(:filename) { 'lfs_object.iso' }
         let(:filepath) { "files/lfs/#{filename}" }
 
-        before do
-          stub_feature_flags(geo_lfs_object_replication_ssf: false)
-        end
-
         it_behaves_like 'a controller that can serve LFS files'
         it_behaves_like 'project cache control headers'
       end

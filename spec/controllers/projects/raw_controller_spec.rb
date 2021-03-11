@@ -65,10 +65,6 @@ RSpec.describe Projects::RawController do
     end
 
     context 'with LFS files' do
-      before do
-        stub_feature_flags(geo_lfs_object_replication_ssf: false)
-      end
-
       let(:filename) { 'lfs_object.iso' }
       let(:filepath) { "be93687/files/lfs/#{filename}" }
 

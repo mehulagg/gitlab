@@ -5,10 +5,6 @@ require 'spec_helper'
 RSpec.describe LfsObject do
   include EE::GeoHelpers
 
-  before do
-    stub_feature_flags(geo_lfs_object_replication_ssf: false)
-  end
-
   describe '#destroy' do
     subject { create(:lfs_object, :with_file) }
 

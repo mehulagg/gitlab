@@ -15,10 +15,6 @@ RSpec.describe Lfs::PushService do
   subject(:service) { described_class.new(project, nil, params) }
 
   describe "#execute" do
-    before do
-      stub_feature_flags(geo_lfs_object_replication_ssf: false)
-    end
-
     it 'uploads the object when upload is requested' do
       stub_lfs_batch(lfs_object)
 
