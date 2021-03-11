@@ -93,7 +93,7 @@ correct information in the [Alert list](alerts.md) and the
 [Alert Details page](alerts.md#alert-details-page), map your alert's fields to
 GitLab fields when you [create an HTTP endpoint](#http-endpoints):
 
-![Alert Management List](img/custom_alert_mapping_v13_8.png)
+![Alert Management List](img/custom_alert_mapping_v13_10.png)
 
 ### External Prometheus integration
 
