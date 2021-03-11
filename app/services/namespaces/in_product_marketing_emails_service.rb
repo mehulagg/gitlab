@@ -39,6 +39,11 @@ module Namespaces
     attr_reader :track, :interval, :sent_email_user_ids
 
     def send_email_for_group(group)
+      # This is a temporary fix to prevent calling `.root_ancestor` on groups
+      # that are not root groups.
+      # See https://gitlab.com/groups/gitlab-org/-/epics/5594 for more information.
+      return unless group.parent_id.nil?
+
       experiment_enabled_for_group = experiment_enabled_for_group?(group)
       experiment_add_group(group, experiment_enabled_for_group)
       return unless experiment_enabled_for_group
