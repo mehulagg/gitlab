@@ -115,26 +115,26 @@ A number of considerations must be made when changing the default branch name fo
 
 - **Step 1:** On your local command line, navigate to the location of the repository in question (named `my-sample-repo` in this example) and ensure you are on the default branch.
 
-   ```
+   ```plaintext
    cd my-sample-repo
    git checkout master
    ```
 
 - **Step 2:** Move the existing default branch to a newly named branch. Using the argument `-m` will ensure all the commit history is transferred to the new branch.
 
-   ```
+   ```plaintext
    git branch -m master main
    ```
 
 - **Step 3:** Push the newly created ‘main’ branch upstream and set your local branch to track the remote branch with the same name.
 
-   ```
+   ```plaintext
    git push -u origin main
    ```
 
 - **Step 4:** Point `HEAD` to your new default branch: in case you plan to remove the old `master` branch, update the pointer to the new default branch.
 
-   ```
+   ```plaintext
    git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
    ```
 
