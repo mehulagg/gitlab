@@ -72,6 +72,10 @@ Please read [versioning](#versioning) section for introducing breaking change sa
   When a root `.gitlab-ci.yml` [includes](../../ci/yaml/README.md#include)
   multiple templates, these global keywords could be overridden by the
   others and cause an unexpected behavior.
+- Include [a changelog](../changelog.md) in your merge request if it's user-facing change.
+- Use [`rules`](../../ci/yaml/README.md#rules) keyword over [`only`/`except`](../../ci/yaml/README.md#onlyexcept-basic) for the consistency.
+- Use [`$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH`](https://docs.gitlab.com/ee/ci/variables/predefined_variables.html)
+  instead of literal branch names such as `only: master` or `only: main` if you want a job to be executed on the default branch only.
 
 ## Versioning
 
