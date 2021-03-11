@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Create' do
-    describe 'File Locking' do
+    describe 'File Locking', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/324167', type: :investigating } do
       let(:user_one) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
       let(:user_two) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_2, Runtime::Env.gitlab_qa_password_2) }
 
