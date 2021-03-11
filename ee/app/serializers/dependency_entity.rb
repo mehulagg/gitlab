@@ -13,9 +13,7 @@ class DependencyEntity < Grape::Entity
   end
 
   class VulnerabilityEntity < Grape::Entity
-    expose :name, :severity
-    expose :id, if: ->() { feature_flag_enabled? }
-    expose :url, if: ->() { feature_flag_enabled? }
+    expose :name, :severity, :id, :url
   end
 
   class LicenseEntity < Grape::Entity
@@ -35,9 +33,5 @@ class DependencyEntity < Grape::Entity
 
   def can_read_licenses?
     can?(request.user, :read_licenses, request.project)
-  end
-
-  def feature_flag_enabled?
-    Feature.enabled?(:standalone_vuln_dependency_list, request.project)
   end
 end
