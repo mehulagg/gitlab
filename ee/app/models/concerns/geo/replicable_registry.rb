@@ -10,6 +10,8 @@ module Geo::ReplicableRegistry
     failed: 3
   }.freeze
 
+  SYNC_TIMEOUT = ::Geo::FrameworkRepositorySyncService::LEASE_TIMEOUT
+
   class_methods do
     def state_value(state_string)
       STATE_VALUES[state_string]
@@ -25,6 +27,21 @@ module Geo::ReplicableRegistry
 
     def registry_consistency_worker_enabled?
       replicator_class.enabled?
+    end
+
+
+    # Fail syncs for records which started syncing a long time ago
+    def fail_sync_timeouts
+      attrs = {
+        state: state_value(:failed),
+        last_sync_failure: "Sync timed out after #{SYNC_TIMEOUT}",
+        retry_count: 1,
+        retry_at: next_retry_time(1)
+      }
+
+      sync_timed_out.each_batch do |relation|
+        relation.update_all(attrs)
+      end
     end
   end
 
@@ -42,6 +59,7 @@ module Geo::ReplicableRegistry
     scope :pending, -> { with_state(:pending) }
     scope :retry_due, -> { where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current))) }
     scope :synced, -> { with_state(:synced) }
+    scope :sync_timed_out, -> { started.where("last_synced_at < ?", SYNC_TIMEOUT.ago) }
 
     state_machine :state, initial: :pending do
       state :pending, value: STATE_VALUES[:pending]
