@@ -205,7 +205,12 @@ export default {
           @selected="onStageSelect"
         />
       </div>
-      <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
+      <div class="gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
+        <filter-bar
+          v-if="shouldDisplayFilters"
+          class="js-filter-bar filtered-search-box gl-display-flex gl-mb-2 gl-mr-3 gl-border-none"
+          :group-path="currentGroupPath"
+        />
         <div
           v-if="shouldDisplayFilters"
           class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
@@ -229,11 +234,6 @@ export default {
             @change="setDateRange"
           />
         </div>
-        <filter-bar
-          v-if="shouldDisplayFilters"
-          class="js-filter-bar filtered-search-box gl-display-flex gl-mt-3 gl-mr-3 gl-border-none"
-          :group-path="currentGroupPath"
-        />
       </div>
     </div>
     <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
