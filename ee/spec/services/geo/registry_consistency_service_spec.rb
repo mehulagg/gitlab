@@ -11,6 +11,7 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
     stub_current_geo_node(secondary)
     stub_registry_replication_config(enabled: true)
     stub_external_diffs_setting(enabled: true)
+    stub_feature_flags(geo_lfs_object_replication_ssf: false)
   end
 
   def model_class_factory_name(registry_class)

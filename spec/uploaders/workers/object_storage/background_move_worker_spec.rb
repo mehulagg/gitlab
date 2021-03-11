@@ -19,6 +19,7 @@ RSpec.describe ObjectStorage::BackgroundMoveWorker do
 
     context 'when object storage is enabled' do
       before do
+        stub_feature_flags(geo_lfs_object_replication_ssf: false)
         stub_lfs_object_storage(background_upload: true)
       end
 

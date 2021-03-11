@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe API::Internal::Lfs do
   include APIInternalBaseHelpers
 
+  before do
+    stub_feature_flags(geo_lfs_object_replication_ssf: false)
+  end
+
   let_it_be(:project) { create(:project) }
   let_it_be(:lfs_object) { create(:lfs_object, :with_file) }
   let_it_be(:lfs_objects_project) { create(:lfs_objects_project, project: project, lfs_object: lfs_object) }

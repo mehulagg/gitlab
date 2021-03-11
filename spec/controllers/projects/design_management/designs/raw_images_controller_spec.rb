@@ -143,6 +143,10 @@ RSpec.describe Projects::DesignManagement::Designs::RawImagesController do
     # controller will never authorize the user. Therefore #show will return a 403 and
     # we cannot test the data that it serves.
     it_behaves_like 'a controller that can serve LFS files', skip_lfs_disabled_tests: true do
+      before do
+        stub_feature_flags(geo_lfs_object_replication_ssf: false)
+      end
+
       let(:file) { fixture_file_upload('spec/fixtures/dk.png', '`/png') }
       let(:lfs_pointer) { Gitlab::Git::LfsPointerFile.new(file.read) }
       let(:design) { create(:design, :with_lfs_file, file: lfs_pointer.pointer, issue: issue) }
