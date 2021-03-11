@@ -63,7 +63,7 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = '', requestHeaders = '', auth = {} } =
+    const { name = '', targetUrl = '', excludedUrls = [], requestHeaders = '', auth = {} } =
       this.siteProfile || {};
 
     const form = {
@@ -72,7 +72,11 @@ export default {
       fields: {
         profileName: initFormField({ value: name }),
         targetUrl: initFormField({ value: targetUrl }),
-        excludedUrls: initFormField({ value: excludedUrls, required: false, skipValidation: true }),
+        excludedUrls: initFormField({
+          value: excludedUrls.join(','),
+          required: false,
+          skipValidation: true,
+        }),
         requestHeaders: initFormField({
           value: requestHeaders,
           required: false,
@@ -169,6 +173,7 @@ export default {
           ...serializeFormObject(this.form.fields),
           ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
             auth: serializeFormObject(this.authSection.fields),
+            excludedUrls: this.form.fields.excludedUrls.value.split(','),
           }),
         },
       };
