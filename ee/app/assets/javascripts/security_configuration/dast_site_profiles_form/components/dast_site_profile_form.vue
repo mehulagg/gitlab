@@ -24,6 +24,7 @@ import DastSiteAuthSection from './dast_site_auth_section.vue';
 
 const MAX_CHAR_LIMIT_EXCLUDED_URLS = 2048;
 const MAX_CHAR_LIMIT_REQUEST_HEADERS = 2048;
+const EXCLUDED_URLS_SEPARATOR = ',';
 
 export default {
   name: 'DastSiteProfileForm',
@@ -63,7 +64,7 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = '', requestHeaders = '', auth = {} } =
+    const { name = '', targetUrl = '', excludedUrls = [], requestHeaders = '', auth = {} } =
       this.siteProfile || {};
 
     const form = {
@@ -72,7 +73,11 @@ export default {
       fields: {
         profileName: initFormField({ value: name }),
         targetUrl: initFormField({ value: targetUrl }),
-        excludedUrls: initFormField({ value: excludedUrls, required: false, skipValidation: true }),
+        excludedUrls: initFormField({
+          value: excludedUrls.join(EXCLUDED_URLS_SEPARATOR),
+          required: false,
+          skipValidation: true,
+        }),
         requestHeaders: initFormField({
           value: requestHeaders,
           required: false,
@@ -147,6 +152,9 @@ export default {
     }
   },
   methods: {
+    parseExcludedUrls(input) {
+      return input.value.split(EXCLUDED_URLS_SEPARATOR).map((url) => url.trim());
+    },
     onSubmit() {
       const isAuthEnabled =
         this.glFeatures.securityDastSiteProfilesAdditionalFields &&
@@ -162,13 +170,18 @@ export default {
       this.hideErrors();
       const { errorMessage } = this.i18n;
 
+      const { profileName, targetUrl, ...additionalFields } = serializeFormObject(this.form.fields);
+
       const variables = {
         input: {
           fullPath: this.fullPath,
           ...(this.isEdit ? { id: this.siteProfile.id } : {}),
-          ...serializeFormObject(this.form.fields),
+          profileName,
+          targetUrl,
           ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
+            ...additionalFields,
             auth: serializeFormObject(this.authSection.fields),
+            excludedUrls: this.parseExcludedUrls(this.form.fields.excludedUrls),
           }),
         },
       };

@@ -24,7 +24,7 @@ const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/d
 const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
-const excludedUrls = 'http://example.com/logout';
+const excludedUrls = 'https://foo.com/logout, https://foo.com/send_mail';
 const requestHeaders = 'my-new-header=something';
 
 const defaultProps = {
@@ -222,10 +222,10 @@ describe('DastSiteProfileForm', () => {
             input: {
               profileName,
               targetUrl,
-              excludedUrls,
               requestHeaders,
               fullPath,
               auth: siteProfileOne.auth,
+              excludedUrls: siteProfileOne.excludedUrls,
               ...mutationVars,
             },
           });
@@ -317,20 +317,54 @@ describe('DastSiteProfileForm', () => {
   });
 
   describe('when feature flag is off', () => {
-    beforeEach(() => {
-      createFullComponent({
-        provide: {
-          glFeatures: {
-            securityDastSiteProfilesAdditionalFields: false,
-          },
+    const mountOpts = {
+      provide: {
+        glFeatures: {
+          securityDastSiteProfilesAdditionalFields: false,
         },
-      });
-    });
+      },
+    };
+
+    const fillAndSubmitForm = async () => {
+      await setFieldValue(findProfileNameInput(), profileName);
+      await setFieldValue(findTargetUrlInput(), targetUrl);
+      submitForm();
+    };
 
     it('should not render additional fields', () => {
+      createFullComponent(mountOpts);
+
       expect(findAuthSection().exists()).toBe(false);
       expect(findExcludedUrlsInput().exists()).toBe(false);
       expect(findRequestHeadersInput().exists()).toBe(false);
+    });
+
+    describe.each`
+      title                  | siteProfile       | mutationVars                 | mutationKind
+      ${'New site profile'}  | ${null}           | ${{}}                        | ${'dastSiteProfileCreate'}
+      ${'Edit site profile'} | ${siteProfileOne} | ${{ id: siteProfileOne.id }} | ${'dastSiteProfileUpdate'}
+    `('$title', ({ siteProfile, mutationVars, mutationKind }) => {
+      beforeEach(() => {
+        createFullComponent({
+          propsData: {
+            siteProfile,
+          },
+          ...mountOpts,
+        });
+        fillAndSubmitForm();
+      });
+
+      it('form submission triggers correct GraphQL mutation', async () => {
+        await fillAndSubmitForm();
+        expect(requestHandlers[mutationKind]).toHaveBeenCalledWith({
+          input: {
+            profileName,
+            targetUrl,
+            fullPath,
+            ...mutationVars,
+          },
+        });
+      });
     });
   });
 });
