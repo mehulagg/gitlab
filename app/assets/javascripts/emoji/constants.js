@@ -1,4 +1,5 @@
 export const CATEGORY_ICON_MAP = {
+  frequently_used: 'history',
   activity: 'dumbbell',
   people: 'smiley',
   nature: 'nature',

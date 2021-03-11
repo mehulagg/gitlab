@@ -5,7 +5,7 @@ import { CATEGORY_NAMES } from '~/emoji';
 import { CATEGORY_ICON_MAP } from '../constants';
 import Category from './category.vue';
 import EmojiList from './emoji_list.vue';
-import { getEmojiCategories } from './utils';
+import { addToFrequentlyUsed, getEmojiCategories, hasFrequentlyUsedEmojis } from './utils';
 
 export default {
   components: {
@@ -31,7 +31,10 @@ export default {
   },
   computed: {
     categoryNames() {
-      return CATEGORY_NAMES.map((category) => ({
+      return CATEGORY_NAMES.filter((c) => {
+        if (c === 'frequently_used') return hasFrequentlyUsedEmojis();
+        return true;
+      }).map((category) => ({
         name: category,
         icon: CATEGORY_ICON_MAP[category],
       }));
@@ -50,6 +53,7 @@ export default {
     selectEmoji(name) {
       this.$emit('click', name);
       this.$refs.dropdown.hide();
+      addToFrequentlyUsed(name);
     },
     getBoundaryElement() {
       return document.querySelector('.content-wrapper') || 'scrollParent';
