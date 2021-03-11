@@ -250,7 +250,7 @@ describe('Batch comments store actions', () => {
       const position = { test: true };
       const expectation = JSON.stringify(position);
       return actions.updateDraft(context, { ...params, position, callback() {} }).then(() => {
-        expect(service.update.mock.calls[0][1].position).toEqual(expectation);
+        expect(service.update.mock.calls[0][1].position).toBe(expectation);
       });
     });
   });

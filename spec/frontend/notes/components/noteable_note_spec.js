@@ -303,7 +303,7 @@ describe('issue_note', () => {
       createWrapper({ note: { ...note, position } });
       updateActions();
       wrapper.findComponent(NoteBody).vm.$emit('handleFormUpdate', ...params);
-      expect(updateNote.mock.calls[0][1].note.note.position).toEqual(expectation);
+      expect(updateNote.mock.calls[0][1].note.note.position).toBe(expectation);
     });
   });
 });
