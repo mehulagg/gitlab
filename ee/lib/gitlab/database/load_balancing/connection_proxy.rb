@@ -19,9 +19,12 @@ module Gitlab
           delete_all
           insert
           transaction
+        ).freeze
+
+        CONDITIONAL_STICKY_WRITES = %i(
           update
           update_all
-        ).freeze
+        )
 
         NON_STICKY_READS = %i(
           sanitize_limit
@@ -57,6 +60,12 @@ module Gitlab
           end
         end
 
+        CONDITIONAL_STICKY_WRITES.each do |name|
+          define_method(name) do |*args, &block|
+            write_using_load_balancer(name, args, conditional_sticky: true, &block)
+          end
+        end
+
         # Delegates all unknown messages to a read-write connection.
         def method_missing(name, *args, &block)
           write_using_load_balancer(name, args, &block)
@@ -78,14 +87,22 @@ module Gitlab
         # name - The name of the method to call on a connection object.
         # sticky - If set to true the session will stick to the master after
         #          the write.
-        def write_using_load_balancer(name, args, sticky: false, &block)
-          result = @load_balancer.read_write do |connection|
+        # conditional_sticky - If set to true the session will stick to master only if write was effective.
+        def write_using_load_balancer(name, args, sticky: false, conditional_sticky: false, &block)
+          result = nil
+
+          @load_balancer.read_write do |connection|
             # Sticking has to be enabled before calling the method. Not doing so
             # could lead to methods called in a block still being performed on a
             # secondary instead of on a primary (when necessary).
             ::Gitlab::Database::LoadBalancing::Session.current.write! if sticky
 
-            connection.send(name, *args, &block)
+            result = connection.send(name, *args, &block)
+
+            # Stick only if `update` or `update_all` return a non-zero of updated rows
+            if result.to_i > 0 && conditional_sticky
+              ::Gitlab::Database::LoadBalancing::Session.current.write! 
+            end
           end
 
           result
