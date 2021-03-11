@@ -29,6 +29,7 @@ module API
         expose :credentials, using: Entities::JobRequest::Credentials
         expose :all_dependencies, as: :dependencies, using: Entities::JobRequest::Dependency
         expose :features
+        expose :release
       end
     end
   end

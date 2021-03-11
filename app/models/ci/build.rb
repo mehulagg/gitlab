@@ -804,6 +804,10 @@ module Ci
        Gitlab::Ci::Build::Step.from_after_script(self)].compact
     end
 
+    def release
+      options[:release]
+    end
+
     def image
       Gitlab::Ci::Build::Image.from_image(self)
     end
