@@ -57,3 +57,5 @@ module Ci
     end
   end
 end
+
+Ci::PipelineArtifact.prepend_if_ee('::EE::Ci::PipelineArtifact')
