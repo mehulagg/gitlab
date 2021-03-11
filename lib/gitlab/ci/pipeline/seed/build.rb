@@ -154,8 +154,8 @@ module Gitlab
           end
 
           def variable_expansion_errors
-            sorted_collection = evaluate_context.variables.sorted_collection(@pipeline.project)
-            errors = sorted_collection.errors
+            expanded_collection = evaluate_context.variables.expand_all(@pipeline.project)
+            errors = expanded_collection.errors
             ["#{name}: #{errors}"] if errors
           end
 

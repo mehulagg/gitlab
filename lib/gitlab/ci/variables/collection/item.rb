@@ -7,26 +7,23 @@ module Gitlab
         class Item
           include Gitlab::Utils::StrongMemoize
 
-          attr_reader :raw
-
           def initialize(key:, value:, public: true, file: false, masked: false, raw: false)
             raise ArgumentError, "`#{key}` must be of type String or nil value, while it was: #{value.class}" unless
               value.is_a?(String) || value.nil?
 
-            @variable = { key: key, value: value, public: public, file: file, masked: masked }
-            @raw = raw
+            @variable = { key: key, value: value, public: public, file: file, masked: masked, raw: raw }
           end
 
           def value
             @variable.fetch(:value)
           end
 
-          def [](key)
-            @variable.fetch(key)
+          def raw
+            @variable.fetch(:raw)
           end
 
-          def merge(*other_hashes)
-            self.class.fabricate(@variable.merge(*other_hashes))
+          def [](key)
+            @variable.fetch(key)
           end
 
           def ==(other)
@@ -50,7 +47,7 @@ module Gitlab
           #
           def to_runner_variable
             @variable.reject do |hash_key, hash_value|
-              hash_key == :file && hash_value == false
+              (hash_key == :file || hash_key == :raw) && hash_value == false
             end
           end
 
