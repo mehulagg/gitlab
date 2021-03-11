@@ -34,11 +34,7 @@ module Rack
         end
 
         def log_threshold
-          threshold = ENV['RACK_MULTIPART_LOGGING_BYTES'].to_i
-
-          return threshold if threshold > 0
-
-          100_000_000
+          ENV.fetch('RACK_MULTIPART_LOGGING_BYTES', 100_000_000).to_i
         end
       end
 
