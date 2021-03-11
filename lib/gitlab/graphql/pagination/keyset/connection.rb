@@ -72,9 +72,13 @@ module Gitlab
                 when Array
                   sliced_nodes.size > limit_value
                 else
-                  # If we count the number of requested items plus one (`limit_value + 1`),
-                  # then if we get `limit_value + 1` then we know there is a next page
-                  relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
+                  # Rails.logger.info "--woot"
+                  # Rails.logger.info sliced_nodes.to_sql
+                  sliced_nodes.limit(1).offset(limit_value)
+                  # Rails.logger.info "-----"
+                  # # If we count the number of requested items plus one (`limit_value + 1`),
+                  # # then if we get `limit_value + 1` then we know there is a next page
+                  # relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
                 end
               else
                 false
