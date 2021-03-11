@@ -68,14 +68,35 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
     end
 
     context 'with vulnerable dependency' do
-      let(:data) { formatter.format(dependency, package_manager, file_path, parsed_report['vulnerabilities'].first) }
       let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][1] }
+      let(:data) { formatter.format(dependency, package_manager, file_path, vulnerability_data) }
 
-      it 'merge vulnerabilities data' do
-        vulnerabilities = data[:vulnerabilities]
+      context 'with feature `standalone vulnerabilities` enabled' do
+        let_it_be(:vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
+        let(:vulnerability_data) { create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: vulnerability) }
 
-        expect(vulnerabilities.first[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-        expect(vulnerabilities.first[:severity]).to eq('high')
+        it 'merge vulnerabilities data' do
+          vulnerabilities = data[:vulnerabilities]
+          path = "/security/vulnerabilities/#{vulnerability.id}"
+
+          expect(vulnerabilities.first[:id]).to eq(vulnerability.id)
+          expect(vulnerabilities.first[:url]).to end_with(path)
+        end
+      end
+
+      context 'with disabled feature' do
+        let(:vulnerability_data) { parsed_report['vulnerabilities'].first }
+
+        before do
+          stub_feature_flags(standalone_vuln_dependency_list: false)
+        end
+
+        it 'merge vulnerabilities data' do
+          vulnerabilities = data[:vulnerabilities]
+
+          expect(vulnerabilities.first[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+          expect(vulnerabilities.first[:severity]).to eq('high')
+        end
       end
     end
   end
