@@ -373,6 +373,34 @@ describe('InviteMembersModal', () => {
         });
       });
 
+      describe('when sharing the group is successful but the json has an invite failure', () => {
+        const groupPostData = {
+          group_id: sharedGroup.id,
+          group_access: defaultAccessLevel,
+          expires_at: undefined,
+          format: 'json',
+        };
+
+        beforeEach(() => {
+          wrapper = createComponent({ groupToBeSharedWith: sharedGroup });
+
+          wrapper.setData({ inviteeType: 'group' });
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest.spyOn(Api, 'groupShareWithGroup').mockResolvedValue({ data: groupPostData });
+          jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
+
+          clickInviteButton();
+        });
+
+        it('calls Api groupShareWithGroup with the correct params', () => {
+          expect(Api.groupShareWithGroup).toHaveBeenCalledWith(id, groupPostData);
+        });
+
+        it('displays the successful toastMessage', () => {
+          expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
+        });
+      });
+
       describe('when sharing the group fails', () => {
         beforeEach(() => {
           wrapper = createComponent({ groupToBeSharedWith: sharedGroup });

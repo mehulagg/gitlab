@@ -204,9 +204,21 @@ export default {
       this.$toast.show(this.$options.labels.toastMessageSuccessful, this.toastOptions);
     },
     showToastMessageError(error) {
-      const message = error.response.data.message || this.$options.labels.toastMessageUnsuccessful;
+      try {
+        const { message } = error.response.data;
 
-      this.$toast.show(message, this.toastOptions);
+        if (isString(message)) {
+          this.$toast.show(message, this.toastOptions);
+
+          return;
+        }
+
+        const [firstKey] = Object.keys(message);
+        const messages = message[firstKey];
+        this.$toast.show(messages[0], this.toastOptions);
+      } catch {
+        this.$toast.show(this.$options.labels.toastMessageUnsuccessful, this.toastOptions);
+      }
     },
   },
   labels: {
