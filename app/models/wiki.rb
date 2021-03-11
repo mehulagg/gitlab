@@ -18,6 +18,8 @@ class Wiki
 
   HOMEPAGE = 'home'
   SIDEBAR = '_sidebar'
+  REDIRECTIONS = '_redirections'
+  SPECIAL_FILES = [SIDEBAR, REDIRECTIONS].freeze
 
   TITLE_ORDER = 'title'
   CREATED_AT_ORDER = 'created_at'
@@ -159,6 +161,10 @@ class Wiki
     find_page(SIDEBAR, version)
   end
 
+  def find_redirection(path)
+    redirections[path]
+  end
+
   def find_file(name, version = nil)
     wiki.file(name, version)
   end
@@ -280,6 +286,31 @@ class Wiki
 
   def default_message(action, title)
     "#{user.username} #{action} page: #{title}"
+  end
+
+  def redirections
+    strong_memoize(:redirections) do
+      redirection_file = find_redirections_file
+
+      {}.tap do |route_table|
+        next route_table unless redirection_file
+
+        redirection_file.content.each_line do |line|
+          route_mapping = line.tr(' ', '').match(/^(.+)->(.+)$/)
+
+          next unless route_mapping
+          next if route_mapping[1] == route_mapping[2]
+          # Avoid create redirections for special files
+          next if (Wiki::SPECIAL_FILES & [route_mapping[1], route_mapping[2]]).present?
+
+          route_table[route_mapping[1]] = route_mapping[2]
+        end
+      end
+    end
+  end
+
+  def find_redirections_file(version = nil)
+    find_page(REDIRECTIONS, version)
   end
 end
 

@@ -81,6 +81,8 @@ module WikiActions
       render 'shared/wikis/show'
     elsif file_blob
       send_blob(wiki.repository, file_blob)
+    elsif redirected_page = wiki.find_redirection(params[:id])
+      redirect_to wiki_page_path(wiki, redirected_page)
     elsif show_create_form?
       # Assign a title to the WikiPage unless `id` is a randomly generated slug from #new
       title = params[:id] unless params[:random_title].present?
