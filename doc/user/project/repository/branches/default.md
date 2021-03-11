@@ -99,11 +99,9 @@ uses. Before you change this branch name, consult with your project owners and m
 Ensure they understand the scope of this change includes references to the old
 branch name in related code and scripts.
 
-<!-- vale off -->
-
 When changing the default branch name for an existing repository, you should preserve
 the history of your default branch by renaming it, instead of deleting it. This example
-renames a Git repository's (`example`) default branch from `master` to `main`.
+renames a Git repository's (`example`) default branch from `old` to `new`.
 
 1. On your local command line, navigate to your `example` repository, and ensure
    you're on the default branch:
@@ -113,47 +111,46 @@ renames a Git repository's (`example`) default branch from `master` to `main`.
    git checkout master
    ```
 
-1. Rename the existing default branch (`master`) to the new name (`main`). The argument `-m`
+1. Rename the existing default branch (`old`) to the new name (`new`). The argument `-m`
    transfers all commit history to the new branch:
 
    ```plaintext
-   git branch -m master main
+   git branch -m old new
    ```
 
-1. Push the newly created `main` branch upstream, and set your local branch to track
+1. Push the newly created `new` branch upstream, and set your local branch to track
    the remote branch with the same name:
 
    ```plaintext
-   git push -u origin main
+   git push -u origin new
    ```
 
-1. If you plan to remove the old `master` branch, update `HEAD` to point your new
-   default branch:
+1. If you plan to remove the `old` branch, update `HEAD` to point to your new default branch:
 
    ```plaintext
-   git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main
+   git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/new
    ```
 
 1. Sign in to the GitLab UI as an [administrator](../../../permissions.md) and follow
    the instructions to
    [change the default branch for this project](#change-the-default-branch-name-for-a-project).
-   Select `main` as your new default branch.
-1. Protect your new `main` branch as described in the [protected branches documentation](../../protected_branches.md).
-1. (Optional) If you want to delete the old `master` branch:
-   1. Verify that nothing is pointing to the old `master` branch.
-   1. Delete the old default branch on the remote:
+   Select `new` as your new default branch.
+1. Protect your new `new` branch as described in the [protected branches documentation](../../protected_branches.md).
+1. (Optional) If you want to delete the `old` branch:
+   1. Verify that nothing is pointing to the `old` branch.
+   1. Delete the o`old` branch on the remote:
 
       ```plaintext
-      git push origin --delete master
+      git push origin --delete old
       ```
 
-      You can delete the `master` branch at a later time, after you confirm the new default branch is working as expected.
+      You can delete the `old` branch at a later time, after you confirm the new default branch is working as expected.
 
 1. Notify your project contributors of this change, because they must also take some steps:
 
    - Contributors should pull the new default branch to their local copy of the repository.
-   - Contributors with open merge requests that target the `master` branch should manually
-     re-point the merge requests to use `main` instead.
+   - Contributors with open merge requests that target the `old` branch should manually
+     re-point the merge requests to use `new` instead.
 1. In your repository, update any references to the old branch name in your code.
 1. Update references to the old branch name in related code and scripts that reside outside
    your repository, such as helper utilities and integrations.
