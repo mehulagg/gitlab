@@ -15,36 +15,60 @@ module Projects
       end
 
       def enabled_keys
-        strong_memoize(:enabled_keys) do
-          project.deploy_keys.with_projects
+        if Feature.enabled?(:optimize_deploy_keys_presenter, project, default_enabled: :yaml)
+          strong_memoize(:enabled_keys) do
+            project.deploy_keys.with_projects.all
+          end
+        else
+          strong_memoize(:legacy_enabled_keys) do
+            project.deploy_keys.with_projects
+          end
         end
       end
 
       def available_keys
-        strong_memoize(:available_keys) do
-          current_user
-            .accessible_deploy_keys
-            .id_not_in(enabled_keys.select(:id))
-            .with_projects
+        if Feature.enabled?(:optimize_deploy_keys_presenter, project, default_enabled: :yaml)
+          strong_memoize(:available_keys) do
+            current_user.accessible_deploy_keys.with_projects.all - enabled_keys
+          end
+        else
+          strong_memoize(:legacy_available_keys) do
+            current_user
+              .accessible_deploy_keys
+              .id_not_in(enabled_keys.select(:id))
+              .with_projects
+          end
         end
       end
 
       def available_project_keys
-        strong_memoize(:available_project_keys) do
-          current_user
-            .project_deploy_keys
-            .id_not_in(enabled_keys.select(:id))
-            .with_projects
+        if Feature.enabled?(:optimize_deploy_keys_presenter, project, default_enabled: :yaml)
+          strong_memoize(:available_project_keys) do
+            current_user.project_deploy_keys.with_projects.all - enabled_keys
+          end
+        else
+          strong_memoize(:legacy_available_project_keys) do
+            current_user
+              .project_deploy_keys
+              .id_not_in(enabled_keys.select(:id))
+              .with_projects
+          end
         end
       end
 
       def available_public_keys
-        strong_memoize(:available_public_keys) do
-          DeployKey
-            .are_public
-            .id_not_in(enabled_keys.select(:id))
-            .id_not_in(available_project_keys.select(:id))
-            .with_projects
+        if Feature.enabled?(:optimize_deploy_keys_presenter, project, default_enabled: :yaml)
+          strong_memoize(:available_public_keys) do
+            DeployKey.are_public.with_projects - (enabled_keys + available_project_keys)
+          end
+        else
+          strong_memoize(:legacy_available_public_keys) do
+            DeployKey
+              .are_public
+              .id_not_in(enabled_keys.select(:id))
+              .id_not_in(available_project_keys.select(:id))
+              .with_projects
+          end
         end
       end
 
