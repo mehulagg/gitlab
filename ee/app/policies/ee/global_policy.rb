@@ -21,6 +21,10 @@ module EE
         ::License.feature_available?(:export_user_permissions)
       end
 
+      condition(:top_level_group_creation_disabled) do
+        ::Gitlab.com? && ::Feature.disabled?(:top_level_group_creation_enabled, type: :ops)
+      end
+
       rule { ~anonymous & operations_dashboard_available }.enable :read_operations_dashboard
 
       rule { admin }.policy do
@@ -46,6 +50,9 @@ module EE
       end
 
       rule { export_user_permissions_available & admin }.enable :export_user_permissions
+
+      rule { can?(:create_group) }.enable :create_group_via_api
+      rule { top_level_group_creation_disabled }.prevent :create_group_via_api
     end
   end
 end

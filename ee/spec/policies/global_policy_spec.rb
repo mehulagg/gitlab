@@ -266,4 +266,48 @@ RSpec.describe GlobalPolicy do
       it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
     end
   end
+
+  describe 'create_group_via_api' do
+    let(:policy) { :create_group_via_api }
+
+    context 'on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'when feature is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it { is_expected.to be_allowed(policy) }
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it { is_expected.to be_disallowed(policy) }
+      end
+    end
+
+    context 'on self-managed' do
+      context 'when feature is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it { is_expected.to be_allowed(policy) }
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it { is_expected.to be_allowed(policy) }
+      end
+    end
+  end
 end

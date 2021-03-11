@@ -49,6 +49,12 @@ module EE
             super
           end
 
+          override :authorize_group_creation!
+          def authorize_group_creation!
+            authorize! :create_group
+            authorize! :create_group_via_api
+          end
+
           def check_audit_events_available!(group)
             forbidden! unless group.feature_available?(:audit_events)
           end
