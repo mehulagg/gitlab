@@ -160,7 +160,7 @@ describe('issue_note', () => {
 
     it('should render user information', () => {
       const { author } = note;
-      const avatar = wrapper.find(UserAvatarLink);
+      const avatar = wrapper.findComponent(UserAvatarLink);
       const avatarProps = avatar.props();
 
       expect(avatarProps.linkHref).toBe(author.path);
@@ -170,7 +170,7 @@ describe('issue_note', () => {
     });
 
     it('should render note header content', () => {
-      const noteHeader = wrapper.find(NoteHeader);
+      const noteHeader = wrapper.findComponent(NoteHeader);
       const noteHeaderProps = noteHeader.props();
 
       expect(noteHeaderProps.author).toEqual(note.author);
@@ -180,7 +180,7 @@ describe('issue_note', () => {
 
     it('should render note actions', () => {
       const { author } = note;
-      const noteActions = wrapper.find(NoteActions);
+      const noteActions = wrapper.findComponent(NoteActions);
       const noteActionsProps = noteActions.props();
 
       expect(noteActionsProps.authorId).toBe(author.id);
@@ -200,7 +200,7 @@ describe('issue_note', () => {
     });
 
     it('should render issue body', () => {
-      const noteBody = wrapper.find(NoteBody);
+      const noteBody = wrapper.findComponent(NoteBody);
       const noteBodyProps = noteBody.props();
 
       expect(noteBodyProps.note).toEqual(note);
@@ -214,7 +214,7 @@ describe('issue_note', () => {
       const noteBody =
         '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="alert(1)" />';
       const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-      const noteBodyComponent = wrapper.find(NoteBody);
+      const noteBodyComponent = wrapper.findComponent(NoteBody);
 
       store.hotUpdate({
         actions: {
@@ -243,7 +243,7 @@ describe('issue_note', () => {
           updateNote() {},
         },
       });
-      const noteBody = wrapper.find(NoteBody);
+      const noteBody = wrapper.findComponent(NoteBody);
       noteBody.vm.resetAutoSave = () => {};
 
       noteBody.vm.$emit('handleFormUpdate', updatedText, null, () => {});
