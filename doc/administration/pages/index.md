@@ -1013,22 +1013,6 @@ to define the explicit address that the GitLab Pages daemon should listen on:
 gitlab_pages['listen_proxy'] = '127.0.0.1:8090'
 ```
 
-### 404 error after transferring the project to a different group or user, or changing project path
-
-If you encounter a `404 Not Found` error a Pages site after transferring a project to
-another group or user, or changing project path, you must trigger a domain configuration
-update for Pages. To do so, write something in the `.update` file. The Pages daemon
-monitors for changes to this file, and reloads the configuration when changes occur.
-
-Use this example to fix a `404 Not Found` error after transferring a project or changing
-a project path with Pages:
-
-```shell
-date > /var/opt/gitlab/gitlab-rails/shared/pages/.update
-```
-
-If you've customized the Pages storage path, adjust the command above to use your custom path.
-
 ### Failed to connect to the internal GitLab API
 
 If you have enabled [API-based configuration](#gitlab-api-based-configuration) and see the following error:
