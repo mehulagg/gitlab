@@ -1228,8 +1228,8 @@ describe('fetchIterations', () => {
 describe('fetchAssignees', () => {
   const queryResponse = {
     data: {
-      project: {
-        projectMembers: {
+      workspace: {
+        assignees: {
           nodes: mockAssignees.map((assignee) => ({ user: assignee })),
         },
       },
