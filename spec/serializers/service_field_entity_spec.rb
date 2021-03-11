@@ -26,7 +26,6 @@ RSpec.describe ServiceFieldEntity do
             help: 'Use a username for server version and an email for cloud version',
             required: true,
             choices: nil,
-            help: nil,
             value: 'jira_username'
           }
 
@@ -45,7 +44,6 @@ RSpec.describe ServiceFieldEntity do
             help: 'Use a password for server version and an API token for cloud version',
             required: true,
             choices: nil,
-            help: nil,
             value: 'true'
           }
 
