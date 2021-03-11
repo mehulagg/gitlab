@@ -8861,23 +8861,6 @@ CREATE SEQUENCE abuse_reports_id_seq
 
 ALTER SEQUENCE abuse_reports_id_seq OWNED BY abuse_reports.id;
 
-CREATE TABLE advanced_search_settings (
-    id bigint NOT NULL,
-    number_of_replicas jsonb NOT NULL,
-    number_of_shards jsonb NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
-);
-
-CREATE SEQUENCE advanced_search_settings_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE advanced_search_settings_id_seq OWNED BY advanced_search_settings.id;
-
 CREATE TABLE alert_management_alert_assignees (
     id bigint NOT NULL,
     user_id bigint NOT NULL,
@@ -12180,6 +12163,14 @@ CREATE SEQUENCE elastic_reindexing_tasks_id_seq
     CACHE 1;
 
 ALTER SEQUENCE elastic_reindexing_tasks_id_seq OWNED BY elastic_reindexing_tasks.id;
+
+CREATE TABLE elastic_settings (
+    id integer DEFAULT 1 NOT NULL,
+    number_of_replicas jsonb NOT NULL,
+    number_of_shards jsonb NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
 
 CREATE TABLE elastic_size_estimates (
     id bigint NOT NULL,
@@ -18832,8 +18823,6 @@ ALTER SEQUENCE zoom_meetings_id_seq OWNED BY zoom_meetings.id;
 
 ALTER TABLE ONLY abuse_reports ALTER COLUMN id SET DEFAULT nextval('abuse_reports_id_seq'::regclass);
 
-ALTER TABLE ONLY advanced_search_settings ALTER COLUMN id SET DEFAULT nextval('advanced_search_settings_id_seq'::regclass);
-
 ALTER TABLE ONLY alert_management_alert_assignees ALTER COLUMN id SET DEFAULT nextval('alert_management_alert_assignees_id_seq'::regclass);
 
 ALTER TABLE ONLY alert_management_alert_user_mentions ALTER COLUMN id SET DEFAULT nextval('alert_management_alert_user_mentions_id_seq'::regclass);
@@ -19864,9 +19853,6 @@ ALTER TABLE ONLY gitlab_partitions_static.product_analytics_events_experimental_
 ALTER TABLE ONLY abuse_reports
     ADD CONSTRAINT abuse_reports_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY advanced_search_settings
-    ADD CONSTRAINT advanced_search_settings_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY alert_management_alert_assignees
     ADD CONSTRAINT alert_management_alert_assignees_pkey PRIMARY KEY (id);
 
@@ -20325,6 +20311,9 @@ ALTER TABLE ONLY elastic_reindexing_subtasks
 
 ALTER TABLE ONLY elastic_reindexing_tasks
     ADD CONSTRAINT elastic_reindexing_tasks_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY elastic_settings
+    ADD CONSTRAINT elastic_settings_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY elastic_size_estimates
     ADD CONSTRAINT elastic_size_estimates_pkey PRIMARY KEY (id);

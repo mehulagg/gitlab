@@ -4,6 +4,7 @@
 - recreate_index_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: recreate_index_url }
 - recreate_index_text = _("Changes won't take place until the index is %{link_start}recreated%{link_end}.").html_safe % { link_start: recreate_index_link_start, link_end: '</a>'.html_safe }
 - elasticsearch_available = Gitlab::Elastic::Helper.default.ping?
+- elasticsearch_settings = Elastic::Setting.current
 
 %section.settings.expanded.as-elasticsearch.no-animate#js-elasticsearch-settings{ data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
@@ -74,14 +75,14 @@
 
             .form-group
               = f.label :elasticsearch_shards, _('Number of Elasticsearch shards'), class: 'label-bold'
-              = f.number_field :elasticsearch_shards, value: @application_setting.elasticsearch_shards, class: 'form-control gl-form-input'
+              = f.number_field :elasticsearch_shards, value: elasticsearch_settings.number_of_shards[:default], class: 'form-control gl-form-input'
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('How many shards to split the Elasticsearch index over.')
                 = recreate_index_text
 
             .form-group
               = f.label :elasticsearch_replicas, _('Number of Elasticsearch replicas'), class: 'label-bold'
-              = f.number_field :elasticsearch_replicas, value: @application_setting.elasticsearch_replicas, class: 'form-control gl-form-input'
+              = f.number_field :elasticsearch_replicas, value: elasticsearch_settings.number_of_replicas[:default], class: 'form-control gl-form-input'
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('How many replicas each Elasticsearch shard has.')
                 = recreate_index_text
