@@ -10,19 +10,37 @@ module Gitlab
           def activate(activation_code)
             uuid = Gitlab::CurrentSettings.uuid
 
+            variables = {
+              activationCode: activation_code,
+              instanceIdentifier: uuid
+            }
+
             query = <<~GQL
-              mutation {
-                cloudActivationActivate(input: { activationCode: "#{activation_code}", instanceIdentifier: "#{uuid}" }) {
-                  authenticationToken
+              mutation($activationCode: String!, $instanceIdentifier: String!) {
+                cloudActivationActivate(
+                  input: {
+                    activationCode: $activationCode,
+                    instanceIdentifier: $instanceIdentifier
+                  }
+                ) {
+                  licenseKey
                   errors
                 }
               }
             GQL
 
-            response = execute_graphql_query(query).dig(:data, 'data', 'cloudActivationActivate')
+            response = execute_graphql_query(
+              { query: query, variables: variables }
+            )
+
+            if !response[:success] || response.dig(:data, 'errors').present?
+              return { success: false, errors: response.dig(:data, 'errors') }
+            end
+
+            response = response.dig(:data, 'data', 'cloudActivationActivate')
 
             if response['errors'].blank?
-              { success: true, authentication_token: response['authenticationToken'] }
+              { success: true, license_key: response['licenseKey'] }
             else
               { success: false, errors: response['errors'] }
             end
@@ -39,7 +57,7 @@ module Gitlab
               }
             GQL
 
-            response = execute_graphql_query(query).dig(:data)
+            response = execute_graphql_query({ query: query }).dig(:data)
 
             if response['errors'].blank?
               eligible = response.dig('data', 'subscription', 'eoaStarterBronzeEligible')
@@ -59,13 +77,11 @@ module Gitlab
 
           private
 
-          def execute_graphql_query(query)
+          def execute_graphql_query(params)
             response = ::Gitlab::HTTP.post(
               graphql_endpoint,
               headers: admin_headers,
-              body: {
-                query: query
-              }.to_json
+              body: params.to_json
             )
 
             parse_response(response)

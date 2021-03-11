@@ -118,7 +118,7 @@ export default {
     handleDragOnEnd(params) {
       document.body.classList.remove('is-dragging');
       const { newIndex, oldIndex, from, to, item } = params;
-      const { issueId, issueIid, issuePath } = item.dataset;
+      const { itemId, itemIid, itemPath } = item.dataset;
       const { children } = to;
       let moveBeforeId;
       let moveAfterId;
@@ -127,10 +127,10 @@ export default {
       if (from === to) {
         if (newIndex > oldIndex && children.length > 1) {
           // If issue is being moved down we look for the issue that ends up before
-          moveBeforeId = Number(children[newIndex].dataset.issueId);
+          moveBeforeId = Number(children[newIndex].dataset.itemId);
         } else if (newIndex < oldIndex && children.length > 1) {
           // If issue is being moved up we look for the issue that ends up after
-          moveAfterId = Number(children[newIndex].dataset.issueId);
+          moveAfterId = Number(children[newIndex].dataset.itemId);
         } else {
           // If issue remains in the same list at the same position we do nothing
           return;
@@ -138,18 +138,18 @@ export default {
       } else {
         // We look for the issue that ends up before the moved issue if it exists
         if (children[newIndex - 1]) {
-          moveBeforeId = Number(children[newIndex - 1].dataset.issueId);
+          moveBeforeId = Number(children[newIndex - 1].dataset.itemId);
         }
         // We look for the issue that ends up after the moved issue if it exists
         if (children[newIndex]) {
-          moveAfterId = Number(children[newIndex].dataset.issueId);
+          moveAfterId = Number(children[newIndex].dataset.itemId);
         }
       }
 
       this.moveIssue({
-        issueId,
-        issueIid,
-        issuePath,
+        itemId,
+        itemIid,
+        itemPath,
         fromListId: from.dataset.listId,
         toListId: to.dataset.listId,
         moveBeforeId,
@@ -187,7 +187,7 @@ export default {
           :key="issue.id"
           :index="index"
           :list="list"
-          :issue="issue"
+          :item="issue"
           :disabled="disabled || !canAdminEpic"
         />
         <gl-loading-icon v-if="isLoadingMore && isUnassignedIssuesLane" size="sm" class="gl-py-3" />

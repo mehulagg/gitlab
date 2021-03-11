@@ -223,6 +223,7 @@ export const mockEpic = {
     closedIssues: 2,
   },
   issues: [mockIssue],
+  labels: [],
 };
 
 export const mockIssueWithEpic = { ...mockIssue3, epic: { id: mockEpic.id, iid: mockEpic.iid } };
@@ -245,6 +246,7 @@ export const mockEpics = [
     parent: {
       id: '40',
     },
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/40',
@@ -259,6 +261,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/marketing/-/epics/1',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/39',
@@ -273,6 +276,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/12',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/38',
@@ -287,6 +291,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/11',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/37',
@@ -301,6 +306,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/10',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
 ];
 

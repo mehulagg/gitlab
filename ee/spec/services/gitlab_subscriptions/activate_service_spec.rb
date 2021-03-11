@@ -8,14 +8,14 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     create(:application_setting, cloud_license_enabled: cloud_license_enabled)
   end
 
+  let_it_be(:license_key) { build(:gitlab_license).export }
   let(:cloud_license_enabled) { true }
-  let(:authentication_token) { 'authentication_token' }
   let(:activation_code) { 'activation_code' }
 
   def stub_client_activate
     expect(Gitlab::SubscriptionPortal::Client).to receive(:activate)
       .with(activation_code)
-      .and_return(response)
+      .and_return(customer_dot_response)
   end
 
   before do
@@ -23,61 +23,58 @@ RSpec.describe GitlabSubscriptions::ActivateService do
   end
 
   context 'when CustomerDot returns success' do
-    let(:response) { { success: true, authentication_token: authentication_token } }
+    let(:customer_dot_response) { { success: true, license_key: license_key } }
 
     before do
       stub_client_activate
     end
 
-    it 'persists authentication_token' do
-      expect(subject.execute(activation_code)).to eq(response)
+    it 'persists license' do
+      expect(subject.execute(activation_code)).to eq({ success: true })
 
-      expect(application_settings.reload.cloud_license_auth_token).to eq(authentication_token)
+      expect(License.last.data).to eq(license_key)
     end
 
     context 'when persisting fails' do
-      let(:response) { { success: true, authentication_token: authentication_token } }
+      let(:license_key) { 'invalid key' }
 
       it 'returns error' do
-        application_settings.errors.add(:base, :invalid)
-        allow(application_settings).to receive(:update).and_return(false)
-
-        expect(subject.execute(activation_code)).to eq({ errors: ["is invalid"], success: false })
+        expect(subject.execute(activation_code)).to match({ errors: [be_a_kind_of(String)], success: false })
       end
     end
   end
 
   context 'when CustomerDot returns failure' do
-    let(:response) { { success: false, errors: ['foo'] } }
+    let(:customer_dot_response) { { success: false, errors: ['foo'] } }
 
     it 'returns error' do
       stub_client_activate
 
-      expect(subject.execute(activation_code)).to eq(response)
+      expect(subject.execute(activation_code)).to eq(customer_dot_response)
 
-      expect(application_settings.reload.cloud_license_auth_token).to be_nil
+      expect(License.last&.data).not_to eq(license_key)
     end
   end
 
   context 'when not self managed instance' do
-    let(:response) { { success: false, errors: [described_class::ERROR_MESSAGES[:not_self_managed]] }}
+    let(:customer_dot_response) { { success: false, errors: [described_class::ERROR_MESSAGES[:not_self_managed]] }}
 
     it 'returns error' do
       allow(Gitlab).to receive(:com?).and_return(true)
       expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
 
-      expect(subject.execute(activation_code)).to eq(response)
+      expect(subject.execute(activation_code)).to eq(customer_dot_response)
     end
   end
 
   context 'when cloud licensing disabled' do
-    let(:response) { { success: false, errors: [described_class::ERROR_MESSAGES[:disabled]] }}
+    let(:customer_dot_response) { { success: false, errors: [described_class::ERROR_MESSAGES[:disabled]] }}
     let(:cloud_license_enabled) { false }
 
     it 'returns error' do
       expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
 
-      expect(subject.execute(activation_code)).to eq(response)
+      expect(subject.execute(activation_code)).to eq(customer_dot_response)
     end
   end
 

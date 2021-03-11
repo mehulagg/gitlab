@@ -32,6 +32,7 @@ import { EpicFilterType, IterationFilterType, GroupByParamType } from '../consta
 import epicQuery from '../graphql/epic.query.graphql';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicBoardListsQuery from '../graphql/epic_board_lists.query.graphql';
+import epicMoveListMutation from '../graphql/epic_move_list.mutation.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import groupBoardAssigneesQuery from '../graphql/group_board_assignees.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
@@ -486,13 +487,21 @@ export default {
     });
   },
 
+  moveItem: ({ getters, dispatch }, params) => {
+    if (!getters.isEpicBoard) {
+      dispatch('moveIssue', params);
+    } else {
+      dispatch('moveEpic', params);
+    }
+  },
+
   moveIssue: (
     { state, commit },
-    { issueId, issueIid, issuePath, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
+    { itemId, itemIid, itemPath, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
   ) => {
-    const originalIssue = state.boardItems[issueId];
+    const originalIssue = state.boardItems[itemId];
     const fromList = state.boardItemsByListId[fromListId];
-    const originalIndex = fromList.indexOf(Number(issueId));
+    const originalIndex = fromList.indexOf(Number(itemId));
     commit(types.MOVE_ISSUE, {
       originalIssue,
       fromListId,
@@ -503,7 +512,7 @@ export default {
     });
 
     const { boardId } = state;
-    const [fullProjectPath] = issuePath.split(/[#]/);
+    const [fullProjectPath] = itemPath.split(/[#]/);
 
     gqlClient
       .mutate({
@@ -511,7 +520,7 @@ export default {
         variables: {
           projectPath: fullProjectPath,
           boardId: fullBoardId(boardId),
-          iid: issueIid,
+          iid: itemIid,
           fromListId: getIdFromGraphQLId(fromListId),
           toListId: getIdFromGraphQLId(toListId),
           moveBeforeId,
@@ -521,7 +530,7 @@ export default {
       })
       .then(({ data }) => {
         if (data?.issueMoveList?.errors.length) {
-          commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex });
+          throw new Error();
         } else {
           const issue = data.issueMoveList?.issue;
           commit(types.MOVE_ISSUE_SUCCESS, { issue });
@@ -529,6 +538,40 @@ export default {
       })
       .catch(() =>
         commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
+      );
+  },
+
+  moveEpic: ({ state, commit }, { itemId, fromListId, toListId, moveBeforeId, moveAfterId }) => {
+    const originalEpic = state.boardItems[itemId];
+    const fromList = state.boardItemsByListId[fromListId];
+    const originalIndex = fromList.indexOf(Number(itemId));
+    commit(types.MOVE_EPIC, {
+      originalEpic,
+      fromListId,
+      toListId,
+      moveBeforeId,
+      moveAfterId,
+    });
+
+    const { boardId } = state;
+
+    gqlClient
+      .mutate({
+        mutation: epicMoveListMutation,
+        variables: {
+          epicId: fullEpicId(itemId),
+          boardId: fullEpicBoardId(boardId),
+          fromListId,
+          toListId,
+        },
+      })
+      .then(({ data }) => {
+        if (data?.epicMoveList?.errors.length) {
+          throw new Error();
+        }
+      })
+      .catch(() =>
+        commit(types.MOVE_EPIC_FAILURE, { originalEpic, fromListId, toListId, originalIndex }),
       );
   },
 
