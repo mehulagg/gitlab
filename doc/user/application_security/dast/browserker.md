@@ -102,6 +102,9 @@ The coverage/scan time trade-off can be managed by the user with the following m
 - Limiting the page depth that Browserker will check coverage on. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
 - Vertically scaling the runner and using a higher number of browsers. The default is `3`.
 
+## Example Application
+
+To assist users we have created an [example application](https://gitlab.com/gitlab-org/security-products/demos/browserker-dast/dvwa) to scan the purposely vulnerable application DVWA.
 ## AJAX Crawler
 
 The AJAX Crawler is not supported by Browserker.
