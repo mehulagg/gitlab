@@ -67,7 +67,7 @@ and you can [customize the payload](#customize-the-alert-payload-outside-of-gitl
    1. Click **Save Integration**.
       1. _(Optional)_ To generate a test alert to test the new integration, or to map
       fields from your monitoring tool's alert to GitLab fields, enter a sample payload
-      and click **Submit payload**. Valid JSON is required.
+      and click **Parse payload for custom mapping**. Valid JSON is required.
 
       NOTE:
       If you update a sample payload, you must also remap the fields.
@@ -86,7 +86,7 @@ side of the integrations list.
 
 #### Map fields in custom alerts
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4443) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.8.
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4443) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10.
 
 You can integrate your monitoring tool's alert format with GitLab alerts. To show the
 correct information in the [Alert list](alerts.md) and the
