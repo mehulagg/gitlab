@@ -28,10 +28,6 @@ export default {
       type: String,
       required: true,
     },
-    noneSelected: {
-      type: String,
-      required: true,
-    },
     searchPlaceholder: {
       type: String,
       required: true,
@@ -81,29 +77,30 @@ export default {
 
         <p class="gl-px-5">{{ formDescription }}</p>
 
-        <gl-dropdown class="gl-px-5" no-flip @shown="setFocus">
+        <gl-dropdown class="gl-px-5" no-flip @shown="setFocus" @hide="$emit('hide')">
           <template #button-content>
             <slot name="selected">
-              <div class="gl-text-gray-900">{{ noneSelected }}</div>
+              <div>{{ $options.i18n.noneSelected }}</div>
             </slot>
             <gl-icon class="dropdown-chevron" name="chevron-down" />
           </template>
 
-          <!-- reduce margin at top to 8px -->
           <!--  add overflow fade tobttom  -->
           <!-- make dropdown close on select -->
           <!-- clear search on close -->
           <!-- selected: style like in the dropdown (swatch _ thing) -->
           <!-- this should stick -->
-          <gl-search-box-by-type
-            id="board-available-column-entities"
-            ref="searchBox"
-            v-model="searchValue"
-            debounce="250"
-            class="gl-mt-0 gl-sticky gl-position-sticky gl-top-0 gl-bg-white"
-            :placeholder="searchPlaceholder"
-            @input="$emit('filter-items', $event)"
-          />
+          <div class="gl-sticky gl-position-sticky gl-top-0 gl-bg-white gl-z-index-1">
+            <gl-search-box-by-type
+              id="board-available-column-entities"
+              ref="searchBox"
+              v-model="searchValue"
+              debounce="250"
+              class="gl-mt-0!"
+              :placeholder="searchPlaceholder"
+              @input="$emit('filter-items', $event)"
+            />
+          </div>
 
           <div v-if="loading" class="gl-px-5">
             <gl-skeleton-loader :width="400" :height="172">
