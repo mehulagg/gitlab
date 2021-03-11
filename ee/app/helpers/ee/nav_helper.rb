@@ -25,7 +25,7 @@ module EE
       controllers = %w(issues_analytics#show)
 
       if @group&.feature_available?(:iterations)
-        controllers = %w(iterations#index)
+        controllers = %w(iterations#index iterations#show)
       end
 
       super.concat(controllers)
