@@ -65,6 +65,7 @@ Example of response
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
     },
+    "project_id": 1,
     "ref": "master",
     "artifacts": [],
     "runner": null,
@@ -118,6 +119,7 @@ Example of response
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
     },
+    "project_id": 1,
     "ref": "master",
     "artifacts": [],
     "runner": null,
@@ -197,6 +199,7 @@ Example of response
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
     },
+    "project_id": 1,
     "ref": "master",
     "artifacts": [],
     "runner": null,
@@ -260,6 +263,7 @@ Example of response
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
     },
+    "project_id": 1,
     "ref": "master",
     "runner": null,
     "stage": "test",
@@ -345,6 +349,7 @@ Example of response
       "updated_at": "2015-12-24T18:00:44.432Z",
       "web_url": "https://example.com/foo/bar/pipelines/6"
     },
+    "project_id": 1,
     "ref": "master",
     "stage": "test",
     "status": "pending",
@@ -423,6 +428,7 @@ Example of response
     "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
     "status": "pending"
   },
+  "project_id": 1,
   "ref": "master",
   "artifacts": [],
   "runner": null,
@@ -498,6 +504,7 @@ Example of response
     "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
     "status": "pending"
   },
+  "project_id": 1,
   "ref": "master",
   "artifacts": [],
   "runner": null,
@@ -587,6 +594,7 @@ Example of response
   "duration": 8,
   "id": 42,
   "name": "rubocop",
+  "project_id": 1,
   "ref": "master",
   "artifacts": [],
   "runner": null,
@@ -636,6 +644,7 @@ Example of response
   "duration": null,
   "id": 42,
   "name": "rubocop",
+  "project_id": 1,
   "ref": "master",
   "artifacts": [],
   "runner": null,
@@ -686,6 +695,7 @@ Example of response
   "download_url": null,
   "id": 42,
   "name": "rubocop",
+  "project_id": 1,
   "ref": "master",
   "artifacts": [],
   "runner": null,
@@ -739,6 +749,7 @@ Example of response
   "duration": null,
   "id": 42,
   "name": "rubocop",
+  "project_id": 1,
   "ref": "master",
   "artifacts": [],
   "runner": null,
