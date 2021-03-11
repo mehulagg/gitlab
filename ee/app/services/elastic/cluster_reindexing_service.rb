@@ -89,7 +89,6 @@ module Elastic
           index_name_from: old_index_name,
           index_name_to: new_index_name,
           documents_count: documents_count,
-          elastic_task: "from #{old_index_name} to #{new_index_name}", # TODO: need to remove this non-null constraint from the DB and model
           elastic_max_slice: max_slice
         )
 

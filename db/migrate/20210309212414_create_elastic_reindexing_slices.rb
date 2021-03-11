@@ -16,15 +16,22 @@ class CreateElasticReindexingSlices < ActiveRecord::Migration[6.0]
   end
 
   def up
-    add_column :elastic_reindexing_subtasks, :elastic_max_slice, :integer
+    with_lock_retries do
+      add_column :elastic_reindexing_subtasks, :elastic_max_slice, :integer
+      change_column_null(:elastic_reindexing_subtasks, :elastic_task, true)
+    end
+
+    remove_not_null_constraint(:elastic_reindexing_subtasks, :elastic_task)
 
     unless table_exists?(:elastic_reindexing_slices)
-      create_table :elastic_reindexing_slices do |t|
-        t.references :elastic_reindexing_subtask, foreign_key: { on_delete: :cascade }, null: false, index: { name: 'idx_elastic_reindexing_slices_on_elastic_reindexing_subtask_id' }
-        t.text :elastic_task, null: false
-        t.integer :elastic_slice
-        t.integer :retry_attempt, null: false, default: 0
-        t.timestamps_with_timezone null: false
+      with_lock_retries do
+        create_table :elastic_reindexing_slices do |t|
+          t.references :elastic_reindexing_subtask, foreign_key: { on_delete: :cascade }, null: false, index: { name: 'idx_elastic_reindexing_slices_on_elastic_reindexing_subtask_id' }
+          t.text :elastic_task, null: false
+          t.integer :elastic_slice
+          t.integer :retry_attempt, null: false, default: 0
+          t.timestamps_with_timezone null: false
+        end
       end
     end
 
@@ -42,8 +49,15 @@ class CreateElasticReindexingSlices < ActiveRecord::Migration[6.0]
   end
 
   def down
-    remove_column :elastic_reindexing_subtasks, :elastic_max_slice
+    with_lock_retries do
+      remove_column :elastic_reindexing_subtasks, :elastic_max_slice
+      change_column_null(:elastic_reindexing_subtasks, :elastic_task, false)
+    end
 
-    drop_table :elastic_reindexing_slices
+    add_not_null_constraint(:elastic_reindexing_subtasks, :elastic_task)
+
+    with_lock_retries do
+      drop_table :elastic_reindexing_slices
+    end
   end
 end

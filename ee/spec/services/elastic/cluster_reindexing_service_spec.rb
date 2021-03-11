@@ -60,7 +60,6 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
       expect(subtasks.count).to eq(2)
 
       expect(subtasks.first.index_name_to).to eq('new_index_name')
-      expect(subtasks.first.elastic_task).to eq('from new_index to new_index_name')
       expect(subtasks.first.elastic_max_slice).to eq(10)
       expect(subtasks.first.slices.count).to eq(10)
       expect(subtasks.first.slices.first.elastic_task).to eq('task_id_1')
@@ -68,7 +67,6 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
       expect(subtasks.first.slices.last.elastic_task).to eq('task_id_1')
       expect(subtasks.first.slices.last.elastic_slice).to eq(9)
       expect(subtasks.last.index_name_to).to eq('new_issues_name')
-      expect(subtasks.last.elastic_task).to eq('from new_issues to new_issues_name')
       expect(subtasks.last.elastic_max_slice).to eq(10)
       expect(subtasks.last.slices.count).to eq(10)
     end
@@ -153,7 +151,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
           it 'increases retry_attempt and reindexes the slice again' do
             expect { subject.execute }
               .to change { slices.first.reload.retry_attempt }.by(1)
-                                                              .and change { slices.second.reload.retry_attempt }.by(1)
+              .and change { slices.second.reload.retry_attempt }.by(1)
             expect(task.reload.state).to eq('reindexing')
             expect(helper).to have_received(:reindex).with(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: 2, slice: 0)
             expect(helper).to have_received(:reindex).with(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: 2, slice: 1)

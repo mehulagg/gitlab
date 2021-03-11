@@ -12293,7 +12293,7 @@ CREATE TABLE elastic_reindexing_subtasks (
     alias_name text NOT NULL,
     index_name_from text NOT NULL,
     index_name_to text NOT NULL,
-    elastic_task text NOT NULL,
+    elastic_task text,
     documents_count_target integer,
     documents_count integer,
     created_at timestamp with time zone NOT NULL,

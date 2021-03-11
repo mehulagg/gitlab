@@ -7,5 +7,5 @@ class Elastic::ReindexingSubtask < ApplicationRecord
 
   has_many :slices, class_name: 'Elastic::ReindexingSlice', foreign_key: :elastic_reindexing_subtask_id
 
-  validates :index_name_from, :index_name_to, :elastic_task, presence: true
+  validates :index_name_from, :index_name_to, presence: true
 end
