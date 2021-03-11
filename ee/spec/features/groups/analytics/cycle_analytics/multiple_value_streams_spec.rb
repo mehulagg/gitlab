@@ -34,6 +34,7 @@ RSpec.describe 'Multiple value streams', :js do
     wait_for_requests
   end
 
+  # TODO: add additional specs for subgroups and stages with labels
   describe 'Create value stream' do
     before do
       select_group(group)
@@ -91,13 +92,38 @@ RSpec.describe 'Multiple value streams', :js do
       expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: edited_name })
     end
 
-    it 'can add a custom stage' do
+    it 'can add and remove custom stages' do
       add_custom_stage_to_form
 
       page.find_button(_('Save Value Stream')).click
       wait_for_requests
 
+      expect(page.find('[data-testid="gl-path-nav"]')).to have_text("Cool custom stage - name")
+
+      page.find_button(_('Edit')).click
+
+      # Delete the custom stages, delete the last one first since the list gets reordered after a deletion
+      page.find('[data-testid*="stage-action-remove-7"]').click
+      page.find('[data-testid*="stage-action-remove-6"]').click
+
+      page.find_button(_('Save Value Stream')).click
+      wait_for_requests
+
+      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Cool custom stage - name")
+    end
+
+    it 'can hide default stages' do
+      page.find("[data-testid='stage-action-hide-5']").click
+      page.find("[data-testid='stage-action-hide-4']").click
+      page.find("[data-testid='stage-action-hide-3']").click
+
+      page.find_button(_('Save Value Stream')).click
+      wait_for_requests
+
       expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: custom_value_stream_name })
+      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Staging")
+      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Review")
+      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Test")
     end
   end
 

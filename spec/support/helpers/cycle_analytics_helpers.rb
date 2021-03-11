@@ -201,4 +201,11 @@ module CycleAnalyticsHelpers
       branch_update
     end
   end
+
+  def create_value_stream(name)
+    fill_in 'create-value-stream-name', with: name
+
+    page.find_button(_('Create Value Stream')).click
+    wait_for_requests
+  end
 end
