@@ -50,6 +50,24 @@ module EE
               end
             end
           end
+
+          namespace 'internal' do
+            # For Workhorse to know if it is a Geo site that should proxy
+            # requests.
+            get '/geo_proxy', feature_category: :geo do
+              # The methods used here (or their underlying methods) are cached
+              # for:
+              #
+              # * 1 minute in memory
+              # * 2 minutes in Redis
+              #
+              if ::Gitlab::Geo.secondary_with_primary?
+                { geo_proxy_url: ::Gitlab::Geo.primary_node.internal_url }
+              else
+                {}
+              end
+            end
+          end
         end
       end
     end
