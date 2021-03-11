@@ -31,6 +31,7 @@ module RedisTracking
     custom_id = yield if block_given?
 
     return unless visitor_id || custom_id
+
     unique_id = visitor_id || custom_id
 
     Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: unique_id)
