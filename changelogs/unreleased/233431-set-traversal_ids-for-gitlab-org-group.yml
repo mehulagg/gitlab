@@ -1,0 +1,5 @@
+---
+title: Backfill namespaces.traversal_ids for gitlab-org
+merge_request: 56293
+author:
+type: performance
