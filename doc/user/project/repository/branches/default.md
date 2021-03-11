@@ -31,7 +31,7 @@ using the GitLab default only if no customizations are set:
    - `master`, for projects created before GitLab 14.0.
 
 In the GitLab UI, you can change the defaults at any level. GitLab also provides
-the Git commands you need to update your copy of the repository.
+the [Git commands you need](#update-the-default-branch-name-in-your-repository) to update your copy of the repository.
 
 ## Change the default branch name for a project
 
