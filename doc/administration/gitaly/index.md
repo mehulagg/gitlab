@@ -140,7 +140,7 @@ WARNING:
 If directly copying repository data from a GitLab server to Gitaly, ensure that the metadata file,
 default path `/var/opt/gitlab/git-data/repositories/.gitaly-metadata`, is not included in the transfer.
 Copying this will lead GitLab to use the Rugged patches for repositories hosted on the Gitaly server,
-leading to errors or stale data.
+leading to `Error creating pipeline` and `Commit not found` errors or stale data.
 
 ### Transition to Gitaly Cluster
 
