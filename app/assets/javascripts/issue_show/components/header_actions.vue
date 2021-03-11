@@ -88,9 +88,6 @@ export default {
     qaSelector() {
       return this.isClosed ? 'reopen_issue_button' : 'close_issue_button';
     },
-    buttonVariant() {
-      return this.isClosed ? 'default' : 'warning';
-    },
     dropdownText() {
       return sprintf(__('%{issueType} actions'), {
         issueType: capitalizeFirstCharacter(this.issueType),
@@ -227,7 +224,6 @@ export default {
       category="secondary"
       :data-qa-selector="qaSelector"
       :loading="isToggleStateButtonLoading"
-      :variant="buttonVariant"
       @click="toggleIssueState"
     >
       {{ buttonText }}
@@ -235,15 +231,10 @@ export default {
 
     <gl-dropdown
       class="gl-display-none gl-sm-display-inline-flex!"
-      toggle-class="gl-border-0! gl-shadow-none!"
+      icon="ellipsis_v"
+      :aria-label="dropdownText"
       no-caret
-      right
     >
-      <template #button-content>
-        <gl-icon name="ellipsis_v" />
-        <span class="gl-sr-only">{{ dropdownText }}</span>
-      </template>
-
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
         {{ newIssueTypeText }}
       </gl-dropdown-item>
