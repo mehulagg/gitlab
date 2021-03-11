@@ -50,7 +50,7 @@ module API
 
       def track_package_event(event_name, scope, **args)
         ::Packages::CreateEventService.new(nil, current_user, event_name: event_name, scope: scope).execute
-        track_event(event_name, **args)
+        ::Gitlab::Tracking.event(args[:category] || self.options[:for].name, event_name.to_s, **args)
       end
     end
   end
