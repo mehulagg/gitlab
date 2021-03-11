@@ -43,7 +43,7 @@ module Gitlab
           end
 
           def context
-            Gitlab::Ci::Pipeline::Seed::Context.new(pipeline, @command.root_variables)
+            Gitlab::Ci::Pipeline::Seed::Context.new(pipeline, root_variables: @command.root_variables)
           end
         end
       end

@@ -58,7 +58,7 @@ module Ci
         builds: [terminal_build_seed]
       }
 
-      seed_context = Gitlab::Ci::Pipeline::Seed::Context.new(pipeline, [])
+      seed_context = Gitlab::Ci::Pipeline::Seed::Context.new(pipeline)
       Gitlab::Ci::Pipeline::Seed::Stage.new(seed_context, attributes, [])
     end
 
