@@ -28,12 +28,12 @@ You can create snippets in multiple ways, depending on whether you want to creat
 
 1. Select the kind of snippet you want to create:
    - **To create a personal snippet**:
-     - *If you're on a project's page,* click the plus icon (**{plus-square-o}**)
+     - *If you're on a project's page,* select the plus icon (**{plus-square-o}**)
        in the top navigation bar, then select **New snippet** from the **GitLab** (for GitLab.com)
        or **Your Instance** (self-managed) section of the same dropdown menu.
-     - *For all other pages,* click the plus icon (**{plus-square-o}**)
+     - *For all other pages,* select the plus icon (**{plus-square-o}**)
        in the top navigation bar, then select **New snippet** from the dropdown menu.
-   - **To create a project snippet**: Go to your project's page. Click the plus icon
+   - **To create a project snippet**: Go to your project's page. Select the plus icon
      (**{plus-square-o}**), then select **New snippet** from the **This project** section
      of the dropdown menu.
 1. Add a **Title** and **Description**.
@@ -42,7 +42,7 @@ You can create snippets in multiple ways, depending on whether you want to creat
    Failure to add a filename can cause a known
    [copy-pasting bug](https://gitlab.com/gitlab-org/gitlab/-/issues/22870). If you don't provide a filename, GitLab [creates a name for you](#filenames).
 1. (Optional) Add [multiple files](#add-or-remove-multiple-files) to your snippet.
-1. Select a visibility level, and click **Create snippet**.
+1. Select a visibility level, and select **Create snippet**.
 
 After you create a snippet, you can still [add more files to it](#add-or-remove-multiple-files).
 In GitLab versions 13.0 and later, snippets are [versioned by default](#versioned-snippets).
@@ -70,7 +70,7 @@ default visibility:
 1. Expand the **Visibility, project features, permissions** section, and scroll to **Snippets**.
 1. Toggle the default visibility, and select whether snippets can be viewed by
    everyone, or only project members.
-1. Click **Save changes**.
+1. Select **Save changes**.
 
 ## Versioned snippets
 
@@ -125,24 +125,24 @@ by a Git repository), through the [Snippets API](../api/snippets.md), and in the
 To add a new file to your snippet through the GitLab UI:
 
 1. Go to your snippet in the GitLab UI.
-1. Click **Edit** in the top right corner.
+1. Select **Edit** in the top right corner.
 1. Select **Add another file**.
 1. Add your content to the file in the form fields provided.
-1. Click **Save changes**.
+1. Select **Save changes**.
 
 To delete a file from your snippet through the GitLab UI:
 
 1. Go to your snippet in the GitLab UI.
-1. Click **Edit** in the top right corner.
+1. Select **Edit** in the top right corner.
 1. Select **Delete file** alongside the filename of each file
 you wish to delete.
-1. Click **Save changes**.
+1. Select **Save changes**.
 
 ## Clone snippets
 
 Instead of copying a snippet to a local file, you may want to clone a snippet to
 preserve its relationship with the repository, so you can receive or make updates
-as needed. Click the **Clone** button on a snippet to display the URLs to clone with SSH or HTTPS:
+as needed. Select the **Clone** button on a snippet to display the URLs to clone with SSH or HTTPS:
 
 ![Clone snippet](img/snippet_clone_button_v13_0.png)
 
@@ -160,7 +160,7 @@ To embed a snippet:
    - The snippet is publicly visible.
    - In **Project > Settings > Permissions**, the snippets
      permissions are set to **Everyone with access**.
-1. In your snippet's **Embed** section, click **Copy** to copy a one-line script you can add to any website or blog post. For example:
+1. In your snippet's **Embed** section, select **Copy** to copy a one-line script you can add to any website or blog post. For example:
 
    ```html
    <script src="https://gitlab.com/namespace/project/snippets/SNIPPET_ID.js"></script>
