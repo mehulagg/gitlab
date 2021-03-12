@@ -1100,7 +1100,7 @@ Example definition:
   operator: AND
   source: database
   events:
-    - 'dependency_scanning_pipeline',
+    - 'dependency_scanning_pipeline'
     - 'container_scanning_pipeline'
   time_frame:
     - 28d

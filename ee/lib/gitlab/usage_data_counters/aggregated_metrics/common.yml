@@ -18,6 +18,6 @@
   source: database
   time_frame: [28d]
   events:
-    - 'dependency_scanning_pipeline',
+    - 'dependency_scanning_pipeline'
     - 'container_scanning_pipeline'
   operator: AND
