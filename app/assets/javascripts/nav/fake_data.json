@@ -1,0 +1,21 @@
+{
+  "topPrimary": [
+    {
+      "id": "project",
+      "title": "Projects",
+      "component": "project"
+    },
+    {
+      "id": "milestones",
+      "title": "Milestones",
+      "href": "#"
+    }
+  ],
+  "topSecondary": [
+    {
+      "id": "admin",
+      "title": "Admin",
+      "href": "#"
+    }
+  ]
+}
