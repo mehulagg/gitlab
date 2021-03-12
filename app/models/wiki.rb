@@ -287,12 +287,13 @@ class Wiki
 
   def gitaly_commit_options(page, action, message = nil)
     commit_message = message.presence || default_message(action, page.title)
+    git_user = Gitlab::Git::User.from_gitlab(user)
 
     {
       branch_name: repository.root_ref,
       message: commit_message,
-      author_email: user.commit_email,
-      author_name: user.name
+      author_email: git_user.email,
+      author_name: git_user.name
     }
   end
 
