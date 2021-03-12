@@ -105,6 +105,7 @@ export const buildCycleAnalyticsInitialData = ({
   labelsPath = '',
   milestonesPath = '',
   defaultStages = null,
+  stageId = null,
 } = {}) => ({
   selectedValueStream: buildValueStreamFromJson(valueStream),
   group: groupId
@@ -128,6 +129,7 @@ export const buildCycleAnalyticsInitialData = ({
   defaultStageConfig: defaultStages
     ? buildDefaultStagesFromJSON(defaultStages).map(convertObjectPropsToCamelCase)
     : [],
+  stageId,
 });
 
 export const filterBySearchTerm = (data = [], searchTerm = '', filterByKey = 'name') => {

@@ -151,14 +151,18 @@ export const receiveGroupStagesError = ({ commit }, error) => {
   createFlash(__('There was an error fetching value stream analytics stages.'));
 };
 
-export const setDefaultSelectedStage = ({ dispatch, getters }) => {
+export const setDefaultSelectedStage = ({ state, dispatch, getters }) => {
+  const { stageId = null } = state;
   const { activeStages = [] } = getters;
 
   if (activeStages?.length) {
-    const [firstActiveStage] = activeStages;
+    const activeStage = stageId
+      ? activeStages.find((stage) => stage.id === stageId) || activeStages[0]
+      : activeStages[0];
+
     return Promise.all([
-      dispatch('setSelectedStage', firstActiveStage),
-      dispatch('fetchStageData', firstActiveStage.slug),
+      dispatch('setSelectedStage', activeStage),
+      dispatch('fetchStageData', activeStage.slug),
     ]);
   }
 
@@ -286,11 +290,12 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
     selectedAssigneeList,
     selectedLabelList,
     group,
+    stageId,
   } = initialData;
   commit(types.SET_FEATURE_FLAGS, featureFlags);
 
   if (group?.fullPath) {
-    return Promise.all([
+    const promises = [
       dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
@@ -300,13 +305,21 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       }),
       dispatch('durationChart/setLoading', true),
       dispatch('typeOfWork/setLoading', true),
-    ])
-      .then(() => dispatch('fetchCycleAnalyticsData'))
+    ];
+
+    if (stageId) {
+      dispatch('setStageId', stageId);
+    }
+
+    return Promise.all(promises)
+      .then(() => dispatch('fetchCycleAnalyticsData', stageId))
       .then(() => dispatch('initializeCycleAnalyticsSuccess'));
   }
 
   return dispatch('initializeCycleAnalyticsSuccess');
 };
+
+export const setStageId = ({ commit }, stageId) => commit(types.SET_STAGE_ID, stageId);
 
 export const requestReorderStage = ({ commit }) => commit(types.REQUEST_REORDER_STAGE);
 

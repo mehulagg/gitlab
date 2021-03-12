@@ -5,6 +5,8 @@ export default () => ({
   startDate: null,
   endDate: null,
 
+  stageId: null,
+
   isLoading: false,
   isLoadingStage: false,
 

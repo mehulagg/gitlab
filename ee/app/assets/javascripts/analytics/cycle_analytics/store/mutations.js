@@ -12,6 +12,9 @@ export default {
   [types.SET_SELECTED_STAGE](state, rawData) {
     state.selectedStage = convertObjectPropsToCamelCase(rawData);
   },
+  [types.SET_STAGE_ID](state, stageId) {
+    state.stageId = stageId;
+  },
   [types.SET_DATE_RANGE](state, { startDate, endDate }) {
     state.startDate = startDate;
     state.endDate = endDate;
