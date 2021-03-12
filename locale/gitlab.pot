@@ -7960,6 +7960,9 @@ msgstr ""
 msgid "ComplianceFramework|This project is regulated by %{framework}."
 msgstr ""
 
+msgid "Component"
+msgstr ""
+
 msgid "Confidence"
 msgstr ""
 
@@ -9869,6 +9872,9 @@ msgid "DastSiteValidation|You will not be able to run active scans against %{url
 msgstr ""
 
 msgid "Data is still calculating..."
+msgstr ""
+
+msgid "Data type"
 msgstr ""
 
 msgid "Database update failed"
@@ -14053,13 +14059,10 @@ msgstr ""
 msgid "Geo|Remove tracking database entry"
 msgstr ""
 
+msgid "Geo|Replicated data is verified with the secondary node(s) using checksums"
+msgstr ""
+
 msgid "Geo|Replicated data is verified with the secondary node(s) using checksums."
-msgstr ""
-
-msgid "Geo|Replication Details Desktop"
-msgstr ""
-
-msgid "Geo|Replication Details Mobile"
 msgstr ""
 
 msgid "Geo|Replication details"
@@ -14128,6 +14131,9 @@ msgstr ""
 msgid "Geo|Synchronization settings"
 msgstr ""
 
+msgid "Geo|Synchronization status"
+msgstr ""
+
 msgid "Geo|The database is currently %{db_lag} behind the primary node."
 msgstr ""
 
@@ -14162,6 +14168,9 @@ msgid "Geo|Verification"
 msgstr ""
 
 msgid "Geo|Verification failed - %{error}"
+msgstr ""
+
+msgid "Geo|Verification status"
 msgstr ""
 
 msgid "Geo|Verificaton information"

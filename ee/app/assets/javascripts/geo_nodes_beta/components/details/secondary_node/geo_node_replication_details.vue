@@ -2,19 +2,18 @@
 import { GlIcon, GlPopover, GlLink, GlButton } from '@gitlab/ui';
 import { mapGetters, mapState } from 'vuex';
 import { GEO_REPLICATION_TYPES_URL } from 'ee/geo_nodes_beta/constants';
-import { s__ } from '~/locale';
+import GeoNodeReplicationDetailsDesktop from './geo_node_replication_details_desktop.vue';
+import GeoNodeReplicationDetailsMobile from './geo_node_replication_details_mobile.vue';
 
 export default {
   name: 'GeoNodeReplicationDetails',
-  i18n: {
-    replicationDetailsDesktop: s__('Geo|Replication Details Desktop'),
-    replicationDetailsMobile: s__('Geo|Replication Details Mobile'),
-  },
   components: {
     GlIcon,
     GlPopover,
     GlLink,
     GlButton,
+    GeoNodeReplicationDetailsMobile,
+    GeoNodeReplicationDetailsDesktop,
   },
   props: {
     node: {
@@ -96,12 +95,14 @@ export default {
       </gl-popover>
     </div>
     <div v-if="!collapsed">
-      <span class="gl-display-none gl-md-display-block" data-testid="replication-details-desktop">{{
-        $options.i18n.replicationDetailsDesktop
-      }}</span>
-      <span class="gl-md-display-none!" data-testid="replication-details-mobile">{{
-        $options.i18n.replicationDetailsMobile
-      }}</span>
+      <geo-node-replication-details-desktop
+        class="gl-display-none gl-md-display-block"
+        :replication-items="replicationItems"
+      />
+      <geo-node-replication-details-mobile
+        class="gl-md-display-none!"
+        :replication-items="replicationItems"
+      />
     </div>
   </div>
 </template>

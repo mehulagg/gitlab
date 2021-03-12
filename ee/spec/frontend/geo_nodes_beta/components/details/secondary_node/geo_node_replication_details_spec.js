@@ -3,9 +3,10 @@ import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import GeoNodeReplicationDetails from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_details.vue';
+import GeoNodeReplicationDetailsDesktop from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_details_desktop.vue';
+import GeoNodeReplicationDetailsMobile from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_details_mobile.vue';
 import { GEO_REPLICATION_TYPES_URL } from 'ee/geo_nodes_beta/constants';
 import { MOCK_NODES, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 Vue.use(Vuex);
 
@@ -29,24 +30,23 @@ describe('GeoNodeReplicationDetails', () => {
       },
     });
 
-    wrapper = extendedWrapper(
-      shallowMount(GeoNodeReplicationDetails, {
-        store,
-        propsData: {
-          ...defaultProps,
-          ...props,
-        },
-      }),
-    );
+    wrapper = shallowMount(GeoNodeReplicationDetails, {
+      store,
+      propsData: {
+        ...defaultProps,
+        ...props,
+      },
+    });
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findGeoMobileReplicationDetails = () => wrapper.findByTestId('replication-details-mobile');
+  const findGeoMobileReplicationDetails = () =>
+    wrapper.findComponent(GeoNodeReplicationDetailsMobile);
   const findGeoDesktopReplicationDetails = () =>
-    wrapper.findByTestId('replication-details-desktop');
+    wrapper.findComponent(GeoNodeReplicationDetailsDesktop);
   const findGlIcon = () => wrapper.findComponent(GlIcon);
   const findGlPopover = () => wrapper.findComponent(GlPopover);
   const findGlPopoverLink = () => findGlPopover().findComponent(GlLink);
@@ -118,12 +118,12 @@ describe('GeoNodeReplicationDetails', () => {
     });
 
     describe.each`
-      description                    | mockSyncData                                                                                                                                    | mockVerificationData                                                                                                                            | expectedData
+      description                    | mockSyncData                                                                                                                                    | mockVerificationData                                                                                                                            | expectedProps
       ${'with no data'}              | ${[]}                                                                                                                                           | ${[]}                                                                                                                                           | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, component: MOCK_REPLICABLE_TYPES[0].titlePlural, syncValues: null, verificationValues: null }]}
       ${'with no verification data'} | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, title: MOCK_REPLICABLE_TYPES[0].titlePlural, values: { total: 100, success: 0 } }]} | ${[]}                                                                                                                                           | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, component: MOCK_REPLICABLE_TYPES[0].titlePlural, syncValues: { total: 100, success: 0 }, verificationValues: null }]}
       ${'with no sync data'}         | ${[]}                                                                                                                                           | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, title: MOCK_REPLICABLE_TYPES[0].titlePlural, values: { total: 50, success: 50 } }]} | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, component: MOCK_REPLICABLE_TYPES[0].titlePlural, syncValues: null, verificationValues: { total: 50, success: 50 } }]}
       ${'with all data'}             | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, title: MOCK_REPLICABLE_TYPES[0].titlePlural, values: { total: 100, success: 0 } }]} | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, title: MOCK_REPLICABLE_TYPES[0].titlePlural, values: { total: 50, success: 50 } }]} | ${[{ dataTypeTitle: MOCK_REPLICABLE_TYPES[0].dataTypeTitle, component: MOCK_REPLICABLE_TYPES[0].titlePlural, syncValues: { total: 100, success: 0 }, verificationValues: { total: 50, success: 50 } }]}
-    `('$description', ({ mockSyncData, mockVerificationData, expectedData }) => {
+    `('$description', ({ mockSyncData, mockVerificationData, expectedProps }) => {
       beforeEach(() => {
         createComponent({ replicableTypes: [MOCK_REPLICABLE_TYPES[0]] }, null, {
           syncInfo: () => () => mockSyncData,
@@ -131,8 +131,16 @@ describe('GeoNodeReplicationDetails', () => {
         });
       });
 
-      it('creates the correct replicationItems array', () => {
-        expect(wrapper.vm.replicationItems).toStrictEqual(expectedData);
+      it('passes the correct props to the mobile replication details', () => {
+        expect(findGeoMobileReplicationDetails().props('replicationItems')).toStrictEqual(
+          expectedProps,
+        );
+      });
+
+      it('passes the correct props to the desktop replication details', () => {
+        expect(findGeoDesktopReplicationDetails().props('replicationItems')).toStrictEqual(
+          expectedProps,
+        );
       });
     });
   });
