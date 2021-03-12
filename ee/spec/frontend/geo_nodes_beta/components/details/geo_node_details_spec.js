@@ -4,6 +4,7 @@ import GeoNodeCoreDetails from 'ee/geo_nodes_beta/components/details/geo_node_co
 import GeoNodeDetails from 'ee/geo_nodes_beta/components/details/geo_node_details.vue';
 import GeoNodePrimaryOtherInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_primary_other_info.vue';
 import GeoNodeVerificationInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_verification_info.vue';
+import GeoNodeReplicationDetails from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_details.vue';
 import GeoNodeReplicationSummary from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_summary.vue';
 import GeoNodeSecondaryOtherInfo from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_secondary_other_info.vue';
 import {
@@ -51,8 +52,7 @@ describe('GeoNodeDetails', () => {
   const findGeoNodeVerificationInfo = () => wrapper.find(GeoNodeVerificationInfo);
   const findGeoNodeSecondaryReplicationSummary = () => wrapper.find(GeoNodeReplicationSummary);
   const findGeoNodeSecondaryOtherInfo = () => wrapper.find(GeoNodeSecondaryOtherInfo);
-  const findGeoNodeSecondaryReplicationDetails = () =>
-    wrapper.find('[data-testid="secondary-replication-details"]');
+  const findGeoNodeSecondaryReplicationDetails = () => wrapper.find(GeoNodeReplicationDetails);
 
   describe('template', () => {
     describe('always', () => {

@@ -7837,6 +7837,9 @@ msgstr ""
 msgid "ComplianceFramework|This project is regulated by %{framework}."
 msgstr ""
 
+msgid "Component"
+msgstr ""
+
 msgid "Confidence"
 msgstr ""
 
@@ -9730,6 +9733,9 @@ msgid "DastSiteValidation|You will not be able to run active scans against %{url
 msgstr ""
 
 msgid "Data is still calculating..."
+msgstr ""
+
+msgid "Data type"
 msgstr ""
 
 msgid "Database update failed"
@@ -13872,6 +13878,9 @@ msgstr ""
 msgid "Geo|Please refer to Geo Troubleshooting."
 msgstr ""
 
+msgid "Geo|Primary Details"
+msgstr ""
+
 msgid "Geo|Primary node"
 msgstr ""
 
@@ -13908,9 +13917,6 @@ msgstr ""
 msgid "Geo|Replicated data is verified with the secondary node(s) using checksums"
 msgstr ""
 
-msgid "Geo|Replication Details"
-msgstr ""
-
 msgid "Geo|Replication details"
 msgstr ""
 
@@ -13942,6 +13948,9 @@ msgid "Geo|Reverify all"
 msgstr ""
 
 msgid "Geo|Review replication status, and resynchronize and reverify items with the primary node."
+msgstr ""
+
+msgid "Geo|Secondary Details"
 msgstr ""
 
 msgid "Geo|Secondary node"
@@ -18479,6 +18488,9 @@ msgid "Logs"
 msgstr ""
 
 msgid "Logs|To see the logs, deploy your code to an environment."
+msgstr ""
+
+msgid "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 msgstr ""
 
 msgid "Low vulnerabilities present"
@@ -25532,7 +25544,13 @@ msgstr ""
 msgid "Replaces the clone URL root."
 msgstr ""
 
+msgid "Replicated data is verified with the secondary node(s) using checksums"
+msgstr ""
+
 msgid "Replication"
+msgstr ""
+
+msgid "Replication Details"
 msgstr ""
 
 msgid "Replication details"
@@ -29331,6 +29349,9 @@ msgid "Synchronization disabled"
 msgstr ""
 
 msgid "Synchronization settings"
+msgstr ""
+
+msgid "Synchronization status"
 msgstr ""
 
 msgid "Syncing…"
