@@ -19,16 +19,16 @@ For an [overview of the feature flag lifecycle](https://about.gitlab.com/handboo
 
 ## Overview
 
-The following points should be considered after deciding to leverage feature flags:
+When you decide to deploy a feature behind a feature flag:
 
-- By default, the feature flags should be **off**.
+- The feature flag must be **disabled by default**.
 - Feature flags should remain in the codebase for as short period as possible
   to reduce the need for feature flag accounting.
-- The person operating the feature flags is responsible for clearly communicating
+- The person operating the feature flag is responsible for clearly communicating
   the status of a feature behind the feature flag in the documentation and with other stakeholders. The
   issue description should be updated with the feature flag name and whether it is
   defaulted on or off as soon it is evident that a feature flag is needed.
-- Merge requests that make changes hidden behind a feature flag, or remove an
+- Merge requests that introduce a feature flag, update its state, or remove them
   existing feature flag because a feature is deemed stable must have the
   ~"feature flag" label assigned.
 
@@ -62,7 +62,7 @@ Choose a feature flag type that matches the expected usage.
 used so that unfinished code can be deployed in production. Most feature flags used at GitLab are the `development` type.
 
 A `development` feature flag should have a rollout issue,
-ideally created using the [Feature Flag Roll Out template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md).
+created from the [Feature Flag Roll Out template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md).
 
 This is the default type used when calling `Feature.enabled?`.
 
@@ -70,7 +70,7 @@ This is the default type used when calling `Feature.enabled?`.
 
 `ops` feature flags are long-lived feature flags that control operational aspects
 of GitLab product behavior. For example, feature flags that disable features that might
-have a performance impact, like special Sidekiq worker behavior.
+have a performance impact such as Sidekiq worker behavior.
 
 `ops` feature flags likely do not have rollout issues, as it is hard to
 predict when they are enabled or disabled.
@@ -95,7 +95,7 @@ push_frontend_feature_flag(:my_ops_flag, project, type: :ops)
 
 An `experiment` feature flag should conform to the same standards as a `development` feature flag,
 although the interface has some differences. An experiment feature flag should have a rollout issue,
-ideally created using the [Experiment Tracking template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/experiment_tracking_template.md). More information can be found in the [experiment guide](../experiment_guide/index.md).
+created using the [Experiment Tracking template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/experiment_tracking_template.md). More information can be found in the [experiment guide](../experiment_guide/index.md).
 
 ## Feature flag definition and validation
 
@@ -175,6 +175,7 @@ To create a feature flag that is only used in EE, add the `--ee` flag: `bin/feat
 
 ### Risk of a broken master (main) branch
 
+WARNING:
 Feature flags **must** be used in the MR that introduces them. Not doing so causes a
 [broken master](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due
 to the `rspec:feature-flags` job that only runs on the `master` branch.
