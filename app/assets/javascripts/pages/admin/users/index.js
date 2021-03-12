@@ -31,37 +31,35 @@ function loadModalsConfigurationFromHtml(modalsElement) {
   return modalsConfiguration;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  Vue.use(Translate);
+Vue.use(Translate);
 
-  initAdminUsersApp();
+initAdminUsersApp();
 
-  const modalConfiguration = loadModalsConfigurationFromHtml(
-    document.querySelector(MODAL_TEXTS_CONTAINER_SELECTOR),
-  );
+const modalConfiguration = loadModalsConfigurationFromHtml(
+  document.querySelector(MODAL_TEXTS_CONTAINER_SELECTOR),
+);
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: MODAL_MANAGER_SELECTOR,
-    functional: true,
-    methods: {
-      show(...args) {
-        this.$refs.manager.show(...args);
+// eslint-disable-next-line no-new
+new Vue({
+  el: MODAL_MANAGER_SELECTOR,
+  functional: true,
+  methods: {
+    show(...args) {
+      this.$refs.manager.show(...args);
+    },
+  },
+  render(h) {
+    return h(ModalManager, {
+      ref: 'manager',
+      props: {
+        selector: CONFIRM_DELETE_BUTTON_SELECTOR,
+        modalConfiguration,
+        csrfToken: csrf.token,
       },
-    },
-    render(h) {
-      return h(ModalManager, {
-        ref: 'manager',
-        props: {
-          selector: CONFIRM_DELETE_BUTTON_SELECTOR,
-          modalConfiguration,
-          csrfToken: csrf.token,
-        },
-      });
-    },
-  });
-
-  initConfirmModal();
-  initCohortsEmptyState();
-  initTabs();
+    });
+  },
 });
+
+initConfirmModal();
+initCohortsEmptyState();
+initTabs();
