@@ -190,6 +190,9 @@ then you'll need to also add the full paths as shown below:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
+WARNING:
+Please note that multiple wildcards for one instance is not supported. Only one wildcard per instance can be assigned.
+
 ### Additional configuration for Docker container
 
 The GitLab Pages daemon doesn't have permissions to bind mounts when it runs
