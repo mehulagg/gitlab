@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared_state do
+RSpec.describe Ci::JobArtifacts::DestroyExpiredService, :clean_gitlab_redis_shared_state do
   include ExclusiveLeaseHelpers
 
   describe '.execute' do
@@ -62,7 +62,7 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
 
     context 'when failed to destroy artifact' do
       before do
-        stub_const('Ci::DestroyExpiredJobArtifactsService::LOOP_LIMIT', 10)
+        stub_const('Ci::JobArtifacts::DestroyExpiredService::LOOP_LIMIT', 10)
         expect(Ci::DeletedObject)
           .to receive(:bulk_import)
           .once
@@ -77,7 +77,7 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
 
     context 'when there are artifacts more than batch sizes' do
       before do
-        stub_const('Ci::DestroyExpiredJobArtifactsService::BATCH_SIZE', 1)
+        stub_const('Ci::JobArtifacts::DestroyExpiredService::BATCH_SIZE', 1)
 
         second_artifact.job.pipeline.unlocked!
       end

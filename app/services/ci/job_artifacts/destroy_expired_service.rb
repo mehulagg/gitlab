@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class DestroyExpiredJobArtifactsService
+  class JobArtifacts::DestroyExpiredService
     include ::Gitlab::ExclusiveLeaseHelpers
     include ::Gitlab::LoopHelpers
 
