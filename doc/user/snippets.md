@@ -27,7 +27,8 @@ GitLab provides two types of snippets:
 You can create snippets in multiple ways, depending on whether you want to create a personal or project snippet:
 
 1. Select the kind of snippet you want to create:
-   - **To create a personal snippet**:
+   - **To create a personal snippet**: on the
+     [Snippets dashboard](https://gitlab.com/dashboard/snippets), click **New snippet**, or:
      - *If you're on a project's page,* select the plus icon (**{plus-square-o}**)
        in the top navigation bar, then select **New snippet** from the **GitLab** (for GitLab.com)
        or **Your Instance** (self-managed) section of the same dropdown menu.
