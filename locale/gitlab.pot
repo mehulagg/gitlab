@@ -16575,9 +16575,6 @@ msgstr ""
 msgid "Invalid Insights config file detected"
 msgstr ""
 
-msgid "Invalid Login or password"
-msgstr ""
-
 msgid "Invalid OS"
 msgstr ""
 
