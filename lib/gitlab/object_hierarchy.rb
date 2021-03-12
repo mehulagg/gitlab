@@ -62,8 +62,8 @@ module Gitlab
     # each parent.
     # rubocop: disable CodeReuse/ActiveRecord
     def base_and_ancestors(upto: nil, hierarchy_order: nil)
-      recursive_query = base_and_ancestors_cte(upto, hierarchy_order).apply_to(model.all).distinct
-      recursive_query = model.from(recursive_query, model.table_name)
+      recursive_query = base_and_ancestors_cte(upto, hierarchy_order).apply_to(model.all)
+      recursive_query = apply_hierarchical_order(recursive_query)
       recursive_query = recursive_query.order(depth: hierarchy_order) if hierarchy_order
 
       read_only(recursive_query)
@@ -76,10 +76,7 @@ module Gitlab
     # When `with_depth` is `true`, a `depth` column is included where it starts with `1` for the base objects
     # and incremented as we go down the descendant tree
     def base_and_descendants(with_depth: false)
-      recursive_query = base_and_descendants_cte(with_depth: with_depth).apply_to(model.all).distinct
-      recursive_query = model.from(recursive_query, model.table_name)
-
-      read_only(recursive_query)
+      read_only(apply_hierarchical_order(base_and_descendants_cte(with_depth: with_depth).apply_to(model.all)))
     end
 
     # Returns a relation that includes the base objects, their ancestors,
@@ -120,10 +117,21 @@ module Gitlab
           model.unscoped.from(ancestors_table),
           model.unscoped.from(descendants_table)
         ])
-        .distinct
-      relation = model.from(relation, model.table_name)
 
-      read_only(relation)
+      read_only(apply_hierarchical_order(relation))
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def apply_hierarchical_order(relation)
+      inner_relation = relation
+        .select(objects_table[Arel.star], Arel::Nodes::NamedFunction.new("ROW_NUMBER", []).over.as("namespaces_row_index"))
+        .distinct
+        .order("namespaces_row_index")
+
+      inner_relation = Arel::Nodes::Grouping.new([Arel.sql(inner_relation.to_sql)])
+
+      model.from(Arel::Nodes::As.new(inner_relation, objects_table))
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
