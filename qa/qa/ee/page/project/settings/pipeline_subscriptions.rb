@@ -5,20 +5,10 @@ module QA
     module Page
       module Project
         module Settings
-          module PipelineSubscriptions
-            extend QA::Page::PageConcern
-
-            def self.prepended(base)
-              super
-
-              base.class_eval do
-                include Page::Component::SecureReport
-
-                view 'ee/app/views/projects/settings/subscriptions/_index.html.haml' do
-                  element :upstream_project_path_field
-                  element :subscribe_button
-                end
-              end
+          class PipelineSubscriptions < QA::Page::Base
+            view 'ee/app/views/projects/settings/subscriptions/_index.html.haml' do
+              element :upstream_project_path_field
+              element :subscribe_button
             end
 
             def subscribe(project_path)

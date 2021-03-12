@@ -25,17 +25,17 @@ module QA
           commit.project = downstream_project
           commit.commit_message = 'Add .gitlab-ci.yml'
           commit.add_files(
-              [
-                {
-                  file_path: '.gitlab-ci.yml',
-                  content: <<~YAML
-                    job:
-                      tags:
-                        - #{executor}
-                      script: echo DONE!
-                  YAML
-                }
-              ]
+            [
+              {
+                file_path: '.gitlab-ci.yml',
+                content: <<~YAML
+                  job:
+                    tags:
+                      - #{executor}
+                    script: echo DONE!
+                YAML
+              }
+            ]
           )
         end
       end
@@ -72,7 +72,7 @@ module QA
       end
 
       it 'test something there' do
-
+        # something will be here
       end
 
       private
