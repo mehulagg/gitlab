@@ -79,7 +79,7 @@
       - if runner.belongs_to_more_than_one_project?
         - delete_runner_tooltip = _('Multi-project Runners cannot be removed')
         .btn-group.has-tooltip{ data: { container: 'body', placement: 'top' }, title: delete_runner_tooltip }
-          .btn.btn-danger{ 'aria-label' => delete_runner_tooltip, disabled: 'disabled' }
+          .gl-button.btn.btn-danger{ 'aria-label' => delete_runner_tooltip, disabled: 'disabled' }
             = sprite_icon('close')
       - else
         .btn-group

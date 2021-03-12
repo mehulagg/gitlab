@@ -12,13 +12,13 @@
 
   .create-mr-dropdown-wrap.d-inline-block.full-width-mobile.js-create-mr{ data: { project_path: @project.full_path, project_id: @project.id, can_create_path: can_create_path, create_mr_path: create_mr_path, create_branch_path: create_branch_path, refs_path: refs_path, is_confidential: can_create_confidential_merge_request?.to_s } }
     .btn-group.btn-group-sm.unavailable
-      %button.btn.btn-grouped{ type: 'button', disabled: 'disabled' }
+      %button.gl-button.btn.btn-grouped{ type: 'button', disabled: 'disabled' }
         .spinner.align-text-bottom.mr-1.hide
         %span.text
           Checking branch availability…
 
     .btn-group.btn-group-sm.available.hidden
-      %button.btn.js-create-merge-request.btn-success.btn-secondary{ type: 'button', data: { action: data_action } }
+      %button.gl-button.btn.js-create-merge-request.btn-success.btn-secondary{ type: 'button', data: { action: data_action } }
         = value
 
       %button.btn.gl-button.create-merge-request-dropdown-toggle.dropdown-toggle.btn-success.btn-secondary.js-dropdown-toggle.gl-flex-grow-0.gl-h-7{ type: 'button', data: { dropdown: { trigger: '#create-merge-request-dropdown' }, display: 'static' } }

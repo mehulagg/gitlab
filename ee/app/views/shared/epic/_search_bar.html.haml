@@ -11,13 +11,13 @@
   .epics-details-filters.filtered-search-block.d-flex.flex-column.flex-md-row.row-content-block.second-block
     - if show_roadmap_presets
       .btn-group.btn-group-toggle.gl-mr-3.js-btn-roadmap-presets{ data: { toggle: 'buttons' } }
-        %label.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_quarters) }
+        %label.gl-button.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_quarters) }
           %input{ type: 'radio', name: 'presetType', autocomplete: 'off', checked: ("checked" if is_quarters), value: 'QUARTERS' }
             = _('Quarters')
-        %label.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_months) }
+        %label.gl-button.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_months) }
           %input{ type: 'radio', name: 'presetType', autocomplete: 'off', checked: ("checked" if is_months), value: 'MONTHS' }
             = _('Months')
-        %label.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_weeks) }
+        %label.gl-button.btn.btn-default.btn-roadmap-preset{ class: ("active" if is_weeks) }
           %input{ type: 'radio', name: 'presetType', autocomplete: 'off', checked: ("checked" if is_weeks), value: 'WEEKS' }
             = _('Weeks')
       .filter-dropdown-container.gl-mr-3
@@ -44,7 +44,7 @@
             #js-dropdown-hint.filtered-search-input-dropdown-menu.dropdown-menu.hint-dropdown
               %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                 %li.filter-dropdown-item{ data: {hint: "#{'{{hint}}'}", tag: "#{'{{tag}}'}", action: "#{'{{hint === \'search\' ? \'submit\' : \'\' }}'}" } }
-                  %button.btn.btn-link{ type: 'button' }
+                  %button.gl-button.btn.btn-link{ type: 'button' }
                     -# Encapsulate static class name `{{icon}}` inside #{} to bypass
                     -# haml lint's ClassAttributeWithStaticValue
                     %svg
@@ -54,7 +54,7 @@
             #js-dropdown-operator.filtered-search-input-dropdown-menu.dropdown-menu
               %ul.filter-dropdown{ data: { dropdown: true, dynamic: true } }
                 %li.filter-dropdown-item{ data: { value: "{{ title }}" } }
-                  %button.btn.btn-link{ type: 'button' }
+                  %button.gl-button.btn.btn-link{ type: 'button' }
                     {{ title }}
                     %span.btn-helptext
                       {{ help }}
@@ -70,12 +70,12 @@
             #js-dropdown-label.filtered-search-input-dropdown-menu.dropdown-menu
               %ul{ data: { dropdown: true } }
                 %li.filter-dropdown-item{ data: { value: 'none' } }
-                  %button.btn.btn-link{ type: 'button' }
+                  %button.gl-button.btn.btn-link{ type: 'button' }
                     = _("No label")
                 %li.divider.droplab-item-ignore
               %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                 %li.filter-dropdown-item{ type: 'button' }
-                  %button.btn.btn-link
+                  %button.gl-button.btn.btn-link
                     %span.dropdown-label-box{ style: 'background: {{color}}' }
                     %span.label-title.js-data-value
                       {{ title }}
