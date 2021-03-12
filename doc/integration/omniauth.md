@@ -259,7 +259,7 @@ To enable/disable an OmniAuth provider:
 1. Scroll to the **Sign-in Restrictions** section, and click **Expand**.
 1. Next to **Enabled OAuth Sign-In sources**, select the check box for each provider you want to enable or disable.
 
-   ![Enabled OAuth Sign-In sources](img/enabled-oauth-sign-in-sources.png)
+   ![Enabled OAuth Sign-In sources](img/enabled-oauth-sign-in-sources_v13_11.png)
 
 ## Disabling OmniAuth
 
