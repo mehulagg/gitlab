@@ -321,6 +321,7 @@ module Gitlab
         # A monkeypatch over ActiveRecord::Base.transaction.
         # It provides observability into transactional methods.
         def transaction(**options, &block)
+          puts "#" * 50
           ActiveSupport::Notifications.instrument('transaction.active_record', { connection: connection }) do
             super(**options, &block)
           end
