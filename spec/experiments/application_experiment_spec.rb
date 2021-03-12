@@ -25,6 +25,10 @@ RSpec.describe ApplicationExperiment, :experiment do
     described_class.new('namespaced/stub')
   end
 
+  it "uses the round robin rollout by default" do
+    expect(described_class.default_rollout).to eq(Gitlab::Experiment::Rollout::RoundRobin)
+  end
+
   describe "enabled" do
     before do
       allow(subject).to receive(:enabled?).and_call_original

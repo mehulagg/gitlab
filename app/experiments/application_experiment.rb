@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/NamespacedClass
+  default_rollout :round_robin # set our default strategy to be round robin
+
   def enabled?
     return false if Feature::Definition.get(feature_flag_name).nil? # there has to be a feature flag yaml file
     return false unless Gitlab.dev_env_or_com? # we have to be in an environment that allows experiments
