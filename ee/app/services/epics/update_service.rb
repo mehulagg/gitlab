@@ -21,6 +21,8 @@ module Epics
         epic.reset
       end
 
+      track_changes(epic)
+
       assign_parent_epic_for(epic)
       assign_child_epic_for(epic)
 
@@ -53,6 +55,18 @@ module Epics
 
     def saved_change_to_epic_dates?(epic)
       (epic.saved_changes.keys.map(&:to_sym) & EPIC_DATE_FIELDS).present?
+    end
+
+    def track_changes(epic)
+      changes = epic.saved_changes.keys
+
+      # if changes.include?(:title)
+      #   ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_title_updated(author: current_user)
+      # end
+      #
+      # if changes.include?(:description)
+      #   ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_description_updated(author: current_user)
+      # end
     end
   end
 end
