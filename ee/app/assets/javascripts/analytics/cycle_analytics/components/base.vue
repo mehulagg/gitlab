@@ -6,7 +6,7 @@ import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE } from '../constants';
+import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
@@ -86,11 +86,16 @@ export default {
     shouldDisplayFilters() {
       return !this.errorCode;
     },
+    isOverviewStageSelected() {
+      return this.selectedStage?.id === OVERVIEW_STAGE_ID;
+    },
     shouldDisplayDurationChart() {
-      return this.featureFlags.hasDurationChart && !this.hasNoAccessError;
+      return (
+        this.featureFlags.hasDurationChart && this.isOverviewStageSelected && !this.hasNoAccessError
+      );
     },
     shouldDisplayTypeOfWorkCharts() {
-      return !this.hasNoAccessError;
+      return this.isOverviewStageSelected && !this.hasNoAccessError;
     },
     shouldDisplayPathNavigation() {
       return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
@@ -243,8 +248,13 @@ export default {
         "
       />
       <div v-else>
-        <metrics :group-path="currentGroupPath" :request-params="cycleAnalyticsRequestParams" />
+        <metrics
+          v-if="isOverviewStageSelected"
+          :group-path="currentGroupPath"
+          :request-params="cycleAnalyticsRequestParams"
+        />
         <stage-table
+          v-if="!isOverviewStageSelected"
           :key="stageCount"
           class="js-stage-table"
           :current-stage="selectedStage"
