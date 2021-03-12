@@ -14,13 +14,16 @@ export default {
       required: true,
     },
   },
-  methods: { ...mapActions(LICENSE_MANAGEMENT, ['setLicenseInModal']) },
+  methods: {
+    ...mapActions(LICENSE_MANAGEMENT, ['setLicenseInModal']),
+  },
 };
 </script>
 
 <template>
   <div class="report-block-info license-item">
-    <gl-link :href="issue.url" target="_blank">{{ issue.name }}</gl-link>
+    <gl-link v-if="issue.url" :href="issue.url" target="_blank">{{ issue.name }}</gl-link>
+    <span v-else>{{ issue.name }}</span>
     <license-packages :packages="issue.packages" class="text-secondary" />
   </div>
 </template>

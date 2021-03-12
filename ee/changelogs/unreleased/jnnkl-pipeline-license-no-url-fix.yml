@@ -1,0 +1,5 @@
+---
+title: Fix for licenses without an url in license issue body
+merge_request: 322160
+author:
+type: changed
