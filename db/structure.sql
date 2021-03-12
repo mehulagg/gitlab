@@ -22044,6 +22044,8 @@ CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_config_source ON c
 
 CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_source ON ci_pipelines USING btree (user_id, created_at, source);
 
+CREATE INDEX index_ci_pipelines_on_user_id_status ON ci_pipelines USING btree (user_id, status);
+
 CREATE UNIQUE INDEX index_ci_project_monthly_usages_on_project_id_and_date ON ci_project_monthly_usages USING btree (project_id, date);
 
 CREATE UNIQUE INDEX index_ci_refs_on_project_id_and_ref_path ON ci_refs USING btree (project_id, ref_path);
