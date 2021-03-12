@@ -13,6 +13,7 @@ import {
 } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import CodeQualityBadge from 'ee_else_ce/diffs/components/code_quality_badge.vue';
 import { diffViewerModes } from '~/ide/constants';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { truncateSha } from '~/lib/utils/text_utility';
@@ -41,6 +42,7 @@ export default {
     GlDropdownDivider,
     GlFormCheckbox,
     GlLoadingIcon,
+    CodeQualityBadge,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -261,7 +263,7 @@ export default {
     :data-qa-file-name="filePath"
     @click.self="handleToggleFile"
   >
-    <div class="file-header-content">
+    <div class="file-header-content gl-display-flex gl-align-items-center">
       <gl-icon
         v-if="collapsible"
         ref="collapseIcon"
@@ -322,6 +324,8 @@ export default {
         data-track-label="diff_copy_file_path_button"
         data-track-property="diff_copy_file"
       />
+
+      <code-quality-badge v-if="false" />
 
       <small v-if="isModeChanged" ref="fileMode" class="mr-1">
         {{ diffFile.a_mode }} → {{ diffFile.b_mode }}
