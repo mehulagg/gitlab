@@ -104,7 +104,12 @@ module Gitlab
 
       def file(name, version)
         wrapped_gitaly_errors do
-          gitaly_find_file(name, version)
+          data_limit = load_content ? -1 : 0
+          blobs = repository.blobs_at([[version, name]], blob_size_limit: data_limit)
+
+          next if blobs.empty?
+
+          Gitlab::Git::WikiFile.new(blobs.first)
         end
       end
 
@@ -159,13 +164,6 @@ module Gitlab
         Gitlab::Git::WikiPage.new(wiki_page, version)
       rescue GRPC::InvalidArgument
         nil
-      end
-
-      def gitaly_find_file(name, version)
-        wiki_file = gitaly_wiki_client.find_file(name, version)
-        return unless wiki_file
-
-        Gitlab::Git::WikiFile.new(wiki_file)
       end
 
       def gitaly_list_pages(limit: 0, sort: nil, direction_desc: false, load_content: false)

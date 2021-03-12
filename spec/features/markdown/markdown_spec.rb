@@ -288,9 +288,10 @@ RSpec.describe 'GitLab Markdown', :aggregate_failures do
       @wiki = @feat.wiki
       @wiki_page = @feat.wiki_page
 
-      path = 'images/example.jpg'
-      gitaly_wiki_file = Gitlab::GitalyClient::WikiFile.new(path: path)
-      expect(@wiki).to receive(:find_file).with(path, load_content: false).and_return(Gitlab::Git::WikiFile.new(gitaly_wiki_file))
+      name = 'example.jpg'
+      path = "images/#{name}"
+      blob = OpenStruct.new(name: name, path: path, mime_type: 'image/jpeg', data: nil)
+      expect(@wiki).to receive(:find_file).with(path, load_content: false).and_return(Gitlab::Git::WikiFile.new(blob))
       allow(@wiki).to receive(:wiki_base_path) { '/namespace1/gitlabhq/wikis' }
 
       @html = markdown(@feat.raw_markdown, { pipeline: :wiki, wiki: @wiki, page_slug: @wiki_page.slug })
