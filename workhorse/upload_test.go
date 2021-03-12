@@ -112,6 +112,7 @@ func TestAcceleratedUpload(t *testing.T) {
 		{"POST", `/example`, false},
 		{"POST", `/uploads/personal_snippet`, true},
 		{"POST", `/uploads/user`, true},
+		{"POST", `/api/v4/projects/1/uploads`, true},
 		{"POST", `/api/v4/projects/1/wikis/attachments`, false},
 		{"POST", `/api/graphql`, false},
 		{"PUT", "/api/v4/projects/9001/packages/nuget/v1/files", true},
