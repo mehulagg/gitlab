@@ -1099,7 +1099,9 @@ Example definition:
 - name: example_metrics_intersection_database_sourced
   operator: AND
   source: database
-  events: ['dependency_scanning_pipeline', 'container_scanning_pipeline']
+  events:
+    - 'dependency_scanning_pipeline',
+    - 'container_scanning_pipeline'
   time_frame:
     - 28d
     - all

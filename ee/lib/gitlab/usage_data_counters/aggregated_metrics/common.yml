@@ -17,5 +17,7 @@
 - name: product_analytics_test_metrics_intersection_database_sourced
   source: database
   time_frame: [28d]
-  events: ['dependency_scanning_pipeline', 'container_scanning_pipeline']
+  events:
+    - 'dependency_scanning_pipeline',
+    - 'container_scanning_pipeline'
   operator: AND
