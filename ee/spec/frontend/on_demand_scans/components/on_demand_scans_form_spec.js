@@ -5,7 +5,6 @@ import VueApollo from 'vue-apollo';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
 import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
-import dastOnDemandScanCreateMutation from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
 import dastProfileCreateMutation from 'ee/on_demand_scans/graphql/dast_profile_create.mutation.graphql';
 import dastProfileUpdateMutation from 'ee/on_demand_scans/graphql/dast_profile_update.mutation.graphql';
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
@@ -152,7 +151,6 @@ describe('OnDemandScansForm', () => {
             newScannerProfilePath,
             newSiteProfilePath,
             glFeatures: {
-              dastSavedScans: true,
               dastBranchSelection: true,
             },
           },
@@ -461,38 +459,6 @@ describe('OnDemandScansForm', () => {
 
     it('redirects to profiles library', () => {
       expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
-    });
-  });
-
-  describe('dastSavedScans feature flag disabled', () => {
-    beforeEach(async () => {
-      mountShallowSubject({
-        provide: {
-          glFeatures: {
-            dastSavedScans: false,
-          },
-        },
-      });
-      subject.vm.$apollo.mutate.mockResolvedValue({
-        data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } },
-      });
-      subject.find(ScannerProfileSelector).vm.$emit('input', passiveScannerProfile.id);
-      subject.find(SiteProfileSelector).vm.$emit('input', nonValidatedSiteProfile.id);
-      submitForm();
-    });
-
-    it('triggers GraphQL mutation', () => {
-      expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
-        mutation: dastOnDemandScanCreateMutation,
-        variables: {
-          input: {
-            branchName: defaultBranch,
-            dastScannerProfileId: passiveScannerProfile.id,
-            dastSiteProfileId: nonValidatedSiteProfile.id,
-            fullPath: projectPath,
-          },
-        },
-      });
     });
   });
 

@@ -39,7 +39,6 @@ export default {
 
       return getProfileSettings({
         createNewProfilePaths,
-        isDastSavedScansEnabled: this.glFeatures.dastSavedScans,
       });
     },
     tabIndex: {

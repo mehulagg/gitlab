@@ -14,8 +14,7 @@ module Dast
       private
 
       def allowed?
-        Feature.enabled?(:dast_saved_scans, container, default_enabled: :yaml) &&
-          can?(current_user, :create_on_demand_dast_scan, container)
+        can?(current_user, :create_on_demand_dast_scan, container)
       end
 
       def unauthorized

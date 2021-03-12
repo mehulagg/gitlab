@@ -36,14 +36,6 @@ RSpec.describe Mutations::Dast::Profiles::Create do
     end
 
     context 'when the feature is licensed' do
-      context 'when the feature is enabled' do
-        it 'raises an exception' do
-          stub_feature_flags(dast_saved_scans: false)
-
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
       context 'when the user can run a dast scan' do
         it 'returns the dast_profile' do
           expect(subject[:dast_profile]).to eq(dast_profile)

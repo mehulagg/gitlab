@@ -48,11 +48,6 @@ describe('EE - DastProfiles', () => {
         {
           propsData: defaultProps,
           mocks: defaultMocks,
-          provide: {
-            glFeatures: {
-              dastSavedScans: true,
-            },
-          },
         },
         options,
       ),
@@ -238,35 +233,6 @@ describe('EE - DastProfiles', () => {
       getProfilesComponent(profileType).vm.$emit('delete-profile');
 
       expect(mutate).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('dastSavedScans feature flag disabled', () => {
-    beforeEach(() => {
-      createFullComponent({
-        provide: {
-          glFeatures: {
-            dastSavedScans: false,
-          },
-        },
-      });
-    });
-
-    it('does not show a "DAST Scan" item in the dropdown', () => {
-      expect(getSiteProfilesDropdownItem('DAST Scan')).toBe(null);
-    });
-
-    it('shows only 2 tabs', () => {
-      expect(withinComponent().getAllByRole('tab')).toHaveLength(2);
-    });
-
-    it('"Site Profile" tab should be selected by default', () => {
-      const tab = getTab({
-        tabName: 'Site Profiles',
-        selected: true,
-      });
-
-      expect(tab).not.toBe(null);
     });
   });
 });

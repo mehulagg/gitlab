@@ -21266,9 +21266,6 @@ msgstr ""
 msgid "OnDemandScans|Manage DAST scans"
 msgstr ""
 
-msgid "OnDemandScans|Manage profiles"
-msgstr ""
-
 msgid "OnDemandScans|Manage scanner profiles"
 msgstr ""
 
@@ -21291,9 +21288,6 @@ msgid "OnDemandScans|On-demand Scans"
 msgstr ""
 
 msgid "OnDemandScans|On-demand scans run outside the DevOps cycle and find vulnerabilities in your projects. %{learnMoreLinkStart}Learn more%{learnMoreLinkEnd}"
-msgstr ""
-
-msgid "OnDemandScans|Run scan"
 msgstr ""
 
 msgid "OnDemandScans|Save and run scan"
