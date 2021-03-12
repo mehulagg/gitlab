@@ -487,9 +487,7 @@ The file can be checked into the project repository or generated as an artifact 
 runs before DAST.
 
 By default, DAST scans do not clone the project repository. Instruct the DAST job to clone
-the project by setting `GIT_STRATEGY` to fetch. The file must be in the `/builds`
-directory, and will most commonly be in `$CI_PROJECT_DIR`. You must provide
-an absolute path to the file in `DAST_PATHS_FILE`.
+the project by setting `GIT_STRATEGY` to fetch. Give a file path relative to `CI_PROJECT_DIR` to `DAST_PATHS_FILE`.
 
 ```yaml
 include:
@@ -497,7 +495,7 @@ include:
 
 variables:
   GIT_STRATEGY: fetch
-  DAST_PATHS_FILE: $CI_PROJECT_DIR/url_file.txt
+  DAST_PATHS_FILE: url_file.txt  # url_file.txt lives in the root directory of the project
 ```
 
 ##### Use `DAST_PATHS` CI/CD variable
@@ -522,8 +520,6 @@ When using `DAST_PATHS` and `DAST_PATHS_FILE`, note the following:
 - `DAST_PATHS_FILE` and `DAST_PATHS` can not be used together
 - The `DAST_PATHS` variable has a limit of about 130kb. If you have a list or paths
   greater than this, use `DAST_PATHS_FILE`.
-- `DAST_PATHS_FILE` will not look for a URLs file in `/zap/wrk` if it has already found a URLs file generated as a job
-  artifact
 
 #### Full Scan
 
