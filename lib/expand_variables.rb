@@ -34,11 +34,7 @@ module ExpandVariables
     end
 
     def match_or_blank_value(variables, last_match)
-      ref_var_name = last_match[1] || last_match[2]
-      ref_var = variables[ref_var_name]
-      return ref_var if ref_var.is_a?(String) # if entry is a simple "key" => "value" hash
-
-      ref_var[:value] if ref_var
+      variables[last_match[1] || last_match[2]]
     end
 
     def match_or_original_value(variables, last_match)
@@ -52,10 +48,10 @@ module ExpandVariables
       # Convert Collection to variables
       variables = variables.to_hash if variables.is_a?(Gitlab::Ci::Variables::Collection)
 
-      # Convert hash array to hash of variables
+      # Convert hash array to variables
       if variables.is_a?(Array)
         variables = variables.reduce({}) do |hash, variable|
-          hash[variable[:key]] = variable
+          hash[variable[:key]] = variable[:value]
           hash
         end
       end

@@ -243,7 +243,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
     end
   end
 
-  describe '#expand_all' do
+  describe '#sort_and_expand_all' do
     context 'when FF :variable_inside_variable is disabled' do
       let_it_be(:project_with_flag_disabled) { create(:project) }
       let_it_be(:project_with_flag_enabled) { create(:project) }
@@ -305,15 +305,14 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
         with_them do
           let(:collection) { Gitlab::Ci::Variables::Collection.new(variables, keep_undefined: keep_undefined) }
 
-          subject { collection.expand_all(project_with_flag_disabled) }
+          subject { collection.sort_and_expand_all(project_with_flag_disabled) }
 
           it 'returns Collection' do
             is_expected.to be_an_instance_of(Gitlab::Ci::Variables::Collection)
           end
 
           it 'does not expand variables' do
-            var_hash = variables.to_h { |env| [env.fetch(:key), env.fetch(:value)] }
-              .with_indifferent_access
+            var_hash = variables.pluck(:key, :value).to_h
             expect(subject.to_hash).to eq(var_hash)
           end
         end
@@ -481,7 +480,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
         with_them do
           let(:collection) { Gitlab::Ci::Variables::Collection.new(variables) }
 
-          subject { collection.expand_all(project_with_flag_enabled, keep_undefined: keep_undefined) }
+          subject { collection.sort_and_expand_all(project_with_flag_enabled, keep_undefined: keep_undefined) }
 
           it 'returns Collection' do
             is_expected.to be_an_instance_of(Gitlab::Ci::Variables::Collection)
@@ -494,11 +493,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
           end
 
           it 'preserves raw attribute' do
-            collection.each do |v|
-              k = v[:key]
-              subject_item = subject.find { |sv| sv[:key] == k }
-              expect(subject_item.raw).to eq(v.raw)
-            end
+            expect(subject.pluck(:key, :raw).to_h).to eq(collection.pluck(:key, :raw).to_h)
           end
         end
       end

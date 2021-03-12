@@ -72,7 +72,7 @@ module Gitlab
           end
         end
 
-        def expand_all(project, keep_undefined: false)
+        def sort_and_expand_all(project, keep_undefined: false)
           return self if Feature.disabled?(:variable_inside_variable, project)
 
           sorted = Sort.new(self)

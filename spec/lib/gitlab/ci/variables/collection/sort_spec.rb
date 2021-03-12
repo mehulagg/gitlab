@@ -29,7 +29,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sort do
         {
           "empty array": {
             variables: [],
-            validation_result: nil
+            expected_errors: nil
           },
           "simple expansions": {
             variables: [
@@ -37,7 +37,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sort do
               { key: 'variable2', value: 'result' },
               { key: 'variable3', value: 'key$variable$variable2' }
             ],
-            validation_result: nil
+            expected_errors: nil
           },
           "cyclic dependency": {
             variables: [
@@ -45,7 +45,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sort do
               { key: 'variable2', value: '$variable3' },
               { key: 'variable3', value: 'key$variable$variable2' }
             ],
-            validation_result: 'circular variable reference detected: ["variable", "variable2", "variable3"]'
+            expected_errors: 'circular variable reference detected: ["variable", "variable2", "variable3"]'
           },
           "array with raw variable": {
             variables: [
@@ -53,7 +53,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sort do
               { key: 'variable2', value: '$variable3' },
               { key: 'variable3', value: 'key$variable$variable2', raw: true }
             ],
-            validation_result: nil
+            expected_errors: nil
           },
           "variable containing escaped variable reference": {
             variables: [
@@ -61,7 +61,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sort do
               { key: 'variable_b', value: '$$variable_a' },
               { key: 'variable_c', value: '$variable_b' }
             ],
-            validation_result: nil
+            expected_errors: nil
           }
         }
       end
@@ -71,12 +71,12 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sort do
 
         subject { Gitlab::Ci::Variables::Collection::Sort.new(collection) }
 
-        it 'errors matches expected validation result' do
-          expect(subject.errors).to eq(validation_result)
+        it 'errors matches expected errors' do
+          expect(subject.errors).to eq(expected_errors)
         end
 
-        it 'valid? matches expected validation result' do
-          expect(subject.valid?).to eq(validation_result.nil?)
+        it 'valid? matches expected errors' do
+          expect(subject.valid?).to eq(expected_errors.nil?)
         end
 
         it 'does not raise' do
@@ -159,7 +159,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sort do
         subject { Gitlab::Ci::Variables::Collection::Sort.new(collection).tsort }
 
         it 'returns correctly sorted variables' do
-          expect(subject.map { |var| var[:key] }).to eq(result)
+          expect(subject.pluck(:key)).to eq(result)
         end
       end
     end
