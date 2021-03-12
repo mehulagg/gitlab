@@ -162,12 +162,14 @@ describe('Approvals ApproversSelect', () => {
     it('skips groups and does not fetch all available', () => {
       expect(Api.projectGroups).toHaveBeenCalledWith(TEST_PROJECT_ID, {
         skip_groups: skipGroupIds,
+        with_shared: true,
       });
     });
 
     it('skips users', () => {
       expect(Api.projectUsers).toHaveBeenCalledWith(TEST_PROJECT_ID, '', {
         skip_users: skipUserIds,
+        with_shared: true,
       });
     });
   });
