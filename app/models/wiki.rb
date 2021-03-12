@@ -187,7 +187,7 @@ class Wiki
   def delete_page(page, message = nil)
     return unless page
 
-    if Feature.enabled?(:gitaly_delete_page, user, default_enabled: :yaml)
+    if Feature.enabled?(:gitaly_replace_wiki_delete_page, user, default_enabled: :yaml)
       begin
         repository.delete_file(user, page.path, **gitaly_commit_options(page, :deleted, message))
 
@@ -291,7 +291,7 @@ class Wiki
     {
       branch_name: repository.root_ref,
       message: commit_message,
-      author_email: user.email,
+      author_email: user.commit_email,
       author_name: user.name
     }
   end

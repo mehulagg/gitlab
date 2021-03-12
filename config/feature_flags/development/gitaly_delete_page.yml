@@ -1,8 +1,0 @@
----
-name: gitaly_delete_page
-introduced_by_url: 
-rollout_issue_url: 
-milestone: '13.10'
-type: development
-group: group::editor
-default_enabled: false
