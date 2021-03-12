@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Package', :orchestrated do
-    describe 'Container Registry', only: { subdomain: :staging } do
+  RSpec.describe 'Package' do
+    describe 'Container Registry', :reliable, only: { subdomain: %i[staging pre] } do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-with-registry'
