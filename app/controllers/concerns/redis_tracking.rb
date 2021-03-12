@@ -28,11 +28,11 @@ module RedisTracking
   private
 
   def track_unique_redis_hll_event(event_name, &block)
-    custom_id = yield if block_given?
+    custom_id = block_given? ? yield : nil
 
-    return unless visitor_id || custom_id
+    return unless custom_id || visitor_id
 
-    unique_id = visitor_id || custom_id
+    unique_id = custom_id || visitor_id
 
     Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: unique_id)
   end
