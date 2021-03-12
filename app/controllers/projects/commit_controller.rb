@@ -20,10 +20,6 @@ class Projects::CommitController < Projects::ApplicationController
   before_action :define_note_vars, only: [:show, :diff_for_path, :diff_files]
   before_action :authorize_edit_tree!, only: [:revert, :cherry_pick]
 
-  before_action only: [:show, :pipelines] do
-    push_frontend_feature_flag(:ci_commit_pipeline_mini_graph_vue, @project, default_enabled: :yaml)
-  end
-
   BRANCH_SEARCH_LIMIT = 1000
   COMMIT_DIFFS_PER_PAGE = 75
 
@@ -210,7 +206,6 @@ class Projects::CommitController < Projects::ApplicationController
   def define_commit_box_vars
     @last_pipeline = @commit.last_pipeline
 
-    return unless ::Gitlab::Ci::Features.ci_commit_pipeline_mini_graph_vue_enabled?(@project)
     return unless @commit.last_pipeline
 
     @last_pipeline_stages = StageSerializer.new(project: @project, current_user: @current_user).represent(@commit.last_pipeline.stages)
