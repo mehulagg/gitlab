@@ -13,7 +13,7 @@
           %p= current_user_empty_message_description
 
         - if secondary_button_link.present?
-          = link_to secondary_button_label, secondary_button_link, class: 'gl-button btn btn-confirm btn-inverted'
+          = link_to secondary_button_label, secondary_button_link, class: 'gl-button btn btn-confirm btn-secondary'
 
         - if primary_button_link.present?
           = link_to primary_button_label, primary_button_link, class: 'gl-button btn btn-confirm'

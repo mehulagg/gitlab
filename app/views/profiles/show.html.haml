@@ -38,7 +38,7 @@
       .form-text.text-muted= s_("Profiles|The maximum file size allowed is 200KB.")
       - if @user.avatar?
         %hr
-        = link_to s_("Profiles|Remove avatar"), profile_avatar_path, data: { confirm: s_("Profiles|Avatar will be removed. Are you sure?") }, method: :delete, class: 'gl-button btn btn-danger btn-inverted'
+        = link_to s_("Profiles|Remove avatar"), profile_avatar_path, data: { confirm: s_("Profiles|Avatar will be removed. Are you sure?") }, method: :delete, class: 'gl-button btn btn-danger btn-secondary'
     .col-lg-12
       %hr
   .row.js-search-settings-section

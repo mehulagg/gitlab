@@ -53,7 +53,7 @@
         %p= _('Still, we recommend keeping a backup saved somewhere. Otherwise, if you ever need it and have lost it, you will need to request GitLab Inc. to send it to you again.')
         %br
         = link_to _('Download license'), download_admin_license_path, class: 'gl-button btn btn-info'
-        = link_to _('Customer Portal'), 'https://customers.gitlab.com', class: 'gl-button btn btn-info btn-inverted', data: { track_event: 'click_text', track_label: 'license_dashboard', track_property: 'customer_portal' }, target: '_blank', rel: 'noopener noreferrer'
+        = link_to _('Customer Portal'), 'https://customers.gitlab.com', class: 'gl-button btn btn-info btn-secondary', data: { track_event: 'click_text', track_label: 'license_dashboard', track_property: 'customer_portal' }, target: '_blank', rel: 'noopener noreferrer'
 
     .gl-card.border-danger.gl-mb-5
       .gl-card-header.bg-danger.text-white
