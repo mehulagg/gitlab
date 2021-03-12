@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class JobArtifactsDestroyBatchService
+  class JobArtifacts::DestroyBatchService
     include BaseServiceUtility
     include ::Gitlab::Utils::StrongMemoize
 
@@ -69,4 +69,4 @@ module Ci
   end
 end
 
-Ci::JobArtifactsDestroyBatchService.prepend_if_ee('EE::Ci::JobArtifactsDestroyBatchService')
+Ci::JobArtifacts::DestroyBatchService.prepend_if_ee('EE::Ci::JobArtifacts::DestroyBatchService')
