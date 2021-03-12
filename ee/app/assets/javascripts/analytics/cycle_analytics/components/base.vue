@@ -139,6 +139,7 @@ export default {
       'fetchStageData',
       'setSelectedProjects',
       'setSelectedStage',
+      'setDefaultSelectedStage',
       'setDateRange',
       'removeStage',
       'updateStage',
@@ -151,8 +152,12 @@ export default {
     },
     onStageSelect(stage) {
       this.hideForm();
-      this.setSelectedStage(stage);
-      this.fetchStageData(this.selectedStage.slug);
+      if (stage.slug === OVERVIEW_STAGE_ID) {
+        this.setDefaultSelectedStage();
+      } else {
+        this.setSelectedStage(stage);
+        this.fetchStageData(stage.slug);
+      }
     },
     onShowAddStageForm() {
       this.showCreateForm();
