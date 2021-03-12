@@ -18,12 +18,12 @@
           = sprite_icon('star')
     - if can?(current_user, :admin_label, label)
       %li.inline
-        = link_to label.edit_path, class: 'btn btn-transparent label-action edit has-tooltip', title: _('Edit'), data: { placement: 'bottom' }, aria_label: _('Edit') do
+        = link_to label.edit_path, class: 'gl-button btn btn-transparent label-action edit has-tooltip', title: _('Edit'), data: { placement: 'bottom' }, aria_label: _('Edit') do
           = sprite_icon('pencil')
     - if can?(current_user, :admin_label, label)
       %li.inline
         .dropdown
-          %button{ type: 'button', class: 'btn btn-transparent js-label-options-dropdown label-action', data: { toggle: 'dropdown' }, aria_label: _('Label actions dropdown') }
+          %button{ type: 'button', class: 'gl-button btn btn-transparent js-label-options-dropdown label-action', data: { toggle: 'dropdown' }, aria_label: _('Label actions dropdown') }
             = sprite_icon('ellipsis_v')
           .dropdown-menu.dropdown-open-left
             %ul
