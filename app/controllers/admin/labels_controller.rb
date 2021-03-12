@@ -43,12 +43,7 @@ class Admin::LabelsController < Admin::ApplicationController
     @label.destroy
     @labels = Label.templates
 
-    respond_to do |format|
-      format.html do
-        redirect_to admin_labels_path, status: :found, notice: _('Label was removed')
-      end
-      format.js
-    end
+    redirect_to admin_labels_path, status: :found, notice: _('Label was removed')
   end
 
   private
