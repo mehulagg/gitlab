@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_25_200858) do
+ActiveRecord::Schema.define(version: 2021_03_12_042626) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -103,7 +103,7 @@ ActiveRecord::Schema.define(version: 2021_02_25_200858) do
     t.binary "sha256"
     t.integer "state", limit: 2, default: 0, null: false
     t.datetime_with_timezone "last_synced_at"
-    t.text "last_sync_failure"
+    t.string "last_sync_failure", limit: 255
     t.index ["lfs_object_id"], name: "index_lfs_object_registry_on_lfs_object_id", unique: true
     t.index ["retry_at"], name: "index_lfs_object_registry_on_retry_at"
     t.index ["state"], name: "index_state_in_lfs_objects"

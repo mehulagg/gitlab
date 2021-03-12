@@ -1,0 +1,5 @@
+---
+title: 'Geo: Change lfs_object_registry.last_sync_failure type from text to string'
+merge_request: 56453
+author:
+type: changed
