@@ -798,9 +798,9 @@ Alternatively, you can use the CI/CD variable `SECURE_ANALYZERS_PREFIX` to overr
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.2.
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.3.
-> - [Added](https://gitlab.com/groups/gitlab-org/-/epics/5100) in GitLab 13.9, the saved scans
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5100) in GitLab 13.9, the saved scans
 >   feature.
-> - [Added](https://gitlab.com/groups/gitlab-org/-/epics/4847) in GitLab 13.10, the option to select
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4847) in GitLab 13.10, the option to select
 >   a branch.
 
 An on-demand DAST scan runs outside the DevOps life cycle. Changes in your repository don't trigger
@@ -812,6 +812,36 @@ An on-demand DAST scan:
   [scanner profile](#scanner-profile).
 - Is associated with your project's default branch.
 - Is saved on creation so it can be run later.
+
+### Branch selection for on-demand scan
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4847) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-branch-selection-for-on-demand-scans). **(ULTIMATE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+#### Enable or disable branch selection for on-demand scans **(ULTIMATE SELF)**
+
+Branch selection for on-demand scans is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:dast_branch_selection)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:dast_branch_selection)
+```
 
 ### On-demand scan modes
 
