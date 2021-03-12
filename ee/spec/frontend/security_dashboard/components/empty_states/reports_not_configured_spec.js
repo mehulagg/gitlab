@@ -1,4 +1,3 @@
-import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
 
@@ -17,23 +16,12 @@ describe('reports not configured empty state', () => {
       propsData: { helpPath },
     });
   };
-  const findEmptyState = () => wrapper.find(GlEmptyState);
 
   beforeEach(() => {
     createComponent();
   });
 
-  it('passes the correct data to the empty state component', () => {
-    const { title, description, primaryButtonText, secondaryButtonText } = wrapper.vm.$options.i18n;
-
-    expect(findEmptyState().props()).toMatchObject({
-      title,
-      description,
-      primaryButtonText,
-      secondaryButtonText,
-      svgPath: emptyStateSvgPath,
-      primaryButtonLink: securityConfigurationPath,
-      secondaryButtonLink: helpPath,
-    });
+  it('matches snapshot', () => {
+    expect(wrapper.html()).toMatchSnapshot();
   });
 });

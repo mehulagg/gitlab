@@ -1,4 +1,3 @@
-import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
 
@@ -17,8 +16,6 @@ describe('first class instance security dashboard empty state', () => {
       },
     });
 
-  const findGlEmptyState = () => wrapper.find(GlEmptyState);
-
   beforeEach(() => {
     wrapper = createWrapper();
   });
@@ -27,17 +24,7 @@ describe('first class instance security dashboard empty state', () => {
     wrapper.destroy();
   });
 
-  it('contains a GlEmptyState with the expected props', () => {
-    const { title, description, primaryButtonText, secondaryButtonText } = wrapper.vm.$options.i18n;
-
-    expect(findGlEmptyState().props()).toMatchObject({
-      title,
-      svgPath: emptyStateSvgPath,
-      description,
-      primaryButtonText,
-      secondaryButtonText,
-      primaryButtonLink: instanceDashboardSettingsPath,
-      secondaryButtonLink: dashboardDocumentation,
-    });
+  it('matches snapshot', () => {
+    expect(wrapper.html()).toMatchSnapshot();
   });
 });

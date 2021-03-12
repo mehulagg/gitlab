@@ -1,4 +1,3 @@
-import { GlEmptyState, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
 
@@ -15,9 +14,6 @@ describe('first class group security dashboard empty state', () => {
       },
     });
 
-  const findGlEmptyState = () => wrapper.find(GlEmptyState);
-  const findButton = () => wrapper.find(GlButton);
-
   beforeEach(() => {
     wrapper = createWrapper();
   });
@@ -26,18 +22,7 @@ describe('first class group security dashboard empty state', () => {
     wrapper.destroy();
   });
 
-  it('contains a GlEmptyState with the expected props', () => {
-    const { title, description } = wrapper.vm.$options.i18n;
-
-    expect(findGlEmptyState().props()).toEqual({
-      title,
-      description,
-      svgPath: emptyStateSvgPath,
-    });
-  });
-
-  it('contains a GlButton with the correct text and link', () => {
-    expect(findButton().attributes('href')).toBe(dashboardDocumentation);
-    expect(findButton().text()).toBe(wrapper.vm.$options.i18n.secondaryButtonText);
+  it('matches snapshot', () => {
+    expect(wrapper.html()).toMatchSnapshot();
   });
 });
