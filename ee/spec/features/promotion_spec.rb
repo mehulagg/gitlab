@@ -24,7 +24,7 @@ RSpec.describe 'Promotions', :js do
     it 'appears in project edit page' do
       visit edit_project_path(project)
 
-      expect(find('#promote_mr_features')).to have_content 'Improve Merge Requests'
+      expect(find('#promote_mr_features')).to have_content 'Improve merge requests'
     end
 
     it 'does not show when cookie is set' do

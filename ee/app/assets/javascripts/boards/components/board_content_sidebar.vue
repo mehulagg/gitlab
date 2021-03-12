@@ -1,6 +1,7 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
+import SidebarIterationWidget from 'ee/sidebar/components/sidebar_iteration_widget.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
@@ -11,7 +12,6 @@ import { contentTop } from '~/lib/utils/common_utils';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
-import BoardSidebarIterationSelect from './sidebar/board_sidebar_iteration_select.vue';
 import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 
@@ -28,12 +28,17 @@ export default {
     BoardSidebarDueDate,
     BoardSidebarSubscription,
     BoardSidebarMilestoneSelect,
-    BoardSidebarIterationSelect,
+    SidebarIterationWidget,
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
-    ...mapGetters(['isSidebarOpen', 'activeIssue']),
-    ...mapState(['sidebarType']),
+    ...mapGetters([
+      'isSidebarOpen',
+      'activeIssue',
+      'groupPathForActiveIssue',
+      'projectPathForActiveIssue',
+    ]),
+    ...mapState(['sidebarType', 'issuableType']),
     isIssuableSidebar() {
       return this.sidebarType === ISSUABLE;
     },
@@ -74,7 +79,13 @@ export default {
       <board-sidebar-epic-select />
       <div>
         <board-sidebar-milestone-select />
-        <board-sidebar-iteration-select class="gl-mt-5" />
+        <sidebar-iteration-widget
+          :iid="activeIssue.iid"
+          :workspace-path="projectPathForActiveIssue"
+          :iterations-workspace-path="groupPathForActiveIssue"
+          :issuable-type="issuableType"
+          class="gl-mt-5"
+        />
       </div>
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
       <board-sidebar-due-date />

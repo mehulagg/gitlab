@@ -20,7 +20,7 @@ RSpec.describe Elastic::IndexingControlService, :clean_gitlab_redis_shared_state
   end
 
   let(:stored_context) do
-    { "#{Gitlab::ApplicationContext::LOG_KEY}.project" => 'gitlab-org/gitlab' }
+    { "#{Labkit::Context::LOG_KEY}.project" => 'gitlab-org/gitlab' }
   end
 
   let(:worker_args) { [1, 2] }
@@ -133,7 +133,7 @@ RSpec.describe Elastic::IndexingControlService, :clean_gitlab_redis_shared_state
         subject.add_to_waiting_queue!(j, worker_context)
       end
 
-      expect(Gitlab::ApplicationContext).to receive(:with_raw_context).with(stored_context).exactly(jobs.count).times.and_call_original
+      expect(Labkit::Context).to receive(:with_context).with(stored_context).exactly(jobs.count).times.and_call_original
       expect(worker_class).to receive(:perform_async).exactly(jobs.count).times
 
       expect { subject.resume_processing! }.to change { subject.has_jobs_in_waiting_queue? }.from(true).to(false)

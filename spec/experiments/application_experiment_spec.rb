@@ -61,24 +61,19 @@ RSpec.describe ApplicationExperiment, :experiment do
     it "tracks the assignment" do
       expect(subject).to receive(:track).with(:assignment)
 
-      subject.publish(nil)
+      subject.publish
     end
 
-    it "pushes the experiment knowledge into the client using Gon.global" do
-      expect(Gon.global).to receive(:push).with(
-        {
-          experiment: {
-            'namespaced/stub' => { # string key because it can be namespaced
-              experiment: 'namespaced/stub',
-              key: '86208ac54ca798e11f127e8b23ec396a',
-              variant: 'control'
-            }
-          }
-        },
-        true
-      )
+    it "pushes the experiment knowledge into the client using Gon" do
+      expect(Gon).to receive(:push).with({ experiment: { 'namespaced/stub' => subject.signature } }, true)
 
-      subject.publish(nil)
+      subject.publish
+    end
+
+    it "handles when Gon raises exceptions (like when it can't be pushed into)" do
+      expect(Gon).to receive(:push).and_raise(NoMethodError)
+
+      expect { subject.publish }.not_to raise_error
     end
   end
 

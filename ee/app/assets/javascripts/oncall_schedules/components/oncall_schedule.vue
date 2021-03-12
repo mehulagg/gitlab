@@ -1,12 +1,5 @@
 <script>
-import {
-  GlSprintf,
-  GlCard,
-  GlButtonGroup,
-  GlButton,
-  GlModalDirective,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlCard, GlButtonGroup, GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
 import {
@@ -16,7 +9,7 @@ import {
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
-import { s__, __ } from '~/locale';
+import { s__ } from '~/locale';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
@@ -24,10 +17,9 @@ import DeleteScheduleModal from './delete_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
-import { getTimeframeForWeeksView } from './schedule/utils';
+import { getTimeframeForWeeksView, selectedTimezoneFormattedOffset } from './schedule/utils';
 
 export const i18n = {
-  scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
   editScheduleLabel: s__('OnCallSchedules|Edit schedule'),
   deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
   rotationTitle: s__('OnCallSchedules|Rotations'),
@@ -51,7 +43,6 @@ export default {
     GlButton,
     GlButtonGroup,
     GlCard,
-    GlSprintf,
     AddEditRotationModal,
     DeleteScheduleModal,
     EditScheduleModal,
@@ -63,6 +54,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: ['projectPath', 'timezones'],
+  provide() {
+    return {
+      selectedTimezone: this.selectedTimezone,
+    };
+  },
   props: {
     schedule: {
       type: Object,
@@ -73,7 +69,7 @@ export default {
     rotations: {
       query: getShiftsForRotations,
       variables() {
-        this.timeframeStartDate.setHours(1, 0, 0, 0);
+        this.timeframeStartDate.setHours(0, 0, 0, 0);
         const startsAt = this.timeframeStartDate;
         const endsAt = nWeeksAfter(startsAt, 2);
 
@@ -101,9 +97,11 @@ export default {
     };
   },
   computed: {
+    selectedTimezone() {
+      return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
+    },
     offset() {
-      const selectedTz = this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
-      return __(`(UTC ${selectedTz.formatted_offset})`);
+      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
     timeframe() {
       return getTimeframeForWeeksView(this.timeframeStartDate);
@@ -197,10 +195,7 @@ export default {
         </div>
       </template>
       <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
-        <gl-sprintf :message="$options.i18n.scheduleForTz">
-          <template #timezone>{{ schedule.timezone }}</template>
-        </gl-sprintf>
-        | {{ offset }}
+        {{ schedule.timezone }} | {{ offset }}
       </p>
       <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
         <div class="gl-display-flex gl-align-items-center">

@@ -36,7 +36,8 @@ RSpec.describe 'User adds milestone lists', :js do
     before do
       stub_licensed_features(
         board_milestone_lists: true,
-        board_assignee_lists: true
+        board_assignee_lists: true,
+        board_iteration_lists: true
       )
       sign_in(user)
 
@@ -74,7 +75,7 @@ RSpec.describe 'User adds milestone lists', :js do
       add_list('Iteration', iteration.title)
 
       expect(page).to have_selector('.board', text: iteration.title)
-      expect(find('.board:nth-child(2) .board-card')).to have_content(issue2.title)
+      expect(find('.board:nth-child(2) .board-card')).to have_content(issue_with_iteration.title)
     end
   end
 

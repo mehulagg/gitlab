@@ -60,7 +60,9 @@ export default {
         </p>
         <div class="gl-ml-auto">
           <gl-button name="cancel" @click="cancel">{{ __('Cancel') }}</gl-button>
-          <gl-button name="ok" variant="success" @click="ok">{{ title }}</gl-button>
+          <gl-button name="ok" category="primary" variant="confirm" @click="ok">{{
+            title
+          }}</gl-button>
         </div>
       </section>
     </template>

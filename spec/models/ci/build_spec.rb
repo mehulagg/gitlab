@@ -1261,6 +1261,21 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#environment_deployment_tier' do
+    subject { build.environment_deployment_tier }
+
+    let(:build) { described_class.new(options: options) }
+    let(:options) { { environment: { deployment_tier: 'production' } } }
+
+    it { is_expected.to eq('production') }
+
+    context 'when options does not include deployment_tier' do
+      let(:options) { { environment: { name: 'production' } } }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
   describe 'deployment' do
     describe '#outdated_deployment?' do
       subject { build.outdated_deployment? }
@@ -2465,9 +2480,9 @@ RSpec.describe Ci::Build do
           { key: 'CI_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },
-          { key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}", public: true, masked: false },
+          { key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port, public: true, masked: false },
           { key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
-            value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{project.namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}",
+            value: "#{Gitlab.host_with_port}/#{project.namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}",
             public: true,
             masked: false },
           { key: 'CI_API_V4_URL', value: 'http://localhost/api/v4', public: true, masked: false },

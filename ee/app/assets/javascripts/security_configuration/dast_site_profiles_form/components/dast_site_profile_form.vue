@@ -7,18 +7,23 @@ import {
   GlFormInput,
   GlModal,
   GlFormTextarea,
+  GlFormText,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
 import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import { initFormField } from 'ee/security_configuration/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
-import { __, s__ } from '~/locale';
+import { __, s__, n__, sprintf } from '~/locale';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import tooltipIcon from '../../dast_scanner_profiles/components/tooltip_icon.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
 import DastSiteAuthSection from './dast_site_auth_section.vue';
+
+const MAX_CHAR_LIMIT_EXCLUDED_URLS = 2048;
+const MAX_CHAR_LIMIT_REQUEST_HEADERS = 2048;
 
 export default {
   name: 'DastSiteProfileForm',
@@ -31,6 +36,8 @@ export default {
     GlModal,
     GlFormTextarea,
     DastSiteAuthSection,
+    GlFormText,
+    tooltipIcon,
   },
   directives: {
     validation: validation(),
@@ -111,6 +118,23 @@ export default {
           okTitle: __('Discard'),
           cancelTitle: __('Cancel'),
         },
+        excludedUrls: {
+          label: s__('DastProfiles|Excluded URLs (Optional)'),
+          description: s__('DastProfiles|Enter URLs in a comma-separated list.'),
+          tooltip: s__(
+            'DastProfiles|URLs to skip during the authenticated scan. Use regular expression syntax to match multiple URLs.',
+          ),
+          placeholder: 'https://example.com/logout, https://example.com/send_mail',
+        },
+        requestHeaders: {
+          label: s__('DastProfiles|Additional request headers (Optional)'),
+          description: s__('DastProfiles|Enter headers in a comma-separated list.'),
+          tooltip: s__(
+            'DastProfiles|Request header names and values. Headers are added to every request made by DAST.',
+          ),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          placeholder: 'Cache-control: no-cache, User-Agent: DAST/1.0',
+        },
       };
     },
     formTouched() {
@@ -143,7 +167,9 @@ export default {
           fullPath: this.fullPath,
           ...(this.isEdit ? { id: this.siteProfile.id } : {}),
           ...serializeFormObject(this.form.fields),
-          auth: isAuthEnabled ? serializeFormObject(this.authSection.fields) : {},
+          ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
+            auth: serializeFormObject(this.authSection.fields),
+          }),
         },
       };
 
@@ -198,8 +224,17 @@ export default {
       this.errors = [];
       this.hasAlert = false;
     },
+    getCharacterLimitText(value, limit) {
+      return value.length
+        ? n__('%d character remaining', '%d characters remaining', limit - value.length)
+        : sprintf(__('Maximum character limit - %{limit}'), {
+            limit,
+          });
+    },
   },
   modalId: 'deleteDastProfileModal',
+  MAX_CHAR_LIMIT_EXCLUDED_URLS,
+  MAX_CHAR_LIMIT_REQUEST_HEADERS,
 };
 </script>
 
@@ -263,21 +298,45 @@ export default {
         :invalid-feedback="form.fields.excludedUrls.feedback"
         class="col-md-6"
       >
+        <template #label>
+          {{ i18n.excludedUrls.label }}
+          <tooltip-icon :title="i18n.excludedUrls.tooltip" />
+          <gl-form-text class="gl-mt-3">{{ i18n.excludedUrls.description }}</gl-form-text>
+        </template>
         <gl-form-textarea
           v-model="form.fields.excludedUrls.value"
+          :maxlength="$options.MAX_CHAR_LIMIT_EXCLUDED_URLS"
+          :placeholder="i18n.excludedUrls.placeholder"
+          :no-resize="false"
           data-testid="excluded-urls-input"
         />
+        <gl-form-text>{{
+          getCharacterLimitText(
+            form.fields.excludedUrls.value,
+            $options.MAX_CHAR_LIMIT_EXCLUDED_URLS,
+          )
+        }}</gl-form-text>
       </gl-form-group>
 
-      <gl-form-group
-        :label="s__('DastProfiles|Additional request headers (Optional)')"
-        :invalid-feedback="form.fields.requestHeaders.feedback"
-        class="col-md-6"
-      >
+      <gl-form-group :invalid-feedback="form.fields.requestHeaders.feedback" class="col-md-6">
+        <template #label>
+          {{ i18n.requestHeaders.label }}
+          <tooltip-icon :title="i18n.requestHeaders.tooltip" />
+          <gl-form-text class="gl-mt-3">{{ i18n.requestHeaders.description }}</gl-form-text>
+        </template>
         <gl-form-textarea
           v-model="form.fields.requestHeaders.value"
+          :maxlength="$options.MAX_CHAR_LIMIT_REQUEST_HEADERS"
+          :placeholder="i18n.requestHeaders.placeholder"
+          :no-resize="false"
           data-testid="request-headers-input"
         />
+        <gl-form-text>{{
+          getCharacterLimitText(
+            form.fields.requestHeaders.value,
+            $options.MAX_CHAR_LIMIT_REQUEST_HEADERS,
+          )
+        }}</gl-form-text>
       </gl-form-group>
     </div>
 

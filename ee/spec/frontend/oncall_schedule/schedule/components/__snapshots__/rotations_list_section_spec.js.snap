@@ -105,14 +105,18 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 class="gl-m-0"
                 data-testid="rotation-assignee-starts-at"
               >
-                Starts: January 12, 2021, 10:04am GMT+0000
+                
+      Starts: January 12, 2021, 10:04 (UTC -12:00)
+    
               </p>
                
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-ends-at"
               >
-                Ends: January 15, 2021, 10:04am GMT+0000
+                
+      Ends: January 15, 2021, 10:04 (UTC -12:00)
+    
               </p>
             </div>
           </div>
@@ -145,14 +149,18 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 class="gl-m-0"
                 data-testid="rotation-assignee-starts-at"
               >
-                Starts: January 16, 2021, 10:04am GMT+0000
+                
+      Starts: January 16, 2021, 10:04 (UTC -12:00)
+    
               </p>
                
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-ends-at"
               >
-                Ends: January 18, 2021, 10:04am GMT+0000
+                
+      Ends: January 18, 2021, 10:04 (UTC -12:00)
+    
               </p>
             </div>
           </div>

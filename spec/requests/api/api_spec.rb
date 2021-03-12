@@ -105,13 +105,14 @@ RSpec.describe API::API do
 
     it 'logs all application context fields' do
       allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
-        Gitlab::ApplicationContext.current.tap do |log_context|
+        Labkit::Context.current.to_h.tap do |log_context|
           expect(log_context).to match('correlation_id' => an_instance_of(String),
                                        'meta.caller_id' => '/api/:version/projects/:id/issues',
                                        'meta.remote_ip' => an_instance_of(String),
                                        'meta.project' => project.full_path,
                                        'meta.root_namespace' => project.namespace.full_path,
                                        'meta.user' => user.username,
+                                       'meta.client_id' => an_instance_of(String),
                                        'meta.feature_category' => 'issue_tracking')
         end
       end
@@ -121,10 +122,11 @@ RSpec.describe API::API do
 
     it 'skips fields that do not apply' do
       allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
-        Gitlab::ApplicationContext.current.tap do |log_context|
+        Labkit::Context.current.to_h.tap do |log_context|
           expect(log_context).to match('correlation_id' => an_instance_of(String),
                                        'meta.caller_id' => '/api/:version/users',
                                        'meta.remote_ip' => an_instance_of(String),
+                                       'meta.client_id' => an_instance_of(String),
                                        'meta.feature_category' => 'users')
         end
       end

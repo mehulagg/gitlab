@@ -232,8 +232,8 @@ RSpec.describe GroupPolicy do
     it { is_expected.not_to be_allowed(:read_group_activity_analytics) }
   end
 
-  context 'group CI / CD analytics' do
-    context 'when group CI / CD analytics is available' do
+  context 'group CI/CD analytics' do
+    context 'when group CI/CD analytics is available' do
       before do
         stub_licensed_features(group_ci_cd_analytics: true)
       end
@@ -251,7 +251,7 @@ RSpec.describe GroupPolicy do
       end
     end
 
-    context 'when group CI / CD analytics is not available' do
+    context 'when group CI/CD analytics is not available' do
       let(:current_user) { reporter }
 
       before do

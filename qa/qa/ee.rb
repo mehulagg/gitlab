@@ -49,6 +49,11 @@ module QA
           autoload :LDAPSync, 'qa/ee/page/group/settings/ldap_sync'
           autoload :General, 'qa/ee/page/group/settings/general'
         end
+
+        module Wiki
+          autoload :Show, 'qa/ee/page/group/wiki/show'
+          autoload :Edit, 'qa/ee/page/group/wiki/edit'
+        end
       end
 
       module File

@@ -60,25 +60,26 @@
   </details>
 <% end %>
 <% end %>
-<% if vulnerability.scanner.present? || vulnerability.scan.present? %>
+<% if vulnerability_scan_data?(vulnerability) %>
 
 ### <%= _("Scanner") %>:
 
 <% if vulnerability.scanner.present? %>
 * <%= _("Name") %>: <%= vulnerability.scanner[:name] %>
 <% end %>
-<% if vulnerability.scan.present? %>
-<% if vulnerability.scan[:type].present? %>
-* <%= _("Type") %>: <%= vulnerability.scan[:type] %>
+<%- scan_data = vulnerability.scan -%>
+<% if scan_data.present? %>
+<% if scan_data[:type].present? %>
+* <%= _("Type") %>: <%= scan_data[:type] %>
 <% end %>
-<% if vulnerability.scan[:status].present? %>
-* <%= _("Status") %>: <%= vulnerability.scan[:status] %>
+<% if scan_data[:status].present? %>
+* <%= _("Status") %>: <%= scan_data[:status] %>
 <% end %>
-<% if vulnerability.scan[:start_time].present? %>
-* <%= _("Start Time") %>: <%= vulnerability.scan[:start_time] %>
+<% if scan_data[:start_time].present? %>
+* <%= _("Start Time") %>: <%= scan_data[:start_time] %>
 <% end %>
-<% if vulnerability.scan[:end_time].present? %>
-* <%= _("End Time") %>: <%= vulnerability.scan[:end_time] %>
+<% if scan_data[:end_time].present? %>
+* <%= _("End Time") %>: <%= scan_data[:end_time] %>
 <% end %>
 <% end %>
 <% end %>

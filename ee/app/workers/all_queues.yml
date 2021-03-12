@@ -195,6 +195,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: cronjob:geo_secondary_usage_data_cron
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:geo_sidekiq_cron_config
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -340,7 +348,7 @@
   :idempotent: true
   :tags: []
 - :name: dora_metrics:dora_daily_metrics_refresh
-  :feature_category: :dora_metrics
+  :feature_category: :continuous_delivery
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -623,11 +631,10 @@
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
   :urgency: :low
-  :resource_boundary: :unknown
+  :resource_boundary: :cpu
   :weight: 2
   :idempotent:
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: security_scans:store_security_scans
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -635,8 +642,7 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: security_scans:sync_security_reports_to_report_approval_rules
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -908,8 +914,7 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: security_auto_fix
   :feature_category: :vulnerability_management
   :has_external_dependencies:

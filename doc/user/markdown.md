@@ -462,7 +462,8 @@ GitLab Flavored Markdown recognizes the following:
 
 For example, referencing an issue by using `#123` formats the output as a link
 to issue number 123 with text `#123`. Likewise, a link to issue number 123 is
-recognized and formatted with text `#123`.
+recognized and formatted with text `#123`. If you don't want `#123` to link to an issue,
+add a leading backslash `\#123`.
 
 In addition to this, links to some objects are also recognized and formatted. Some examples of these are:
 
@@ -1322,7 +1323,7 @@ Examples:
 <!--
 The "2." and "4." in the example above are changed to "1." below, to match the style
 standards on docs.gitlab.com.
-See https://docs.gitlab.com/ee/development/documentation/styleguide.html#lists
+See https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#lists
 -->
 
 1. First ordered list item
@@ -1356,7 +1357,7 @@ They can even:
 <!--
 The "*" and "+" in the example above are changed to "-" below, to match the style
 standards on docs.gitlab.com.
-See https://docs.gitlab.com/ee/development/documentation/styleguide.html#lists
+See https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#lists
 -->
 
 Unordered lists can:

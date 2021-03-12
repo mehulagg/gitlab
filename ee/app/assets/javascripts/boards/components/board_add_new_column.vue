@@ -22,12 +22,15 @@ export default {
     labelListDescription: __('A label list displays issues with the selected label.'),
     assigneeListDescription: __('An assignee list displays issues assigned to the selected user'),
     milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
+    iterationListDescription: __('An iteration list displays issues in the selected iteration.'),
     selectLabel: __('Select label'),
     selectAssignee: __('Select assignee'),
     selectMilestone: __('Select milestone'),
+    selectIteration: __('Select iteration'),
     searchLabels: __('Search labels'),
     searchAssignees: __('Search assignees'),
     searchMilestones: __('Search milestones'),
+    searchIterations: __('Search iterations'),
   },
   columnTypes: [
     { value: ListType.label, text: __('Label') },
@@ -180,7 +183,7 @@ export default {
       }
 
       if (this.iterationTypeSelected) {
-        return __('An iteration list displays issues in the selected iteration.');
+        return this.$options.i18n.iterationListDescription;
       }
 
       return null;
@@ -200,7 +203,7 @@ export default {
       }
 
       if (this.iterationTypeSelected) {
-        return __('Select iteration');
+        return this.$options.i18n.selectIteration;
       }
 
       return null;
@@ -220,7 +223,7 @@ export default {
       }
 
       if (this.iterationTypeSelected) {
-        return __('Search iterations');
+        return this.$options.i18n.searchIterations;
       }
 
       return null;
