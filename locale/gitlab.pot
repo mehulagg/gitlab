@@ -13945,6 +13945,9 @@ msgstr ""
 msgid "Geo|Geo sites"
 msgstr ""
 
+msgid "Geo|Geo supports replication of many data types."
+msgstr ""
+
 msgid "Geo|Git"
 msgstr ""
 
@@ -14053,7 +14056,10 @@ msgstr ""
 msgid "Geo|Replicated data is verified with the secondary node(s) using checksums."
 msgstr ""
 
-msgid "Geo|Replication Details"
+msgid "Geo|Replication Details Desktop"
+msgstr ""
+
+msgid "Geo|Replication Details Mobile"
 msgstr ""
 
 msgid "Geo|Replication details"
@@ -25800,6 +25806,9 @@ msgid "Replaces the clone URL root."
 msgstr ""
 
 msgid "Replication"
+msgstr ""
+
+msgid "Replication Details"
 msgstr ""
 
 msgid "Replication details"

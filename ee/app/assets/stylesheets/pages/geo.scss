@@ -50,3 +50,12 @@
   grid-template-columns: 1fr 1fr;
   grid-gap: $gl-spacing-scale-5;
 }
+
+.geo-node-replication-details-grid-columns {
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 1rem;
+
+  @include media-breakpoint-up(md) {
+    grid-template-columns: 1fr 1fr 2fr 2fr;
+  }
+}
