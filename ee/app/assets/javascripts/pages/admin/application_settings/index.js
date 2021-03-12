@@ -3,6 +3,7 @@ import $ from 'jquery';
 import Api from '~/api';
 import groupsSelect from '~/groups_select';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { select2AxiosTransport } from '~/lib/utils/select2_utils';
 import { s__ } from '~/locale';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
@@ -29,12 +30,13 @@ const getDropdownConfig = (placeholder, apiPath, textProp) => ({
     },
     results(data) {
       return {
-        results: data.map((entity) => ({
+        results: data.results.map((entity) => ({
           id: entity.id,
           text: entity[textProp],
         })),
       };
     },
+    transport: select2AxiosTransport,
   },
 });
 

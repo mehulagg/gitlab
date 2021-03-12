@@ -128,19 +128,25 @@ module EE
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
         field :api_fuzzing_ci_configuration,
-              ::Types::CiConfiguration::ApiFuzzingType,
+              ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
               null: true,
               description: 'API fuzzing configuration for the project.',
               feature_flag: :api_fuzzing_configuration_ui
+
+        field :push_rules,
+              ::Types::PushRulesType,
+              null: true,
+              description: "The project's push rules settings.",
+              method: :push_rule
       end
 
       def api_fuzzing_ci_configuration
         return unless Ability.allowed?(current_user, :read_vulnerability, object)
 
-        configuration = ::Security::ApiFuzzing::CiConfiguration.new(project: object)
+        configuration = ::AppSec::Fuzzing::Api::CiConfiguration.new(project: object)
 
         {
-          scan_modes: ::Security::ApiFuzzing::CiConfiguration::SCAN_MODES,
+          scan_modes: ::AppSec::Fuzzing::Api::CiConfiguration::SCAN_MODES,
           scan_profiles: configuration.scan_profiles
         }
       end

@@ -346,7 +346,7 @@ export default {
             @columnMetricChange="setColumnMetric"
             @pageChange="setPage"
           />
-          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissable="false">
+          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissible="false">
             {{ __('There is no data available. Please change your selection.') }}
           </gl-alert>
         </div>

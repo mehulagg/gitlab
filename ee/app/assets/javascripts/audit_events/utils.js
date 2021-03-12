@@ -1,10 +1,6 @@
 import { parsePikadayDate, pikadayToString } from '~/lib/utils/datetime_utility';
 import { AVAILABLE_TOKEN_TYPES, AUDIT_FILTER_CONFIGS } from './constants';
 
-export const isNumeric = (str) => {
-  return !Number.isNaN(parseInt(str, 10));
-};
-
 export const getTypeFromEntityType = (entityType) => {
   return AUDIT_FILTER_CONFIGS.find(
     ({ entityType: configEntityType }) => configEntityType === entityType,

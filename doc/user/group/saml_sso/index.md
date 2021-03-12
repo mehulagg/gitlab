@@ -103,7 +103,6 @@ With this option enabled, users must go through your group's GitLab single sign-
 However, users are not prompted to sign in through SSO on each visit. GitLab checks whether a user
 has authenticated through SSO. If it's been more than 1 day since the last sign-in, GitLab
 prompts the user to sign in again through SSO.
-You can see more information about how long a session is valid in our [user profile documentation](../../profile/#why-do-i-keep-getting-signed-out).
 
 We intend to add a similar SSO requirement for [Git and API activity](https://gitlab.com/gitlab-org/gitlab/-/issues/9152).
 
@@ -187,7 +186,7 @@ For more information, see our [discussion on providers](#providers).
 Your identity provider may have relevant documentation. It may be generic SAML documentation, or specifically targeted for GitLab. Examples:
 
 - [ADFS (Active Directory Federation Services)](https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/create-a-relying-party-trust)
-- [Auth0](https://auth0.com/docs/protocols/saml-configuration-options/configure-auth0-as-saml-identity-provider)
+- [Auth0](https://auth0.com/docs/protocols/saml-protocol/configure-auth0-as-saml-identity-provider)
 - [Google Workspace](https://support.google.com/a/answer/6087519?hl=en)
 - [JumpCloud](https://support.jumpcloud.com/support/s/article/single-sign-on-sso-with-gitlab-2019-08-21-10-36-47)
 - [PingOne by Ping Identity](https://docs.pingidentity.com/bundle/pingone/page/xsh1564020480660-1.html)
@@ -365,7 +364,7 @@ the user gets the highest access level from the groups. For example, if one grou
 is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maintainer`
 access.
 
-Users who are not members of any mapped SAML groups are removed from the GitLab group. 
+Users who are not members of any mapped SAML groups are removed from the GitLab group.
 
 You can prevent accidental member removal. For example, if you have a SAML group link for `Owner` level access
 in a top-level group, you should also set up a group link for all other members.

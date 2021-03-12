@@ -210,6 +210,7 @@ Settings.gitlab['domain_allowlist'] ||= []
 Settings.gitlab['import_sources'] ||= Gitlab::ImportSources.values
 Settings.gitlab['trusted_proxies'] ||= []
 Settings.gitlab['content_security_policy'] ||= Gitlab::ContentSecurityPolicy::ConfigLoader.default_settings_hash
+Settings.gitlab['allowed_hosts'] ||= []
 Settings.gitlab['no_todos_messages'] ||= YAML.load_file(Rails.root.join('config', 'no_todos_messages.yml'))
 Settings.gitlab['impersonation_enabled'] ||= true if Settings.gitlab['impersonation_enabled'].nil?
 Settings.gitlab['usage_ping_enabled'] = true if Settings.gitlab['usage_ping_enabled'].nil?
@@ -585,6 +586,9 @@ Gitlab.ee do
   Settings.cron_jobs['geo_verification_cron_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['geo_verification_cron_worker']['cron'] ||= '* * * * *'
   Settings.cron_jobs['geo_verification_cron_worker']['job_class'] ||= 'Geo::VerificationCronWorker'
+  Settings.cron_jobs['geo_secondary_usage_data_cron_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['geo_secondary_usage_data_cron_worker']['cron'] ||= '0 0 * * 0'
+  Settings.cron_jobs['geo_secondary_usage_data_cron_worker']['job_class'] ||= 'Geo::SecondaryUsageDataCronWorker'
   Settings.cron_jobs['geo_file_download_dispatch_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['geo_file_download_dispatch_worker']['cron'] ||= '*/1 * * * *'
   Settings.cron_jobs['geo_file_download_dispatch_worker']['job_class'] ||= 'Geo::FileDownloadDispatchWorker'

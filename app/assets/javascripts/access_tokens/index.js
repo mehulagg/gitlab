@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import createFlash from '~/flash';
+import { __ } from '~/locale';
 
 import ExpiresAtField from './components/expires_at_field.vue';
 
@@ -8,6 +10,7 @@ const getInputAttrs = (el) => {
   return {
     id: input.id,
     name: input.name,
+    value: input.value,
     placeholder: input.placeholder,
   };
 };
@@ -43,17 +46,46 @@ export const initProjectsField = () => {
   const inputAttrs = getInputAttrs(el);
 
   if (window.gon.features.personalAccessTokensScopedToProjects) {
-    const ProjectsField = () => import('./components/projects_field.vue');
+    return new Promise((resolve) => {
+      Promise.all([
+        import('./components/projects_field.vue'),
+        import('vue-apollo'),
+        import('~/lib/graphql'),
+      ])
+        .then(
+          ([
+            { default: ProjectsField },
+            { default: VueApollo },
+            { default: createDefaultClient },
+          ]) => {
+            const apolloProvider = new VueApollo({
+              defaultClient: createDefaultClient(),
+            });
 
-    return new Vue({
-      el,
-      render(h) {
-        return h(ProjectsField, {
-          props: {
-            inputAttrs,
+            Vue.use(VueApollo);
+
+            resolve(
+              new Vue({
+                el,
+                apolloProvider,
+                render(h) {
+                  return h(ProjectsField, {
+                    props: {
+                      inputAttrs,
+                    },
+                  });
+                },
+              }),
+            );
           },
+        )
+        .catch(() => {
+          createFlash({
+            message: __(
+              'An error occurred while loading the access tokens form, please try again.',
+            ),
+          });
         });
-      },
     });
   }
 

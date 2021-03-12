@@ -9,9 +9,15 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     Feature.get(feature_flag_name).state != :off # rubocop:disable Gitlab/AvoidFeatureGet
   end
 
-  def publish(_result)
+  def publish(_result = nil)
     track(:assignment) # track that we've assigned a variant for this context
-    Gon.global.push({ experiment: { name => signature } }, true) # push the experiment data to the client
+
+    # push the experiment data to the client
+    begin
+      Gon.push({ experiment: { name => signature } }, true) # push the experiment data to the client
+    rescue NoMethodError
+      # means we're not in the request cycle, and can't add to Gon. Log a warning maybe?
+    end
   end
 
   def track(action, **event_args)

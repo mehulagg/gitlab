@@ -21,5 +21,9 @@ FactoryBot.define do
         create(:incident_management_oncall_participant, rotation: rotation, user: user)
       end
     end
+
+    trait :utc do
+      association :schedule, :utc, factory: :incident_management_oncall_schedule
+    end
   end
 end

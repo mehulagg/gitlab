@@ -285,4 +285,34 @@ RSpec.describe VulnerabilitiesHelper do
       end
     end
   end
+
+  describe '#vulnerability_scan_data?' do
+    subject { helper.vulnerability_scan_data?(vulnerability) }
+
+    context 'scanner present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'scan present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(false)
+        allow(vulnerability).to receive(:scan).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'neither scan nor scanner being present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(false)
+        allow(vulnerability).to receive(:scan).and_return(false)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
 end

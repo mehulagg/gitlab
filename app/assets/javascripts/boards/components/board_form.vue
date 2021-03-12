@@ -1,5 +1,6 @@
 <script>
 import { GlModal } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { getParameterByName } from '~/lib/utils/common_utils';
@@ -106,6 +107,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['isEpicBoard', 'isGroupBoard', 'isProjectBoard']),
     isNewForm() {
       return this.currentPage === formType.new;
     },
@@ -176,8 +178,8 @@ export default {
           }
         : {
             ...variables,
-            projectPath: this.projectId ? this.fullPath : undefined,
-            groupPath: this.groupId ? this.fullPath : undefined,
+            projectPath: this.isProjectBoard ? this.fullPath : undefined,
+            groupPath: this.isGroupBoard ? this.fullPath : undefined,
           };
     },
     boardScopeMutationVariables() {
@@ -322,7 +324,7 @@ export default {
       />
 
       <board-scope
-        v-if="scopedIssueBoardFeatureEnabled"
+        v-if="scopedIssueBoardFeatureEnabled && !isEpicBoard"
         :collapse-scope="isNewForm"
         :board="board"
         :can-admin-board="canAdminBoard"

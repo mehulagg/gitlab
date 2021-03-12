@@ -28,6 +28,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         full_path: project.full_path,
         name: name,
         description: description,
+        branch_name: 'orphaned-branch',
         dast_site_profile_id: dast_site_profile.to_global_id.to_s,
         dast_scanner_profile_id: dast_scanner_profile.to_global_id.to_s,
         run_after_create: run_after_create
@@ -55,7 +56,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
             actual_url = subject[:pipeline_url]
             pipeline = Ci::Pipeline.find_by(
               project: project,
-              sha: project.repository.commit.sha,
+              sha: project.repository.commits('orphaned-branch', limit: 1)[0].id,
               source: :ondemand_dast_scan,
               config_source: :parameter_source
             )
@@ -64,6 +65,22 @@ RSpec.describe Mutations::Dast::Profiles::Create do
               pipeline
             )
             expect(actual_url).to eq(expected_url)
+          end
+        end
+
+        context "when branch_name='orphaned_branch'" do
+          context 'when the feature flag dast_branch_selection is disabled' do
+            it 'does not set the branch_name' do
+              stub_feature_flags(dast_branch_selection: false)
+
+              expect(subject[:dast_profile].branch_name).to be_nil
+            end
+          end
+
+          context 'when the feature flag dast_branch_selection is enabled' do
+            it 'sets the branch_name' do
+              expect(subject[:dast_profile].branch_name).to eq('orphaned-branch')
+            end
           end
         end
       end

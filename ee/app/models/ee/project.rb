@@ -130,6 +130,10 @@ module EE
           .limit(limit)
       end
 
+      scope :with_code_coverage, -> do
+        joins(:daily_build_group_report_results).merge(::Ci::DailyBuildGroupReportResult.with_coverage.with_default_branch).group(:id)
+      end
+
       scope :including_project, ->(project) { where(id: project) }
       scope :with_wiki_enabled, -> { with_feature_enabled(:wiki) }
       scope :within_shards, -> (shard_names) { where(repository_storage: Array(shard_names)) }
@@ -206,6 +210,8 @@ module EE
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
       delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
       alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
+
+      delegate :prevent_merge_without_jira_issue, to: :project_setting
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
@@ -295,6 +301,10 @@ module EE
 
     def latest_pipeline_with_reports(reports)
       all_pipelines.newest_first(ref: default_branch).with_reports(reports).take
+    end
+
+    def security_reports_up_to_date_for_ref?(ref)
+      latest_pipeline_with_security_reports(only_successful: true) == ci_pipelines.newest_first(ref: ref).take
     end
 
     def ensure_external_webhook_token
@@ -524,7 +534,10 @@ module EE
     def require_password_to_approve
       super && password_authentication_enabled_for_web?
     end
-    alias_method :require_password_to_approve?, :require_password_to_approve
+
+    def require_password_to_approve?
+      !!require_password_to_approve
+    end
 
     def find_path_lock(path, exact_match: false, downstream: false)
       path_lock_finder = strong_memoize(:path_lock_finder) do
@@ -713,7 +726,10 @@ module EE
         ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request? || super
       end
     end
-    alias_method :disable_overriding_approvers_per_merge_request?, :disable_overriding_approvers_per_merge_request
+
+    def disable_overriding_approvers_per_merge_request?
+      !!disable_overriding_approvers_per_merge_request
+    end
 
     def merge_requests_author_approval
       strong_memoize(:merge_requests_author_approval) do
@@ -723,7 +739,10 @@ module EE
         super
       end
     end
-    alias_method :merge_requests_author_approval?, :merge_requests_author_approval
+
+    def merge_requests_author_approval?
+      !!merge_requests_author_approval
+    end
 
     def merge_requests_disable_committers_approval
       strong_memoize(:merge_requests_disable_committers_approval) do
@@ -732,7 +751,10 @@ module EE
         ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval? || super
       end
     end
-    alias_method :merge_requests_disable_committers_approval?, :merge_requests_disable_committers_approval
+
+    def merge_requests_disable_committers_approval?
+      !!merge_requests_disable_committers_approval
+    end
 
     def license_compliance(pipeline = latest_pipeline_with_reports(::Ci::JobArtifact.license_scanning_reports))
       SCA::LicenseCompliance.new(self, pipeline)
@@ -760,6 +782,10 @@ module EE
       end
     end
 
+    def prevent_merge_without_jira_issue?
+      jira_issue_association_required_to_merge_enabled? && prevent_merge_without_jira_issue
+    end
+
     private
 
     def group_hooks
@@ -776,9 +802,6 @@ module EE
     end
 
     def licensed_feature_available?(feature, user = nil)
-      # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, user, type: :licensed, default_enabled: true)
-
       available_features = strong_memoize(:licensed_feature_available) do
         Hash.new do |h, f|
           h[f] = load_licensed_feature_available(f)

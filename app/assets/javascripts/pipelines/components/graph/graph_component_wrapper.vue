@@ -7,6 +7,7 @@ import PipelineGraph from './graph_component.vue';
 import {
   getQueryHeaders,
   reportToSentry,
+  serializeLoadErrors,
   toggleQueryPollingByVisibility,
   unwrapPipelineData,
 } from './utils';
@@ -58,10 +59,30 @@ export default {
         };
       },
       update(data) {
+        /*
+          This check prevents the pipeline from being overwritten
+          when a poll times out and the data returned is empty.
+          This can be removed once the timeout behavior is updated.
+          See: https://gitlab.com/gitlab-org/gitlab/-/issues/323213.
+        */
+
+        if (!data?.project?.pipeline) {
+          return this.pipeline;
+        }
+
         return unwrapPipelineData(this.pipelineProjectPath, data);
       },
-      error() {
-        this.reportFailure(LOAD_FAILURE);
+      error(err) {
+        this.reportFailure(LOAD_FAILURE, serializeLoadErrors(err));
+      },
+      result({ error }) {
+        /*
+          If there is a successful load after a failure, clear
+          the failure notification to avoid confusion.
+        */
+        if (!error && this.alertType === LOAD_FAILURE) {
+          this.hideAlert();
+        }
       },
     },
   },
@@ -108,14 +129,15 @@ export default {
   methods: {
     hideAlert() {
       this.showAlert = false;
+      this.alertType = null;
     },
     refreshPipelineGraph() {
       this.$apollo.queries.pipeline.refetch();
     },
-    reportFailure(type) {
+    reportFailure(type, err = '') {
       this.showAlert = true;
       this.alertType = type;
-      reportToSentry(this.$options.name, this.alertType);
+      reportToSentry(this.$options.name, `type: ${this.alertType}, info: ${err}`);
     },
   },
 };

@@ -32,7 +32,7 @@ Each metric is defined in a separate YAML file consisting of a number of fields:
 | `product_stage`     | no       | The [stage](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml) for the metric. |
 | `product_group`     | yes      | The [group](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml) that owns the metric. |
 | `product_category`  | no       | The [product category](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/categories.yml) for the metric. |
-| `value_type`        | yes      | `string`; one of `string`, `number`, `boolean`.                                                               |
+| `value_type`        | yes      | `string`; one of `string`, `number`, `boolean`, `object`.                                                     |
 | `status`            | yes      | `string`; status of the metric, may be set to `data_available`, `planned`, `in_progress`, `implemented`, `not_used`, `deprecated` |
 | `time_frame`        | yes      | `string`; may be set to a value like `7d`, `28d`, `all`, `none`. |
 | `data_source`       | yes      | `string`; may be set to a value like `database`, `redis`, `redis_hll`, `prometheus`, `ruby`. |
@@ -41,6 +41,7 @@ Each metric is defined in a separate YAML file consisting of a number of fields:
 | `milestone`         | no       | The milestone when the metric is introduced. |
 | `milestone_removed` | no       | The milestone when the metric is removed. |
 | `introduced_by_url` | no       | The URL to the Merge Request that introduced the metric. |
+| `skip_validation`   | no       | This should **not** be set. [Used for imported metrics until we review, update and make them valid](https://gitlab.com/groups/gitlab-org/-/epics/5425). |
 
 ### Example YAML metric definition
 

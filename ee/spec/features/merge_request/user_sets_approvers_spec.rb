@@ -87,10 +87,12 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
       it 'allows setting groups as approvers' do
         group = create :group
+        group_project = create :project, :repository, group: group
+
+        group.add_developer(user)
         group.add_developer(other_user)
 
-        visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature' })
-
+        visit project_new_merge_request_path(group_project, merge_request: { target_branch: 'master', source_branch: 'feature' })
         open_modal(text: 'Add approval rule')
         open_approver_select
 
@@ -156,9 +158,13 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
       it 'allows setting groups as approvers' do
         group = create :group
+        group_project = create :project, :repository, group: group
+        group_project_merge_request = create :merge_request, source_project: group_project
+
+        group.add_developer(user)
         group.add_developer(other_user)
 
-        visit edit_project_merge_request_path(project, merge_request)
+        visit edit_project_merge_request_path(group_project, group_project_merge_request)
 
         open_modal(text: 'Add approval rule')
         open_approver_select
@@ -228,9 +234,9 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         find('.merge-request').click_on 'Edit'
         open_modal
 
-        expect(page).to have_field 'Approvals required', exact: 2
+        expect(page).to have_field 'approvals_required', exact: 2
 
-        fill_in 'Approvals required', with: '3'
+        fill_in 'approvals_required', with: '3'
 
         click_button 'Update approval rule'
         click_on('Save changes')
@@ -245,7 +251,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
         open_modal
 
-        expect(page).to have_field 'Approvals required', exact: 3
+        expect(page).to have_field 'approvals_required', exact: 3
       end
     end
   end

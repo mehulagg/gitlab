@@ -157,8 +157,8 @@ export default {
         },
       })
       .then(({ data }) => {
-        if (data?.boardListCreate?.errors.length) {
-          commit(types.CREATE_LIST_FAILURE);
+        if (data.boardListCreate?.errors.length) {
+          commit(types.CREATE_LIST_FAILURE, data.boardListCreate.errors[0]);
         } else {
           const list = data.boardListCreate?.list;
           dispatch('addList', list);
@@ -176,7 +176,7 @@ export default {
   },
 
   fetchLabels: ({ state, commit, getters }, searchTerm) => {
-    const { fullPath, boardType, isEpicBoard } = state;
+    const { fullPath, boardType } = state;
 
     const variables = {
       fullPath,
@@ -195,7 +195,7 @@ export default {
       .then(({ data }) => {
         let labels = data[boardType]?.labels.nodes;
 
-        if (!getters.shouldUseGraphQL && !isEpicBoard) {
+        if (!getters.shouldUseGraphQL && !getters.isEpicBoard) {
           labels = labels.map((label) => ({
             ...label,
             id: getIdFromGraphQLId(label.id),
@@ -254,6 +254,10 @@ export default {
       .catch(() => {
         commit(types.UPDATE_LIST_FAILURE, backupList);
       });
+  },
+
+  toggleListCollapsed: ({ commit }, { listId, collapsed }) => {
+    commit(types.TOGGLE_LIST_COLLAPSED, { listId, collapsed });
   },
 
   removeList: ({ state, commit }, listId) => {
@@ -321,17 +325,21 @@ export default {
     commit(types.RESET_ISSUES);
   },
 
+  moveItem: ({ dispatch }) => {
+    dispatch('moveIssue');
+  },
+
   moveIssue: (
     { state, commit },
-    { issueId, issueIid, issuePath, fromListId, toListId, moveBeforeId, moveAfterId },
+    { itemId, itemIid, itemPath, fromListId, toListId, moveBeforeId, moveAfterId },
   ) => {
-    const originalIssue = state.boardItems[issueId];
+    const originalIssue = state.boardItems[itemId];
     const fromList = state.boardItemsByListId[fromListId];
-    const originalIndex = fromList.indexOf(Number(issueId));
+    const originalIndex = fromList.indexOf(Number(itemId));
     commit(types.MOVE_ISSUE, { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId });
 
     const { boardId } = state;
-    const [fullProjectPath] = issuePath.split(/[#]/);
+    const [fullProjectPath] = itemPath.split(/[#]/);
 
     gqlClient
       .mutate({
@@ -339,7 +347,7 @@ export default {
         variables: {
           projectPath: fullProjectPath,
           boardId: fullBoardId(boardId),
-          iid: issueIid,
+          iid: itemIid,
           fromListId: getIdFromGraphQLId(fromListId),
           toListId: getIdFromGraphQLId(toListId),
           moveBeforeId,
@@ -348,7 +356,7 @@ export default {
       })
       .then(({ data }) => {
         if (data?.issueMoveList?.errors.length) {
-          commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex });
+          throw new Error();
         } else {
           const issue = data.issueMoveList?.issue;
           commit(types.MOVE_ISSUE_SUCCESS, { issue });

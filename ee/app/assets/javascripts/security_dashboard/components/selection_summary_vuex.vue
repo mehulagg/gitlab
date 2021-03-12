@@ -13,9 +13,11 @@ export default {
     GlButton,
     GlFormSelect,
   },
-  data: () => ({
-    dismissalReason: null,
-  }),
+  data() {
+    return {
+      dismissalReason: null,
+    };
+  },
   computed: {
     ...mapGetters('vulnerabilities', ['selectedVulnerabilitiesCount']),
     canDismissVulnerability() {

@@ -25,6 +25,7 @@ query DastSiteProfiles($fullPath: ID!, $after: String, $before: String, $first: 
           }
           excludedUrls @client
           requestHeaders @client
+          referencedInSecurityPolicies
         }
       }
     }

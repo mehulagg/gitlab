@@ -117,7 +117,7 @@ RSpec.describe Boards::ListsController do
 
       context 'without licensed wip limits' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'ignores max issue count' do
@@ -141,7 +141,7 @@ RSpec.describe Boards::ListsController do
 
       context 'without licensed wip limits' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'ignores max issue count' do
@@ -193,7 +193,7 @@ RSpec.describe Boards::ListsController do
 
       context 'without licensed wip limits' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'ignores limit metric setting' do
@@ -467,7 +467,7 @@ RSpec.describe Boards::ListsController do
 
       context 'when wip limits are not licensed' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'fails to update max issue count with expected status' do

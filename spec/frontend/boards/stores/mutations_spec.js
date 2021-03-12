@@ -1,3 +1,4 @@
+import { issuableTypes } from '~/boards/constants';
 import * as types from '~/boards/stores/mutation_types';
 import mutations from '~/boards/stores/mutations';
 import defaultState from '~/boards/stores/state';
@@ -37,7 +38,7 @@ describe('Board Store Mutations', () => {
       const boardConfig = {
         milestoneTitle: 'Milestone 1',
       };
-      const isEpicBoard = true;
+      const issuableType = issuableTypes.issue;
 
       mutations[types.SET_INITIAL_BOARD_DATA](state, {
         boardId,
@@ -45,7 +46,7 @@ describe('Board Store Mutations', () => {
         boardType,
         disabled,
         boardConfig,
-        isEpicBoard,
+        issuableType,
       });
 
       expect(state.boardId).toEqual(boardId);
@@ -53,7 +54,7 @@ describe('Board Store Mutations', () => {
       expect(state.boardType).toEqual(boardType);
       expect(state.disabled).toEqual(disabled);
       expect(state.boardConfig).toEqual(boardConfig);
-      expect(state.isEpicBoard).toEqual(isEpicBoard);
+      expect(state.issuableType).toEqual(issuableType);
     });
   });
 
@@ -199,6 +200,24 @@ describe('Board Store Mutations', () => {
 
       expect(state.boardLists).toEqual(initialBoardListsState);
       expect(state.error).toEqual('An error occurred while updating the list. Please try again.');
+    });
+  });
+
+  describe('TOGGLE_LIST_COLLAPSED', () => {
+    it('updates collapsed attribute of list in boardLists state', () => {
+      const listId = 'gid://gitlab/List/1';
+      state = {
+        ...state,
+        boardLists: {
+          [listId]: mockLists[0],
+        },
+      };
+
+      expect(state.boardLists[listId].collapsed).toEqual(false);
+
+      mutations.TOGGLE_LIST_COLLAPSED(state, { listId, collapsed: true });
+
+      expect(state.boardLists[listId].collapsed).toEqual(true);
     });
   });
 

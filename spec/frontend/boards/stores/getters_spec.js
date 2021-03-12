@@ -7,9 +7,47 @@ import {
   mockIssuesByListId,
   issues,
   mockLists,
+  mockGroupProject1,
+  mockArchivedGroupProject,
 } from '../mock_data';
 
 describe('Boards - Getters', () => {
+  describe('isGroupBoard', () => {
+    it('returns true when boardType on state is group', () => {
+      const state = {
+        boardType: 'group',
+      };
+
+      expect(getters.isGroupBoard(state)).toBe(true);
+    });
+
+    it('returns false when boardType on state is not group', () => {
+      const state = {
+        boardType: 'project',
+      };
+
+      expect(getters.isGroupBoard(state)).toBe(false);
+    });
+  });
+
+  describe('isProjectBoard', () => {
+    it('returns true when boardType on state is project', () => {
+      const state = {
+        boardType: 'project',
+      };
+
+      expect(getters.isProjectBoard(state)).toBe(true);
+    });
+
+    it('returns false when boardType on state is not project', () => {
+      const state = {
+        boardType: 'group',
+      };
+
+      expect(getters.isProjectBoard(state)).toBe(false);
+    });
+  });
+
   describe('isSidebarOpen', () => {
     it('returns true when activeId is not equal to 0', () => {
       const state = {
@@ -127,6 +165,16 @@ describe('Boards - Getters', () => {
   describe('getListByTitle', () => {
     it('returns list for a given list title', () => {
       expect(getters.getListByTitle(boardsState)('To Do')).toEqual(mockLists[1]);
+    });
+  });
+
+  describe('activeGroupProjects', () => {
+    const state = {
+      groupProjects: [mockGroupProject1, mockArchivedGroupProject],
+    };
+
+    it('returns only returns non-archived group projects', () => {
+      expect(getters.activeGroupProjects(state)).toEqual([mockGroupProject1]);
     });
   });
 });

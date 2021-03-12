@@ -6,7 +6,7 @@ import { createStore } from '~/boards/stores';
 describe('ee/BoardContent', () => {
   let wrapper;
   let store;
-  window.gon = { features: {} };
+  window.gon = { licensed_features: {} };
 
   const createComponent = () => {
     wrapper = shallowMount(BoardContent, {
@@ -30,19 +30,19 @@ describe('ee/BoardContent', () => {
   });
 
   afterEach(() => {
-    window.gon.features = {};
+    window.gon.licensed_features = {};
     wrapper.destroy();
   });
 
   describe.each`
-    featureFlag | state                                 | result
-    ${true}     | ${{ isShowingEpicsSwimlanes: true }}  | ${true}
-    ${true}     | ${{ isShowingEpicsSwimlanes: false }} | ${false}
-    ${false}    | ${{ isShowingEpicsSwimlanes: true }}  | ${false}
-    ${false}    | ${{ isShowingEpicsSwimlanes: false }} | ${false}
-  `('with featureFlag=$featureFlag and state=$state', ({ featureFlag, state, result }) => {
+    licenseEnabled | state                                 | result
+    ${true}        | ${{ isShowingEpicsSwimlanes: true }}  | ${true}
+    ${true}        | ${{ isShowingEpicsSwimlanes: false }} | ${false}
+    ${false}       | ${{ isShowingEpicsSwimlanes: true }}  | ${false}
+    ${false}       | ${{ isShowingEpicsSwimlanes: false }} | ${false}
+  `('with licenseEnabled=$licenseEnabled and state=$state', ({ licenseEnabled, state, result }) => {
     beforeEach(() => {
-      gon.features.swimlanes = featureFlag;
+      gon.licensed_features.swimlanes = licenseEnabled;
       Object.assign(store.state, state);
       createComponent();
     });

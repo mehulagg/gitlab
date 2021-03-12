@@ -1,0 +1,6 @@
+mutation($gitlabSubscriptionActivateInput: GitlabSubscriptionActivateInput!) {
+  gitlabSubscriptionActivate(input: $gitlabSubscriptionActivateInput) {
+    clientMutationId
+    errors
+  }
+}

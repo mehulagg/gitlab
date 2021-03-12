@@ -72,6 +72,9 @@ starting in GitLab 14.0, GitLab will not check your repository's root for config
 
 ### OpenAPI Specification
 
+> Support for OpenAPI Specification v3 was
+> [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228652) in GitLab 13.9.
+
 The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an
 API description format for REST APIs. This section shows you how to configure API fuzzing by using
 an OpenAPI specification to provide information about the target API to test. OpenAPI specifications
@@ -941,7 +944,7 @@ pipelines. For more information, see the [Security Dashboard documentation](../s
 
 Fuzzing faults show up as vulnerabilities with a severity of Unknown.
 Once a fault is found, you can interact with it. Read more on how to
-[interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
+[address the vulnerabilities](../index.md#addressing-vulnerabilities).
 
 ## Handling False Positives
 

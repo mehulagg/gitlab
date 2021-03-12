@@ -37,6 +37,8 @@ module Analytics
           raw_params[:stages_attributes] = raw_params.delete(:stages) || []
           raw_params[:stages_attributes].map! { |attrs| build_stage_attributes(attrs) }
 
+          set_relative_positions!(raw_params[:stages_attributes])
+
           raw_params
         end
 
@@ -60,6 +62,13 @@ module Analytics
         def authorize!
           unless can?(current_user, :read_group_cycle_analytics, group)
             ServiceResponse.error(message: 'Forbidden', http_status: :forbidden, payload: { errors: nil })
+          end
+        end
+
+        def set_relative_positions!(stages_attributes)
+          increment = (Gitlab::RelativePositioning::MAX_POSITION - Gitlab::RelativePositioning::START_POSITION).fdiv(stages_attributes.size + 1).floor
+          stages_attributes.each_with_index do |stage_attribute, i|
+            stage_attribute[:relative_position] = increment * i
           end
         end
       end

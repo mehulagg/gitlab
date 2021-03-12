@@ -108,7 +108,7 @@ of GitLab more efficient.
 
 New information that would be useful toward the future usage or troubleshooting
 of GitLab should not be written directly in a forum or other messaging system,
-but added to a documentation MR and then referenced, as described above. 
+but added to a documentation MR and then referenced, as described above.
 
 The more we reflexively add information to the documentation, the more
 the documentation helps others efficiently accomplish tasks and solve problems.
@@ -1611,11 +1611,12 @@ If all content in a section is related, add version text after the header for
 the section. The version information must:
 
 - Be surrounded by blank lines.
-- Start with `>`.
-- Version histories with more than one entry should have each entry on its own
-  line (long lines are okay). Start each line with `> -` to get unordered list
-  formatting.
-- Whenever possible, have a link to the completed issue, merge request, or epic
+- Start with `>`. If there are multiple bullets, each line must start with `> -`.
+- The string must include these words in this order (capitalization doesn't matter):
+  - `introduced`, `deprecated`, `moved`
+  - `in` or `to`
+  - `GitLab`
+- Whenever possible, include a link to the completed issue, merge request, or epic
   that introduced the feature. An issue is preferred over a merge request, and
   a merge request is preferred over an epic.
 

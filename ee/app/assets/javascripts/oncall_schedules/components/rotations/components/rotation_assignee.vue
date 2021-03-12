@@ -1,8 +1,10 @@
 <script>
-import { GlToken, GlAvatar, GlPopover } from '@gitlab/ui';
+import { GlAvatar, GlPopover } from '@gitlab/ui';
+import { uniqueId } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
+import { selectedTimezoneFormattedOffset } from '../../schedule/utils';
 
 export const SHIFT_WIDTHS = {
   md: 140,
@@ -10,12 +12,16 @@ export const SHIFT_WIDTHS = {
   xs: 40,
 };
 
+const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
+export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
+
 export default {
+  ROTATION_CENTER_CLASS,
   components: {
     GlAvatar,
     GlPopover,
-    GlToken,
   },
+  inject: ['selectedTimezone'],
   props: {
     assignee: {
       type: Object,
@@ -51,20 +57,26 @@ export default {
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)} ${
+          this.timezoneOffset
+        }`,
       });
     },
     rotationAssigneeUniqueID() {
-      const { _uid } = this;
-      return `${this.assignee.user.id}-${_uid}`;
+      return uniqueId('rotation-assignee-');
     },
     rotationMobileView() {
       return this.shiftWidth <= SHIFT_WIDTHS.xs;
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)} ${
+          this.timezoneOffset
+        }`,
       });
+    },
+    timezoneOffset() {
+      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
   },
 };
@@ -72,27 +84,31 @@ export default {
 
 <template>
   <div class="gl-absolute gl-h-7 gl-mt-3" :style="rotationAssigneeStyle">
-    <gl-token
+    <div
       :id="rotationAssigneeUniqueID"
-      class="gl-w-full gl-h-6 gl-align-items-center"
-      :class="chevronClass"
-      :view-only="true"
+      class="gl-h-6"
+      :class="[chevronClass, $options.ROTATION_CENTER_CLASS]"
+      data-testid="rotation-assignee"
     >
-      <div class="gl-display-flex gl-text-white gl-font-weight-normal">
+      <div class="gl-text-white" :class="$options.ROTATION_CENTER_CLASS">
         <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
         <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
           assigneeName
         }}</span>
       </div>
-    </gl-token>
+    </div>
     <gl-popover
       :target="rotationAssigneeUniqueID"
       :title="assignee.user.username"
       triggers="hover"
       placement="top"
     >
-      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>
-      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">{{ endsAt }}</p>
+      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">
+        {{ startsAt }}
+      </p>
+      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">
+        {{ endsAt }}
+      </p>
     </gl-popover>
   </div>
 </template>

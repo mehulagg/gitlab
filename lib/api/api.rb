@@ -58,6 +58,7 @@ module API
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
+        runner: -> { @current_runner || @runner },
         caller_id: route.origin,
         remote_ip: request.ip,
         feature_category: feature_category
@@ -169,6 +170,7 @@ module API
       mount ::API::AccessRequests
       mount ::API::Admin::Ci::Variables
       mount ::API::Admin::InstanceClusters
+      mount ::API::Admin::PlanLimits
       mount ::API::Admin::Sidekiq
       mount ::API::Appearance
       mount ::API::Applications

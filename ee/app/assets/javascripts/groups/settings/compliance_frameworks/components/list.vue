@@ -7,6 +7,7 @@ import { s__ } from '~/locale';
 
 import { DANGER, INFO } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
+import { injectIdIntoEditPath } from '../utils';
 import DeleteModal from './delete_modal.vue';
 import EmptyState from './list_empty_state.vue';
 import ListItem from './list_item.vue';
@@ -27,6 +28,10 @@ export default {
       type: String,
       required: true,
     },
+    editFrameworkPath: {
+      type: String,
+      required: true,
+    },
     emptyStateSvgPath: {
       type: String,
       required: true,
@@ -39,7 +44,7 @@ export default {
   data() {
     return {
       markedForDeletion: {},
-      deletingFramework: null,
+      deletingFrameworksIds: [],
       complianceFrameworks: [],
       error: '',
       message: '',
@@ -56,10 +61,15 @@ export default {
       update(data) {
         const nodes = data.namespace?.complianceFrameworks?.nodes;
         return (
-          nodes?.map((framework) => ({
-            ...framework,
-            parsedId: getIdFromGraphQLId(framework.id),
-          })) || []
+          nodes?.map((framework) => {
+            const parsedId = getIdFromGraphQLId(framework.id);
+
+            return {
+              ...framework,
+              parsedId,
+              editPath: injectIdIntoEditPath(this.editFrameworkPath, parsedId),
+            };
+          }) || []
         );
       },
       error(error) {
@@ -70,7 +80,7 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.$apollo.loading && !this.deletingFramework;
+      return this.$apollo.loading && this.deletingFrameworksIds.length === 0;
     },
     hasLoaded() {
       return !this.isLoading && !this.error;
@@ -98,6 +108,9 @@ export default {
     },
   },
   methods: {
+    dismissAlertMessage() {
+      this.message = null;
+    },
     markForDeletion(framework) {
       this.markedForDeletion = framework;
       this.$refs.modal.show();
@@ -105,15 +118,18 @@ export default {
     onError() {
       this.error = this.$options.i18n.deleteError;
     },
-    onDelete() {
+    onDelete(id) {
       this.message = this.$options.i18n.deleteMessage;
-      this.deletingFramework = null;
+      const idx = this.deletingFrameworksIds.indexOf(id);
+      if (idx > -1) {
+        this.deletingFrameworksIds.splice(idx, 1);
+      }
     },
     onDeleting() {
-      this.deletingFramework = this.markedForDeletion;
+      this.deletingFrameworksIds.push(this.markedForDeletion.id);
     },
-    isDeleting(framework) {
-      return this.deletingFramework === framework;
+    isDeleting(id) {
+      return this.deletingFrameworksIds.includes(id);
     },
   },
   i18n: {
@@ -137,6 +153,7 @@ export default {
       class="gl-mt-5"
       :variant="alertVariant"
       :dismissible="alertDismissible"
+      @dismiss="dismissAlertMessage"
     >
       {{ alertMessage }}
     </gl-alert>
@@ -153,7 +170,7 @@ export default {
           v-for="framework in complianceFrameworks"
           :key="framework.parsedId"
           :framework="framework"
-          :loading="isDeleting(framework)"
+          :loading="isDeleting(framework.id)"
           @delete="markForDeletion"
         />
       </gl-tab>

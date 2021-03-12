@@ -68,10 +68,10 @@ describe('EE billings seats module mutations', () => {
     });
   });
 
-  describe(types.RESET_MEMBERS, () => {
+  describe(types.RESET_BILLABLE_MEMBERS, () => {
     beforeEach(() => {
       mutations[types.RECEIVE_BILLABLE_MEMBERS_SUCCESS](state, mockDataSeats);
-      mutations[types.RESET_MEMBERS](state);
+      mutations[types.RESET_BILLABLE_MEMBERS](state);
     });
 
     it('resets members state', () => {
@@ -96,42 +96,42 @@ describe('EE billings seats module mutations', () => {
       mutations[types.RECEIVE_BILLABLE_MEMBERS_SUCCESS](state, mockDataSeats);
     });
 
-    describe(types.SET_MEMBER_TO_REMOVE, () => {
+    describe(types.SET_BILLABLE_MEMBER_TO_REMOVE, () => {
       it('sets the member to remove', () => {
-        mutations[types.SET_MEMBER_TO_REMOVE](state, memberToRemove);
+        mutations[types.SET_BILLABLE_MEMBER_TO_REMOVE](state, memberToRemove);
 
-        expect(state.memberToRemove).toMatchObject(memberToRemove);
+        expect(state.billableMemberToRemove).toMatchObject(memberToRemove);
       });
     });
 
-    describe(types.REMOVE_MEMBER, () => {
+    describe(types.REMOVE_BILLABLE_MEMBER, () => {
       it('sets state to loading', () => {
-        mutations[types.REMOVE_MEMBER](state, memberToRemove);
+        mutations[types.REMOVE_BILLABLE_MEMBER](state, memberToRemove);
 
         expect(state).toMatchObject({ isLoading: true, hasError: false });
       });
     });
 
-    describe(types.REMOVE_MEMBER_SUCCESS, () => {
+    describe(types.REMOVE_BILLABLE_MEMBER_SUCCESS, () => {
       it('sets state to successfull', () => {
-        mutations[types.REMOVE_MEMBER_SUCCESS](state, memberToRemove);
+        mutations[types.REMOVE_BILLABLE_MEMBER_SUCCESS](state, memberToRemove);
 
         expect(state).toMatchObject({
           isLoading: false,
           hasError: false,
-          memberToRemove: null,
+          billableMemberToRemove: null,
         });
       });
     });
 
-    describe(types.REMOVE_MEMBER_ERROR, () => {
+    describe(types.REMOVE_BILLABLE_MEMBER_ERROR, () => {
       it('sets state to errored', () => {
-        mutations[types.REMOVE_MEMBER_ERROR](state, memberToRemove);
+        mutations[types.REMOVE_BILLABLE_MEMBER_ERROR](state, memberToRemove);
 
         expect(state).toMatchObject({
           isLoading: false,
           hasError: true,
-          memberToRemove: null,
+          billableMemberToRemove: null,
         });
       });
     });

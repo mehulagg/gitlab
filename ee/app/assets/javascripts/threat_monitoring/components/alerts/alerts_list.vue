@@ -56,7 +56,7 @@ export default {
       },
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
       result({ data }) {
-        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo;
+        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo || {};
       },
       error() {
         this.errored = true;
@@ -103,7 +103,6 @@ export default {
           variables: { nextPageCursor: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             const results = produce(fetchMoreResult, (draftData) => {
-              // eslint-disable-next-line no-param-reassign
               draftData.project.alertManagementAlerts.nodes = [
                 ...previousResult.project.alertManagementAlerts.nodes,
                 ...draftData.project.alertManagementAlerts.nodes,

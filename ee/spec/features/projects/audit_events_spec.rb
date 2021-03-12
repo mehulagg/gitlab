@@ -113,53 +113,23 @@ RSpec.describe 'Projects > Audit Events', :js do
       project.add_developer(pete)
     end
 
-    context 'when `vue_project_members_list` feature flag is enabled' do
-      it "appears in the project's audit events" do
-        visit project_project_members_path(project)
+    it "appears in the project's audit events" do
+      visit project_project_members_path(project)
 
-        page.within find_member_row(pete) do
-          click_button 'Developer'
-          click_button 'Maintainer'
-        end
-
-        page.within('.qa-project-sidebar') do
-          find(:link, text: 'Security & Compliance').click
-          click_link 'Audit Events'
-        end
-
-        page.within('.audit-log-table') do
-          expect(page).to have_content 'Changed access level from Developer to Maintainer'
-          expect(page).to have_content(project.owner.name)
-          expect(page).to have_content('Pete')
-        end
-      end
-    end
-
-    context 'when `vue_project_members_list` feature flag is disabled' do
-      before do
-        stub_feature_flags(vue_project_members_list: false)
+      page.within find_member_row(pete) do
+        click_button 'Developer'
+        click_button 'Maintainer'
       end
 
-      it "appears in the project's audit events" do
-        visit project_project_members_path(project)
+      page.within('.qa-project-sidebar') do
+        find(:link, text: 'Security & Compliance').click
+        click_link 'Audit Events'
+      end
 
-        project_member = project.project_member(pete)
-
-        page.within "#project_member_#{project_member.id}" do
-          click_button 'Developer'
-          click_link 'Maintainer'
-        end
-
-        page.within('.qa-project-sidebar') do
-          find(:link, text: 'Security & Compliance').click
-          click_link 'Audit Events'
-        end
-
-        page.within('.audit-log-table') do
-          expect(page).to have_content 'Changed access level from Developer to Maintainer'
-          expect(page).to have_content(project.owner.name)
-          expect(page).to have_content('Pete')
-        end
+      page.within('.audit-log-table') do
+        expect(page).to have_content 'Changed access level from Developer to Maintainer'
+        expect(page).to have_content(project.owner.name)
+        expect(page).to have_content('Pete')
       end
     end
   end

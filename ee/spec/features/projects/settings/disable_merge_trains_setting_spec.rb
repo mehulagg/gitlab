@@ -62,7 +62,7 @@ RSpec.describe 'Disable Merge Trains Setting', :js do
     end
 
     it 'unchecking merge pipelines checkbox disables merge trains checkbox' do
-      uncheck('Enable merged results pipelines.')
+      uncheck('Enable merged results pipelines')
 
       expect(find('#project_merge_pipelines_enabled')).not_to be_checked
       expect(find('#project_merge_trains_enabled')).to be_disabled
@@ -70,7 +70,7 @@ RSpec.describe 'Disable Merge Trains Setting', :js do
 
     it 'unchecking merge pipelines checkbox unchecks merge trains checkbox if it was previously checked' do
       check('Enable merge trains.')
-      uncheck('Enable merged results pipelines.')
+      uncheck('Enable merged results pipelines')
 
       expect(find('#project_merge_pipelines_enabled')).not_to be_checked
       expect(find('#project_merge_trains_enabled')).to be_disabled
@@ -88,14 +88,14 @@ RSpec.describe 'Disable Merge Trains Setting', :js do
     include_examples 'loads correct checkbox state'
 
     it 'checking merge pipelines checkbox enables merge trains checkbox' do
-      check('Enable merged results pipelines.')
+      check('Enable merged results pipelines')
 
       expect(find('#project_merge_pipelines_enabled')).to be_checked
       expect(find('#project_merge_trains_enabled')).not_to be_disabled
     end
 
     it 'checking merge pipelines checkbox should leave merge trains checkbox unchecked' do
-      check('Enable merged results pipelines.')
+      check('Enable merged results pipelines')
 
       expect(find('#project_merge_pipelines_enabled')).to be_checked
       expect(find('#project_merge_trains_enabled')).not_to be_checked
@@ -112,7 +112,7 @@ RSpec.describe 'Disable Merge Trains Setting', :js do
     include_examples 'loads correct checkbox state'
 
     it 'unchecking merge pipelines checkbox disables and unchecks merge trains checkbox' do
-      uncheck('Enable merged results pipelines.')
+      uncheck('Enable merged results pipelines')
 
       expect(find('#project_merge_pipelines_enabled')).not_to be_checked
       expect(find('#project_merge_trains_enabled')).to be_disabled

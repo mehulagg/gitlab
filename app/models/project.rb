@@ -393,6 +393,7 @@ class Project < ApplicationRecord
     :wiki_access_level, :snippets_access_level, :builds_access_level,
     :repository_access_level, :pages_access_level, :metrics_dashboard_access_level, :analytics_access_level,
     :operations_enabled?, :operations_access_level, :security_and_compliance_access_level,
+    :container_registry_access_level,
     to: :project_feature, allow_nil: true
   delegate :show_default_award_emojis, :show_default_award_emojis=,
     :show_default_award_emojis?,
@@ -492,10 +493,22 @@ class Project < ApplicationRecord
       { column: arel_table["description"], multiplier: 0.2 }
     ])
 
-    query = reorder(order_expression.desc, arel_table['id'].desc)
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'similarity',
+        column_expression: order_expression,
+        order_expression: order_expression.desc,
+        order_direction: :desc,
+        distinct: false,
+        add_to_projections: true
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'id',
+        order_expression: Project.arel_table[:id].desc
+      )
+    ])
 
-    query = query.select(*query.arel.projections, order_expression.as('similarity')) if include_in_select
-    query
+    order.apply_cursor_conditions(reorder(order))
   end
 
   scope :with_packages, -> { joins(:packages) }
@@ -1697,8 +1710,8 @@ class Project < ApplicationRecord
     end
   end
 
-  def any_runners?(&block)
-    active_runners.any?(&block)
+  def any_active_runners?(&block)
+    active_runners_with_tags.any?(&block)
   end
 
   def valid_runners_token?(token)
@@ -1987,6 +2000,7 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
       .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
+      .append(key: 'CI_CONFIG_PATH', value: ci_config_path_or_default)
   end
 
   def predefined_ci_server_variables
@@ -2024,10 +2038,12 @@ class Project < ApplicationRecord
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       break variables unless Gitlab.config.dependency_proxy.enabled
 
-      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}")
+      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port)
       variables.append(
         key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
-        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+        # The namespace path can include uppercase letters, which
+        # Docker doesn't allow. The proxy expects it to be downcased.
+        value: "#{Gitlab.host_with_port}/#{namespace.root_ancestor.path.downcase}#{DependencyProxy::URL_SUFFIX}"
       )
     end
   end
@@ -2698,6 +2714,12 @@ class Project < ApplicationRecord
 
   def cache_has_external_issue_tracker
     update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
+  end
+
+  def active_runners_with_tags
+    strong_memoize(:active_runners_with_tags) do
+      active_runners.with_tags
+    end
   end
 end
 

@@ -191,9 +191,13 @@ class MergeRequest < ApplicationRecord
   end
 
   state_machine :merge_status, initial: :unchecked do
+    event :mark_as_preparing do
+      transition unchecked: :preparing
+    end
+
     event :mark_as_unchecked do
-      transition [:can_be_merged, :checking, :unchecked] => :unchecked
-      transition [:cannot_be_merged, :cannot_be_merged_rechecking, :cannot_be_merged_recheck] => :cannot_be_merged_recheck
+      transition [:preparing, :can_be_merged, :checking] => :unchecked
+      transition [:cannot_be_merged, :cannot_be_merged_rechecking] => :cannot_be_merged_recheck
     end
 
     event :mark_as_checking do
@@ -209,6 +213,7 @@ class MergeRequest < ApplicationRecord
       transition [:unchecked, :cannot_be_merged_recheck, :checking, :cannot_be_merged_rechecking] => :cannot_be_merged
     end
 
+    state :preparing
     state :unchecked
     state :cannot_be_merged_recheck
     state :checking
@@ -237,7 +242,7 @@ class MergeRequest < ApplicationRecord
   # Returns current merge_status except it returns `cannot_be_merged_rechecking` as `checking`
   # to avoid exposing unnecessary internal state
   def public_merge_status
-    cannot_be_merged_rechecking? ? 'checking' : merge_status
+    cannot_be_merged_rechecking? || preparing? ? 'checking' : merge_status
   end
 
   validates :source_project, presence: true, unless: [:allow_broken, :importing?, :closed_or_merged_without_fork?]
@@ -305,10 +310,28 @@ class MergeRequest < ApplicationRecord
   end
   scope :by_target_branch, ->(branch_name) { where(target_branch: branch_name) }
   scope :order_merged_at, ->(direction) do
-    query = join_metrics.order(Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction))
+    reverse_direction = { 'ASC' => 'DESC', 'DESC' => 'ASC' }
+    reversed_direction = reverse_direction[direction] || raise("Unknown sort direction was given: #{direction}")
 
-    # Add `merge_request_metrics.merged_at` to the `SELECT` in order to make the keyset pagination work.
-    query.select(*query.arel.projections, MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics.merged_at"'))
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'merge_request_metrics_merged_at',
+        column_expression: MergeRequest::Metrics.arel_table[:merged_at],
+        order_expression: Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction),
+        reversed_order_expression: Gitlab::Database.nulls_first_order('merge_request_metrics.merged_at', reversed_direction),
+        order_direction: direction,
+        nullable: :nulls_last,
+        distinct: false,
+        add_to_projections: true
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'merge_request_metrics_id',
+        order_expression: MergeRequest::Metrics.arel_table[:id].desc,
+        add_to_projections: true
+      )
+    ])
+
+    order.apply_cursor_conditions(join_metrics).order(order)
   end
   scope :order_merged_at_asc, -> { order_merged_at('ASC') }
   scope :order_merged_at_desc, -> { order_merged_at('DESC') }
@@ -322,7 +345,7 @@ class MergeRequest < ApplicationRecord
   scope :preload_approved_by_users, -> { preload(:approved_by_users) }
   scope :preload_metrics, -> (relation) { preload(metrics: relation) }
   scope :preload_project_and_latest_diff, -> { preload(:source_project, :latest_merge_request_diff) }
-  scope :preload_latest_diff_comment, -> { preload(latest_merge_request_diff: :merge_request_diff_commits) }
+  scope :preload_latest_diff_commit, -> { preload(latest_merge_request_diff: :merge_request_diff_commits) }
   scope :with_web_entity_associations, -> { preload(:author, :target_project) }
 
   scope :with_auto_merge_enabled, -> do
@@ -406,8 +429,8 @@ class MergeRequest < ApplicationRecord
 
   def self.sort_by_attribute(method, excluded_labels: [])
     case method.to_s
-    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_id_desc
-    when 'merged_at_desc' then order_merged_at_desc.with_order_id_desc
+    when 'merged_at', 'merged_at_asc' then order_merged_at_asc
+    when 'merged_at_desc' then order_merged_at_desc
     else
       super
     end
@@ -1861,6 +1884,12 @@ class MergeRequest < ApplicationRecord
       sast: report_type_enabled?(:sast),
       secret_detection: report_type_enabled?(:secret_detection)
     }
+  end
+
+  def includes_ci_config?
+    return false unless diff_stats
+
+    diff_stats.map(&:path).include?(project.ci_config_path_or_default)
   end
 
   private

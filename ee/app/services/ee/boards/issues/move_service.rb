@@ -6,8 +6,8 @@ module EE
       module MoveService
         extend ::Gitlab::Utils::Override
 
-        override :issue_params
-        def issue_params(issue)
+        override :issuable_params
+        def issuable_params(issue)
           args = super
           args[:epic_id] = params[:epic_id] if params.has_key?(:epic_id)
 

@@ -82,6 +82,21 @@ describe('DevopsAdoptionDeleteModal', () => {
     });
   });
 
+  describe.each`
+    state        | action    | expected
+    ${'opening'} | ${'show'} | ${true}
+    ${'closing'} | ${'hide'} | ${false}
+  `('$state the modal', ({ action, expected }) => {
+    beforeEach(() => {
+      createComponent();
+      findModal().vm.$emit(action);
+    });
+
+    it(`emits trackModalOpenState as ${expected}`, () => {
+      expect(wrapper.emitted('trackModalOpenState')).toStrictEqual([[expected]]);
+    });
+  });
+
   describe('submitting the form', () => {
     describe('while waiting for the mutation', () => {
       beforeEach(() => createComponent({ mutationMock: mutateLoading }));
@@ -120,7 +135,7 @@ describe('DevopsAdoptionDeleteModal', () => {
         expect(mutate).toHaveBeenCalledWith(
           expect.objectContaining({
             variables: {
-              id: devopsAdoptionSegmentsData.nodes[0].id,
+              id: [devopsAdoptionSegmentsData.nodes[0].id],
             },
           }),
         );

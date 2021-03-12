@@ -2899,6 +2899,14 @@ RSpec.describe MergeRequest, factory_default: :keep do
       expect(subject.mergeable?).to be_truthy
     end
 
+    it 'return true if #mergeable_state? is true and the MR #can_be_merged? is false' do
+      allow(subject).to receive(:mergeable_state?) { true }
+      expect(subject).to receive(:check_mergeability)
+      expect(subject).to receive(:can_be_merged?) { false }
+
+      expect(subject.mergeable?).to be_falsey
+    end
+
     context 'with skip_ci_check option' do
       before do
         allow(subject).to receive_messages(check_mergeability: nil,
@@ -3076,6 +3084,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     where(:status, :public_status) do
       'cannot_be_merged_rechecking' | 'checking'
+      'preparing'                   | 'checking'
       'checking'                    | 'checking'
       'cannot_be_merged'            | 'cannot_be_merged'
     end
@@ -4099,6 +4108,65 @@ RSpec.describe MergeRequest, factory_default: :keep do
       end
     end
 
+    describe '#mark_as_unchecked' do
+      subject { create(:merge_request, source_project: project, merge_status: merge_status) }
+
+      shared_examples 'for an invalid state transition' do
+        it 'is not a valid state transition' do
+          expect { subject.mark_as_unchecked! }.to raise_error(StateMachines::InvalidTransition)
+        end
+      end
+
+      shared_examples 'for an valid state transition' do
+        it 'is a valid state transition' do
+          expect { subject.mark_as_unchecked! }
+            .to change { subject.merge_status }
+            .from(merge_status.to_s)
+            .to(expected_merge_status)
+        end
+      end
+
+      context 'when the status is unchecked' do
+        let(:merge_status) { :unchecked }
+
+        include_examples 'for an invalid state transition'
+      end
+
+      context 'when the status is checking' do
+        let(:merge_status) { :checking }
+        let(:expected_merge_status) { 'unchecked' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is can_be_merged' do
+        let(:merge_status) { :can_be_merged }
+        let(:expected_merge_status) { 'unchecked' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is cannot_be_merged_recheck' do
+        let(:merge_status) { :cannot_be_merged_recheck }
+
+        include_examples 'for an invalid state transition'
+      end
+
+      context 'when the status is cannot_be_merged' do
+        let(:merge_status) { :cannot_be_merged }
+        let(:expected_merge_status) { 'cannot_be_merged_recheck' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is cannot_be_merged' do
+        let(:merge_status) { :cannot_be_merged }
+        let(:expected_merge_status) { 'cannot_be_merged_recheck' }
+
+        include_examples 'for an valid state transition'
+      end
+    end
+
     describe 'transition to cannot_be_merged' do
       let(:notification_service) { double(:notification_service) }
       let(:todo_service) { double(:todo_service) }
@@ -4795,6 +4863,35 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
         it { is_expected.to be_falsy }
       end
+    end
+  end
+
+  describe '#includes_ci_config?' do
+    let(:merge_request) { build(:merge_request) }
+    let(:project) { merge_request.project }
+
+    subject(:result) { merge_request.includes_ci_config? }
+
+    before do
+      allow(merge_request).to receive(:diff_stats).and_return(diff_stats)
+    end
+
+    context 'when diff_stats is nil' do
+      let(:diff_stats) {}
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when diff_stats does not include the ci config path of the project' do
+      let(:diff_stats) { [double(path: 'abc.txt')] }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when diff_stats includes the ci config path of the project' do
+      let(:diff_stats) { [double(path: '.gitlab-ci.yml')] }
+
+      it { is_expected.to eq(true) }
     end
   end
 end

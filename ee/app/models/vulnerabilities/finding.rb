@@ -123,7 +123,7 @@ module Vulnerabilities
     def state
       return 'dismissed' if dismissal_feedback.present?
 
-      if vulnerability.nil?
+      if vulnerability.nil? || vulnerability.detected?
         'detected'
       elsif vulnerability.resolved?
         'resolved'

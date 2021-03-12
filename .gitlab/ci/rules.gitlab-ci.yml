@@ -149,6 +149,7 @@
   - "{,ee/}{app/channels,app/controllers,app/finders,app/graphql,app/helpers,app/mailers,app/models,app/policies,app/presenters,app/serializers,app/services,app/uploaders,app/validators,app/views,app/workers}/**/*"
   - "{,ee/}{bin,cable,config,db,lib}/**/*"
   - "{,ee/}spec/**/*.rb"
+  # CI changes
   - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*"
   - "*_VERSION"
@@ -162,6 +163,9 @@
   - "{,ee/}spec/support/helpers/database/**/*"
   - "config/prometheus/common_metrics.yml"  # Used by Gitlab::DatabaseImporters::CommonMetrics::Importer
   - "{,ee/}app/models/project_statistics.rb"  # Used to calculate sizes in migration specs
+  # CI changes
+  - ".gitlab-ci.yml"
+  - ".gitlab/ci/**/*"
 
 .db-library-patterns: &db-library-patterns
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/database/**/*"
@@ -183,6 +187,8 @@
   - ".csscomb.json"
   - "Dockerfile.assets"
   - "vendor/assets/**/*"
+  # CI changes
+  - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo}.yml"
@@ -193,6 +199,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
 
 .qa-patterns: &qa-patterns
   - ".dockerignore"
@@ -205,6 +212,8 @@
   - ".csscomb.json"
   - "Dockerfile.assets"
   - "vendor/assets/**/*"
+  # CI changes
+  - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo}.yml"
@@ -215,6 +224,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
   # Backstage changes
   - "Dangerfile"
   - "danger/**/*"
@@ -230,6 +240,8 @@
   - ".csscomb.json"
   - "Dockerfile.assets"
   - "vendor/assets/**/*"
+  # CI changes
+  - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo}.yml"
@@ -240,6 +252,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
   # QA changes
   - ".dockerignore"
   - "qa/**/*"
@@ -251,6 +264,8 @@
   - ".csscomb.json"
   - "Dockerfile.assets"
   - "vendor/assets/**/*"
+  # CI changes
+  - ".gitlab-ci.yml"
   - ".gitlab/ci/**/*"
   - ".{eslintignore,gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - ".{codeclimate,eslintrc,gitlab-ci,haml-lint,haml-lint_todo,rubocop,rubocop_todo,rubocop_manual_todo}.yml"
@@ -261,6 +276,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
   # Backstage changes
   - "Dangerfile"
   - "danger/**/*"
@@ -405,6 +421,7 @@
     - <<: *if-security-merge-request
       changes: *code-backstage-patterns
     - <<: *if-merge-request-title-as-if-foss
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -445,6 +462,8 @@
 
 .frontend:rules:bundle-size-review:
   rules:
+    - <<: *if-not-canonical-namespace
+      when: never
     - if: '$DANGER_GITLAB_API_TOKEN && $CI_MERGE_REQUEST_IID && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main")'
       changes: *frontend-patterns
       allow_failure: true
@@ -483,6 +502,7 @@
     - <<: *if-security-merge-request
       changes: *code-qa-patterns
     - <<: *if-merge-request-title-as-if-foss
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -602,10 +622,9 @@
     - <<: *if-merge-request
       changes: ["config/**/*"]
 
-.rails:rules:default-refs-code-backstage-qa:
+.rails:rules:code-backstage-qa:
   rules:
-    - <<: *if-default-refs
-      changes: *code-backstage-qa-patterns
+    - changes: *code-backstage-qa-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-only-migration:
@@ -700,6 +719,7 @@
       changes: *db-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *db-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -716,6 +736,7 @@
       changes: *db-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *db-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:as-if-foss-unit:
   rules:
@@ -725,6 +746,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -741,6 +763,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:as-if-foss-integration:
   rules:
@@ -750,6 +773,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -766,6 +790,7 @@
       changes: *backend-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *backend-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:as-if-foss-system:
   rules:
@@ -775,6 +800,7 @@
       changes: *code-backstage-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *code-backstage-patterns
+    - <<: *if-merge-request-title-run-all-rspec
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -791,6 +817,7 @@
       changes: *code-backstage-patterns
     - <<: *if-merge-request-title-as-if-foss
       changes: *code-backstage-patterns
+    - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:ee-and-foss-db-library-code:
   rules:
@@ -809,8 +836,7 @@
 
 .rails:rules:detect-tests:
   rules:
-    - <<: *if-default-refs
-      changes: *code-backstage-patterns
+    - changes: *code-backstage-patterns
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:rspec-foss-impact:
@@ -1123,8 +1149,7 @@
 #######################
 .test-metadata:rules:retrieve-tests-metadata:
   rules:
-    - <<: *if-default-refs
-      changes: *code-backstage-patterns
+    - changes: *code-backstage-patterns
       when: on_success
     - <<: *if-merge-request-title-run-all-rspec
 

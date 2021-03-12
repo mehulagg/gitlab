@@ -16,12 +16,15 @@ import {
 import * as Sentry from '@sentry/browser';
 import { isEmpty, omit } from 'lodash';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   integrationTypes,
+  integrationSteps,
+  createStepNumbers,
+  editStepNumbers,
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
   typeSet,
+  viewCredentialsTabIndex,
   i18n,
 } from '../constants';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
@@ -35,6 +38,7 @@ export default {
   },
   JSON_VALIDATE_DELAY,
   typeSet,
+  integrationSteps,
   i18n,
   components: {
     ClipboardButton,
@@ -55,7 +59,6 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     generic: {
       default: {},
@@ -108,6 +111,7 @@ export default {
       parsingPayload: false,
       currentIntegration: null,
       parsedPayload: [],
+      activeTabIndex: 0,
     };
   },
   computed: {
@@ -157,12 +161,7 @@ export default {
       };
     },
     showMappingBuilder() {
-      return (
-        this.multiIntegrations &&
-        this.glFeatures.multipleHttpIntegrationsCustomMapping &&
-        this.isHttp &&
-        this.alertFields?.length
-      );
+      return this.multiIntegrations && this.isHttp && this.alertFields?.length;
     },
     hasSamplePayload() {
       return this.isValidNonEmptyJSON(this.currentIntegration?.payloadExample);
@@ -170,19 +169,22 @@ export default {
     canEditPayload() {
       return this.hasSamplePayload && !this.resetPayloadAndMappingConfirmed;
     },
+    canParseSamplePayload() {
+      return !this.active || !this.isSampePayloadValid || !this.samplePayload.json;
+    },
     isResetAuthKeyDisabled() {
       return !this.active && !this.integrationForm.token !== '';
     },
     isPayloadEditDisabled() {
-      return this.glFeatures.multipleHttpIntegrationsCustomMapping
-        ? !this.active || this.canEditPayload
-        : !this.active;
-    },
-    isSubmitTestPayloadDisabled() {
-      return !this.active || Boolean(this.samplePayload.error) || this.samplePayload.json === '';
+      return !this.active || this.canEditPayload;
     },
     isSelectDisabled() {
       return this.currentIntegration !== null || !this.canAddIntegration;
+    },
+    viewCredentialsHelpMsg() {
+      return this.isPrometheus
+        ? i18n.integrationFormSteps.setupCredentials.prometheusHelp
+        : i18n.integrationFormSteps.setupCredentials.help;
     },
   },
   watch: {
@@ -203,6 +205,8 @@ export default {
         );
         this.updateMapping(mapping);
       }
+      this.activeTabIndex = viewCredentialsTabIndex;
+      this.$el.scrollIntoView({ block: 'center' });
     },
   },
   methods: {
@@ -223,12 +227,10 @@ export default {
     },
     submit() {
       const { name, apiUrl } = this.integrationForm;
-      const customMappingVariables = this.glFeatures.multipleHttpIntegrationsCustomMapping
-        ? {
-            payloadAttributeMappings: this.mapping,
-            payloadExample: this.samplePayload.json || '{}',
-          }
-        : {};
+      const customMappingVariables = {
+        payloadAttributeMappings: this.mapping,
+        payloadExample: this.samplePayload.json || '{}',
+      };
 
       const variables =
         this.selectedIntegration === typeSet.http
@@ -320,18 +322,32 @@ export default {
       this.parsedPayload = [];
       this.updateMapping([]);
     },
+    getLabelWithStepNumber(step, label) {
+      let stepNumber = editStepNumbers[step];
+
+      if (this.isCreating) {
+        stepNumber = createStepNumbers[step];
+      }
+
+      return stepNumber ? `${stepNumber}.${label}` : label;
+    },
   },
 };
 </script>
 
 <template>
   <gl-form class="gl-mt-6" @submit.prevent="submit" @reset.prevent="reset">
-    <gl-tabs>
+    <gl-tabs v-model="activeTabIndex">
       <gl-tab :title="$options.i18n.integrationTabs.configureDetails">
         <gl-form-group
           v-if="isCreating"
           id="integration-type"
-          :label="$options.i18n.integrationFormSteps.selectType.label"
+          :label="
+            getLabelWithStepNumber(
+              $options.integrationSteps.selectType,
+              $options.i18n.integrationFormSteps.selectType.label,
+            )
+          "
           label-for="integration-type"
         >
           <gl-form-select
@@ -354,7 +370,12 @@ export default {
           <gl-form-group
             v-if="isHttp"
             id="name-integration"
-            :label="$options.i18n.integrationFormSteps.nameIntegration.label"
+            :label="
+              getLabelWithStepNumber(
+                $options.integrationSteps.nameIntegration,
+                $options.i18n.integrationFormSteps.nameIntegration.label,
+              )
+            "
             label-for="name-integration"
           >
             <gl-form-input
@@ -363,15 +384,6 @@ export default {
               :placeholder="$options.i18n.integrationFormSteps.nameIntegration.placeholder"
             />
           </gl-form-group>
-
-          <alert-settings-form-help-block
-            :message="
-              isPrometheus
-                ? $options.i18n.integrationFormSteps.setupCredentials.prometheusHelp
-                : $options.i18n.integrationFormSteps.setupCredentials.help
-            "
-            link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
-          />
 
           <gl-toggle
             v-model="active"
@@ -382,7 +394,12 @@ export default {
 
           <div v-if="isPrometheus" class="gl-my-4">
             <span class="gl-font-weight-bold">
-              {{ $options.i18n.integrationFormSteps.prometheusFormUrl.label }}
+              {{
+                getLabelWithStepNumber(
+                  $options.integrationSteps.setPrometheusApiUrl,
+                  $options.i18n.integrationFormSteps.prometheusFormUrl.label,
+                )
+              }}
             </span>
 
             <gl-form-input
@@ -397,34 +414,38 @@ export default {
             </span>
           </div>
 
-          <gl-form-group
-            v-if="isHttp"
-            data-testid="sample-payload-section"
-            :label="$options.i18n.integrationFormSteps.setSamplePayload.label"
-            label-for="sample-payload"
-            :class="{ 'gl-mb-0!': showMappingBuilder }"
-            :invalid-feedback="samplePayload.error"
-          >
-            <alert-settings-form-help-block
-              :message="$options.i18n.integrationFormSteps.setSamplePayload.testPayloadHelpHttp"
-              :link="generic.alertsUsageUrl"
-            />
-
-            <gl-form-textarea
-              id="sample-payload"
-              v-model.trim="samplePayload.json"
-              :disabled="isPayloadEditDisabled"
-              :state="isSampePayloadValid"
-              :placeholder="$options.i18n.integrationFormSteps.setSamplePayload.placeholder"
-              class="gl-my-3"
-              :debounce="$options.JSON_VALIDATE_DELAY"
-              rows="6"
-              max-rows="10"
-              @input="validateJson"
-            />
-          </gl-form-group>
-
           <template v-if="showMappingBuilder">
+            <gl-form-group
+              data-testid="sample-payload-section"
+              :label="
+                getLabelWithStepNumber(
+                  $options.integrationSteps.setSamplePayload,
+                  $options.i18n.integrationFormSteps.setSamplePayload.label,
+                )
+              "
+              label-for="sample-payload"
+              class="gl-mb-0!"
+              :invalid-feedback="samplePayload.error"
+            >
+              <alert-settings-form-help-block
+                :message="$options.i18n.integrationFormSteps.setSamplePayload.testPayloadHelpHttp"
+                :link="generic.alertsUsageUrl"
+              />
+
+              <gl-form-textarea
+                id="sample-payload"
+                v-model.trim="samplePayload.json"
+                :disabled="isPayloadEditDisabled"
+                :state="isSampePayloadValid"
+                :placeholder="$options.i18n.integrationFormSteps.setSamplePayload.placeholder"
+                class="gl-my-3"
+                :debounce="$options.JSON_VALIDATE_DELAY"
+                rows="6"
+                max-rows="10"
+                @input="validateJson"
+              />
+            </gl-form-group>
+
             <gl-button
               v-if="canEditPayload"
               v-gl-modal.resetPayloadModal
@@ -439,7 +460,7 @@ export default {
               v-else
               data-testid="payload-action-btn"
               :class="{ 'gl-mt-3': samplePayload.error }"
-              :disabled="!active || !isSampePayloadValid"
+              :disabled="canParseSamplePayload"
               :loading="parsingPayload"
               @click="parseMapping"
             >
@@ -454,23 +475,27 @@ export default {
             >
               {{ $options.i18n.integrationFormSteps.setSamplePayload.resetBody }}
             </gl-modal>
-          </template>
 
-          <gl-form-group
-            v-if="showMappingBuilder"
-            id="mapping-builder"
-            class="gl-mt-5"
-            :label="$options.i18n.integrationFormSteps.mapFields.label"
-            label-for="mapping-builder"
-          >
-            <span>{{ $options.i18n.integrationFormSteps.mapFields.intro }}</span>
-            <mapping-builder
-              :parsed-payload="parsedPayload"
-              :saved-mapping="mapping"
-              :alert-fields="alertFields"
-              @onMappingUpdate="updateMapping"
-            />
-          </gl-form-group>
+            <gl-form-group
+              id="mapping-builder"
+              class="gl-mt-5"
+              :label="
+                getLabelWithStepNumber(
+                  $options.integrationSteps.customizeMapping,
+                  $options.i18n.integrationFormSteps.mapFields.label,
+                )
+              "
+              label-for="mapping-builder"
+            >
+              <span>{{ $options.i18n.integrationFormSteps.mapFields.intro }}</span>
+              <mapping-builder
+                :parsed-payload="parsedPayload"
+                :saved-mapping="mapping"
+                :alert-fields="alertFields"
+                @onMappingUpdate="updateMapping"
+              />
+            </gl-form-group>
+          </template>
         </div>
 
         <div class="gl-display-flex gl-justify-content-start gl-py-3">
@@ -490,6 +515,11 @@ export default {
       </gl-tab>
 
       <gl-tab :title="$options.i18n.integrationTabs.viewCredentials" :disabled="isCreating">
+        <alert-settings-form-help-block
+          :message="viewCredentialsHelpMsg"
+          link="https://docs.gitlab.com/ee/operations/incident_management/alert_integrations.html"
+        />
+
         <gl-form-group id="integration-webhook">
           <div class="gl-my-4">
             <span class="gl-font-weight-bold">

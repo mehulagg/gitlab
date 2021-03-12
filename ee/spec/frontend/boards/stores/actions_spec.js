@@ -1,16 +1,31 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
+import Vuex from 'vuex';
 import { GroupByParamType } from 'ee/boards/constants';
 import actions, { gqlClient } from 'ee/boards/stores/actions';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import * as types from 'ee/boards/stores/mutation_types';
+import mutations from 'ee/boards/stores/mutations';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 import { formatListIssues, formatBoardLists } from '~/boards/boards_util';
+import { issuableTypes } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { mockLists, mockIssue, mockIssue2, mockEpic, rawIssue } from '../mock_data';
+import {
+  mockLists,
+  mockIssue,
+  mockIssue2,
+  mockEpic,
+  rawIssue,
+  mockMilestones,
+  mockAssignees,
+  mockEpics,
+} from '../mock_data';
+
+Vue.use(Vuex);
 
 const expectNotImplemented = (action) => {
   it('is not implemented', () => {
@@ -136,18 +151,20 @@ describe('performSearch', () => {
 });
 
 describe('fetchLists', () => {
-  it('should dispatch fetchIssueLists action when isEpicBoard is false on state', async () => {
+  it('should dispatch fetchIssueLists action when isEpicBoard is false', async () => {
+    const getters = { isEpicBoard: false };
     await testAction({
       action: actions.fetchLists,
-      state: { isEpicBoard: false },
+      state: { issuableType: issuableTypes.issue, ...getters },
       expectedActions: [{ type: 'fetchIssueLists' }],
     });
   });
 
-  it('should dispatch fetchEpicLists action when isEpicBoard is true on state', async () => {
+  it('should dispatch fetchEpicLists action when isEpicBoard is true', async () => {
+    const getters = { isEpicBoard: true };
     await testAction({
       action: actions.fetchLists,
-      state: { isEpicBoard: true },
+      state: { issuableType: issuableTypes.epic, ...getters },
       expectedActions: [{ type: 'fetchEpicLists' }],
     });
   });
@@ -838,6 +855,21 @@ describe('setActiveIssueWeight', () => {
   });
 });
 
+describe.each`
+  isEpicBoard | issuableType             | dispatchedAction
+  ${false}    | ${'issuableTypes.issue'} | ${'moveIssue'}
+  ${true}     | ${'issuableTypes.epic'}  | ${'moveEpic'}
+`('moveItem', ({ isEpicBoard, issuableType, dispatchedAction }) => {
+  it(`should dispatch ${dispatchedAction}  action when isEpicBoard is ${isEpicBoard}`, async () => {
+    await testAction({
+      action: actions.moveItem,
+      payload: { itemId: 1 },
+      state: { isEpicBoard, issuableType },
+      expectedActions: [{ type: dispatchedAction, payload: { itemId: 1 } }],
+    });
+  });
+});
+
 describe('moveIssue', () => {
   const epicId = 'gid://gitlab/Epic/1';
 
@@ -874,9 +906,9 @@ describe('moveIssue', () => {
     testAction(
       actions.moveIssue,
       {
-        issueId: '436',
-        issueIid: mockIssue.iid,
-        issuePath: mockIssue.referencePath,
+        itemId: '436',
+        itemIid: mockIssue.iid,
+        itemPath: mockIssue.referencePath,
         fromListId: 'gid://gitlab/List/1',
         toListId: 'gid://gitlab/List/2',
         epicId,
@@ -915,9 +947,9 @@ describe('moveIssue', () => {
     testAction(
       actions.moveIssue,
       {
-        issueId: '436',
-        issueIid: mockIssue.iid,
-        issuePath: mockIssue.referencePath,
+        itemId: '436',
+        itemIid: mockIssue.iid,
+        itemPath: mockIssue.referencePath,
         fromListId: 'gid://gitlab/List/1',
         toListId: 'gid://gitlab/List/2',
         epicId,
@@ -947,112 +979,374 @@ describe('moveIssue', () => {
       done,
     );
   });
+});
 
-  describe.each`
-    isEpicBoard | dispatchedAction
-    ${false}    | ${'createIssueList'}
-    ${true}     | ${'createEpicList'}
-  `('createList', ({ isEpicBoard, dispatchedAction }) => {
-    it(`should dispatch ${dispatchedAction}  action when isEpicBoard is ${isEpicBoard} on state`, async () => {
-      await testAction({
-        action: actions.createList,
-        payload: { backlog: true },
-        state: { isEpicBoard },
-        expectedActions: [{ type: dispatchedAction, payload: { backlog: true } }],
-      });
+describe('moveEpic', () => {
+  const listEpics = {
+    'gid://gitlab/List/1': [41, 40],
+    'gid://gitlab/List/2': [],
+  };
+
+  const epics = {
+    41: mockEpic,
+    40: mockEpics[1],
+  };
+
+  const state = {
+    fullPath: 'gitlab-org',
+    boardId: 1,
+    boardType: 'group',
+    disabled: false,
+    boardLists: mockLists,
+    boardItemsByListId: listEpics,
+    boardItems: epics,
+    issuableType: 'epic',
+  };
+
+  it('should commit MOVE_EPIC mutation mutation when successful', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        epicMoveList: {
+          errors: [],
+        },
+      },
+    });
+
+    await testAction({
+      action: actions.moveEpic,
+      payload: {
+        itemId: '41',
+        fromListId: 'gid://gitlab/List/1',
+        toListId: 'gid://gitlab/List/2',
+      },
+      state,
+      expectedMutations: [
+        {
+          type: types.MOVE_EPIC,
+          payload: {
+            originalEpic: mockEpic,
+            fromListId: 'gid://gitlab/List/1',
+            toListId: 'gid://gitlab/List/2',
+          },
+        },
+      ],
     });
   });
 
-  describe('createEpicList', () => {
-    let commit;
-    let dispatch;
-    let getters;
-
-    beforeEach(() => {
-      commit = jest.fn();
-      dispatch = jest.fn();
-      getters = {
-        getListByLabelId: jest.fn(),
-      };
+  it('should commit MOVE_EPIC mutation and MOVE_EPIC_FAILURE mutation when unsuccessful', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        epicMoveList: {
+          errors: [{ foo: 'bar' }],
+        },
+      },
     });
 
-    it('should dispatch addList action when creating backlog list', async () => {
-      const backlogList = {
-        id: 'gid://gitlab/List/1',
-        listType: 'backlog',
-        title: 'Open',
-        position: 0,
-      };
-
-      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-        data: {
-          epicBoardListCreate: {
-            list: backlogList,
-            errors: [],
+    await testAction({
+      action: actions.moveEpic,
+      payload: {
+        itemId: '41',
+        fromListId: 'gid://gitlab/List/1',
+        toListId: 'gid://gitlab/List/2',
+      },
+      state,
+      expectedMutations: [
+        {
+          type: types.MOVE_EPIC,
+          payload: {
+            originalEpic: mockEpic,
+            fromListId: 'gid://gitlab/List/1',
+            toListId: 'gid://gitlab/List/2',
           },
         },
-      });
-
-      await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
-
-      expect(dispatch).toHaveBeenCalledWith('addList', backlogList);
-    });
-
-    it('dispatches highlightList after addList has succeeded', async () => {
-      const list = {
-        id: 'gid://gitlab/List/1',
-        listType: 'label',
-        title: 'Open',
-        labelId: '4',
-      };
-
-      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-        data: {
-          epicBoardListCreate: {
-            list,
-            errors: [],
+        {
+          type: types.MOVE_EPIC_FAILURE,
+          payload: {
+            originalEpic: mockEpic,
+            fromListId: 'gid://gitlab/List/1',
+            toListId: 'gid://gitlab/List/2',
+            originalIndex: 0,
           },
         },
-      });
-
-      await actions.createEpicList({ getters, state, commit, dispatch }, { labelId: '4' });
-
-      expect(dispatch).toHaveBeenCalledWith('addList', list);
-      expect(dispatch).toHaveBeenCalledWith('highlightList', list.id);
+      ],
     });
+  });
+});
 
-    it('should commit CREATE_LIST_FAILURE mutation when API returns an error', async () => {
-      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-        data: {
-          epicBoardListCreate: {
-            list: {},
-            errors: [{ foo: 'bar' }],
-          },
+describe.each`
+  isEpicBoard | issuableType             | dispatchedAction
+  ${false}    | ${'issuableTypes.issue'} | ${'createIssueList'}
+  ${true}     | ${'issuableTypes.epic'}  | ${'createEpicList'}
+`('createList', ({ isEpicBoard, issuableType, dispatchedAction }) => {
+  it(`should dispatch ${dispatchedAction}  action when isEpicBoard is ${isEpicBoard}`, async () => {
+    await testAction({
+      action: actions.createList,
+      payload: { backlog: true },
+      state: { isEpicBoard, issuableType },
+      expectedActions: [{ type: dispatchedAction, payload: { backlog: true } }],
+    });
+  });
+});
+
+describe('createEpicList', () => {
+  let commit;
+  let dispatch;
+  let getters;
+
+  const state = {
+    fullPath: 'gitlab-org',
+    boardId: 1,
+    boardType: 'group',
+    disabled: false,
+    boardLists: mockLists,
+  };
+
+  beforeEach(() => {
+    commit = jest.fn();
+    dispatch = jest.fn();
+    getters = {
+      getListByLabelId: jest.fn(),
+    };
+  });
+
+  it('should dispatch addList action when creating backlog list', async () => {
+    const backlogList = {
+      id: 'gid://gitlab/List/1',
+      listType: 'backlog',
+      title: 'Open',
+      position: 0,
+    };
+
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        epicBoardListCreate: {
+          list: backlogList,
+          errors: [],
         },
-      });
-
-      await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
-
-      expect(commit).toHaveBeenCalledWith(types.CREATE_LIST_FAILURE);
+      },
     });
 
-    it('highlights list and does not re-query if it already exists', async () => {
-      const existingList = {
-        id: 'gid://gitlab/List/1',
-        listType: 'label',
-        title: 'Some label',
-        position: 1,
-      };
+    await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
 
-      getters = {
-        getListByLabelId: jest.fn().mockReturnValue(existingList),
-      };
+    expect(dispatch).toHaveBeenCalledWith('addList', backlogList);
+  });
 
-      await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
+  it('dispatches highlightList after addList has succeeded', async () => {
+    const list = {
+      id: 'gid://gitlab/List/1',
+      listType: 'label',
+      title: 'Open',
+      labelId: '4',
+    };
 
-      expect(dispatch).toHaveBeenCalledWith('highlightList', existingList.id);
-      expect(dispatch).toHaveBeenCalledTimes(1);
-      expect(commit).not.toHaveBeenCalled();
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        epicBoardListCreate: {
+          list,
+          errors: [],
+        },
+      },
+    });
+
+    await actions.createEpicList({ getters, state, commit, dispatch }, { labelId: '4' });
+
+    expect(dispatch).toHaveBeenCalledWith('addList', list);
+    expect(dispatch).toHaveBeenCalledWith('highlightList', list.id);
+  });
+
+  it('should commit CREATE_LIST_FAILURE mutation when API returns an error', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        epicBoardListCreate: {
+          list: {},
+          errors: ['foo'],
+        },
+      },
+    });
+
+    await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
+
+    expect(commit).toHaveBeenCalledWith(types.CREATE_LIST_FAILURE, 'foo');
+  });
+
+  it('highlights list and does not re-query if it already exists', async () => {
+    const existingList = {
+      id: 'gid://gitlab/List/1',
+      listType: 'label',
+      title: 'Some label',
+      position: 1,
+    };
+
+    getters = {
+      getListByLabelId: jest.fn().mockReturnValue(existingList),
+    };
+
+    await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
+
+    expect(dispatch).toHaveBeenCalledWith('highlightList', existingList.id);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(commit).not.toHaveBeenCalled();
+  });
+});
+
+describe('fetchMilestones', () => {
+  const queryResponse = {
+    data: {
+      project: {
+        milestones: {
+          nodes: mockMilestones,
+        },
+      },
+    },
+  };
+
+  const queryErrors = {
+    data: {
+      project: {
+        errors: ['You cannot view these milestones'],
+        milestones: {},
+      },
+    },
+  };
+
+  function createStore({
+    state = {
+      boardType: 'project',
+      fullPath: 'gitlab-org/gitlab',
+      milestones: [],
+      milestonesLoading: false,
+    },
+  } = {}) {
+    return new Vuex.Store({
+      state,
+      mutations,
+    });
+  }
+
+  it('throws error if state.boardType is not group or project', () => {
+    const store = createStore({
+      state: {
+        boardType: 'invalid',
+      },
+    });
+
+    expect(() => actions.fetchMilestones(store)).toThrow(new Error('Unknown board type'));
+  });
+
+  it('sets milestonesLoading to true', async () => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    const store = createStore();
+
+    actions.fetchMilestones(store);
+
+    expect(store.state.milestonesLoading).toBe(true);
+  });
+
+  describe('success', () => {
+    it('sets state.milestones from query result', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+      const store = createStore();
+
+      await actions.fetchMilestones(store);
+
+      expect(store.state.milestonesLoading).toBe(false);
+      expect(store.state.milestones).toBe(mockMilestones);
+    });
+  });
+
+  describe('failure', () => {
+    it('sets state.milestones from query result', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryErrors);
+
+      const store = createStore();
+
+      await expect(actions.fetchMilestones(store)).rejects.toThrow();
+
+      expect(store.state.milestonesLoading).toBe(false);
+      expect(store.state.error).toBe('Failed to load milestones.');
+    });
+  });
+});
+
+describe('fetchAssignees', () => {
+  const queryResponse = {
+    data: {
+      workspace: {
+        assignees: {
+          nodes: mockAssignees.map((assignee) => ({ user: assignee })),
+        },
+      },
+    },
+  };
+
+  const queryErrors = {
+    data: {
+      project: {
+        errors: ['You cannot view these assignees'],
+        assignees: {},
+      },
+    },
+  };
+
+  function createStore({
+    state = {
+      boardType: 'project',
+      fullPath: 'gitlab-org/gitlab',
+      assignees: [],
+      assigneesLoading: false,
+    },
+  } = {}) {
+    return new Vuex.Store({
+      state,
+      mutations,
+    });
+  }
+
+  it('throws error if state.boardType is not group or project', () => {
+    const store = createStore({
+      state: {
+        boardType: 'invalid',
+      },
+    });
+
+    expect(() => actions.fetchAssignees(store)).toThrow(new Error('Unknown board type'));
+  });
+
+  it('sets assigneesLoading to true', async () => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    const store = createStore();
+
+    actions.fetchAssignees(store);
+
+    expect(store.state.assigneesLoading).toBe(true);
+  });
+
+  describe('success', () => {
+    it('sets state.assignees from query result', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+      const store = createStore();
+
+      await actions.fetchAssignees(store);
+
+      expect(store.state.assigneesLoading).toBe(false);
+      expect(store.state.assignees).toEqual(expect.objectContaining(mockAssignees));
+    });
+  });
+
+  describe('failure', () => {
+    it('throws an error and displays an error message', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryErrors);
+
+      const store = createStore();
+
+      await expect(actions.fetchAssignees(store)).rejects.toThrow();
+
+      expect(store.state.assigneesLoading).toBe(false);
+      expect(store.state.error).toBe('Failed to load assignees.');
     });
   });
 });

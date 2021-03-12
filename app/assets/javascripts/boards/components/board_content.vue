@@ -3,10 +3,10 @@ import { GlAlert } from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import Draggable from 'vuedraggable';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
 import { sortableEnd, sortableStart } from '~/boards/mixins/sortable_default_options';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import BoardAddNewColumn from './board_add_new_column.vue';
 import BoardColumn from './board_column.vue';
 import BoardColumnDeprecated from './board_column_deprecated.vue';
 
@@ -38,8 +38,8 @@ export default {
     },
   },
   computed: {
-    ...mapState(['boardLists', 'error', 'addColumnForm', 'isEpicBoard']),
-    ...mapGetters(['isSwimlanesOn']),
+    ...mapState(['boardLists', 'error', 'addColumnForm']),
+    ...mapGetters(['isSwimlanesOn', 'isEpicBoard']),
     addColumnFormVisible() {
       return this.addColumnForm?.visible;
     },
@@ -49,7 +49,7 @@ export default {
         : this.lists;
     },
     canDragColumns() {
-      return this.glFeatures.graphqlBoardLists && this.canAdminList;
+      return !this.isEpicBoard && this.glFeatures.graphqlBoardLists && this.canAdminList;
     },
     boardColumnWrapper() {
       return this.canDragColumns ? Draggable : 'div';
@@ -80,6 +80,7 @@ export default {
 
     handleDragOnEnd(params) {
       sortableEnd();
+      if (this.isEpicBoard) return;
 
       const { item, newIndex, oldIndex, to } = params;
 

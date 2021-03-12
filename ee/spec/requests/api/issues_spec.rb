@@ -162,6 +162,12 @@ RSpec.describe API::Issues, :mailer do
 
           expect_paginated_array_response([issue3.id, issue2.id, issue1.id])
         end
+
+        it 'returns issues without specific weight' do
+          get api('/issues', user), params: { scope: 'all', not: { weight: 5 } }
+
+          expect_paginated_array_response([issue3.id, issue1.id, issue.id])
+        end
       end
 
       context 'filtering by assignee_username' do

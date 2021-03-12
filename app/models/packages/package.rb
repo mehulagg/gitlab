@@ -91,6 +91,12 @@ class Packages::Package < ApplicationRecord
     joins(:conan_metadatum).where(packages_conan_metadata: { package_username: package_username })
   end
 
+  scope :with_debian_codename, -> (codename) do
+    debian
+      .joins(:debian_distribution)
+      .where(Packages::Debian::ProjectDistribution.table_name => { codename: codename })
+  end
+  scope :preload_debian_file_metadata, -> { preload(package_files: :debian_file_metadatum) }
   scope :with_composer_target, -> (target) do
     includes(:composer_metadatum)
       .joins(:composer_metadatum)
@@ -125,6 +131,8 @@ class Packages::Package < ApplicationRecord
   scope :order_project_path, -> { joins(:project).reorder('projects.path ASC, id ASC') }
   scope :order_project_path_desc, -> { joins(:project).reorder('projects.path DESC, id DESC') }
   scope :order_by_package_file, -> { joins(:package_files).order('packages_package_files.created_at ASC') }
+
+  after_commit :update_composer_cache, on: :destroy, if: -> { composer? }
 
   def self.for_projects(projects)
     return none unless projects.any?
@@ -218,7 +226,19 @@ class Packages::Package < ApplicationRecord
     end
   end
 
+  def sync_maven_metadata(user)
+    return unless maven? && version? && user
+
+    ::Packages::Maven::Metadata::SyncWorker.perform_async(user.id, project.id, name)
+  end
+
   private
+
+  def update_composer_cache
+    return unless composer?
+
+    ::Packages::Composer::CacheUpdateWorker.perform_async(project_id, name, composer_metadatum.version_cache_sha) # rubocop:disable CodeReuse/Worker
+  end
 
   def composer_tag_version?
     composer? && !Gitlab::Regex.composer_dev_version_regex.match(version.to_s)

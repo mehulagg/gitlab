@@ -229,6 +229,7 @@ RSpec.describe ProjectsHelper do
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
         projects/threat_monitoring#alert_details
+        projects/security/policies#show
         projects/audit_events#index
       ]
     end
@@ -560,14 +561,48 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#project_permissions_settings' do
+    using RSpec::Parameterized::TableSyntax
+
     let(:expected_settings) { { requirementsAccessLevel: 20, securityAndComplianceAccessLevel: 10 } }
 
     subject { helper.project_permissions_settings(project) }
 
     it { is_expected.to include(expected_settings) }
+
+    context 'cveIdRequestEnabled' do
+      context "with cve_id_request_button feature flag" do
+        where(feature_flag_enabled: [true, false])
+        with_them do
+          before do
+            stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+          end
+
+          it 'includes cveIdRequestEnabled' do
+            expect(subject.key?(:cveIdRequestEnabled)).to eq(feature_flag_enabled)
+          end
+        end
+      end
+
+      where(:project_attrs, :cve_enabled, :expected) do
+        [:public]   | true  | true
+        [:public]   | false | false
+        [:internal] | true  | false
+        [:private]  | true  | false
+      end
+      with_them do
+        let(:project) { create(:project, :with_cve_request, *project_attrs, cve_request_enabled: cve_enabled) }
+        subject { helper.project_permissions_settings(project) }
+
+        it 'has the correct cveIdRequestEnabled value' do
+          expect(subject[:cveIdRequestEnabled]).to eq(expected)
+        end
+      end
+    end
   end
 
   describe '#project_permissions_panel_data' do
+    using RSpec::Parameterized::TableSyntax
+
     let(:user) { instance_double(User, admin?: false) }
     let(:expected_data) { { requirementsAvailable: false, securityAndComplianceAvailable: true } }
 
@@ -579,5 +614,31 @@ RSpec.describe ProjectsHelper do
     end
 
     it { is_expected.to include(expected_data) }
+
+    context "if in Gitlab.com" do
+      where(is_gitlab_com: [true, false])
+      with_them do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(is_gitlab_com)
+        end
+
+        it 'sets requestCveAvailable to the correct value' do
+          expect(subject[:requestCveAvailable]).to eq(is_gitlab_com)
+        end
+      end
+    end
+
+    context "with cve_id_request_button feature flag" do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+        end
+
+        it 'includes requestCveAvailable' do
+          expect(subject.key?(:requestCveAvailable)).to eq(feature_flag_enabled)
+        end
+      end
+    end
   end
 end
