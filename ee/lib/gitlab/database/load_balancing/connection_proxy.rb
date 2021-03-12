@@ -57,9 +57,21 @@ module Gitlab
           end
         end
 
+        def transaction(*args, &block)
+          if ::Gitlab::Database::LoadBalancing::Session.current.use_replica?
+            read_using_load_balancer(:transaction, args, &block)
+          else
+            write_using_load_balancer(:transaction, args, sticky: true, &block)
+          end
+        end
+
         # Delegates all unknown messages to a read-write connection.
         def method_missing(name, *args, &block)
-          write_using_load_balancer(name, args, &block)
+          if ::Gitlab::Database::LoadBalancing::Session.current.use_replica?
+            read_using_load_balancer(name, args, &block)
+          else
+            write_using_load_balancer(name, args, &block)
+          end
         end
 
         # Performs a read using the load balancer.
