@@ -19,7 +19,8 @@ module Rack
             message: "Large multipart body detected",
             path: req.path,
             content_length: content_length,
-            correlation_id: ::Labkit::Context.correlation_id
+            correlation_id: ::Labkit::Context.correlation_id,
+            timestamp: Time.now.utc.iso8601(3)
           }
 
           log_warn(message)

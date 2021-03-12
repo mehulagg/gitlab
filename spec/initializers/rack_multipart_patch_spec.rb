@@ -52,7 +52,8 @@ EOF
                                                              message: 'Large multipart body detected',
                                                              path: '/',
                                                              content_length: anything,
-                                                             correlation_id: anything
+                                                             correlation_id: anything,
+                                                             timestamp: anything
                                                            })
         params = described_class.parse_multipart(env)
 
