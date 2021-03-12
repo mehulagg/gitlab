@@ -1,4 +1,3 @@
-
 ---
 stage: Secure
 group: Fuzz Testing
