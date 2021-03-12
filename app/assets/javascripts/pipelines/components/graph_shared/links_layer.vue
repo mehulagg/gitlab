@@ -1,8 +1,20 @@
 <script>
+import { isEmpty } from 'lodash';
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
+import {
+  PIPELINES_DETAIL_LINKS_MARK_CALCULATE_START,
+  PIPELINES_DETAIL_LINKS_MARK_CALCULATE_END,
+  PIPELINES_DETAIL_LINKS_MEASURE_CALCULATION,
+  PIPELINES_DETAIL_LINK_DURATION,
+  PIPELINES_DETAIL_LINKS_TOTAL,
+  PIPELINES_DETAIL_LINKS_JOB_RATIO,
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 import { reportToSentry } from '../graph/utils';
 import LinksInner from './links_inner.vue';
+import { parseData } from '../parsing_utils';
+import { reportPerformance } from './api';
 
 export default {
   name: 'LinksLayer',
@@ -19,6 +31,11 @@ export default {
     pipelineData: {
       type: Array,
       required: true,
+    },
+    metricsConfig: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     neverShowLinks: {
       type: Boolean,
@@ -46,6 +63,9 @@ export default {
       return this.pipelineData.reduce((acc, { groups }) => {
         return acc + Number(groups.length);
       }, 0);
+    },
+    shouldCollectMetrics() {
+      return this.metricsConfig.collectMetrics && this.metricsConfig.path;
     },
     showAlert() {
       /*
@@ -75,13 +95,81 @@ export default {
   errorCaptured(err, _vm, info) {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
+  mounted(){
+    /*
+      This is code to get metrics for the graph (to observe links performance).
+      It is currently here because we want values for links without drawing them.
+      It can be removed when https://gitlab.com/gitlab-org/gitlab/-/issues/298930
+      is closed and functionality is enabled by default.
+    */
+
+    if (this.neverShowLinks && !isEmpty(this.pipelineData)) {
+      window.requestAnimationFrame(() => {
+        this.prepareLinkData();
+      })
+    }
+
+  },
   methods: {
+    beginPerfMeasure() {
+      if (this.shouldCollectMetrics) {
+        performanceMarkAndMeasure({ mark: PIPELINES_DETAIL_LINKS_MARK_CALCULATE_START });
+      }
+    },
+    finishPerfMeasureAndSend(numLinks) {
+
+      if (this.shouldCollectMetrics) {
+        performanceMarkAndMeasure({
+          mark: PIPELINES_DETAIL_LINKS_MARK_CALCULATE_END,
+          measures: [
+            {
+              name: PIPELINES_DETAIL_LINKS_MEASURE_CALCULATION,
+              start: PIPELINES_DETAIL_LINKS_MARK_CALCULATE_START,
+            },
+          ],
+        });
+      }
+
+      window.requestAnimationFrame(() => {
+        const duration = window.performance.getEntriesByName(
+          PIPELINES_DETAIL_LINKS_MEASURE_CALCULATION,
+        )[0]?.duration;
+
+        if (!duration) {
+          return;
+        }
+
+        const data = {
+          histograms: [
+            { name: PIPELINES_DETAIL_LINK_DURATION, value: duration / 1000 },
+            { name: PIPELINES_DETAIL_LINKS_TOTAL, value: numLinks },
+            {
+              name: PIPELINES_DETAIL_LINKS_JOB_RATIO,
+              value: numLinks / this.numGroups,
+            },
+          ],
+        };
+
+        reportPerformance(this.metricsConfig.path, data);
+      });
+    },
     dismissAlert() {
       this.alertDismissed = true;
     },
     overrideShowLinks() {
       this.dismissAlert();
       this.showLinksOverride = true;
+    },
+    prepareLinkData() {
+      this.beginPerfMeasure();
+      let numLinks;
+      try {
+        const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
+        numLinks = parseData(arrayOfJobs).links.length;
+      } catch (err) {
+        reportToSentry(this.$options.name, err);
+      }
+      this.finishPerfMeasureAndSend(numLinks);
     },
   },
 };
@@ -92,6 +180,7 @@ export default {
     :container-measurements="containerMeasurements"
     :pipeline-data="pipelineData"
     :total-groups="numGroups"
+    :metrics-config="metricsConfig"
     v-bind="$attrs"
     v-on="$listeners"
   >
