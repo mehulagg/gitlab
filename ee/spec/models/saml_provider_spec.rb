@@ -216,6 +216,34 @@ RSpec.describe SamlProvider do
     end
   end
 
+  describe '#git_check_enforced?' do
+    context 'without enforced sso' do
+      before do
+        allow(subject).to receive(:enforced_sso?).and_return(false)
+      end
+
+      it 'does not enforce git activity check' do
+        subject.git_check_enforced = true
+        expect(subject).not_to be_git_check_enforced
+        subject.git_check_enforced = false
+        expect(subject).not_to be_git_check_enforced
+      end
+    end
+
+    context 'with enforced sso' do
+      before do
+        allow(subject).to receive(:enforced_sso?).and_return(true)
+      end
+
+      it 'enforces git activity check when attribute is set to true' do
+        subject.git_check_enforced = true
+        expect(subject).to be_git_check_enforced
+        subject.git_check_enforced = false
+        expect(subject).not_to be_git_check_enforced
+      end
+    end
+  end
+
   describe '#prohibited_outer_forks?' do
     context 'without enforced GMA' do
       it 'is false when prohibited_outer_forks flag value is true' do

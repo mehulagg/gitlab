@@ -35,6 +35,10 @@ class SamlProvider < ApplicationRecord
     enabled? && super && group.feature_available?(:group_saml)
   end
 
+  def git_check_enforced?
+    super && enforced_sso?
+  end
+
   def enforced_group_managed_accounts?
     super && enforced_sso? && Feature.enabled?(:group_managed_accounts, group)
   end
