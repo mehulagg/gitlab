@@ -189,8 +189,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'updates UUIDv4 to UUIDv5' do
-        require 'pry'; binding.pry
-
         subject
 
         expect(finding.reload.uuid).to eq(desired_uuid)
