@@ -374,11 +374,10 @@ export const transformStagesForPathNavigation = ({ stages, medians, selectedStag
     });
 
     return {
-      ...stage,
       metric: days ? sprintf(s__('ValueStreamAnalytics|%{days}d'), { days }) : null,
       selected: stage.title === selectedStage.title,
-      title: stage.title,
       icon: null,
+      ...stage,
     };
   });
 

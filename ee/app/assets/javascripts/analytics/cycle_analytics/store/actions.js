@@ -2,7 +2,7 @@ import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import httpStatus from '~/lib/utils/http_status';
 import { __, sprintf } from '~/locale';
-import { FETCH_VALUE_STREAM_DATA } from '../constants';
+import { FETCH_VALUE_STREAM_DATA, OVERVIEW_STAGE_CONFIG } from '../constants';
 import {
   removeFlash,
   throwIfUserForbidden,
@@ -151,20 +151,8 @@ export const receiveGroupStagesError = ({ commit }, error) => {
   createFlash(__('There was an error fetching value stream analytics stages.'));
 };
 
-export const setDefaultSelectedStage = ({ dispatch, getters }) => {
-  const { activeStages = [] } = getters;
-
-  if (activeStages?.length) {
-    const [firstActiveStage] = activeStages;
-    return Promise.all([
-      dispatch('setSelectedStage', firstActiveStage),
-      dispatch('fetchStageData', firstActiveStage.slug),
-    ]);
-  }
-
-  createFlash(__('There was an error while fetching value stream analytics data.'));
-  return Promise.resolve();
-};
+export const setDefaultSelectedStage = ({ dispatch }) =>
+  dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
 
 export const receiveGroupStagesSuccess = ({ commit, dispatch }, stages) => {
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
