@@ -151,8 +151,7 @@ export const receiveGroupStagesError = ({ commit }, error) => {
   createFlash(__('There was an error fetching value stream analytics stages.'));
 };
 
-export const setDefaultSelectedStage = ({ state, dispatch, getters }) => {
-  const { stageId = null } = state;
+export const setDefaultSelectedStage = ({ dispatch, getters }) => {
   const { activeStages = [] } = getters;
 
   if (activeStages?.length) {
