@@ -189,7 +189,7 @@ class Wiki
 
     if Feature.enabled?(:gitaly_replace_wiki_delete_page, user, default_enabled: :yaml)
       begin
-        repository.delete_file(user, page.path, **gitaly_commit_options(page, :deleted, message))
+        repository.delete_file(user, page.path, **multi_commit_options(:deleted, message, page.title))
 
         after_wiki_activity
 
@@ -285,8 +285,8 @@ class Wiki
 
   private
 
-  def gitaly_commit_options(page, action, message = nil)
-    commit_message = message.presence || default_message(action, page.title)
+  def multi_commit_options(action, message = nil, title = nil)
+    commit_message = build_commit_message(action, message, title)
     git_user = Gitlab::Git::User.from_gitlab(user)
 
     {
@@ -298,7 +298,7 @@ class Wiki
   end
 
   def commit_details(action, message = nil, title = nil)
-    commit_message = message.presence || default_message(action, title)
+    commit_message = build_commit_message(action, message, title)
     git_user = Gitlab::Git::User.from_gitlab(user)
 
     Gitlab::Git::Wiki::CommitDetails.new(user.id,
@@ -306,6 +306,10 @@ class Wiki
                                          git_user.name,
                                          git_user.email,
                                          commit_message)
+  end
+
+  def build_commit_message(action, message, title)
+    message.presence || default_message(action, title)
   end
 
   def default_message(action, title)

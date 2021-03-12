@@ -79,9 +79,9 @@ RSpec.describe Gitlab::Git::Wiki do
 
     it_behaves_like 'delete_page operations'
 
-    context 'when feature flag :gitaly_delete_page is disabled' do
+    context 'when feature flag :gitaly_replace_wiki_delete_page is disabled' do
       before do
-        stub_feature_flags(gitaly_delete_page: false)
+        stub_feature_flags(gitaly_replace_wiki_delete_page: false)
       end
 
       it_behaves_like 'delete_page operations'
