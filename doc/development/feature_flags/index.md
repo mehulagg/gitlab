@@ -25,20 +25,20 @@ The following points should be considered after deciding to leverage feature fla
 - Feature flags should remain in the codebase for as short period as possible
   to reduce the need for feature flag accounting.
 - The person operating the feature flags is responsible for clearly communicating
-  the status of a feature behind the feature flag with other stakeholders. The
+  the status of a feature behind the feature flag in the documentation and with other stakeholders. The
   issue description should be updated with the feature flag name and whether it is
   defaulted on or off as soon it is evident that a feature flag is needed.
 - Merge requests that make changes hidden behind a feature flag, or remove an
   existing feature flag because a feature is deemed stable must have the
   ~"feature flag" label assigned.
-- When development of a feature is spread across multiple merge
-  requests, you can use the following workflow:
+
+When the feature implementation is delivered among multiple merge requests:
 
   1. [Create a new feature flag](#create-a-new-feature-flag)
-     which is **off** by default, in the first merge request which uses the flag.
+     (**disabled by default**) in the first merge request of your implementation.
      Flags [should not be added separately](#risk-of-a-broken-master-main-branch).
-  1. Submit incremental changes via one or more merge requests, ensuring that any
-     new code added can only be reached if the feature flag is **on**.
+  1. Submit incremental changes ensuring that any
+     new code added can only be reached if the feature flag is **enabled**.
      You can keep the feature flag enabled on your local GDK during development.
   1. When the feature is ready to be tested, enable the feature flag for
      a specific project and ensure that there are no issues with the implementation.
@@ -47,9 +47,8 @@ The following points should be considered after deciding to leverage feature fla
      and a changelog entry. In the same merge request either flip the feature flag to
      be **on by default** or remove it entirely in order to enable the new behavior.
 
-One might be tempted to think that feature flags must delay the release of a
-feature by at least one month (= one release). This is not the case. A feature
-flag does not have to stick around for a specific amount of time. They should stick around until the feature
+Feature flags do not need to stick around for an entire release and be removed only in the next release.
+The feature only needs to be behind a flag until it
 is deemed stable. Stable means it works on GitLab.com without causing any
 problems, such as outages.
 
@@ -287,6 +286,10 @@ end
 ```
 
 ### Frontend
+
+When using a feature flag for UI elements, make sure to _also_ use a feature
+flag for the underlying backend code, if there is any. This ensures there is
+absolutely no way to use the feature until it is enabled.
 
 Use the `push_frontend_feature_flag` method for frontend code, which is
 available to all controllers that inherit from `ApplicationController`. You can use
