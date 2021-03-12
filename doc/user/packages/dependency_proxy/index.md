@@ -134,7 +134,7 @@ To store a Docker image in Dependency Proxy storage:
      image: gitlab.example.com/groupname/dependency_proxy/containers/alpine:latest
      ```
 
-   - Pull an image by by adding the URL to your [`.gitlab-ci.yml`](../../../ci/yaml/README.md#image) file:
+   - Pull an image by adding the URL to your [`.gitlab-ci.yml`](../../../ci/yaml/README.md#image) file:
 
      ```shell
      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine@sha256:c9375e662992791e3f39e919b26f510e5254b42792519c180aad254e6b38f4dc
