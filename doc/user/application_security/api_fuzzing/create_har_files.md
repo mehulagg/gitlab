@@ -57,6 +57,32 @@ HAR files may contain sensitive information such as authentication tokens, API k
 1. Click Done.
 1. Select location and filename for har file.
 
+### Safari
+
+Safari will require you to enable `Develop menu` before being able to export HAR files.
+
+1. Make sure `Develop menu` is enable.
+   1. Open Safari Preferences by pression `Command` + `,` or using menu `Safari / Preferences...`
+   ![Safari Preferences](img/safari_preferences_menu.png)
+
+   1. Select `Advanced` tab, and check `Show Develop menu item in menu bar`
+   ![Safari Advanced Show Develop menu](img/safari_preferences_advanced.png)
+
+   1. Close `Preferences` window
+1. Open `Web Inspector` by pressing `Option` + `Command` + `i`, or by selecting menu `Develop / Show Web Inspector`
+![Safari Show Web Inspector](img/safari_develop_web_inspector_open.png)
+
+1. Select `Network` tab pane, and check `Preserve Log`
+![Safari Web Inspector Network Preserve Log](img/safari_web_inspector_network_preserve_log.png)
+
+1. Browse pages that call API.  
+1. In `Web Inspector` window in `Network` tab and select the request to export.
+1. Export the request by using right click on the request or by clicking on the `Export` buton.
+![Safari Web Inspector Network Export Request](img/safari_web_inspector_network_request_export.png)
+
+1. Profile filename and hit `Save`.
+![Safari Web Inspector Network Export Request Save Dialog](img/safari_web_inspector_network_request_export_save.png)
+
 ### Chrome
 
 1. Right click Inspect.
