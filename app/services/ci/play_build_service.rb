@@ -12,7 +12,10 @@ module Ci
       # Try to enqueue the build, otherwise create a duplicate.
       #
       if build.enqueue
-        build.tap { |action| action.update(user: current_user, job_variables_attributes: job_variables_attributes || []) }
+        build.tap do |build|
+          build.update(user: current_user, job_variables_attributes: job_variables_attributes || [])
+          build.mark_subsequent_stages_as_processable(current_user)
+        end
       else
         Ci::Build.retry(build, current_user)
       end

@@ -168,6 +168,17 @@ module Ci
       dependencies.all
     end
 
+    def mark_subsequent_stages_as_processable(user)
+      pipeline.processables
+              .skipped
+              .after_stage(stage_idx)
+              .find_each do |skipped|
+        Gitlab::OptimisticLocking.retry_lock(skipped, name: 'ci_mark_subsequent_stages_as_processable') do |processable|
+          processable.process(user)
+        end
+      end
+    end
+
     private
 
     def dependencies

@@ -8,6 +8,7 @@ module Ci
       bridge.tap do |bridge|
         bridge.user = current_user
         bridge.enqueue!
+        bridge.mark_subsequent_stages_as_processable(current_user)
       end
     end
   end
