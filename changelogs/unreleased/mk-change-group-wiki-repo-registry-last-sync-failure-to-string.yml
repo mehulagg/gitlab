@@ -1,0 +1,6 @@
+---
+title: 'Geo: Change group_wiki_repository_registry.last_sync_failure type from text
+  to string'
+merge_request: 56455
+author:
+type: changed

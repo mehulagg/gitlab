@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_25_200858) do
+ActiveRecord::Schema.define(version: 2021_03_12_051153) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,9 +70,9 @@ ActiveRecord::Schema.define(version: 2021_02_25_200858) do
     t.bigint "group_wiki_repository_id", null: false
     t.integer "state", limit: 2, default: 0, null: false
     t.integer "retry_count", limit: 2, default: 0
-    t.text "last_sync_failure"
     t.boolean "force_to_redownload"
     t.boolean "missing_on_primary"
+    t.string "last_sync_failure", limit: 255
     t.index ["group_wiki_repository_id"], name: "index_g_wiki_repository_registry_on_group_wiki_repository_id", unique: true
     t.index ["retry_at"], name: "index_group_wiki_repository_registry_on_retry_at"
     t.index ["state"], name: "index_group_wiki_repository_registry_on_state"
