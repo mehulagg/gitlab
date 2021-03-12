@@ -749,6 +749,8 @@ The default value for Omnibus installations is `nil`.
 If left unchanged, GitLab Pages tries to use any available source (either `gitlab` or `disk`). The
 preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-based-configuration).
 
+On large GitLab instances using API-based configuration will significanly improve pages daemon startup times as there is no need to load all custom domains configuration into memory. 
+
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
 ### Deprecated `domain_config_source`
