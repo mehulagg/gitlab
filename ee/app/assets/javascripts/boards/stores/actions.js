@@ -650,14 +650,14 @@ export default {
       });
   },
 
-  fetchIterations({ state, commit }, searchTerm) {
+  fetchIterations({ state, commit }, title) {
     commit(types.RECEIVE_ITERATIONS_REQUEST);
 
     const { fullPath, boardType } = state;
 
     const variables = {
       fullPath,
-      searchTerm,
+      title,
     };
 
     let query;

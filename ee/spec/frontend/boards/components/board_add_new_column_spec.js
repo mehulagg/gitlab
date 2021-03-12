@@ -2,7 +2,7 @@ import { GlAvatarLabeled, GlSearchBoxByType, GlFormRadio, GlFormSelect } from '@
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
-import BoardAddNewColumn from 'ee/boards/components/board_add_new_column.vue';
+import BoardAddNewColumn, { listTypeInfo } from 'ee/boards/components/board_add_new_column.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
 import { ListType } from '~/boards/constants';
@@ -178,9 +178,9 @@ describe('BoardAddNewColumn', () => {
 
     it('sets assignee placeholder text in form', async () => {
       expect(findForm().props()).toMatchObject({
-        formDescription: BoardAddNewColumn.i18n.assigneeListDescription,
-        searchLabel: BoardAddNewColumn.i18n.selectAssignee,
-        searchPlaceholder: BoardAddNewColumn.i18n.searchAssignees,
+        formDescription: listTypeInfo.assignee.formDescription,
+        searchLabel: listTypeInfo.assignee.searchLabel,
+        searchPlaceholder: listTypeInfo.assignee.searchPlaceholder,
       });
     });
 
@@ -213,9 +213,9 @@ describe('BoardAddNewColumn', () => {
 
     it('sets iteration placeholder text in form', async () => {
       expect(findForm().props()).toMatchObject({
-        formDescription: BoardAddNewColumn.i18n.iterationListDescription,
-        searchLabel: BoardAddNewColumn.i18n.selectIteration,
-        searchPlaceholder: BoardAddNewColumn.i18n.searchIterations,
+        formDescription: listTypeInfo.iteration.formDescription,
+        searchLabel: listTypeInfo.iteration.searchLabel,
+        searchPlaceholder: listTypeInfo.iteration.searchPlaceholder,
       });
     });
 
@@ -223,8 +223,8 @@ describe('BoardAddNewColumn', () => {
       const itemList = wrapper.findAllComponents(GlFormRadio);
 
       expect(itemList).toHaveLength(mockIterations.length);
-      expect(itemList.at(0).attributes('value')).toEqual(mockIterations[0].id);
-      expect(itemList.at(1).attributes('value')).toEqual(mockIterations[1].id);
+      expect(itemList.at(0).attributes('value')).toBe(mockIterations[0].id);
+      expect(itemList.at(1).attributes('value')).toBe(mockIterations[1].id);
     });
   });
 });
