@@ -83,27 +83,21 @@ module Elastic
         documents_count = elastic_helper.documents_count(index_name: old_index_name)
         # Trigger reindex
         max_slice = REINDEX_SLICE_MULTIPLIER * elastic_helper.get_settings.dig('number_of_shards').to_i
+        task_id = elastic_helper.reindex(from: old_index_name, to: new_index_name, max_slice: max_slice, slice: 0)
+        logger.info(message: "Reindex task #{task_id} from #{old_index_name} to #{new_index_name} started for slice 0.")
 
-        subtask = current_task.subtasks.create!(
+        current_task.subtasks.create!(
           alias_name: alias_name,
           index_name_from: old_index_name,
           index_name_to: new_index_name,
           documents_count: documents_count,
-          elastic_max_slice: max_slice
+          elastic_task: task_id,
+          elastic_max_slice: max_slice,
+          elastic_slice: 0
         )
-
-        0.upto(max_slice - 1).to_a.each do |slice|
-          task_id = elastic_helper.reindex(from: old_index_name, to: new_index_name, max_slice: max_slice, slice: slice)
-
-          subtask.slices.create!(
-            elastic_slice: slice,
-            elastic_task: task_id
-          )
-        end
       end
 
       current_task.update!(state: :reindexing)
-
       true
     end
 
@@ -119,73 +113,85 @@ module Elastic
     def check_task_status
       save_documents_count!(refresh: false)
 
-      slices_failed = 0
-      slices_not_completed = 0
+      failed = 0
+      not_completed = 0
       current_task.subtasks.each do |subtask|
-        subtask.slices.each do |slice|
-          task_status = elastic_helper.task_status(task_id: slice.elastic_task)
-          slices_not_completed += 1 unless task_status['completed']
+        task_status = elastic_helper.task_status(task_id: subtask.elastic_task)
+        not_completed += 1 unless task_status['completed']
 
-          reindexing_error = task_status.dig('error', 'type')
-          if reindexing_error
-            message = "Task #{slice.elastic_task} has failed with an Elasticsearch error."
-            if slice.retry_attempt < REINDEX_MAX_RETRY_LIMIT
-              retry_slice(slice, "#{message} Retrying slice." )
-            else
-              abort_reindexing!("#{message}. Slice has reached the retry limit. Aborting reindexing.", additional_logs: { elasticsearch_error_type: reindexing_error, elastic_slice: slice.elastic_slice })
-            end
-
-            slices_failed += 1
+        reindexing_error = task_status.dig('error', 'type')
+        if reindexing_error
+          message = "Task #{subtask.elastic_task} has failed with an Elasticsearch error."
+          if subtask.retry_attempt < REINDEX_MAX_RETRY_LIMIT
+            retry_slice(subtask, "#{message} Retrying." )
+          else
+            abort_reindexing!("#{message}. Retry limit reached. Aborting reindexing.", additional_logs: { elasticsearch_error_type: reindexing_error, elastic_slice: subtask.elastic_slice })
           end
+
+          failed += 1
         end
       end
 
-      slices_not_completed == 0 && slices_failed == 0
+      not_completed == 0 && failed == 0
     rescue Elasticsearch::Transport::Transport::Error
       abort_reindexing!("Couldn't load task status")
 
       false
     end
 
-    def retry_slice(slice, message, additional_options = {})
-      subtask = slice.elastic_reindexing_subtask
-
+    def retry_slice(subtask, message, additional_options = {})
       warn = {
         message: message,
         gitlab_task_id: current_task.id,
         gitlab_task_state: current_task.state,
         gitlab_subtask_id:  subtask.id,
-        gitlab_subtask_slice: slice.elastic_slice
+        gitlab_subtask_slice: subtask.elastic_slice
       }.merge(additional_options)
       logger.warn(warn)
 
-      task_id = elastic_helper.reindex(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: subtask.elastic_max_slice, slice: slice.elastic_slice)
-      retry_attempt = slice.retry_attempt + 1
-      slice.update!(elastic_task: task_id, retry_attempt: retry_attempt)
+      task_id = elastic_helper.reindex(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: subtask.elastic_max_slice, slice: subtask.elastic_slice)
+      retry_attempt = subtask.retry_attempt + 1
+      subtask.update!(elastic_task: task_id, retry_attempt: retry_attempt)
     end
 
     def compare_slice_totals
       save_documents_count!(refresh: true)
 
-      slices_where_totals_do_not_match = 0
+      totals_do_not_match = 0
       current_task.subtasks.each do |subtask|
-        subtask.slices.each do |slice|
-          task = elastic_helper.task_status(task_id: slice.elastic_task)
-          response = task['response']
-          if response['total'] != (response['created'] + response['updated'] + response['deleted'])
-            message = "Task #{slice.elastic_task} total is not equal to updated + created + deleted."
-            if slice.retry_attempt < REINDEX_MAX_RETRY_LIMIT
-              retry_slice(slice, "#{message} Retrying slice.")
-            else
-              abort_reindexing!("#{message} Slice has reached the retry limit. Aborting reindexing.", additional_logs: { elastic_slice: slice.elastic_slice })
-            end
-
-            slices_where_totals_do_not_match += 1
+        task = elastic_helper.task_status(task_id: subtask.elastic_task)
+        response = task['response']
+        if response['total'] != (response['created'] + response['updated'] + response['deleted'])
+          message = "Task #{subtask.elastic_task} total is not equal to updated + created + deleted."
+          if subtask.retry_attempt < REINDEX_MAX_RETRY_LIMIT
+            retry_slice(subtask, "#{message} Retrying.")
+          else
+            abort_reindexing!("#{message} Retry limit reached. Aborting reindexing.", additional_logs: { elastic_slice: subtask.elastic_slice })
           end
+
+          totals_do_not_match += 1
         end
       end
 
-      slices_where_totals_do_not_match == 0
+      totals_do_not_match == 0
+    end
+
+    def check_all_slices_submitted
+      save_documents_count!(refresh: false)
+
+      not_completed = 0
+      current_task.subtasks.each do |subtask|
+        next_slice = subtask.elastic_slice + 1
+        if next_slice < subtask.elastic_max_slice
+          # Trigger next slice and reset retry count
+          task_id = elastic_helper.reindex(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: subtask.elastic_max_slice, slice: next_slice)
+          logger.info(message: "Reindex task #{task_id} from #{subtask.index_name_from} to #{subtask.index_name_to} started for slice #{next_slice}.")
+          subtask.update!(elastic_task: task_id, elastic_slice: next_slice, retry_attempt: 0)
+          not_completed += 1
+        end
+      end
+
+      not_completed == 0
     end
 
     def compare_documents_count
@@ -228,6 +234,7 @@ module Elastic
     def reindexing!
       return false unless check_task_status
       return false unless compare_slice_totals
+      return false unless check_all_slices_submitted
       return false unless compare_documents_count
 
       apply_default_index_options
