@@ -38,7 +38,11 @@ export default (el, dashboardType) => {
     pipelineSecurityBuildsFailedCount,
     pipelineSecurityBuildsFailedPath,
     hasJiraVulnerabilitiesIntegrationEnabled,
+    securityConfigurationPath,
+    hasProjects,
   } = el.dataset;
+
+  console.log(el.dataset);
 
   if (isUnavailable) {
     return new Vue({
@@ -60,6 +64,9 @@ export default (el, dashboardType) => {
     emptyStateSvgPath,
     notEnabledScannersHelpPath,
     noPipelineRunScannersHelpPath,
+    groupFullPath,
+    securityConfigurationPath,
+    hasProjects: parseBoolean(hasProjects),
     hasVulnerabilities: parseBoolean(hasVulnerabilities),
     scanners: scanners ? JSON.parse(scanners) : [],
     hasJiraVulnerabilitiesIntegrationEnabled: parseBoolean(
@@ -90,7 +97,6 @@ export default (el, dashboardType) => {
     provide.autoFixMrsPath = autoFixMrsPath;
   } else if (dashboardType === DASHBOARD_TYPES.GROUP) {
     component = FirstClassGroupSecurityDashboard;
-    props.groupFullPath = groupFullPath;
   } else if (dashboardType === DASHBOARD_TYPES.INSTANCE) {
     provide.instanceDashboardSettingsPath = instanceDashboardSettingsPath;
     component = FirstClassInstanceSecurityDashboard;

@@ -28,10 +28,14 @@ export default (el, dashboardType) => {
     });
   }
 
+  console.log(el.dataset);
+
   const props = {};
   const provide = {
     dashboardDocumentation: el.dataset.dashboardDocumentation,
     emptyStateSvgPath: el.dataset.emptyStateSvgPath,
+    securityConfigurationPath: el.dataset.securityConfigurationPath,
+    hasProjects: parseBoolean(el.dataset.hasProjects),
   };
 
   let component;
