@@ -55,7 +55,6 @@ Browserker can be configured using CI/CD variables.
 | `DAST_BROWSERKER_MAX_DEPTH`          | number          | `10`                              | The maximum number of chained actions that the crawler will take. For example, `Click -> Form Fill -> Click` would be a depth of three. |
 | `DAST_BROWSERKER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners on GitLab.com it is recommended to not choose a value over three. Private runners with more resources may benefit from a higher number, but will likely produce little benefit after five to seven instances. |
 | `DAST_BROWSERKER_COOKIES`            | dictionary      | `abtesting_group:3,region:locked` | A cookie name and value that should be added to every request. |
-| `DAST_BROWSERKER_LOG`                | dictionary      | `brows:info,crawl:debug`          | Configures log level for each Browserker module. For more details see [logging](#logging). |
 | `DAST_AUTH_URL`                      | string          | `https://example.com/sign-in`     | URL of page that hosts the sign-in form. |
 | `DAST_USERNAME`                      | string          | `user123`                         | The username to enter into the username field on the sign-in HTML form. |
 | `DAST_PASSWORD`                      | string          | `p@55w0rd`                        | The password to enter into the password field on the sign-in HTML form. |
