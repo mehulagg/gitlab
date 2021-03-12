@@ -27,15 +27,6 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingSignature do
     end
   end
 
-  describe '#to_h' do
-    it 'returns a hash representation of the signature' do
-      expect(subject.to_h).to eq(
-        algorithm_type: params[:algorithm_type],
-        signature_sha: Digest::SHA1.digest(params[:signature_value])
-      )
-    end
-  end
-
   describe '#valid?' do
     context 'when supported algorithm_type is given' do
       it 'is valid' do
