@@ -740,9 +740,12 @@ export default {
       });
   },
 
-  createList: ({ getters, dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
+  createList: (
+    { getters, dispatch },
+    { backlog, labelId, milestoneId, assigneeId, iterationId },
+  ) => {
     if (!getters.isEpicBoard) {
-      dispatch('createIssueList', { backlog, labelId, milestoneId, assigneeId });
+      dispatch('createIssueList', { backlog, labelId, milestoneId, assigneeId, iterationId });
     } else {
       dispatch('createEpicList', { backlog, labelId });
     }

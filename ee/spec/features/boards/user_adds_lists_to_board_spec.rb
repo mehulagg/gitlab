@@ -36,7 +36,8 @@ RSpec.describe 'User adds milestone lists', :js do
     before do
       stub_licensed_features(
         board_milestone_lists: true,
-        board_assignee_lists: true
+        board_assignee_lists: true,
+        board_iteration_lists: true
       )
       sign_in(user)
 
