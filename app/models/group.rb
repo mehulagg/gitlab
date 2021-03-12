@@ -116,7 +116,7 @@ class Group < Namespace
       .where("project_authorizations.user_id IN (?)", user_ids)
   end
 
-  delegate :default_branch_name, to: :namespace_settings
+  delegate :default_branch_name, :delayed_project_removal, to: :namespace_settings
 
   class << self
     def sort_by_attribute(method)
