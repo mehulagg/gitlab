@@ -1270,6 +1270,77 @@ describe('fetchMilestones', () => {
   });
 });
 
+describe('fetchIterations', () => {
+  const queryResponse = {
+    data: {
+      group: {
+        iterations: {
+          nodes: mockMilestones,
+        },
+      },
+    },
+  };
+
+  const queryErrors = {
+    data: {
+      group: {
+        errors: ['You cannot view these iterations'],
+        iterations: {},
+      },
+    },
+  };
+
+  function createStore({
+    state = {
+      boardType: 'group',
+      fullPath: 'gitlab-org/gitlab',
+      iterations: [],
+      iterationsLoading: false,
+    },
+  } = {}) {
+    return new Vuex.Store({
+      state,
+      mutations,
+    });
+  }
+
+  it('sets iterationsLoading to true', async () => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    const store = createStore();
+
+    actions.fetchIterations(store);
+
+    expect(store.state.iterationsLoading).toBe(true);
+  });
+
+  describe('success', () => {
+    it('sets state.iterations from query result', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+      const store = createStore();
+
+      await actions.fetchIterations(store);
+
+      expect(store.state.iterationsLoading).toBe(false);
+      expect(store.state.iterations).toBe(mockMilestones);
+    });
+  });
+
+  describe('failure', () => {
+    it('throws an error and displays an error message', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryErrors);
+
+      const store = createStore();
+
+      await expect(actions.fetchIterations(store)).rejects.toThrow();
+
+      expect(store.state.iterationsLoading).toBe(false);
+      expect(store.state.error).toBe('Failed to load iterations.');
+    });
+  });
+});
+
 describe('fetchAssignees', () => {
   const queryResponse = {
     data: {

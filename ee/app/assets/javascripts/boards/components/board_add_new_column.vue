@@ -22,17 +22,21 @@ export default {
     labelListDescription: __('A label list displays issues with the selected label.'),
     assigneeListDescription: __('An assignee list displays issues assigned to the selected user'),
     milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
+    iterationListDescription: __('An iteration list displays issues in the selected iteration.'),
     selectLabel: __('Select label'),
     selectAssignee: __('Select assignee'),
     selectMilestone: __('Select milestone'),
+    selectIteration: __('Select iteration'),
     searchLabels: __('Search labels'),
     searchAssignees: __('Search assignees'),
     searchMilestones: __('Search milestones'),
+    searchIterations: __('Search iterations'),
   },
   columnTypes: [
     { value: ListType.label, text: __('Label') },
     { value: ListType.assignee, text: __('Assignee') },
     { value: ListType.milestone, text: __('Milestone') },
+    { value: ListType.iteration, text: __('Iteration') },
   ],
   components: {
     BoardAddNewColumnForm,
@@ -57,10 +61,12 @@ export default {
     ...mapState([
       'labels',
       'labelsLoading',
-      'assignees',
-      'assigneesLoading',
       'milestones',
       'milestonesLoading',
+      'iterations',
+      'iterationsLoading',
+      'assignees',
+      'assigneesLoading',
     ]),
     ...mapGetters(['getListByTypeId', 'shouldUseGraphQL', 'isEpicBoard']),
 
@@ -74,6 +80,9 @@ export default {
       if (this.milestoneTypeSelected) {
         return this.milestones;
       }
+      if (this.iterationTypeSelected) {
+        return this.iterations;
+      }
       return [];
     },
 
@@ -85,6 +94,9 @@ export default {
     },
     milestoneTypeSelected() {
       return this.columnType === ListType.milestone;
+    },
+    iterationTypeSelected() {
+      return this.columnType === ListType.iteration;
     },
 
     selectedLabel() {
@@ -105,6 +117,12 @@ export default {
       }
       return this.milestones.find(({ id }) => id === this.selectedId);
     },
+    selectedIteration() {
+      if (!this.iterationTypeSelected) {
+        return null;
+      }
+      return this.iterations.find(({ id }) => id === this.selectedId);
+    },
     selectedItem() {
       if (!this.selectedId) {
         return null;
@@ -117,6 +135,9 @@ export default {
       }
       if (this.milestoneTypeSelected) {
         return this.selectedMilestone;
+      }
+      if (this.iterationTypeSelected) {
+        return this.selectedIteration;
       }
       return null;
     },
@@ -133,14 +154,17 @@ export default {
     },
 
     loading() {
-      if (this.columnType === ListType.label) {
+      if (this.labelTypeSelected) {
         return this.labelsLoading;
       }
       if (this.assigneeTypeSelected) {
         return this.assigneesLoading;
       }
-      if (this.columnType === ListType.milestone) {
+      if (this.milestoneTypeSelected) {
         return this.milestonesLoading;
+      }
+      if (this.iterationTypeSelected) {
+        return this.iterationsLoading;
       }
       return false;
     },
@@ -156,6 +180,10 @@ export default {
 
       if (this.milestoneTypeSelected) {
         return this.$options.i18n.milestoneListDescription;
+      }
+
+      if (this.iterationTypeSelected) {
+        return this.$options.i18n.iterationListDescription;
       }
 
       return null;
@@ -174,6 +202,10 @@ export default {
         return this.$options.i18n.selectMilestone;
       }
 
+      if (this.iterationTypeSelected) {
+        return this.$options.i18n.selectIteration;
+      }
+
       return null;
     },
 
@@ -190,6 +222,10 @@ export default {
         return this.$options.i18n.searchMilestones;
       }
 
+      if (this.iterationTypeSelected) {
+        return this.$options.i18n.searchIterations;
+      }
+
       return null;
     },
   },
@@ -203,6 +239,7 @@ export default {
       'highlightList',
       'setAddColumnFormVisibility',
       'fetchAssignees',
+      'fetchIterations',
       'fetchMilestones',
     ]),
     highlight(listId) {
@@ -250,6 +287,11 @@ export default {
             ...this.selectedMilestone,
             id: getIdFromGraphQLId(this.selectedMilestone.id),
           };
+        } else if (this.iterationTypeSelected) {
+          listObj.iteration = {
+            ...this.selectedIteration,
+            id: getIdFromGraphQLId(this.selectedIteration.id),
+          };
         } else if (this.assigneeTypeSelected) {
           listObj.assignee = {
             ...this.selectedAssignee,
@@ -263,6 +305,9 @@ export default {
 
     filterItems(searchTerm) {
       switch (this.columnType) {
+        case ListType.iteration:
+          this.fetchIterations(searchTerm);
+          break;
         case ListType.milestone:
           this.fetchMilestones(searchTerm);
           break;
@@ -326,6 +371,9 @@ export default {
       </div>
       <div v-else-if="selectedMilestone" class="gl-text-truncate">
         {{ selectedMilestone.title }}
+      </div>
+      <div v-else-if="selectedIteration" class="gl-text-truncate">
+        {{ selectedIteration.title }}
       </div>
     </template>
 
