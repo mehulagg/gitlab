@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class CreateJobArtifactsService < ::BaseService
+  class JobArtifacts::CreateService < ::BaseService
     include Gitlab::Utils::UsageData
 
     ArtifactsExistError = Class.new(StandardError)
