@@ -342,19 +342,19 @@ module EE
 
     def vulnerabilities
       ::Vulnerability.where(
-        project: ::Project.for_group_and_its_subgroups(self).non_archived.without_deleted
+        project: all_projects.non_archived.without_deleted
       )
     end
 
     def vulnerability_scanners
       ::Vulnerabilities::Scanner.where(
-        project: ::Project.for_group_and_its_subgroups(self).non_archived.without_deleted
+        project: all_projects.non_archived.without_deleted
       )
     end
 
     def vulnerability_historical_statistics
       ::Vulnerabilities::HistoricalStatistic
-        .for_project(::Project.for_group_and_its_subgroups(self).non_archived.without_deleted)
+        .for_project(all_projects.non_archived.without_deleted)
     end
 
     def max_personal_access_token_lifetime_from_now

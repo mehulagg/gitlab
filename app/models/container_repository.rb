@@ -21,8 +21,8 @@ class ContainerRepository < ApplicationRecord
   scope :ordered, -> { order(:name) }
   scope :with_api_entity_associations, -> { preload(project: [:route, { namespace: :route }]) }
   scope :for_group_and_its_subgroups, ->(group) do
-    project_scope = Project
-      .for_group_and_its_subgroups(group)
+    project_scope = group
+      .all_projects
       .with_container_registry
       .select(:id)
 

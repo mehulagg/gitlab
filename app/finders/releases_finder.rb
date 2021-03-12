@@ -46,7 +46,7 @@ class ReleasesFinder
 
   def accessible_projects
     projects = if include_subgroups?
-                 Project.for_group_and_its_subgroups(parent)
+                 parent.all_projects
                else
                  parent.projects
                end

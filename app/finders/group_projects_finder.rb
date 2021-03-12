@@ -116,7 +116,7 @@ class GroupProjectsFinder < ProjectsFinder
 
   def owned_projects
     if include_subgroups?
-      Project.for_group_and_its_subgroups(group)
+      group.all_projects
     else
       group.projects
     end
