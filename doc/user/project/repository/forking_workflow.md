@@ -39,6 +39,37 @@ is forked, the repository is public in the fork. The owner
 of the fork must manually change the visibility. This is being
 fixed in [#36662](https://gitlab.com/gitlab-org/gitlab/-/issues/36662).
 
+### Creating a fork using fork form project
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15013) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-fork-project-form). **(FREE SELF)**
+
+Complete the form and click Fork project.
+
+![Choose namespace](img/fork_form_v13_10.png)
+
+#### Enable or disable Fork Project Form
+
+Fork Project Form is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:fork_project_form>)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:fork_project_form)
+```
+
 ## Repository mirroring
 
 You can use [repository mirroring](repository_mirroring.md) to keep your fork synced with the original repository. You can also use `git remote add upstream` to achieve the same result.
