@@ -44,12 +44,7 @@ class Projects::PathLocksController < Projects::ApplicationController
       return access_denied!
     end
 
-    respond_to do |format|
-      format.html do
-        redirect_to project_locks_path(@project), status: :found
-      end
-      format.js
-    end
+    redirect_to project_path_locks_path(@project), status: :found
   end
 
   private
