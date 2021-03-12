@@ -17143,7 +17143,8 @@ CREATE TABLE saml_providers (
     enforced_sso boolean DEFAULT false NOT NULL,
     enforced_group_managed_accounts boolean DEFAULT false NOT NULL,
     prohibited_outer_forks boolean DEFAULT true NOT NULL,
-    default_membership_role smallint DEFAULT 10 NOT NULL
+    default_membership_role smallint DEFAULT 10 NOT NULL,
+    git_check_enforced boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE saml_providers_id_seq
