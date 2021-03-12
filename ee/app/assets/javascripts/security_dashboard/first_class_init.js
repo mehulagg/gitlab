@@ -61,6 +61,7 @@ export default (el, dashboardType) => {
     emptyStateSvgPath,
     notEnabledScannersHelpPath,
     noPipelineRunScannersHelpPath,
+    groupFullPath,
     securityConfigurationPath,
     hasVulnerabilities: parseBoolean(hasVulnerabilities),
     scanners: scanners ? JSON.parse(scanners) : [],
@@ -92,7 +93,6 @@ export default (el, dashboardType) => {
     provide.autoFixMrsPath = autoFixMrsPath;
   } else if (dashboardType === DASHBOARD_TYPES.GROUP) {
     component = FirstClassGroupSecurityDashboard;
-    props.groupFullPath = groupFullPath;
   } else if (dashboardType === DASHBOARD_TYPES.INSTANCE) {
     provide.instanceDashboardSettingsPath = instanceDashboardSettingsPath;
     component = FirstClassInstanceSecurityDashboard;
