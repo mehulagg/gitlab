@@ -57,7 +57,6 @@ HAR files may contain sensitive information such as authentication tokens, API k
 1. Click Done.
 1. Select location and filename for har file.
 
-
 ### Chrome
 
 1. Right click Inspect.
