@@ -68,7 +68,7 @@ describe('Vulnerability Report', () => {
     });
 
     it('sets up group-level', () => {
-      createComponent({ data: { groupFullPath: '/test/' }, type: DASHBOARD_TYPES.GROUP });
+      createComponent({ type: DASHBOARD_TYPES.GROUP });
 
       // These assertions will be expanded in issue #220290
       expect(root).not.toStrictEqual(EMPTY_DIV);

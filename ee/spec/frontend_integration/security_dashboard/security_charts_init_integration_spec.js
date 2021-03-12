@@ -45,7 +45,7 @@ describe('Security Charts', () => {
 
   describe('default states', () => {
     it('sets up group-level', () => {
-      createComponent({ data: { groupFullPath: '/test/' }, type: DASHBOARD_TYPES.GROUP });
+      createComponent({ type: DASHBOARD_TYPES.GROUP });
 
       expect(root).toMatchSnapshot();
     });

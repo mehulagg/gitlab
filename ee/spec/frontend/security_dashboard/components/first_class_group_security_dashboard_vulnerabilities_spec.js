@@ -24,15 +24,13 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
 
   const createWrapper = ({ $apollo = apolloMock, stubs } = {}) => {
     return shallowMount(FirstClassGroupVulnerabilities, {
-      propsData: {
-        groupFullPath,
-      },
       stubs,
       mocks: {
         $apollo,
         fetchNextPage: () => {},
       },
       provide: {
+        groupFullPath,
         hasVulnerabilities: true,
         hasJiraVulnerabilitiesIntegrationEnabled: false,
       },
