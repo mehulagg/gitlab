@@ -631,11 +631,17 @@ class ProjectPolicy < BasePolicy
 
   rule { project_bot }.enable :project_bot_access
 
-  rule { resource_access_token_available & can?(:admin_project) }.policy do
-    enable :admin_resource_access_tokens
+  rule { can?(:admin_project) }.policy do
+    enable :read_resource_access_tokens
   end
 
-  rule { can?(:project_bot_access) }.prevent :admin_resource_access_tokens
+  rule { can?(:admin_project) }.policy do
+    enable :destroy_resource_access_tokens
+  end
+
+  rule { resource_access_token_available & can?(:read_resource_access_tokens) }.policy do
+    enable :create_resource_access_tokens
+  end
 
   rule { user_defined_variables_allowed | can?(:maintainer_access) }.policy do
     enable :set_pipeline_variables

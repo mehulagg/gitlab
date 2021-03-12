@@ -212,8 +212,16 @@ class GroupPolicy < BasePolicy
   rule { developer & dependency_proxy_available }
     .enable :admin_dependency_proxy
 
-  rule { resource_access_token_available & can?(:admin_group) }.policy do
-    enable :admin_resource_access_tokens
+  rule { can?(:admin_group) }.policy do
+    enable :read_resource_access_tokens
+  end
+
+  rule { can?(:admin_group) }.policy do
+    enable :destroy_resource_access_tokens
+  end
+
+  rule { resource_access_token_available & can?(:read_resource_access_tokens) }.policy do
+    enable :create_resource_access_tokens
   end
 
   rule { support_bot & has_project_with_service_desk_enabled }.policy do

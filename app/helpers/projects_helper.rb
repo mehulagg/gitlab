@@ -818,7 +818,7 @@ module ProjectsHelper
   end
 
   def project_access_token_available?(project)
-    can?(current_user, :admin_resource_access_tokens, project)
+    can?(current_user, :create_resource_access_tokens, project)
   end
 
   def build_project_breadcrumb_link(project)
