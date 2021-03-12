@@ -51,7 +51,7 @@ module API
       if try(:namespace_inheritable, :authentication)
         ci_build_from_namespace_inheritable
       else
-        @current_authenticated_job
+        @current_authenticated_job # rubocop:disable Gitlab/ModuleWithInstanceVariables
       end
     end
 
