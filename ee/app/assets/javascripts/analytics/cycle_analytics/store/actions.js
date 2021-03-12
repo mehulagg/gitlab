@@ -308,7 +308,7 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
     ];
 
     if (stageId) {
-      dispatch('setStageId', stageId);
+      promises.push(dispatch('setStageId', stageId));
     }
 
     return Promise.all(promises)
