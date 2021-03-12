@@ -26,17 +26,18 @@ export default {
     },
   },
   data() {
+    const isEditMode = Object.keys(this.value.fields).length > 0;
+
     const {
       enabled,
       url,
       username,
-      password,
       // default to commonly used names for `username` and `password` fields in authentcation forms
       usernameField = 'username',
       passwordField = 'password',
     } = this.value.fields;
 
-    const isEditMode = Object.keys(this.value.fields).length > 0;
+    const password = isEditMode ? '---------' : '';
 
     return {
       form: {
@@ -59,9 +60,6 @@ export default {
   computed: {
     showValidationOrInEditMode() {
       return this.showValidation || this.isEditMode;
-    },
-    sensitiveFieldPlaceholder() {
-      return this.isEditMode ? __('[Unchanged]') : '';
     },
   },
   watch: {
@@ -126,7 +124,6 @@ export default {
             autocomplete="off"
             name="password"
             type="password"
-            :placeholder="sensitiveFieldPlaceholder"
             :required="isSensitiveFieldRequired"
             :state="form.fields.password.state"
           />
