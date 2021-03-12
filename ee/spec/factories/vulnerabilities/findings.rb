@@ -59,6 +59,17 @@ FactoryBot.define do
     confidence { :medium }
     scanner factory: :vulnerabilities_scanner
     metadata_version { 'sast:1.0' }
+
+    details do
+      {
+        url: {
+          name: 'URL',
+          type: 'url',
+          href: 'http://site.com'
+        }
+      }
+    end
+
     raw_metadata do
       {
         description: 'The cipher does not provide data integrity update 1',
