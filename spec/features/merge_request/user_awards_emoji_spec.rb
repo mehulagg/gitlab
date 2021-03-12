@@ -42,8 +42,10 @@ RSpec.describe 'Merge request > User awards emoji', :js do
     end
 
     it 'adds awards to note' do
-      first('.js-note-emoji').click
-      first('.emoji-menu .js-emoji-btn').click
+      page.within('.note-actions') do
+        find('.note-emoji-button').click
+      end
+      first('gl-emoji[data-name="8ball"]').click
 
       wait_for_requests
 
