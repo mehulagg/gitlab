@@ -70,27 +70,22 @@ class ChatNotificationService < Service
   end
 
   def execute(data)
-    return unless supported_events.include?(data[:object_kind])
+    data_object = ChatNotificationData.new(data, project)
 
-    return unless notify_label?(data)
+    return unless supported_events.include?(data_object.object_type)
+
+    return unless notify_label?(data_object)
 
     return unless webhook.present?
-
-    object_kind = data[:object_kind]
-
-    data = custom_data(data)
 
     # WebHook events often have an 'update' event that follows a 'open' or
     # 'close' action. Ignore update events for now to prevent duplicate
     # messages from arriving.
-
-    message = get_message(object_kind, data)
+    message = get_message(data_object.object_type, data_object.raw_data)
 
     return false unless message
 
-    event_type = data[:event_type] || object_kind
-
-    channel_names = get_channel_field(event_type).presence || channel.presence
+    channel_names = get_channel_field(data_object.event_type).presence || channel.presence
     channels = channel_names&.split(',')&.map(&:strip)
 
     opts = {}
@@ -98,7 +93,7 @@ class ChatNotificationService < Service
     opts[:username] = username if username
 
     if notify(message, opts)
-      log_usage(event_type, user_id_from_hook_data(data))
+      log_usage(data_object.event_type, data_object.user_id)
       return true
     end
 
@@ -134,13 +129,9 @@ class ChatNotificationService < Service
   end
 
   def notify_label?(data)
-    return true unless SUPPORTED_EVENTS_FOR_LABEL_FILTER.include?(data[:object_kind]) && labels_to_be_notified.present?
+    return true unless SUPPORTED_EVENTS_FOR_LABEL_FILTER.include?(data.object_type) && labels_to_be_notified.present?
 
-    issue_labels = data.dig(:issue, :labels) || []
-    merge_request_labels = data.dig(:merge_request, :labels) || []
-    label_titles = (issue_labels + merge_request_labels).pluck(:title)
-
-    (labels_to_be_notified_list & label_titles).any?
+    (labels_to_be_notified_list & data.labels.pluck(:title)).any?
   end
 
   def user_id_from_hook_data(data)
