@@ -110,16 +110,16 @@ module CommitsHelper
     end
   end
 
-  def revert_commit_link
-    return unless current_user
-
-    tag(:div, data: { display_text: 'Revert' }, class: "js-revert-commit-trigger")
-  end
-
-  def cherry_pick_commit_link
-    return unless current_user
-
-    tag(:div, data: { display_text: 'Cherry-pick' }, class: "js-cherry-pick-commit-trigger")
+  def commit_options_dropdown_data(project, commit)
+    {
+      new_project_tag_path: new_project_tag_path(project, ref: commit),
+      email_patches_path: project_commit_path(project, commit, format: :patch),
+      plain_diff_path: project_commit_path(project, commit, format: :diff),
+      can_revert: current_user && can_collaborate_with_project?(project) && !commit.has_been_reverted?(current_user),
+      can_cherry_pick: current_user && can_collaborate_with_project?(project),
+      can_tag: can?(current_user, :push_code, project),
+      can_email_patches: commit.parents.length > 1
+    }
   end
 
   def commit_signature_badge_classes(additional_classes)

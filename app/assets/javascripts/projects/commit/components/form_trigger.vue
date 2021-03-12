@@ -6,16 +6,16 @@ export default {
   components: {
     GlLink,
   },
-  inject: {
-    displayText: {
-      default: '',
-    },
-    testId: {
-      default: '',
-    },
-  },
   props: {
     openModal: {
+      type: String,
+      required: true,
+    },
+    displayText: {
+      type: String,
+      required: true,
+    },
+    testId: {
       type: String,
       required: true,
     },
