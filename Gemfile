@@ -343,7 +343,7 @@ group :metrics do
 end
 
 group :development do
-  gem 'brakeman', '~> 4.2', require: false
+  gem 'brakeman', '~> 5.0.0', require: false
   gem 'lefthook', '~> 0.7', require: false
 
   gem 'letter_opener_web', '~> 1.3.4'
