@@ -388,14 +388,6 @@ RSpec.shared_examples 'wiki model' do
         expect(file.raw_data).to be_empty
       end
     end
-
-    context 'when feature flag :gitaly_find_file is disabled' do
-      before do
-        stub_feature_flags(gitaly_find_file: false)
-      end
-
-      it_behaves_like 'find_file results'
-    end
   end
 
   describe '#create_page' do
