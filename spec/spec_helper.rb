@@ -246,6 +246,8 @@ RSpec.configure do |config|
 
       stub_feature_flags(unified_diff_components: false)
 
+      stub_feature_flags(geo_lfs_object_replication_ssf: false)
+
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
