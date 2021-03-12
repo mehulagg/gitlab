@@ -1,5 +1,12 @@
 <script>
-import { GlButton, GlDropdown, GlIcon, GlSearchBoxByType, GlSkeletonLoader } from '@gitlab/ui';
+import {
+  GlButton,
+  GlDropdown,
+  GlFormGroup,
+  GlIcon,
+  GlSearchBoxByType,
+  GlSkeletonLoader,
+} from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { __ } from '~/locale';
 
@@ -15,6 +22,7 @@ export default {
   components: {
     GlButton,
     GlDropdown,
+    GlFormGroup,
     GlIcon,
     GlSearchBoxByType,
     GlSkeletonLoader,
@@ -22,6 +30,10 @@ export default {
   props: {
     loading: {
       type: Boolean,
+      required: true,
+    },
+    formLabel: {
+      type: String,
       required: true,
     },
     formDescription: {
@@ -69,51 +81,49 @@ export default {
       </h3>
 
       <div
-        class="gl-display-flex gl-flex-direction-column gl-h-full gl-overflow-hidden gl-align-items-flex-start"
+        class="gl-display-flex gl-flex-direction-column gl-h-full gl-overflow-y-auto gl-align-items-flex-start"
       >
         <slot name="select-list-type">
           <div class="gl-mb-5"></div>
         </slot>
 
-        <p class="gl-px-5">{{ formDescription }}</p>
+        <gl-form-group class="gl-px-5" :label="formLabel" :description="formDescription">
+          <gl-dropdown class="gl-mb-3" no-flip @shown="setFocus" @hide="$emit('hide')">
+            <template #button-content>
+              <slot name="selected">
+                <div>{{ $options.i18n.noneSelected }}</div>
+              </slot>
+              <gl-icon class="dropdown-chevron" name="chevron-down" />
+            </template>
 
-        <gl-dropdown class="gl-px-5" no-flip @shown="setFocus" @hide="$emit('hide')">
-          <template #button-content>
-            <slot name="selected">
-              <div>{{ $options.i18n.noneSelected }}</div>
+            <!--  add overflow fade tobttom  -->
+            <!-- make dropdown close on select -->
+            <!-- clear search on close -->
+            <div class="gl-sticky gl-position-sticky gl-top-0 gl-bg-white gl-z-index-1">
+              <gl-search-box-by-type
+                id="board-available-column-entities"
+                ref="searchBox"
+                v-model="searchValue"
+                debounce="250"
+                class="gl-mt-0!"
+                :placeholder="searchPlaceholder"
+                @input="$emit('filter-items', $event)"
+              />
+            </div>
+
+            <div v-if="loading" class="gl-px-5">
+              <gl-skeleton-loader :width="400" :height="172">
+                <rect width="380" height="20" x="10" y="15" rx="4" />
+                <rect width="280" height="20" x="10" y="50" rx="4" />
+                <rect width="330" height="20" x="10" y="85" rx="4" />
+              </gl-skeleton-loader>
+            </div>
+
+            <slot v-else name="items">
+              <p class="gl-mx-5">{{ $options.i18n.noResults }}</p>
             </slot>
-            <gl-icon class="dropdown-chevron" name="chevron-down" />
-          </template>
-
-          <!--  add overflow fade tobttom  -->
-          <!-- make dropdown close on select -->
-          <!-- clear search on close -->
-          <!-- selected: style like in the dropdown (swatch _ thing) -->
-          <!-- this should stick -->
-          <div class="gl-sticky gl-position-sticky gl-top-0 gl-bg-white gl-z-index-1">
-            <gl-search-box-by-type
-              id="board-available-column-entities"
-              ref="searchBox"
-              v-model="searchValue"
-              debounce="250"
-              class="gl-mt-0!"
-              :placeholder="searchPlaceholder"
-              @input="$emit('filter-items', $event)"
-            />
-          </div>
-
-          <div v-if="loading" class="gl-px-5">
-            <gl-skeleton-loader :width="400" :height="172">
-              <rect width="380" height="20" x="10" y="15" rx="4" />
-              <rect width="280" height="20" x="10" y="50" rx="4" />
-              <rect width="330" height="20" x="10" y="85" rx="4" />
-            </gl-skeleton-loader>
-          </div>
-
-          <slot v-else name="items">
-            <p class="gl-mx-5">{{ $options.i18n.noResults }}</p>
-          </slot>
-        </gl-dropdown>
+          </gl-dropdown>
+        </gl-form-group>
       </div>
       <div
         class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-10 gl-rounded-bottom-left-base gl-rounded-bottom-right-base"
