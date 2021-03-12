@@ -10,8 +10,7 @@ type: reference, howto
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/323423) in GitLab 13.10.
 
 WARNING:
-This product is in an [alpha](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha) stage and considered unstable.
-Features may be subject to change or breakage across future releases.
+This product is an early access and is considered a [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta) feature.
 
 Browserker is a crawler engine built by GitLab to test Single Page Applications (SPAs) as well as traditional web applications.
 Due to the reliance of modern web applications on JavaScript, handling SPAs or applications that are dependent on JavaScript is paramount to ensuring proper coverage of an application for Dynamic Application Security Testing (DAST).
@@ -56,6 +55,7 @@ Browserker can be configured using CI/CD variables.
 | `DAST_BROWSERKER_MAX_DEPTH`          | number          | `10`                              | The maximum number of chained actions that the crawler will take. For example, `Click -> Form Fill -> Click` would be a depth of three. |
 | `DAST_BROWSERKER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners on GitLab.com it is recommended to not choose a value over three. Private runners with more resources may benefit from a higher number, but will likely produce little benefit after five to seven instances. |
 | `DAST_BROWSERKER_COOKIES`            | dictionary      | `abtesting_group:3,region:locked` | A cookie name and value that should be added to every request. |
+| `DAST_BROWSERKER_LOG`                | dictionary      | `brows:info,crawl:debug`          | Configures log level for each Browserker module. For more details see [logging](#logging). |
 | `DAST_AUTH_URL`                      | string          | `https://example.com/sign-in`     | URL of page that hosts the sign-in form. |
 | `DAST_USERNAME`                      | string          | `user123`                         | The username to enter into the username field on the sign-in HTML form. |
 | `DAST_PASSWORD`                      | string          | `p@55w0rd`                        | The password to enter into the password field on the sign-in HTML form. |
@@ -101,10 +101,6 @@ The coverage/scan time trade-off can be managed by the user with the following m
 - Limiting the number of actions executed by the browser. The default is `10,000`.
 - Limiting the page depth that Browserker will check coverage on. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
 - Vertically scaling the runner and using a higher number of browsers. The default is `3`.
-
-## Example Application
-
-To assist users we have created an [example application](https://gitlab.com/gitlab-org/security-products/demos/browserker-dast/dvwa) to scan the purposely vulnerable application DVWA.
 
 ## AJAX Crawler
 
