@@ -1,0 +1,5 @@
+---
+title: Update NuGet finder and service to use Namespace#all_projects
+merge_request: 56475
+author:
+type: performance
