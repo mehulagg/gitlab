@@ -21,7 +21,7 @@ module Gitlab
           :stage_id,
           label_name: [].freeze,
           assignee_username: [].freeze,
-          project_ids: [].freeze,
+          project_ids: [].freeze
         ].freeze
 
         FINDER_PARAM_NAMES = [
