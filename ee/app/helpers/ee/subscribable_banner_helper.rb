@@ -58,6 +58,8 @@ module EE
 
     def decorated_subscription
       entity = @project || @group
+      return unless entity.persisted?
+
       subscription = entity&.closest_gitlab_subscription
 
       return unless subscription

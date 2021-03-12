@@ -3,6 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe EE::SubscribableBannerHelper do
+  describe '#renew_subscription_path' do
+    it 'does not raise error if project is not persisted' do
+      assign(:project, Project.new)
+
+      expect { helper.renew_subscription_path }.not_to raise_error
+    end
+  end
+
   describe '#gitlab_subscription_or_license' do
     subject { helper.gitlab_subscription_or_license }
 
