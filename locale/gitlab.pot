@@ -4220,6 +4220,11 @@ msgstr ""
 msgid "Assignee(s)"
 msgstr ""
 
+msgid "Assignee: %{users}"
+msgid_plural "Assignees: %{users}"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Assignees"
 msgstr ""
 
@@ -26045,12 +26050,17 @@ msgid "ReviewApp|Enable Review App"
 msgstr ""
 
 msgid "Reviewer"
-msgid_plural "%d Reviewers"
+msgid_plural "Reviewers"
 msgstr[0] ""
 msgstr[1] ""
 
 msgid "Reviewer(s)"
 msgstr ""
+
+msgid "Reviewer: %{users}"
+msgid_plural "Reviewers: %{users}"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Reviewers"
 msgstr ""

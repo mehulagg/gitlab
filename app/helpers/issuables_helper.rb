@@ -20,13 +20,13 @@ module IssuablesHelper
   end
 
   def assignees_label(issuable, include_value: true)
-    label = 'Assignee'.pluralize(issuable.assignees.count)
+    assignees = issuable.assignees
 
     if include_value
       sanitized_list = sanitize_name(issuable.assignee_list)
-      "#{label}: #{sanitized_list}"
+      n_('Assignee: %{users}', 'Assignees: %{users}', assignees.count) % { users: sanitized_list }
     else
-      label
+      n_('Assignee', 'Assignees', assignees.count)
     end
   end
 
