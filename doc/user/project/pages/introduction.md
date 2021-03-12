@@ -295,6 +295,6 @@ artifacts, navigate to **Project -> CI/CD -> Jobs**. Then click on the latest jo
 
 Files listed under the public directory can be accessed through the Pages URL for the project.
 
-A 404 can also be related to incorrect permissions. If [Pages Access Control](#access-control) is enabled, and a user
+A 404 can also be related to incorrect permissions. If [Pages Access Control](pages_access_control.md) is enabled, and a user
 navigates to the Pages URL and receives a 404 reponse, it is possible that the user does not have permission to view the site.
 To fix this, verify that the user is a member of the project.
