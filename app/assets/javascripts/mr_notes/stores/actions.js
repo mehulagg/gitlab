@@ -1,7 +1,5 @@
-import types from './mutation_types';
+import mutators from './actions/mutators';
 
 export default {
-  setActiveTab({ commit }, tab) {
-    commit(types.SET_ACTIVE_TAB, tab);
-  },
+  ...mutators,
 };
