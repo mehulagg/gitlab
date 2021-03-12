@@ -62,7 +62,8 @@ module Gitlab
     # each parent.
     # rubocop: disable CodeReuse/ActiveRecord
     def base_and_ancestors(upto: nil, hierarchy_order: nil)
-      recursive_query = base_and_ancestors_cte(upto, hierarchy_order).apply_to(model.all)
+      recursive_query = base_and_ancestors_cte(upto, hierarchy_order).apply_to(model.all).distinct
+      recursive_query = model.from(recursive_query, model.table_name)
       recursive_query = recursive_query.order(depth: hierarchy_order) if hierarchy_order
 
       read_only(recursive_query)
@@ -75,7 +76,10 @@ module Gitlab
     # When `with_depth` is `true`, a `depth` column is included where it starts with `1` for the base objects
     # and incremented as we go down the descendant tree
     def base_and_descendants(with_depth: false)
-      read_only(base_and_descendants_cte(with_depth: with_depth).apply_to(model.all))
+      recursive_query = base_and_descendants_cte(with_depth: with_depth).apply_to(model.all).distinct
+      recursive_query = model.from(recursive_query, model.table_name)
+
+      read_only(recursive_query)
     end
 
     # Returns a relation that includes the base objects, their ancestors,
@@ -116,6 +120,8 @@ module Gitlab
           model.unscoped.from(ancestors_table),
           model.unscoped.from(descendants_table)
         ])
+        .distinct
+      relation = model.from(relation, model.table_name)
 
       read_only(relation)
     end
