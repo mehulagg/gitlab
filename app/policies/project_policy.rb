@@ -643,6 +643,10 @@ class ProjectPolicy < BasePolicy
     enable :create_resource_access_tokens
   end
 
+  rule { can?(:project_bot_access) }.policy do
+    prevent :create_resource_access_tokens
+  end
+
   rule { user_defined_variables_allowed | can?(:maintainer_access) }.policy do
     enable :set_pipeline_variables
   end

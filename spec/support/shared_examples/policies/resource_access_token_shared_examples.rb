@@ -18,6 +18,34 @@ RSpec.shared_examples 'Self-managed Core resource access tokens' do
       it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
     end
   end
+
+  context 'read resource access tokens' do
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:read_resource_access_tokens) }
+    end
+
+    context 'with developer' do
+      let(:current_user) { developer }
+
+      it { is_expected.not_to be_allowed(:read_resource_access_tokens) }
+    end
+  end
+
+  context 'destroy resource access tokens' do
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:destroy_resource_access_tokens) }
+    end
+
+    context 'with developer' do
+      let(:current_user) { developer }
+
+      it { is_expected.not_to be_allowed(:destroy_resource_access_tokens) }
+    end
+  end
 end
 
 RSpec.shared_examples 'GitLab.com Core resource access tokens' do
