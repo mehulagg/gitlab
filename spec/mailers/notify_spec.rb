@@ -72,7 +72,7 @@ RSpec.describe Notify do
         sender = subject.header[:from].addrs.first
 
         aggregate_failures do
-          expect(sender.display_name).to eq(current_user.name)
+          expect(sender.display_name).to eq("#{current_user.name} (@#{current_user.username})")
           expect(sender.address).to eq(gitlab_sender)
           expect(subject).to deliver_to(recipient.notification_email)
         end
@@ -147,7 +147,7 @@ RSpec.describe Notify do
 
         it 'is sent as the author' do
           sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
+          expect(sender.display_name).to eq("#{current_user.name} (@#{current_user.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
@@ -188,7 +188,7 @@ RSpec.describe Notify do
 
         it 'is sent as the author' do
           sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
+          expect(sender.display_name).to eq("#{current_user.name} (@#{current_user.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
@@ -252,7 +252,7 @@ RSpec.describe Notify do
 
         it 'is sent as the author' do
           sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
+          expect(sender.display_name).to eq("#{current_user.name} (@#{current_user.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
@@ -390,7 +390,7 @@ RSpec.describe Notify do
 
         it 'is sent as the author' do
           sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
+          expect(sender.display_name).to eq("#{current_user.name} (@#{current_user.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
@@ -457,7 +457,7 @@ RSpec.describe Notify do
 
         it 'is sent as the author' do
           sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
+          expect(sender.display_name).to eq("#{current_user.name} (@#{current_user.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
@@ -488,7 +488,7 @@ RSpec.describe Notify do
         it 'is sent as the push user' do
           sender = subject.header[:from].addrs[0]
 
-          expect(sender.display_name).to eq(push_user.name)
+          expect(sender.display_name).to eq("#{push_user.name} (@#{push_user.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
@@ -1005,7 +1005,7 @@ RSpec.describe Notify do
           sender = subject.header[:from].addrs[0]
 
           aggregate_failures do
-            expect(sender.display_name).to eq(note_author.name)
+            expect(sender.display_name).to eq("#{note_author.name} (@#{note_author.username})")
             expect(sender.address).to eq(gitlab_sender)
             expect(subject).to deliver_to(recipient.notification_email)
           end
@@ -1165,7 +1165,7 @@ RSpec.describe Notify do
           sender = subject.header[:from].addrs[0]
 
           aggregate_failures do
-            expect(sender.display_name).to eq(note_author.name)
+            expect(sender.display_name).to eq("#{note_author.name} (@#{note_author.username})")
             expect(sender.address).to eq(gitlab_sender)
             expect(subject).to deliver_to(recipient.notification_email)
           end
@@ -1220,9 +1220,9 @@ RSpec.describe Notify do
         issue.update!(external_author: 'service.desk@example.com')
       end
 
-      def expect_sender(username)
+      def expect_sender(user)
         sender = subject.header[:from].addrs[0]
-        expect(sender.display_name).to eq(username)
+        expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
         expect(sender.address).to eq(gitlab_sender)
       end
 
@@ -1243,14 +1243,16 @@ RSpec.describe Notify do
         end
 
         it 'uses service bot name by default' do
-          expect_sender(User.support_bot.name)
+          expect_sender(User.support_bot)
         end
 
         context 'when custom outgoing name is set' do
           let_it_be(:settings) { create(:service_desk_setting, project: project, outgoing_name: 'some custom name') }
 
           it 'uses custom name in "from" header' do
-            expect_sender('some custom name')
+            sender = subject.header[:from].addrs[0]
+            expect(sender.display_name).to eq('some custom name')
+            expect(sender.address).to eq(gitlab_sender)
           end
         end
 
@@ -1258,7 +1260,7 @@ RSpec.describe Notify do
           let_it_be(:settings) { create(:service_desk_setting, project: project, outgoing_name: '') }
 
           it 'uses service bot name' do
-            expect_sender(User.support_bot.name)
+            expect_sender(User.support_bot)
           end
         end
       end
@@ -1275,7 +1277,7 @@ RSpec.describe Notify do
         end
 
         it 'uses author\'s name in "from" header' do
-          expect_sender(first_note.author.name)
+          expect_sender(first_note.author)
         end
 
         it 'has the correct subject and body' do
@@ -1672,7 +1674,7 @@ RSpec.describe Notify do
 
     it 'is sent as the author' do
       sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
+      expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
       expect(sender.address).to eq(gitlab_sender)
     end
 
@@ -1699,7 +1701,7 @@ RSpec.describe Notify do
 
     it 'is sent as the author' do
       sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
+      expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
       expect(sender.address).to eq(gitlab_sender)
     end
 
@@ -1725,7 +1727,7 @@ RSpec.describe Notify do
 
     it 'is sent as the author' do
       sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
+      expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
       expect(sender.address).to eq(gitlab_sender)
     end
 
@@ -1748,7 +1750,7 @@ RSpec.describe Notify do
 
     it 'is sent as the author' do
       sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
+      expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
       expect(sender.address).to eq(gitlab_sender)
     end
 
@@ -1777,7 +1779,7 @@ RSpec.describe Notify do
 
     it 'is sent as the author' do
       sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
+      expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
       expect(sender.address).to eq(gitlab_sender)
     end
 
@@ -1870,7 +1872,7 @@ RSpec.describe Notify do
 
     it 'is sent as the author' do
       sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
+      expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
       expect(sender.address).to eq(gitlab_sender)
     end
 
@@ -1964,7 +1966,7 @@ RSpec.describe Notify do
       sender = subject.header[:from].addrs[0]
 
       aggregate_failures do
-        expect(sender.display_name).to eq(review.author_name)
+        expect(sender.display_name).to eq("#{review.author.name} (@#{review.author.username})")
         expect(sender.address).to eq(gitlab_sender)
         expect(subject).to deliver_to(recipient.notification_email)
       end

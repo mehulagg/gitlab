@@ -107,7 +107,7 @@ RSpec.describe Notify do
 
         it 'is sent as the last approver' do
           sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(last_approver.name)
+          expect(sender.display_name).to eq("#{last_approver.name} (@#{last_approver.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
@@ -171,7 +171,7 @@ RSpec.describe Notify do
 
         it 'is sent as the last unapprover' do
           sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(last_unapprover.name)
+          expect(sender.display_name).to eq("#{last_unapprover.name} (@#{last_unapprover.username})")
           expect(sender.address).to eq(gitlab_sender)
         end
 
