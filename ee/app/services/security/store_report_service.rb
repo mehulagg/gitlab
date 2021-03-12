@@ -234,6 +234,7 @@ module Security
     def update_feedbacks(vulnerability_finding, new_uuid)
       vulnerability_finding.load_feedback.each do |feedback|
         feedback.finding_uuid = new_uuid
+        feedback.vulnerability_data = vulnerability_finding.raw_metadata
         feedback.save!
       end
     end
@@ -260,7 +261,7 @@ module Security
 
       # any remaining poro fingerprints left are new
       poro_fingerprints.values.each do |poro_fingerprint|
-        attributes = poro_fingerprint.to_h.merge(finding_id: vulnerability_finding.id)
+        attributes = poro_fingerprint.to_hash.merge(finding_id: vulnerability_finding.id)
         to_create << ::Vulnerabilities::FindingFingerprint.new(attributes: attributes, created_at: Time.zone.now, updated_at: Time.zone.now)
       end
 
