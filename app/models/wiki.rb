@@ -187,10 +187,28 @@ class Wiki
   def delete_page(page, message = nil)
     return unless page
 
-    wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
-    after_wiki_activity
+    if Feature.enabled?(:gitaly_delete_page, user, default_enabled: :yaml)
+      begin
+        repository.delete_file(user, page.path, **gitaly_commit_options(page, :deleted, message))
 
-    true
+        after_wiki_activity
+
+        true
+      rescue Gitlab::Git::Index::IndexError,
+             Gitlab::Git::CommitError,
+             Gitlab::Git::PreReceiveError,
+             Gitlab::Git::CommandError,
+             ArgumentError => error
+
+        @error_message = "#{error.message}"
+        false
+      end
+    else
+      wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
+      after_wiki_activity
+
+      true
+    end
   end
 
   def page_title_and_dir(title)
@@ -266,6 +284,17 @@ class Wiki
   end
 
   private
+
+  def gitaly_commit_options(page, action, message = nil)
+    commit_message = message.presence || default_message(action, page.title)
+
+    {
+      branch_name: repository.root_ref,
+      message: commit_message,
+      author_email: user.email,
+      author_name: user.name
+    }
+  end
 
   def commit_details(action, message = nil, title = nil)
     commit_message = message.presence || default_message(action, title)
