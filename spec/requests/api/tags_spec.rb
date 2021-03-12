@@ -145,12 +145,60 @@ RSpec.describe API::Tags do
       end
     end
 
-    context ":api_caching_tags flag enabled" do
+    context ":api_caching_tags flag enabled", :use_clean_rails_memory_store_caching do
       before do
         stub_feature_flags(api_caching_tags: true)
       end
 
       it_behaves_like "get repository tags"
+
+      describe "cache expiry" do
+        let(:route) { "/projects/#{project_id}/repository/tags" }
+        let(:current_user) { user }
+
+        before do
+          # Set the cache
+          get api(route, current_user)
+        end
+
+        it "is cached" do
+          expect(API::Entities::Tag).not_to receive(:represent)
+
+          get api(route, current_user)
+        end
+
+        shared_examples "cache expired" do
+          it "isn't cached" do
+            expect(API::Entities::Tag).to receive(:represent).exactly(3).times
+
+            get api(route, current_user)
+          end
+        end
+
+        context "when protected tag is changed" do
+          before do
+            create(:protected_tag, name: tag_name, project: project)
+          end
+
+          it_behaves_like "cache expired"
+        end
+
+        context "when release is changed" do
+          before do
+            create(:release, :legacy, project: project, tag: tag_name)
+          end
+
+          it_behaves_like "cache expired"
+        end
+
+        context "when project is changed" do
+          before do
+            project.touch
+          end
+
+          it_behaves_like "cache expired"
+        end
+      end
     end
 
     context ":api_caching_tags flag disabled" do
