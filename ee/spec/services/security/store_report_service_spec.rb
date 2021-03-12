@@ -5,7 +5,6 @@ require 'spec_helper'
 RSpec.describe Security::StoreReportService, '#execute' do
   using RSpec::Parameterized::TableSyntax
 
-
   let_it_be(:user) { create(:user) }
   let(:artifact) { create(:ee_ci_job_artifact, trait) }
   let(:report_type) { artifact.file_type }
@@ -136,7 +135,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       let(:trait) { :sast }
 
       let!(:finding) do
-        create(:vulnerabilities_finding,
+        created_finding = create(:vulnerabilities_finding,
           pipelines: [pipeline],
           identifiers: [identifier],
           primary_identifier: identifier,
@@ -190,6 +189,8 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'updates UUIDv4 to UUIDv5' do
+        require 'pry'; binding.pry
+
         subject
 
         expect(finding.reload.uuid).to eq(desired_uuid)
