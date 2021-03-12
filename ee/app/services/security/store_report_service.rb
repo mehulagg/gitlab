@@ -234,6 +234,7 @@ module Security
     def update_feedbacks(vulnerability_finding, new_uuid)
       vulnerability_finding.load_feedback.each do |feedback|
         feedback.finding_uuid = new_uuid
+        feedback.vulnerability_data = vulnerability_finding.raw_metadata
         feedback.save!
       end
     end
