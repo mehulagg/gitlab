@@ -17,6 +17,18 @@ RSpec.shared_examples 'Self-managed Core resource access tokens' do
 
       it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
     end
+
+    context 'when resource access tokens are not available' do
+      let(:current_user) { owner }
+      let(:group) { create(:group) }
+      let(:project) { create(:project, group: group) }
+
+      before do
+        group.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+      end
+
+      it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+    end
   end
 
   context 'read resource access tokens' do
