@@ -10,7 +10,7 @@ export default {
   i18n: {
     title: s__('SecurityReports|Monitor vulnerabilities in all of your projects'),
     description: s__(
-      'SecurityReports|Manage and track vulnerabilities identified in your projects’. Add projects you have access to with security testing configured to have their results show here.',
+      'SecurityReports|Manage and track vulnerabilities identified in your selected projects. Vulnerabilities for selected projects with security testing configured are shown here.',
     ),
     primaryButtonText: s__('Add projects'),
     secondaryButtonText: __('Learn more'),

@@ -26809,6 +26809,9 @@ msgstr ""
 msgid "SecurityOrchestration|Security policy project"
 msgstr ""
 
+msgid "SecurityReports  |No vulnerabilities found"
+msgstr ""
+
 msgid "SecurityReports|%{firstProject} and %{secondProject}"
 msgstr ""
 
@@ -26822,6 +26825,9 @@ msgid "SecurityReports|Add projects"
 msgstr ""
 
 msgid "SecurityReports|All"
+msgstr ""
+
+msgid "SecurityReports|Although it's rare to have no vulnerabilities for your group, it can happen. Check your settings to make sure you've set up your dashboard correctly."
 msgstr ""
 
 msgid "SecurityReports|Change status"
@@ -26896,13 +26902,13 @@ msgstr ""
 msgid "SecurityReports|Learn more about setting up your dashboard"
 msgstr ""
 
-msgid "SecurityReports|Manage and track vulnerabilities identified in projects within your group. Projects with security testing configured will have their results show here."
+msgid "SecurityReports|Manage and track vulnerabilities identified in projects within your group. Vulnerabilities in projects are shown here when security testing is configured."
 msgstr ""
 
-msgid "SecurityReports|Manage and track vulnerabilities identified in your project. Projects with security testing configured will have their results show here."
+msgid "SecurityReports|Manage and track vulnerabilities identified in your project. Vulnerabilities are shown here when security testing is configured."
 msgstr ""
 
-msgid "SecurityReports|Manage and track vulnerabilities identified in your projects’. Add projects you have access to with security testing configured to have their results show here."
+msgid "SecurityReports|Manage and track vulnerabilities identified in your selected projects. Vulnerabilities for selected projects with security testing configured are shown here."
 msgstr ""
 
 msgid "SecurityReports|Monitor vulnerabilities in all of your projects"
@@ -26924,9 +26930,6 @@ msgid "SecurityReports|No activity"
 msgstr ""
 
 msgid "SecurityReports|No longer detected"
-msgstr ""
-
-msgid "SecurityReports|No vulnerabilities found"
 msgstr ""
 
 msgid "SecurityReports|No vulnerabilities found for this pipeline"
@@ -27032,9 +27035,6 @@ msgid "SecurityReports|Vulnerability Report"
 msgstr ""
 
 msgid "SecurityReports|While it's rare to have no vulnerabilities for your pipeline, it can happen. In any event, we ask that you double check your settings to make sure all security scanning jobs have passed successfully."
-msgstr ""
-
-msgid "SecurityReports|While it's rare to have no vulnerabilities, it can happen. In any event, we ask that you double check your settings to make sure you've set up your dashboard correctly."
 msgstr ""
 
 msgid "SecurityReports|With issues"
