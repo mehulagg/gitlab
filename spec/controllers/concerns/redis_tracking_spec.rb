@@ -92,14 +92,14 @@ RSpec.describe RedisTracking do
     end
   end
 
-  context 'when user is not logged in and there is a visitor_id' do
+  context 'when user is not logged in' do
     let(:visitor_id) { SecureRandom.uuid }
 
     before do
       routes.draw { get 'show' => 'anonymous#show' }
     end
 
-    it 'tracks the event' do
+    it 'tracks the event when there is a visitor id' do
       cookies[:visitor_id] = { value: visitor_id, expires: 24.months }
 
       expect_tracking
@@ -107,7 +107,7 @@ RSpec.describe RedisTracking do
       get :show
     end
 
-    it 'tracks when no visitor id but use custom id' do
+    it 'tracks when no visitor id but there is custom id' do
       expect_tracking
 
       get :show
