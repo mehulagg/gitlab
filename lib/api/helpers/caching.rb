@@ -32,7 +32,7 @@ module API
       # to export the string without conversion.
       #
       # A cache context can be supplied to add more context to the cache key. This
-      # defaults to including the `current_user` for safety.
+      # defaults to including the `current_user` in every key for safety, unless overridden.
       #
       # @param obj_or_collection [Object, Enumerable<Object>] the object or objects to render
       # @param with [Grape::Entity] the entity to use for rendering

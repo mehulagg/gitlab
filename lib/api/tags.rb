@@ -30,7 +30,7 @@ module API
 
         paginated_tags = paginate(::Kaminari.paginate_array(tags))
 
-        if Feature.enabled?(:api_caching_tags, user_project, type: :ops)
+        if Feature.enabled?(:api_caching_tags, user_project, type: :development)
           present_cached paginated_tags, with: Entities::Tag, project: user_project, cache_context: -> (_tag) { user_project.cache_key }
         else
           present paginated_tags, with: Entities::Tag, project: user_project
