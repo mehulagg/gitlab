@@ -255,7 +255,12 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
 
 - In Vue:
 
-  See the section on [Vue component interpolation](#vue-components-interpolation).
+  Use [`gl-sprintf`](#vue-components-interpolation) if you need to include
+  child components or HTML inside the translation string.
+
+  Otherwise, you _may_ use `sprintf`. If you find you need to pass `false` to
+  stop `sprintf` from escaping your placeholder values, then you should instead
+  be using `gl-sprintf`.
 
 - In JavaScript (when Vue cannot be used):
 
@@ -632,7 +637,7 @@ This also applies when using links in between translated sentences, otherwise th
   {{
       sprintf(s__("ClusterIntegration|Learn more about %{link}"), {
           link: '<a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones" target="_blank" rel="noopener noreferrer">zones</a>'
-      })
+      }, false)
   }}
   ```
 
@@ -643,7 +648,7 @@ This also applies when using links in between translated sentences, otherwise th
       sprintf(s__("ClusterIntegration|Learn more about %{linkStart}zones%{linkEnd}"), {
           linkStart: '<a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones" target="_blank" rel="noopener noreferrer">',
           linkEnd: '</a>',
-      })
+      }, false)
   }}
   ```
 
@@ -689,7 +694,7 @@ Assume you want to print the translatable string
 </template>
 ```
 
-For more information, see the [`gl-sprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-sprintf--default) documentation.
+For more information, see the [`gl-sprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/docs/utilities-sprintf--sentence-with-link) documentation.
 
 ## Updating the PO files with the new content
 
