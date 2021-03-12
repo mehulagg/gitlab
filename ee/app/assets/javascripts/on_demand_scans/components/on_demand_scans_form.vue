@@ -17,6 +17,7 @@ import {
   SCAN_TYPE_LABEL,
   SCAN_TYPE,
 } from 'ee/security_configuration/dast_scanner_profiles/constants';
+import { EXCLUDED_URLS_SEPARATOR } from 'ee/security_configuration/dast_site_profiles_form/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
@@ -339,6 +340,7 @@ export default {
     },
   },
   ON_DEMAND_SCANS_STORAGE_KEY,
+  EXCLUDED_URLS_SEPARATOR,
 };
 </script>
 
@@ -534,7 +536,7 @@ export default {
             <div class="row">
               <profile-selector-summary-cell
                 :label="s__('DastProfiles|Excluded URLs')"
-                :value="selectedSiteProfile.excludedUrls"
+                :value="selectedSiteProfile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
               />
               <profile-selector-summary-cell
                 :label="s__('DastProfiles|Request headers')"

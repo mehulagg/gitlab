@@ -18,13 +18,14 @@ import { __, s__, n__, sprintf } from '~/locale';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import tooltipIcon from '../../dast_scanner_profiles/components/tooltip_icon.vue';
+import {
+  MAX_CHAR_LIMIT_EXCLUDED_URLS,
+  MAX_CHAR_LIMIT_REQUEST_HEADERS,
+  EXCLUDED_URLS_SEPARATOR,
+} from '../constants';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
 import DastSiteAuthSection from './dast_site_auth_section.vue';
-
-const MAX_CHAR_LIMIT_EXCLUDED_URLS = 2048;
-const MAX_CHAR_LIMIT_REQUEST_HEADERS = 2048;
-const EXCLUDED_URLS_SEPARATOR = ',';
 
 export default {
   name: 'DastSiteProfileForm',
