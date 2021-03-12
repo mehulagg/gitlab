@@ -18,9 +18,10 @@ module Gitlab
           :milestone_title,
           :sort,
           :direction,
+          :stage_id,
           label_name: [].freeze,
           assignee_username: [].freeze,
-          project_ids: [].freeze
+          project_ids: [].freeze,
         ].freeze
 
         FINDER_PARAM_NAMES = [
@@ -39,6 +40,7 @@ module Gitlab
         attribute :value_stream
         attribute :sort
         attribute :direction
+        attribute :stage_id
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -85,6 +87,7 @@ module Gitlab
             attrs[:milestone] = milestone_title if milestone_title.present?
             attrs[:sort] = sort if sort.present?
             attrs[:direction] = direction if direction.present?
+            attrs[:stage_id] = stage_id if stage_id.present?
           end
         end
 
