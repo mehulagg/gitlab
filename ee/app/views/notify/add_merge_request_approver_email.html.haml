@@ -14,5 +14,8 @@
 
 = render_if_exists 'notify/merge_request_approvers', presenter: @mr_presenter
 
+- if @merge_request.reviewers.any?
+  = reviewers_label(@merge_request)
+
 - if @merge_request.description
   = markdown(@merge_request.description, pipeline: :email, author: @merge_request.author)
