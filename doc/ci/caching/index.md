@@ -581,6 +581,8 @@ via the GitLab UI:
 
 1. On the next push, your CI/CD job uses a new cache.
 
+NOTE:Clearing the cache will modify your cache name to include an incremental index for each time it has been cleared on an specific project, so your value will change from **cache_name** to **cache_name-#**.
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
