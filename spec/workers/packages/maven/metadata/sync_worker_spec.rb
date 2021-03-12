@@ -57,9 +57,10 @@ RSpec.describe Packages::Maven::Metadata::SyncWorker, type: :worker do
         let(:project) { create(:project) }
 
         it 'does not create the updated metadata files' do
+          expect(worker).to receive(:log_extra_metadata_on_done).with(:message, 'Non existing versionless package')
+
           expect { subject }
             .to change { ::Packages::PackageFile.count }.by(0)
-            .and raise_error(described_class::SyncError, 'Non existing versionless package')
         end
       end
 

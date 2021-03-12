@@ -13,7 +13,7 @@ module Packages
         def execute
           return error('Blank package name') unless package_name
           return error('Not allowed') unless Ability.allowed?(current_user, :destroy_package, project)
-          return error('Non existing versionless package') unless versionless_package_for_versions
+          return success('Non existing versionless package') unless versionless_package_for_versions
           return error('Non existing metadata file for versions') unless metadata_package_file_for_versions
 
           update_versions_xml

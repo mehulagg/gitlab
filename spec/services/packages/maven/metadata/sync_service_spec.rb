@@ -126,7 +126,7 @@ RSpec.describe ::Packages::Maven::Metadata::SyncService do
           expect(::Packages::Maven::Metadata::CreateVersionsXmlService).not_to receive(:new)
         end
 
-        it_behaves_like 'returning an error service response', message: 'Non existing versionless package'
+        it_behaves_like 'returning a success service response', message: 'Non existing versionless package'
       end
 
       context 'without a metadata package file for versions' do
