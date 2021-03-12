@@ -6,18 +6,25 @@ RSpec.describe Ci::AbortPipelinesService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, namespace: user.namespace) }
 
-  describe '#execute' do
-    let_it_be(:pipeline) { create(:ci_pipeline, :running, project: project) }
-    let_it_be(:build) { create(:ci_build, :running, pipeline: pipeline) }
+  let_it_be(:cancelable_pipeline, reload: true) { create(:ci_pipeline, :running, project: project, user: user) }
+  let_it_be(:manual_pipeline, reload: true) { create(:ci_pipeline, status: :manual, project: project, user: user) } # not cancelable
+  let_it_be(:other_users_pipeline, reload: true) { create(:ci_pipeline, :running, project: project, user: create(:user)) } # not this user's pipeline
+  let_it_be(:build, reload: true) { create(:ci_build, :running, pipeline: cancelable_pipeline) }
 
+  describe '#execute' do
     context 'with project pipelines' do
       it 'cancels all running pipelines and related jobs' do
         result = described_class.new.execute(project.all_pipelines)
 
         expect(result).to be_success
-        expect(pipeline.reload).to be_canceled
-        expect(pipeline.stages).to all(be_canceled)
-        expect(build.reload).to be_canceled
+        expect(cancelable_pipeline).to be_canceled
+        expect(cancelable_pipeline.stages).to all(be_canceled)
+        expect(build).to be_canceled
+
+        expect(other_users_pipeline).to be_canceled
+        expect(other_users_pipeline.stages).to all(be_canceled)
+
+        expect(manual_pipeline).not_to be_canceled
       end
 
       it 'avoids N+1 queries' do
@@ -32,21 +39,16 @@ RSpec.describe Ci::AbortPipelinesService do
     end
 
     context 'with user pipelines' do
-      let_it_be(:cancelable_pipeline) { create(:ci_pipeline, :running, project: project, user: user) }
-      let_it_be(:manual_pipeline) { create(:ci_pipeline, status: :manual, project: project, user: user) } # not cancelable
-      let_it_be(:unrelated_pipeline) { create(:ci_pipeline, :running, project: project, user: create(:user)) } # not this user's pipeline
-      let_it_be(:build) { create(:ci_build, :running, pipeline: cancelable_pipeline) }
-
       it 'cancels all running pipelines and related jobs' do
         result = described_class.new.execute(user.pipelines)
 
         expect(result).to be_success
-        expect(cancelable_pipeline.reload).to be_canceled
+        expect(cancelable_pipeline).to be_canceled
         expect(cancelable_pipeline.stages).to all(be_canceled)
+        expect(build).to be_canceled
 
-        expect(manual_pipeline.reload).not_to be_canceled
-        expect(unrelated_pipeline.reload).not_to be_canceled
-        expect(build.reload).to be_canceled
+        expect(manual_pipeline).not_to be_canceled
+        expect(other_users_pipeline).not_to be_canceled
       end
 
       it 'avoids N+1 queries' do
