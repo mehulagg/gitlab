@@ -15,11 +15,11 @@ module Gitlab
             private
 
             def count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
-              name_suggestion(column: column, relation: relation, prefix:  'count')
+              name_suggestion(column: column, relation: relation, prefix: 'count')
             end
 
             def distinct_count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
-              name_suggestion(column: column, relation: relation, prefix:  'count_distinct', distinct: :distinct)
+              name_suggestion(column: column, relation: relation, prefix: 'count_distinct', distinct: :distinct)
             end
 
             def redis_usage_counter
