@@ -6404,6 +6404,30 @@ Status: `implemented`
 
 Tiers: `premium`, `ultimate`
 
+### `g_project_management_epic_labels_changed_monthly`
+
+Count of MAU chaging the epic lables
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312195730_g_product_planning_epic_labels_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `g_project_management_epic_labels_changed_weeekly`
+
+Count of WAU chaging the epic lables
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312195849_g_product_planning_epic_labels_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `geo_enabled`
 
 Is Geo enabled?
