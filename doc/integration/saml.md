@@ -185,7 +185,7 @@ Your identity provider may require additional configuration, such as the followi
 | Check SAML request signature | No | GitLab does not sign SAML requests, but does check the signature on the SAML response. |
 | Default RelayState | Optional | The URL users should end up on after signing in through a button on your identity provider's list of apps. |
 | NameID format | `Persistent` | See [NameID format details](../user/group/saml_sso/index.md#nameid-format). |
-| Additional URLs | | You may need to use the issuer (or identifier) or  the assertion consumer service URL in other fields on some providers. |
+| Additional URLs | | You may need to use the issuer (or identifier) or the assertion consumer service URL in other fields on some providers. |
 | Single sign out URL | | Not supported |
 
 For example configurations, see the [notes on specific providers](#providers).
