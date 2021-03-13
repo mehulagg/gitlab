@@ -165,7 +165,7 @@ export default {
         if (toYaml(fromYaml(manifest)) === manifest) {
           Object.assign(this.policy, fromYaml(manifest));
         } else {
-          this.yamlEditorError = new Error('Unsupported attribute');
+          throw new Error(s__('NetworkPolicies|Unsupported attribute'));
         }
       } catch (error) {
         this.yamlEditorError = error;
