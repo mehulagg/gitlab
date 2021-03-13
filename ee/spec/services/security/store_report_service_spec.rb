@@ -189,7 +189,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'updates UUIDv4 to UUIDv5' do
-        require 'pry'; binding.pry
+        finding.uuid = '00000000-1111-2222-3333-444444444444'
+        finding.save!
+
+        # this report_finding should be used to update the finding's uuid
+        report_finding = new_report.findings.find { |f| f.location.fingerprint == 'd869ba3f0b3347eb2749135a437dc07c8ae0f420' }
+        allow(report_finding).to receive(:uuid).and_return(desired_uuid)
+        report_finding.fingerprints.pop
 
         subject
 
