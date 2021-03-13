@@ -224,7 +224,7 @@ RSpec.describe Gitlab::Utils::UsageData do
       it 'returns the fallback when Redis HLL raises any error' do
         stub_const("Gitlab::Utils::UsageData::FALLBACK", 15)
 
-        expect(described_class.redis_usage_data { raise Gitlab::UsageDataCounters::HLLRedisCounter::CategoryMismatch } ).to eq(15)
+        expect(described_class.redis_usage_data { raise Gitlab::UsageDataCounters::HLLRedisCounter::UnknownEvent } ).to eq(15)
       end
 
       it 'returns the evaluated block when given' do
