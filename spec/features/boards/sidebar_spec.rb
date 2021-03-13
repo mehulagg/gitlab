@@ -34,6 +34,7 @@ RSpec.describe 'Issue Boards', :js do
     stub_application_setting(application_settings)
 
     visit project_board_path(project, board)
+
     wait_for_requests
   end
 
