@@ -58,10 +58,24 @@ module Gitlab
 
         def unique_events(event_names:, start_date:, end_date:, context: '')
           count_unique_events(event_names: event_names, start_date: start_date, end_date: end_date, context: context) do |events|
-            Gitlab::AppLogger.error("SlotMismatch for events #{events}") unless events_in_same_slot?(events)
-            Gitlab::AppLogger.error("CategoryMismatch for events #{events}") unless events_in_same_category?(events)
-            Gitlab::AppLogger.error("AggregationMismatch for events #{events}") unless events_same_aggregation?(events)
-            Gitlab::AppLogger.error("InvalidContext error") if context.present? && !context.in?(valid_context_list)
+            unless events_in_same_slot?(events)
+              Gitlab::AppLogger.error("SlotMismatch for events #{events}")
+              return
+            end
+
+            unless events_in_same_category?(events)
+              Gitlab::AppLogger.error("CategoryMismatch for events #{events}")
+              return
+            end
+
+            unless events_same_aggregation?(events)
+              Gitlab::AppLogger.error("AggregationMismatch for events #{events}")
+              return
+            end
+
+            if context.present? && !context.in?(valid_context_list)
+              Gitlab::AppLogger.error("InvalidContext error")
+            end
           end
         end
 
@@ -111,8 +125,15 @@ module Gitlab
 
         def calculate_events_union(event_names:, start_date:, end_date:)
           count_unique_events(event_names: event_names, start_date: start_date, end_date: end_date) do |events|
-            Gitlab::AppLogger.error("SlotMismatch for events #{events}") unless events_in_same_slot?(events)
-            Gitlab::AppLogger.error("AggregationMismatch for events #{events}") unless events_same_aggregation?(events)
+            unless events_in_same_slot?(events)
+              Gitlab::AppLogger.error("SlotMismatch for events #{events}")
+              return
+            end
+
+            unless events_same_aggregation?(events)
+              Gitlab::AppLogger.error("AggregationMismatch for events #{events}")
+              return
+            end
           end
         end
 

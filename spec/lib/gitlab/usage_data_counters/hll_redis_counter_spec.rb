@@ -147,8 +147,10 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
           described_class.track_event(:g_analytics_contribution, values: values)
         end
 
-        it "raise error if metrics don't have same aggregation" do
-          expect { described_class.track_event(different_aggregation, values: entity1, time: Date.current) }.to raise_error(Gitlab::UsageDataCounters::HLLRedisCounter::UnknownAggregation)
+        it "logs error if metrics don't have same aggregation" do
+          expect(Gitlab::AppLogger).to receive(:error).with('UnknownAggregation Use :daily or :weekly aggregation')
+
+          described_class.track_event(different_aggregation, values: entity1, time: Date.current)
         end
 
         it 'raise error if metrics of unknown event' do
@@ -289,22 +291,22 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
         described_class.track_event(daily_event, values: entity4, time: 29.days.ago)
       end
 
-      it 'raise error if metrics are not in the same slot' do
-        expect do
-          described_class.unique_events(event_names: [compliance_slot_event, analytics_slot_event], start_date: 4.weeks.ago, end_date: Date.current)
-        end.to raise_error(Gitlab::UsageDataCounters::HLLRedisCounter::SlotMismatch)
+      it 'logs error if metrics are not in the same slot' do
+        expect(Gitlab::AppLogger).to receive(:error).with(/SlotMismatch for events/)
+
+        described_class.unique_events(event_names: [compliance_slot_event, analytics_slot_event], start_date: 4.weeks.ago, end_date: Date.current)
       end
 
-      it 'raise error if metrics are not in the same category' do
-        expect do
-          described_class.unique_events(event_names: [category_analytics_event, category_productivity_event], start_date: 4.weeks.ago, end_date: Date.current)
-        end.to raise_error(Gitlab::UsageDataCounters::HLLRedisCounter::CategoryMismatch)
+      it 'logs error if metrics are not in the same category' do
+        expect(Gitlab::AppLogger).to receive(:error).with(/CategoryMismatch for events/)
+
+        described_class.unique_events(event_names: [category_analytics_event, category_productivity_event], start_date: 4.weeks.ago, end_date: Date.current)
       end
 
-      it "raise error if metrics don't have same aggregation" do
-        expect do
-          described_class.unique_events(event_names: [daily_event, weekly_event], start_date: 4.weeks.ago, end_date: Date.current)
-        end.to raise_error(Gitlab::UsageDataCounters::HLLRedisCounter::AggregationMismatch)
+      it "logs error if metrics don't have same aggregation" do
+        expect(Gitlab::AppLogger).to receive(:error).with(/AggregationMismatch for events/)
+
+        described_class.unique_events(event_names: [daily_event, weekly_event], start_date: 4.weeks.ago, end_date: Date.current)
       end
 
       context 'when data for the last complete week' do
@@ -415,8 +417,10 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
     end
 
     context 'with invalid context' do
-      it 'raise error' do
-        expect { described_class.unique_events(event_names: 'event_name_1', start_date: 4.weeks.ago, end_date: Date.current, context: invalid_context) }.to raise_error(Gitlab::UsageDataCounters::HLLRedisCounter::InvalidContext)
+      it 'logs error' do
+        expect(Gitlab::AppLogger).to receive(:error).with('InvalidContext error')
+
+        described_class.unique_events(event_names: 'event_name_1', start_date: 4.weeks.ago, end_date: Date.current, context: invalid_context)
       end
     end
   end
@@ -505,8 +509,11 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
     end
 
     it 'validates and raise exception if events has mismatched slot or aggregation', :aggregate_failure do
-      expect { described_class.calculate_events_union(**time_range.merge(event_names: %w[event1_slot event4])) }.to raise_error described_class::SlotMismatch
-      expect { described_class.calculate_events_union(**time_range.merge(event_names: %w[event5_slot event3_slot])) }.to raise_error described_class::AggregationMismatch
+      expect(Gitlab::AppLogger).to receive(:error).with(/SlotMismatch for events/)
+      expect(Gitlab::AppLogger).to receive(:error).with(/AggregationMismatch for events/)
+
+      described_class.calculate_events_union(**time_range.merge(event_names: %w[event1_slot event4]))
+      described_class.calculate_events_union(**time_range.merge(event_names: %w[event5_slot event3_slot]))
     end
   end
 
