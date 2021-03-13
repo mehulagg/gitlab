@@ -8,11 +8,48 @@ class TrialsController < ApplicationController
   before_action :check_if_gl_com_or_dev
   before_action :authenticate_user!
   before_action :find_or_create_namespace, only: :apply
+  before_action :find_namespace, only: [:extend_trial, :reactivate_trial]
+  before_action :authenticate_owner!, only: [:extend_trial, :reactivate_trial]
+
 
   feature_category :purchase
 
   def new
     record_experiment_user(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
+  end
+
+  def extend_trial
+    # return redirect_to "http://192.168.0.64:3000"
+    # return head 200
+    # return
+
+    # require 'pry'
+    # binding.pry
+    puts "X" * 100
+    pp @namespace.can_extend?
+    pp @namespace.invalid?
+
+    return render_403 unless @namespace.can_extend?
+
+    return render_403 if @namespace.invalid?
+
+    @result = GitlabSubscriptions::ExtendTrialService.new.execute(extend_reactivate_trial_params)
+
+
+    pp @result
+
+    if @result&.dig(:success)
+      head 200
+      # redirect_to group_url(@namespace, { trial: true })
+    else
+      render_403
+    end
+
+    # if @namespace.gitlab_subscription.extend_trial
+    #   head 200
+    # else
+    #   render_403 #403? or other code? error message?
+    # end
   end
 
   def select
@@ -64,6 +101,14 @@ class TrialsController < ApplicationController
     redirect_to new_trial_registration_path, alert: I18n.t('devise.failure.unauthenticated')
   end
 
+  def authenticate_owner!
+    pp @namespace.owners
+    pp current_user
+    pp @namespace.owners.include?(current_user)
+
+    render_403 unless @namespace.owners.include?(current_user)
+  end
+
   def company_params
     params.permit(:company_name, :company_size, :first_name, :last_name, :phone_number, :number_of_users, :country)
           .merge(extra_params)
@@ -90,12 +135,33 @@ class TrialsController < ApplicationController
     }
   end
 
+  def extend_reactivate_trial_params
+    apply_trial_params
+  end
+
   def find_or_create_namespace
     @namespace = if find_namespace?
                    current_user.namespaces.find_by_id(params[:namespace_id])
                  elsif can_create_group?
                    create_group
                  end
+
+    render_404 unless @namespace
+  end
+
+  def find_namespace
+    # require 'pry'
+    # binding.pry
+
+    @namespace = if find_namespace?
+                   current_user.namespaces.find_by_id(params[:namespace_id])
+                 end
+
+    puts "T" * 100
+    pp params
+    pp @namespace
+    pp @namespace.gitlab_subscription
+    raise 'failed to find namespace from method `find_namespace`' unless @namespace
 
     render_404 unless @namespace
   end
