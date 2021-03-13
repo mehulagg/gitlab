@@ -87,7 +87,7 @@ After you set up your identity provider to work with GitLab, you must configure 
 ![Group SAML Settings for GitLab.com](img/group_saml_settings_v13_3.png)
 
 NOTE:
-Please note that the certificate [fingerprint algorithm](#additional-providers-and-setup-options) must be in SHA1. When configuring the identity provider, use a secure signature algorithm.
+Please note that the certificate [fingerprint algorithm](../../../integration/saml.md#notes-on-configuring-your-identity-provider) must be in SHA1. When configuring the identity provider, use a secure signature algorithm.
 
 ### SSO enforcement
 
@@ -112,7 +112,7 @@ The SAML standard means that a wide range of identity providers will work with G
 
 When [configuring your identity provider](#configuring-your-identity-provider), please consider the notes below for specific providers to help avoid common issues and as a guide for terminology used.
 
-For providers not listed below, you can refer to the [instance SAML notes on configuring an identity provider](#notes-on-configuring-your-identity-provider)
+For providers not listed below, you can refer to the [instance SAML notes on configuring an identity provider](../../../integration/saml.md#notes-on-configuring-your-identity-provider)
 for additional guidance on information your identity provider may require.
 
 Please note that GitLab provides the following for guidance only.

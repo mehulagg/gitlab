@@ -754,7 +754,7 @@ You will also need to setup the following SAML attribute mappings:
 | Basic Information > First name    | `first_name`   |
 | Basic Information > Last name     | `last_name`    |
 
-You may also use some of this information when you [Configure GitLab](#configure-gitlab).
+You may also use some of this information when you [configure GitLab](#general-setup).
 
 When configuring the Google Workspace SAML app, be sure to record the following information:
 
