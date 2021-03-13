@@ -125,6 +125,12 @@
     @media (min-width: map-get($grid-breakpoints, sm)) and (max-width: map-get($grid-breakpoints, sm)) {
       box-shadow: inset -1px 0 0 $border-color, 2px 1px 3px $dropdown-shadow-color;
     }
+
+    &.active.home a {
+      margin-left: 4px;
+      // Subtract width of left border on active element
+      padding-left: $gl-padding-12;
+    }
   }
 
   @mixin collapse-contextual-sidebar {
@@ -195,12 +201,6 @@
       > a {
         font-weight: $gl-font-weight-bold;
         background-color: $link-hover-background;
-      }
-
-      &.home a {
-        margin-left: 4px;
-        // Subtract width of left border on active element
-        padding-left: $gl-padding-12;
       }
     }
   }
