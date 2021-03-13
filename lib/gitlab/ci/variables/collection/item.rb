@@ -34,9 +34,7 @@ module Gitlab
             strong_memoize(:depends_on) do
               next if raw
 
-              next unless ExpandVariables.possible_var_reference?(value)
-
-              value.scan(ExpandVariables::VARIABLES_REGEXP).map(&:first)
+              Gitlab::Ci::Variables::ExpressionParser.new(value).dependencies
             end
           end
 

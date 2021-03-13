@@ -291,6 +291,14 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
               ],
               keep_undefined: false
             },
+            "complex expansions with escaped characters": {
+              variables: [
+                { key: 'variable3', value: 'key_${variable}_$${HOME}_%%HOME%%' },
+                { key: 'variable', value: '$variable2' },
+                { key: 'variable2', value: 'value2' }
+              ],
+              keep_undefined: false
+            },
             "array with cyclic dependency": {
               variables: [
                 { key: 'variable', value: '$variable2' },
@@ -391,6 +399,30 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
                 { key: 'variable3', value: 'keyvalueresult' }
               ]
             },
+            "complex expansions with escaped characters keeping undefined": {
+              variables: [
+                { key: 'variable3', value: 'key_${variable}_$${HOME}_%%HOME%%' },
+                { key: 'variable', value: '$variable2' },
+                { key: 'variable2', value: 'value' }
+              ],
+              keep_undefined: true,
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'value' },
+                { key: 'variable3', value: 'key_value_${HOME}_%HOME%' }
+              ]
+            },
+            "complex expansions with escaped characters discarding undefined": {
+              variables: [
+                { key: 'variable2', value: 'key_${variable4}_$${HOME}_%%HOME%%' },
+                { key: 'variable', value: 'value' }
+              ],
+              keep_undefined: false,
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'key__${HOME}_%HOME%' }
+              ]
+            },
             "out-of-order expansion": {
               variables: [
                 { key: 'variable3', value: 'key$variable2$variable' },
@@ -417,7 +449,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
                 { key: 'variable3', value: 'keyresultvalue' }
               ]
             },
-            "missing variable": {
+            "missing variable discarding original": {
               variables: [
                 { key: 'variable2', value: 'key$variable' }
               ],

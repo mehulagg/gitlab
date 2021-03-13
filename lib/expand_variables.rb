@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# ExpandVariables is a legacy class used to expand variable values.
+# GitLab::Ci::Variables::Collection should be used when possible as it supports
+# more advanced functionality, such as:
+# - recursive resolving of values
+# - circular dependency detection
+# - escaping ($$, %%)
 module ExpandVariables
   VARIABLES_REGEXP = /\$([a-zA-Z_][a-zA-Z0-9_]*)|\${\g<1>}|%\g<1>%/.freeze
 

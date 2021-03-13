@@ -64,12 +64,7 @@ module Gitlab
         end
 
         def expand_value(value, keep_undefined: false)
-          value.gsub(ExpandVariables::VARIABLES_REGEXP) do
-            match = Regexp.last_match
-            result = @variables_by_key[match[1] || match[2]]&.value
-            result ||= match[0] if keep_undefined
-            result
-          end
+          Gitlab::Ci::Variables::ExpressionParser.new(value).expand(self, keep_undefined)
         end
 
         def sort_and_expand_all(project, keep_undefined: false)
