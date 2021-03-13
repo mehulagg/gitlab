@@ -8,7 +8,7 @@ module SystemCheck
       def skip?
         return true if omnibus_gitlab?
 
-        unless mail_room_configured?
+        unless mail_room_enabled? || mail_room_configured?
           self.skip_reason = "can't check because of previous errors"
           true
         end
@@ -20,16 +20,24 @@ module SystemCheck
 
       def show_error
         try_fixing_it(
-          sudo_gitlab('RAILS_ENV=production bin/mail_room start')
+          'Start mail_room'
         )
         for_more_information(
-          see_installation_guide_section('Install Init Script'),
+          'doc/administration/incoming_email.md',
           'see log/mail_room.log for possible errors'
         )
         fix_and_rerun
       end
 
       private
+
+      def mail_room_enabled?
+        target = '/etc/systemd/system/gitlab.target'
+        service = '/etc/systemd/system/gitlab-mailroom.service'
+        wants = '/etc/systemd/system/gitlab.target.wants/gitlab-mailroom.service'
+
+        File.exist?(target) && File.exist?(service) && File.symlink?(wants)
+      end
 
       def mail_room_configured?
         path = '/etc/default/gitlab'
