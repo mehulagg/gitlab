@@ -11,14 +11,14 @@ This page describes instance-wide SAML for self-managed GitLab instances. For SA
 
 You should also reference the [OmniAuth documentation](omniauth.md) for general settings that apply to all OmniAuth providers.
 
-## Common SAML Terms
+## Glossary of common terms
 
 | Term                           | Description |
 |--------------------------------|-------------|
-| Identity Provider (IdP)        | The service which manages your user identities, such as ADFS, Okta, OneLogin, or Ping Identity. |
-| Service Provider (SP)          | SAML considers GitLab to be a service provider. |
+| Identity provider (IdP)        | The service which manages your user identities, such as ADFS, Okta, OneLogin, or Ping Identity. |
+| Service provider (SP)          | SAML considers GitLab to be a service provider. |
 | Assertion                      | A piece of information about a user's identity, such as their name or role. Also known as claims or attributes. |
-| SSO                            | Single Sign-On. |
+| Single Sign-On (SSO)           | Name of authentication scheme. |
 | Assertion consumer service URL | The callback on GitLab where users will be redirected after successfully authenticating with the identity provider. |
 | Issuer                         | How GitLab identifies itself to the identity provider. Also known as a "Relying party trust identifier". |
 | Certificate fingerprint        | Used to confirm that communications over SAML are secure by checking that the server is signing communications with the correct certificate. Also known as a certificate thumbprint. |
@@ -26,8 +26,8 @@ You should also reference the [OmniAuth documentation](omniauth.md) for general 
 ## General Setup
 
 GitLab can be configured to act as a SAML 2.0 Service Provider (SP). This allows
-GitLab to consume assertions from a SAML 2.0 Identity Provider (IdP) such as
-Microsoft ADFS to authenticate users.
+GitLab to consume assertions from a SAML 2.0 Identity Provider (IdP), such as
+Okta to authenticate users.
 
 First configure SAML 2.0 support in GitLab, then register the GitLab application
 in your SAML IdP:
@@ -52,7 +52,7 @@ in your SAML IdP:
    ```
 
 1. To allow your users to use SAML to sign up without having to manually create
-   an account first, don't forget to add the following values to your configuration:
+   an account first, add the following values to your configuration:
 
    For Omnibus package:
 
@@ -85,7 +85,8 @@ in your SAML IdP:
    auto_link_saml_user: true
    ```
 
-1. Ensure that the SAML [`NameID`](../user/group/saml_sso/index.md#nameid) and email address are fixed for each user, as described in the section on [Security](#security). Otherwise, your users will be able to sign in as other authorized users.
+1. Ensure that the SAML [`NameID`](../user/group/saml_sso/index.md#nameid) and email address are fixed for each user,
+as described in the section on [Security](#security). Otherwise, your users will be able to sign in as other authorized users.
 
 1. Add the provider configuration:
 
@@ -102,7 +103,7 @@ in your SAML IdP:
                 issuer: 'https://gitlab.example.com',
                 name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
               },
-       label: 'Company Login' # optional label for SAML login button, defaults to "Saml"
+       label: 'Provider name' # optional label for SAML login button, defaults to "Saml"
      }
    ]
    ```
@@ -134,6 +135,7 @@ in your SAML IdP:
    be a SHA1 fingerprint; check
    [the OmniAuth SAML documentation](https://github.com/omniauth/omniauth-saml)
    for more details on these options.
+   See the [notes on configuring your identity provider](#notes-on-configuring-your-identity-provider) for more information.
 
 1. Change the value of `issuer` to a unique name, which will identify the application
    to the IdP.
@@ -151,15 +153,57 @@ configuration information to the IdP. To build the metadata URL for GitLab, appe
 https://gitlab.example.com/users/auth/saml/metadata
 ```
 
-At a minimum the IdP *must* provide a claim containing the user's email address, using
-claim name `email` or `mail`. The email will be used to automatically generate the GitLab
-username. GitLab will also use claims with name `name`, `first_name`, `last_name`
-(see [the OmniAuth SAML gem](https://github.com/omniauth/omniauth-saml/blob/master/lib/omniauth/strategies/saml.rb)
-for supported claims).
+At a minimum the IdP *must* provide a claim containing the user's email address using `email` or `mail`.
+See [the assertions list](#assertions) for other available claims.
 
 On the sign in page there should now be a SAML button below the regular sign in form.
 Click the icon to begin the authentication process. If everything goes well the user
 will be returned to GitLab and will be signed in.
+
+### Notes on configuring your identity provider
+
+A SAML app should be configured in the identity provider at minimum with:
+
+- assertion consumer service URL
+- issuer
+- [`NameID`](../user/group/saml_sso/index.md#nameid)
+- [email assertion claim](#assertions)
+
+Your identity provider may require additional configuration, such as the following:
+
+| Field | Value | Notes |
+|-------|-------|-------|
+| SAML profile | Web browser SSO profile | GitLab uses SAML to sign users in through their browser. No requests are made directly to the identity provider. |
+| SAML request binding | HTTP Redirect | GitLab (the service provider) redirects users to your identity provider with a base64 encoded `SAMLRequest` HTTP parameter. |
+| SAML response binding | HTTP POST | Your identity provider responds to users with an HTTP form including the `SAMLResponse`, which a user's browser submits back to GitLab. |
+| Sign SAML response | Yes | Required to prevent tampering. |
+| X.509 certificate in response | Yes | Used to sign the response and checked against the provided fingerprint. |
+| Fingerprint algorithm | SHA-1  | A SHA-1 hash of the certificate is used to sign the SAML Response. |
+| Signature algorithm | SHA-1/SHA-256/SHA-384/SHA-512 | Also known as the digest method, this can be specified in the SAML response. It determines how a response is signed. |
+| Encrypt SAML assertion | No | TLS is used between your identity provider, the user's browser, and GitLab. |
+| Sign SAML assertion | Optional | Assertions do not need to be signed. We validate their integrity by requiring the whole response to be signed. |
+| Check SAML request signature | No | GitLab does not sign SAML requests, but does check the signature on the SAML response. |
+| Default RelayState | Optional | The URL users should end up on after signing in through a button on your identity provider's list of apps. |
+| NameID format | `Persistent` | See [NameID format details](../user/group/saml_sso/index.md#nameid-format). |
+| Additional URLs | | You may need to use the issuer (or identifier) or  the assertion consumer service URL in other fields on some providers. |
+| Single sign out URL | | Not supported |
+
+For example configurations, see the [notes on specific providers](#providers).
+
+### Assertions
+
+| Field           | Supported keys |
+|-----------------|----------------|
+| Email (required)| `email`, `mail` |
+| Username        | `username`, `nickname` |
+| Full Name       | `name` |
+| First Name      | `first_name`, `firstname`, `firstName` |
+| Last Name       | `last_name`, `lastname`, `lastName` |
+
+If username is not specified, the email will be used to automatically generate the GitLab username.
+
+Please refer to [the OmniAuth SAML gem](https://github.com/omniauth/omniauth-saml/blob/master/lib/omniauth/strategies/saml.rb)
+for a full list of supported claims.
 
 ## SAML Groups
 
@@ -649,6 +693,79 @@ Group SAML on a self-managed instance is limited when compared to the recommende
         - { name: 'group_saml' }
     ```
 
+## Providers
+
+The SAML standard means that a wide range of identity providers will work with GitLab. Your identity provider may have relevant documentation. It may be generic SAML documentation, or specifically targeted for GitLab.
+
+Examples:
+
+- [ADFS (Active Directory Federation Services)](https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/create-a-relying-party-trust)
+- [Auth0](https://auth0.com/docs/protocols/saml-protocol/configure-auth0-as-saml-identity-provider)
+- [PingOne by Ping Identity](https://docs.pingidentity.com/bundle/pingone/page/xsh1564020480660-1.html)
+
+Please note that GitLab provides the following for guidance only.
+If you have any questions on configuring the SAML app, please contact your provider's support.
+
+### Okta setup notes
+
+The following guidance is based on this Okta article, on adding a [SAML Application with an Okta Developer account](https://support.okta.com/help/s/article/Why-can-t-I-add-a-SAML-Application-with-an-Okta-Developer-account?language=en_US):
+
+1. In the Okta admin section, make sure to select Classic UI view in the top left corner. From there, choose to **Add an App**.
+1. When the app screen comes up you see another button to **Create an App** and
+   choose SAML 2.0 on the next screen.
+1. Optionally, you can add a logo
+   (you can choose it from <https://about.gitlab.com/press/>). You'll have to
+   crop and resize it.
+1. Next, you'll need the to fill in the SAML general configuration with
+   the assertion consumer service URL as "Single sign-on URL" and
+   the issuer as "Audience URI" along with the [NameID](../user/group/saml_sso/index.md#nameid) and [assertions](#assertions).
+1. The last part of the configuration is the feedback section where you can
+   just say you're a customer and creating an app for internal use.
+1. When you have your app you'll have a few tabs on the top of the app's
+   profile. Click on the SAML 2.0 configuration instructions button.
+1. On the screen that comes up take note of the
+   **Identity Provider Single Sign-On URL** which you'll use for the
+   `idp_sso_target_url` on your GitLab configuration file.
+1. **Before you leave Okta, make sure you add your user and groups if any.**
+
+### Google workspace setup notes
+
+The following guidance is based on this Google Workspace article, on how to [Set up your own custom SAML application](https://support.google.com/a/answer/6087519?hl=en):
+
+Make sure you have access to a Google Workspace [Super Admin](https://support.google.com/a/answer/2405986#super_admin) account.
+   Follow the instructions in the linked Google Workspace article, where you'll need the following information:
+
+|                  | Typical value                                    | Description                                              |
+|------------------|--------------------------------------------------|----------------------------------------------------------|
+| Name of SAML App | GitLab                                           | Other names OK.                                          |
+| ACS URL          | `https://<GITLAB_DOMAIN>/users/auth/saml/callback` | ACS is short for Assertion Consumer Service.             |
+| GITLAB_DOMAIN    | `gitlab.example.com`                             | Set to the domain of your GitLab instance.               |
+| Entity ID        | `https://gitlab.example.com`                     | A value unique to your SAML app, you'll set it to the `issuer` in your GitLab configuration.                         |
+| Name ID format   | EMAIL                                            | Required value. Also known as `name_identifier_format`                    |
+| Name ID          | Primary email address                            | Make sure someone receives content sent to that address                |
+| First name       | `first_name`                                     | Required value to communicate with GitLab.               |
+| Last name        | `last_name`                                      | Required value to communicate with GitLab.               |
+
+You will also need to setup the following SAML attribute mappings:
+
+| Google Directory attributes       | App attributes |
+|-----------------------------------|----------------|
+| Basic information > Email         | `email`        |
+| Basic Information > First name    | `first_name`   |
+| Basic Information > Last name     | `last_name`    |
+
+You may also use some of this information when you [Configure GitLab](#configure-gitlab).
+
+When configuring the Google Workspace SAML app, be sure to record the following information:
+
+|             | Value        | Description                                                                       |
+|-------------|--------------|-----------------------------------------------------------------------------------|
+| SSO URL     | Depends      | Google Identity Provider details. Set to the GitLab `idp_sso_target_url` setting. |
+| Certificate | Downloadable | Run `openssl x509 -in <your_certificate.crt> -noout -fingerprint` to generate the SHA1 fingerprint that can be used in the `idp_cert_fingerprint` setting.                         |
+
+While the Google Workspace Admin provides IDP metadata, Entity ID and SHA-256 fingerprint,
+GitLab does not need that information to connect to the Google Workspace SAML app.
+
 ## Troubleshooting
 
 ### SAML Response
@@ -735,3 +852,11 @@ The following are the most likely reasons that a user is blocked when signing in
 
 - In the configuration, `gitlab_rails['omniauth_block_auto_created_users'] = true` is set and this is the user's first time signing in.
 - There are [`required_groups`](#required-groups) configured, but the user is not a member of one.
+
+### Google workspace troubleshooting tips
+
+The Google Workspace documentation on [SAML app error messages](https://support.google.com/a/answer/6301076?hl=en) is helpful for debugging if you are seeing an error from Google while signing in.
+Pay particular attention to the following 403 errors:
+
+- `app_not_configured`
+- `app_not_configured_for_user`
