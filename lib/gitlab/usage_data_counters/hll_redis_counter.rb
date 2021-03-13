@@ -9,11 +9,6 @@ module Gitlab
 
       EventError = Class.new(StandardError)
       UnknownEvent = Class.new(EventError)
-      UnknownAggregation = Class.new(EventError)
-      AggregationMismatch = Class.new(EventError)
-      SlotMismatch = Class.new(EventError)
-      CategoryMismatch = Class.new(EventError)
-      InvalidContext = Class.new(EventError)
 
       KNOWN_EVENTS_PATH = File.expand_path('known_events/*.yml', __dir__)
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
@@ -63,10 +58,10 @@ module Gitlab
 
         def unique_events(event_names:, start_date:, end_date:, context: '')
           count_unique_events(event_names: event_names, start_date: start_date, end_date: end_date, context: context) do |events|
-            raise SlotMismatch, events unless events_in_same_slot?(events)
-            raise CategoryMismatch, events unless events_in_same_category?(events)
-            raise AggregationMismatch, events unless events_same_aggregation?(events)
-            raise InvalidContext if context.present? && !context.in?(valid_context_list)
+            Gitlab::AppLogger.error("SlotMismatch for events #{events}") unless events_in_same_slot?(events)
+            Gitlab::AppLogger.error("CategoryMismatch for events #{events}") unless events_in_same_category?(events)
+            Gitlab::AppLogger.error("AggregationMismatch for events #{events}") unless events_same_aggregation?(events)
+            Gitlab::AppLogger.error("InvalidContext error") if context.present? && !context.in?(valid_context_list)
           end
         end
 
@@ -116,8 +111,8 @@ module Gitlab
 
         def calculate_events_union(event_names:, start_date:, end_date:)
           count_unique_events(event_names: event_names, start_date: start_date, end_date: end_date) do |events|
-            raise SlotMismatch, events unless events_in_same_slot?(events)
-            raise AggregationMismatch, events unless events_same_aggregation?(events)
+            Gitlab::AppLogger.error("SlotMismatch for events #{events}") unless events_in_same_slot?(events)
+            Gitlab::AppLogger.error("AggregationMismatch for events #{events}") unless events_same_aggregation?(events)
           end
         end
 
@@ -229,8 +224,8 @@ module Gitlab
 
         # Compose the key in order to store events daily or weekly
         def redis_key(event, time, context = '')
-          raise UnknownEvent.new("Unknown event #{event[:name]}") unless known_events_names.include?(event[:name].to_s)
-          raise UnknownAggregation.new("Use :daily or :weekly aggregation") unless ALLOWED_AGGREGATIONS.include?(event[:aggregation].to_sym)
+          Gitlab::AppLogger.error("Unknown event #{event[:name]}") unless known_events_names.include?(event[:name].to_s)
+          Gitlab::AppLogger.error("UnknownAggregation Use :daily or :weekly aggregation") unless ALLOWED_AGGREGATIONS.include?(event[:aggregation].to_sym)
 
           key = apply_slot(event)
           key = apply_time_aggregation(key, time, event)
