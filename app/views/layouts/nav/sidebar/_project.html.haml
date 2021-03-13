@@ -1,29 +1,26 @@
 %aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('projects_side_navigation', 'render', 'projects_side_navigation'), 'aria-label': _('Project navigation') }
   .nav-sidebar-inner-scroll
     .context-header
-      = link_to project_path(@project), title: @project.name do
-        .avatar-container.rect-avatar.s40.project-avatar
-          = project_icon(@project, alt: @project.name, class: 'avatar s40 avatar-tile', width: 40, height: 40)
-        .sidebar-context-title
-          = @project.name
+      = nav_link(path: %w[projects#show], html_options: {class: 'home'}) do
+        = link_to project_path(@project), title: @project.name do
+          .avatar-container.rect-avatar.s40.project-avatar
+            = project_icon(@project, alt: @project.name, class: 'avatar s40 avatar-tile', width: 40, height: 40)
+          .sidebar-context-title
+            = @project.name
     %ul.sidebar-top-level-items.qa-project-sidebar
-      = nav_link(path: sidebar_projects_paths, html_options: { class: 'home' }) do
-        = link_to project_path(@project), class: 'shortcuts-project rspec-project-link', data: { qa_selector: 'project_link' } do
+      = nav_link(path: 'projects#activity') do
+        = link_to activity_project_path(@project), class: 'shortcuts-project rspec-project-link', data: { qa_selector: 'project_link' } do
           .nav-icon-container
-            = sprite_icon('home')
+            = sprite_icon('project')
           %span.nav-item-name
             = _('Project overview')
 
         %ul.sidebar-sub-level-items
-          = nav_link(path: 'projects#show', html_options: { class: "fly-out-top-item" } ) do
-            = link_to project_path(@project) do
+          = nav_link(path: 'projects#activity', html_options: { class: "fly-out-top-item" } ) do
+            = link_to activity_project_path(@project) do
               %strong.fly-out-top-item-name
                 = _('Project overview')
           %li.divider.fly-out-top-item
-          = nav_link(path: 'projects#show') do
-            = link_to project_path(@project), title: _('Project details'), class: 'shortcuts-project' do
-              %span= _('Details')
-
           = nav_link(path: 'projects#activity') do
             = link_to activity_project_path(@project), title: _('Activity'), class: 'shortcuts-project-activity', data: { qa_selector: 'activity_link' } do
               %span= _('Activity')

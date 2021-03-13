@@ -179,6 +179,11 @@
       align-items: center;
       padding: 12px $gl-padding;
       color: $gl-text-color-secondary;
+
+      &:hover {
+        background-color: $link-hover-background;
+        color: $gl-text-color;
+      }
     }
 
     .nav-item-name {
@@ -186,8 +191,16 @@
     }
 
     &.active {
+      background-color: $link-hover-background;
       > a {
         font-weight: $gl-font-weight-bold;
+        background-color: $link-hover-background;
+      }
+
+      &.home a {
+        margin-left: 4px;
+        // Subtract width of left border on active element
+        padding-left: $gl-padding-12;
       }
     }
   }
