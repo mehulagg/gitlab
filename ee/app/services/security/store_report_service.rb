@@ -138,7 +138,7 @@ module Security
       find_params = {
         # this isn't taking prioritization into account (happens in the filter
         # block below), but it *does* limit the number of findings we have to sift through
-        uuid: [finding.uuid, *finding.fingerprint_uuids],
+        location_fingerprint: [finding.location.fingerprint, *finding.fingerprints.map(&:fingerprint_hex)],
         scanner: scanners_objects[finding.scanner.key],
         primary_identifier: identifiers_objects[finding.primary_identifier.key]
       }
@@ -164,6 +164,7 @@ module Security
             .find_or_initialize_by(find_params)
         end
 
+        vulnerability_finding.uuid = finding.uuid
         vulnerability_finding.location_fingerprint = finding.location.fingerprint
         vulnerability_finding.location = create_params.dig(:location)
         vulnerability_finding.save!
