@@ -1,4 +1,5 @@
 <script>
+import { GlAlert } from '@gitlab/ui';
 import { mapGetters, mapActions } from 'vuex';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
 import { __ } from '~/locale';
@@ -12,7 +13,10 @@ import placeholderSystemNote from '../../vue_shared/components/notes/placeholder
 import skeletonLoadingContainer from '../../vue_shared/components/notes/skeleton_note.vue';
 import systemNote from '../../vue_shared/components/notes/system_note.vue';
 import * as constants from '../constants';
+
 import eventHub from '../event_hub';
+import { MR_METADATA_NETWORK_ERROR_FAILED } from '../events';
+
 import commentForm from './comment_form.vue';
 import discussionFilterNote from './discussion_filter_note.vue';
 import noteableDiscussion from './noteable_discussion.vue';
@@ -22,6 +26,7 @@ import SidebarSubscription from './sidebar_subscription.vue';
 export default {
   name: 'NotesApp',
   components: {
+    GlAlert,
     noteableNote,
     noteableDiscussion,
     systemNote,
@@ -62,6 +67,7 @@ export default {
   data() {
     return {
       currentFilter: null,
+      errors: [],
     };
   },
   computed: {
@@ -132,7 +138,11 @@ export default {
     this.setNoteableData(this.noteableData);
     this.setUserData(this.userData);
     this.setTargetNoteHash(getLocationHash());
+
     eventHub.$once('fetchNotesData', this.fetchNotes);
+    eventHub.$on(MR_METADATA_NETWORK_ERROR_FAILED, (event) => {
+      this.errors = event.errors;
+    });
   },
   mounted() {
     if (this.shouldShow) {
@@ -256,6 +266,9 @@ export default {
       }
       return defaultConfig;
     },
+    dismissError(index) {
+      this.errors.splice(index, 1);
+    },
   },
   systemNote: constants.SYSTEM_NOTE,
 };
@@ -263,6 +276,15 @@ export default {
 
 <template>
   <div v-show="shouldShow" id="notes">
+    <gl-alert
+      v-for="(error, index) in errors"
+      :key="index"
+      class="gl-mt-5"
+      :variant="error.type"
+      @dismiss="dismissError(index)"
+    >
+      {{ error.message }}
+    </gl-alert>
     <sidebar-subscription :iid="noteableData.iid" :noteable-data="noteableData" />
     <ordered-layout :slot-keys="slotKeys">
       <template #form>
