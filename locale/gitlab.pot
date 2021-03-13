@@ -14508,9 +14508,6 @@ msgstr ""
 msgid "Group description (optional)"
 msgstr ""
 
-msgid "Group details"
-msgstr ""
-
 msgid "Group export could not be started."
 msgstr ""
 
@@ -23555,9 +23552,6 @@ msgid "Project configuration, excluding integrations"
 msgstr ""
 
 msgid "Project description (optional)"
-msgstr ""
-
-msgid "Project details"
 msgstr ""
 
 msgid "Project does not exist or you don't have permission to perform this action"

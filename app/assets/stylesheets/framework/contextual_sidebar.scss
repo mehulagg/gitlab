@@ -198,6 +198,7 @@
 
     &.active {
       background-color: $link-hover-background;
+      
       > a {
         font-weight: $gl-font-weight-bold;
         background-color: $link-hover-background;
