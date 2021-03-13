@@ -4,6 +4,7 @@ import mutations from '../mutations';
 
 export default () => ({
   state: {
+    endpoints: {},
     activeTab: null,
   },
   actions,
