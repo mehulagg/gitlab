@@ -166,6 +166,10 @@ module EE
       def usage_ping_record_epic_creation
         ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_created_action(author: author)
       end
+
+      def usage_ping_track_create_note(note_author)
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_note_created_action(author: note_author)
+      end
     end
 
     class_methods do

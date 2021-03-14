@@ -135,3 +135,5 @@ module Notes
     end
   end
 end
+
+Notes::CreateService.prepend_if_ee('EE::Notes::CreateService')
