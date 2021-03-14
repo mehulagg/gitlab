@@ -11,12 +11,8 @@ module Gitlab
             http_post("trials", admin_headers, params)
           end
 
-          def extend_trial(params)
-            http_put("trial_extend", admin_headers, params)
-          end
-
-          def reactivate_trial(params)
-            http_put("trial_reactivate", admin_headers, params)
+          def extend_reactivate_trial(params)
+            http_put("extend_reactivate_trial", admin_headers, params)
           end
 
           def create_customer(params)

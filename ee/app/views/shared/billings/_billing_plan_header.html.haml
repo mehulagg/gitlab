@@ -45,12 +45,14 @@
     %br
     %br
   - if true
-    = form_tag extend_trial_url(namespace, plan), :method => :put do
+    = form_tag extend_reactivate_trial_url(namespace, plan), :method => :put do
       = text_field_tag "namespace_id", "#{namespace.id}"
+      = text_field_tag "trial_extension_type", "1"
       = submit_tag "ExtendTrial"
     %br
   - if true
-    = form_tag reactivate_trial_url(namespace, plan), :method => :put do
+    = form_tag extend_reactivate_trial_url(namespace, plan), :method => :put do
       = text_field_tag "namespace_id", "#{namespace.id}"
+      = text_field_tag "trial_extension_type", "2"
       = submit_tag "ReactivateTrial"
     %br

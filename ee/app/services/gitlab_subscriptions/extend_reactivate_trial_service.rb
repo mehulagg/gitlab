@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module GitlabSubscriptions
-  class ExtendTrialService
+  class ExtendReactivateTrialService
     def execute(extend_trial_params)
-      response = client.extend_trial(extend_trial_params)
+      response = client.extend_reactivate_trial(extend_trial_params)
 
       if response[:success]
         { success: true }
