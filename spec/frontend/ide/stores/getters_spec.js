@@ -6,7 +6,6 @@ import {
 } from '~/ide/constants';
 import {
   MSG_CANNOT_PUSH_CODE,
-  MSG_CANNOT_PUSH_CODE_SHORT,
   MSG_CANNOT_PUSH_UNSIGNED,
   MSG_CANNOT_PUSH_UNSIGNED_SHORT,
 } from '~/ide/messages';
@@ -436,7 +435,7 @@ describe('IDE store getters', () => {
     it.each`
       pushCode | rejectUnsignedCommits | expected
       ${true}  | ${false}              | ${{ isAllowed: true, message: '', messageShort: '' }}
-      ${false} | ${false}              | ${{ isAllowed: false, message: MSG_CANNOT_PUSH_CODE, messageShort: MSG_CANNOT_PUSH_CODE_SHORT }}
+      ${false} | ${false}              | ${{ isAllowed: false, message: MSG_CANNOT_PUSH_CODE, messageShort: MSG_CANNOT_PUSH_CODE }}
       ${false} | ${true}               | ${{ isAllowed: false, message: MSG_CANNOT_PUSH_UNSIGNED, messageShort: MSG_CANNOT_PUSH_UNSIGNED_SHORT }}
     `(
       'with pushCode="$pushCode" and rejectUnsignedCommits="$rejectUnsignedCommits"',

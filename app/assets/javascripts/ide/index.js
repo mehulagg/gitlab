@@ -4,6 +4,7 @@ import { mapActions } from 'vuex';
 import PerformancePlugin from '~/performance/vue_performance_plugin';
 import Translate from '~/vue_shared/translate';
 import { parseBoolean } from '../lib/utils/common_utils';
+import { tryJSONParse } from '../lib/utils/try_json_parse';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import ide from './components/ide.vue';
 import { createRouter } from './ide_router';
@@ -54,6 +55,7 @@ export function initIde(el, options = {}) {
       });
       this.setLinks({
         webIDEHelpPagePath: el.dataset.webIdeHelpPagePath,
+        forkInfo: tryJSONParse(el.dataset.forkInfo),
       });
       this.setInitialData({
         clientsidePreviewEnabled: parseBoolean(el.dataset.clientsidePreviewEnabled),
