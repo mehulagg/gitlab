@@ -36,12 +36,12 @@ RSpec.describe Gitlab::Tracking do
   end
 
   describe '.event' do
-    before do
-      allow_any_instance_of(Gitlab::Tracking::Destinations::Snowplow).to receive(:event)
-      allow_any_instance_of(Gitlab::Tracking::Destinations::ProductAnalytics).to receive(:event)
-    end
-
     shared_examples 'delegates to destination' do |klass|
+      before do
+        allow_any_instance_of(Gitlab::Tracking::Destinations::Snowplow).to receive(:event)
+        allow_any_instance_of(Gitlab::Tracking::Destinations::ProductAnalytics).to receive(:event)
+      end
+
       it "delegates to #{klass} destination" do
         other_context = double(:context)
 
@@ -70,8 +70,14 @@ RSpec.describe Gitlab::Tracking do
       end
     end
 
-    include_examples 'delegates to destination', Gitlab::Tracking::Destinations::Snowplow
-    include_examples 'delegates to destination', Gitlab::Tracking::Destinations::ProductAnalytics
+    it_behaves_like 'delegates to destination', Gitlab::Tracking::Destinations::Snowplow
+    it_behaves_like 'delegates to destination', Gitlab::Tracking::Destinations::ProductAnalytics
+
+    it 'rescues errors and writes a log message' do
+      expect(Gitlab::AppLogger).to receive(:warn).with(/Tracking event failed for category: , action: some_action, message: Contract violation/)
+
+      expect { described_class.event(nil, 'some_action') }.not_to raise_error
+    end
   end
 
   describe '.self_describing_event' do
