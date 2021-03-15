@@ -36,8 +36,7 @@ export function formatListEpics(listEpics) {
   let listItemsCount;
 
   const listData = listEpics.nodes.reduce((map, list) => {
-    // TODO update when list.epics.count is available: https://gitlab.com/gitlab-org/gitlab/-/issues/301017
-    listItemsCount = list.epics.edges.length;
+    listItemsCount = list.epicsCount;
     let sortedEpics = list.epics.edges.map((epicNode) => ({
       ...epicNode.node,
     }));

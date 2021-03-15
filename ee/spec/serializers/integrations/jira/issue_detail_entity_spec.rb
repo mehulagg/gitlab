@@ -40,11 +40,7 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
         'comment' => {
           'comments' => [
             {
-              'id' => '10022',
-              'author' => comment_author,
-              'body' => '<p>Comment</p>',
-              'created' => '2020-06-25T15:50:00.000+0000',
-              'updated' => '2020-06-25T15:51:00.000+0000'
+              'body' => '<p>Comment</p>'
             }
           ]
         }
@@ -56,7 +52,18 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       labels: ['backend'],
       fields: {
         'reporter' => reporter,
-        'assignee' => assignee
+        'assignee' => assignee,
+        'comment' => {
+          'comments' => [
+            {
+              'id' => '10022',
+              'author' => comment_author,
+              'body' => '<p>Comment</p>',
+              'created' => '2020-06-25T15:50:00.000+0000',
+              'updated' => '2020-06-25T15:51:00.000+0000'
+            }
+          ]
+        }
       },
       project: double(key: 'GL'),
       key: 'GL-5',
@@ -87,13 +94,11 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       ],
       author: hash_including(
         name: 'reporter',
-        username: 'reporter@reporter.com',
         avatar_url: 'http://reporter.avatar'
       ),
       assignees: [
         hash_including(
           name: 'assignee',
-          username: 'assignee@assignee.com',
           avatar_url: 'http://assignee.avatar'
         )
       ],
@@ -103,11 +108,10 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       comments: [
         hash_including(
           id: '10022',
-          author: hash_including({
+          author: hash_including(
             name: 'comment_author',
-            username: 'comment@author.com',
             avatar_url: 'http://comment_author.avatar'
-          }),
+          ),
           body_html: "<p dir=\"auto\">Comment</p>",
           created_at: '2020-06-25T15:50:00.000+0000'.to_datetime.utc,
           updated_at: '2020-06-25T15:51:00.000+0000'.to_datetime.utc

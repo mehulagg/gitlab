@@ -3,25 +3,64 @@
 require 'spec_helper'
 
 RSpec.describe TrialStatusWidgetHelper do
-  describe '#plan_title_for_group' do
-    using RSpec::Parameterized::TableSyntax
+  describe 'data attributes for mounting Vue components' do
+    let(:subscription) { instance_double(GitlabSubscription, plan_title: 'Ultimate') }
 
-    let_it_be(:group) { create(:group) }
-
-    subject { helper.plan_title_for_group(group) }
-
-    where(:plan, :title) do
-      :bronze   | 'Bronze'
-      :silver   | 'Silver'
-      :gold     | 'Gold'
-      :premium  | 'Premium'
-      :ultimate | 'Ultimate'
+    let(:group) do
+      instance_double(Group,
+        id: 123,
+        name: 'Pants Group',
+        to_param: 'pants-group',
+        gitlab_subscription: subscription,
+        trial_days_remaining: 12,
+        trial_ends_on: Date.current.advance(days: 18),
+        trial_percentage_complete: 40
+      )
     end
 
-    with_them do
-      let!(:subscription) { build(:gitlab_subscription, plan, namespace: group) }
+    let(:shared_expected_attrs) do
+      {
+        container_id: 'trial-status-sidebar-widget',
+        plan_name: 'Ultimate',
+        plans_href: '/groups/pants-group/-/billings'
+      }
+    end
 
-      it { is_expected.to eq(title) }
+    before do
+      travel_to Date.parse('2021-01-12')
+    end
+
+    describe '#trial_status_popover_data_attrs' do
+      subject(:data_attrs) { helper.trial_status_popover_data_attrs(group) }
+
+      it 'returns the needed data attributes for mounting the Vue component' do
+        expect(data_attrs).to match(
+          shared_expected_attrs.merge(
+            group_name: 'Pants Group',
+            purchase_href: '/-/subscriptions/new?namespace_id=123&plan_id=2c92a0fc5a83f01d015aa6db83c45aac',
+            target_id: shared_expected_attrs[:container_id],
+            trial_end_date: Date.parse('2021-01-30')
+          )
+        )
+      end
+    end
+
+    describe '#trial_status_widget_data_attrs' do
+      before do
+        allow(helper).to receive(:image_path).and_return('/image-path/for-file.svg')
+      end
+
+      subject(:data_attrs) { helper.trial_status_widget_data_attrs(group) }
+
+      it 'returns the needed data attributes for mounting the Vue component' do
+        expect(data_attrs).to match(
+          shared_expected_attrs.merge(
+            days_remaining: 12,
+            nav_icon_image_path: '/image-path/for-file.svg',
+            percentage_complete: 40
+          )
+        )
+      end
     end
   end
 

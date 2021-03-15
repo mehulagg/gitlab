@@ -6,7 +6,7 @@ RSpec.describe Resolvers::IncidentManagement::OncallShiftsResolver do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:rotation) { create(:incident_management_oncall_rotation, :with_participant) }
+  let_it_be(:rotation) { create(:incident_management_oncall_rotation, :with_participants, :utc) }
   let_it_be(:project) { rotation.project }
   let(:args) { { start_time: rotation.starts_at, end_time: rotation.starts_at + rotation.shift_cycle_duration } }
 

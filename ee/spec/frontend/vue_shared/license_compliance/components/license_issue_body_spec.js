@@ -14,7 +14,6 @@ describe('LicenseIssueBody', () => {
 
   beforeEach(() => {
     store = createStore();
-    vm = mountComponentWithStore(Component, { props: { issue }, store });
   });
 
   afterEach(() => {
@@ -22,6 +21,10 @@ describe('LicenseIssueBody', () => {
   });
 
   describe('template', () => {
+    beforeEach(() => {
+      vm = mountComponentWithStore(Component, { props: { issue }, store });
+    });
+
     it('renders component container element with class `license-item`', () => {
       expect(vm.$el.classList.contains('license-item')).toBe(true);
     });
@@ -38,6 +41,22 @@ describe('LicenseIssueBody', () => {
 
       expect(packagesEl).not.toBeNull();
       expect(trimText(packagesEl.innerText)).toBe('Used by pg, puma, foo, and 2 more');
+    });
+  });
+
+  describe('template without packages', () => {
+    beforeEach(() => {
+      const issueWithoutPackages = licenseReport[0];
+      issueWithoutPackages.packages = [];
+
+      vm = mountComponentWithStore(Component, { props: { issue: issueWithoutPackages }, store });
+    });
+
+    it('does not render packages list', () => {
+      const packagesEl = vm.$el.querySelector('.license-packages');
+
+      expect(packagesEl).toBeNull();
+      vm.$destroy();
     });
   });
 });

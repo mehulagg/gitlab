@@ -35,6 +35,9 @@ import PolicyPreview from './policy_preview.vue';
 import PolicyRuleBuilder from './policy_rule_builder.vue';
 
 export default {
+  i18n: {
+    toggleLabel: s__('NetworkPolicies|Policy status'),
+  },
   components: {
     GlFormGroup,
     GlFormSelect,
@@ -253,8 +256,8 @@ export default {
     </div>
     <div class="row">
       <div class="col-md-auto">
-        <gl-form-group :label="s__('NetworkPolicies|Policy status')" label-for="policyStatus">
-          <gl-toggle id="policyStatus" v-model="policy.isEnabled" />
+        <gl-form-group>
+          <gl-toggle v-model="policy.isEnabled" :label="$options.i18n.toggleLabel" />
         </gl-form-group>
       </div>
     </div>

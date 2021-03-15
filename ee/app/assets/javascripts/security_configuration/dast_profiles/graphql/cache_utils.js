@@ -31,7 +31,6 @@ export const removeProfile = ({ profileId, profileType, store, queryBody }) => {
   const sourceData = store.readQuery(queryBody);
 
   const data = produce(sourceData, (draftState) => {
-    // eslint-disable-next-line no-param-reassign
     draftState.project[profileType].edges = draftState.project[profileType].edges.filter(
       ({ node }) => {
         return node.id !== profileId;

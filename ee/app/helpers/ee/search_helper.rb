@@ -79,7 +79,7 @@ module EE
       text = sanitize(search_highlight[issuable.id].description.first)
       text.gsub!(::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG, '<span class="gl-text-gray-900 gl-font-weight-bold">')
       text.gsub!(::Elastic::Latest::GitClassProxy::HIGHLIGHT_END_TAG, '</span>')
-      Truncato.truncate(text, count_tags: false, count_tail: false, max_length: 200).html_safe
+      search_truncate(text).html_safe
     end
 
     def advanced_search_status_marker(project)

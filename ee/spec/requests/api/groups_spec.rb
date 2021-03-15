@@ -414,6 +414,100 @@ RSpec.describe API::Groups do
         end
       end
     end
+
+    context 'when creating group on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it 'does not create a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.not_to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+
+        it 'creates a subgroup' do
+          parent = create(:group)
+          parent.add_owner(admin)
+
+          expect do
+            post api("/groups", admin), params: { parent_id: parent.id, name: 'foo', path: 'foo' }
+          end.to change { Group.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+    end
+
+    context 'when creating group on self-managed' do
+      context 'when top_level_group_creation_enabled feature flag is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+
+        it 'creates a subgroup' do
+          parent = create(:group)
+          parent.add_owner(admin)
+
+          expect do
+            post api("/groups", admin), params: { parent_id: parent.id, name: 'foo', path: 'foo' }
+          end.to change { Group.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+    end
   end
 
   describe 'POST /groups/:id/ldap_sync' do

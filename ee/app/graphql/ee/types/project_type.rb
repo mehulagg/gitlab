@@ -56,11 +56,14 @@ module EE
               description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
+        field :iteration_cadences, ::Types::Iterations::CadenceType.connection_type, null: true,
+              description: 'Find iteration cadences.',
+              resolver: ::Resolvers::Iterations::CadencesResolver
+
         field :dast_profiles,
               ::Types::Dast::ProfileType.connection_type,
               null: true,
-              description: 'DAST Profiles associated with the project. Always returns no nodes ' \
-                           'if `dast_saved_scans` is disabled.'
+              description: 'DAST Profiles associated with the project.'
 
         field :dast_site_profile,
               ::Types::DastSiteProfileType,
@@ -152,8 +155,6 @@ module EE
       end
 
       def dast_profiles
-        return Dast::Profile.none unless ::Feature.enabled?(:dast_saved_scans, object, default_enabled: :yaml)
-
         Dast::ProfilesFinder.new(project_id: object.id).execute
       end
 

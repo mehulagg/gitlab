@@ -15,9 +15,5 @@ module Geo
     def repository
       model_record.repository
     end
-
-    def self.replication_enabled_by_default?
-      false
-    end
   end
 end

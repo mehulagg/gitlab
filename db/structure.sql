@@ -10219,8 +10219,12 @@ CREATE TABLE bulk_import_trackers (
     relation text NOT NULL,
     next_page text,
     has_next_page boolean DEFAULT false NOT NULL,
+    jid text,
+    stage smallint DEFAULT 0 NOT NULL,
+    status smallint DEFAULT 0 NOT NULL,
     CONSTRAINT check_2d45cae629 CHECK ((char_length(relation) <= 255)),
     CONSTRAINT check_40aeaa600b CHECK ((char_length(next_page) <= 255)),
+    CONSTRAINT check_603f91cb06 CHECK ((char_length(jid) <= 255)),
     CONSTRAINT check_next_page_requirement CHECK (((has_next_page IS FALSE) OR (next_page IS NOT NULL)))
 );
 
@@ -10295,7 +10299,8 @@ CREATE TABLE ci_build_needs (
     id integer NOT NULL,
     build_id integer NOT NULL,
     name text NOT NULL,
-    artifacts boolean DEFAULT true NOT NULL
+    artifacts boolean DEFAULT true NOT NULL,
+    optional boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE ci_build_needs_id_seq
@@ -13266,7 +13271,11 @@ CREATE TABLE group_merge_request_approval_settings (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     group_id bigint NOT NULL,
-    allow_author_approval boolean DEFAULT false NOT NULL
+    allow_author_approval boolean DEFAULT false NOT NULL,
+    allow_committer_approval boolean DEFAULT false NOT NULL,
+    allow_overrides_to_approver_list_per_merge_request boolean DEFAULT false NOT NULL,
+    retain_approvals_on_push boolean DEFAULT false NOT NULL,
+    require_password_to_approve boolean DEFAULT false NOT NULL
 );
 
 CREATE TABLE group_repository_storage_moves (
@@ -15754,7 +15763,8 @@ CREATE TABLE plan_limits (
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
     daily_invites integer DEFAULT 0 NOT NULL,
-    rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL
+    rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
+    terraform_module_max_file_size bigint DEFAULT 1073741824 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -23994,6 +24004,8 @@ CREATE INDEX index_vulnerability_occurrence_identifiers_on_identifier_id ON vuln
 CREATE UNIQUE INDEX index_vulnerability_occurrence_identifiers_on_unique_keys ON vulnerability_occurrence_identifiers USING btree (occurrence_id, identifier_id);
 
 CREATE INDEX index_vulnerability_occurrence_pipelines_on_pipeline_id ON vulnerability_occurrence_pipelines USING btree (pipeline_id);
+
+CREATE INDEX index_vulnerability_occurrences_deduplication ON vulnerability_occurrences USING btree (project_id, report_type, project_fingerprint);
 
 CREATE INDEX index_vulnerability_occurrences_for_issue_links_migration ON vulnerability_occurrences USING btree (project_id, report_type, encode(project_fingerprint, 'hex'::text));
 

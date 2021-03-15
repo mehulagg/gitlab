@@ -45,8 +45,7 @@ module Mutations
         private
 
         def allowed?(project)
-          project.feature_available?(:security_on_demand_scans) &&
-            Feature.enabled?(:dast_saved_scans, project, default_enabled: :yaml)
+          project.feature_available?(:security_on_demand_scans)
         end
 
         def find_dast_profile(project, id)

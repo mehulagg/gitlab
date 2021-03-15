@@ -104,6 +104,17 @@ export const mockMilestones = [
   },
 ];
 
+export const mockIterations = [
+  {
+    id: 'gid://gitlab/Iteration/1',
+    title: 'Iteration 1',
+  },
+  {
+    id: 'gid://gitlab/Iteration/2',
+    title: 'Iteration 2',
+  },
+];
+
 const labels = [
   {
     id: 'gid://gitlab/GroupLabel/5',
@@ -226,7 +237,14 @@ export const mockEpic = {
   labels: [],
 };
 
-export const mockIssueWithEpic = { ...mockIssue3, epic: { id: mockEpic.id, iid: mockEpic.iid } };
+export const mockIssueWithEpic = {
+  ...mockIssue3,
+  epic: {
+    id: mockEpic.id,
+    iid: mockEpic.iid,
+    webPath: '/gitlab-org/-/epics/41',
+  },
+};
 export const mockAssignedEpic = { ...mockIssueWithEpic.epic, title: mockEpic.title };
 
 export const mockEpics = [

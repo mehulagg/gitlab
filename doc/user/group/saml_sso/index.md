@@ -103,7 +103,6 @@ With this option enabled, users must go through your group's GitLab single sign-
 However, users are not prompted to sign in through SSO on each visit. GitLab checks whether a user
 has authenticated through SSO. If it's been more than 1 day since the last sign-in, GitLab
 prompts the user to sign in again through SSO.
-You can see more information about how long a session is valid in our [user profile documentation](../../profile/#why-do-i-keep-getting-signed-out).
 
 We intend to add a similar SSO requirement for [Git and API activity](https://gitlab.com/gitlab-org/gitlab/-/issues/9152).
 
@@ -112,7 +111,7 @@ When SSO enforcement is enabled for a group, users can't share a project in the 
 ## Providers
 
 NOTE:
-GitLab is unable to provide full support for integrating identify providers that are not listed here.
+GitLab is unable to provide full support for integrating identity providers that are not listed here.
 
 | Provider | Documentation |
 |----------|---------------|
@@ -120,7 +119,7 @@ GitLab is unable to provide full support for integrating identify providers that
 | Okta | [Setting up a SAML application in Okta](https://developer.okta.com/docs/guides/build-sso-integration/saml2/overview/) |
 | OneLogin | [Use the OneLogin SAML Test Connector](https://onelogin.service-now.com/support?id=kb_article&sys_id=93f95543db109700d5505eea4b96198f) |
 
-When [configuring your identify provider](#configuring-your-identity-provider), please consider the notes below for specific providers to help avoid common issues and as a guide for terminology used.
+When [configuring your identity provider](#configuring-your-identity-provider), please consider the notes below for specific providers to help avoid common issues and as a guide for terminology used.
 
 ### Azure setup notes
 

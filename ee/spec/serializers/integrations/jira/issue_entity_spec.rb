@@ -61,13 +61,11 @@ RSpec.describe Integrations::Jira::IssueEntity do
       ],
       author: hash_including(
         name: 'reporter',
-        username: 'reporter@reporter.com',
         avatar_url: 'http://reporter.avatar'
       ),
       assignees: [
         hash_including(
           name: 'assignee',
-          username: 'assignee@assignee.com',
           avatar_url: 'http://assignee.avatar'
         )
       ],

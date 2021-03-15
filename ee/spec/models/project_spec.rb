@@ -2775,6 +2775,28 @@ RSpec.describe Project do
     end
   end
 
+  describe '#prevent_merge_without_jira_issue?' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { project.prevent_merge_without_jira_issue? }
+
+    where(:feature_available, :prevent_merge, :result) do
+      true  | true  | true
+      true  | false | false
+      false | true  | false
+      false | false | false
+    end
+
+    with_them do
+      before do
+        allow(project).to receive(:jira_issue_association_required_to_merge_enabled?).and_return(feature_available)
+        project.create_project_setting(prevent_merge_without_jira_issue: prevent_merge)
+      end
+
+      it { is_expected.to be result }
+    end
+  end
+
   context 'indexing updates in Elasticsearch', :elastic do
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)

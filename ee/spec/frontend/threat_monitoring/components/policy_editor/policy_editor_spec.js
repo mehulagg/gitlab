@@ -1,4 +1,4 @@
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import NetworkPolicyEditor from 'ee/threat_monitoring/components/network_policy_editor.vue';
 import {
@@ -101,6 +101,10 @@ spec:
 
   it('renders the policy editor layout', () => {
     expect(wrapper.find('section').element).toMatchSnapshot();
+  });
+
+  it('renders toggle with label', () => {
+    expect(wrapper.findComponent(GlToggle).props('label')).toBe(PolicyEditorApp.i18n.toggleLabel);
   });
 
   it('does not render yaml editor', () => {

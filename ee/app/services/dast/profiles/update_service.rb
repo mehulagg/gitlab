@@ -23,7 +23,6 @@ module Dast
 
       def allowed?
         container.feature_available?(:security_on_demand_scans) &&
-          Feature.enabled?(:dast_saved_scans, container, default_enabled: :yaml) &&
           can?(current_user, :create_on_demand_dast_scan, container)
       end
 

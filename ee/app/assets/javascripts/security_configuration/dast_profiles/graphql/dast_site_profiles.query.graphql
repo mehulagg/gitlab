@@ -16,6 +16,7 @@ query DastSiteProfiles($fullPath: ID!, $after: String, $before: String, $first: 
           targetUrl
           editPath
           validationStatus
+          referencedInSecurityPolicies
         }
       }
     }

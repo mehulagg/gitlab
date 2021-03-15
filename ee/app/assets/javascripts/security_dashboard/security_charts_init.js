@@ -32,6 +32,7 @@ export default (el, dashboardType) => {
   const provide = {
     dashboardDocumentation: el.dataset.dashboardDocumentation,
     emptyStateSvgPath: el.dataset.emptyStateSvgPath,
+    securityConfigurationPath: el.dataset.securityConfigurationPath,
   };
 
   let component;

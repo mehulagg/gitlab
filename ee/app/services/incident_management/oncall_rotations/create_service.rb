@@ -3,7 +3,7 @@
 module IncidentManagement
   module OncallRotations
     class CreateService < OncallRotations::BaseService
-      MAXIMUM_PARTICIPANTS = 100
+      include IncidentManagement::OncallRotations::SharedRotationLogic
 
       # @param schedule [IncidentManagement::OncallSchedule]
       # @param project [Project]
@@ -33,84 +33,27 @@ module IncidentManagement
         return error_no_permissions unless allowed?
         return error_too_many_participants if participants_params.size > MAXIMUM_PARTICIPANTS
         return error_duplicate_participants if duplicated_users?
+        return error_participants_without_permission if users_without_permissions?
 
         OncallRotation.transaction do
-          oncall_rotation = schedule.rotations.create(rotation_params)
-          break error_in_validation(oncall_rotation) unless oncall_rotation.persisted?
+          @oncall_rotation = schedule.rotations.create!(rotation_params)
 
-          participants = participants_for(oncall_rotation)
-          break error_participant_has_no_permission if participants.nil?
+          save_participants!
+          save_current_shift!
 
-          first_invalid_participant = participants.find(&:invalid?)
-          break error_in_validation(first_invalid_participant) if first_invalid_participant
-
-          insert_participants(participants)
-
-          success(oncall_rotation)
+          success(oncall_rotation.reset)
         end
+
+      rescue ActiveRecord::RecordInvalid => err
+        error_in_validation(err.record)
       end
 
       private
 
-      attr_reader :schedule, :project, :user, :rotation_params, :participants_params
-
-      def duplicated_users?
-        users = participants_params.map { |participant| participant[:user] }
-
-        users != users.uniq
-      end
-
-      def participants_for(rotation)
-        participants_params.map do |participant|
-          break unless participant[:user].can?(:read_project, project)
-
-          OncallParticipant.new(
-            rotation: rotation,
-            user: participant[:user],
-            color_palette: participant[:color_palette],
-            color_weight: participant[:color_weight]
-          )
-        end
-      end
-
-      def participant_rows(participants)
-        participants.map do |participant|
-          {
-            oncall_rotation_id: participant.oncall_rotation_id,
-            user_id: participant.user_id,
-            color_palette: OncallParticipant.color_palettes[participant.color_palette],
-            color_weight: OncallParticipant.color_weights[participant.color_weight]
-          }
-        end
-      end
-
-      # BulkInsertSafe cannot be used here while OncallParticipant
-      # has a has_many association. https://gitlab.com/gitlab-org/gitlab/-/issues/247718
-      # We still want to bulk insert to avoid up to MAXIMUM_PARTICIPANTS
-      # consecutive insertions, but .insert_all
-      # does not include validations. Warning!
-      def insert_participants(participants)
-        OncallParticipant.insert_all(participant_rows(participants))
-      end
-
-      def error_participant_has_no_permission
-        error('A participant has insufficient permissions to access the project')
-      end
-
-      def error_too_many_participants
-        error(_('A maximum of %{count} participants can be added') % { count: MAXIMUM_PARTICIPANTS })
-      end
-
-      def error_duplicate_participants
-        error(_('A user can only participate in a rotation once'))
-      end
+      attr_reader :schedule, :project, :user, :rotation_params, :participants_params, :oncall_rotation
 
       def error_no_permissions
-        error(_('You have insufficient permissions to create an on-call rotation for this project'))
-      end
-
-      def error_in_validation(object)
-        error(object.errors.full_messages.to_sentence)
+        error('You have insufficient permissions to create an on-call rotation for this project')
       end
     end
   end

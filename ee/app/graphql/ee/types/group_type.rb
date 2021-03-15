@@ -39,6 +39,10 @@ module EE
               description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
+        field :iteration_cadences, ::Types::Iterations::CadenceType.connection_type, null: true,
+              description: 'Find iteration cadences.',
+              resolver: ::Resolvers::Iterations::CadencesResolver
+
         field :timelogs, ::Types::TimelogType.connection_type, null: false,
               description: 'Time logged in issues by group members.',
               extras: [:lookahead],

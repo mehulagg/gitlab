@@ -22,8 +22,8 @@ export default {
 </script>
 
 <template>
-  <div class="health-status d-inline-flex align-items-center">
-    <span class="gl-label gl-label-text-dark gl-label-sm" :class="cssMapping">
+  <div class="health-status">
+    <span class="gl-label gl-label-sm" :class="cssMapping">
       <span class="gl-label-text">
         {{ getFormattedStatus }}
       </span>

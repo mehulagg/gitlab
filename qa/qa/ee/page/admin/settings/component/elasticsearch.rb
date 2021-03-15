@@ -15,11 +15,11 @@ module QA
               end
 
               def check_indexing
-                check_element :indexing_checkbox
+                check_element(:indexing_checkbox)
               end
 
               def check_search
-                check_element :search_checkbox
+                check_element(:search_checkbox)
               end
 
               def enter_link(link)

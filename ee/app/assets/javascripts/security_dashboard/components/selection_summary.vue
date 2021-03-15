@@ -3,6 +3,7 @@ import { GlButton, GlAlert } from '@gitlab/ui';
 import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import { __, s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
+import eventHub from '../utils/event_hub';
 import StatusDropdown from './status_dropdown.vue';
 
 export default {
@@ -72,6 +73,7 @@ export default {
       return Promise.all(promises).then(() => {
         if (fulfilledCount > 0) {
           toast(this.$options.i18n.vulnerabilitiesUpdated(fulfilledCount));
+          eventHub.$emit('vulnerabilities-updated', this);
         }
 
         if (rejected.length > 0) {

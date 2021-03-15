@@ -23,20 +23,9 @@ RSpec.describe Mutations::Dast::Profiles::Run do
       )
     end
 
-    context 'when the feature flag dast_saved_scans is disabled' do
-      it 'raises an exception' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: false)
-
-        expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'raises an exception' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(dast_saved_scans: true)
-
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
       end
     end
@@ -44,7 +33,6 @@ RSpec.describe Mutations::Dast::Profiles::Run do
     context 'when the feature is enabled' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: true)
       end
 
       context 'when the project does not exist' do

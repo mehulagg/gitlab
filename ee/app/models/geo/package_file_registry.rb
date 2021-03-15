@@ -2,7 +2,6 @@
 
 class Geo::PackageFileRegistry < Geo::BaseRegistry
   include ::Geo::ReplicableRegistry
-  include ::Gitlab::Geo::VerificationState
   include ::Geo::VerifiableRegistry
 
   MODEL_CLASS = ::Packages::PackageFile

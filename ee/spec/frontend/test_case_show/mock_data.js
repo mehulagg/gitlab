@@ -6,6 +6,10 @@ export const mockTestCase = {
   currentUserTodos: {
     nodes: [mockCurrentUserTodo],
   },
+  taskCompletionStatus: {
+    completedCount: 0,
+    count: 5,
+  },
 };
 
 export const mockProvide = {
@@ -19,4 +23,6 @@ export const mockProvide = {
   labelsFetchPath: '/gitlab-org/gitlab-test/-/labels.json',
   labelsManagePath: '/gitlab-org/gitlab-shell/-/labels',
   projectsFetchPath: '/-/autocomplete/projects?project_id=1',
+  updatePath: `${mockIssuable.webUrl}.json`,
+  lockVersion: 1,
 };

@@ -10,6 +10,22 @@ module Dora
 
     self.table_name = 'dora_daily_metrics'
 
+    INTERVAL_ALL = 'all'
+    INTERVAL_MONTHLY = 'monthly'
+    INTERVAL_DAILY = 'daily'
+    METRIC_DEPLOYMENT_FREQUENCY = 'deployment_frequency'
+    METRIC_LEAD_TIME_FOR_CHANGES = 'lead_time_for_changes'
+    AVAILABLE_METRICS = [METRIC_DEPLOYMENT_FREQUENCY, METRIC_LEAD_TIME_FOR_CHANGES].freeze
+    AVAILABLE_INTERVALS = [INTERVAL_ALL, INTERVAL_MONTHLY, INTERVAL_DAILY].freeze
+
+    scope :for_environments, -> (environments) do
+      where(environment: environments)
+    end
+
+    scope :in_range_of, -> (after, before) do
+      where(date: after..before)
+    end
+
     class << self
       def refresh!(environment, date)
         raise ArgumentError unless environment.is_a?(::Environment) && date.is_a?(Date)
@@ -38,7 +54,40 @@ module Dora
         SQL
       end
 
+      def aggregate_for!(metric, interval)
+        data_query = data_query_for!(metric)
+
+        case interval
+        when INTERVAL_ALL
+          select(data_query).take.data
+        when INTERVAL_MONTHLY
+          select("DATE_TRUNC('month', date)::date AS month, #{data_query}")
+            .group("DATE_TRUNC('month', date)")
+            .order('month ASC')
+            .map { |row| { row.month.to_s => row.data } }
+        when INTERVAL_DAILY
+          select("date, #{data_query}")
+            .group('date')
+            .order('date ASC')
+            .map { |row| { row.date.to_s => row.data } }
+        else
+          raise ArgumentError, 'Unknown interval'
+        end
+      end
+
       private
+
+      def data_query_for!(metric)
+        case metric
+        when METRIC_DEPLOYMENT_FREQUENCY
+          'SUM(deployment_frequency) AS data'
+        when METRIC_LEAD_TIME_FOR_CHANGES
+          # Median
+          '(PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY lead_time_for_changes_in_seconds)) AS data'
+        else
+          raise ArgumentError, 'Unknown metric'
+        end
+      end
 
       # Compose a query to calculate "Deployment Frequency" of the date
       def deployment_frequency(environment, date)

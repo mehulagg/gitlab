@@ -5,6 +5,16 @@ module Mutations
     module ScopedBoardMutation
       extend ActiveSupport::Concern
 
+      prepended do
+        argument :labels, [GraphQL::STRING_TYPE],
+                 required: false,
+                 description: copy_field_description(::Types::IssueType, :labels)
+
+        argument :label_ids, [::Types::GlobalIDType[::Label]],
+                 required: false,
+                 description: 'IDs of labels to be added to the board.'
+      end
+
       def resolve(**args)
         parsed_params = parse_arguments(args)
 

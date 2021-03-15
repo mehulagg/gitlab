@@ -7,7 +7,7 @@ RSpec.describe ::IncidentManagement::OncallShifts::ReadService do
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be(:current_user) { user_with_permissions }
 
-  let_it_be_with_refind(:rotation) { create(:incident_management_oncall_rotation, length: 1, length_unit: :days) }
+  let_it_be_with_refind(:rotation) { create(:incident_management_oncall_rotation, :utc, length: 1, length_unit: :days) }
   let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
   let_it_be(:project) { rotation.project }
 
