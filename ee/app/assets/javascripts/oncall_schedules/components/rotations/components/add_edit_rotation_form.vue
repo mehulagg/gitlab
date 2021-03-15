@@ -103,8 +103,23 @@ export default {
       endDateEnabled: false,
     };
   },
+  computed: {
+    shouldShowRestrictedToTime() {
+      return this.form.rotationLength.unit !== this.$options.LENGTH_ENUM.hours;
+    },
+  },
   methods: {
     format24HourTimeStringFromInt,
+    updateLengthUnit(value) {
+      this.updateRotationForm('rotationLength.unit', value);
+
+      if (value === this.$options.LENGTH_ENUM.hours) {
+        this.updateRotationForm('isRestrictedToTime', false);
+      }
+    },
+    updateRotationForm(type, value) {
+      this.$emit('update-rotation-form', { type, value });
+    },
   },
 };
 </script>
@@ -178,7 +193,7 @@ export default {
               :key="unit"
               :is-checked="form.rotationLength.unit === unit"
               is-check-item
-              @click="$emit('update-rotation-form', { type: 'rotationLength.unit', value: unit })"
+              @click="updateLengthUnit(unit)"
             >
               {{ unit.toLowerCase() }}
             </gl-dropdown-item>
@@ -294,6 +309,7 @@ export default {
       </gl-card>
 
       <gl-toggle
+        v-if="shouldShowRestrictedToTime"
         :value="form.isRestrictedToTime"
         data-testid="restricted-to-toggle"
         :label="$options.i18n.fields.restrictToTime.enableToggle"
