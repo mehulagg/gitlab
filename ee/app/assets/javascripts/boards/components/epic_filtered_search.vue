@@ -9,15 +9,10 @@ export default {
   i18n: {
     search: __('Search'),
   },
-  inject: {
-    search: {
-      default: '',
-    },
-  },
+  inject: ['search'],
   components: { FilteredSearch },
   computed: {
     initialSearch() {
-      console.log(this.search);
       return [{ type: 'filtered-search-term', value: { data: this.search } }];
     },
   },

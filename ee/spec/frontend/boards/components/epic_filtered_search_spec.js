@@ -15,10 +15,12 @@ describe('EpicFilteredSearch', () => {
   const createComponent = () => {
     wrapper = shallowMount(EpicFilteredSearch, {
       localVue,
-      propsData: { search: '' },
+      provide: { search: '' },
       store,
     });
   };
+
+  const findFilteredSearch = () => wrapper.findComponent(FilteredSearchBarRoot);
 
   beforeEach(() => {
     // this needed for actions call for performSearch
@@ -39,21 +41,19 @@ describe('EpicFilteredSearch', () => {
     });
 
     it('finds FilteredSearch', () => {
-      expect(wrapper.find(FilteredSearchBarRoot).exists()).toBe(true);
+      expect(findFilteredSearch().exists()).toBe(true);
     });
 
     describe('when onFilter is emitted', () => {
       it('calls performSearch', () => {
-        wrapper.find(FilteredSearchBarRoot).vm.$emit('onFilter', [{ value: { data: '' } }]);
+        findFilteredSearch().vm.$emit('onFilter', [{ value: { data: '' } }]);
 
         expect(store.dispatch).toHaveBeenCalledWith('performSearch');
       });
 
       it('calls historyPushState', () => {
-        commonUtils.historyPushState = jest.fn();
-        wrapper
-          .find(FilteredSearchBarRoot)
-          .vm.$emit('onFilter', [{ value: { data: 'searchQuery' } }]);
+        jest.spyOn(commonUtils, 'historyPushState');
+        findFilteredSearch().vm.$emit('onFilter', [{ value: { data: 'searchQuery' } }]);
 
         expect(commonUtils.historyPushState).toHaveBeenCalledWith(
           'http://test.host/?search=searchQuery',
