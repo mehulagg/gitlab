@@ -8,6 +8,8 @@ class GroupsController < Groups::ApplicationController
   include RecordUserLastActivity
   include SendFileUpload
   include FiltersEvents
+  include Recaptcha::Verify
+  include RecaptchaHelper
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -15,6 +17,7 @@ class GroupsController < Groups::ApplicationController
   prepend_before_action(only: [:show, :issues]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:issues_calendar]) { authenticate_sessionless_user!(:ics) }
   prepend_before_action :ensure_export_enabled, only: [:export, :download_export]
+  prepend_before_action :check_captcha, only: :create
 
   before_action :authenticate_user!, only: [:new, :create]
   before_action :group, except: [:index, :new, :create]
@@ -22,6 +25,7 @@ class GroupsController < Groups::ApplicationController
   # Authorize
   before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer, :export, :download_export]
   before_action :authorize_create_group!, only: [:new]
+  before_action :load_recaptcha, only: [:new]
 
   before_action :group_projects, only: [:projects, :activity, :issues, :merge_requests]
   before_action :event_filter, only: [:activity]
@@ -37,6 +41,8 @@ class GroupsController < Groups::ApplicationController
   end
 
   before_action :export_rate_limit, only: [:export, :download_export]
+
+  helper_method :captcha_enabled?
 
   skip_cross_project_access_check :index, :new, :create, :edit, :update,
                                   :destroy, :projects
@@ -56,6 +62,8 @@ class GroupsController < Groups::ApplicationController
   feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
   feature_category :projects, [:projects]
   feature_category :importers, [:export, :download_export]
+
+  CAPTCHA_HEADER = 'X-GitLab-Show-Login-Captcha'
 
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
@@ -317,6 +325,22 @@ class GroupsController < Groups::ApplicationController
     render_404 unless Feature.enabled?(:group_import_export, @group, default_enabled: true)
   end
 
+  def load_recaptcha
+    Gitlab::Recaptcha.load_configurations!
+  end
+
+  def check_captcha
+    return unless show_recaptcha_sign_up?
+    return unless Gitlab::Recaptcha.load_configurations!
+
+    return if verify_recaptcha
+
+    flash[:alert] = _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
+    flash.delete :recaptcha_error
+    @group = Group.new(params.permit(:parent_id))
+    render action: 'new'
+  end
+
   private
 
   def successful_creation_hooks; end
@@ -335,6 +359,10 @@ class GroupsController < Groups::ApplicationController
   override :has_project_list?
   def has_project_list?
     %w(details show index).include?(action_name)
+  end
+
+  def captcha_enabled?
+    Gitlab::Recaptcha.enabled?
   end
 end
 
