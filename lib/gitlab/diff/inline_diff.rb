@@ -24,14 +24,11 @@ module Gitlab
 
           inline_diffs = []
 
-          pair_selector.each do |old_index, new_index|
-            old_line = lines[old_index]
-            new_line = lines[new_index]
+          pair_selector.each do |old_diff_line, new_diff_line|
+            old_diffs, new_diffs = new(old_diff_line.text, new_diff_line.text, offset: 1).inline_diffs
 
-            old_diffs, new_diffs = new(old_line, new_line, offset: 1).inline_diffs
-
-            inline_diffs[old_index] = old_diffs
-            inline_diffs[new_index] = new_diffs
+            inline_diffs[old_diff_line.index] = old_diffs
+            inline_diffs[new_diff_line.index] = new_diffs
           end
 
           inline_diffs

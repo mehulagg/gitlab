@@ -73,7 +73,7 @@ module Gitlab
       end
 
       def inline_diffs
-        @inline_diffs ||= InlineDiff.for_lines(@raw_lines)
+        @inline_diffs ||= InlineDiff.for_lines(@diff_lines)
       end
 
       def old_lines
