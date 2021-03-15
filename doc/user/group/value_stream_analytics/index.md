@@ -198,6 +198,8 @@ GitLab allows users to create multiple value streams, hide default stages and cr
 > - It's enabled on GitLab.com.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
 
+![Value stream path navigation](img/vsa_path_nav_v13_10.png "Value stream path navigation")
+
 Stages are visually depicted as a horizontal process flow. Selecting a stage will update the content below the value stream.
 
 This is enabled by default. If you have a self-managed instance, an
