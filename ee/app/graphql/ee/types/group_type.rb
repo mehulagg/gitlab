@@ -39,12 +39,6 @@ module EE
               description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
-        field :timelogs, ::Types::TimelogType.connection_type, null: false,
-              description: 'Time logged in issues by group members.',
-              extras: [:lookahead],
-              complexity: 5,
-              resolver: ::Resolvers::TimelogResolver
-
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
               null: true,

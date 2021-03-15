@@ -124,7 +124,6 @@ class License < ApplicationRecord
     scoped_labels
     smartcard_auth
     swimlanes
-    group_timelogs
     type_of_work_analytics
     minimal_access_role
     unprotection_restrictions

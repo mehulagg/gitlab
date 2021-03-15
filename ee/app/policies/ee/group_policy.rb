@@ -94,10 +94,6 @@ module EE
         @subject.saml_group_sync_available?
       end
 
-      condition(:group_timelogs_available) do
-        @subject.feature_available?(:group_timelogs)
-      end
-
       with_scope :global
       condition(:commit_committer_check_disabled_globally) do
         !PushRule.global&.commit_committer_check
@@ -152,7 +148,6 @@ module EE
         enable :admin_issue_board_list
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
-        enable :read_group_timelogs
         enable :download_wiki_code
       end
 
@@ -308,8 +303,6 @@ module EE
       rule { owner & group_saml_enabled }.policy do
         enable :read_group_saml_identity
       end
-
-      rule { ~group_timelogs_available }.prevent :read_group_timelogs
 
       rule { ~(admin | allow_to_manage_default_branch_protection) }.policy do
         prevent :update_default_branch_protection

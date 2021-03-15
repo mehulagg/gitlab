@@ -12,7 +12,6 @@ module EE
     prepended do
       include TokenAuthenticatable
       include InsightsFeature
-      include HasTimelogsReport
       include HasWiki
       include CanMoveRepositoryStorage
 

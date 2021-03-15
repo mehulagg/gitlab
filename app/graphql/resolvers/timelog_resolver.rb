@@ -45,8 +45,7 @@ module Resolvers
     end
 
     def timelogs_available_for_user?
-      group&.feature_available?(:group_timelogs) &&
-        group&.user_can_access_group_timelogs?(context[:current_user])
+      group&.user_can_access_group_timelogs?(context[:current_user])
     end
 
     def validate_params_presence!(args)

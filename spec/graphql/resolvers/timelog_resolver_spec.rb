@@ -17,7 +17,6 @@ RSpec.describe Resolvers::TimelogResolver do
     before do
       group.add_developer(current_user)
       project.add_developer(current_user)
-      stub_licensed_features(group_timelogs: true)
     end
 
     describe '#resolve' do
@@ -36,12 +35,6 @@ RSpec.describe Resolvers::TimelogResolver do
 
       it 'return nothing when user has insufficient permissions' do
         group.add_guest(current_user)
-
-        expect(resolve_timelogs(args)).to be_empty
-      end
-
-      it 'returns nothing when feature is disabled' do
-        stub_licensed_features(group_timelogs: false)
 
         expect(resolve_timelogs(args)).to be_empty
       end
