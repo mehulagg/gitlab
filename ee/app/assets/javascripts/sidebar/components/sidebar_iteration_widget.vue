@@ -13,35 +13,46 @@ import {
 import * as Sentry from '@sentry/browser';
 import createFlash from '~/flash';
 import { IssuableType } from '~/issue_show/constants';
-import { __ } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
-import {
-  iterationSelectTextMap,
-  iterationDisplayState,
-  noIteration,
-  issuableIterationQueries,
-  iterationsQueries,
-} from '../constants';
+import { iterationDisplayState, issuableIterationQueries, iterationsQueries } from '../constants';
+
+export const PropType = {
+  Iteration: 'iteration',
+  Epic: 'epic',
+  Milestone: 'milestone',
+};
+
+export const noPropId = null;
 
 export default {
-  noIteration,
+  noPropId,
   i18n: {
-    iteration: iterationSelectTextMap.iteration,
-    noIteration: iterationSelectTextMap.noIteration,
-    assignIteration: iterationSelectTextMap.assignIteration,
-    iterationSelectFail: iterationSelectTextMap.iterationSelectFail,
-    noIterationsFound: iterationSelectTextMap.noIterationsFound,
-    currentIterationFetchError: iterationSelectTextMap.currentIterationFetchError,
-    iterationsFetchError: iterationSelectTextMap.iterationsFetchError,
-    edit: __('Edit'),
+    [PropType.Iteration]: __('Iteration'),
+    [PropType.Epic]: __('Epic'),
+    [PropType.Milestone]: __('Milestone'),
     none: __('None'),
   },
-  issuableIterationQueries,
-  iterationsQueries,
+  queries: {
+    [PropType.Iteration]: {
+      current: issuableIterationQueries,
+      list: iterationsQueries,
+    },
+  },
   tracking: {
     label: 'right_sidebar',
-    property: 'iteration',
     event: 'click_edit_button',
+  },
+  trackingProp: {
+    [PropType.Iteration]: {
+      property: 'iteration',
+    },
+    [PropType.Epic]: {
+      property: 'epic',
+    },
+    [PropType.Milestone]: {
+      property: 'milestone',
+    },
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -63,6 +74,13 @@ export default {
     },
   },
   props: {
+    propType: {
+      type: String,
+      required: true,
+      validator(value) {
+        return [PropType.Iteration, PropType.Epic, PropType.Milestone].includes(value);
+      },
+    },
     workspacePath: {
       required: true,
       type: String,
@@ -71,7 +89,7 @@ export default {
       required: true,
       type: String,
     },
-    iterationsWorkspacePath: {
+    propsWorkspacePath: {
       required: true,
       type: String,
     },
@@ -80,15 +98,25 @@ export default {
       required: true,
       validator(value) {
         // Add supported IssuableType here along with graphql queries
-        // as this widget is used for addtional issuable types.
+        // as this widget can be used for addtional issuable types.
         return [IssuableType.Issue].includes(value);
       },
     },
   },
   apollo: {
-    currentIteration: {
+    currentProp: {
       query() {
-        return issuableIterationQueries[this.issuableType].query;
+        const {
+          queries: {
+            [this.propType]: {
+              current: {
+                [this.issuableType]: { query },
+              },
+            },
+          },
+        } = this.$options;
+
+        return query;
       },
       variables() {
         return {
@@ -97,16 +125,26 @@ export default {
         };
       },
       update(data) {
-        return data?.workspace?.issuable.iteration;
+        return data?.workspace?.issuable.prop;
       },
       error(error) {
-        createFlash({ message: this.$options.i18n.currentIterationFetchError });
+        createFlash({ message: this.$options.i18n.currentFetchError });
         Sentry.captureException(error);
       },
     },
-    iterations: {
+    propsList: {
       query() {
-        return iterationsQueries[this.issuableType].query;
+        const {
+          queries: {
+            [this.propType]: {
+              list: {
+                [this.issuableType]: { query },
+              },
+            },
+          },
+        } = this.$options;
+
+        return query;
       },
       skip() {
         return !this.editing;
@@ -114,16 +152,20 @@ export default {
       debounce: 250,
       variables() {
         return {
-          fullPath: this.iterationsWorkspacePath,
+          fullPath: this.propsWorkspacePath,
           title: this.searchTerm,
+          // TODO
           state: iterationDisplayState,
         };
       },
       update(data) {
-        return data?.workspace?.iterations.nodes || [];
+        if (data?.workspace) {
+          return data?.workspace?.props.nodes;
+        }
+        return [];
       },
       error(error) {
-        createFlash({ message: this.$options.i18n.iterationsFetchError });
+        createFlash({ message: this.$options.i18n.listFetchError });
         Sentry.captureException(error);
       },
     },
@@ -134,59 +176,108 @@ export default {
       editing: false,
       updating: false,
       selectedTitle: null,
-      currentIteration: null,
-      iterations: [],
+      currentProp: null,
+      propsList: [],
     };
   },
   computed: {
-    iteration() {
-      return this.iterations.find(({ id }) => id === this.currentIteration);
+    prop() {
+      return this.propsList.find(({ id }) => id === this.currentProp);
     },
-    iterationTitle() {
-      return this.currentIteration?.title;
+    propTitle() {
+      return this.currentProp?.title;
     },
-    iterationUrl() {
-      return this.currentIteration?.webUrl;
+    propUrl() {
+      return this.currentProp?.webUrl;
     },
     dropdownText() {
-      return this.currentIteration ? this.currentIteration?.title : this.$options.i18n.iteration;
+      return this.currentProp ? this.currentProp?.title : this.$options.i18n[this.propType];
     },
     loading() {
-      return this.$apollo.queries.currentIteration.loading;
+      return this.$apollo.queries.currentProp.loading;
     },
-    noIterations() {
-      return this.iterations.length === 0;
+    emptyPropsList() {
+      return this.propsList.length === 0;
+    },
+    propTypeTitle() {
+      return this.$options.i18n[this.propType];
+    },
+    i18n() {
+      return {
+        noProp: sprintf(s__('DropdownWidget|No %{propType}'), {
+          propType: this.propType,
+        }),
+        assignProp: sprintf(s__('DropdownWidget|Assign %{propType}'), {
+          propType: this.propType,
+        }),
+        selectFail: sprintf(
+          s__(
+            'DropdownWidget|Failed to set %{propType} on this %{issuableType}. Please try again.',
+          ),
+          { propType: this.propType, issuableType: this.issuableType },
+        ),
+        noPropsFound: sprintf(s__('DropdownWidget|No %{propType}s found'), {
+          propType: this.propType,
+        }),
+        updateError: sprintf(
+          s__(
+            'DropdownWidget|An error occurred while assigning the selected %{propType} to the ${issuableType}.',
+          ),
+          { propType: this.propType, issuableType: this.issuableType },
+        ),
+        listFetchError: sprintf(
+          s__(
+            'DropdownWidget|Failed to fetch the %{propType} for this %{issuableType}. Please try again.',
+          ),
+          { propType: this.propType, issuableType: this.issuableType },
+        ),
+        currentFetchError: sprintf(
+          s__(
+            'DropdownWidget|An error occurred while fetching the assigned %{propType} of the selected ${issuableType}.',
+            { propType: this.propType, issuableType: this.issuableType },
+          ),
+        ),
+      };
     },
   },
   methods: {
-    updateIteration(iterationId) {
-      if (this.currentIteration === null && iterationId === null) return;
-      if (iterationId === this.currentIteration?.id) return;
+    updateProp(propId) {
+      if (this.currentProp === null && propId === null) return;
+      if (propId === this.currentProp?.id) return;
 
       this.updating = true;
 
-      const selectedIteration = this.iterations.find((i) => i.id === iterationId);
-      this.selectedTitle = selectedIteration ? selectedIteration.title : this.$options.i18n.none;
+      const selectedProp = this.propsList.find((p) => p.id === propId);
+      this.selectedTitle = selectedProp ? selectedProp.title : this.$options.i18n.none;
+
+      const {
+        [this.propType]: {
+          current: {
+            [this.issuableType]: { mutation },
+          },
+        },
+      } = this.$options.queries;
 
       this.$apollo
         .mutate({
-          mutation: issuableIterationQueries[this.issuableType].mutation,
+          mutation,
           variables: {
             fullPath: this.workspacePath,
-            iterationId,
+            propId,
             iid: this.iid,
           },
         })
         .then(({ data }) => {
-          if (data.issuableSetIteration?.errors?.length) {
-            createFlash(data.issuableSetIteration.errors[0]);
-            Sentry.captureException(data.issuableSetIteration.errors[0]);
+          // TAKE CARE OF THIS
+          if (data.issuableSetProp?.errors?.length) {
+            createFlash(data.issuableSetProp.errors[0]);
+            Sentry.captureException(data.issuableSetProp.errors[0]);
           } else {
-            this.$emit('iteration-updated', data);
+            this.$emit('prop-updated', data);
           }
         })
         .catch((error) => {
-          createFlash(this.$options.i18n.iterationSelectFail);
+          createFlash(this.$options.i18n.selectFail);
           Sentry.captureException(error);
         })
         .finally(() => {
@@ -195,10 +286,8 @@ export default {
           this.selectedTitle = null;
         });
     },
-    isIterationChecked(iterationId = undefined) {
-      return (
-        iterationId === this.currentIteration?.id || (!this.currentIteration?.id && !iterationId)
-      );
+    isPropChecked(propId = undefined) {
+      return propId === this.currentProp?.id || (!this.currentProp?.id && !propId);
     },
     showDropdown() {
       this.$refs.newDropdown.show();
@@ -221,32 +310,30 @@ export default {
   <div data-qa-selector="iteration_container">
     <sidebar-editable-item
       ref="editable"
-      :title="$options.i18n.iteration"
-      data-testid="iteration-edit-link"
+      :title="propTypeTitle"
+      data-testid="prop-edit-link"
       :tracking="$options.tracking"
+      :trakcing-prop="$options.trackingProp[propType]"
       :loading="updating || loading"
       @open="handleOpen"
       @close="handleClose"
     >
       <template #collapsed>
         <div v-if="isClassicSidebar" v-gl-tooltip class="sidebar-collapsed-icon">
-          <gl-icon :size="16" :aria-label="$options.i18n.iteration" name="iteration" />
-          <span class="collapse-truncated-title">{{ iterationTitle }}</span>
+          <gl-icon :size="16" :aria-label="propTypeTitle" :name="propType" />
+          <span class="collapse-truncated-title">{{ propTitle }}</span>
         </div>
-        <div
-          data-testid="select-iteration"
-          :class="isClassicSidebar ? 'hide-collapsed' : 'gl-mt-3'"
-        >
+        <div data-testid="select-prop" :class="isClassicSidebar ? 'hide-collapsed' : 'gl-mt-3'">
           <strong v-if="updating">{{ selectedTitle }}</strong>
-          <span v-else-if="!updating && !currentIteration" class="gl-text-gray-500">{{
+          <span v-else-if="!updating && !currentProp" class="gl-text-gray-500">{{
             $options.i18n.none
           }}</span>
           <gl-link
             v-else
             data-qa-selector="iteration_link"
             class="gl-text-gray-900! gl-font-weight-bold"
-            :href="iterationUrl"
-            ><strong>{{ iterationTitle }}</strong></gl-link
+            :href="propUrl"
+            ><strong>{{ propTitle }}</strong></gl-link
           >
         </div>
       </template>
@@ -254,7 +341,7 @@ export default {
         <gl-dropdown
           ref="newDropdown"
           lazy
-          :header-text="$options.i18n.assignIteration"
+          :header-text="i18n.assignProp"
           :text="dropdownText"
           :loading="loading"
           class="gl-w-full"
@@ -262,31 +349,31 @@ export default {
         >
           <gl-search-box-by-type ref="search" v-model="searchTerm" />
           <gl-dropdown-item
-            data-testid="no-iteration-item"
+            data-testid="no-prop-item"
             :is-check-item="true"
-            :is-checked="isIterationChecked($options.noIteration)"
-            @click="updateIteration($options.noIteration)"
+            :is-checked="isPropChecked($options.noPropId)"
+            @click="updateProp($options.noPropId)"
           >
-            {{ $options.i18n.noIteration }}
+            {{ i18n.noProp }}
           </gl-dropdown-item>
           <gl-dropdown-divider />
           <gl-loading-icon
-            v-if="$apollo.queries.iterations.loading"
+            v-if="$apollo.queries.propsList.loading"
             class="gl-py-4"
             data-testid="loading-icon-dropdown"
           />
           <template v-else>
-            <gl-dropdown-text v-if="noIterations">
-              {{ $options.i18n.noIterationsFound }}
+            <gl-dropdown-text v-if="emptyPropsList">
+              {{ i18n.noPropsFound }}
             </gl-dropdown-text>
             <gl-dropdown-item
-              v-for="iterationItem in iterations"
-              :key="iterationItem.id"
+              v-for="propItem in propsList"
+              :key="propItem.id"
               :is-check-item="true"
-              :is-checked="isIterationChecked(iterationItem.id)"
-              data-testid="iteration-items"
-              @click="updateIteration(iterationItem.id)"
-              >{{ iterationItem.title }}</gl-dropdown-item
+              :is-checked="isPropChecked(propItem.id)"
+              data-testid="prop-items"
+              @click="updateProp(propItem.id)"
+              >{{ propItem.title }}</gl-dropdown-item
             >
           </template>
         </gl-dropdown>

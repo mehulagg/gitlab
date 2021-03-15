@@ -3,7 +3,8 @@
 query issueIterations($fullPath: ID!, $title: String, $state: IterationState) {
   workspace: group(fullPath: $fullPath) {
     __typename
-    iterations(title: $title, state: $state) {
+    props: iterations(title: $title, state: $state) {
+      __typename
       nodes {
         ...IterationFragment
         state

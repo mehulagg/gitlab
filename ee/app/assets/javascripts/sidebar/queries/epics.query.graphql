@@ -1,0 +1,14 @@
+query issueEpics($fullPath: ID!, $title: String, $state: EpicState) {
+  workspace: group(fullPath: $fullPath) {
+    __typename
+    props: epics(title: $title, state: $state) {
+      __typename
+      nodes {
+        id
+        title
+        webUrl
+        state
+      }
+    }
+  }
+}

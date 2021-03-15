@@ -80,9 +80,10 @@ export default {
       <div>
         <board-sidebar-milestone-select />
         <sidebar-iteration-widget
+          :prop-type="'iteration'"
           :iid="activeIssue.iid"
           :workspace-path="projectPathForActiveIssue"
-          :iterations-workspace-path="groupPathForActiveIssue"
+          :props-workspace-path="groupPathForActiveIssue"
           :issuable-type="issuableType"
           class="gl-mt-5"
         />
