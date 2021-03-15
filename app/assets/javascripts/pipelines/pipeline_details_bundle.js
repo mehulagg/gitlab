@@ -81,7 +81,7 @@ const createTestDetails = () => {
 
 export default async function initPipelineDetailsBundle() {
   createTestDetails();
-  createDagApp();
+  createDagApp(apolloProvider);
 
   const canShowNewPipelineDetails =
     gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
