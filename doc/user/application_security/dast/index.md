@@ -798,10 +798,8 @@ Alternatively, you can use the CI/CD variable `SECURE_ANALYZERS_PREFIX` to overr
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.2.
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.3.
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5100) in GitLab 13.9, the saved scans
->   feature.
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4847) in GitLab 13.10, the option to select
->   a branch.
+> - The saved scans feature was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/5100) in GitLab 13.9.
+> - The option to select a branch was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/4847) in GitLab 13.10.
 
 An on-demand DAST scan runs outside the DevOps life cycle. Changes in your repository don't trigger
 the scan. You must start it manually.
@@ -813,35 +811,10 @@ An on-demand DAST scan:
 - Is associated with your project's default branch.
 - Is saved on creation so it can be run later.
 
-### Branch selection for on-demand scan
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4847) in GitLab 13.10.
-> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-branch-selection-for-on-demand-scans). **(ULTIMATE SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
-#### Enable or disable branch selection for on-demand scans **(ULTIMATE SELF)**
-
-Branch selection for on-demand scans is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:dast_branch_selection)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:dast_branch_selection)
-```
+In GitLab 13.10 and later, you can select to run an on-demand scan against a specific branch. This
+feature is [deployed behind a feature flag](../../feature_flags.md), enabled by default. It's
+enabled on GitLab.com and recommended for production use. [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it with `Feature.disable(:dast_branch_selection)`.
 
 ### On-demand scan modes
 
@@ -874,8 +847,8 @@ To run an on-demand scan, either:
 
 1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left
    sidebar.
-1. Complete the **Scan name** and **Description** fields, and select the desired branch from the
-   **Branch** dropdown.
+1. Complete the **Scan name** and **Description** fields.
+1. In GitLab 13.10 and later, select the desired branch from the **Branch** dropdown.
 1. In **Scanner profile**, select a scanner profile from the dropdown.
 1. In **Site profile**, select a site profile from the dropdown.
 1. To run the on-demand scan now, select **Save and run scan**. Otherwise select **Save scan** to
