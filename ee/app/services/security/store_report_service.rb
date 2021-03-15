@@ -73,7 +73,7 @@ module Security
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
 
-      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints, project)
         update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
       end
 
@@ -93,7 +93,7 @@ module Security
     end
 
     def create_or_find_vulnerability_finding(finding, create_params)
-      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints, project)
         create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
       else
         create_or_find_vulnerability_finding_normal(finding, create_params)
