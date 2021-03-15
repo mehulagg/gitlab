@@ -183,6 +183,7 @@ The following variables are used for configuring specific analyzers (used for a 
 | `BUNDLER_AUDIT_ADVISORY_DB_URL`      | `bundler-audit`    | `https://github.com/rubysec/ruby-advisory-db` | URL of the advisory database used by bundler-audit. |
 | `BUNDLER_AUDIT_ADVISORY_DB_REF_NAME` | `bundler-audit`    | `master`                     | Git ref for the advisory database specified by `BUNDLER_AUDIT_ADVISORY_DB_URL`. |
 | `GEMNASIUM_DB_LOCAL_PATH`            | `gemnasium`        | `/gemnasium-db`              | Path to local Gemnasium database. |
+| `GEMNASIUM_DB_UPDATE_DISABLED`       | `gemnasium`        | `"false"`                    | Disable automatic updates for the `gemnasium-db` advisory database (For usage see: [examples](#hosting-a-copy-of-the-gemnasium_db-advisory-database))|
 | `GEMNASIUM_DB_REMOTE_URL`            | `gemnasium`        | `https://gitlab.com/gitlab-org/security-products/gemnasium-db.git` | Repository URL for fetching the Gemnasium database. |
 | `GEMNASIUM_DB_REF_NAME`              | `gemnasium`        | `master`                     | Branch name for remote repository database. `GEMNASIUM_DB_REMOTE_URL` is required. |
 | `DS_REMEDIATE`                       | `gemnasium`        | `"true"`                     | Enable automatic remediation of vulnerable dependencies. |
@@ -504,6 +505,36 @@ ensure that it can reach your private repository. Here is an example configurati
    import setuptools.ssl_support
    setuptools.ssl_support.cert_paths = ['internal.crt']
    ```
+
+## Hosting a copy of the gemnasium_db advisory database
+
+The [gemnasium_db](https://gitlab.com/gitlab-org/security-products/gemnasium-db) Git repository is used by `gemnasium`, `gemnasium-maven`, and `gemnasium-python` as the source of vulnerability data. This repository gets updated at the time of the scan in order to fetch the latest advisories. However, due to a restricted networking environment running this update is sometimes not possible. In this case a user can do one of the following.
+
+### Host own copy of the advisory database
+
+If [gemnasium-db](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is not reachable from within the environment, but there is an option to host the user's own Git copy. Then the analyzer can be instructed to update the database from the user's copy using `GEMNASIUM_DB_REMOTE_URL`.
+
+```yaml
+variables:
+  GEMNASIUM_DB_REMOTE_URL: https://users-own-copy.example.com/gemnasium-db/.git
+
+...
+```
+
+### Use local clone
+
+If a hosted copy is not possible. Then the user can clone [gemnasium-db](https://gitlab.com/gitlab-org/security-products/gemnasium-db) before the scan and point the analyzer to this directory (using: `GEMNASIUM_DB_LOCAL_PATH`) and turn off the analyzer's self-update mechanism (using: `GEMNASIUM_DB_UPDATE_DISABLED`). In this example we show the checkout occurring before the scan job of the `gemnasium` analyzer.
+
+```yaml
+...
+
+gemnasium-dependency_scanning:
+  variables:
+    GEMNASIUM_DB_LOCAL_PATH: ./gemnasium-db-local
+    GEMNASIUM_DB_UPDATE_DISABLED: "true"
+  before_script:
+    - git clone https://gitlab.com/gitlab-org/security-products/gemnasium-db.git $GEMNASIUM_DB_LOCAL_PATH
+```
 
 ## Limitations
 
