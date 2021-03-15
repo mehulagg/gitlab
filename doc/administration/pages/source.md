@@ -135,8 +135,8 @@ The Pages daemon doesn't listen to the outside world.
    `lib/support/systemd/gitlab-pages.service` to `/etc/systemd/system` and type
 
    ```shell
-   systemctl daemon-reload
-   systemctl edit gitlab-pages.service
+   sudo systemctl daemon-reload
+   sudo systemctl edit gitlab-pages.service
    ```
 
    In the opening editor write
@@ -147,10 +147,17 @@ The Pages daemon doesn't listen to the outside world.
    ```
 
    setting `example.io` to match the `host` setting that you set above. Finally
-   enable the service
+   add `gitlab-pages.service` as a dependency to `gitlab.target`
 
    ```shell
-   systemctl enable gitlab-pages.service
+   sudo systemctl edit gitlab.target
+   ```
+
+   In the editor that opens, add the following and save the file:
+
+   ```plaintext
+   [Unit]
+   Wants=gitlab-pages.service
    ```
 
    When using SysV init instead, edit `/etc/default/gitlab` and set

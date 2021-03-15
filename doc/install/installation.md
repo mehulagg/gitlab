@@ -778,7 +778,7 @@ For example, if you're running Redis and PostgreSQL on the same machine as GitLa
 Make GitLab start on boot:
 
 ```shell
-sudo systemctl enable gitlab-gitaly.service gitlab-mailroom.service gitlab-puma.service gitlab-sidekiq.service gitlab-workhorse.service gitlab.target
+sudo systemctl enable gitlab.target
 ```
 
 #### Install SysV init script
