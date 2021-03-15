@@ -103,6 +103,14 @@ module QA
           element :suggestion_button
         end
 
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_merged.vue' do
+          element :cherry_pick_button
+        end
+
+        view 'app/assets/javascripts/projects/commit/components/form_modal.vue' do
+          element :submit_commit_button
+        end
+
         def start_review
           click_element(:start_review_button)
 
@@ -349,6 +357,11 @@ module QA
 
         def apply_suggestions_batch
           all_elements(:apply_suggestions_batch_button, minimum: 1).first.click
+        end
+
+        def cherry_pick
+          click_element(:cherry_pick_button)
+          click_element(:submit_commit_button)
         end
       end
     end

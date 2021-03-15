@@ -152,6 +152,7 @@ export default {
           :title="cherryPickTitle"
           size="small"
           @click="openCherryPickModal"
+          data-qa-selector="cherry_pick_button"
         >
           {{ cherryPickLabel }}
         </gl-button>
