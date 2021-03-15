@@ -8,7 +8,7 @@ type: reference, howto
 # Dynamic Application Security Testing (DAST) **(ULTIMATE)**
 
 If you deploy your web application into a new environment, your application may
-become exposed to new categories of attacks. For example, misconfigurations of your
+become exposed to new types of attacks. For example, misconfigurations of your
 application server or incorrect assumptions about security controls may not be
 visible from the source code.
 
