@@ -83,12 +83,15 @@ RSpec.describe 'User adds milestone lists', :js do
     click_button 'Create list'
     wait_for_all_requests
 
-    select(list_type, from: 'List type')
+    page.choose(list_type)
 
-    page.within('.board-add-new-list') do
+    click_button 'None'
+
+    page.within('.dropdown-menu') do
       find('label', text: title).click
-      click_button 'Add'
     end
+
+    click_button 'Add to board'
 
     wait_for_all_requests
   end

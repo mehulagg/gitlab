@@ -32,7 +32,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    formLabel: {
+    searchLabel: {
       type: String,
       required: true,
     },
@@ -101,7 +101,7 @@ export default {
 
         <gl-form-group
           class="gl-px-5 gl-max-w-full"
-          :label="formLabel"
+          :label="searchLabel"
           :description="formDescription"
         >
           <gl-dropdown

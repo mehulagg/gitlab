@@ -21,7 +21,6 @@ export const listTypeInfo = {
     loadingPropertyName: 'labelsLoading',
     fetchMethodName: 'fetchLabels',
     formDescription: __('A label list displays issues with the selected label.'),
-    formLabel: __('Label'),
     searchLabel: __('Select label'),
     searchPlaceholder: __('Search labels'),
   },
@@ -30,7 +29,6 @@ export const listTypeInfo = {
     loadingPropertyName: 'assigneesLoading',
     fetchMethodName: 'fetchAssignees',
     formDescription: __('An assignee list displays issues assigned to the selected user'),
-    formLabel: __('Assignee'),
     searchLabel: __('Select assignee'),
     searchPlaceholder: __('Search assignees'),
   },
@@ -39,7 +37,6 @@ export const listTypeInfo = {
     loadingPropertyName: 'milestonesLoading',
     fetchMethodName: 'fetchMilestones',
     formDescription: __('A milestone list displays issues in the selected milestone.'),
-    formLabel: __('Milestone'),
     searchLabel: __('Select milestone'),
     searchPlaceholder: __('Search milestones'),
   },
@@ -48,7 +45,6 @@ export const listTypeInfo = {
     loadingPropertyName: 'iterationsLoading',
     fetchMethodName: 'fetchIterations',
     formDescription: __('An iteration list displays issues in the selected iteration.'),
-    formLabel: __('Iteration'),
     searchLabel: __('Select iteration'),
     searchPlaceholder: __('Search iterations'),
   },
@@ -242,7 +238,6 @@ export default {
 <template>
   <board-add-new-column-form
     :loading="loading"
-    :form-label="info.formLabel"
     :form-description="info.formDescription"
     :search-label="info.searchLabel"
     :search-placeholder="info.searchPlaceholder"

@@ -1,4 +1,10 @@
-import { GlAvatarLabeled, GlSearchBoxByType, GlFormRadio, GlFormRadioGroup } from '@gitlab/ui';
+import {
+  GlAvatarLabeled,
+  GlDropdown,
+  GlSearchBoxByType,
+  GlFormRadio,
+  GlFormRadioGroup,
+} from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
@@ -77,7 +83,6 @@ describe('BoardAddNewColumn', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findForm = () => wrapper.findComponent(BoardAddNewColumnForm);
@@ -91,7 +96,7 @@ describe('BoardAddNewColumn', () => {
       .filter((r) => r.attributes('value') === type)
       .at(0);
     radio.element.value = type;
-    radio.trigger('change');
+    radio.vm.$emit('change', type);
   };
 
   beforeEach(() => {
@@ -215,9 +220,9 @@ describe('BoardAddNewColumn', () => {
         },
       });
 
-      await nextTick();
-
       listTypeSelect(ListType.iteration);
+
+      await nextTick();
     });
 
     it('sets iteration placeholder text in form', async () => {
@@ -229,7 +234,7 @@ describe('BoardAddNewColumn', () => {
     });
 
     it('shows list of iterations', () => {
-      const itemList = wrapper.findAllComponents(GlFormRadio);
+      const itemList = wrapper.findComponent(GlDropdown).findAllComponents(GlFormRadio);
 
       expect(itemList).toHaveLength(mockIterations.length);
       expect(itemList.at(0).attributes('value')).toBe(mockIterations[0].id);
