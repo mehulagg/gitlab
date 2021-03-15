@@ -341,19 +341,23 @@ As in other list types, click the trash icon to remove a list.
 
 ### Iteration lists **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250479) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250479) in GitLab 13.10.
 > - It's [deployed behind the `board_new_lists` feature flag](../feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-adding-issues-to-the-list).
 
-You're also able to create lists of an iteration. These are lists that filter issues by the assigned
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You're also able to create lists of an iteration.
+These are lists that filter issues by the assigned
 iteration. To add an iteration list:
 
-1. Click the **Create list** button.
-1. Select the **Iteration** radio button.
+1. Select **Create list**.
+1. Select the **Iteration**.
 1. In the dropdown, select an iteration.
-1. Click **Add to board**.
+1. Select **Add to board**.
 
 Like the milestone lists, you're able to [drag issues](#drag-issues-between-lists)
 to and from a iteration list to manipulate the iteration of the dragged issues.
