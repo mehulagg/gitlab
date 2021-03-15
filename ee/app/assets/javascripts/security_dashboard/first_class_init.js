@@ -38,7 +38,10 @@ export default (el, dashboardType) => {
     pipelineSecurityBuildsFailedCount,
     pipelineSecurityBuildsFailedPath,
     hasJiraVulnerabilitiesIntegrationEnabled,
+    surveyRequestSvgPath,
   } = el.dataset;
+
+  console.log(el.dataset);
 
   if (isUnavailable) {
     return new Vue({
@@ -60,6 +63,7 @@ export default (el, dashboardType) => {
     emptyStateSvgPath,
     notEnabledScannersHelpPath,
     noPipelineRunScannersHelpPath,
+    surveyRequestSvgPath,
     hasVulnerabilities: parseBoolean(hasVulnerabilities),
     scanners: scanners ? JSON.parse(scanners) : [],
     hasJiraVulnerabilitiesIntegrationEnabled: parseBoolean(
