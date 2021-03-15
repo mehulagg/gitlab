@@ -17,24 +17,6 @@ class TrialsController < ApplicationController
     record_experiment_user(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
   end
 
-  def extend_reactivate
-    return render_403 unless %w[GitlabSubscription::TRIAL_EXTENDED GitlabSubscription::TRIAL_REACTIVATED].include?(params[:trial_extension_type])
-
-    return render_403 if params[:trial_extension_type].to_i == GitlabSubscription::TRIAL_EXTENDED && !@namespace.can_extend?
-
-    return render_403 if params[:trial_extension_type].to_i == GitlabSubscription::TRIAL_REACTIVATED && !@namespace.can_reactivate?
-
-    return render_403 if @namespace.invalid?
-
-    @result = GitlabSubscriptions::ExtendReactivateTrialService.new.execute(extend_reactivate_trial_params)
-
-    if @result&.dig(:success)
-      head 200
-    else
-      render_403
-    end
-  end
-
   def select
   end
 
@@ -66,6 +48,26 @@ class TrialsController < ApplicationController
       redirect_to group_url(@namespace, { trial: true })
     else
       render :select
+    end
+  end
+
+  def extend_reactivate
+    trial_extension_type = params[:trial_extension_type].to_i
+
+    return render_403 unless [GitlabSubscription::TRIAL_EXTENDED, GitlabSubscription::TRIAL_REACTIVATED].include?(trial_extension_type)
+
+    return render_403 if trial_extension_type == GitlabSubscription::TRIAL_EXTENDED && !@namespace.can_extend?
+
+    return render_403 if trial_extension_type == GitlabSubscription::TRIAL_REACTIVATED && !@namespace.can_reactivate?
+
+    return render_403 if @namespace.invalid?
+
+    @result = GitlabSubscriptions::ExtendReactivateTrialService.new.execute(extend_reactivate_trial_params)
+
+    if @result&.dig(:success)
+      head 200
+    else
+      render_403
     end
   end
 

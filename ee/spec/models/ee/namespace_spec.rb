@@ -26,6 +26,7 @@ RSpec.describe Namespace do
   it { is_expected.to delegate_method(:trial_days_remaining).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:trial_percentage_complete).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:upgradable?).to(:gitlab_subscription) }
+  it { is_expected.to delegate_method(:trial_extension_type).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:email).to(:owner).with_prefix.allow_nil }
   it { is_expected.to delegate_method(:additional_purchased_storage_size).to(:namespace_limit) }
   it { is_expected.to delegate_method(:additional_purchased_storage_size=).to(:namespace_limit).with_arguments(:args) }
@@ -1227,6 +1228,80 @@ RSpec.describe Namespace do
           end
         end
       end
+    end
+  end
+
+  describe '#trial_extended_or_reactivated?' do
+    subject { namespace.trial_extended_or_reactivated? }
+
+    where(:trial_extension_type, :extended_or_reactivated) do
+      nil | false
+      0   | false
+      1   | true
+      2   | true
+      3   | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:trial_extension_type).and_return(trial_extension_type)
+      end
+
+      it { is_expected.to be extended_or_reactivated }
+    end
+  end
+
+  describe '#can_extend?' do
+    subject { namespace.can_extend? }
+
+    where(:trial_active, :trial_extended_or_reactivated, :can_extend) do
+      false | false | false
+      false | true  | false
+      true  | false | true
+      true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(trial_active)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+      end
+
+      it { is_expected.to be can_extend }
+    end
+  end
+
+  describe '#can_reactivate?' do
+    subject { namespace.can_reactivate? }
+
+    where(:trial_active, :never_had_trial, :trial_extended_or_reactivated, :free_plan, :can_reactivate) do
+          false | false | false | false | false
+          false | false | false | true  | true
+          false | false | true  | false | false
+          false | false | true  | true  | false
+          false | true  | false | false | false
+          false | true  | false | true  | false
+          false | true  | true  | false | false
+          false | true  | true  | true  | false
+          true  | false | false | false | false
+          true  | false | false | true  | false
+          true  | false | true  | false | false
+          true  | false | true  | true  | false
+          true  | true  | false | false | false
+          true  | true  | false | true  | false
+          true  | true  | true  | false | false
+          true  | true  | true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(trial_active)
+        allow(namespace).to receive(:never_had_trial?).and_return(never_had_trial)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+        allow(namespace).to receive(:free_plan?).and_return(free_plan)
+      end
+
+      it { is_expected.to be can_reactivate }
     end
   end
 

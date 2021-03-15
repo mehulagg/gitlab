@@ -127,10 +127,6 @@ module BillingPlansHelper
     end
   end
 
-  def extend_reactivate_trial_url(group, plan)
-    extend_reactivate_trials_path
-  end
-
   private
 
   def add_seats_url(group)

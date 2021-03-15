@@ -2,8 +2,8 @@
 
 module GitlabSubscriptions
   class ExtendReactivateTrialService
-    def execute(extend_trial_params)
-      response = client.extend_reactivate_trial(extend_trial_params)
+    def execute(extend_reactivate_trial_params)
+      response = client.extend_reactivate_trial(extend_reactivate_trial_params)
 
       if response[:success]
         { success: true }

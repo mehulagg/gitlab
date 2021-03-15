@@ -298,7 +298,7 @@ module EE
     end
 
     def trial_extended_or_reactivated?
-      trial_extension_type && [GitlabSubscription::TRIAL_EXTENDED, GitlabSubscription::TRIAL_REACTIVATED].include?(trial_extension_type)
+      [GitlabSubscription::TRIAL_EXTENDED, GitlabSubscription::TRIAL_REACTIVATED].include?(trial_extension_type)
     end
 
     def can_extend?
