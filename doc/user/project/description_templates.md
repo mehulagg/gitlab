@@ -89,7 +89,7 @@ For example: `https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_templat
 
 ![Description templates](img/description_templates.png)
 
-### Set a group-level description template **(PREMIUM)**
+### Set group-level description templates **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52360) in GitLab 13.9.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/7749) in GitLab 13.10.
@@ -104,7 +104,7 @@ To re-use templates [you've created](../project/description_templates.md#create-
 
 ![Group template settings](../group/img/group_file_template_settings.png)
 
-### Set an instance-level description template **(PREMIUM SELF)**
+### Set instance-level description templates **(PREMIUM SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52360) in GitLab 13.9.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/7749) in GitLab 13.10.
