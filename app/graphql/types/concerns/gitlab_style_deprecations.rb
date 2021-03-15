@@ -5,8 +5,14 @@
 module GitlabStyleDeprecations
   extend ActiveSupport::Concern
 
+  REASONS = {
+    renamed: 'This was renamed.',
+    discouraged: 'Use of this is not recommended.'
+  }.freeze
+
   private
 
+  # Mutate the arguments, returns the deprecation
   def gitlab_deprecation(kwargs)
     if kwargs[:deprecation_reason].present?
       raise ArgumentError, 'Use `deprecated` property instead of `deprecation_reason`. ' \
@@ -14,7 +20,7 @@ module GitlabStyleDeprecations
     end
 
     deprecation = kwargs.delete(:deprecated)
-    return kwargs unless deprecation
+    return unless deprecation
 
     milestone, reason = deprecation.values_at(:milestone, :reason).map(&:presence)
 
@@ -22,10 +28,17 @@ module GitlabStyleDeprecations
     raise ArgumentError, 'Please provide a `reason` within `deprecated`' unless reason
     raise ArgumentError, '`milestone` must be a `String`' unless milestone.is_a?(String)
 
-    deprecated_in = "Deprecated in #{milestone}"
-    kwargs[:deprecation_reason] = "#{reason}. #{deprecated_in}."
-    kwargs[:description] += " #{deprecated_in}: #{reason}." if kwargs[:description]
+    reason = REASONS.key?(reason) ? REASONS[reason] : reason.to_s.strip
+    deprecation[:reason_text] = reason
+    deprecation.freeze
 
-    kwargs
+    replacement = deprecation[:replacement]
+    reason += " Please use `#{replacement}`." if replacement.present?
+    deprecated_in = "Deprecated in #{milestone}"
+
+    kwargs[:deprecation_reason] = "#{reason} #{deprecated_in}."
+    kwargs[:description] += " #{deprecated_in}: #{reason}" if kwargs[:description]
+
+    deprecation
   end
 end

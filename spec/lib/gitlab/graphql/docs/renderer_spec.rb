@@ -15,10 +15,13 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
         end
       end
 
-      GraphQL::Schema.define(
-        query: query_type,
-        resolve_type: ->(obj, ctx) { raise 'Not a real schema' }
-      )
+      Class.new(GraphQL::Schema) do
+        query(query_type)
+
+        def resolve_type(obj, ctx)
+          raise 'Not a real schema'
+        end
+      end
     end
 
     let_it_be(:template) { Rails.root.join('lib/gitlab/graphql/docs/templates/default.md.haml') }
@@ -26,7 +29,7 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
 
     subject(:contents) do
       described_class.new(
-        mock_schema(type, field_description).graphql_definition,
+        mock_schema(type, field_description),
         output_dir: nil,
         template: template
       ).contents

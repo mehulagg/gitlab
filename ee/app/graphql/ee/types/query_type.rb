@@ -40,7 +40,7 @@ module EE
               null: true,
               description: "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard.",
               resolver: ::Resolvers::VulnerabilitiesHistoryResolver,
-              deprecated: { reason: 'Use `vulnerabilitiesCountByDay`', milestone: '13.3' }
+              deprecated: { reason: :discouraged, replacement: 'Query.vulnerabilitiesCountByDay', milestone: '13.3' }
 
         field :geo_node, ::Types::Geo::GeoNodeType,
               null: true,
