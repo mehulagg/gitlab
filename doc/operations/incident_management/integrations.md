@@ -57,15 +57,15 @@ and you can [customize the payload](#customize-the-alert-payload-outside-of-gitl
 1. Expand the **Alerts** section.
 1. For each endpoint you want to create:
 
-   1. Click **Add new integration** button
+   1. Click the **Add new integration** button.
    1. In the **Integration** dropdown menu, select **HTTP Endpoint**.
    1. Name the integration.
-   1. Toggle the **Active** alert setting. **URL** and **Authorization Key**
-      for the webhook configuration will be available in the **View credentials** tab after you save the integration. You must also input the URL and Authorization Key
-      in your external service.
-   1. _(Optional)_ To map fields from your monitoring tool's alert to GitLab fields, enter a sample payload
-      and click **Parse payload for custom mapping**. Valid JSON is required.
-      If you update a sample payload, you must also remap the fields.
+   1. Toggle the **Active** alert setting. The **URL** and **Authorization Key** for the webhook
+      configuration are available in the **View credentials** tab after you save the integration.
+      You must also input the URL and Authorization Key in your external service.
+   1. _(Optional)_ To map fields from your monitoring tool's alert to GitLab fields, enter a sample
+      payload and click **Parse payload for custom mapping**. Valid JSON is required. If you update
+      a sample payload, you must also remap the fields.
 
    1. _(Optional)_ If you provided a valid sample payload, select each value in
       **Payload alert key** to [map to a **GitLab alert key**](#map-fields-in-custom-alerts).
