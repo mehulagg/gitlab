@@ -28,11 +28,9 @@ module Mutations
     end
 
     def ready?(**args)
-      if Gitlab::Database.read_only?
-        raise Gitlab::Graphql::Errors::ResourceNotAvailable, ERROR_MESSAGE
-      else
-        true
-      end
+      raise Gitlab::Graphql::Errors::ResourceNotAvailable, ERROR_MESSAGE if Gitlab::Database.read_only?
+
+      true
     end
   end
 end
