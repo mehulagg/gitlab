@@ -193,7 +193,7 @@ GitLab allows users to create multiple value streams, hide default stages and cr
 
 ### Stage path
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
 > - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
