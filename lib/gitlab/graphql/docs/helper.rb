@@ -178,7 +178,24 @@ module Gitlab
 
           desc = object[:description].strip
           desc += '.' unless desc.ends_with?('.')
+          see = doc_reference(object, owner)
+          desc += " #{see}" if see
+          desc += " (see [Connections](#connections))" if connection?(object)
           desc
+        end
+
+        def doc_reference(object, owner)
+          field = schema_field(owner, object[:name])
+          return unless field
+
+          ref = field.try(:doc_reference)
+          return if ref.blank?
+
+          parts = ref.to_a.map do |(title, url)|
+            "[#{title.strip}](#{url.strip})"
+          end
+
+          "See #{parts.join(', ')}."
         end
 
         def render_deprecation(object, owner, context)

@@ -144,6 +144,58 @@ RSpec.describe Gitlab::Graphql::Docs::Renderer do
       end
     end
 
+    context 'when a field has a documentation reference' do
+      let(:type) do
+        Class.new(Types::BaseObject) do
+          graphql_name 'DocRefSpec'
+          description 'Testing doc refs'
+
+          field :foo,
+                type: GraphQL::STRING_TYPE,
+                null: false,
+                description: 'The foo.',
+                see: { 'A list of foos' => 'https://example.com/foos' }
+          field :bar,
+                type: GraphQL::STRING_TYPE,
+                null: false,
+                description: 'The bar.',
+                see: { 'A list of bars' => 'https://example.com/bars' } do
+                  argument :barity, ::GraphQL::INT_TYPE, required: false, description: '?'
+                end
+        end
+      end
+
+      let(:section) do
+        <<~DOC
+          ### `DocRefSpec`
+
+          Testing doc refs.
+
+          #### fields
+
+          | Name | Type | Description |
+          | ---- | ---- | ----------- |
+          | <a id="docrefspecfoo"></a>`foo` | [`String!`](#string) | The foo. See [A list of foos](https://example.com/foos). |
+
+          #### fields with arguments
+
+          ##### `DocRefSpec.bar`
+
+          The bar. See [A list of bars](https://example.com/bars).
+
+          Returns [`String!`](#string).
+
+          ###### arguments
+
+          | Name | Type | Description |
+          | ---- | ---- | ----------- |
+          | <a id="docrefspecbarbarity"></a>`barity` | [`Int`](#int) | ?. |
+        DOC
+      end
+
+      it_behaves_like 'renders correctly as GraphQL documentation'
+    end
+
     context 'when a field is deprecated' do
       let(:type) do
         Class.new(Types::BaseObject) do
