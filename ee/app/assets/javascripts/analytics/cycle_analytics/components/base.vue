@@ -109,6 +109,7 @@ export default {
         project_ids: selectedProjectIds,
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
+        stage_id: this.selectedStage?.id || null,
       };
     },
     stageCount() {
