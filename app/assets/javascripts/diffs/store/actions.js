@@ -233,6 +233,26 @@ export const fetchCoverageFiles = ({ commit, state }) => {
   coveragePoll.makeRequest();
 };
 
+export const fetchCodequality = ({ commit, state }) => {
+  const codequalityPoll = new Poll({
+    resource: {
+      getCodequalityDiffReports: (endpoint) => axios.get(endpoint),
+    },
+    data: state.endpointCodequality,
+    method: 'getCodequalityDiffReports',
+    successCallback: ({ status, data }) => {
+      if (status === httpStatusCodes.OK) {
+        commit(types.SET_CODEQUALITY_DATA, data);
+
+        codequalityPoll.stop();
+      }
+    },
+    errorCallback: () => createFlash(__('Something went wrong on our end. Please try again!')),
+  });
+
+  codequalityPoll.makeRequest();
+};
+
 export const setHighlightedRow = ({ commit }, lineCode) => {
   const fileHash = lineCode.split('_')[0];
   commit(types.SET_HIGHLIGHTED_ROW, lineCode);
