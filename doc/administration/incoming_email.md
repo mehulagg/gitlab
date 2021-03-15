@@ -155,6 +155,35 @@ Reply by email should now be working.
 1. Find the `incoming_email` section in `config/gitlab.yml`, enable the feature
   and fill in the details for your specific IMAP server and email account (see [examples](#configuration-examples) below).
 
+If you are using the systemd units to manage GitLab
+
+1. Add as a dependency `gitlab-mailroom.service` to `gitlab.target`
+
+   ```shell
+   sudo systemctl edit gitlab.target
+   ```
+
+1. In the editor that opens, add the following and save the file:
+
+   ```plaintext
+   [Unit]
+   Wants=gitlab-mailroom.service
+   ```
+
+1. Start `gitlab-mailroom.service`
+
+   ```shell
+   sudo systemctl start gitlab-mailroom.service
+   ```
+
+1. Verify that everything is configured correctly:
+
+   ```shell
+   sudo -u git -H bundle exec rake gitlab:incoming_email:check RAILS_ENV=production
+   ```
+
+If you are using the SysV init script
+
 1. Enable `mail_room` in the init script at `/etc/default/gitlab`:
 
    ```shell
