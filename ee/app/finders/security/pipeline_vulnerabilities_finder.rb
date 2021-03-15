@@ -84,7 +84,6 @@ module Security
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
-        # finding.location = report_finding.location_json
         finding.finding_links = report_finding.links.map do |link|
           Vulnerabilities::FindingLink.new(link.to_hash)
         end
