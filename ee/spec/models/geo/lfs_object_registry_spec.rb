@@ -203,3 +203,17 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
     end
   end
 end
+
+RSpec.describe Geo::LfsObjectRegistry, :geo, type: :model do
+  let_it_be(:registry) { create(:geo_lfs_object_registry_ssf) }
+
+  before do
+    stub_feature_flags(geo_lfs_object_replication_ssf: registry)
+  end
+
+  specify 'factory is valid' do
+    expect(registry).to be_valid
+  end
+
+  include_examples 'a Geo framework registry'
+end

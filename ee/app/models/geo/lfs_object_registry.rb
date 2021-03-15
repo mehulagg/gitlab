@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
 class Geo::LfsObjectRegistry < Geo::BaseRegistry
-  include ::Geo::ReplicableRegistry
-  include ::ShaAttribute
-  # include ::Geo::Syncable #TODO: This breaks due to scopes from Syncable overwriting behavior from ReplicableRegistry
+  # This works for everything, but the ::Geo::Syncable concern
+  if Feature.enabled?(:geo_lfs_object_replication_ssf)
+    Geo::LfsObjectRegistry.prepend(::Geo::ReplicableRegistry)
+  else
+    Geo::LfsObjectRegistry.prepend(::ShaAttribute)
+    sha_attribute :sha256
+    Geo::LfsObjectRegistry.extend(::Geo::Syncable)
+  end
 
   MODEL_CLASS = ::LfsObject
   MODEL_FOREIGN_KEY = :lfs_object_id
-
-  sha_attribute :sha256
 
   belongs_to :lfs_object, class_name: 'LfsObject'
 

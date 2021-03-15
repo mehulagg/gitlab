@@ -256,10 +256,12 @@ module Gitlab
       end
 
       def print_lfs_objects_status
-        print 'LFS Objects: '.rjust(GEO_STATUS_COLUMN_WIDTH)
-        show_failed_value(current_node_status.lfs_objects_failed_count)
-        print "#{current_node_status.lfs_objects_synced_count}/#{current_node_status.lfs_objects_count} "
-        puts using_percentage(current_node_status.lfs_objects_synced_in_percentage)
+        if Feature.disabled?(:geo_lfs_object_replication_ssf)
+          print 'LFS Objects: '.rjust(GEO_STATUS_COLUMN_WIDTH)
+          show_failed_value(current_node_status.lfs_objects_failed_count)
+          print "#{current_node_status.lfs_objects_synced_count}/#{current_node_status.lfs_objects_count} "
+          puts using_percentage(current_node_status.lfs_objects_synced_in_percentage)
+        end
       end
 
       def print_attachments_status
