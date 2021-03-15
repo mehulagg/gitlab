@@ -1,0 +1,8 @@
+---
+name: ci_queueing_defcon_disable_fair_scheduling
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.10'
+type: ops
+group: group::continuous integration
+default_enabled: false

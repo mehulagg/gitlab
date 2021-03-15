@@ -21,6 +21,13 @@ RSpec.configure do |config|
     TestLicense.init
   end
 
+  config.before do |example|
+    if example.metadata.fetch(:stub_feature_flags, true)
+      # This feature flag is by default disabled and used in a DEFCON mode
+      stub_feature_flags(ci_queueing_defcon_disable_quota: false)
+    end
+  end
+
   config.around(:each, :geo_tracking_db) do |example|
     example.run if Gitlab::Geo.geo_database_configured?
   end

@@ -29,9 +29,12 @@ module EE
       end
 
       def builds_for_shared_runner
-        return super unless shared_runner_build_limits_feature_enabled?
-
-        enforce_minutes_based_on_cost_factors(super)
+        # if a DEFCON is enabled, we disable quota
+        if ::Feature.enabled?(:ci_queueing_defcon_disable_quota, type: :ops, default_enabled: :yaml)
+          super
+        else
+          enforce_minutes_based_on_cost_factors(super)
+        end
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -69,10 +72,6 @@ module EE
 
       def application_shared_runners_minutes
         ::Gitlab::CurrentSettings.shared_runners_minutes
-      end
-
-      def shared_runner_build_limits_feature_enabled?
-        ENV['DISABLE_SHARED_RUNNER_BUILD_MINUTES_LIMIT'].to_s != 'true'
       end
 
       override :pre_assign_runner_checks

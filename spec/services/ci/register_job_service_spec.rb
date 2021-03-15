@@ -81,31 +81,61 @@ module Ci
             let!(:build2_project2) { FactoryBot.create :ci_build, pipeline: pipeline2 }
             let!(:build1_project3) { FactoryBot.create :ci_build, pipeline: pipeline3 }
 
-            it 'prefers projects without builds first' do
-              # it gets for one build from each of the projects
-              expect(execute(shared_runner)).to eq(build1_project1)
-              expect(execute(shared_runner)).to eq(build1_project2)
-              expect(execute(shared_runner)).to eq(build1_project3)
+            context 'when using fair scheduling' do
+              it 'prefers projects without builds first' do
+                # it gets for one build from each of the projects
+                expect(execute(shared_runner)).to eq(build1_project1)
+                expect(execute(shared_runner)).to eq(build1_project2)
+                expect(execute(shared_runner)).to eq(build1_project3)
 
-              # then it gets a second build from each of the projects
-              expect(execute(shared_runner)).to eq(build2_project1)
-              expect(execute(shared_runner)).to eq(build2_project2)
+                # then it gets a second build from each of the projects
+                expect(execute(shared_runner)).to eq(build2_project1)
+                expect(execute(shared_runner)).to eq(build2_project2)
 
-              # in the end the third build
-              expect(execute(shared_runner)).to eq(build3_project1)
+                # in the end the third build
+                expect(execute(shared_runner)).to eq(build3_project1)
+              end
+
+              it 'equalises number of running builds' do
+                # after finishing the first build for project 1, get a second build from the same project
+                expect(execute(shared_runner)).to eq(build1_project1)
+                build1_project1.reload.success
+                expect(execute(shared_runner)).to eq(build2_project1)
+
+                expect(execute(shared_runner)).to eq(build1_project2)
+                build1_project2.reload.success
+                expect(execute(shared_runner)).to eq(build2_project2)
+                expect(execute(shared_runner)).to eq(build1_project3)
+                expect(execute(shared_runner)).to eq(build3_project1)
+              end
             end
 
-            it 'equalises number of running builds' do
-              # after finishing the first build for project 1, get a second build from the same project
-              expect(execute(shared_runner)).to eq(build1_project1)
-              build1_project1.reload.success
-              expect(execute(shared_runner)).to eq(build2_project1)
+            context 'when using DEFCON mode that disables fair scheduling' do
+              before do
+                stub_feature_flags(ci_queueing_defcon_disable_fair_scheduling: true)
+              end
 
-              expect(execute(shared_runner)).to eq(build1_project2)
-              build1_project2.reload.success
-              expect(execute(shared_runner)).to eq(build2_project2)
-              expect(execute(shared_runner)).to eq(build1_project3)
-              expect(execute(shared_runner)).to eq(build3_project1)
+              it 'returns builds in order of creation (FIFO)' do
+                # it gets for one build from each of the projects
+                expect(execute(shared_runner)).to eq(build1_project1)
+                expect(execute(shared_runner)).to eq(build2_project1)
+                expect(execute(shared_runner)).to eq(build3_project1)
+                expect(execute(shared_runner)).to eq(build1_project2)
+                expect(execute(shared_runner)).to eq(build2_project2)
+                expect(execute(shared_runner)).to eq(build1_project3)
+              end
+
+              it 'returns builds in order of creation (FIFO)' do
+                expect(execute(shared_runner)).to eq(build1_project1)
+                build1_project1.reload.success
+                expect(execute(shared_runner)).to eq(build2_project1)
+
+                expect(execute(shared_runner)).to eq(build3_project1)
+                build2_project1.reload.success
+                expect(execute(shared_runner)).to eq(build1_project2)
+                expect(execute(shared_runner)).to eq(build2_project2)
+                expect(execute(shared_runner)).to eq(build1_project3)
+              end
             end
           end
 

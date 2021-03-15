@@ -233,6 +233,9 @@ RSpec.configure do |config|
       # tests, until we introduce it in user settings
       stub_feature_flags(forti_token_cloud: false)
 
+      # This feature flag is by default disabled and used in a DEFCON mode
+      stub_feature_flags(ci_queueing_defcon_disable_fair_scheduling: false)
+
       enable_rugged = example.metadata[:enable_rugged].present?
 
       # Disable Rugged features by default

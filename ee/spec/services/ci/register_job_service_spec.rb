@@ -56,6 +56,12 @@ RSpec.describe Ci::RegisterJobService do
         end
 
         it { is_expected.to be_nil }
+
+        it 'when in DEFCON it ignores quota and returns anyway' do
+          stub_feature_flags(ci_queueing_defcon_disable_quota: true)
+
+          is_expected.to be_kind_of(Ci::Build)
+        end
       end
 
       context 'when limit set at global level' do
