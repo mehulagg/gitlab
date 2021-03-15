@@ -116,6 +116,27 @@ class InvitesController < ApplicationController
     end
   end
 
+  def invite_landing_path(member)
+    experiment(:invited_users_land_on_activity_page, actor: member) do |e|
+      e.use do
+        case member.source
+        when Project
+          project_path(member.source)
+        when Group
+          group_path(member.source)
+        end
+      end
+      e.try(:activity) do
+        case member.source
+        when Project
+          activity_project_path(member.source)
+        when Group
+          activity_group_path(member.source)
+        end
+      end
+    end
+  end
+
   def invite_details
     @invite_details ||= case member.source
                         when Project
@@ -123,14 +144,14 @@ class InvitesController < ApplicationController
                             name: member.source.full_name,
                             url: project_url(member.source),
                             title: _("project"),
-                            path: project_path(member.source)
+                            path: invite_landing_path(member)
                           }
                         when Group
                           {
                             name: member.source.name,
                             url: group_url(member.source),
                             title: _("group"),
-                            path: group_path(member.source)
+                            path: invite_landing_path(member)
                           }
                         end
   end
