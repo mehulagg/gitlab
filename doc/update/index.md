@@ -358,7 +358,7 @@ The required Git version is Git v2.29 or higher.
 
 ### 13.4.0
 
-GitLab 13.4.0 includes a background migration to [move all remaining repositories in legacy storage to hashed storage](https://docs.gitlab.com/ee/administration/raketasks/storage.html#migrate-to-hashed-storage). There are [known issues with this migration](https://gitlab.com/gitlab-org/gitlab/-/issues/259605); they are fixed in GitLab 13.5.4 and later. If possible, skip 13.4.0 and upgrade to 13.5.4 or higher instead. Note that the migration can take quite a while to run, depending on how many repos must be moved. Be sure to check that all background migrations have completed before upgrading further.
+GitLab 13.4.0 includes a background migration to [move all remaining repositories in legacy storage to hashed storage](../administration/raketasks/storage.md#migrate-to-hashed-storage). There are [known issues with this migration](https://gitlab.com/gitlab-org/gitlab/-/issues/259605); they are fixed in GitLab 13.5.4 and later. If possible, skip 13.4.0 and upgrade to 13.5.4 or higher instead. Note that the migration can take quite a while to run, depending on how many repos must be moved. Be sure to check that all background migrations have completed before upgrading further.
 
 ### 13.3.0
 
