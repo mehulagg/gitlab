@@ -158,6 +158,7 @@ export default {
       plainDiffPath: (state) => state.diffs.plainDiffPath,
       emailPatchPath: (state) => state.diffs.emailPatchPath,
       retrievingBatches: (state) => state.diffs.retrievingBatches,
+      codequalityDiff: (state) => state.diffs.codequalityDiff,
     }),
     ...mapState('diffs', [
       'showTreeList',
@@ -325,6 +326,7 @@ export default {
       'fetchDiffFilesMeta',
       'fetchDiffFilesBatch',
       'fetchCoverageFiles',
+      'fetchCodequalityMrDiff',
       'startRenderDiffsQueue',
       'assignDiscussionsToDiff',
       'setHighlightedRow',
@@ -390,6 +392,10 @@ export default {
 
       if (this.endpointCoverage) {
         this.fetchCoverageFiles();
+      }
+
+      if (this.endpointCodequalityMrDiff) {
+        this.fetchCodequalityMrDiff();
       }
 
       if (!this.isNotesFetched) {
