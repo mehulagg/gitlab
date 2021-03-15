@@ -85,6 +85,7 @@
         endpoint_metadata: @endpoint_metadata_url,
         endpoint_batch: diffs_batch_project_json_merge_request_path(@project, @merge_request, 'json', params),
         endpoint_coverage: @coverage_path,
+        endpoint_codequality_mr_diff: codequality_mr_diff_reports_project_merge_request_path(@project, @merge_request, 'json'),
         help_page_path: suggest_changes_help_path,
         current_user_data: @current_user_data,
         project_path: project_path(@merge_request.project),

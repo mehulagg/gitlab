@@ -77,6 +77,11 @@ export default {
       required: false,
       default: '',
     },
+    endpointCodequalityMrDiff: {
+      type: String,
+      required: false,
+      default: '',
+    },
     projectPath: {
       type: String,
       required: true,
@@ -264,6 +269,7 @@ export default {
       endpointMetadata: this.endpointMetadata,
       endpointBatch: this.endpointBatch,
       endpointCoverage: this.endpointCoverage,
+      endpointCodequalityMrDiff: this.endpointCodequalityMrDiff,
       projectPath: this.projectPath,
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
