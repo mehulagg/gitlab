@@ -8,10 +8,15 @@ module Gitlab
       # slot of issue events to allow data aggregation.
       # More information in: https://gitlab.com/gitlab-org/gitlab/-/issues/322405
       EPIC_CREATED = 'g_project_management_epic_created'
+      ISSUE_PROMOTED_TO_EPIC = 'g_project_management_issue_promoted_to_epic'
 
       class << self
         def track_epic_created_action(author:, time: Time.zone.now)
           track_unique_action(EPIC_CREATED, author, time)
+        end
+
+        def track_issue_promoted_to_epic(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_PROMOTED_TO_EPIC, author, time)
         end
 
         private
