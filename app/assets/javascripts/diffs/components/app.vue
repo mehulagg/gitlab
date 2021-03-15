@@ -172,7 +172,12 @@ export default {
       'viewDiffsFileByFile',
       'mrReviews',
     ]),
-    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('diffs', [
+      'whichCollapsedTypes',
+      'isParallelView',
+      'currentDiffIndex',
+      'fileCodequalityDiff',
+    ]),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -532,6 +537,7 @@ export default {
               :help-page-path="helpPagePath"
               :can-current-user-fork="canCurrentUserFork"
               :view-diffs-file-by-file="viewDiffsFileByFile"
+              :codequality-diff="fileCodequalityDiff(file.file_path)"
             />
             <div
               v-if="showFileByFileNavigation"

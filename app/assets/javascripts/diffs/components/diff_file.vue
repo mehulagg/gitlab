@@ -67,6 +67,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    codequalityDiff: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
@@ -294,6 +298,7 @@ export default {
       :add-merge-request-buttons="true"
       :view-diffs-file-by-file="viewDiffsFileByFile"
       :show-local-file-reviews="showLocalFileReviews"
+      :has-codequality-changes="codequalityDiff.length > 0"
       class="js-file-title file-title gl-border-1 gl-border-solid gl-border-gray-100"
       :class="hasBodyClasses.header"
       @toggleFile="handleToggle"

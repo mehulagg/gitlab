@@ -96,6 +96,11 @@ export default {
       required: false,
       default: false,
     },
+    hasCodequalityChanges: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -325,7 +330,7 @@ export default {
         data-track-property="diff_copy_file"
       />
 
-      <code-quality-badge v-if="false" />
+      <code-quality-badge v-if="hasCodequalityChanges" />
 
       <small v-if="isModeChanged" ref="fileMode" class="mr-1">
         {{ diffFile.a_mode }} → {{ diffFile.b_mode }}
