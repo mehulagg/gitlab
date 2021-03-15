@@ -22,7 +22,7 @@ class ChatNotificationService < Service
   # Custom serialized properties initialization
   prop_accessor(*SUPPORTED_EVENTS.map { |event| EVENT_CHANNEL[event] })
 
-  boolean_accessor :notify_only_broken_pipelines, :notify_only_default_branch
+  boolean_accessor :notify_only_broken_pipelines, :notify_only_default_branch, :must_have_all_labels_to_be_notified
 
   validates :webhook, presence: true, public_url: true, if: :activated?
 
@@ -31,6 +31,7 @@ class ChatNotificationService < Service
       self.properties = {}
       self.notify_only_broken_pipelines = true
       self.branches_to_be_notified = "default"
+      self.must_have_all_labels_to_be_notified = false
     elsif !self.notify_only_default_branch.nil?
       # In older versions, there was only a boolean property named
       # `notify_only_default_branch`. Now we have a string property named
@@ -65,7 +66,18 @@ class ChatNotificationService < Service
       { type: 'text', name: 'username', placeholder: 'e.g. GitLab' }.freeze,
       { type: 'checkbox', name: 'notify_only_broken_pipelines' }.freeze,
       { type: 'select', name: 'branches_to_be_notified', choices: branch_choices }.freeze,
-      { type: 'text', name: 'labels_to_be_notified', placeholder: 'e.g. ~backend', help: 'Only supported for issue, merge request and note events.' }.freeze
+      {
+        type: 'text',
+        name: 'labels_to_be_notified',
+        placeholder: 'e.g. ~backend',
+        help: 'A message will only be send if the corresponding issue or merge request has one of the listed labels applied. Only supported for issue, merge request and note events.'
+      }.freeze,
+      {
+        type: 'checkbox',
+        name: 'must_have_all_labels_to_be_notified',
+        help: 'Only send a message when the corresponding issue or merge request has all of the listed labels applied',
+        title: 'Notify only when all labels applied'
+      }.freeze
     ].freeze
   end
 
@@ -140,7 +152,11 @@ class ChatNotificationService < Service
     merge_request_labels = data.dig(:merge_request, :labels) || []
     label_titles = (issue_labels + merge_request_labels).pluck(:title)
 
-    (labels_to_be_notified_list & label_titles).any?
+    matching_labels = labels_to_be_notified_list & label_titles
+
+    return labels_to_be_notified_list.difference(matching_labels).empty? if must_have_all_labels_to_be_notified
+
+    matching_labels.any?
   end
 
   def user_id_from_hook_data(data)

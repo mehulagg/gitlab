@@ -33,7 +33,7 @@ RSpec.describe ChatNotificationService do
     subject(:chat_service) { described_class.new }
 
     let(:user) { create(:user) }
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { create_default(:project, :repository) }
     let(:webhook_url) { 'https://example.gitlab.com/' }
     let(:data) { Gitlab::DataBuilder::Push.build_sample(subject.project, user) }
 
@@ -76,9 +76,11 @@ RSpec.describe ChatNotificationService do
     end
 
     context 'when the data object has a label' do
-      let(:label) { create(:label, project: project, name: 'Bug')}
-      let(:issue) { create(:labeled_issue, project: project, labels: [label]) }
-      let(:note) { create(:note, noteable: issue, project: project)}
+      let_it_be(:label) { create(:label, name: 'Bug') }
+      let_it_be(:label_2) { create(:label, name: 'Community contribution') }
+      let_it_be(:label_3) { create(:label, name: 'Backend') }
+      let_it_be(:issue) { create(:labeled_issue, project: project, labels: [label, label_2, label_3]) }
+      let_it_be(:note) { create(:note, noteable: issue, project: project) }
       let(:data) { Gitlab::DataBuilder::Note.build(note, user) }
 
       it 'notifies the chat service' do
@@ -104,6 +106,53 @@ RSpec.describe ChatNotificationService do
           expect(chat_service).to receive(:notify).with(any_args)
 
           chat_service.execute(data)
+        end
+      end
+
+      context 'when the must_have_all_labels_to_be_notified option is true' do
+        context 'when labels match exactly' do
+          subject(:chat_service) do
+            described_class.new(
+              labels_to_be_notified: '~Bug, ~Backend, ~Community contribution',
+              must_have_all_labels_to_be_notified: true
+            )
+          end
+
+          it 'notifies the chat service' do
+            expect(chat_service).to receive(:notify).with(any_args)
+
+            chat_service.execute(data)
+          end
+        end
+
+        context 'when the object has matching labels and more' do
+          subject(:chat_service) do
+            described_class.new(
+              labels_to_be_notified: '~Bug, ~Backend',
+              must_have_all_labels_to_be_notified: true
+            )
+          end
+
+          it 'notifies the chat service' do
+            expect(chat_service).to receive(:notify).with(any_args)
+
+            chat_service.execute(data)
+          end
+        end
+
+        context 'when the object has not all of the filtered labels' do
+          subject(:chat_service) do
+            described_class.new(
+              labels_to_be_notified: '~Bug, ~Backend, ~Community contribution, ~One more label',
+              must_have_all_labels_to_be_notified: true
+            )
+          end
+
+          it 'does not notify the chat service' do
+            expect(chat_service).not_to receive(:notify).with(any_args)
+
+            chat_service.execute(data)
+          end
         end
       end
     end
