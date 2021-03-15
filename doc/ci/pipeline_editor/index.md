@@ -26,8 +26,7 @@ From the pipeline editor page you can:
 - [Commit](#commit-changes-to-ci-configuration) the changes to a specific branch.
 
 NOTE:
-You must already have [a `.gitlab-ci.yml` file](../quick_start/index.md#create-a-gitlab-ciyml-file)
-on the default branch of your project to use the editor.
+The editor currently only support creating and editing a root `.gitlab-ci.yml` file on the default branch.
 
 ## Validate CI configuration
 
