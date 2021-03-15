@@ -1,0 +1,8 @@
+---
+name: swimlanes_buffered_rendering
+introduced_by_url:
+rollout_issue_url:
+milestone:
+type: development
+group: group::product planning
+default_enabled: false
