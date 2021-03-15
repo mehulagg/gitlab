@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlLink, GlModal } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem, GlLink, GlModal } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
@@ -17,7 +17,6 @@ export default {
     GlButton,
     GlDropdown,
     GlDropdownItem,
-    GlIcon,
     GlLink,
     GlModal,
   },
