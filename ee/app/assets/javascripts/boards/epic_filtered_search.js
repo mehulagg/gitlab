@@ -9,11 +9,11 @@ export default () => {
 
   return new Vue({
     el,
+    provide: {
+      search: queryParams.search,
+    },
     store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider: {},
-    render: (createElement) =>
-      createElement(EpicFilteredSearch, {
-        props: { search: queryParams.search },
-      }),
+    render: (createElement) => createElement(EpicFilteredSearch, {}),
   });
 };

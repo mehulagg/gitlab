@@ -9,32 +9,25 @@ export default {
   i18n: {
     search: __('Search'),
   },
-  components: { FilteredSearch },
-  props: {
+  inject: {
     search: {
-      type: String,
-      required: false,
       default: '',
     },
   },
+  components: { FilteredSearch },
   computed: {
     initialSearch() {
+      console.log(this.search);
       return [{ type: 'filtered-search-term', value: { data: this.search } }];
     },
   },
   methods: {
     ...mapActions(['performSearch']),
-    handleSearch(filters) {
-      let itemValue = '';
+    handleSearch(filters = []) {
       const [item] = filters;
+      const itemValue = item?.value?.data || '';
 
-      if (filters.length === 0) {
-        itemValue = '';
-      } else {
-        itemValue = item?.value?.data;
-      }
-
-      historyPushState(setUrlParams({ search: itemValue }, window.location.href));
+      historyPushState(setUrlParams({ search: itemValue }));
 
       this.performSearch();
     },

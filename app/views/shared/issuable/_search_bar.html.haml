@@ -5,7 +5,7 @@
 - placeholder = local_assigns[:placeholder] || _('Search or filter results...')
 - is_not_boards_modal_or_productivity_analytics = type != :boards_modal && type != :productivity_analytics
 - block_css_class = is_not_boards_modal_or_productivity_analytics ? 'row-content-block second-block' : ''
-- is_epic_board = board && board.to_type == "EpicBoard"
+- is_epic_board = board&.to_type == "EpicBoard"
 - if is_epic_board
   - user_can_admin_list = can?(current_user, :admin_epic_board_list, board.resource_parent)
 - elsif board

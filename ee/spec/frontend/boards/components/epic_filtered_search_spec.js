@@ -17,7 +17,6 @@ describe('EpicFilteredSearch', () => {
       localVue,
       propsData: { search: '' },
       store,
-      attachTo: document.body,
     });
   };
 
