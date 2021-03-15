@@ -1196,6 +1196,7 @@ An edge in a connection.
 | `detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the job. |
 | `duration` | [`Int`](#int) | Duration of the job in seconds. |
 | `finishedAt` | [`Time`](#time) | When a job has finished running. |
+| `id` | [`ID!`](#id) | ID of the job. |
 | `name` | [`String`](#string) | Name of the job. |
 | `needs` | [`CiBuildNeedConnection`](#cibuildneedconnection) | References to builds that must complete before the jobs run. |
 | `pipeline` | [`Pipeline`](#pipeline) | Pipeline the job belongs to. |

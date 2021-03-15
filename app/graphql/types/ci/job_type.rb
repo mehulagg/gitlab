@@ -6,6 +6,8 @@ module Types
       graphql_name 'CiJob'
       authorize :read_commit_status
 
+      field :id, GraphQL::ID_TYPE, null: false,
+            description: 'ID of the job.'
       field :pipeline, Types::Ci::PipelineType, null: true,
             description: 'Pipeline the job belongs to.'
       field :name, GraphQL::STRING_TYPE, null: true,
