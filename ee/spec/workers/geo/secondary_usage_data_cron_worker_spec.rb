@@ -32,7 +32,16 @@ RSpec.describe Geo::SecondaryUsageDataCronWorker, :clean_gitlab_redis_shared_sta
     subject.perform
   end
 
-  it "does not update metrics if it doesn't obtain the lease" do
+  it 'does not update metrics if secondary_usage_data_collection is disabled' do
+    stub_feature_flag(:secondary_usage_data_collection, false)
+
+    expect(subject).not_to receive(:try_obtain_lease)
+    expect(Geo::SecondaryUsageData).to receive(:update_metrics!)
+
+    subject.perform
+  end
+
+  it 'does not update metrics if it does not obtain the lease' do
     expect(subject).to receive(:try_obtain_lease).and_return(false)
     expect(Geo::SecondaryUsageData).not_to receive(:update_metrics!)
 
