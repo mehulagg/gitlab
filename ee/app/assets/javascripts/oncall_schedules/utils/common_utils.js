@@ -73,7 +73,7 @@ export const parseRotationDate = (dateTimeString, scheduleTimezone) => {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    hour12: false, // The time picker uses 24 hour time
+    hourCycle: 'h23',
     timeZone: scheduleTimezone,
     timeZoneName: 'long',
   };
