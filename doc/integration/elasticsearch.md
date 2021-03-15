@@ -189,7 +189,7 @@ To enable Advanced Search, you need to have admin access to GitLab:
 1. Now enable **Elasticsearch indexing** in **Admin Area > Settings >
    Advanced Search** and click **Save changes**. This will create
    an empty index if one does not already exist.
-1. Click **Index all projects**. This will start indexing all projects on the GitLab instance.
+1. Click **Index all projects**.
 1. Click **Check progress** in the confirmation message to see the status of
    the background jobs.
 1. Personal snippets need to be indexed using another Rake task:
@@ -936,3 +936,10 @@ sudo gitlab-rake gitlab:elastic:index
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:elastic:index
 ```
+
+### How does Advanced Search handle private projects?
+
+Advanced Search will store all the projects in the same Elasticsearch indexes,
+however searches will only surface results that can be viewed by the user.
+Advanced Search will honor all permission checks in the application by
+filtering out projects that a user does not have access to at search time.
