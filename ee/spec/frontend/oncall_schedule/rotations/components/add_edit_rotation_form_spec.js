@@ -47,6 +47,10 @@ describe('AddEditRotationForm', () => {
   });
 
   const findRotationLength = () => wrapper.find('[id="rotation-length"]');
+  const rotationLengthItems = () =>
+    wrapper.find('[data-testid="rotation-length-unit"]').findAllComponents(GlDropdownItem);
+  const findRotationHours = () => rotationLengthItems().at(0);
+  const findRotationDays = () => rotationLengthItems().at(1);
   const findRotationStartTime = () => wrapper.find('[data-testid="rotation-start-time"]');
   const findRotationEndsContainer = () => wrapper.find('[data-testid="rotation-ends-on"]');
   const findEndDateToggle = () => wrapper.find(GlToggle);
@@ -80,7 +84,7 @@ describe('AddEditRotationForm', () => {
     );
   });
 
-  describe('Rotation length and start time', () => {
+  describe('Rotation length', () => {
     it('renders the rotation length value', async () => {
       createComponent();
       const rotationLength = findRotationLength();
@@ -88,6 +92,32 @@ describe('AddEditRotationForm', () => {
       expect(rotationLength.attributes('value')).toBe('1');
     });
 
+    it('sets the rotationLength.unit field', () => {
+      createComponent();
+      findRotationDays().vm.$emit('click');
+
+      const emittedEvent = wrapper.emitted('update-rotation-form');
+
+      expect(emittedEvent).toHaveLength(1);
+      expect(emittedEvent[0][0]).toEqual({ type: 'rotationLength.unit', value: LENGTH_ENUM.days });
+    });
+
+    it('clears the isRestrictedToTime field for hourly length', () => {
+      createComponent();
+      findRotationHours().vm.$emit('click');
+
+      const emittedEvents = wrapper.emitted('update-rotation-form');
+
+      expect(emittedEvents).toHaveLength(2);
+      expect(emittedEvents[0][0]).toEqual({
+        type: 'rotationLength.unit',
+        value: LENGTH_ENUM.hours,
+      });
+      expect(emittedEvents[1][0]).toEqual({ type: 'isRestrictedToTime', value: false });
+    });
+  });
+
+  describe('Rotation start time', () => {
     it('renders the rotation starts on datepicker', async () => {
       createComponent();
       const startsOn = findRotationStartTime();

@@ -187,7 +187,10 @@ export default {
             :value="1"
             @input="$emit('update-rotation-form', { type: 'rotationLength.length', value: $event })"
           />
-          <gl-dropdown :text="form.rotationLength.unit.toLowerCase()">
+          <gl-dropdown
+            :text="form.rotationLength.unit.toLowerCase()"
+            data-testid="rotation-length-unit"
+          >
             <gl-dropdown-item
               v-for="unit in $options.LENGTH_ENUM"
               :key="unit"
