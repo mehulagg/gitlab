@@ -9,10 +9,11 @@ module Types
 
     DEFAULT_COMPLEXITY = 1
 
-    attr_reader :deprecation
+    attr_reader :deprecation, :doc_reference
 
     def initialize(**kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
+      @doc_reference = kwargs.delete(:see)
       @constant_complexity = kwargs[:complexity].is_a?(Integer) && kwargs[:complexity] > 0
       @requires_argument = !!kwargs.delete(:requires_argument)
       kwargs[:complexity] = field_complexity(kwargs[:resolver_class], kwargs[:complexity])
