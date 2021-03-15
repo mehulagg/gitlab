@@ -4,7 +4,7 @@ import pipelineHeader from './components/header_component.vue';
 
 Vue.use(VueApollo);
 
-export const createPipelineHeaderApp = (elSelector, apolloProvider) => {
+export const createPipelineHeaderApp = (elSelector, apolloProvider, graphqlResourceEtag) => {
   const el = document.querySelector(elSelector);
 
   if (!el) {
@@ -22,6 +22,7 @@ export const createPipelineHeaderApp = (elSelector, apolloProvider) => {
     provide: {
       paths: {
         fullProject: fullPath,
+        graphqlResourceEtag,
         pipelinesPath,
       },
       pipelineId,

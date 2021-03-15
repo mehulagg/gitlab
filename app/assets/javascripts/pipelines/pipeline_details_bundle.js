@@ -112,7 +112,7 @@ export default async function initPipelineDetailsBundle() {
     const { createPipelineHeaderApp } = await import(
       /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
     );
-    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER, apolloProvider);
+    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER, apolloProvider, dataset.graphqlResourceEtag);
   } catch {
     Flash(__('An error occurred while loading a section of this page.'));
   }
