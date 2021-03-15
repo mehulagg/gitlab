@@ -200,7 +200,7 @@ GitLab allows users to create multiple value streams, hide default stages and cr
 
 ![Value stream path navigation](img/vsa_path_nav_v13_10.png "Value stream path navigation")
 
-Stages are visually depicted as a horizontal process flow. Selecting a stage will update the content below the value stream.
+Stages are visually depicted as a horizontal process flow. Selecting a stage updates the content below the value stream.
 
 This is enabled by default. If you have a self-managed instance, an
 administrator can [open a Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
