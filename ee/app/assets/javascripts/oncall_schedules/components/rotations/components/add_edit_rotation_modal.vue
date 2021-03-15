@@ -168,8 +168,8 @@ export default {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
     },
     isEndDateValid() {
-      const startsAt = this.form.startsAt.date?.getTime();
-      const endsAt = this.form.endsAt.date?.getTime();
+      const startsAt = new Date(this.form.startsAt.date).getTime();
+      const endsAt = new Date(this.form.endsAt.date).getTime();
 
       if (!startsAt || !endsAt) {
         // If start or end is not present, we consider the end date valid

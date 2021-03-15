@@ -28,8 +28,8 @@ export const FIELDS = [
   },
 ];
 
-export const REMOVE_MEMBER_MODAL_ID = 'member-remove-modal';
-export const REMOVE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE = s__(
+export const REMOVE_BILLABLE_MEMBER_MODAL_ID = 'billable-member-remove-modal';
+export const REMOVE_BILLABLE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE = s__(
   `Billing|You are about to remove user %{username} from your subscription.
 If you continue, the user will be removed from the %{namespace}
 group and all its subgroups and projects. This action can't be undone.`,

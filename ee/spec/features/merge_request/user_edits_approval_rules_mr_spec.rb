@@ -73,7 +73,11 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
   end
 
   context "with public group" do
+    let_it_be(:group) { create(:group, :public) }
+
     before do
+      group.add_developer create(:user)
+
       click_button 'Approval rules'
       click_button "Add approval rule"
     end

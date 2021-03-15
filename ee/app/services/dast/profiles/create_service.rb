@@ -39,8 +39,7 @@ module Dast
       private
 
       def allowed?
-        container.feature_available?(:security_on_demand_scans) &&
-          Feature.enabled?(:dast_saved_scans, container, default_enabled: :yaml)
+        container.feature_available?(:security_on_demand_scans)
       end
 
       def dast_site_profile

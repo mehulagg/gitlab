@@ -144,7 +144,7 @@ export default {
             >{{ __('Select all') }}</gl-form-checkbox
           >
         </div>
-        <div class="gl-pt-5 gl-pb-4 scrollbox-body">
+        <div class="gl-pt-5 gl-pb-4 gl-pl-6 scrollbox-body">
           <gl-form-checkbox
             v-for="field in $options.fields"
             :key="field.key"

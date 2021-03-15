@@ -76,13 +76,20 @@ const defaultDescendantCounts = {
   closedIssues: 0,
 };
 
-const assignees = [
+export const mockAssignees = [
   {
     id: 'gid://gitlab/User/2',
     username: 'angelina.herman',
     name: 'Bernardina Bosco',
     avatar: 'https://www.gravatar.com/avatar/eb7b664b13a30ad9f9ba4b61d7075470?s=80&d=identicon',
     webUrl: 'http://127.0.0.1:3000/angelina.herman',
+  },
+  {
+    id: 'gid://gitlab/User/118',
+    username: 'jacklyn.moore',
+    name: 'Brock Jaskolski',
+    avatar: 'https://www.gravatar.com/avatar/af29c072d9fcf315772cfd802c7a7d35?s=80&d=identicon',
+    webUrl: 'http://127.0.0.1:3000/jacklyn.moore',
   },
 ];
 
@@ -94,6 +101,17 @@ export const mockMilestones = [
   {
     id: 'gid://gitlab/Milestone/2',
     title: 'Milestone 2',
+  },
+];
+
+export const mockIterations = [
+  {
+    id: 'gid://gitlab/Iteration/1',
+    title: 'Iteration 1',
+  },
+  {
+    id: 'gid://gitlab/Iteration/2',
+    title: 'Iteration 2',
   },
 ];
 
@@ -127,7 +145,7 @@ export const rawIssue = {
     ],
   },
   assignees: {
-    nodes: assignees,
+    nodes: mockAssignees,
   },
   epic: {
     id: 'gid://gitlab/Epic/41',
@@ -147,7 +165,7 @@ export const mockIssue = {
   weight: null,
   confidential: false,
   path: `/${mockIssueProjectPath}/-/issues/27`,
-  assignees,
+  assignees: mockAssignees,
   labels,
   epic: {
     id: 'gid://gitlab/Epic/41',
@@ -165,7 +183,7 @@ export const mockIssue2 = {
   weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
-  assignees,
+  assignees: mockAssignees,
   labels,
   epic: {
     id: 'gid://gitlab/Epic/40',
@@ -183,7 +201,7 @@ export const mockIssue3 = {
   weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
-  assignees,
+  assignees: mockAssignees,
   labels,
   epic: null,
 };
@@ -198,7 +216,7 @@ export const mockIssue4 = {
   weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
-  assignees,
+  assignees: mockAssignees,
   labels,
   epic: null,
 };
@@ -216,9 +234,17 @@ export const mockEpic = {
     closedIssues: 2,
   },
   issues: [mockIssue],
+  labels: [],
 };
 
-export const mockIssueWithEpic = { ...mockIssue3, epic: { id: mockEpic.id, iid: mockEpic.iid } };
+export const mockIssueWithEpic = {
+  ...mockIssue3,
+  epic: {
+    id: mockEpic.id,
+    iid: mockEpic.iid,
+    webPath: '/gitlab-org/-/epics/41',
+  },
+};
 export const mockAssignedEpic = { ...mockIssueWithEpic.epic, title: mockEpic.title };
 
 export const mockEpics = [
@@ -238,6 +264,7 @@ export const mockEpics = [
     parent: {
       id: '40',
     },
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/40',
@@ -252,6 +279,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/marketing/-/epics/1',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/39',
@@ -266,6 +294,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/12',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/38',
@@ -280,6 +309,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/11',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/37',
@@ -294,6 +324,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/10',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
 ];
 

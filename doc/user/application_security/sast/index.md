@@ -137,7 +137,7 @@ as shown in the following table:
 | [Customize SAST Settings](#customizing-the-sast-settings)                                                    | **{check-circle}**  | **{check-circle}** |
 | View [JSON Report](#reports-json-format)                                                                     | **{check-circle}**  | **{check-circle}** |
 | Presentation of JSON Report in Merge Request                                                                 | **{dotted-circle}** | **{check-circle}** |
-| [Interaction with Vulnerabilities](../../application_security/index.md#interacting-with-the-vulnerabilities) | **{dotted-circle}** | **{check-circle}** |
+| [Address vulnerabilities](../../application_security/index.md#addressing-vulnerabilities)                    | **{dotted-circle}** | **{check-circle}** |
 | [Access to Security Dashboard](../../application_security/security_dashboard/index.md)                       | **{dotted-circle}** | **{check-circle}** |
 | [Configure SAST in the UI](#configure-sast-in-the-ui)                                                        | **{dotted-circle}** | **{check-circle}** |
 | [Customize SAST Rulesets](#customize-rulesets)                                                               | **{dotted-circle}** | **{check-circle}** |
@@ -375,8 +375,6 @@ If all dependencies are present, the `COMPILE=false` CI/CD variable can be provi
 analyzer and compilation is skipped:
 
 ```yaml
-image: maven:3.6-jdk-8-alpine
-
 stages:
   - build
   - test
@@ -385,6 +383,7 @@ include:
   - template: Security/SAST.gitlab-ci.yml
 
 build:
+  image: maven:3.6-jdk-8-slim
   stage: build
   script:
     - mvn package -Dmaven.repo.local=./.m2/repository

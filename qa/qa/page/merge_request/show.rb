@@ -183,7 +183,11 @@ module QA
         end
 
         def fast_forward_possible?
-          has_no_text?('Fast-forward merge is not possible')
+          has_text?('Fast-forward merge without a merge commit')
+        end
+
+        def fast_forward_not_possible?
+          has_text?('Fast-forward merge is not possible')
         end
 
         def has_file?(file_name)
@@ -224,6 +228,7 @@ module QA
             !find_element(:squash_checkbox).disabled?
           end
 
+          # TODO: Fix workaround for data-qa-selector failure
           click_element(:squash_checkbox)
         end
 

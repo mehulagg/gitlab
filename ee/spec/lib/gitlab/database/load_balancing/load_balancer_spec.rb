@@ -243,8 +243,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
   end
 
   describe '#primary_write_location' do
-    it 'returns a String' do
-      expect(lb.primary_write_location).to be_an_instance_of(String)
+    it 'returns a String in the right format' do
+      expect(lb.primary_write_location).to match(/[A-E0-9]{1,8}\/[A-E0-9]{1,8}/)
     end
 
     it 'raises an error if the write location could not be retrieved' do

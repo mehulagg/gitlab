@@ -54,7 +54,7 @@ export default {
     };
   },
   computed: {
-    isNotYetConfigured() {
+    hasNoProjects() {
       return this.projects.length === 0 && this.projectsWereFetched;
     },
   },
@@ -70,22 +70,20 @@ export default {
 <template>
   <div>
     <gl-loading-icon v-if="!projectsWereFetched" size="lg" class="gl-mt-6" />
-    <dashboard-not-configured v-if="isNotYetConfigured" />
-    <security-dashboard-layout v-else :class="{ 'gl-display-none': !projectsWereFetched }">
+    <dashboard-not-configured v-else-if="hasNoProjects" />
+    <security-dashboard-layout v-else>
       <template #header>
-        <div>
-          <header class="gl-my-6 gl-display-flex gl-align-items-center">
-            <h2 class="gl-flex-grow-1 gl-my-0">
-              {{ s__('SecurityReports|Vulnerability Report') }}
-            </h2>
-            <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
-          </header>
-          <vulnerabilities-count-list
-            :scope="$options.vulnerabilitiesSeverityCountScopes.group"
-            :full-path="groupFullPath"
-            :filters="filters"
-          />
-        </div>
+        <header class="gl-my-6 gl-display-flex gl-align-items-center">
+          <h2 class="gl-flex-grow-1 gl-my-0">
+            {{ s__('SecurityReports|Vulnerability Report') }}
+          </h2>
+          <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
+        </header>
+        <vulnerabilities-count-list
+          :scope="$options.vulnerabilitiesSeverityCountScopes.group"
+          :full-path="groupFullPath"
+          :filters="filters"
+        />
       </template>
       <template #sticky>
         <filters :projects="projects" @filterChange="handleFilterChange" />

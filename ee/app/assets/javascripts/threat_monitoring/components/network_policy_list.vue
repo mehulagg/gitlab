@@ -19,6 +19,9 @@ import { CiliumNetworkPolicyKind } from './policy_editor/constants';
 import PolicyDrawer from './policy_editor/policy_drawer.vue';
 
 export default {
+  i18n: {
+    enforcementStatus: s__('NetworkPolicies|Enforcement status'),
+  },
   components: {
     GlTable,
     GlEmptyState,
@@ -294,9 +297,13 @@ export default {
           </div>
         </div>
 
-        <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Enforcement status') }}</h5>
+        <h5 class="gl-mt-6">{{ $options.i18n.enforcementStatus }}</h5>
         <p>{{ s__('NetworkPolicies|Choose whether to enforce this policy.') }}</p>
-        <gl-toggle v-model="selectedPolicy.isEnabled" data-testid="policyToggle" />
+        <gl-toggle
+          v-model="selectedPolicy.isEnabled"
+          :label="$options.i18n.enforcementStatus"
+          label-position="hidden"
+        />
       </div>
     </gl-drawer>
   </div>

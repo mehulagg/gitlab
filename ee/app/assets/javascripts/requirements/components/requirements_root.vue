@@ -1,5 +1,5 @@
 <script>
-import { GlPagination } from '@gitlab/ui';
+import { GlPagination, GlAlert } from '@gitlab/ui';
 import Api from '~/api';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
@@ -39,6 +39,7 @@ export default {
   AvailableSortOptions,
   components: {
     GlPagination,
+    GlAlert,
     FilteredSearchBar,
     RequirementsTabs,
     RequirementsLoading,
@@ -234,6 +235,7 @@ export default {
         ARCHIVED: this.initialRequirementsCount[FilterState.archived],
         ALL: this.initialRequirementsCount[FilterState.all],
       },
+      alert: null,
     };
   },
   computed: {
@@ -455,6 +457,15 @@ export default {
             selectedFields,
           },
         })
+        .then(() => {
+          this.alert = {
+            variant: 'info',
+            message: sprintf(
+              __('Your CSV export has started. It will be emailed to %{email} when complete.'),
+              { email: this.currentUserEmail },
+            ),
+          };
+        })
         .catch((e) => {
           createFlash({
             message: __('Something went wrong while exporting requirements'),
@@ -675,6 +686,16 @@ export default {
 
 <template>
   <div class="requirements-list-container">
+    <gl-alert
+      v-if="alert"
+      :variant="alert.variant"
+      :dismissible="true"
+      class="gl-mt-3 gl-mb-4"
+      @dismiss="alert = null"
+    >
+      {{ alert.message }}
+    </gl-alert>
+
     <requirements-tabs
       :filter-by="filterBy"
       :requirements-count="requirementsCount"

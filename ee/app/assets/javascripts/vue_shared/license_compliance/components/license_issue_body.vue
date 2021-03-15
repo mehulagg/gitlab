@@ -14,6 +14,11 @@ export default {
       required: true,
     },
   },
+  computed: {
+    hasPackages() {
+      return Boolean(this.issue.packages.length);
+    },
+  },
   methods: { ...mapActions(LICENSE_MANAGEMENT, ['setLicenseInModal']) },
 };
 </script>
@@ -21,6 +26,6 @@ export default {
 <template>
   <div class="report-block-info license-item">
     <gl-link :href="issue.url" target="_blank">{{ issue.name }}</gl-link>
-    <license-packages :packages="issue.packages" class="text-secondary" />
+    <license-packages v-if="hasPackages" :packages="issue.packages" class="text-secondary" />
   </div>
 </template>

@@ -242,7 +242,7 @@ a [beta feature](https://about.gitlab.com/handbook/product/#beta).
 
 For a group, you can view how many merge requests, issues, and members were created in the last 90 days.
 
-These Group Activity Analytics can be enabled with the `group_activity_analytics` [feature flag](../../development/feature_flags/development.md#enabling-a-feature-flag-locally-in-development).
+These Group Activity Analytics can be enabled with the `group_activity_analytics` [feature flag](../../development/feature_flags/index.md#enabling-a-feature-flag-locally-in-development).
 
 ![Recent Group Activity](img/group_activity_analytics_v13_10.png)
 
@@ -336,7 +336,7 @@ You can move group wiki repositories by using the [Group repository storage move
 There are a few limitations compared to project wikis:
 
 - Git LFS is not supported.
-- Group wikis are not included in global search and Geo replication.
+- Group wikis are not included in global search.
 - Changes to group wikis don't show up in the group's activity feed.
 
 For updates, follow [the epic that tracks feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).

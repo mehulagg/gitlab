@@ -82,7 +82,6 @@ export default {
               const newProject = results.addProjectToSecurityDashboard.project;
 
               const data = produce(sourceData, (draftData) => {
-                // eslint-disable-next-line no-param-reassign
                 draftData.instanceSecurityDashboard.projects.nodes = [
                   ...draftData.instanceSecurityDashboard.projects.nodes,
                   {
@@ -157,7 +156,6 @@ export default {
             const sourceData = store.readQuery({ query: projectsQuery });
 
             const data = produce(sourceData, (draftData) => {
-              // eslint-disable-next-line no-param-reassign
               draftData.instanceSecurityDashboard.projects.nodes = draftData.instanceSecurityDashboard.projects.nodes.filter(
                 (curr) => curr.id !== id,
               );

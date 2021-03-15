@@ -36,8 +36,8 @@ module EE
       end
     end
 
-    def new_epic(epic)
-      new_resource_email(epic, :new_epic_email)
+    def new_epic(epic, current_user)
+      new_resource_email(epic, current_user, :new_epic_email)
     end
 
     def close_epic(epic, current_user)

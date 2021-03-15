@@ -40,10 +40,7 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
         'comment' => {
           'comments' => [
             {
-              'author' => comment_author,
-              'body' => '<p>Comment</p>',
-              'created' => '2020-06-25T15:50:00.000+0000',
-              'updated' => '2020-06-25T15:51:00.000+0000'
+              'body' => '<p>Comment</p>'
             }
           ]
         }
@@ -55,7 +52,18 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       labels: ['backend'],
       fields: {
         'reporter' => reporter,
-        'assignee' => assignee
+        'assignee' => assignee,
+        'comment' => {
+          'comments' => [
+            {
+              'id' => '10022',
+              'author' => comment_author,
+              'body' => '<p>Comment</p>',
+              'created' => '2020-06-25T15:50:00.000+0000',
+              'updated' => '2020-06-25T15:51:00.000+0000'
+            }
+          ]
+        }
       },
       project: double(key: 'GL'),
       key: 'GL-5',
@@ -86,13 +94,11 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       ],
       author: hash_including(
         name: 'reporter',
-        username: 'reporter@reporter.com',
         avatar_url: 'http://reporter.avatar'
       ),
       assignees: [
         hash_including(
           name: 'assignee',
-          username: 'assignee@assignee.com',
           avatar_url: 'http://assignee.avatar'
         )
       ],
@@ -101,10 +107,12 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       external_tracker: 'jira',
       comments: [
         hash_including(
-          name: 'comment_author',
-          username: 'comment@author.com',
-          avatar_url: 'http://comment_author.avatar',
-          note: "<p dir=\"auto\">Comment</p>",
+          id: '10022',
+          author: hash_including(
+            name: 'comment_author',
+            avatar_url: 'http://comment_author.avatar'
+          ),
+          body_html: "<p dir=\"auto\">Comment</p>",
           created_at: '2020-06-25T15:50:00.000+0000'.to_datetime.utc,
           updated_at: '2020-06-25T15:51:00.000+0000'.to_datetime.utc
         )
@@ -116,7 +124,7 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
     it 'returns the Jira Server profile URL' do
       expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
       expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee@assignee.com')
-      expect(subject[:comments].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=comment@author.com')
+      expect(subject[:comments].first[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=comment@author.com')
     end
 
     context 'with only url' do
@@ -142,7 +150,7 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
     it 'returns the Jira Cloud profile URL' do
       expect(subject[:author]).to include(web_url: 'http://jira.com/people/12345')
       expect(subject[:assignees].first).to include(web_url: 'http://jira.com/people/67890')
-      expect(subject[:comments].first).to include(web_url: 'http://jira.com/people/54321')
+      expect(subject[:comments].first[:author]).to include(web_url: 'http://jira.com/people/54321')
     end
   end
 

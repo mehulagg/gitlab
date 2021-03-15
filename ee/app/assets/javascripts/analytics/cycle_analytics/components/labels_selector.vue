@@ -159,7 +159,7 @@ export default {
           'cursor-not-allowed': disabled,
         }"
         :active="isSelectedLabel(label.id)"
-        @click.prevent="$emit('select-label', label.id, selectedLabelIds)"
+        @click.prevent="$emit('select-label', label.id)"
       >
         <gl-icon
           v-if="multiselect && isSelectedLabel(label.id)"

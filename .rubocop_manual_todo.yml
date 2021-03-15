@@ -44,15 +44,10 @@ Graphql/Descriptions:
 # WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/267606
 FactoryBot/InlineAssociation:
   Exclude:
-    - 'ee/spec/factories/merge_request_blocks.rb'
-    - 'ee/spec/factories/vulnerabilities/feedback.rb'
     - 'spec/factories/atlassian_identities.rb'
     - 'spec/factories/events.rb'
     - 'spec/factories/git_wiki_commit_details.rb'
     - 'spec/factories/gitaly/commit.rb'
-    - 'spec/factories/go_module_commits.rb'
-    - 'spec/factories/go_module_versions.rb'
-    - 'spec/factories/go_modules.rb'
     - 'spec/factories/group_group_links.rb'
     - 'spec/factories/import_export_uploads.rb'
 
@@ -2512,8 +2507,3 @@ Style/HashTransformation:
     - 'spec/support/helpers/graphql_helpers.rb'
     - 'spec/support/import_export/project_tree_expectations.rb'
     - 'spec/support/shared_contexts/services/projects/container_repository/delete_tags_service_shared_context.rb'
-
-Style/ClassEqualityComparison:
-  Exclude:
-    - spec/lib/peek/views/active_record_spec.rb
-    - ee/spec/lib/peek/views/active_record_spec.rb

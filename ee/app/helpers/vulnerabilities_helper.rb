@@ -67,4 +67,8 @@ module VulnerabilitiesHelper
     data[:location].merge!('blob_path' => vulnerability.blob_path).compact!
     data
   end
+
+  def vulnerability_scan_data?(vulnerability)
+    vulnerability.scanner.present? || vulnerability.scan.present?
+  end
 end

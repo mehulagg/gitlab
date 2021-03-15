@@ -6,7 +6,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
   let(:client) { Gitlab::SubscriptionPortal::Client }
 
   describe '#activate' do
-    let(:authentication_token) { 'authentication_token' }
+    let(:license_key) { 'license_key' }
 
     it 'returns success' do
       expect(client).to receive(:execute_graphql_query).and_return(
@@ -15,7 +15,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
           data: {
             "data" => {
               "cloudActivationActivate" => {
-                "authenticationToken" => authentication_token,
+                "licenseKey" => license_key,
                 "errors" => []
               }
             }
@@ -25,7 +25,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
 
       result = client.activate('activation_code_abc')
 
-      expect(result).to eq({ authentication_token: authentication_token, success: true })
+      expect(result).to eq({ license_key: license_key, success: true })
     end
 
     it 'returns failure' do
@@ -35,7 +35,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
           data: {
             "data" => {
               "cloudActivationActivate" => {
-                "authenticationToken" => nil,
+                "licenseKey" => nil,
                 "errors" => ["invalid activation code"]
               }
             }

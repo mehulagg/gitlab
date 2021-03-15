@@ -1,0 +1,5 @@
+---
+title: Replace stubbed dastProfiles.branch GraphQL field
+merge_request: 56604
+author:
+type: fixed

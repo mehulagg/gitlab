@@ -1,18 +1,19 @@
-import { GlSearchBoxByType } from '@gitlab/ui';
+import { GlAvatarLabeled, GlSearchBoxByType, GlFormRadio, GlFormSelect } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
-import BoardAddNewColumn from 'ee/boards/components/board_add_new_column.vue';
+import BoardAddNewColumn, { listTypeInfo } from 'ee/boards/components/board_add_new_column.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
+import { ListType } from '~/boards/constants';
 import defaultState from '~/boards/stores/state';
-import { mockLists } from '../mock_data';
+import { mockAssignees, mockLists, mockIterations } from '../mock_data';
 
 const mockLabelList = mockLists[1];
 
 Vue.use(Vuex);
 
-describe('Board card layout', () => {
+describe('BoardAddNewColumn', () => {
   let wrapper;
   let shouldUseGraphQL;
 
@@ -30,6 +31,8 @@ describe('Board card layout', () => {
   const mountComponent = ({
     selectedId,
     labels = [],
+    assignees = [],
+    iterations = [],
     getListByTypeId = jest.fn(),
     actions = {},
   } = {}) => {
@@ -57,10 +60,17 @@ describe('Board card layout', () => {
           state: {
             labels,
             labelsLoading: false,
+            assignees,
+            assigneesLoading: false,
+            iterations,
+            iterationsLoading: false,
           },
         }),
         provide: {
           scopedLabelsAvailable: true,
+          milestoneListsAvailable: true,
+          assigneeListsAvailable: true,
+          iterationListsAvailable: true,
         },
       }),
     );
@@ -71,10 +81,12 @@ describe('Board card layout', () => {
     wrapper = null;
   });
 
+  const findForm = () => wrapper.findComponent(BoardAddNewColumnForm);
   const formTitle = () => wrapper.findByTestId('board-add-column-form-title').text();
   const findSearchInput = () => wrapper.find(GlSearchBoxByType);
   const cancelButton = () => wrapper.findByTestId('cancelAddNewColumn');
   const submitButton = () => wrapper.findByTestId('addNewColumnButton');
+  const listTypeSelect = () => wrapper.findComponent(GlFormSelect);
 
   beforeEach(() => {
     shouldUseGraphQL = true;
@@ -150,6 +162,72 @@ describe('Board card layout', () => {
 
       expect(highlightList).toHaveBeenCalledWith(expect.anything(), mockLabelList.id);
       expect(createList).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('assignee list', () => {
+    beforeEach(async () => {
+      mountComponent({
+        assignees: mockAssignees,
+        actions: {
+          fetchAssignees: jest.fn(),
+        },
+      });
+
+      listTypeSelect().vm.$emit('change', ListType.assignee);
+
+      await nextTick();
+    });
+
+    it('sets assignee placeholder text in form', async () => {
+      expect(findForm().props()).toMatchObject({
+        formDescription: listTypeInfo.assignee.formDescription,
+        searchLabel: listTypeInfo.assignee.searchLabel,
+        searchPlaceholder: listTypeInfo.assignee.searchPlaceholder,
+      });
+    });
+
+    it('shows list of assignees', () => {
+      const userList = wrapper.findAllComponents(GlAvatarLabeled);
+
+      const [firstUser] = mockAssignees;
+
+      expect(userList).toHaveLength(mockAssignees.length);
+      expect(userList.at(0).props()).toMatchObject({
+        label: firstUser.name,
+        subLabel: firstUser.username,
+      });
+    });
+  });
+
+  describe('iteration list', () => {
+    beforeEach(async () => {
+      mountComponent({
+        iterations: mockIterations,
+        actions: {
+          fetchIterations: jest.fn(),
+        },
+      });
+
+      listTypeSelect().vm.$emit('change', ListType.iteration);
+
+      await nextTick();
+    });
+
+    it('sets iteration placeholder text in form', async () => {
+      expect(findForm().props()).toMatchObject({
+        formDescription: listTypeInfo.iteration.formDescription,
+        searchLabel: listTypeInfo.iteration.searchLabel,
+        searchPlaceholder: listTypeInfo.iteration.searchPlaceholder,
+      });
+    });
+
+    it('shows list of iterations', () => {
+      const itemList = wrapper.findAllComponents(GlFormRadio);
+
+      expect(itemList).toHaveLength(mockIterations.length);
+      expect(itemList.at(0).attributes('value')).toBe(mockIterations[0].id);
+      expect(itemList.at(1).attributes('value')).toBe(mockIterations[1].id);
     });
   });
 });

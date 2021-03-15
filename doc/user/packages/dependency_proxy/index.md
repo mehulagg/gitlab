@@ -89,14 +89,17 @@ You can authenticate using:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/280582) in GitLab 13.7.
 > - Automatic runner authentication [added](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/27302) in GitLab 13.9.
+> - The prefix for group names containing uppercase letters was [fixed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54559) in GitLab 13.10.
 
 Runners log in to the Dependency Proxy automatically. To pull through
 the Dependency Proxy, use the `CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX`
 [predefined CI/CD variable](../../../ci/variables/predefined_variables.md):
 
+Example pulling the latest alpine image:
+
 ```yaml
 # .gitlab-ci.yml
-image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:latest
+image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:latest
 ```
 
 There are other additional predefined CI/CD variables you can also use:
@@ -124,11 +127,18 @@ To store a Docker image in Dependency Proxy storage:
 1. Go to your group's **Packages & Registries > Dependency Proxy**.
 1. Copy the **Dependency Proxy URL**.
 1. Use one of these commands. In these examples, the image is `alpine:latest`.
+1. You can also pull images by digest to specify exactly which version of an image to pull.
 
-   - Add the URL to your [`.gitlab-ci.yml`](../../../ci/yaml/README.md#image) file:
+   - Pull an image by tag by adding the image to your [`.gitlab-ci.yml`](../../../ci/yaml/README.md#image) file:
 
      ```shell
      image: gitlab.example.com/groupname/dependency_proxy/containers/alpine:latest
+     ```
+
+   - Pull an image by digest by adding the image to your [`.gitlab-ci.yml`](../../../ci/yaml/README.md#image) file:
+
+     ```shell
+     image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine@sha256:c9375e662992791e3f39e919b26f510e5254b42792519c180aad254e6b38f4dc
      ```
 
    - Manually pull the Docker image:

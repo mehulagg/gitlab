@@ -23,7 +23,7 @@ module Dast
     def branch
       return unless project.repository.exists?
 
-      Dast::Branch.new(project)
+      Dast::Branch.new(self)
     end
 
     private

@@ -372,7 +372,7 @@ export default {
         :can-manage-licenses="mr.licenseScanning.can_manage_licenses"
         :full-report-path="mr.licenseScanning.full_report_path"
         :license-management-settings-path="mr.licenseScanning.settings_path"
-        :security-approvals-help-page-path="mr.securityApprovalsHelpPagePath"
+        :license-compliance-docs-path="mr.licenseComplianceDocsPath"
         report-section-class="mr-widget-border-top"
       />
 

@@ -17,4 +17,10 @@ fragment BoardListFragment on BoardList {
     webPath
     description
   }
+  iteration {
+    id
+    title
+    webPath
+    description
+  }
 }

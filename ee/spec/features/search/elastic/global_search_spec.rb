@@ -170,7 +170,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       submit_search('term')
       select_search_scope('Wiki')
 
-      expect(page).to have_selector('.search-result-row .description', text: '# term')
+      expect(page).to have_selector('.search-result-row .description', text: 'term')
       expect(page).to have_link('test')
     end
   end

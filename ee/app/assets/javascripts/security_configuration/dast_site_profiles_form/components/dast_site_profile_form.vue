@@ -18,12 +18,14 @@ import { __, s__, n__, sprintf } from '~/locale';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import tooltipIcon from '../../dast_scanner_profiles/components/tooltip_icon.vue';
+import {
+  MAX_CHAR_LIMIT_EXCLUDED_URLS,
+  MAX_CHAR_LIMIT_REQUEST_HEADERS,
+  EXCLUDED_URLS_SEPARATOR,
+} from '../constants';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
 import DastSiteAuthSection from './dast_site_auth_section.vue';
-
-const MAX_CHAR_LIMIT_EXCLUDED_URLS = 2048;
-const MAX_CHAR_LIMIT_REQUEST_HEADERS = 2048;
 
 export default {
   name: 'DastSiteProfileForm',
@@ -63,7 +65,7 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = '', requestHeaders = '', auth = {} } =
+    const { name = '', targetUrl = '', excludedUrls = [], requestHeaders = '', auth = {} } =
       this.siteProfile || {};
 
     const form = {
@@ -72,7 +74,11 @@ export default {
       fields: {
         profileName: initFormField({ value: name }),
         targetUrl: initFormField({ value: targetUrl }),
-        excludedUrls: initFormField({ value: excludedUrls, required: false, skipValidation: true }),
+        excludedUrls: initFormField({
+          value: excludedUrls.join(EXCLUDED_URLS_SEPARATOR),
+          required: false,
+          skipValidation: true,
+        }),
         requestHeaders: initFormField({
           value: requestHeaders,
           required: false,
@@ -140,6 +146,14 @@ export default {
     formTouched() {
       return !isEqual(serializeFormObject(this.form.fields), this.initialFormValues);
     },
+    isPolicyProfile() {
+      return Boolean(this.siteProfile?.referencedInSecurityPolicies?.length);
+    },
+    parsedExcludedUrls() {
+      return this.form.fields.excludedUrls.value
+        .split(EXCLUDED_URLS_SEPARATOR)
+        .map((url) => url.trim());
+    },
   },
   async mounted() {
     if (this.isEdit) {
@@ -162,13 +176,20 @@ export default {
       this.hideErrors();
       const { errorMessage } = this.i18n;
 
+      const { profileName, targetUrl, ...additionalFields } = serializeFormObject(this.form.fields);
+
       const variables = {
         input: {
           fullPath: this.fullPath,
           ...(this.isEdit ? { id: this.siteProfile.id } : {}),
-          ...serializeFormObject(this.form.fields),
+          profileName,
+          targetUrl,
           ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
+            ...additionalFields,
             auth: serializeFormObject(this.authSection.fields),
+            ...(additionalFields.excludedUrls && {
+              excludedUrls: this.parsedExcludedUrls,
+            }),
           }),
         },
       };
@@ -245,6 +266,20 @@ export default {
     </h2>
 
     <gl-alert
+      v-if="isPolicyProfile"
+      data-testid="dast-policy-site-profile-form-alert"
+      variant="info"
+      class="gl-mb-5"
+      :dismissible="false"
+    >
+      {{
+        s__(
+          'DastProfiles|This site profile is currently being used by a policy. To make edits you must remove it from the active policy.',
+        )
+      }}
+    </gl-alert>
+
+    <gl-alert
       v-if="hasAlert"
       variant="danger"
       class="gl-mb-5"
@@ -257,98 +292,102 @@ export default {
       </ul>
     </gl-alert>
 
-    <gl-form-group
-      :label="s__('DastProfiles|Profile name')"
-      :invalid-feedback="form.fields.profileName.feedback"
-    >
-      <gl-form-input
-        v-model="form.fields.profileName.value"
-        v-validation:[form.showValidation]
-        name="profileName"
-        class="mw-460"
-        data-testid="profile-name-input"
-        type="text"
-        required
-        :state="form.fields.profileName.state"
-      />
-    </gl-form-group>
-
-    <hr class="gl-border-gray-100" />
-
-    <gl-form-group
-      data-testid="target-url-input-group"
-      :invalid-feedback="form.fields.targetUrl.feedback"
-      :label="s__('DastProfiles|Target URL')"
-    >
-      <gl-form-input
-        v-model="form.fields.targetUrl.value"
-        v-validation:[form.showValidation]
-        name="targetUrl"
-        class="mw-460"
-        data-testid="target-url-input"
-        required
-        type="url"
-        :state="form.fields.targetUrl.state"
-      />
-    </gl-form-group>
-
-    <div v-if="glFeatures.securityDastSiteProfilesAdditionalFields" class="row">
+    <gl-form-group data-testid="dast-site-parent-group" :disabled="isPolicyProfile">
       <gl-form-group
-        :label="s__('DastProfiles|Excluded URLs (Optional)')"
-        :invalid-feedback="form.fields.excludedUrls.feedback"
-        class="col-md-6"
+        :label="s__('DastProfiles|Profile name')"
+        :invalid-feedback="form.fields.profileName.feedback"
       >
-        <template #label>
-          {{ i18n.excludedUrls.label }}
-          <tooltip-icon :title="i18n.excludedUrls.tooltip" />
-          <gl-form-text class="gl-mt-3">{{ i18n.excludedUrls.description }}</gl-form-text>
-        </template>
-        <gl-form-textarea
-          v-model="form.fields.excludedUrls.value"
-          :maxlength="$options.MAX_CHAR_LIMIT_EXCLUDED_URLS"
-          :placeholder="i18n.excludedUrls.placeholder"
-          :no-resize="false"
-          data-testid="excluded-urls-input"
+        <gl-form-input
+          v-model="form.fields.profileName.value"
+          v-validation:[form.showValidation]
+          name="profileName"
+          class="mw-460"
+          data-testid="profile-name-input"
+          type="text"
+          required
+          :state="form.fields.profileName.state"
         />
-        <gl-form-text>{{
-          getCharacterLimitText(
-            form.fields.excludedUrls.value,
-            $options.MAX_CHAR_LIMIT_EXCLUDED_URLS,
-          )
-        }}</gl-form-text>
       </gl-form-group>
 
-      <gl-form-group :invalid-feedback="form.fields.requestHeaders.feedback" class="col-md-6">
-        <template #label>
-          {{ i18n.requestHeaders.label }}
-          <tooltip-icon :title="i18n.requestHeaders.tooltip" />
-          <gl-form-text class="gl-mt-3">{{ i18n.requestHeaders.description }}</gl-form-text>
-        </template>
-        <gl-form-textarea
-          v-model="form.fields.requestHeaders.value"
-          :maxlength="$options.MAX_CHAR_LIMIT_REQUEST_HEADERS"
-          :placeholder="i18n.requestHeaders.placeholder"
-          :no-resize="false"
-          data-testid="request-headers-input"
+      <hr class="gl-border-gray-100" />
+
+      <gl-form-group
+        data-testid="target-url-input-group"
+        :invalid-feedback="form.fields.targetUrl.feedback"
+        :label="s__('DastProfiles|Target URL')"
+      >
+        <gl-form-input
+          v-model="form.fields.targetUrl.value"
+          v-validation:[form.showValidation]
+          name="targetUrl"
+          class="mw-460"
+          data-testid="target-url-input"
+          required
+          type="url"
+          :state="form.fields.targetUrl.state"
         />
-        <gl-form-text>{{
-          getCharacterLimitText(
-            form.fields.requestHeaders.value,
-            $options.MAX_CHAR_LIMIT_REQUEST_HEADERS,
-          )
-        }}</gl-form-text>
       </gl-form-group>
-    </div>
+
+      <div v-if="glFeatures.securityDastSiteProfilesAdditionalFields" class="row">
+        <gl-form-group
+          :label="s__('DastProfiles|Excluded URLs (Optional)')"
+          :invalid-feedback="form.fields.excludedUrls.feedback"
+          class="col-md-6"
+        >
+          <template #label>
+            {{ i18n.excludedUrls.label }}
+            <tooltip-icon :title="i18n.excludedUrls.tooltip" />
+            <gl-form-text class="gl-mt-3">{{ i18n.excludedUrls.description }}</gl-form-text>
+          </template>
+          <gl-form-textarea
+            v-model="form.fields.excludedUrls.value"
+            :maxlength="$options.MAX_CHAR_LIMIT_EXCLUDED_URLS"
+            :placeholder="i18n.excludedUrls.placeholder"
+            :no-resize="false"
+            data-testid="excluded-urls-input"
+          />
+          <gl-form-text>{{
+            getCharacterLimitText(
+              form.fields.excludedUrls.value,
+              $options.MAX_CHAR_LIMIT_EXCLUDED_URLS,
+            )
+          }}</gl-form-text>
+        </gl-form-group>
+
+        <gl-form-group :invalid-feedback="form.fields.requestHeaders.feedback" class="col-md-6">
+          <template #label>
+            {{ i18n.requestHeaders.label }}
+            <tooltip-icon :title="i18n.requestHeaders.tooltip" />
+            <gl-form-text class="gl-mt-3">{{ i18n.requestHeaders.description }}</gl-form-text>
+          </template>
+          <gl-form-textarea
+            v-model="form.fields.requestHeaders.value"
+            :maxlength="$options.MAX_CHAR_LIMIT_REQUEST_HEADERS"
+            :placeholder="i18n.requestHeaders.placeholder"
+            :no-resize="false"
+            data-testid="request-headers-input"
+          />
+          <gl-form-text>{{
+            getCharacterLimitText(
+              form.fields.requestHeaders.value,
+              $options.MAX_CHAR_LIMIT_REQUEST_HEADERS,
+            )
+          }}</gl-form-text>
+        </gl-form-group>
+      </div>
+    </gl-form-group>
 
     <dast-site-auth-section
       v-if="glFeatures.securityDastSiteProfilesAdditionalFields"
       v-model="authSection"
+      :disabled="isPolicyProfile"
       :show-validation="form.showValidation"
     />
 
     <hr class="gl-border-gray-100" />
 
     <gl-button
+      :disabled="isPolicyProfile"
       type="submit"
       variant="success"
       class="js-no-auto-disable"

@@ -134,14 +134,6 @@ RSpec.describe Gitlab::UsageData do
       expect(count_data[:epic_issues]).to eq(2)
     end
 
-    it 'has integer value for epic relationship level' do
-      expect(count_data[:epics_deepest_relationship_level]).to be_a_kind_of(Integer)
-    end
-
-    it 'has integer values for all counts' do
-      expect(count_data.values).to all(be_a_kind_of(Integer))
-    end
-
     it 'gathers security products usage data' do
       expect(count_data[:container_scanning_jobs]).to eq(1)
       expect(count_data[:dast_jobs]).to eq(1)

@@ -25,8 +25,7 @@ gem 'marginalia', '~> 1.10.0'
 
 # Authentication libraries
 gem 'devise', '~> 4.7.2'
-# TODO: verify ARM compile issue on 3.1.13+ version (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18828)
-gem 'bcrypt', '3.1.12'
+gem 'bcrypt', '~> 3.1', '>= 3.1.14'
 gem 'doorkeeper', '~> 5.5.0.rc2'
 gem 'doorkeeper-openid_connect', '~> 1.7.5'
 gem 'omniauth', '~> 1.8'
@@ -120,7 +119,7 @@ gem 'fog-aws', '~> 3.9'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
-gem 'fog-google', '~> 1.12'
+gem 'gitlab-fog-google', '~> 1.13', require: 'fog/google'
 gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
@@ -313,7 +312,7 @@ gem 'pg_query', '~> 1.3.0'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '~> 0.16.0'
+gem 'gitlab-labkit', '~> 0.16.1'
 # Thrift is a dependency of gitlab-labkit, we want a version higher than 0.14.0
 # because of https://gitlab.com/gitlab-org/gitlab/-/issues/321900
 gem 'thrift', '>= 0.14.0'
@@ -345,7 +344,6 @@ end
 
 group :development do
   gem 'brakeman', '~> 4.2', require: false
-  gem 'danger', '~> 8.0.6', require: false
   gem 'lefthook', '~> 0.7', require: false
 
   gem 'letter_opener_web', '~> 1.3.4'
@@ -400,6 +398,11 @@ group :development, :test do
   gem 'rblineprof', '~> 0.3.6', platform: :mri, require: false
 end
 
+group :development, :test, :danger do
+  gem 'danger-gitlab', '~> 8.0', require: false
+  gem 'gitlab-dangerfiles', '~> 0.8.0', require: false
+end
+
 group :development, :test, :coverage do
   gem 'simplecov', '~> 0.18.5', require: false
   gem 'simplecov-cobertura', '~> 1.3.1', require: false
@@ -436,7 +439,7 @@ end
 gem 'octokit', '~> 4.15'
 
 # https://gitlab.com/gitlab-org/gitlab/issues/207207
-gem 'gitlab-mail_room', '~> 0.0.8', require: 'mail_room'
+gem 'gitlab-mail_room', '~> 0.0.9', require: 'mail_room'
 
 gem 'email_reply_trimmer', '~> 0.1'
 gem 'html2text'
@@ -485,7 +488,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.4.12'
+gem 'gitlab-experiment', '~> 0.5.0'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

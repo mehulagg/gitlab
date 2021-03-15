@@ -77,16 +77,6 @@ RSpec.describe 'Query.project(fullPath).dastProfiles' do
 
       expect(graphql_data_at(:project, :dast_profiles, :nodes, 0, 'branch')).to eq('name' => 'master', 'exists' => true)
     end
-
-    context 'when the feature is disabled' do
-      it 'returns no nodes' do
-        stub_feature_flags(dast_saved_scans: false)
-
-        subject
-
-        expect(graphql_data_at(:project, :dast_profiles, :nodes)).to be_empty
-      end
-    end
   end
 
   def pagination_query(arguments)

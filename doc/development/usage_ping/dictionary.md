@@ -1028,6 +1028,18 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
+### `counts.geo_node_usage.git_fetch_event_count_weekly`
+
+Number of Git fetch events from Prometheus on the Geo secondary
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210309194425_git_fetch_event_count_weekly.yml)
+
+Group: `group::geo`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `counts.geo_nodes`
 
 Total number of sites in a Geo deployment
@@ -3535,6 +3547,42 @@ Group: ``
 Status: `data_available`
 
 Tiers: `free`
+
+### `counts.package_events_i_package_rubygems_delete_package`
+
+Total count of RubyGems packages delete events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210303153000_package_events_i_package_rubygems_delete_package.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_rubygems_pull_package`
+
+Total count of pull RubyGems packages events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210303153002_package_events_i_package_rubygems_pull_package.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_rubygems_push_package`
+
+Total count of push RubyGems packages events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210303153004_package_events_i_package_rubygems_push_package.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_tag_delete_package`
 
@@ -9380,6 +9428,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_monthly`
+
+Distinct user count events for RubyGems packages in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154626_i_package_rubygems_deploy_token_monthly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_weekly`
+
+Distinct RubyGems pakages deployed in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154624_i_package_rubygems_deploy_token_weekly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.deploy_token_packages.i_package_tag_deploy_token_monthly`
 
 Missing description
@@ -9523,6 +9595,222 @@ Group: ``
 Status: `data_available`
 
 Tiers:
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_issue_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on a confidential issue by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152233_i_ecosystem_slack_service_confidential_issue_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_issue_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on a confidential issue by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104814_i_ecosystem_slack_service_confidential_issue_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_note_notification_monthly`
+
+Calculated unique users to trigger a Slack message by creating a confidential note by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152144_i_ecosystem_slack_service_confidential_note_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_note_notification_weekly`
+
+Calculated unique users to trigger a Slack message by creating a confidential note by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104556_i_ecosystem_slack_service_confidential_note_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_deployment_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing a deployment by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150912_i_ecosystem_slack_service_deployment_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_deployment_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing a deployment by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103755_i_ecosystem_slack_service_deployment_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_issue_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on an issue by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150507_i_ecosystem_slack_service_issue_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_issue_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on an issue by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103002_i_ecosystem_slack_service_issue_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_merge_request_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on a merge request by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151831_i_ecosystem_slack_service_merge_request_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_merge_request_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on a merge request by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104007_i_ecosystem_slack_service_merge_request_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_note_notification_monthly`
+
+Calculated unique users to trigger a Slack message by creating a note by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151946_i_ecosystem_slack_service_note_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_note_notification_weekly`
+
+Calculated unique users to trigger a Slack message by creating a note by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104047_i_ecosystem_slack_service_note_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_push_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing a Git push by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150654_i_ecosystem_slack_service_push_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_push_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing a Git push by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103629_i_ecosystem_slack_service_push_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_tag_push_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing a tag push by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152049_i_ecosystem_slack_service_tag_push_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_tag_push_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing a tag push by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302104144_i_ecosystem_slack_service_tag_push_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_wiki_page_notification_monthly`
+
+Calculated unique users to trigger a Slack message by performing an action on a wiki page by month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151609_i_ecosystem_slack_service_wiki_page_notification_monthly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_wiki_page_notification_weekly`
+
+Calculated unique users to trigger a Slack message by performing an action on a wiki page by week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103907_i_ecosystem_slack_service_wiki_page_notification_weekly.yml)
+
+Group: `group::ecosystem`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sfe_monthly`
 
@@ -11398,7 +11686,7 @@ Tiers:
 
 ### `redis_hll_counters.quickactions.i_quickactions_invite_email_multiple_monthly`
 
-Missing description
+Unique users using the /invite_email quick action to add a multiple email participants to an issue within 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210222041235_i_quickactions_invite_email_multiple_monthly.yml)
 
@@ -11406,11 +11694,23 @@ Group: `group::product planning`
 
 Status: `implemented`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.quickactions.i_quickactions_invite_email_multiple_weekly`
+
+Unique users using the /invite_email quick action to add a multiple email participants to an issue within 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154600_i_quickactions_invite_email_multiple_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.quickactions.i_quickactions_invite_email_single_monthly`
 
-Missing description
+Unique users using the /invite_email quick action to add a single email participant to an issue within 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210222041219_i_quickactions_invite_email_single_monthly.yml)
 
@@ -11418,7 +11718,19 @@ Group: `group::product planning`
 
 Status: `implemented`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.quickactions.i_quickactions_invite_email_single_weekly`
+
+Unique users using the /invite_email quick action to add a single email participant to an issue within 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154557_i_quickactions_invite_email_single_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.quickactions.i_quickactions_iteration_monthly`
 
@@ -13244,6 +13556,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.user_packages.i_package_rubygems_user_monthly`
+
+Distinct user count events for RubyGems packages in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154654_i_package_rubygems_user_monthly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.user_packages.i_package_rubygems_user_weekly`
+
+Distinct user count events for RubyGems packages in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154652_i_package_rubygems_user_weekly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.user_packages.i_package_tag_user_monthly`
 
 Missing description
@@ -13394,11 +13730,11 @@ Whether public signup is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124918_signup_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `topology.duration_s`
 
@@ -13972,7 +14308,7 @@ Distinct count of users that triggered an import using the Group Migration tool
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14056,7 +14392,7 @@ Distinct count of users that imported groups using Group Import
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14116,7 +14452,7 @@ Distinct count of users that imported issues into projects using CSV upload
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14128,7 +14464,7 @@ Distinct count of users that imported issues into projects using FogBugz
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14140,7 +14476,7 @@ Distinct count of users that imported issues into projects using Jira
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14152,7 +14488,7 @@ Distinct count of users that imported issues into projects using Phabricator
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14344,7 +14680,7 @@ Distinct count of users that imported projects from Bitbucket Cloud
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14356,7 +14692,7 @@ Distinct count of users that imported projects from Bitbucket Server
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14368,7 +14704,7 @@ Distinct count of users that imported projects using Import by URL
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14380,7 +14716,7 @@ Distinct count of users that imported projects from Gitea
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14392,7 +14728,7 @@ Distinct count of users that imported projects from GitHub
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14404,7 +14740,7 @@ Distinct count of users that imported projects from GitLab.com
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14416,7 +14752,7 @@ Distinct count of users that imported projects using Project Import/Export
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14428,7 +14764,7 @@ Distinct count of users that imported projects using Manifest file
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14440,7 +14776,7 @@ Total count of all projects imported with import_source NOT NULL
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14623,6 +14959,18 @@ Group: `group::health`
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage.monitor.projects_with_enabled_alert_integrations_histogram`
+
+Histogram (buckets 1 to 100) of projects with at least 1 enabled integration.
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210309165717_projects_with_enabled_alert_integrations_histogram.yml)
+
+Group: `group::monitor`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.monitor.projects_with_error_tracking_enabled`
 
@@ -15892,7 +16240,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -15976,7 +16324,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16036,7 +16384,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16048,7 +16396,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16060,7 +16408,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16072,7 +16420,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16264,7 +16612,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16276,7 +16624,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16288,7 +16636,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16300,7 +16648,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16312,7 +16660,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16324,7 +16672,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16336,7 +16684,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16348,7 +16696,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16360,7 +16708,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 

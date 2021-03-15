@@ -12,18 +12,6 @@ RSpec.describe DastSiteValidations::CreateService do
   subject { described_class.new(container: dast_site.project, params: params).execute }
 
   describe 'execute', :clean_gitlab_redis_shared_state do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(dast_saved_scans: false)
-
-        aggregate_failures do
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to eq('Insufficient permissions')
-        end
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)

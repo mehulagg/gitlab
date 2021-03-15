@@ -27,7 +27,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
 
     context 'when rotation has no saved shifts' do
       context 'and rotation was created before it "started"' do
-        let_it_be(:rotation) { create(:incident_management_oncall_rotation, :with_participant, created_at: 1.day.ago) }
+        let_it_be(:rotation) { create(:incident_management_oncall_rotation, :with_participants, created_at: 1.day.ago) }
 
         it 'creates shift' do
           expect { perform }.to change { rotation.shifts.count }.by(1)
@@ -36,7 +36,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
       end
 
       context 'and rotation "started" before it was created' do
-        let_it_be(:rotation) { create(:incident_management_oncall_rotation, :with_participant, starts_at: 1.month.ago) }
+        let_it_be(:rotation) { create(:incident_management_oncall_rotation, :with_participants, starts_at: 1.month.ago) }
 
         it 'creates shift without backfilling' do
           expect { perform }.to change { rotation.shifts.count }.by(1)
@@ -58,7 +58,8 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
           create(
             :incident_management_oncall_rotation,
             :with_active_period, # 8:00 - 17:00
-            :with_participant,
+            :with_participants,
+            :utc,
             created_at: created_at, # Monday @ 5:00
             starts_at: starts_at, # Tuesday @ 00:00
             updated_at: updated_at # Friday @ 6:00
@@ -174,7 +175,8 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
         let_it_be_with_reload(:rotation) do
           create(
             :incident_management_oncall_rotation,
-            :with_participant,
+            :with_participants,
+            :utc,
             :with_active_period, # 8:00-17:00
             starts_at: starts_at
           )

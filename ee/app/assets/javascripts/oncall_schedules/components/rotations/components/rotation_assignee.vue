@@ -7,9 +7,9 @@ import { __, sprintf } from '~/locale';
 import { selectedTimezoneFormattedOffset } from '../../schedule/utils';
 
 export const SHIFT_WIDTHS = {
-  md: 140,
-  sm: 90,
-  xs: 40,
+  md: 100,
+  sm: 50,
+  xs: 25,
 };
 
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     assigneeName() {
-      if (this.shiftWidth <= SHIFT_WIDTHS.sm) {
+      if (this.shiftWidth <= SHIFT_WIDTHS.md) {
         return truncate(this.assignee.user.username, 3);
       }
 
@@ -65,8 +65,11 @@ export default {
     rotationAssigneeUniqueID() {
       return uniqueId('rotation-assignee-');
     },
-    rotationMobileView() {
+    hasRotationMobileViewAvatar() {
       return this.shiftWidth <= SHIFT_WIDTHS.xs;
+    },
+    hasRotationMobileViewText() {
+      return this.shiftWidth <= SHIFT_WIDTHS.sm;
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
@@ -91,10 +94,13 @@ export default {
       data-testid="rotation-assignee"
     >
       <div class="gl-text-white" :class="$options.ROTATION_CENTER_CLASS">
-        <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
-        <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
-          assigneeName
-        }}</span>
+        <gl-avatar v-if="!hasRotationMobileViewAvatar" :src="assignee.user.avatarUrl" :size="16" />
+        <span
+          v-if="!hasRotationMobileViewText"
+          class="gl-ml-2"
+          data-testid="rotation-assignee-name"
+          >{{ assigneeName }}</span
+        >
       </div>
     </div>
     <gl-popover

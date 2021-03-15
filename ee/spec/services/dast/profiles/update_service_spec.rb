@@ -31,22 +31,9 @@ RSpec.describe Dast::Profiles::UpdateService do
   end
 
   describe 'execute', :clean_gitlab_redis_shared_state do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: false)
-
-        aggregate_failures do
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to eq('You are not authorized to update this profile')
-        end
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(dast_saved_scans: true)
 
         aggregate_failures do
           expect(subject.status).to eq(:error)
@@ -58,7 +45,6 @@ RSpec.describe Dast::Profiles::UpdateService do
     context 'when the feature is enabled' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: true)
       end
 
       context 'when the user cannot run a DAST scan' do

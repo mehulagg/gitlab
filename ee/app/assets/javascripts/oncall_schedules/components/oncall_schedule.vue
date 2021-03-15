@@ -194,7 +194,7 @@ export default {
           </gl-button-group>
         </div>
       </template>
-      <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
+      <p class="gl-text-gray-500 gl-mb-5" data-testid="scheduleBody">
         {{ schedule.timezone }} | {{ offset }}
       </p>
       <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">

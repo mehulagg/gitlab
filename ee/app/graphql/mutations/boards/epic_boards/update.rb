@@ -16,14 +16,6 @@ module Mutations
                  required: true,
                  description: 'The epic board global ID.'
 
-        argument :labels, [GraphQL::STRING_TYPE],
-                 required: false,
-                 description: 'Labels to be added to the board.'
-
-        argument :label_ids, [::Types::GlobalIDType[::Label]],
-                 required: false,
-                 description: 'The IDs of labels to be added to the board.'
-
         field :epic_board,
               Types::Boards::EpicBoardType,
               null: true,

@@ -1,7 +1,11 @@
 <script>
 import { GlToggle } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 export default {
+  i18n: {
+    toggleLabel: s__('Trial|GitLab Ultimate trial (optional)'),
+  },
   components: {
     GlToggle,
   },
@@ -30,5 +34,12 @@ export default {
 };
 </script>
 <template>
-  <gl-toggle v-model="trial" name="trial" data-testid="trial" @change="toggleTrial" />
+  <gl-toggle
+    v-model="trial"
+    name="trial"
+    :label="$options.i18n.toggleLabel"
+    label-position="hidden"
+    data-testid="trial"
+    @change="toggleTrial"
+  />
 </template>

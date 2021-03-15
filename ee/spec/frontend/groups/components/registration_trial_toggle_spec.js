@@ -26,7 +26,7 @@ describe('Registration Trial Toggle', () => {
     });
 
     it('shows the toggle component', () => {
-      expect(wrapper.find(GlToggle).exists()).toBe(true);
+      expect(wrapper.find(GlToggle).props('label')).toBe(RegistrationTrialToggle.i18n.toggleLabel);
     });
 
     it('sets the default value to be false', () => {
