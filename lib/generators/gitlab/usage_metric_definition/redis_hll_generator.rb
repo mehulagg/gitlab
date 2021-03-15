@@ -11,8 +11,8 @@ module Gitlab
       argument :event, type: :string, desc: "Event name"
 
       def create_metrics
-        generate 'gitlab:usage_metric_definition', "#{key_path}_weekly --dir 7d"
-        generate 'gitlab:usage_metric_definition', "#{key_path}_monthly --dir 28d"
+        Gitlab::UsageMetricDefinitionGenerator.start(["#{key_path}_weekly", '--dir', '7d'])
+        Gitlab::UsageMetricDefinitionGenerator.start(["#{key_path}_monthly", '--dir', '28d'])
       end
 
       private
