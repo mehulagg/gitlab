@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module EE
-  module ApplicationRecord
+  # Intentionally pick a different name, to prevent naming conflicts
+  module ApplicationRecordHelpers
     extend ActiveSupport::Concern
 
     class_methods do

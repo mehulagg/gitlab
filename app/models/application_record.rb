@@ -84,4 +84,4 @@ class ApplicationRecord < ActiveRecord::Base
   end
 end
 
-ApplicationRecord.prepend_if_ee('EE::ApplicationRecord')
+ApplicationRecord.prepend_if_ee('EE::ApplicationRecordHelpers')
