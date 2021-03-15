@@ -140,7 +140,7 @@ module Gitlab
       # Clear configuration
       def self.clear_configuration
         @proxy = nil
-        remove_instance_variable(:@feature_available)
+        remove_instance_variable(:@feature_available) if defined?(@feature_available)
       end
 
       def self.active_record_models
