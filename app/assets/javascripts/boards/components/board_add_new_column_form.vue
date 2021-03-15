@@ -55,10 +55,22 @@ export default {
       searchValue: '',
     };
   },
+  watch: {
+    selectedId(val) {
+      if (val) {
+        this.$refs.dropdown.hide(true);
+      }
+    },
+  },
   methods: {
     ...mapActions(['setAddColumnFormVisibility']),
     setFocus() {
       this.$refs.searchBox.focusInput();
+    },
+    onHide() {
+      this.searchValue = '';
+      this.$emit('filter-items', '');
+      this.$emit('hide');
     },
   },
 };
@@ -87,8 +99,19 @@ export default {
           <div class="gl-mb-5"></div>
         </slot>
 
-        <gl-form-group class="gl-px-5" :label="formLabel" :description="formDescription">
-          <gl-dropdown class="gl-mb-3" no-flip @shown="setFocus" @hide="$emit('hide')">
+        <gl-form-group
+          class="gl-px-5 gl-max-w-full"
+          :label="formLabel"
+          :description="formDescription"
+        >
+          <gl-dropdown
+            ref="dropdown"
+            class="gl-mb-3 gl-max-w-full"
+            toggle-class="gl-max-w-full"
+            no-flip
+            @shown="setFocus"
+            @hide="onHide"
+          >
             <template #button-content>
               <slot name="selected">
                 <div>{{ $options.i18n.noneSelected }}</div>
@@ -96,9 +119,6 @@ export default {
               <gl-icon class="dropdown-chevron" name="chevron-down" />
             </template>
 
-            <!--  add overflow fade tobttom  -->
-            <!-- make dropdown close on select -->
-            <!-- clear search on close -->
             <div class="gl-sticky gl-position-sticky gl-top-0 gl-bg-white gl-z-index-1">
               <gl-search-box-by-type
                 id="board-available-column-entities"

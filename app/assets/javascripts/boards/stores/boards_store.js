@@ -583,7 +583,7 @@ const boardsStore = {
       entityType = 'assignee_id';
     } else if (IS_EE && list.milestone) {
       entityType = 'milestone_id';
-    } else if (list.iteration) {
+    } else if (IS_EE && list.iteration) {
       entityType = 'iteration_id';
     }
 

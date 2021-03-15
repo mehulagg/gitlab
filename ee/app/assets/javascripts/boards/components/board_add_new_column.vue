@@ -5,33 +5,58 @@ import {
   GlFormGroup,
   GlFormRadio,
   GlFormRadioGroup,
-  GlFormSelect,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
-import { ListType, ListTypeTitles } from '~/boards/constants';
+import { ListType } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
+export const listTypeInfo = {
+  [ListType.label]: {
+    listPropertyName: 'labels',
+    loadingPropertyName: 'labelsLoading',
+    fetchMethodName: 'fetchLabels',
+    formDescription: __('A label list displays issues with the selected label.'),
+    formLabel: __('Label'),
+    searchLabel: __('Select label'),
+    searchPlaceholder: __('Search labels'),
+  },
+  [ListType.assignee]: {
+    listPropertyName: 'assignees',
+    loadingPropertyName: 'assigneesLoading',
+    fetchMethodName: 'fetchAssignees',
+    formDescription: __('An assignee list displays issues assigned to the selected user'),
+    formLabel: __('Assignee'),
+    searchLabel: __('Select assignee'),
+    searchPlaceholder: __('Search assignees'),
+  },
+  [ListType.milestone]: {
+    listPropertyName: 'milestones',
+    loadingPropertyName: 'milestonesLoading',
+    fetchMethodName: 'fetchMilestones',
+    formDescription: __('A milestone list displays issues in the selected milestone.'),
+    formLabel: __('Milestone'),
+    searchLabel: __('Select milestone'),
+    searchPlaceholder: __('Search milestones'),
+  },
+  [ListType.iteration]: {
+    listPropertyName: 'iterations',
+    loadingPropertyName: 'iterationsLoading',
+    fetchMethodName: 'fetchIterations',
+    formDescription: __('An iteration list displays issues in the selected iteration.'),
+    formLabel: __('Iteration'),
+    searchLabel: __('Select iteration'),
+    searchPlaceholder: __('Search iterations'),
+  },
+};
+
 export default {
   i18n: {
-    listType: __('Scope'),
-    scopeDescription: __('Issues in the list will be filtered by this scope'),
-    labelListDescription: __('A label list displays issues with the selected label.'),
-    assigneeListDescription: __('An assignee list displays issues assigned to the selected user'),
-    milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
-    iterationListDescription: __('An iteration list displays issues in the selected iteration.'),
-    selectLabel: __('Select label'),
-    selectAssignee: __('Select assignee'),
-    selectMilestone: __('Select milestone'),
-    selectIteration: __('Select iteration'),
-    searchLabels: __('Search labels'),
-    searchAssignees: __('Search assignees'),
-    searchMilestones: __('Search milestones'),
-    searchIterations: __('Search iterations'),
+    listType: __('List type'),
   },
   columnTypes: [
     { value: ListType.label, text: __('Label') },
@@ -70,20 +95,12 @@ export default {
     ]),
     ...mapGetters(['getListByTypeId', 'shouldUseGraphQL', 'isEpicBoard']),
 
+    info() {
+      return listTypeInfo[this.columnType] || {};
+    },
+
     items() {
-      if (this.labelTypeSelected) {
-        return this.labels;
-      }
-      if (this.assigneeTypeSelected) {
-        return this.assignees;
-      }
-      if (this.milestoneTypeSelected) {
-        return this.milestones;
-      }
-      if (this.iterationTypeSelected) {
-        return this.iterations;
-      }
-      return [];
+      return this[this.info.listPropertyName] || [];
     },
 
     labelTypeSelected() {
@@ -99,47 +116,21 @@ export default {
       return this.columnType === ListType.iteration;
     },
 
-    selectedLabel() {
-      if (!this.labelTypeSelected) {
-        return null;
-      }
-      return this.labels.find(({ id }) => id === this.selectedId);
-    },
-    selectedAssignee() {
-      if (!this.assigneeTypeSelected) {
-        return null;
-      }
-      return this.assignees.find(({ id }) => id === this.selectedId);
-    },
-    selectedMilestone() {
-      if (!this.milestoneTypeSelected) {
-        return null;
-      }
-      return this.milestones.find(({ id }) => id === this.selectedId);
-    },
-    selectedIteration() {
-      if (!this.iterationTypeSelected) {
-        return null;
-      }
-      return this.iterations.find(({ id }) => id === this.selectedId);
-    },
     selectedItem() {
-      if (!this.selectedId) {
-        return null;
-      }
-      if (this.labelTypeSelected) {
-        return this.selectedLabel;
-      }
-      if (this.assigneeTypeSelected) {
-        return this.selectedAssignee;
-      }
-      if (this.milestoneTypeSelected) {
-        return this.selectedMilestone;
-      }
-      if (this.iterationTypeSelected) {
-        return this.selectedIteration;
-      }
-      return null;
+      return this.items.find(({ id }) => id === this.selectedId);
+    },
+
+    hasLabelSelection() {
+      return this.labelTypeSelected && this.selectedItem;
+    },
+    hasMilestoneSelection() {
+      return this.milestoneTypeSelected && this.selectedItem;
+    },
+    hasIterationSelection() {
+      return this.iterationTypeSelected && this.selectedItem;
+    },
+    hasAssigneeSelection() {
+      return this.assigneeTypeSelected && this.selectedItem;
     },
 
     columnForSelected() {
@@ -154,83 +145,7 @@ export default {
     },
 
     loading() {
-      if (this.labelTypeSelected) {
-        return this.labelsLoading;
-      }
-      if (this.assigneeTypeSelected) {
-        return this.assigneesLoading;
-      }
-      if (this.milestoneTypeSelected) {
-        return this.milestonesLoading;
-      }
-      if (this.iterationTypeSelected) {
-        return this.iterationsLoading;
-      }
-      return false;
-    },
-
-    formLabel() {
-      return ListTypeTitles[this.columnType];
-    },
-
-    formDescription() {
-      if (this.labelTypeSelected) {
-        return this.$options.i18n.labelListDescription;
-      }
-
-      if (this.assigneeTypeSelected) {
-        return this.$options.i18n.assigneeListDescription;
-      }
-
-      if (this.milestoneTypeSelected) {
-        return this.$options.i18n.milestoneListDescription;
-      }
-
-      if (this.iterationTypeSelected) {
-        return this.$options.i18n.iterationListDescription;
-      }
-
-      return null;
-    },
-
-    searchLabel() {
-      if (this.labelTypeSelected) {
-        return this.$options.i18n.selectLabel;
-      }
-
-      if (this.assigneeTypeSelected) {
-        return this.$options.i18n.selectAssignee;
-      }
-
-      if (this.milestoneTypeSelected) {
-        return this.$options.i18n.selectMilestone;
-      }
-
-      if (this.iterationTypeSelected) {
-        return this.$options.i18n.selectIteration;
-      }
-
-      return null;
-    },
-
-    searchPlaceholder() {
-      if (this.labelTypeSelected) {
-        return this.$options.i18n.searchLabels;
-      }
-
-      if (this.assigneeTypeSelected) {
-        return this.$options.i18n.searchAssignees;
-      }
-
-      if (this.milestoneTypeSelected) {
-        return this.$options.i18n.searchMilestones;
-      }
-
-      if (this.iterationTypeSelected) {
-        return this.$options.i18n.searchIterations;
-      }
-
-      return null;
+      return this[this.info.loadingPropertyName];
     },
   },
   created() {
@@ -285,21 +200,21 @@ export default {
         };
 
         if (this.labelTypeSelected) {
-          listObj.label = this.selectedLabel;
+          listObj.label = this.selectedItem;
         } else if (this.milestoneTypeSelected) {
           listObj.milestone = {
-            ...this.selectedMilestone,
-            id: getIdFromGraphQLId(this.selectedMilestone.id),
+            ...this.selectedItem,
+            id: getIdFromGraphQLId(this.selectedItem.id),
           };
         } else if (this.iterationTypeSelected) {
           listObj.iteration = {
-            ...this.selectedIteration,
-            id: getIdFromGraphQLId(this.selectedIteration.id),
+            ...this.selectedItem,
+            id: getIdFromGraphQLId(this.selectedItem.id),
           };
         } else if (this.assigneeTypeSelected) {
           listObj.assignee = {
-            ...this.selectedAssignee,
-            id: getIdFromGraphQLId(this.selectedAssignee.id),
+            ...this.selectedItem,
+            id: getIdFromGraphQLId(this.selectedItem.id),
           };
         }
 
@@ -308,20 +223,7 @@ export default {
     },
 
     filterItems(searchTerm) {
-      switch (this.columnType) {
-        case ListType.iteration:
-          this.fetchIterations(searchTerm);
-          break;
-        case ListType.milestone:
-          this.fetchMilestones(searchTerm);
-          break;
-        case ListType.assignee:
-          this.fetchAssignees(searchTerm);
-          break;
-        case ListType.label:
-        default:
-          this.fetchLabels(searchTerm);
-      }
+      this[this.info.fetchMethodName](searchTerm);
     },
 
     showScopedLabels(label) {
@@ -340,10 +242,10 @@ export default {
 <template>
   <board-add-new-column-form
     :loading="loading"
-    :form-label="formLabel"
-    :form-description="formDescription"
-    :search-label="searchLabel"
-    :search-placeholder="searchPlaceholder"
+    :form-label="info.formLabel"
+    :form-description="info.formDescription"
+    :search-label="info.searchLabel"
+    :search-placeholder="info.searchPlaceholder"
     :selected-id="selectedId"
     @filter-items="filterItems"
     @add-list="addList"
@@ -371,7 +273,7 @@ export default {
     </template>
 
     <template slot="selected">
-      <div v-if="selectedLabel" class="gl-display-flex gl-flex-align-items-center">
+      <div v-if="hasLabelSelection" class="gl-display-flex gl-flex-align-items-center">
         <span
           class="dropdown-label-box gl-top-0"
           :style="{
@@ -382,20 +284,20 @@ export default {
       </div>
 
       <div
-        v-else-if="selectedMilestone"
+        v-else-if="hasMilestoneSelection"
         class="gl-text-truncate gl-display-flex gl-flex-align-items-center"
       >
         <gl-icon name="clock" />
         <span>{{ selectedItem.title }}</span>
       </div>
 
-      <div v-else-if="selectedIteration" class="gl-text-truncate">
+      <div v-else-if="hasIterationSelection" class="gl-text-truncate">
         <gl-icon name="iteration" />
         <span>{{ selectedItem.title }}</span>
       </div>
 
       <div
-        v-else-if="selectedAssignee"
+        v-else-if="hasAssigneeSelection"
         class="gl-text-truncate gl-display-flex gl-flex-align-items-center"
       >
         <gl-avatar-labeled
@@ -408,9 +310,8 @@ export default {
       </div>
     </template>
 
-    <template slot="items">
+    <template v-if="items.length > 0" slot="items">
       <gl-form-radio-group
-        v-if="items.length > 0"
         v-model="selectedId"
         class="gl-overflow-y-auto gl-px-5"
         @change="$root.$emit('bv::dropdown::hide')"
@@ -439,6 +340,8 @@ export default {
           <span v-else>{{ item.title }}</span>
         </label>
       </gl-form-radio-group>
+
+      <div class="dropdown-content-faded-mask gl-fixed gl-bottom-0 gl-w-full"></div>
     </template>
   </board-add-new-column-form>
 </template>

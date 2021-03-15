@@ -100,6 +100,7 @@ export default {
   <board-add-new-column-form
     :loading="labelsLoading"
     :form-description="__('A label list displays issues with the selected label.')"
+    :form-label="__('Label')"
     :search-label="__('Select label')"
     :search-placeholder="__('Search labels')"
     :selected-id="selectedId"

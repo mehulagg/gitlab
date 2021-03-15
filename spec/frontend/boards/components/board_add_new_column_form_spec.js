@@ -26,6 +26,7 @@ describe('Board card layout', () => {
   const mountComponent = ({
     loading = false,
     formDescription = '',
+    formLabel = '',
     searchLabel = '',
     searchPlaceholder = '',
     selectedId,
@@ -35,11 +36,12 @@ describe('Board card layout', () => {
     wrapper = extendedWrapper(
       shallowMount(BoardAddNewColumnForm, {
         stubs: {
-          GlFormGroup: true,
+          GlFormGroup,
         },
         propsData: {
           loading,
           formDescription,
+          formLabel,
           searchLabel,
           searchPlaceholder,
           selectedId,
