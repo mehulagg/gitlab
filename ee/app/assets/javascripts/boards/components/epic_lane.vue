@@ -142,7 +142,7 @@ export default {
         >
           {{ epic.title }}
         </h4>
-        <gl-popover :target="() => $refs.epicTitle" triggers="hover" placement="top">
+        <gl-popover :target="() => $refs.epicTitle" placement="top">
           <template #title>{{ epic.title }} &middot; {{ epic.reference }}</template>
           <div>{{ epicTimeAgoString }}</div>
           <div class="gl-mb-2">{{ epicDateString }}</div>

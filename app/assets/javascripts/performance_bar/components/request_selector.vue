@@ -63,7 +63,6 @@ export default {
       <gl-popover
         target="performance-bar-request-selector-warning"
         :content="warningMessage"
-        triggers="hover focus"
       />
     </span>
   </div>

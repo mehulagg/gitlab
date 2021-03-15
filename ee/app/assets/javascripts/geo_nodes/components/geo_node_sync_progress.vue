@@ -57,7 +57,6 @@ export default {
     <gl-popover
       :target="`syncProgress-${itemTitle}`"
       placement="right"
-      triggers="hover focus"
       :css-classes="['w-100']"
     >
       <template #title>

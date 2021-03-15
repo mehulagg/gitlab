@@ -33,7 +33,6 @@ export default {
         target="pop-approver"
         container="popovercontainer"
         placement="top"
-        triggers="hover focus"
       >
         <template #title>{{ __('Who can approve?') }}</template>
         <ul class="pl-3">

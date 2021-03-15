@@ -48,7 +48,6 @@ export default {
       data-testid="vulnerability-solutions-popover"
       :target="() => $refs.popover"
       placement="top"
-      triggers="hover focus"
     >
       <template #title>
         <span>{{ s__('AutoRemediation| 1 Merge Request') }}</span>

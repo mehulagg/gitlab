@@ -120,7 +120,6 @@ export default {
       <gl-popover
         :target="`syncDisabled-${itemTitle}`"
         placement="right"
-        triggers="hover focus"
         :css-classes="['w-100']"
       >
         <section>

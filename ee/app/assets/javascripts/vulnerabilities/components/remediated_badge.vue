@@ -38,7 +38,6 @@ export default {
       :target="target"
       :title="__('Vulnerability remediated. Review before resolving.')"
       placement="top"
-      triggers="hover focus"
     />
   </div>
 </template>

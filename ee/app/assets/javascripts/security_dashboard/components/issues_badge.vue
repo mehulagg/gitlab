@@ -41,7 +41,7 @@ export default {
       <gl-icon name="issues" class="gl-mr-2" />
       {{ numberOfIssues }}
     </gl-badge>
-    <gl-popover ref="popover" :target="issueBadgeEl" triggers="hover" placement="top">
+    <gl-popover ref="popover" :target="issueBadgeEl" placement="top">
       <template #title>
         {{ popoverTitle }}
       </template>

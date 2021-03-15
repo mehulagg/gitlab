@@ -88,7 +88,6 @@ export default {
     <gl-popover
       :target="rotationAssigneeUniqueID"
       :title="assignee.user.username"
-      triggers="hover"
       placement="top"
     >
       <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>

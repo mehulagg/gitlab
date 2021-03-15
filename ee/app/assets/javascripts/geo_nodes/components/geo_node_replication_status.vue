@@ -56,7 +56,6 @@ export default {
       <gl-popover
         :target="() => $refs.replicationStatusHelp.$el"
         placement="top"
-        triggers="hover focus"
       >
         <p>{{ __('Geo nodes are paused using a command run on the node') }}</p>
         <gl-link

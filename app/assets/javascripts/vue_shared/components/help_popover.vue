@@ -23,7 +23,7 @@ export default {
 <template>
   <span>
     <gl-button ref="popoverTrigger" variant="link" icon="question" tabindex="0" />
-    <gl-popover triggers="hover focus" :target="() => $refs.popoverTrigger.$el" v-bind="options">
+    <gl-popover :target="() => $refs.popoverTrigger.$el" v-bind="options">
       <template #title>
         <!-- eslint-disable-next-line vue/no-v-html -->
         <span v-html="options.title"></span>

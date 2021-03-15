@@ -116,7 +116,6 @@ export default {
       <gl-icon id="location-info" name="information" class="gl-text-blue-600" />
       <gl-popover
         target="location-info"
-        triggers="hover focus"
         placement="top"
         :title="s__('Dependencies|Location and dependency path')"
       >
