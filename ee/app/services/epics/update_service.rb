@@ -18,6 +18,9 @@ module Epics
 
       if saved_change_to_epic_dates?(epic)
         Epics::UpdateDatesService.new([epic]).execute
+
+        track_date_events(epic)
+
         epic.reset
       end
 
@@ -50,6 +53,10 @@ module Epics
     end
 
     private
+
+    def track_date_events(epic)
+
+    end
 
     def saved_change_to_epic_dates?(epic)
       (epic.saved_changes.keys.map(&:to_sym) & EPIC_DATE_FIELDS).present?
