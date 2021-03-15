@@ -1,6 +1,14 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
+import {
+  GlToast,
+  GlModal,
+  GlTooltipDirective,
+  GlIcon,
+  GlFormCheckbox,
+  GlDropdown,
+  GlDropdownItem,
+} from '@gitlab/ui';
 import $ from 'jquery';
 import Vue from 'vue';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
@@ -9,6 +17,7 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import { __, s__ } from '~/locale';
 import { updateUserStatus } from '~/rest_api';
+import { timeRanges } from '~/vue_shared/constants';
 import EmojiMenuInModal from './emoji_menu_in_modal';
 import { isUserBusy } from './utils';
 
@@ -20,11 +29,23 @@ export const AVAILABILITY_STATUS = {
 
 Vue.use(GlToast);
 
+const statusTimeRanges = [
+  {
+    label: __('Never'),
+    duration: { seconds: null },
+    name: 'never',
+    interval: null,
+  },
+  ...timeRanges,
+];
+
 export default {
   components: {
     GlIcon,
     GlModal,
     GlFormCheckbox,
+    GlDropdown,
+    GlDropdownItem,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -65,6 +86,7 @@ export default {
       modalId: 'set-user-status-modal',
       noEmoji: true,
       availability: isUserBusy(this.currentAvailability),
+      clearStatusDate: statusTimeRanges[0], // Need to update this to get the current value if set
     };
   },
   computed: {
@@ -183,7 +205,11 @@ export default {
 
       this.closeModal();
     },
+    setClearStatusDate(date) {
+      this.clearStatusDate = date;
+    },
   },
+  statusTimeRanges,
 };
 </script>
 
@@ -208,6 +234,24 @@ export default {
         name="user[status][emoji]"
       />
       <div ref="userStatusForm" class="form-group position-relative m-0">
+        <div v-if="canSetUserAvailability" class="form-group">
+          <div class="gl-display-flex">
+            <gl-form-checkbox
+              v-model="availability"
+              data-testid="user-availability-checkbox"
+              class="gl-mb-0"
+            >
+              <span class="gl-font-weight-bold">{{ s__('SetStatusModal|Busy') }}</span>
+            </gl-form-checkbox>
+          </div>
+          <div class="gl-display-flex">
+            <span class="gl-text-gray-600 gl-ml-5">
+              {{
+                s__('SetStatusModal|A busy indicator will be shown next to your name and avatar')
+              }}
+            </span>
+          </div>
+        </div>
         <div class="input-group gl-mb-5">
           <span class="input-group-prepend">
             <button
@@ -256,21 +300,16 @@ export default {
             </button>
           </span>
         </div>
-        <div v-if="canSetUserAvailability" class="form-group">
-          <div class="gl-display-flex">
-            <gl-form-checkbox
-              v-model="availability"
-              data-testid="user-availability-checkbox"
-              class="gl-mb-0"
+        <div class="form-group gl-display-flex gl-align-items-baseline">
+          <span class="gl-mr-3">{{ s__('SetStatusModal|Clear status after') }}</span>
+          <gl-dropdown :text="clearStatusDate.label">
+            <gl-dropdown-item
+              v-for="range in $options.statusTimeRanges"
+              :key="range.name"
+              @click="setClearStatusDate(range)"
+              >{{ range.label }}</gl-dropdown-item
             >
-              <span class="gl-font-weight-bold">{{ s__('SetStatusModal|Busy') }}</span>
-            </gl-form-checkbox>
-          </div>
-          <div class="gl-display-flex">
-            <span class="gl-text-gray-600 gl-ml-5">
-              {{ s__('SetStatusModal|"Busy" will be shown next to your name') }}
-            </span>
-          </div>
+          </gl-dropdown>
         </div>
       </div>
     </div>
