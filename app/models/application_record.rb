@@ -57,7 +57,7 @@ class ApplicationRecord < ActiveRecord::Base
   # Start a new transaction with a shorter-than-usual statement timeout. This is
   # currently one third of the default 15-second timeout
   def self.with_fast_read_statement_timeout
-    ::Gitlab::Database::LoadBalancing::Session.current.use_replica do
+    ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
       transaction(requires_new: true) do
         connection.exec_query("SET LOCAL statement_timeout = 5000")
 

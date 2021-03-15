@@ -18,7 +18,6 @@ module Gitlab
           delete
           delete_all
           insert
-          transaction
           update
           update_all
         ).freeze
