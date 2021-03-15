@@ -207,7 +207,7 @@ target API to test:
    ```
 
 1. Provide the location of the HAR specification. You can provide the specification as a file
-   or URL. Specify the location by adding the `FUZZAPI_HAR` variable:
+   or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020) in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_HAR` variable:
 
    ```yaml
    include:
@@ -299,7 +299,7 @@ information about the target API to test:
    ```
 
 1. Provide the location of the Postman Collection specification. You can provide the specification as a file
-   or URL. Specify the location by adding the `FUZZAPI_POSTMAN_COLLECTION` variable:
+   or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020) in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_POSTMAN_COLLECTION` variable:
 
    ```yaml
    include:
