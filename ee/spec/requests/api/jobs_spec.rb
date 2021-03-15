@@ -25,6 +25,33 @@ RSpec.describe API::Jobs do
     project.add_developer(developer)
   end
 
+  describe 'GET /job/allowed_agents' do
+    let_it_be(:agent) { create(:cluster_agent, project: project) }
+    let(:running_job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: :running) }
+
+    subject do
+      get api('/job/allowed_agents'), headers: headers_with_token, params: {}
+    end
+
+    before do
+      stub_licensed_features(cluster_agents: true)
+    end
+
+    context 'when user is authorized' do
+      let(:headers_with_token) { { API::Helpers::Runner::JOB_TOKEN_HEADER => running_job.token } }
+      let(:api_user) { project.creator }
+
+      it 'returns agent info' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+
+        expect(json_response['id']).to eq(agent.id)
+        expect(json_response['project_id']).to eq(project.id)
+      end
+    end
+  end
+
   describe 'GET /projects/:id/jobs/:job_id/artifacts' do
     let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: :running) }
 

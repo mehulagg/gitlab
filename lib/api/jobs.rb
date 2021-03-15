@@ -170,15 +170,17 @@ module API
     end
 
     resource :job do
+      before do
+        # current_authenticated_job will be nil if user is using
+        # a valid authentication that is not CI_JOB_TOKEN
+        not_found!('Job') unless current_authenticated_job
+      end
+
       desc 'Get current project using job token' do
         success Entities::Ci::Job
       end
       route_setting :authentication, job_token_allowed: true
       get do
-        # current_authenticated_job will be nil if user is using
-        # a valid authentication that is not CI_JOB_TOKEN
-        not_found!('Job') unless current_authenticated_job
-
         present current_authenticated_job, with: Entities::Ci::Job
       end
     end
@@ -199,3 +201,5 @@ module API
     end
   end
 end
+
+API::Jobs.prepend_if_ee('EE::API::Jobs')
