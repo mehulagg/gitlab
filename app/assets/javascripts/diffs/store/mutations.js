@@ -94,6 +94,10 @@ export default {
     Object.assign(state, { coverageFiles });
   },
 
+  [types.SET_CODEQUALITY_DATA](state, codequalityDiffData) {
+    Object.assign(state, { codequalityDiff: codequalityDiffData });
+  },
+
   [types.RENDER_FILE](state, file) {
     renderFile(file);
   },
