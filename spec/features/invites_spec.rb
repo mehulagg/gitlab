@@ -289,6 +289,22 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
         expect(page).to have_content('You have been granted Owner access to group Owned.')
         expect(group.users.include?(user)).to be true
       end
+
+      context 'when the experiment is enabled' do
+        before do
+          stub_experiments(:invited_users_land_on_activity_page, user)
+        end
+
+        it 'grants access and redirects to the activity' do
+          expect(group.users.include?(user)).to be false
+
+          page.click_link 'Accept invitation'
+
+          expect(current_path).to eq(group_activity_path(group))
+          expect(page).to have_content('You have been granted Owner access to group Owned.')
+          expect(group.users.include?(user)).to be true
+        end
+      end
     end
   end
 end

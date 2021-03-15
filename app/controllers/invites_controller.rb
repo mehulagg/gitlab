@@ -102,19 +102,37 @@ class InvitesController < ApplicationController
     redirect_to new_user_session_path(redirect_params), notice: notice
   end
 
+  def invite_landing_url(member)
+    if experiment_enabled?(:invited_users_land_on_activity_page, member)
+      case member.source
+      when Project
+        project_activity_url(member.source)
+      when Group
+        group_activity_url(member.source)
+      end
+    else
+      case member.source
+      when Project
+        project_url(member.source)
+      when Group
+        group_url(member.source)
+      end
+    end
+  end
+
   def invite_details
     @invite_details ||= case member.source
                         when Project
                           {
                             name: member.source.full_name,
-                            url: project_url(member.source),
+                            url: invite_landing_url(member),
                             title: _("project"),
                             path: project_path(member.source)
                           }
                         when Group
                           {
                             name: member.source.name,
-                            url: group_url(member.source),
+                            url: invite_landing_url(member),
                             title: _("group"),
                             path: group_path(member.source)
                           }
