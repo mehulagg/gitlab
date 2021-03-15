@@ -114,7 +114,7 @@ module Security
     end
 
     def dismissal_feedback?(finding)
-      if ::Feature.enabled?(:vulnerability_finding_fingerprints) && !finding.fingerprints.empty?
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints, pipeline.project) && !finding.fingerprints.empty?
         dismissal_feedback_by_finding_fingerprints(finding)
       else
         dismissal_feedback_by_project_fingerprint(finding)
