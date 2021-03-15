@@ -8,7 +8,7 @@ RSpec.describe 'User edits Release', :js do
   let_it_be(:user) { create(:user) }
 
   before do
-    project.add_developer(user)
+    project.add_maintainer(user)
 
     sign_in(user)
 

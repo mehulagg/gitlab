@@ -7,16 +7,16 @@ RSpec.describe Projects::ReleasesController do
 
   let!(:project) { create(:project, :repository, :public) }
   let_it_be(:private_project) { create(:project, :repository, :private) }
+  let_it_be(:maintainer) { create(:user) }
   let_it_be(:developer)  { create(:user) }
-  let_it_be(:reporter)   { create(:user) }
   let_it_be(:guest)      { create(:user) }
-  let_it_be(:user)       { developer }
+  let_it_be(:user)       { maintainer }
   let!(:release_1)       { create(:release, project: project, released_at: Time.zone.parse('2018-10-18')) }
   let!(:release_2)       { create(:release, project: project, released_at: Time.zone.parse('2019-10-19')) }
 
   before do
+    project.add_maintainer(maintainer)
     project.add_developer(developer)
-    project.add_reporter(reporter)
     project.add_guest(guest)
   end
 
@@ -127,8 +127,8 @@ RSpec.describe Projects::ReleasesController do
       get :new, params: { namespace_id: project.namespace, project_id: project }
     end
 
-    it { expect { request }.to be_denied_for(:reporter).of(project) }
-    it { expect { request }.to be_allowed_for(:developer).of(project) }
+    it { expect { request }.to be_denied_for(:developer).of(project) }
+    it { expect { request }.to be_allowed_for(:maintainer).of(project) }
   end
 
   describe 'GET #edit' do
@@ -163,8 +163,8 @@ RSpec.describe Projects::ReleasesController do
       it_behaves_like 'not found'
     end
 
-    context 'when user is a reporter' do
-      let(:user) { reporter }
+    context 'when user is a developer' do
+      let(:user) { developer }
 
       it_behaves_like 'not found'
     end

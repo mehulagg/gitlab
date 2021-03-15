@@ -11,9 +11,9 @@ RSpec.describe 'Markdown keyboard shortcuts', :js do
   let(:other_modifier_key) { is_mac ? :control : :command }
 
   before do
-    project.add_developer(user)
+    project.add_maintainer(user)
 
-    gitlab_sign_in(user)
+    sign_in(user)
 
     visit path_to_visit
 

@@ -7,8 +7,8 @@ RSpec.describe 'Query.project(fullPath).releases()' do
 
   let_it_be(:stranger) { create(:user) }
   let_it_be(:guest) { create(:user) }
-  let_it_be(:reporter) { create(:user) }
   let_it_be(:developer) { create(:user) }
+  let_it_be(:maintainer) { create(:user) }
 
   let(:base_url_params) { { scope: 'all', release_tag: release.tag } }
   let(:opened_url_params) { { state: 'opened', **base_url_params } }
@@ -224,8 +224,8 @@ RSpec.describe 'Query.project(fullPath).releases()' do
 
       before_all do
         project.add_guest(guest)
-        project.add_reporter(reporter)
         project.add_developer(developer)
+        project.add_maintainer(maintainer)
       end
 
       context 'when the user is not logged in' do
@@ -240,15 +240,15 @@ RSpec.describe 'Query.project(fullPath).releases()' do
         it_behaves_like 'no access to any repository-related fields'
       end
 
-      context 'when the user has Reporter permissions' do
-        let(:current_user) { reporter }
+      context 'when the user has Developer permissions' do
+        let(:current_user) { developer }
 
         it_behaves_like 'full access to all repository-related fields'
         it_behaves_like 'no access to editUrl'
       end
 
-      context 'when the user has Developer permissions' do
-        let(:current_user) { developer }
+      context 'when the user has Maintainer permissions' do
+        let(:current_user) { maintainer }
 
         it_behaves_like 'full access to all repository-related fields'
         it_behaves_like 'access to editUrl'
@@ -261,8 +261,8 @@ RSpec.describe 'Query.project(fullPath).releases()' do
 
       before_all do
         project.add_guest(guest)
-        project.add_reporter(reporter)
         project.add_developer(developer)
+        project.add_maintainer(maintainer)
       end
 
       context 'when the user is not logged in' do
@@ -279,15 +279,15 @@ RSpec.describe 'Query.project(fullPath).releases()' do
         it_behaves_like 'no access to editUrl'
       end
 
-      context 'when the user has Reporter permissions' do
-        let(:current_user) { reporter }
+      context 'when the user has Developer permissions' do
+        let(:current_user) { developer }
 
         it_behaves_like 'full access to all repository-related fields'
         it_behaves_like 'no access to editUrl'
       end
 
-      context 'when the user has Developer permissions' do
-        let(:current_user) { developer }
+      context 'when the user has Maintainer permissions' do
+        let(:current_user) { maintainer }
 
         it_behaves_like 'full access to all repository-related fields'
         it_behaves_like 'access to editUrl'

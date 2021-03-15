@@ -33,7 +33,7 @@ RSpec.describe Projects::GroupLinks::UpdateService, '#execute' do
   end
 
   it 'updates project permissions' do
-    expect { subject }.to change { user.can?(:create_release, project) }.from(true).to(false)
+    expect { subject }.to change { user.can?(:create_pipeline, project) }.from(true).to(false)
   end
 
   it 'executes UserProjectAccessChangedService' do

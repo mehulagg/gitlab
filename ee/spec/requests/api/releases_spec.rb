@@ -295,10 +295,10 @@ RSpec.describe API::Releases do
     end
 
     context 'when user is a developer' do
-      it 'accepts the request' do
-        post api("/projects/#{project.id}/releases/#{tag_name}/evidence", developer)
+      it 'forbids the request' do
+        post api("/projects/#{project.id}/releases/#{tag_name}/evidence", reporter)
 
-        expect(response).to have_gitlab_http_status(:accepted)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 

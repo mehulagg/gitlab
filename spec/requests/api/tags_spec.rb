@@ -13,7 +13,7 @@ RSpec.describe API::Tags do
   let(:current_user) { nil }
 
   before do
-    project.add_developer(user)
+    project.add_maintainer(user)
   end
 
   describe 'GET /projects/:id/repository/tags' do

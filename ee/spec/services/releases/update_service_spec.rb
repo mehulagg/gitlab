@@ -12,7 +12,7 @@ RSpec.describe Releases::UpdateService do
   let(:service) { described_class.new(project, user, params_with_milestones) }
 
   before do
-    project.add_developer(user)
+    project.add_maintainer(user)
   end
 
   describe 'group milestones' do

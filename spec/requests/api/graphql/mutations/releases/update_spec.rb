@@ -8,8 +8,8 @@ RSpec.describe 'Updating an existing release' do
 
   let_it_be(:public_user) { create(:user) }
   let_it_be(:guest) { create(:user) }
-  let_it_be(:reporter) { create(:user) }
   let_it_be(:developer) { create(:user) }
+  let_it_be(:maintainer) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:milestone_12_3) { create(:milestone, project: project, title: '12.3') }
   let_it_be(:milestone_12_4) { create(:milestone, project: project, title: '12.4') }
@@ -76,8 +76,8 @@ RSpec.describe 'Updating an existing release' do
 
   before do
     project.add_guest(guest)
-    project.add_reporter(reporter)
     project.add_developer(developer)
+    project.add_maintainer(maintainer)
 
     stub_default_url_options(host: 'www.example.com')
   end
@@ -121,7 +121,7 @@ RSpec.describe 'Updating an existing release' do
   end
 
   context 'when the current user has access to update releases' do
-    let(:current_user) { developer }
+    let(:current_user) { maintainer }
 
     context 'name' do
       context 'when a new name is provided' do
@@ -226,8 +226,8 @@ RSpec.describe 'Updating an existing release' do
   context "when the current user doesn't have access to update releases" do
     expected_error_message = "The resource that you are attempting to access does not exist or you don't have permission to perform this action"
 
-    context 'when the current user is a Reporter' do
-      let(:current_user) { reporter }
+    context 'when the current user is a Developer' do
+      let(:current_user) { developer }
 
       it_behaves_like 'top-level error with message', expected_error_message
     end

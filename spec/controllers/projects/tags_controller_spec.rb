@@ -122,7 +122,7 @@ RSpec.describe Projects::TagsController do
 
   describe 'POST #create' do
     before do
-      project.add_developer(user)
+      project.add_maintainer(user)
       sign_in(user)
     end
 
@@ -197,7 +197,7 @@ RSpec.describe Projects::TagsController do
     end
 
     before do
-      project.add_developer(user)
+      project.add_maintainer(user)
       sign_in(user)
     end
 

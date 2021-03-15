@@ -13,7 +13,7 @@ RSpec.describe 'User creates release', :js do
   let(:new_page_url) { new_project_release_path(project) }
 
   before do
-    project.add_developer(user)
+    project.add_maintainer(user)
 
     sign_in(user)
 

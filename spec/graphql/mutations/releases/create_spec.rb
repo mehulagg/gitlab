@@ -6,8 +6,8 @@ RSpec.describe Mutations::Releases::Create do
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:milestone_12_3) { create(:milestone, project: project, title: '12.3') }
   let_it_be(:milestone_12_4) { create(:milestone, project: project, title: '12.4') }
-  let_it_be(:reporter) { create(:user) }
   let_it_be(:developer) { create(:user) }
+  let_it_be(:maintainer) { create(:user) }
 
   let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }
 
@@ -48,8 +48,8 @@ RSpec.describe Mutations::Releases::Create do
   end
 
   before do
-    project.add_reporter(reporter)
     project.add_developer(developer)
+    project.add_maintainer(maintainer)
   end
 
   describe '#resolve' do
@@ -60,7 +60,7 @@ RSpec.describe Mutations::Releases::Create do
     let(:new_release) { subject[:release] }
 
     context 'when the current user has access to create releases' do
-      let(:current_user) { developer }
+      let(:current_user) { maintainer }
 
       it 'returns no errors' do
         expect(resolve).to include(errors: [])
@@ -120,7 +120,7 @@ RSpec.describe Mutations::Releases::Create do
     end
 
     context "when the current user doesn't have access to create releases" do
-      let(:current_user) { reporter }
+      let(:current_user) { developer }
 
       it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)

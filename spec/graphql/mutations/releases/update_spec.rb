@@ -6,8 +6,8 @@ RSpec.describe Mutations::Releases::Update do
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:milestone_12_3) { create(:milestone, project: project, title: '12.3') }
   let_it_be(:milestone_12_4) { create(:milestone, project: project, title: '12.4') }
-  let_it_be(:reporter) { create(:user) }
   let_it_be(:developer) { create(:user) }
+  let_it_be(:maintainer) { create(:user) }
 
   let_it_be(:tag) { 'v1.1.0'}
   let_it_be(:name) { 'Version 1.0'}
@@ -36,8 +36,8 @@ RSpec.describe Mutations::Releases::Update do
   end
 
   before do
-    project.add_reporter(reporter)
     project.add_developer(developer)
+    project.add_maintainer(maintainer)
   end
 
   shared_examples 'no changes to the release except for the' do |except_for|
@@ -63,7 +63,7 @@ RSpec.describe Mutations::Releases::Update do
   end
 
   describe '#ready?' do
-    let(:current_user) { developer }
+    let(:current_user) { maintainer }
 
     subject(:ready) do
       mutation.ready?(**mutation_arguments)
@@ -94,7 +94,7 @@ RSpec.describe Mutations::Releases::Update do
     let(:updated_release) { subject[:release] }
 
     context 'when the current user has access to create releases' do
-      let(:current_user) { developer }
+      let(:current_user) { maintainer }
 
       context 'name' do
         let(:mutation_arguments) { super().merge(name: updated_name) }
@@ -217,7 +217,7 @@ RSpec.describe Mutations::Releases::Update do
     end
 
     context "when the current user doesn't have access to update releases" do
-      let(:current_user) { reporter }
+      let(:current_user) { developer }
 
       it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, "The resource that you are attempting to access does not exist or you don't have permission to perform this action")

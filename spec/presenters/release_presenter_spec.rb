@@ -6,9 +6,10 @@ RSpec.describe ReleasePresenter do
   include Gitlab::Routing.url_helpers
 
   let_it_be(:project) { create(:project, :repository) }
+  let(:maintainer) { create(:user) }
   let(:developer) { create(:user) }
   let(:guest) { create(:user) }
-  let(:user) { developer }
+  let(:user) { maintainer }
   let(:release) { create(:release, project: project) }
   let(:presenter) { described_class.new(release, current_user: user) }
 
@@ -18,6 +19,7 @@ RSpec.describe ReleasePresenter do
   let(:closed_url_params) { { state: 'closed', **base_url_params } }
 
   before do
+    project.add_maintainer(maintainer)
     project.add_developer(developer)
     project.add_guest(guest)
   end
@@ -158,7 +160,7 @@ RSpec.describe ReleasePresenter do
     end
 
     context 'when a user is not allowed to update a release' do
-      let(:presenter) { described_class.new(release, current_user: guest) }
+      let(:presenter) { described_class.new(release, current_user: developer) }
 
       it { is_expected.to be_nil }
     end
