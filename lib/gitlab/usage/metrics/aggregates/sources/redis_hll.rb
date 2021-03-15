@@ -48,8 +48,6 @@ module Gitlab
               sum_of_all_subset_powers + (subset_powers_size_even ? power_of_union_of_all_metrics : -power_of_union_of_all_metrics)
             end
 
-            private
-
             def self.subsets_intersection_powers(metric_names, start_date, end_date, recorded_at, subset_powers_cache)
               subset_sizes = (1...metric_names.size)
 
@@ -71,7 +69,7 @@ module Gitlab
             end
 
             def self.sum_subset_powers(subset_powers_data, subset_powers_size_even)
-              sum_without_sign =  subset_powers_data.to_enum.with_index.sum do |value, index|
+              sum_without_sign = subset_powers_data.to_enum.with_index.sum do |value, index|
                 (index + 1).odd? ? value : -value
               end
 
