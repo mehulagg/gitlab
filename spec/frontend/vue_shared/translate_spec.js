@@ -211,4 +211,58 @@ describe('Vue translate filter', () => {
 
     expect(wrapper.text()).toBe(translation);
   });
+
+  describe('formats numbers', () => {
+    it('a simple number', () => {
+      const expectation = '10';
+
+      const wrapper = mount(
+        {
+          template: '<span>{{ formatNumber(10) }}</span>',
+        },
+        { localVue },
+      );
+
+      expect(wrapper.text('10')).toBe(expectation);
+    });
+
+    it('a large number', () => {
+      const expectation = '10,000';
+
+      const wrapper = mount(
+        {
+          template: '<span>{{ formatNumber(10000) }}</span>',
+        },
+        { localVue },
+      );
+
+      expect(wrapper.text()).toBe(expectation);
+    });
+
+    it('a number with a different locale', () => {
+      const expectation = '10.000';
+
+      const wrapper = mount(
+        {
+          template: "<span>{{ formatNumber(10000, {}, 'es') }}</span>",
+        },
+        { localVue },
+      );
+
+      expect(wrapper.text()).toBe(expectation);
+    });
+
+    it('a number with style', () => {
+      const expectation = '50%';
+
+      const wrapper = mount(
+        {
+          template: "<span>{{ formatNumber(0.5, { style: 'percent' }) }}</span>",
+        },
+        { localVue },
+      );
+
+      expect(wrapper.text()).toBe(expectation);
+    });
+  });
 });
