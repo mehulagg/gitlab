@@ -16,13 +16,10 @@ module Gitlab
         def access_restricted?
           return false if skip_check?
 
-          session = find_session
-          return true unless session
-
-          latest_sign_in = session.with_indifferent_access[saml_provider.id]
+          latest_sign_in = find_session
 
           return true unless latest_sign_in
-          return SsoEnforcer::DEFAULT_SESSION_TIMEOUT.ago < latest_sign_in if ::Feature.enabled?(:enforced_sso_expiry, group)
+          return SsoEnforcer::DEFAULT_SESSION_TIMEOUT.ago > latest_sign_in if ::Feature.enabled?(:enforced_sso_expiry, group)
 
           false
         end
@@ -30,8 +27,8 @@ module Gitlab
         private
 
         def skip_check?
-          return true if user_allowed?
           return true if no_group_or_provider?
+          return true if user_allowed?
           return true unless git_check_enforced?
         end
 
@@ -50,15 +47,15 @@ module Gitlab
         end
 
         def user_allowed?
-          return true if user.auditor?
+          return true if user.auditor? || user.admin?
           return true if group.owned_by?(user)
         end
 
         def find_session
           sessions = ActiveSession.list_sessions(user)
-          sessions.select do |session|
+          sessions.filter_map do |session|
             Gitlab::NamespacedSessionStore.new(SESSION_STORE_KEY, session.with_indifferent_access)[saml_provider.id]
-          end
+          end.last
         end
       end
     end
