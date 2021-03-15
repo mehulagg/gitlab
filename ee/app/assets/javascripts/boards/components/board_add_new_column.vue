@@ -295,13 +295,9 @@ export default {
         v-else-if="hasAssigneeSelection"
         class="gl-text-truncate gl-display-flex gl-flex-align-items-center"
       >
-        <gl-avatar-labeled
-          inline
-          :size="16"
-          :label="selectedItem.name"
-          :sub-label="selectedItem.username"
-          :src="selectedItem.avatarUrl"
-        />
+        <gl-avatar-labeled :size="16" :src="selectedItem.avatarUrl" />
+        <b class="gl-mr-2">{{ selectedItem.name }}</b>
+        <span class="gl-text-gray-700">@{{ selectedItem.username }}</span>
       </div>
     </template>
 

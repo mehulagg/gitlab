@@ -26,7 +26,6 @@ describe('Board card layout', () => {
   const mountComponent = ({
     loading = false,
     formDescription = '',
-    formLabel = '',
     searchLabel = '',
     searchPlaceholder = '',
     selectedId,
@@ -35,13 +34,9 @@ describe('Board card layout', () => {
   } = {}) => {
     wrapper = extendedWrapper(
       shallowMount(BoardAddNewColumnForm, {
-        stubs: {
-          GlFormGroup,
-        },
         propsData: {
           loading,
           formDescription,
-          formLabel,
           searchLabel,
           searchPlaceholder,
           selectedId,
@@ -95,7 +90,9 @@ describe('Board card layout', () => {
 
     mountComponent(props);
 
-    expect(wrapper.html()).toHaveText(props.formDescription);
+    expect(wrapper.findComponent(GlFormGroup).attributes('description')).toBe(
+      props.formDescription,
+    );
   });
 
   describe('items', () => {
