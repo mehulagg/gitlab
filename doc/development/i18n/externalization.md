@@ -255,14 +255,25 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
 
 - In Vue:
 
-  Use [`gl-sprintf`](#vue-components-interpolation) if you need to include
-  child components or HTML inside the translation string.
+  Use [`GlSprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/docs/utilities-sprintf--sentence-with-link) if:
+  - you need to include child components in the translation string.
+  - you need to include HTML in your translation string.
+  - you are using `sprintf` and need to pass `false` as the third argument
+      to prevent it from escaping placeholder values.
 
-  Otherwise, you _may_ use `sprintf`. If you find you need to pass `false` to
-  stop `sprintf` from escaping your placeholder values, then you should instead
-  be using `gl-sprintf`.
+  For example:
 
-- In JavaScript (when Vue cannot be used):
+  ```html
+  <gl-sprintf :message="s__('ClusterIntegration|Learn more about %{zones_link_start}zones%{zones_link_end}">
+    <template #link="{ content }">
+      <gl-link :href="somePath">{{ content }}</gl-link>
+    </template>
+  </gl-sprintf>
+  ```
+
+  In other cases it may be simpler to use `sprintf`. For example, see below.
+
+- In JavaScript:
 
   ```javascript
   import { __, sprintf } from '~/locale';
@@ -271,7 +282,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   ```
 
   If you want to use markup within the translation and are using Vue, you
-  **must** use the [`gl-sprintf`](#vue-components-interpolation) component. If
+  **must** use the [`GlSprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/docs/utilities-sprintf--sentence-with-link) component. If
   for some reason you cannot use Vue, use `sprintf` and stop it from escaping
   placeholder values by passing `false` as its third argument. You **must**
   escape any interpolated dynamic values yourself, for instance using
@@ -656,45 +667,6 @@ The reasoning behind this is that in some languages words change depending on co
 
 When in doubt, try to follow the best practices described in this [Mozilla
 Developer documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_content_best_practices#Splitting).
-
-##### Vue components interpolation
-
-When translating UI text in Vue components, you might want to include child components inside
-the translation string.
-You could not use a JavaScript-only solution to render the translation,
-because Vue would not be aware of the child components and would render them as plain text.
-
-For this use case, you should use the `gl-sprintf` component which is maintained
-in **GitLab UI**.
-
-The `gl-sprintf` component accepts a `message` property, which is the translatable string,
-and it exposes a named slot for every placeholder in the string, which lets you include Vue
-components easily.
-
-Assume you want to print the translatable string
-`Pipeline %{pipelineId} triggered %{timeago} by %{author}`. To replace the `%{timeago}` and
-`%{author}` placeholders with Vue components, here's how you would do that with `gl-sprintf`:
-
-```html
-<template>
-  <div>
-    <gl-sprintf :message="__('Pipeline %{pipelineId} triggered %{timeago} by %{author}')">
-      <template #pipelineId>{{ pipeline.id }}</template>
-      <template #timeago>
-        <timeago :time="pipeline.triggerTime" />
-      </template>
-      <template #author>
-        <gl-avatar-labeled
-          :src="pipeline.triggeredBy.avatarPath"
-          :label="pipeline.triggeredBy.name"
-        />
-      </template>
-    </gl-sprintf>
-  </div>
-</template>
-```
-
-For more information, see the [`gl-sprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/docs/utilities-sprintf--sentence-with-link) documentation.
 
 ## Updating the PO files with the new content
 
