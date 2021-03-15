@@ -13,7 +13,6 @@ export default {
   inject: ['search'],
   computed: {
     initialSearch() {
-      console.log(this.search);
       return [{ type: 'filtered-search-term', value: { data: this.search } }];
     },
   },
