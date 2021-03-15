@@ -7,25 +7,30 @@ RSpec.describe Gitlab::Usage::Metrics::NamesSuggestions::RelationParsers::Joins 
     let(:collector) { Arel::Collectors::SubstituteBinds.new(ActiveRecord::Base.connection, Arel::Collectors::SQLString.new) }
 
     it 'builds correct constraints description' do
-      # source_table = Arel::Table.new('records')
-      # joined_table = Arel::Table.new('joins')
-      # second_level_joined_table = Arel::Table.new('second_level_joins')
-      #
-      # arel = source_table
-      #          .from
-      #          .project(source_table['id'].count)
-      #          .join(joined_table, Arel::Nodes::OuterJoin)
-      #          .on(source_table[:id].eq(joined_table[:records_id]))
-      #          .join(second_level_joined_table, Arel::Nodes::OuterJoin)
-      #          .on(joined_table[:id].eq(second_level_joined_table[:joins_id]))
-      #
-
       arel = Issue.joins('LEFT JOIN projects ON projects.id = issue.project_id')
 
       arel = arel.arel
       result = described_class.new(ApplicationRecord.connection).accept(arel)
 
-      expect(result.map(&:value)).to match_array ["joins ON records.id = joins.records_id", "second_level_joins ON joins.id = second_level_joins.joins_id"]
+      expect(result).to match_array [{ source: "projects", constraints: "projects.id = issue.project_id" }]
+    end
+
+    it 'builds correct constraints description' do
+      source_table = Arel::Table.new('records')
+      joined_table = Arel::Table.new('joins')
+      second_level_joined_table = Arel::Table.new('second_level_joins')
+
+      arel = source_table
+               .from
+               .project(source_table['id'].count)
+               .join(joined_table, Arel::Nodes::OuterJoin)
+               .on(source_table[:id].eq(joined_table[:records_id]))
+               .join(second_level_joined_table, Arel::Nodes::OuterJoin)
+               .on(joined_table[:id].eq(second_level_joined_table[:joins_id]))
+
+      result = described_class.new(ApplicationRecord.connection).accept(arel)
+
+      expect(result).to match_array [{ source: "joins", constraints: "records.id = joins.records_id" }, { source: "second_level_joins", constraints: "joins.id = second_level_joins.joins_id" }]
     end
   end
 end
