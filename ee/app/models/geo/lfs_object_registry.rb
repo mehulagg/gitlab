@@ -7,7 +7,7 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   else
     Geo::LfsObjectRegistry.prepend(::ShaAttribute)
     sha_attribute :sha256
-    Geo::LfsObjectRegistry.extend(::Geo::Syncable)
+    Geo::LfsObjectRegistry.include(::Geo::Syncable)
   end
 
   MODEL_CLASS = ::LfsObject
