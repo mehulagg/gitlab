@@ -403,4 +403,246 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       end
     end
   end
+
+  # Enough mocking
+  describe 'LoadBalancing integration tests', :delete do
+    where(:queries, :include_transaction, :expected_results) do
+      [
+        # Read methods
+        [-> { model.first }, false, [:replica]],
+        [-> { model.find_by(id: 123) }, false, [:replica]],
+        [-> { model.where(name: 'hello').to_a }, false, [:replica]],
+
+        # Write methods
+        [-> { model.create!(name: 'test1') }, false, [:primary]],
+        [
+          -> {
+            instance = model.create!(name: 'test1')
+            instance.update!(name: 'test2')
+          },
+          false, [:primary, :primary]
+        ],
+        [-> { model.update_all(name: 'test2') }, false, [:primary]],
+        [
+          -> {
+            instance = model.create!(name: 'test1')
+            instance.destroy!
+          },
+          false, [:primary, :primary]
+        ],
+        [-> { model.delete_all }, false, [:primary]],
+
+        # Custom query
+        [-> { model.connection.exec_query('SELECT 1').to_a }, false, [:primary]],
+
+        # Reads after a write
+        [
+          -> {
+            model.first
+            model.create!(name: 'test1')
+            model.first
+            model.find_by(name: 'test1')
+          },
+          false, [:replica, :primary, :primary, :primary]
+        ],
+
+        # Inside a transaction
+        [
+          -> {
+            model.transaction do
+              model.find_by(name: 'test1')
+              model.create!(name: 'test1')
+              instance = model.find_by(name: 'test1')
+              instance.update!(name: 'test2')
+            end
+            model.find_by(name: 'test1')
+          },
+          true, [:primary, :primary, :primary, :primary, :primary, :primary, :primary]
+        ],
+
+        # Nested transaction
+        [
+          -> {
+            model.transaction do
+              model.transaction do
+                model.create!(name: 'test1')
+              end
+              model.update_all(name: 'test2')
+            end
+            model.find_by(name: 'test1')
+          },
+          true, [:primary, :primary, :primary, :primary, :primary]
+        ],
+
+        # Read-only transaction
+        [
+          -> {
+            model.transaction do
+              model.first
+              model.where(name: 'test1').to_a
+            end
+          },
+          true, [:primary, :primary, :primary, :primary]
+        ],
+
+        # Read-only transaction
+        [
+          -> {
+            model.transaction do
+              model.first
+              model.where(name: 'test1').to_a
+            end
+          },
+          true, [:primary, :primary, :primary, :primary]
+        ],
+
+        # use_primary
+        [
+          -> {
+            ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
+              model.first
+              model.where(name: 'test1').to_a
+            end
+            model.first
+          },
+          false, [:primary, :primary, :replica]
+        ],
+
+        # use_primary!
+        [
+          -> {
+            model.first
+            ::Gitlab::Database::LoadBalancing::Session.current.use_primary!
+            model.where(name: 'test1').to_a
+          },
+          false, [:replica, :primary]
+        ],
+
+        # use_replica_if_possible
+        [
+          -> {
+            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+              model.first
+              model.where(name: 'test1').to_a
+            end
+          },
+          false, [:replica, :replica]
+        ],
+
+        # use_replica_if_possible for read-only transaction
+        [
+          -> {
+            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+              model.transaction do
+                model.first
+                model.where(name: 'test1').to_a
+              end
+            end
+          },
+          false, [:replica, :replica]
+        ],
+
+        # use_replica_if_possible after a write
+        [
+          -> {
+            model.create!(name: 'Test1')
+            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+              model.first
+            end
+          },
+          false, [:primary, :primary]
+        ],
+
+        # use_replica_if_possible after use_primary!
+        [
+          -> {
+            ::Gitlab::Database::LoadBalancing::Session.current.use_primary!
+            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+              model.first
+            end
+          },
+          false, [:primary]
+        ],
+
+        # use_replica_if_possible inside use_primary!
+        [
+          -> {
+            ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
+              ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+                model.first
+              end
+            end
+          },
+          false, [:primary]
+        ]
+      ]
+    end
+
+    with_them do
+      let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
+      let(:hosts) { [ActiveRecord::Base.configurations["development"]['host']] }
+      let(:model) do
+        Class.new(ApplicationRecord) do
+          self.table_name = "load_balancing_test"
+        end
+      end
+
+      before do
+        ActiveRecord::Schema.define do
+          create_table :load_balancing_test, force: true do |t|
+            t.string :name, null: true
+          end
+        end
+        # Preloading testing class
+        model.singleton_class.prepend ::Gitlab::Database::LoadBalancing::ActiveRecordProxy
+
+        # Setup load balancing
+        subject.clear_configuration
+        allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
+        subject.configure_proxy(::Gitlab::Database::LoadBalancing::ConnectionProxy.new(hosts))
+        allow(ActiveRecord::Base.configurations[Rails.env])
+          .to receive(:[])
+          .with('load_balancing')
+          .and_return('hosts' => hosts)
+        ::Gitlab::Database::LoadBalancing::Session.clear_session
+      end
+
+      after do
+        subject.clear_configuration
+        ActiveRecord::Schema.define do
+          drop_table :load_balancing_test, force: true
+        end
+      end
+
+      it 'redirects queries to the right roles' do
+        roles = []
+
+        subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
+          payload = event.payload
+
+          assert =
+            if payload[:name] == 'SCHEMA'
+              false
+            elsif payload[:name] == 'SQL' # Custom query
+              true
+            else
+              keywords = %w[load_balancing_test]
+              keywords += %w[begin commit] if include_transaction
+              keywords.any? { |keyword| payload[:sql].downcase.include?(keyword) }
+            end
+
+          if assert
+            db_role = ::Gitlab::Database::LoadBalancing.db_role_for_connection(payload[:connection])
+            roles << db_role
+          end
+        end
+
+        self.instance_exec(&queries)
+
+        expect(roles).to eql(expected_results)
+      ensure
+        ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+      end
+    end
+  end
 end
