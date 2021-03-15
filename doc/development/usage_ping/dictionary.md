@@ -6392,6 +6392,30 @@ Status: `implemented`
 
 Tiers: `premium`, `ultimate`
 
+### `g_project_management_epic_note_destroyed_monthly`
+
+Counts of MAU destroying epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315034808_g_project_management_epic_note_destroyed_monthly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `g_project_management_epic_note_destroyed_weekly`
+
+Counts of WAU destroying epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315034846_g_project_management_epic_note_destroyed_weekly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `geo_enabled`
 
 Is Geo enabled?

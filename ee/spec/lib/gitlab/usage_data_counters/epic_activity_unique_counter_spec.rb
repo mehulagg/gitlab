@@ -19,4 +19,16 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
 
     it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
   end
+
+  context 'for epic note destroyed event' do
+    def track_action(params)
+      described_class.track_epic_note_destroyed_action(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_NOTE_DESTROYED }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
 end
