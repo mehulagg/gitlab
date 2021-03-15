@@ -5,6 +5,22 @@ return if Rails.env.production?
 module Gitlab
   module Graphql
     module Docs
+      CONNECTION_ARGS = %w[after before first last].to_set
+
+      FIELD_HEADER = <<~MD
+        #### fields
+
+        | Name | Type | Description |
+        | ---- | ---- | ----------- |
+      MD
+
+      ARG_HEADER = <<~MD
+        # arguments
+
+        | Name | Type | Description |
+        | ---- | ---- | ----------- |
+      MD
+
       # Helper with functions to be used by HAML templates
       # This includes graphql-docs gem helpers class.
       # You can check the included module on: https://github.com/gjtorikian/graphql-docs/blob/v1.6.0/lib/graphql-docs/helpers.rb
@@ -27,18 +43,96 @@ module Gitlab
           MD
         end
 
-        def render_name_and_description(object, level = 3)
+        def render_full_field(field, level = 3, owner = nil)
+          conn = connection?(field)
+          args = field[:arguments].reject { |f| conn && CONNECTION_ARGS.include?(f[:name]) }
+          arg_owner = [owner, field[:name]]
+
+          [
+            render_name_and_description(field, level, owner),
+            render_return_type(field),
+            render_input_type(field),
+            render_connection_note(field),
+            render_argument_table(level, args, arg_owner)
+          ].compact.join("\n\n")
+        end
+
+        def render_argument_table(level, args, owner)
+          arg_header = ('#' * level) + ARG_HEADER
+          render_field_table(arg_header, args, owner)
+        end
+
+        def render_connection_note(field)
+          return unless connection?(field)
+
+          <<~MD.chomp
+          This field returns a [connection](#connections). It accepts the
+          four standard [pagination arguments](#connection-pagination-arguments):
+          `before: String`, `after: String`, `first: Int`, `last: Int`.
+          MD
+        end
+
+        def render_field_table(header, fields, owner)
+          return if fields.empty?
+
+          fields = sorted_by_name(fields)
+          header + fields.map { |f| render_field(f, owner) }.join("\n")
+        end
+
+        def render_object_fields(fields, owner, bump = 0)
+          return if fields.empty?
+
+          (simple, has_args) = fields.partition { |f| simple?(f) }
+          type_name = owner[:name] if owner
+          extra_level = '#' * bump
+
+          [
+            simple_fields(simple, type_name, extra_level),
+            fields_with_arguments(has_args, type_name, extra_level)
+          ].compact.join("\n\n")
+        end
+
+        def simple?(field)
+          return true if field[:arguments].empty?
+
+          if connection?(field)
+            field[:arguments].all? { |arg| CONNECTION_ARGS.include?(arg[:name]) }
+          else
+            false
+          end
+        end
+
+        def connection?(field)
+          type_name = field.dig(:type, :name)
+          type_name.present? && type_name.ends_with?('Connection')
+        end
+
+        def simple_fields(fields, type_name, header_prefix)
+          render_field_table(header_prefix + FIELD_HEADER, fields, type_name)
+        end
+
+        def fields_with_arguments(fields, type_name, header_prefix)
+          return if fields.empty?
+
+          level = 5 + header_prefix.length
+
+          <<~MD.chomp
+            #{header_prefix}#### fields with arguments
+
+            #{sorted_by_name(fields).map { |f| render_full_field(f, level, type_name) }.join("\n\n")}
+          MD
+        end
+
+        def render_name_and_description(object, level = 3, owner = nil)
           content = []
 
-          content << "#{'#' * level} `#{object[:name]}`"
+          heading = '#' * level
+          name = owner ? "#{owner}.#{object[:name]}" : object[:name]
 
-          if object[:description].present?
-            desc = object[:description].strip
-            desc += '.' unless desc.ends_with?('.')
-            content << desc
-          end
+          content << "#{heading} `#{name}`"
+          content << render_description(object, owner, :block)
 
-          content.join("\n\n")
+          content.compact.join("\n\n")
         end
 
         def sorted_by_name(objects)
@@ -66,7 +160,13 @@ module Gitlab
         def render_name(object, owner = nil)
           rendered_name = "`#{object[:name]}`"
           rendered_name += ' **{warning-solid}**' if object[:is_deprecated]
-          rendered_name
+
+          return rendered_name unless owner
+
+          owner = Array.wrap(owner).join('')
+          id = (owner + object[:name]).downcase
+
+          %(<a id="#{id}"></a>) + rendered_name
         end
 
         # Returns the object description. If the object has been deprecated,
@@ -138,7 +238,16 @@ module Gitlab
         end
 
         def render_return_type(query)
-          "Returns #{render_field_type(query[:type])}.\n"
+          return unless query[:type]
+
+          "Returns #{render_field_type(query[:type])}."
+        end
+
+        def render_input_type(query)
+          input_field = query[:input_fields]&.first
+          return unless input_field
+
+          "Input type: `#{input_field[:type][:name]}`."
         end
 
         # We are ignoring connections and built in types for now,
@@ -153,8 +262,30 @@ module Gitlab
           end
         end
 
+        def interfaces
+          graphql_interface_types.map { |t| t.merge(fields: t[:fields] + t[:connections]) }
+        end
+
         def queries
-          graphql_operation_types.find { |type| type[:name] == 'Query' }.to_h.values_at(:fields, :connections).flatten
+          operation_fields('Query')
+        end
+
+        def mutations
+          graphql_mutation_types.map do |t|
+            input_type_name = t[:input_fields].first[:type][:name]
+            input_type = graphql_input_object_types.find { |t| t[:name] == input_type_name }
+            arguments = input_type ? input_type[:input_fields] : t[:input_fields]
+            seen_type(input_type_name)
+            t.merge(arguments: arguments, fields: t[:return_fields])
+          end
+        end
+
+        def input_types
+          graphql_input_object_types.reject { |t| seen?(t[:name]) }
+        end
+
+        def operation_fields(name)
+          graphql_operation_types.find { |type| type[:name] == name }.to_h.values_at(:fields, :connections).flatten
         end
 
         # We ignore the built-in enum types.

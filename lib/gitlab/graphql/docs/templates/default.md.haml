@@ -27,16 +27,67 @@
 \
 
 - sorted_by_name(queries).each do |query|
-  = render_name_and_description(query)
+  = render_full_field(query, 3, 'Query')
   \
-  = render_return_type(query)
-  - unless query[:arguments].empty?
-    ~ "#### Arguments\n"
-    ~ "| Name | Type | Description |"
-    ~ "| ---- | ---- | ----------- |"
-    - sorted_by_name(query[:arguments]).each do |argument|
-      = render_field(argument)
-    \
+
+:plain
+  ## `Mutation` type
+
+  The `Mutation` type contains the API's top-level entry points for all executable mutations.
+
+  All mutations receive their arguments in a single input object named `input`, and all mutations
+  support at least a return field `errors` containing a list of error messages.
+
+  All input objects may have a `clientMutationId: String` field, identifying the mutation.
+
+  For example:
+
+  ```graphql
+  mutation($id: NoteableID!, $body: String!) {
+    createNote(input: { noteableId: $id, body: $body }) {
+      errors
+    }
+  }
+  ```
+\
+
+- sorted_by_name(mutations).each do |field|
+  = render_full_field(field, 3, 'Mutation')
+  \
+
+:plain
+  ## Connections
+
+  Some types in our schema are `Connection` types - they represent a paginated
+  collection of edges between two nodes in the graph. These follow the
+  [Relay cursor connections specification](https://relay.dev/graphql/connections.htm).
+
+  All connection fields support the following pagination arguments:
+
+  ### Pagination arguments {#connection-pagination-arguments}
+
+  | Name | Type | Description |
+  |------|------|-------------|
+  | `after` | [`String`](#string) | Returns the elements in the list that come after the specified cursor. |
+  | `before` | [`String`](#string) | Returns the elements in the list that come before the specified cursor. |
+  | `first` | [`Int`](#int) | Returns the first _n_ elements from the list. |
+  | `last` | [`Int`](#int) | Returns the last _n_ elements from the list. |
+
+  ### Connection fields
+
+  And all connections have the following fields:
+
+  | Name | Type | Description |
+  |------|------|-------------|
+  | `pageInfo` | [`PageInfo!`](#pageinfo) | Pagination information. |
+  | `edges` | `[edge!]` | The edges. |
+  | `nodes` | `[item!]` | The items in the current page. |
+
+  The precise type of `Edge` and `Item` depends on the kind of connection. A [`UserConnection`](#userconnection)
+  will have nodes that have the type [`[User!]`](#user).
+
+  Since these arguments are common to all connection fields, they are not repeated for each connection.
+\
 
 :plain
   ## Object types
@@ -52,14 +103,10 @@
 \
 
 - objects.each do |type|
-  - unless type[:fields].empty?
-    = render_name_and_description(type)
-    \
-    ~ "| Field | Type | Description |"
-    ~ "| ----- | ---- | ----------- |"
-    - sorted_by_name(type[:fields]).each do |field|
-      = render_field(field)
-    \
+  = render_name_and_description(type)
+  \
+  = render_object_fields(type[:fields], type)
+  \
 
 :plain
   ## Enumeration types
@@ -79,7 +126,7 @@
     ~ "| Value | Description |"
     ~ "| ----- | ----------- |"
     - sorted_by_name(enum[:values]).each do |value|
-      = render_enum_value(value)
+      = render_enum_value(enum, value)
     \
 
 :plain
@@ -133,7 +180,7 @@
   ### Interfaces
 \
 
-- graphql_interface_types.each do |type|
+- interfaces.each do |type|
   = render_name_and_description(type, 4)
   \
   Implementations:
@@ -141,8 +188,21 @@
   - type[:implemented_by].each do |type_name|
     ~ "- [`#{type_name}`](##{type_name.downcase})"
   \
-  ~ "| Field | Type | Description |"
-  ~ "| ----- | ---- | ----------- |"
-  - sorted_by_name(type[:fields] + type[:connections]).each do |field|
-    = render_field(field)
+  = render_object_fields(type[:fields], type, 1)
+  \
+
+:plain
+  ### Input types
+
+  Types that may be used as arguments. (All scalar types may also
+  be used as arguments).
+
+  Only general use input types are listed here. For mutation input types,
+  see the associated mutation type above.
+\
+
+- input_types.each do |type|
+  = render_name_and_description(type)
+  \
+  = render_argument_table(3, type[:input_fields], type[:name])
   \
