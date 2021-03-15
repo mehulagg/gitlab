@@ -31,13 +31,20 @@ describe('getParticipantsForSave', () => {
 });
 
 describe('parseRotationDate', () => {
+  const scheduleTimezone = 'Pacific/Honolulu';
+
   it('parses a rotation date according to the supplied timezone', () => {
     const dateTimeString = '2021-01-12T05:04:56.333Z';
-    const scheduleTimezone = 'Pacific/Honolulu';
-
     const rotationDate = parseRotationDate(dateTimeString, scheduleTimezone);
 
     expect(rotationDate).toStrictEqual({ date: new Date('2021-01-11T00:00:00.000Z'), time: 19 });
+  });
+
+  it('parses a rotation date at midnight without exceeding 24 hours', () => {
+    const dateTimeString = '2021-01-12T10:00:00.000Z';
+    const rotationDate = parseRotationDate(dateTimeString, scheduleTimezone);
+
+    expect(rotationDate).toStrictEqual({ date: new Date('2021-01-12T00:00:00.000Z'), time: 0 });
   });
 });
 
