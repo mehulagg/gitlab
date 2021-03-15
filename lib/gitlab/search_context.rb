@@ -130,8 +130,8 @@ module Gitlab
         elsif view_context.current_controller?(:commits)
           'commits'
         elsif view_context.current_controller?(:groups)
-          if view_context.action_name == 'issues' || view_context.action_name == 'merge_requests'
-            view_context.action_name
+          if view_context.controller.action_name == 'issues' || view_context.controller.action_name == 'merge_requests'
+            view_context.controller.action_name
           else
             nil
           end
