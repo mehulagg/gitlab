@@ -43,7 +43,7 @@ To enable DAST, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast) (provided
   by [Auto DevOps](../../../topics/autodevops/index.md)).
-- Manually [include the DAST template](#dast-cicd-template) in your existing
+- Manually [include the DAST template](#include-the-dast-template) in your existing
   `.gitlab-ci.yml` file.
 
 ### Include the DAST template
@@ -754,7 +754,7 @@ successfully run. For more information, see [Offline environments](../offline_de
 
 To use DAST in an offline environment, you need:
 
-- GitLab Runner with the [`docker` or `kubernetes` executor](#prerequisites).
+- GitLab Runner with the [`docker` or `kubernetes` executor](#prerequisite).
 - Docker Container Registry with a locally available copy of the DAST
   [container image](https://gitlab.com/gitlab-org/security-products/dast), found in the
   [DAST container registry](https://gitlab.com/gitlab-org/security-products/dast/container_registry).
