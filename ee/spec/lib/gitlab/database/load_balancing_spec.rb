@@ -404,7 +404,16 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     end
   end
 
-  # Enough mocking
+  # For such an important module like LoadBalancing, full mocking is not
+  # enough. This section implements some integration tests to test a full flow
+  # of the load balancer.
+  # - A real model with a table backed behind is defined
+  # - The load balancing module is set up for this module only, as to prevent
+  # breaking other tests. The replica configuraiton is cloned from the test
+  # configuraiton.
+  # - In each test, we listen to the SQL queries (via sql.active_record
+  # instrumentaiton) while triggering real queries from the defined model.
+  # - We assert the desinations (replica/primary) of the queries in order.
   describe 'LoadBalancing integration tests', :delete do
     where(:queries, :include_transaction, :expected_results) do
       [
