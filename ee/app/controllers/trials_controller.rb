@@ -11,7 +11,6 @@ class TrialsController < ApplicationController
   before_action :find_namespace, only: [:extend_reactivate]
   before_action :authenticate_owner!, only: [:extend_reactivate]
 
-
   feature_category :purchase
 
   def new
@@ -19,47 +18,18 @@ class TrialsController < ApplicationController
   end
 
   def extend_reactivate
-    # return head 200
+    return render_403 unless %w[GitlabSubscription::TRIAL_EXTENDED GitlabSubscription::TRIAL_REACTIVATED].include?(params[:trial_extension_type])
 
-    # require 'pry'
-    # binding.pry
-    puts "X" * 100
-    pp params
-    puts '@namespace.can_extend?:'
-    pp @namespace.can_extend?
-    puts '@namespace.can_reactivate?:'
-    pp @namespace.can_reactivate?
+    return render_403 if params[:trial_extension_type].to_i == GitlabSubscription::TRIAL_EXTENDED && !@namespace.can_extend?
 
-    puts '@namespace.invalid?:'
-    pp @namespace.invalid?
+    return render_403 if params[:trial_extension_type].to_i == GitlabSubscription::TRIAL_REACTIVATED && !@namespace.can_reactivate?
 
-    pp params[:trial_extension_type]
-    pp %w[1 2].include?(params[:trial_extension_type])
-    pp params[:trial_extension_type] && %w[1 2].include?(params[:trial_extension_type])
-
-    pp '111111111111'
-
-    return render_403 unless params[:trial_extension_type] && %w[1 2].include?(params[:trial_extension_type])
-    pp 'a222222'
-
-    return render_403 if params[:trial_extension_type] == '1' && !@namespace.can_extend?
-    pp '333333333333'
-
-    return render_403 if params[:trial_extension_type] == '2' && !@namespace.can_reactivate?
-
-    pp '44444444444'
     return render_403 if @namespace.invalid?
-    pp '5555555555'
 
     @result = GitlabSubscriptions::ExtendReactivateTrialService.new.execute(extend_reactivate_trial_params)
-    pp '66666666666'
-
-    puts 'GitlabSubscriptions::ExtendReactivateTrialService.new.execute result:'
-    pp @result
 
     if @result&.dig(:success)
       head 200
-      # redirect_to group_url(@namespace, { trial: true })
     else
       render_403
     end
@@ -115,10 +85,6 @@ class TrialsController < ApplicationController
   end
 
   def authenticate_owner!
-    pp @namespace.owners
-    pp current_user
-    pp @namespace.owners.include?(current_user)
-
     render_403 unless @namespace.owners.include?(current_user)
   end
 
@@ -171,12 +137,6 @@ class TrialsController < ApplicationController
     @namespace = if find_namespace?
                    current_user.namespaces.find_by_id(params[:namespace_id])
                  end
-
-    puts "T" * 100
-    pp params
-    pp @namespace
-    pp @namespace.gitlab_subscription
-    raise 'failed to find namespace from method `find_namespace`' unless @namespace
 
     render_404 unless @namespace
   end

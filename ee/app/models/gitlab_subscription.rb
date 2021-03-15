@@ -5,6 +5,8 @@ class GitlabSubscription < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
 
   EOA_ROLLOUT_DATE = '2021-01-26'
+  TRIAL_EXTENDED = 1
+  TRIAL_REACTIVATED = 2
 
   default_value_for(:start_date) { Date.today }
   before_update :log_previous_state_for_update
