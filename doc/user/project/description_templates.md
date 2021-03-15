@@ -89,25 +89,29 @@ For example: `https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_templat
 
 ![Description templates](img/description_templates.png)
 
-### Set an issue and merge request description template at group level **(PREMIUM)**
+### Set a group-level description template **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52360) in GitLab 13.9.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/7749) in GitLab 13.10.
 
-Templates can be useful because you can create a template once and use it multiple times.
+With **group-level** description templates, you can create a template once and use it in issues and
+merge requests in all the group's projects.
 To re-use templates [you've created](../project/description_templates.md#create-an-issue-template):
 
 1. Go to the group's **Settings > General > Templates**.
 1. From the dropdown, select your template project as the template repository at group level.
+1. Select **Save changes**.
 
 ![Group template settings](../group/img/group_file_template_settings.png)
 
-### Set an issue and merge request description template at instance level **(PREMIUM ONLY)**
+### Set an instance-level description template **(PREMIUM SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52360) in GitLab 13.9.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/7749) in GitLab 13.10.
 
-Similar to group templates, issue and merge request templates can also be set up at the instance level.
+Similar to group templates, you can set a description template at the **instance level** for issues
+and merge requests.
+
 This results in those templates being available in all projects within the instance.
 Only instance administrators can set instance-level templates.
 
@@ -116,6 +120,7 @@ To set the instance-level description template repository:
 1. Select the **Admin Area** icon (**{admin}**).
 1. Go to **Settings > Templates**.
 1. From the dropdown, select your template project as the template repository at instance level.
+1. Select **Save changes**.
 
 Learn more about [instance template repository](../admin_area/settings/instance_template_repository.md).
 
