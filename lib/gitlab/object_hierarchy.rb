@@ -161,7 +161,7 @@ module Gitlab
 
     # Use distinct on the Namespace queries to avoid bad planner behavior in PG11.
     def use_distinct?
-      (model <= Namespace) && options[:use_distinct]
+      false
     end
 
     # Remove the extra `depth` field using an INNER JOIN to avoid breaking UNION queries
