@@ -71,10 +71,15 @@ RSpec.describe 'User adds lists', :js do
 
   def select_label(board_new_list_enabled, label)
     if board_new_list_enabled
-      page.within('.board-add-new-list') do
+      click_button 'None'
+
+      page.within('.dropdown-menu') do
         find('label', text: label.title).click
-        click_button 'Add'
       end
+
+      click_button 'Add to board'
+
+      wait_for_all_requests
     else
       page.within('.dropdown-menu-issues-board-new') do
         click_link label.title
