@@ -91,9 +91,6 @@ module EE
         # This will remove the duplicated findings within the artifact itself
         ::Security::MergeReportsService.new(report).execute
       end
-    rescue StandardError => e
-      puts "Error fetching job artifact security report: #{e}"
-      puts e.backtrace.map {|x| "    #{x}"}.join("\n")
     end
 
     # This method is necessary to remove the reference to the
