@@ -99,15 +99,16 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('setSelectedValueStream', () => {
-    const vs = { id: 'vs-1', name: 'Value stream 1' };
+    const valueStream = { id: 'vs-1', name: 'Value stream 1' };
+    const stageId = 1;
 
     it('refetches the Value Stream Analytics data', () => {
       return testAction(
         actions.setSelectedValueStream,
-        vs,
+        { valueStream, stageId },
         { ...state, selectedValueStream: {} },
-        [{ type: types.SET_SELECTED_VALUE_STREAM, payload: vs }],
-        [{ type: 'fetchValueStreamData' }],
+        [{ type: types.SET_SELECTED_VALUE_STREAM, payload: valueStream }],
+        [{ type: 'fetchValueStreamData', payload: stageId }],
       );
     });
   });
@@ -261,12 +262,12 @@ describe('Value Stream Analytics actions', () => {
     it(`dispatches actions for required value stream analytics analytics data`, () => {
       return testAction(
         actions.fetchCycleAnalyticsData,
-        state,
         null,
+        state,
         [],
         [
           { type: 'requestCycleAnalyticsData' },
-          { type: 'fetchValueStreams' },
+          { type: 'fetchValueStreams', payload: null },
           { type: 'receiveCycleAnalyticsDataSuccess' },
         ],
       );
@@ -376,17 +377,20 @@ describe('Value Stream Analytics actions', () => {
     beforeEach(() => {});
 
     it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage'`, () => {
+      const stages = { ...customizableStagesAndEvents.stages };
+      const stageId = null;
+
       return testAction(
         actions.receiveGroupStagesSuccess,
-        { ...customizableStagesAndEvents.stages },
+        { stages, stageId },
         state,
         [
           {
             type: types.RECEIVE_GROUP_STAGES_SUCCESS,
-            payload: { ...customizableStagesAndEvents.stages },
+            payload: stages,
           },
         ],
-        [{ type: 'setDefaultSelectedStage' }],
+        [{ type: 'setDefaultSelectedStage', payload: stageId }],
       );
     });
   });
@@ -414,7 +418,7 @@ describe('Value Stream Analytics actions', () => {
       shouldFlashAMessage(flashErrorMessage);
     });
 
-    it('will select the first active stage', () => {
+    it('will select the first active stage when no stageId is given', () => {
       return testAction(
         actions.setDefaultSelectedStage,
         null,
@@ -423,6 +427,20 @@ describe('Value Stream Analytics actions', () => {
         [
           { type: 'setSelectedStage', payload: stages[1] },
           { type: 'fetchStageData', payload: stages[1].slug },
+        ],
+      );
+    });
+
+    it('will select corresponding stage when a stageId is given', () => {
+      const stageId = 3;
+      return testAction(
+        actions.setDefaultSelectedStage,
+        stageId,
+        state,
+        [],
+        [
+          { type: 'setSelectedStage', payload: stages[2] },
+          { type: 'fetchStageData', payload: stages[2].slug },
         ],
       );
     });
@@ -766,6 +784,7 @@ describe('Value Stream Analytics actions', () => {
     const selectedMilestone = '13.6';
     const selectedAssigneeList = ['nchom'];
     const selectedLabelList = ['label 1', 'label 2'];
+    const stageId = 1;
     const initialData = {
       group: currentGroup,
       projectIds: [1, 2],
@@ -775,6 +794,7 @@ describe('Value Stream Analytics actions', () => {
       selectedMilestone,
       selectedAssigneeList,
       selectedLabelList,
+      stageId,
     };
 
     beforeEach(() => {
@@ -814,7 +834,7 @@ describe('Value Stream Analytics actions', () => {
 
       it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
         await actions.initializeCycleAnalytics(store, initialData);
-        expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
+        expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData', stageId);
         expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
       });
 
@@ -1110,8 +1130,11 @@ describe('Value Stream Analytics actions', () => {
         [
           {
             payload: {
-              events: [],
-              stages: [],
+              data: {
+                events: [],
+                stages: [],
+              },
+              stageId: null,
             },
             type: 'receiveValueStreamsSuccess',
           },
@@ -1144,24 +1167,27 @@ describe('Value Stream Analytics actions', () => {
 
     describe('receiveValueStreamsSuccess', () => {
       it(`with a selectedValueStream in state commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'fetchValueStreamData'`, () => {
+        const data = valueStreams;
+        const stageId = null;
+
         return testAction(
           actions.receiveValueStreamsSuccess,
-          valueStreams,
+          { data, stageId },
           state,
           [
             {
               type: types.RECEIVE_VALUE_STREAMS_SUCCESS,
-              payload: valueStreams,
+              payload: data,
             },
           ],
-          [{ type: 'fetchValueStreamData' }],
+          [{ type: 'fetchValueStreamData', payload: stageId }],
         );
       });
 
       it(`commits the ${types.RECEIVE_VALUE_STREAMS_SUCCESS} mutation and dispatches 'setSelectedValueStream'`, () => {
         return testAction(
           actions.receiveValueStreamsSuccess,
-          valueStreams,
+          { data: valueStreams, stageId: null },
           {
             ...state,
             selectedValueStream: null,
@@ -1172,7 +1198,12 @@ describe('Value Stream Analytics actions', () => {
               payload: valueStreams,
             },
           ],
-          [{ type: 'setSelectedValueStream', payload: selectedValueStream }],
+          [
+            {
+              type: 'setSelectedValueStream',
+              payload: { valueStream: selectedValueStream, stageId: null },
+            },
+          ],
         );
       });
     });
@@ -1199,7 +1230,7 @@ describe('Value Stream Analytics actions', () => {
         state,
         [],
         [
-          { type: 'fetchGroupStagesAndEvents' },
+          { type: 'fetchGroupStagesAndEvents', payload: null },
           { type: 'fetchStageMedianValues' },
           { type: 'durationChart/fetchDurationData' },
         ],
