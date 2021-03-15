@@ -174,3 +174,98 @@ export const mockStatusToken = {
   token: StatusToken,
   operators: [{ value: '=', description: 'is', default: 'true' }],
 };
+
+/* mock data for testing with mock apollo client */
+
+export const mockTestReport = {
+  id: 'gid://gitlab/RequirementsManagement::TestReport/3',
+  state: 'PASSED',
+  createdAt: '2021-03-15T07:10:20Z',
+  __typename: 'TestReport',
+};
+
+export const mockTestReportConnection = {
+  nodes: [mockTestReport],
+  __typename: 'TestReportConnection',
+};
+
+export const mockProjectRequirement = {
+  __typename: 'Requirement',
+  iid: '1',
+  title: 'Requirement 1',
+  titleHtml: 'Requirement 1',
+  description: '',
+  descriptionHtml: '',
+  createdAt: '2021-03-15T05:24:32Z',
+  updatedAt: '2021-03-15T05:24:32Z',
+  state: 'OPENED',
+  lastTestReportState: 'PASSED',
+  lastTestReportManuallyCreated: true,
+  testReports: {
+    ...mockTestReportConnection,
+  },
+  userPermissions: {
+    updateRequirement: true,
+    adminRequirement: true,
+    __typename: 'RequirementPermissions',
+  },
+  author: {
+    __typename: 'User',
+    id: 'gid://gitlab/User/1',
+    avatarUrl:
+      'https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80\u0026d=identicon',
+    name: 'Administrator',
+    username: 'root',
+    webUrl: 'http://gdk.test:3000/root',
+  },
+};
+
+export const mockProjectRequirementCounts = {
+  data: {
+    project: {
+      requirementStatesCount: {
+        opened: 1,
+        archived: 0,
+        __typename: 'RequirementStatesCount',
+      },
+      __typename: 'Project',
+    },
+  },
+};
+
+export const mockProjectRequirementResponse1 = {
+  data: {
+    project: {
+      requirements: {
+        nodes: [{ ...mockProjectRequirement }],
+        pageInfo: {
+          __typename: 'PageInfo',
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor:
+            'eyJpZCI6IjEiLCJjcmVhdGVkX2F0IjoiMjAyMS0wMy0xNSAwNToyNDozMi40NzczODUwMDAgVVRDIn0',
+          endCursor:
+            'eyJpZCI6IjEiLCJjcmVhdGVkX2F0IjoiMjAyMS0wMy0xNSAwNToyNDozMi40NzczODUwMDAgVVRDIn0',
+        },
+        __typename: 'RequirementConnection',
+      },
+      __typename: 'Project',
+    },
+  },
+};
+
+export const mockUpdateRequirementResponse1 = {
+  data: {
+    updateRequirement: {
+      clientMutationId: null,
+      errors: [],
+      requirement: {
+        ...mockProjectRequirement,
+        testReports: {
+          ...mockTestReportConnection,
+        },
+      },
+      __typename: 'UpdateRequirementPayload',
+    },
+  },
+};

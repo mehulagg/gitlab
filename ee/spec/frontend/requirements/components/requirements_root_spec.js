@@ -1,5 +1,7 @@
 import { GlPagination } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 
 import RequirementItem from 'ee/requirements/components/requirement_item.vue';
 import RequirementsEmptyState from 'ee/requirements/components/requirements_empty_state.vue';
@@ -85,6 +87,115 @@ const createComponent = ({
 describe('RequirementsRoot', () => {
   let wrapper;
   let trackingSpy;
+
+  const createComponentWithApollo = ({
+    mockUpdateRequirementResponse = mockUpdateRequirementResponse1,
+  }) => {
+    Vue.use(VueApollo);
+    mockApollo = createMockApollo([[updateRequirementMutation, mockUpdateRequirementResponse]]);
+
+    wrapper = shallowMount(RequirementsRoot, {
+      propsData: {
+        projectPath,
+        initialFilterBy,
+        initialRequirementsCount,
+        showCreateRequirement,
+        emptyStatePath,
+        canCreateReqSuirement,
+        requirementsWebUrl,
+        importCsvPath,
+        currentUserEmail,
+      },
+      mocks: {
+        $toast,
+      },
+    });
+  };
+
+  const findRequirementEditForm = wrapper.find(RequirementEditForm);
+
+  describe('With apollo mock', () => {
+    describe('when requirement is edited', () => {
+      /*
+        A requirement may be in the following states:
+        1. a requirement has never been marked as satisfied (test report does not exist)
+        2. a requirement has been marked as either failed or satisfied at least once.
+      */
+      describe('when a requirement has an existing test report', () => {
+        /*
+          This tests the following cases:
+          1. user is marking a requirement as satisfied for the first time.
+          2. user is overriding the status of a requirement that already 
+        */
+        describe('when requirement status changes to "FAILED" from "SUCCESS"', () => {
+          beforeEach(() => {
+            const mockUpdateRequirement = jest
+              .fn()
+              .mockResolvedValue(mockUpdateRequirementResponse1);
+            createComponentWithApollo({ mockMutation });
+
+            const mockRequirement = 'TODO';
+            findRequirementEditForm().vm.$emit('save', mockRequirement);
+          });
+
+          it('calls mutate with parameters that include `lastTestReportState`', () => {
+            expect(mockUpdateRequirement).toHaveBeenCalledWith(
+              expect.objectContaining({
+                mutation: updateRequirement,
+                variables: {
+                  updateRequirementInput: {
+                    projectPath: 'gitlab-org/gitlab-shell',
+                    iid: '1',
+                    lastTestReportState: 'FAILED',
+                  },
+                },
+              }),
+            );
+          });
+
+          it('renders some badge or something', () => {
+            expect(true).toBe(true);
+          });
+        });
+
+        // describe('when `lastTestReportState is null', () => {
+        //   beforeEach(() => {
+        //     // TODO DON'T directly invoke updateRequirement
+        //     // wrapper.vm.updateRequirement({
+        //     //   iid: '1',
+        //     //   lastTestReportState: null,
+        //     // });
+
+        //     const mutationMock = jest
+        //       .fn()
+        //       .mockResolvedValue(activateLicenseMutationResponse.SUCCESS);
+        //     createComponentWithApollo({ mutationMock });
+
+        //     const mockRequirement = 'TODO';
+        //     findRequirementEditForm().vm.$emit('save', mockRequirement);
+        //   });
+
+        //   it('calls mutate with parameters that excludes `lastTestReportState`', () => {
+        //     expect(mockMutation).toHaveBeenCalledWith(
+        //       expect.objectContaining({
+        //         mutation: updateRequirement,
+        //         variables: {
+        //           updateRequirementInput: {
+        //             projectPath: 'gitlab-org/gitlab-shell',
+        //             iid: '1',
+        //           },
+        //         },
+        //       }),
+        //     );
+        //   });
+
+        //   it('renders some badge or something', () => {
+        //     expect(true).toBe(true);
+        //   });
+        // });
+      });
+    });
+  });
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -425,51 +536,6 @@ describe('RequirementsRoot', () => {
             },
           }),
         );
-      });
-
-      describe('when `lastTestReportState` is included in object param', () => {
-        beforeEach(() => {
-          jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockUpdateMutationResult);
-        });
-
-        it('calls `$apollo.mutate` with `lastTestReportState` when it is not null', () => {
-          wrapper.vm.updateRequirement({
-            iid: '1',
-            lastTestReportState: 'PASSED',
-          });
-
-          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              mutation: updateRequirement,
-              variables: {
-                updateRequirementInput: {
-                  projectPath: 'gitlab-org/gitlab-shell',
-                  iid: '1',
-                  lastTestReportState: 'PASSED',
-                },
-              },
-            }),
-          );
-        });
-
-        it('calls `$apollo.mutate` without `lastTestReportState` when it is null', () => {
-          wrapper.vm.updateRequirement({
-            iid: '1',
-            lastTestReportState: null,
-          });
-
-          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              mutation: updateRequirement,
-              variables: {
-                updateRequirementInput: {
-                  projectPath: 'gitlab-org/gitlab-shell',
-                  iid: '1',
-                },
-              },
-            }),
-          );
-        });
       });
 
       it('calls `createFlash` with provided `errorFlashMessage` param when request fails', () => {
