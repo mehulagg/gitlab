@@ -883,7 +883,8 @@ To run a saved on-demand scan:
 1. Select the **Saved Scans** tab.
 1. In the scan's row select **Run scan**.
 
-   If the branch saved in the scan no longer exists, you must first select **Select branch**.
+   If the branch saved in the scan no longer exists, you must first
+   [edit the scan](#edit-an-on-demand-scan), select a new branch, and save the edited scan.
 
 The on-demand DAST scan runs and the project's dashboard shows the results.
 
