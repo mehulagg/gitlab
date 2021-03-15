@@ -267,6 +267,11 @@ module TestEnv
   end
 
   def setup_workhorse
+    if ci?
+      # In CI, workhorse is only needed on rspec system jobs
+      return unless ENV['RSPEC_TEST_LEVEL'] == 'system'
+    end
+
     start = Time.now
     return if skip_compile_workhorse?
 
