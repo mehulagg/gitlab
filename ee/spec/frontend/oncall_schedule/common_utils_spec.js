@@ -31,7 +31,7 @@ describe('getParticipantsForSave', () => {
 });
 
 describe('parseRotationDate', () => {
-  const scheduleTimezone = 'Pacific/Honolulu';
+  const scheduleTimezone = 'Pacific/Honolulu'; // UTC -10
 
   it('parses a rotation date according to the supplied timezone', () => {
     const dateTimeString = '2021-01-12T05:04:56.333Z';
