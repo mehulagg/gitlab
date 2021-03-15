@@ -72,11 +72,9 @@ and you can [customize the payload](#customize-the-alert-payload-outside-of-gitl
 
    1. _(Optional)_ If you provided a valid sample payload, select each value in
       **Payload alert key** to [map to a **GitLab alert key**](#map-fields-in-custom-alerts).
-      Define both a mapping and fallback for the **Title** field, because a title is
-      required to trigger an alert.
-   1. To save your integration, you can:
-      - Click **Save and test alert payload** to save your configuration and send a test alert.
-      - Click **Save Integration** to save the alert without sending a test alert.
+      Define a mapping for the **Title** field. A title is required to trigger an alert.
+   1. To save your integration, click **Save Integration**. If desired, you can send a test alert
+      from your integration's **Send test alert** tab.
 
 The new HTTP Endpoint displays in the [integrations list](#integrations-list).
 You can edit the integration by selecting the **{pencil}** pencil icon on the right
