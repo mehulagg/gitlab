@@ -1,20 +1,20 @@
 <script>
 import { GlIcon, GlLoadingIcon, GlTooltip, GlSprintf } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { PAGE_CONFIG } from '../../constants';
 import AlertStatus from '../alert_status.vue';
 
 export default {
-  statuses: {
-    TRIGGERED: s__('AlertManagement|Triggered'),
-    ACKNOWLEDGED: s__('AlertManagement|Acknowledged'),
-    RESOLVED: s__('AlertManagement|Resolved'),
-  },
   components: {
     GlIcon,
     GlLoadingIcon,
     GlTooltip,
     GlSprintf,
     AlertStatus,
+  },
+  inject: {
+    isThreatMonitoringPage: {
+      default: false,
+    },
   },
   props: {
     projectPath: {
@@ -40,6 +40,11 @@ export default {
   computed: {
     dropdownClass() {
       return this.isDropdownShowing ? 'show' : 'gl-display-none';
+    },
+    statuses() {
+      return this.isThreatMonitoringPage
+        ? PAGE_CONFIG.THREAT_MONITORING.STATUSES
+        : PAGE_CONFIG.OPERATIONS.STATUSES;
     },
   },
   methods: {
@@ -103,14 +108,11 @@ export default {
       <p
         v-else-if="!isDropdownShowing"
         class="value gl-m-0"
-        :class="{ 'no-value': !$options.statuses[alert.status] }"
+        :class="{ 'no-value': !statuses[alert.status] }"
       >
-        <span
-          v-if="$options.statuses[alert.status]"
-          class="gl-text-gray-500"
-          data-testid="status"
-          >{{ $options.statuses[alert.status] }}</span
-        >
+        <span v-if="statuses[alert.status]" class="gl-text-gray-500" data-testid="status">
+          {{ statuses[alert.status] }}
+        </span>
         <span v-else>
           {{ s__('AlertManagement|None') }}
         </span>

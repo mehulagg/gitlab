@@ -3,6 +3,7 @@ import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import updateAlertStatusMutation from '~/graphql_shared/mutations/alert_status_update.mutation.graphql';
 import { s__ } from '~/locale';
 import Tracking from '~/tracking';
+import { PAGE_CONFIG } from '../constants';
 
 export default {
   i18n: {
@@ -11,11 +12,6 @@ export default {
     ),
     UPDATE_ALERT_STATUS_INSTRUCTION: s__('AlertManagement|Please try again.'),
   },
-  statuses: {
-    TRIGGERED: s__('AlertManagement|Triggered'),
-    ACKNOWLEDGED: s__('AlertManagement|Acknowledged'),
-    RESOLVED: s__('AlertManagement|Resolved'),
-  },
   components: {
     GlDropdown,
     GlDropdownItem,
@@ -23,6 +19,9 @@ export default {
   inject: {
     trackAlertStatusUpdateOptions: {
       default: null,
+    },
+    isThreatMonitoringPage: {
+      default: false,
     },
   },
   props: {
@@ -48,6 +47,11 @@ export default {
       // eslint-disable-next-line no-nested-ternary
       return this.isSidebar ? (this.isDropdownShowing ? 'show' : 'gl-display-none') : '';
     },
+    statuses() {
+      return this.isThreatMonitoringPage
+        ? PAGE_CONFIG.THREAT_MONITORING.STATUSES
+        : PAGE_CONFIG.OPERATIONS.STATUSES;
+    },
   },
   methods: {
     updateAlertStatus(status) {
@@ -62,7 +66,7 @@ export default {
           },
         })
         .then((resp) => {
-          if (this.trackAlertStatusUpdateOptions) {
+          if (this.trackAlertStatusUpdateOptions && !this.isThreatMonitoringPage) {
             this.trackStatusUpdate(status);
           }
           const errors = resp.data?.updateAlertStatus?.errors || [];
@@ -99,7 +103,7 @@ export default {
     <gl-dropdown
       ref="dropdown"
       right
-      :text="$options.statuses[alert.status]"
+      :text="statuses[alert.status]"
       class="w-100"
       toggle-class="dropdown-menu-toggle"
       @keydown.esc.native="$emit('hide-dropdown')"
@@ -110,12 +114,12 @@ export default {
       </p>
       <div class="dropdown-content dropdown-body">
         <gl-dropdown-item
-          v-for="(label, field) in $options.statuses"
+          v-for="(label, field) in statuses"
           :key="field"
           data-testid="statusDropdownItem"
-          :active="label.toUpperCase() === alert.status"
+          :active="field === alert.status"
           :active-class="'is-active'"
-          @click="updateAlertStatus(label)"
+          @click="updateAlertStatus(field)"
         >
           {{ label }}
         </gl-dropdown-item>
