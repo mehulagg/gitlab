@@ -30,10 +30,10 @@ module Gitlab
         unless skip_validation?
           self.class.schemer.validate(attributes.stringify_keys).each do |error|
             error_message = <<~ERROR_MSG
-              Error type: #{error['type'] || nil}
-              Data: #{error['data'] || nil}
-              Path: #{error['data_pointer'] || nil}
-              Details: #{error['details'] || nil}
+              Error type: #{error['type']}
+              Data: #{error['data']}
+              Path: #{error['data_pointer']}
+              Details: #{error['details']}
               Metric file: #{path}
             ERROR_MSG
 
