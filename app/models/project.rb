@@ -2552,10 +2552,6 @@ class Project < ApplicationRecord
     Projects::GitGarbageCollectWorker
   end
 
-  def inherited_issuable_templates_enabled?
-    Feature.enabled?(:inherited_issuable_templates, self, default_enabled: :yaml)
-  end
-
   private
 
   def set_container_registry_access_level
