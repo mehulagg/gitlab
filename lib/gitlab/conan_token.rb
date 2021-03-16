@@ -6,8 +6,8 @@
 # authenticate with GitLab
 
 module Gitlab
-  class ConanToken
-    HMAC_KEY = 'gitlab-conan-packages'.freeze
+  class ConanToken < JWTToken
+    HMAC_EXPIRES_IN = 1.hour.freeze
 
     attr_reader :access_token_id, :user_id
 
@@ -25,40 +25,16 @@ module Gitlab
       end
 
       def decode(jwt)
-        payload = JSONWebToken::HMACToken.decode(jwt, secret).first
-
-        new(access_token_id: payload['access_token'], user_id: payload['user_id'])
-      rescue JWT::DecodeError, JWT::ExpiredSignature, JWT::ImmatureSignature
-        # we return on expired and errored tokens because the Conan client
-        # will request a new token automatically.
-      end
-
-      def secret
-        OpenSSL::HMAC.hexdigest(
-          OpenSSL::Digest.new('SHA256'),
-          ::Settings.attr_encrypted_db_key_base,
-          HMAC_KEY
-        )
+        super(jwt, expires_in: HMAC_EXPIRES_IN)
       end
     end
 
     def initialize(access_token_id:, user_id:)
       @access_token_id = access_token_id
       @user_id = user_id
+      super(access_token_id: @access_token_id, user_id: @user_id, expires_in: HMAC_EXPIRES_IN)
     end
 
-    def to_jwt
-      hmac_token.encoded
-    end
-
-    private
-
-    def hmac_token
-      JSONWebToken::HMACToken.new(self.class.secret).tap do |token|
-        token['access_token'] = access_token_id
-        token['user_id'] = user_id
-        token.expire_time = token.issued_at + 1.hour
-      end
-    end
+    alias_method :to_jwt, :encoded
   end
 end
