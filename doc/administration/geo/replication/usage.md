@@ -18,8 +18,8 @@ Example of the output you will see when pushing to a **secondary** site:
 ```shell
 $ git push
 remote:
-remote: You're pushing to a Geo secondary. We'll help you by proxying this
-remote: request to the primary:
+remote: This request to a Geo secondary node will be forwarded to the
+remote: Geo primary node:
 remote:
 remote:   ssh://git@primary.geo/user/repo.git
 remote:
