@@ -4033,7 +4033,7 @@ Once installed, the `release` keyword should be available to you.
 1. Create a folder somewhere in your system, for example `C:\GitLab\Release-CLI\bin`
 
   ```shell
-  PS C:\> New-Item -Path 'C:\GitLab\Release-CLI\bin' -ItemType Directory
+  New-Item -Path 'C:\GitLab\Release-CLI\bin' -ItemType Directory
   ```
 
 1. Download the executable file
