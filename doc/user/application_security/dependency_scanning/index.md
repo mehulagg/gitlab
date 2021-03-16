@@ -523,7 +523,7 @@ variables:
 
 ### Use local clone
 
-If a hosted copy is not possible. Then the user can clone [gemnasium-db](https://gitlab.com/gitlab-org/security-products/gemnasium-db) before the scan and point the analyzer to this directory (using: `GEMNASIUM_DB_LOCAL_PATH`) and turn off the analyzer's self-update mechanism (using: `GEMNASIUM_DB_UPDATE_DISABLED`). In this example we show the checkout occurring before the scan job of the `gemnasium` analyzer.
+If a hosted copy is not possible. Then the user can clone [gemnasium-db](https://gitlab.com/gitlab-org/security-products/gemnasium-db) or create an archive before the scan and point the analyzer to the directory (using: `GEMNASIUM_DB_LOCAL_PATH`). And turn off the analyzer's self-update mechanism (using: `GEMNASIUM_DB_UPDATE_DISABLED`). In this example we show the database directory getting created in the `before_script` before the scan job of the `gemnasium` analyzer.
 
 ```yaml
 ...
@@ -533,7 +533,8 @@ gemnasium-dependency_scanning:
     GEMNASIUM_DB_LOCAL_PATH: ./gemnasium-db-local
     GEMNASIUM_DB_UPDATE_DISABLED: "true"
   before_script:
-    - git clone https://gitlab.com/gitlab-org/security-products/gemnasium-db.git $GEMNASIUM_DB_LOCAL_PATH
+    - mkdir $GEMNASIUM_DB_LOCAL_PATH
+    - tar -xzf gemnasium_db.tar.gz -C $GEMNASIUM_DB_LOCAL_PATH
 ```
 
 ## Limitations
