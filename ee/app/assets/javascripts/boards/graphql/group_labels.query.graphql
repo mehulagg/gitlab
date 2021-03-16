@@ -1,0 +1,14 @@
+query EpicLabels($fullPath: ID!) {
+  group(fullPath: $fullPath) {
+    labels(includeAncestorGroups: true, includeDescendantGroups: true, first: 20) {
+      edges {
+        node {
+          id
+          color
+          title
+          textColor
+        }
+      }
+    }
+  }
+}
