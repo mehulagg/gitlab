@@ -55,8 +55,8 @@ class Packages::Package < ApplicationRecord
   validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
   validates :version, format: { with: Gitlab::Regex.prefixed_semver_regex }, if: :golang?
   validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { composer_tag_version? || npm? || generic? }
-  validates :version, format: { with: Gitlab::Regex.debian_version_regex }, if: :debian?
-  validates :version, presence: true, if: -> { generic? || debian? }
+  validates :version, format: { with: Gitlab::Regex.debian_version_regex }, if: :debian_package?
+  validates :version, presence: true, if: -> { generic? || debian_package? }
 
   enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5,
                        composer: 6, generic: 7, golang: 8, debian: 9,
