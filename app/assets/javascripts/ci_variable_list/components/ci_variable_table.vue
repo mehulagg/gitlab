@@ -4,6 +4,7 @@ import { mapState, mapActions } from 'vuex';
 import { s__, __ } from '~/locale';
 import { ADD_CI_VARIABLE_MODAL_ID } from '../constants';
 import CiVariablePopover from './ci_variable_popover.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   modalId: ADD_CI_VARIABLE_MODAL_ID,
@@ -59,6 +60,7 @@ export default {
   directives: {
     GlModalDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapState(['variables', 'valuesHidden', 'isGroup', 'isLoading', 'isDeleting']),
     valuesButtonText() {
@@ -68,7 +70,7 @@ export default {
       return this.variables && this.variables.length > 0;
     },
     fields() {
-      if (this.isGroup) {
+      if (this.isGroup && !this.glFeatures.scopedGroupVariables) {
         return this.$options.fields.filter((field) => field.key !== 'environment_scope');
       }
       return this.$options.fields;
