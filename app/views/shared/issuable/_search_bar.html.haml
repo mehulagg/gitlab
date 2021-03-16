@@ -9,6 +9,7 @@
   - user_can_admin_list = can?(current_user, :admin_epic_board_list, board.resource_parent)
 - elsif board
   - user_can_admin_list = can?(current_user, :admin_issue_board_list, board.resource_parent)
+-# render if exists i think should go here
 
 .issues-filters
   .issues-details-filters.filtered-search-block.d-flex.flex-column.flex-lg-row{ class: block_css_class }

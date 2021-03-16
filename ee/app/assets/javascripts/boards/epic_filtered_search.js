@@ -3,7 +3,7 @@ import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_sea
 import store from '~/boards/stores';
 import { queryToObject } from '~/lib/utils/url_utility';
 
-export default () => {
+export default (apolloProvider) => {
   const queryParams = queryToObject(window.location.search);
   const el = document.getElementById('js-board-filtered-search');
 

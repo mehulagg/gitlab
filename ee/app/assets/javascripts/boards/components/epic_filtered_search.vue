@@ -4,6 +4,7 @@ import { historyPushState } from '~/lib/utils/common_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import LabelToken from './label_token.vue';
 
 export default {
   i18n: {
@@ -28,6 +29,22 @@ export default {
       historyPushState(setUrlParams({ search }));
 
       this.performSearch();
+    },
+    tokens() {
+      return [
+        {
+          icon: 'labels',
+          title: __('Label'),
+          type: 'labels',
+          operators: [
+            { value: '=', description: 'is' },
+            { value: '!=', description: 'is not' }, // backend not ready yet..
+          ],
+          token: LabelToken,
+          unique: true,
+          symbol: '~',
+        },
+      ];
     },
   },
 };
