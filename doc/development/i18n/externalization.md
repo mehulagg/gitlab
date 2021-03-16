@@ -294,7 +294,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   </template>
   ```
 
-- In JavaScript:
+- In JavaScript (when Vue cannot be used):
 
   ```javascript
   import { __, sprintf } from '~/locale';
@@ -302,12 +302,10 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   sprintf(__('Hello %{username}'), { username: 'Joe' }); // => 'Hello Joe'
   ```
 
-  If you want to use markup within the translation and are using Vue, you
-  **must** use the [`GlSprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/docs/utilities-sprintf--sentence-with-link) component. If
-  for some reason you cannot use Vue, use `sprintf` and stop it from escaping
-  placeholder values by passing `false` as its third argument. You **must**
-  escape any interpolated dynamic values yourself, for instance using
-  `escape` from `lodash`.
+  If you need to use markup within the translation, use `sprintf` and stop it
+  from escaping placeholder values by passing `false` as its third argument.
+  You **must** escape any interpolated dynamic values yourself, for instance
+  using `escape` from `lodash`.
 
   ```javascript
   import { escape } from 'lodash';
