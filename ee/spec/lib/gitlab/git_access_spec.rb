@@ -925,11 +925,8 @@ RSpec.describe Gitlab::GitAccess do
     context 'user with a sso session' do
       let(:allowed?) { true }
 
-      it 'allows pull changes' do
+      it 'allows pull and push changes' do
         expect { pull_changes }.not_to raise_error
-      end
-
-      it 'allows push changes' do
         expect { push_changes }.not_to raise_error
       end
     end
@@ -937,12 +934,11 @@ RSpec.describe Gitlab::GitAccess do
     context 'user without a sso session' do
       let(:allowed?) { false }
 
-      it 'does not allow pull changes' do
-        expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
-      end
-
-      it 'does not allow push changes' do
-        expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+      it 'does not allow pull or push changes' do
+        aggregate_failures do
+          expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+          expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+        end
       end
     end
   end
