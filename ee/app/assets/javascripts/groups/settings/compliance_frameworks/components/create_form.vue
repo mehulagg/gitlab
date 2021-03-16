@@ -52,17 +52,18 @@ export default {
 
       try {
         const { name, description, pipelineConfigurationFullPath, color } = this.formData;
+        let params = { name, description, color };
+
+        if (this.pipelineConfigurationFullPathEnabled) {
+          params = { ...params, pipelineConfigurationFullPath };
+        }
+
         const { data } = await this.$apollo.mutate({
           mutation: createComplianceFrameworkMutation,
           variables: {
             input: {
               namespacePath: this.groupPath,
-              params: {
-                name,
-                description,
-                pipelineConfigurationFullPath,
-                color,
-              },
+              params,
             },
           },
         });

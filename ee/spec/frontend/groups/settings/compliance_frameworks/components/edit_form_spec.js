@@ -56,11 +56,11 @@ describe('EditForm', () => {
     return createMockApollo(requestHandlers);
   }
 
-  function createComponent(requestHandlers = []) {
+  function createComponent(requestHandlers = [], props = {}) {
     return shallowMount(EditForm, {
       localVue,
       apolloProvider: createMockApolloProvider(requestHandlers),
-      propsData,
+      propsData: { ...propsData, ...props },
     });
   }
 
@@ -195,6 +195,29 @@ describe('EditForm', () => {
       expect(update).toHaveBeenCalledWith(updateProps);
       expect(findFormStatus().props('loading')).toBe(true);
       expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
+    });
+
+    it('does not save the pipelineConfigurationFullPath if disabled', async () => {
+      wrapper = createComponent(
+        [
+          [getComplianceFrameworkQuery, fetchOne],
+          [updateComplianceFrameworkMutation, update],
+        ],
+        { pipelineConfigurationFullPathEnabled: false },
+      );
+
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
+
+      expect(update).toHaveBeenCalledWith({
+        input: {
+          id: 'gid://gitlab/ComplianceManagement::Framework/1',
+          params: {
+            name,
+            description,
+            color,
+          },
+        },
+      });
     });
   });
 });

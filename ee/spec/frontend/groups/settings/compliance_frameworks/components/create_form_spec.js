@@ -43,11 +43,11 @@ describe('CreateForm', () => {
     return createMockApollo(requestHandlers);
   }
 
-  function createComponent(requestHandlers = []) {
+  function createComponent(requestHandlers = [], props = {}) {
     return shallowMount(CreateForm, {
       localVue,
       apolloProvider: createMockApolloProvider(requestHandlers),
-      propsData,
+      propsData: { ...propsData, ...props },
     });
   }
 
@@ -138,6 +138,25 @@ describe('CreateForm', () => {
       expect(create).toHaveBeenCalledWith(creationProps);
       expect(findFormStatus().props('loading')).toBe(true);
       expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
+    });
+
+    it('does not save the pipelineConfigurationFullPath if disabled', async () => {
+      wrapper = createComponent([[createComplianceFrameworkMutation, create]], {
+        pipelineConfigurationFullPathEnabled: false,
+      });
+
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
+
+      expect(create).toHaveBeenCalledWith({
+        input: {
+          namespacePath: 'group-1',
+          params: {
+            name,
+            description,
+            color,
+          },
+        },
+      });
     });
   });
 });

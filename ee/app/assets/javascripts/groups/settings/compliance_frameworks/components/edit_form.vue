@@ -115,17 +115,18 @@ export default {
 
       try {
         const { name, description, pipelineConfigurationFullPath, color } = this.formData;
+        let params = { name, description, color };
+
+        if (this.pipelineConfigurationFullPathEnabled) {
+          params = { ...params, pipelineConfigurationFullPath };
+        }
+
         const { data } = await this.$apollo.mutate({
           mutation: updateComplianceFrameworkMutation,
           variables: {
             input: {
               id: this.graphqlId,
-              params: {
-                name,
-                description,
-                pipelineConfigurationFullPath,
-                color,
-              },
+              params,
             },
           },
         });
