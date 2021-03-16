@@ -6,6 +6,7 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlSearchBoxByType,
+  GlSafeHtmlDirective as SafeHtml
 } from '@gitlab/ui';
 import { isEqual, isEmpty } from 'lodash';
 import { s__, __ } from '~/locale';
@@ -45,6 +46,9 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlSearchBoxByType,
+  },
+  directives: {
+    SafeHtml,
   },
   inject: ['projectPath', 'timezones'],
   props: {
@@ -152,7 +156,7 @@ export default {
           is-check-item
           @click="setTimezone(tz)"
         >
-          <span class="gl-white-space-nowrap"> {{ getFormattedTimezone(tz) }}</span>
+          <span v-safe-html="getFormattedTimezone(tz)" class="gl-white-space-nowrap"> </span>
         </gl-dropdown-item>
         <gl-dropdown-item v-if="noResults">
           {{ $options.i18n.noResults }}
