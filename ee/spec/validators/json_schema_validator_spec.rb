@@ -7,11 +7,12 @@ RSpec.describe JsonSchemaValidator do
     let(:test_value) { 'bar' }
     let(:mock_subject) { double(:subject) }
     let(:validator) { described_class.new(attributes: [:foo], filename: schema_name, base_directory: %w(spec fixtures)) }
+    let(:fake_draft) { double('Draft7', valid?: true) }
 
     subject(:validate_subject) { validator.validate_each(mock_subject, :foo, test_value) }
 
     before do
-      allow(JSON::Validator).to receive(:validate).and_return(true)
+      allow(JSONSchemer).to receive(:schema).and_return(fake_draft)
     end
 
     context 'when the schema file exists on CE' do
@@ -21,7 +22,7 @@ RSpec.describe JsonSchemaValidator do
       it 'calls the validator with CE schema' do
         validate_subject
 
-        expect(JSON::Validator).to have_received(:validate).with(schema_path, test_value)
+        expect(fake_draft).to have_received(:valid?)
       end
     end
 
@@ -32,7 +33,7 @@ RSpec.describe JsonSchemaValidator do
       it 'calls the validator with EE schema' do
         validate_subject
 
-        expect(JSON::Validator).to have_received(:validate).with(schema_path, test_value)
+        expect(fake_draft).to have_received(:valid?)
       end
     end
   end
