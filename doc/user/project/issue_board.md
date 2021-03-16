@@ -345,7 +345,7 @@ As in other list types, click the trash icon to remove a list.
 > - It's [deployed behind the `board_new_lists` feature flag](../feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-adding-issues-to-the-list).
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-new-add-list-form).
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -666,4 +666,23 @@ To disable it:
 
 ```ruby
 Feature.disable(:add_issues_button)
+```
+
+### Enable or disable new add list form **(FREE SELF)**
+
+The new form for adding lists is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:board_new_list)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:board_new_list)
 ```
