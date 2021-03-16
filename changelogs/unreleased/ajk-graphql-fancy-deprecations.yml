@@ -1,0 +1,5 @@
+---
+title: Change how we handle deprecations in GraphQL docs
+merge_request: 56698
+author:
+type: changed

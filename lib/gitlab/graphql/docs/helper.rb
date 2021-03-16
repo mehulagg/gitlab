@@ -27,7 +27,7 @@ module Gitlab
           MD
         end
 
-        def render_name_and_description(object, level = 3)
+        def render_name_and_description(object, owner: nil, level: 3)
           content = []
 
           content << "#{'#' * level} `#{object[:name]}`"
@@ -35,10 +35,18 @@ module Gitlab
           if object[:description].present?
             desc = object[:description].strip
             desc += '.' unless desc.ends_with?('.')
+          end
+
+          if object[:is_deprecated]
+            owner = Array.wrap(owner)
+            deprecation = schema_deprecation(owner, object[:name])
+            content << (deprecation&.original_description || desc)
+            content << render_deprecation(object, owner, :block)
+          else
             content << desc
           end
 
-          content.join("\n\n")
+          content.compact.join("\n\n")
         end
 
         def sorted_by_name(objects)
@@ -47,19 +55,23 @@ module Gitlab
           objects.sort_by { |o| o[:name] }
         end
 
-        def render_field(field)
-          row(render_name(field), render_field_type(field[:type]), render_description(field))
+        def render_field(field, owner)
+          row(
+            render_name(field, owner),
+            render_field_type(field[:type]),
+            render_description(field, owner, :inline)
+          )
         end
 
-        def render_enum_value(value)
-          row(render_name(value), render_description(value))
+        def render_enum_value(enum, value)
+          row(render_name(value, enum[:name]), render_description(value, enum[:name], :inline))
         end
 
         def row(*values)
-          "| #{values.join(' | ')} |"
+          "| #{values.map { |val| val.to_s.gsub(/\n+/, ' ') }.join(' | ')} |"
         end
 
-        def render_name(object)
+        def render_name(object, owner = nil)
           rendered_name = "`#{object[:name]}`"
           rendered_name += ' **{warning-solid}**' if object[:is_deprecated]
           rendered_name
@@ -67,10 +79,51 @@ module Gitlab
 
         # Returns the object description. If the object has been deprecated,
         # the deprecation reason will be returned in place of the description.
-        def render_description(object)
-          return object[:description] unless object[:is_deprecated]
+        def render_description(object, owner = nil, context = :block)
+          owner = Array.wrap(owner)
+          return render_deprecation(object, owner, context) if object[:is_deprecated]
+          return if object[:description].blank?
 
-          "**Deprecated:** #{object[:deprecation_reason]}"
+          desc = object[:description].strip
+          desc += '.' unless desc.ends_with?('.')
+          desc
+        end
+
+        def render_deprecation(object, owner, context)
+          deprecation = schema_deprecation(owner, object[:name])
+          return deprecation.markdown(context: context) if deprecation
+
+          reason = object[:deprecation_reason] || 'Use of this is deprecated.'
+          "**Deprecated:** #{reason}"
+        end
+
+        def schema_deprecation(type_name, field_name)
+          schema_field(type_name, field_name)&.deprecation
+        end
+
+        def schema_field(type_name, field_name)
+          type_name = Array.wrap(type_name)
+          if type_name.size == 2
+            arg_name = field_name
+            type_name, field_name = type_name
+          else
+            type_name = type_name.first
+            arg_name = nil
+          end
+
+          return if type_name.nil? || field_name.nil?
+
+          type = schema.types[type_name]
+          return unless type && type.kind.fields?
+
+          field = type.fields[field_name]
+          return field if arg_name.nil?
+
+          args = field.arguments
+          is_mutation = field.mutation && field.mutation <= ::Mutations::BaseMutation
+          args = args['input'].type.unwrap.arguments if is_mutation
+
+          args[arg_name]
         end
 
         def render_field_type(type)
