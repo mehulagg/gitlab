@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails/generators'
+require_relative '../usage_metric_definition_generator'
 
 module Gitlab
   module UsageMetricDefinition
