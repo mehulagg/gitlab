@@ -75,29 +75,13 @@ class Commit
     end
 
     def diff_safe_lines(project: nil)
-      Gitlab::Git::DiffCollection.default_limits(project: project)[:max_lines]
-    end
-
-    def diff_hard_limit_files(project: nil)
-      if Feature.enabled?(:increased_diff_limits, project)
-        3000
-      else
-        1000
-      end
-    end
-
-    def diff_hard_limit_lines(project: nil)
-      if Feature.enabled?(:increased_diff_limits, project)
-        100000
-      else
-        50000
-      end
+      Gitlab::Git::DiffCollection.diff_safe_max_files(project: project)
     end
 
     def max_diff_options(project: nil)
       {
-        max_files: diff_hard_limit_files(project: project),
-        max_lines: diff_hard_limit_lines(project: project)
+        max_files: Gitlab::Git::DiffCollection.diff_max_files(project: project),
+        max_lines: Gitlab::Git::DiffCollection.diff_max_lines(project: project)
       }
     end
 

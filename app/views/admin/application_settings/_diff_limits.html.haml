@@ -12,4 +12,25 @@
         = link_to sprite_icon('question-o'),
           help_page_path('user/admin_area/diff_limits',
           anchor: 'maximum-diff-patch-size')
+
+      = f.label :diff_max_files, 'Maximum files in a diff', class: 'label-light'
+      = f.number_field :diff_max_files, class: 'form-control gl-form-input'
+      %span.form-text.text-muted
+        Diff files surpassing this limit will be presented as 'too large'
+        and won't be expandable.
+
+        = link_to sprite_icon('question-o'),
+          help_page_path('user/admin_area/diff_limits',
+          anchor: 'maximum-diff-files-size')
+
+      = f.label :diff_max_lines, 'Maximum lines in a diff', class: 'label-light'
+      = f.number_field :diff_max_lines, class: 'form-control gl-form-input'
+      %span.form-text.text-muted
+        Diff files surpassing this limit will be presented as 'too large'
+        and won't be expandable.
+
+        = link_to sprite_icon('question-o'),
+          help_page_path('user/admin_area/diff_limits',
+          anchor: 'maximum-diff-lines-size')
   = f.submit _('Save changes'), class: 'gl-button btn btn-confirm'
+
