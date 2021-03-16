@@ -378,6 +378,10 @@ FactoryBot.define do
       end
     end
 
+    trait :with_user do
+      user
+    end
+
     trait :extended_options do
       options do
         {

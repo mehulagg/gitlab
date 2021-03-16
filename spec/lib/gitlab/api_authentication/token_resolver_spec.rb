@@ -9,6 +9,9 @@ RSpec.describe Gitlab::APIAuthentication::TokenResolver do
   let_it_be(:ci_job) { create(:ci_build, project: project, user: user, status: :running) }
   let_it_be(:ci_job_done) { create(:ci_build, project: project, user: user, status: :success) }
   let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
+  let(:jwt_token_from_ci_job) { build(:jwt_token, :from_job, job: ci_job) }
+  let(:jwt_token_from_personal_access_token) { build(:jwt_token, :from_personal_access_token, personal_access_token: personal_access_token) }
+  let(:jwt_token_from_deploy_token) { build(:jwt_token, :from_deploy_token, deploy_token: deploy_token) }
 
   shared_examples 'an authorized request' do
     it 'returns the correct token' do
@@ -158,6 +161,40 @@ RSpec.describe Gitlab::APIAuthentication::TokenResolver do
         let(:raw) { username_and_password(nil, token.token) }
 
         it_behaves_like 'an authorized request'
+      end
+    end
+
+    context 'with :jwt_token' do
+      let(:type) { :jwt_token }
+
+      context 'from a job' do
+        let(:token) { jwt_token_from_ci_job }
+
+        context 'with a valid JWT token' do
+          let(:raw) { username_and_password(nil, token.encoded) }
+
+          it_behaves_like 'an authorized request'
+        end
+      end
+
+      context 'from a personal access token' do
+        let(:token) { jwt_token_from_personal_access_token }
+
+        context 'with a valid JWT token' do
+          let(:raw) { username_and_password(nil, token.encoded) }
+
+          it_behaves_like 'an authorized request'
+        end
+      end
+
+      context 'from a deploy token' do
+        let(:token) { jwt_token_from_deploy_token }
+
+        context 'with a valid JWT token' do
+          let(:raw) { username_and_password(nil, token.encoded) }
+
+          it_behaves_like 'an authorized request'
+        end
       end
     end
   end

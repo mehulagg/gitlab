@@ -15,6 +15,7 @@ module Gitlab
           personal_access_token
           job_token
           deploy_token
+          jwt_token
         ]
       }
 
@@ -56,6 +57,9 @@ module Gitlab
 
         when :deploy_token_with_username
           resolve_deploy_token_with_username raw
+
+        when :jwt_token
+          resolve_jwt_token raw
         end
       end
 
@@ -116,6 +120,12 @@ module Gitlab
         end
       end
 
+      def resolve_jwt_token(raw)
+        with_jwt_token(raw) do |token|
+          token
+        end
+      end
+
       def with_personal_access_token(raw, &block)
         pat = ::PersonalAccessToken.find_by_token(raw.password)
         return unless pat
@@ -135,6 +145,13 @@ module Gitlab
         raise ::Gitlab::Auth::UnauthorizedError unless job
 
         yield(job)
+      end
+
+      def with_jwt_token(raw, &block)
+        token = ::Gitlab::JWTToken.decode(raw.password)
+        return unless token
+
+        yield(token)
       end
     end
   end
