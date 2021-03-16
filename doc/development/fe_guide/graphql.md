@@ -769,7 +769,7 @@ export default {
 
 #### Polling and Performance
 
-While the Apollo client has support for simple polling, it is possible that for performance reasons, you might need to use our Etag-based caching rather than hit the database each time. The larger and more complex the query, the likelier it is that you should use this approach. If you are not sure if it applies to your situation, discuss with your backend engineer. 
+While the Apollo client has support for simple polling, for performance reasons, our Etag-based caching is preferred to hitting the database each time.
 
 Once the backend is set up, there are a few changes to make on the frontend.
 
