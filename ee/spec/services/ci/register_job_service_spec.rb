@@ -46,7 +46,17 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        it { is_expected.to be_kind_of(Ci::Build) }
+        context 'with flag enabled' do
+          stub_feature_flags(traversal_ids_for_quota_calculation: true)
+
+          it { is_expected.to be_kind_of(Ci::Build) }
+        end
+
+        context 'with flag disabled' do
+          stub_feature_flags(traversal_ids_for_quota_calculation: false)
+
+          it { is_expected.to be_kind_of(Ci::Build) }
+        end
       end
 
       shared_examples 'does not return a build' do |runners_minutes_used|
@@ -55,7 +65,17 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        it { is_expected.to be_nil }
+        context 'with flag enabled' do
+          stub_feature_flags(traversal_ids_for_quota_calculation: true)
+
+          it { is_expected.to be_nil }
+        end
+
+        context 'with flag disabled' do
+          stub_feature_flags(traversal_ids_for_quota_calculation: false)
+
+          it { is_expected.to be_nil }
+        end
       end
 
       context 'when limit set at global level' do

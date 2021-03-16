@@ -39,9 +39,23 @@ module EE
         visibility_relation = ::Ci::Build.where(
           projects: { visibility_level: runner.visibility_levels_without_minutes_quota })
 
-        enforce_limits_relation = ::Ci::Build.where('EXISTS (?)', builds_check_limit)
-
-        relation.merge(visibility_relation.or(enforce_limits_relation))
+        if ::Feature.enabled?(:traversal_ids_for_quota_calculation, type: :ops, default_enabled: :yaml)
+          relation
+            .joins('LEFT JOIN namespaces ON namespaces.id = projects.namespace_id')
+            .joins('LEFT JOIN namespaces as root_namespaces ON root_namespaces.id = namespaces.traversal_ids[1]')
+            .joins('LEFT JOIN namespace_statistics ON namespace_statistics.namespace_id = root_namespaces.id')
+            .merge(visibility_relation
+              .or(::Ci::Build.where.not(root_namespaces: { id: nil })
+                .where('COALESCE(root_namespaces.shared_runners_minutes_limit, ?, 0) = 0 OR ' \
+                      'COALESCE(namespace_statistics.shared_runners_seconds, 0) < ' \
+                      'COALESCE('\
+                        '(root_namespaces.shared_runners_minutes_limit + COALESCE(root_namespaces.extra_shared_runners_minutes_limit, 0)), ' \
+                        '(? + COALESCE(root_namespaces.extra_shared_runners_minutes_limit, 0)), ' \
+                      '0) * 60', application_shared_runners_minutes, application_shared_runners_minutes)))
+        else
+          enforce_limits_relation = ::Ci::Build.where('EXISTS (?)', builds_check_limit)
+          relation.merge(visibility_relation.or(enforce_limits_relation))
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
