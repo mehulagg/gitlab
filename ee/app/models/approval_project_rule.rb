@@ -23,9 +23,13 @@ class ApprovalProjectRule < ApplicationRecord
   validates :rule_type, uniqueness: { scope: :project_id, message: proc { _('any-approver for the project already exists') } }, if: :any_approver?
 
   def applies_to_branch?(branch)
-    return true if protected_branches.empty?
+    return true if protected_branches.blank?
 
-    protected_branches.matching(branch).any?
+    @applies_to_branch ||= Hash.new do |h, key|
+      h[key] = protected_branches.matching(key).present?
+    end
+
+    @applies_to_branch[branch]
   end
 
   def source_rule

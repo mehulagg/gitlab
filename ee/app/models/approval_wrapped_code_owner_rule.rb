@@ -8,7 +8,7 @@ class ApprovalWrappedCodeOwnerRule < ApprovalWrappedRule
     strong_memoize(:code_owner_approvals_required) do
       next 0 unless branch_requires_code_owner_approval?
 
-      approvers.any? ? REQUIRED_APPROVALS_PER_CODE_OWNER_RULE : 0
+      approvers.present? ? REQUIRED_APPROVALS_PER_CODE_OWNER_RULE : 0
     end
   end
 

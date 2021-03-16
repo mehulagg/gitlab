@@ -13,10 +13,18 @@ module EE
     end
 
     class_methods do
+      include ::Gitlab::Utils::StrongMemoize
+
       def branch_requires_code_owner_approval?(project, branch_name)
         return false unless project.code_owner_approval_required_available?
 
-        project.protected_branches.requiring_code_owner_approval.matching(branch_name).any?
+        code_owner_approval = strong_memoize(:code_owner_approval) do
+          Hash.new do |h, key|
+            h[key] = project.protected_branches.requiring_code_owner_approval.matching(branch_name).present?
+          end
+        end
+
+        code_owner_approval[branch_name]
       end
     end
 
