@@ -12,6 +12,7 @@ import Poll from '~/lib/utils/poll';
 import { s__, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import Evidence from './evidence/evidence.vue';
 import HistoryEntry from './history_entry.vue';
 import RelatedIssues from './related_issues.vue';
 import RelatedJiraIssues from './related_jira_issues.vue';
@@ -20,6 +21,7 @@ import StatusDescription from './status_description.vue';
 export default {
   name: 'VulnerabilityFooter',
   components: {
+    Evidence,
     SolutionCard,
     MergeRequestNote,
     HistoryEntry,
@@ -206,6 +208,36 @@ export default {
 <template>
   <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
+    <evidence
+      class="md"
+      :details="[
+        { type: 'url', key: 1, message: 'yo 1' },
+        { type: 'foo', key: 10, message: 'boooom' },
+        {
+          type: 'list',
+          key: 2,
+          items: [
+            { type: 'url', key: 3, message: 'yo 2' },
+            {
+              type: 'list',
+              key: 4,
+              items: [
+                { type: 'url', key: 5, message: 'yo 3' },
+
+                {
+                  type: 'list',
+                  key: 6,
+                  items: [
+                    { type: 'url', key: 7, message: 'yo 4' },
+                    { type: 'list', key: 8, items: [{ type: 'url', key: 9, message: 'yo 5' }] },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]"
+    />
     <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
       <merge-request-note
         :feedback="vulnerability.mergeRequestFeedback"

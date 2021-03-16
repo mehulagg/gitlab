@@ -1,14 +1,16 @@
 <script>
 import { GlCollapse, GlIcon } from '@gitlab/ui';
+import EvidenceItem from './evidence_item.vue';
 
 export default {
   components: {
     GlCollapse,
     GlIcon,
+    EvidenceItem,
   },
   props: {
     details: {
-      type: Object,
+      type: Array,
       required: true,
     },
   },
@@ -16,11 +18,6 @@ export default {
     return {
       showSection: false,
     };
-  },
-  computed: {
-    headerIcon() {
-      return this.showSection ? 'chevron-down' : 'chevron-right';
-    },
   },
   methods: {
     toggleShowSection() {
@@ -32,17 +29,14 @@ export default {
 
 <template>
   <section>
-    <header>
-      <h3
-        class="gl-display-inline-flex gl-align-items-center gl-mb-0! gl-cursor-pointer"
-        @click="toggleShowSection"
-      >
-        <gl-icon name="angle-right" class="gl-mr-2" :class="{ 'gl-rotate-90': showSection }" />
+    <header class="gl-display-flex gl-align-items-center">
+      <gl-icon name="angle-right" class="gl-mr-2" :class="{ 'gl-rotate-90': showSection }" />
+      <h3 class="gl-display-inline gl-my-0! gl-cursor-pointer" @click="toggleShowSection">
         {{ s__('Vulnerability|Evidence') }}
       </h3>
     </header>
     <gl-collapse :visible="showSection">
-      <div>{{ __('Something is here!') }}</div>
+      <evidence-item v-for="item in details" :key="item.key" :item="item" />
     </gl-collapse>
   </section>
 </template>
