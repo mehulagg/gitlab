@@ -128,16 +128,16 @@ This command permanently deletes the log files and is irreversible.
 find /var/opt/gitlab/gitlab-rails/shared/artifacts -name "job.log" -mtime +60 -delete
 ```
 
-## New incremental logging architecture
+## Incremental logging architecture
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18169) in GitLab 10.4.
+> - [Introduced (as beta)](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18169) in GitLab 10.4.
+> - [Suitable for production use (but off by default)](https://gitlab.com/groups/gitlab-org/-/epics/4275) in GitLab 13.6.
 
 NOTE:
-This beta feature is off by default. See below for how to [enable or disable](#enabling-incremental-logging) it.
+This feature is part of the Helm deployment of GitLab, but is off by default on other self-managed GitLab installations. See below for how to [enable or disable](#enabling-incremental-logging) it.
 
-By combining the process with object storage settings, we can completely bypass
-the local file storage. This is a useful option if GitLab is installed as
-cloud-native, for example on Kubernetes.
+Combining this feature with [object storage settings](job_artifacts.md#object-storage-settings)
+removes the need for shared file storage (NFS) for CI jobs on a scaled-out deployment of GitLab.
 
 The data flow is the same as described in the [data flow section](#data-flow)
 with one change: _the stored path of the first two phases is different_. This incremental
