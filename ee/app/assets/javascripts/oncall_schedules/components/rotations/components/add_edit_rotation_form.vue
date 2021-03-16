@@ -197,7 +197,6 @@ export default {
         <div class="gl-display-flex gl-align-items-center">
           <gl-datepicker
             class="gl-mr-3"
-            data-testid="rotation-start-date"
             :value="form.startsAt.date"
             @input="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
           >
@@ -255,7 +254,6 @@ export default {
           <div class="gl-display-flex gl-align-items-center">
             <gl-datepicker
               class="gl-mr-3"
-              data-testid="rotation-end-date"
               :value="form.endsAt.date"
               @input="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
             >
