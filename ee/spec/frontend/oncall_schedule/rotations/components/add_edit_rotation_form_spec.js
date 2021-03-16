@@ -227,8 +227,8 @@ describe('AddEditRotationForm', () => {
         findRestrictedToOptions().at(timeTo).vm.$emit('click');
         const emittedEvent = wrapper.emitted('update-rotation-form');
         expect(emittedEvent).toHaveLength(2);
-        expect(emittedEvent[0][0]).toEqual({ type: 'restrictedTo.startTime', value: timeFrom + 1 });
-        expect(emittedEvent[1][0]).toEqual({ type: 'restrictedTo.endTime', value: timeTo + 1 });
+        expect(emittedEvent[0][0]).toEqual({ type: 'restrictedTo.startTime', value: timeFrom });
+        expect(emittedEvent[1][0]).toEqual({ type: 'restrictedTo.endTime', value: timeTo });
       });
 
       it('should add a checkmark to a selected restricted FROM time', async () => {
@@ -241,16 +241,8 @@ describe('AddEditRotationForm', () => {
             },
           },
         });
-        expect(
-          findRestrictedFromOptions()
-            .at(timeFrom - 1)
-            .props('isChecked'),
-        ).toBe(true);
-        expect(
-          findRestrictedToOptions()
-            .at(timeTo - 1)
-            .props('isChecked'),
-        ).toBe(true);
+        expect(findRestrictedFromOptions().at(timeFrom).props('isChecked')).toBe(true);
+        expect(findRestrictedToOptions().at(timeTo).props('isChecked')).toBe(true);
       });
     });
   });
