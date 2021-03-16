@@ -39,9 +39,11 @@ module EE
         visibility_relation = ::Ci::Build.where(
           projects: { visibility_level: runner.visibility_levels_without_minutes_quota })
 
-        enforce_limits_relation = ::Ci::Build.where('EXISTS (?)', builds_check_limit)
+        enforce_limits_relation = visibility_relation
+          .or(::Ci::Build.where.not(namespaces: { id: nil }))
+          .joins("LEFT JOIN (#{builds_check_limit.to_sql}) namespaces ON namespaces.id = projects.namespace_id")
 
-        relation.merge(visibility_relation.or(enforce_limits_relation))
+        relation.merge(enforce_limits_relation)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -56,13 +58,13 @@ module EE
                    '(? + COALESCE(namespaces.extra_shared_runners_minutes_limit, 0)), ' \
                   '0) * 60',
                 application_shared_runners_minutes, application_shared_runners_minutes)
-          .select('1')
+          .select('namespaces.id')
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       # rubocop: disable CodeReuse/ActiveRecord
       def all_namespaces
-        namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')
+        namespaces = ::Namespace.reorder(nil)
         ::Gitlab::ObjectHierarchy.new(namespaces).roots
       end
       # rubocop: enable CodeReuse/ActiveRecord
