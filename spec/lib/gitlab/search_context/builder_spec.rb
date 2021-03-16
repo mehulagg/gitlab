@@ -129,7 +129,6 @@ RSpec.describe Gitlab::SearchContext::Builder, type: :controller do
       it { is_expected.to be_search_context(group: group) }
 
       context 'with group scope' do
-        # let(:view_context) { double('view_context') }
         let(:action_name) { '' }
 
         before do
