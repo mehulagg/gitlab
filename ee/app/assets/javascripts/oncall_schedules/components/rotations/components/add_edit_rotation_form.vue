@@ -97,13 +97,6 @@ export default {
       default: () => ({}),
     },
   },
-  computed: {
-    startDate() {
-      const { date } = this.form.startDate;
-
-      return this.form.startDate.date instanceof Date ? date : null;
-    },
-  },
   methods: {
     format24HourTimeStringFromInt,
   },
