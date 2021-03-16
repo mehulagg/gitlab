@@ -10,7 +10,8 @@ class TemplateFinder
     gitlab_ci_syntax_ymls: ::Gitlab::Template::GitlabCiSyntaxYmlTemplate,
     metrics_dashboard_ymls: ::Gitlab::Template::MetricsDashboardTemplate,
     issues: ::Gitlab::Template::IssueTemplate,
-    merge_requests: ::Gitlab::Template::MergeRequestTemplate
+    merge_requests: ::Gitlab::Template::MergeRequestTemplate,
+    epics: ::Gitlab::Template::EpicTemplate
   ).freeze
 
   class << self
@@ -55,10 +56,12 @@ class TemplateFinder
     @project = project
     @params = params
 
-    @vendored_templates = VENDORED_TEMPLATES.fetch(type)
+    @vendored_templates = VENDORED_TEMPLATES.fetch(type, nil)
   end
 
   def execute
+    return unless vendored_templates
+
     if params[:name]
       vendored_templates.find(params[:name], project)
     else
@@ -67,6 +70,8 @@ class TemplateFinder
   end
 
   def template_names
+    return {} unless vendored_templates
+
     vendored_templates.template_names(project)
   end
 end

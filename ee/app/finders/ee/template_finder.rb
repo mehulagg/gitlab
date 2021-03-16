@@ -46,14 +46,16 @@ module EE
     # This method is going to be removed once we remove the `inherited_issuable_templates` FF and
     # issues and merge_requests entries will go into CUSTOM_TEMPLATES
     def custom_templates_mapping
-      if project&.inherited_issuable_templates_enabled?
-        CUSTOM_TEMPLATES.merge(
-          issues: ::Gitlab::Template::IssueTemplate,
-          merge_requests: ::Gitlab::Template::MergeRequestTemplate
-        )
-      else
-        CUSTOM_TEMPLATES
-      end
+      custom_templates = if project&.inherited_issuable_templates_enabled?
+                           CUSTOM_TEMPLATES.merge(
+                             issues: ::Gitlab::Template::IssueTemplate,
+                             merge_requests: ::Gitlab::Template::MergeRequestTemplate
+                           )
+                         else
+                           CUSTOM_TEMPLATES
+                         end
+
+      custom_templates.merge(epics: ::Gitlab::Template::EpicTemplate)
     end
   end
 end

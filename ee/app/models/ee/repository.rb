@@ -15,6 +15,11 @@ module EE
       include Elastic::RepositoriesSearch
 
       delegate :checksum, :find_remote_root_ref, to: :raw_repository
+
+      def epic_template_names_hash
+        ::Gitlab::Template::EpicTemplate.repository_template_names(project)
+      end
+      cache_method :epic_template_names_hash, fallback: {}
     end
 
     # Transiently sets a configuration variable
