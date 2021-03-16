@@ -264,7 +264,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   For example:
 
   ```html
-  <gl-sprintf :message="s__('ClusterIntegration|Learn more about %{zones_link_start}zones%{zones_link_end}">
+  <gl-sprintf :message="s__('ClusterIntegration|Learn more about %{linkStart}zones%{linkEnd}')">
     <template #link="{ content }">
       <gl-link :href="somePath">{{ content }}</gl-link>
     </template>
