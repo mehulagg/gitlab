@@ -1,6 +1,7 @@
 <script>
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import { LOAD_FAILURE } from '../../constants';
+import { formatForLayers } from '../parsing_utils';
 import { ONE_COL_WIDTH, UPSTREAM } from './constants';
 import LinkedPipeline from './linked_pipeline.vue';
 import {
@@ -105,7 +106,17 @@ export default {
             return this.currentPipeline;
           }
 
-          return unwrapPipelineData(projectPath, data);
+          const pipelineData = unwrapPipelineData(this.pipelineProjectPath, data);
+          const layeredData = formatForLayers(pipelineData);
+
+          /*
+            Add these back to the stages section of the pipeline data.
+            Note, we don't use spread here even though it looks nice
+            because it can become unperformant to copy large amounts of data.
+          */
+
+          pipelineData.stages = layeredData;
+          return pipelineData;
         },
         result() {
           this.loadingPipelineId = null;

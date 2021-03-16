@@ -158,7 +158,7 @@ export default {
               :container-measurements="measurements"
               :highlighted-job="hoveredJobName"
               :metrics-config="metricsConfig"
-              :never-show-links="true"
+              :never-show-links="false"
               default-link-color="gl-stroke-transparent"
               @error="onError"
               @highlightedJobsChange="updateHighlightedJobs"

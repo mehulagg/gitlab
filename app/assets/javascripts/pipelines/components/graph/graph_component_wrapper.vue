@@ -3,6 +3,7 @@ import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import { __ } from '~/locale';
 import { DEFAULT, DRAW_FAILURE, LOAD_FAILURE } from '../../constants';
+import { formatForLayers } from '../parsing_utils';
 import PipelineGraph from './graph_component.vue';
 import {
   getQueryHeaders,
@@ -70,7 +71,17 @@ export default {
           return this.pipeline;
         }
 
-        return unwrapPipelineData(this.pipelineProjectPath, data);
+        const pipelineData = unwrapPipelineData(this.pipelineProjectPath, data);
+        const layeredData = formatForLayers(pipelineData);
+
+        /*
+          Add these back to the stages section of the pipeline data.
+          Note, we don't use spread here even though it looks nice
+          because it can become unperformant to copy large amounts of data.
+        */
+
+        pipelineData.stages = layeredData;
+        return pipelineData;
       },
       error(err) {
         this.reportFailure({ type: LOAD_FAILURE, skipSentry: true });

@@ -1,4 +1,6 @@
 import { uniqWith, isEqual } from 'lodash';
+import { s__ } from '~/locale';
+import { createSankey } from './dag/drawing_utils';
 
 /*
     The following functions are the main engine in transforming the data as
@@ -143,4 +145,38 @@ export const getMaxNodes = (nodes) => {
 
 export const removeOrphanNodes = (sankeyfiedNodes) => {
   return sankeyfiedNodes.filter((node) => node.sourceLinks.length || node.targetLinks.length);
+};
+
+/*
+  This utility accepts unwrapped pipeline data in the format return from
+  our standard pipeline GraphQL query and returns a format suited for showing
+  on the main pipeline and pipeline editing graphs.
+*/
+
+export const formatForLayers = ({ stages }) => {
+  const arrayOfJobs = stages.flatMap(({ groups }) => groups);
+  const parsedData = parseData(arrayOfJobs);
+  const withLayers = createSankey()(parsedData);
+
+  return withLayers.nodes
+    .reduce((acc, group) => {
+      /* sort groups by layer */
+      const layerNum = group.layer;
+
+      if (!acc[layerNum]) {
+        acc[layerNum] = [];
+      }
+
+      acc[layerNum].push(group);
+
+      return acc;
+    }, [])
+    .map((groups, idx) => {
+      /* then add each set of layer groups to a stage-like object */
+      return {
+        name: `${s__('Layer')} ${idx}`,
+        status: { action: null },
+        groups,
+      };
+    });
 };
