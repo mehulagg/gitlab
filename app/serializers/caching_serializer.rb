@@ -7,9 +7,10 @@
 class CachingSerializer < BaseSerializer
   def represent(resource, opts = {}, entity_class = nil)
     cache_opts = opts.delete(:cache)
-    cache_opts[:context] ||= -> (resource) { cache_context(resource) }
 
-    return super(resource, opts, entity_class) if cache_opts.nil?
+    return super(resource, opts, entity_class) unless cache_opts.is_a?(Hash)
+
+    cache_opts[:context] ||= -> (resource) { cache_context(resource) }
 
     rendered = Gitlab::Utils::Caching.fetch_multi([resource], cache_opts) do |object|
       Gitlab::Json.dump(super(object, opts, entity_class))
