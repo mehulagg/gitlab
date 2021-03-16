@@ -1,18 +1,25 @@
 <script>
 import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
-import actionsMixin from '../mixins/line_conflict_actions';
+import { mapActions } from 'vuex';
+import syntaxHighlight from '~/syntax_highlight';
 import utilsMixin from '../mixins/line_conflict_utils';
 
 export default {
   directives: {
     SafeHtml,
   },
-  mixins: [utilsMixin, actionsMixin],
+  mixins: [utilsMixin],
   props: {
     file: {
       type: Object,
       required: true,
     },
+  },
+  mounted() {
+    syntaxHighlight(document.querySelectorAll('.js-syntax-highlight'));
+  },
+  methods: {
+    ...mapActions(['handleSelected']),
   },
 };
 </script>
@@ -26,7 +33,7 @@ export default {
           <td class="diff-line-num header" :class="lineCssClass(line)"></td>
           <td class="line_content header" :class="lineCssClass(line)">
             <strong>{{ line.richText }}</strong>
-            <button class="btn" @click="handleSelected(file, line.id, line.section)">
+            <button class="btn" @click="handleSelected({ file, line })">
               {{ line.buttonTitle }}
             </button>
           </td>

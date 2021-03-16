@@ -1,21 +1,15 @@
 <script>
 import { debounce } from 'lodash';
+import { mapActions } from 'vuex';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
+import { INTERACTIVE_RESOLVE_MODE } from '../constants';
 
 export default {
   props: {
     file: {
       type: Object,
-      required: true,
-    },
-    onCancelDiscardConfirmation: {
-      type: Function,
-      required: true,
-    },
-    onAcceptDiscardConfirmation: {
-      type: Function,
       required: true,
     },
   },
@@ -50,6 +44,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['setFileResolveMode', 'setPromptConfirmationState']),
     loadEditor() {
       const EditorPromise = import(/* webpackChunkName: 'EditorLite' */ '~/editor/editor_lite');
       const DataPromise = axios.get(this.file.content_path);
@@ -94,11 +89,12 @@ export default {
         this.editor.setValue(this.originalContent);
       }
     },
-    cancelDiscardConfirmation(file) {
-      this.onCancelDiscardConfirmation(file);
-    },
     acceptDiscardConfirmation(file) {
-      this.onAcceptDiscardConfirmation(file);
+      this.setPromptConfirmationState({ file, promptDiscardConfirmation: false });
+      this.setFileResolveMode({ file, mode: INTERACTIVE_RESOLVE_MODE });
+    },
+    cancelDiscardConfirmation(file) {
+      this.setPromptConfirmationState({ file, promptDiscardConfirmation: false });
     },
   },
 };
