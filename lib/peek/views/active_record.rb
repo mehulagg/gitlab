@@ -17,23 +17,11 @@ module Peek
         }
       }.freeze
 
-      def results
-        super.merge(calls: detailed_calls)
-      end
-
       def self.thresholds
         @thresholds ||= THRESHOLDS.fetch(Rails.env.to_sym, DEFAULT_THRESHOLDS)
       end
 
       private
-
-      def detailed_calls
-        "#{calls} (#{cached_calls} cached)"
-      end
-
-      def cached_calls
-        detail_store.count { |item| item[:cached] == 'cached' }
-      end
 
       def setup_subscribers
         super
@@ -45,10 +33,13 @@ module Peek
 
       def generate_detail(start, finish, data)
         {
+          start: start,
+          finish: finish,
           duration: finish - start,
           sql: data[:sql].strip,
           backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller),
-          cached: data[:cached] ? 'cached' : ''
+          cached: data[:cached] ? 'Cached by ActiveRecord' : '',
+          transaction: data[:connection].transaction_open? ? 'In a transaction' : ''
         }
       end
     end
