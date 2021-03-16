@@ -116,7 +116,7 @@ export default {
       </gl-dropdown>
 
       <div
-        v-if="value && $scopedSlots.summary"
+        v-if="selectedProfile && $scopedSlots.summary"
         data-testid="selected-profile-summary"
         class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
       >
