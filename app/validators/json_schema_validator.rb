@@ -35,11 +35,7 @@ class JsonSchemaValidator < ActiveModel::EachValidator
   attr_reader :base_directory
 
   def valid_schema?(value)
-    if draft_version > JSON_VALIDATOR_MAX_DRAFT_VERSION
-      JSONSchemer.schema(Pathname.new(schema_path)).valid?(value)
-    else
-      JSON::Validator.validate(schema_path, value)
-    end
+    JSONSchemer.schema(Pathname.new(schema_path)).valid?(value)
   end
 
   def schema_path
