@@ -67,16 +67,16 @@ You can tune the scope of your notifications by selecting different notification
 
 Notification scope is applied in order of precedence (highest to lowest):
 
-- Project
-  - For each project, you can select a notification level. Your project setting overrides the group setting.
-- Group
-  - For each group, you can select a notification level. Your group setting overrides your default setting.
-- Global (default)
-  - Your global, or _default_, notification level applies if you have not selected a notification level for the project or group in which the activity occurred.
+- **Project**: For each project, you can select a notification level. Your project
+  setting overrides the group setting.
+- **Group**: For each group, you can select a notification level. Your group setting
+  overrides your default setting.
+- **Global (default)**: Your global, or _default_, notification level applies if you
+  have not selected a notification level for the project or group in which the activity occurred.
 
 #### Project notifications
 
-You can select a notification level for each project. This can be useful if you need to closely monitor activity in select projects.
+You can select a notification level for each project to help you closely monitor activity in select projects.
 
 ![notification settings](img/notification_project_settings_v12_8.png)
 
