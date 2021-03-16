@@ -12,6 +12,11 @@ module Gitlab
             %r(\Apipelines/id/\d+\z),
             'pipelines_graph',
             'continuous_integration'
+          ],
+          [
+            %r(merge_requests/widget/id/\d+\z),
+            'merge_request_widget',
+            'code_review'
           ]
         ].map(&method(:build_route)).freeze
 

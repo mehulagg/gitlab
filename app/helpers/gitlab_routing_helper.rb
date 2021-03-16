@@ -354,6 +354,10 @@ module GitlabRoutingHelper
     [api_graphql_path, "pipelines/id/#{pipeline.id}"].join(':')
   end
 
+  def graphql_etag_merge_request_widget_path(merge_request)
+    [api_graphql_path, "merge_requests/widget/id/#{merge_request.id}"].join(':')
+  end
+
   private
 
   def snippet_query_params(snippet, *args)

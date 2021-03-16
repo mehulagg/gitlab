@@ -1941,8 +1941,11 @@ class MergeRequest < ApplicationRecord
   def expire_etag_cache
     return unless project.namespace
 
+    store = Gitlab::EtagCaching::Store.new
+
     key = Gitlab::Routing.url_helpers.cached_widget_project_json_merge_request_path(project, self, format: :json)
-    Gitlab::EtagCaching::Store.new.touch(key)
+    store.touch(key)
+    store.touch(graphql_etag_merge_request_widget_path(self))
   end
 
   def report_type_enabled?(report_type)

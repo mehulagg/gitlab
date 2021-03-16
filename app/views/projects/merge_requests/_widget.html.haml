@@ -14,4 +14,4 @@
     window.gl.mrWidgetData.pipelines_empty_svg_path = '#{image_path('illustrations/pipelines_empty.svg')}';
     window.gl.mrWidgetData.codequality_help_path = '#{help_page_path("user/project/merge_requests/code_quality", anchor: "code-quality-reports")}';
 
-#js-vue-mr-widget.mr-widget
+#js-vue-mr-widget.mr-widget{ data: { graphql_resource_etag: graphql_etag_merge_request_widget_path(@merge_request) } }

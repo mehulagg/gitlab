@@ -92,6 +92,18 @@ export default {
     state: {
       query: getStateQuery,
       manual: true,
+      context() {
+        return {
+          fetchOptions: {
+            method: 'GET',
+          },
+          headers: {
+            'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'code_review/merge_request_widget',
+            'X-GITLAB-GRAPHQL-RESOURCE-ETAG': this.graphqlResourceEtag,
+            'X-REQUESTED-WITH': 'XMLHttpRequest',
+          },
+        };
+      },
       skip() {
         return !this.mr || !window.gon?.features?.mergeRequestWidgetGraphql;
       },
@@ -122,6 +134,7 @@ export default {
       state: store && store.state,
       service: store && this.createService(store),
       loading: true,
+      graphqlResourceEtag: this.$options.el?.dataset?.graphqlResourceEtag,
     };
   },
   computed: {

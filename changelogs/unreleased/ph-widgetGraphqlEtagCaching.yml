@@ -1,0 +1,5 @@
+---
+title: Add etag caching to widgets GraphQL requests
+merge_request:
+author:
+type: performance
