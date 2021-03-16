@@ -200,7 +200,6 @@ export default {
             data-testid="rotation-start-date"
             :value="form.startsAt.date"
             @input="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
-            @blur="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
           >
             <template #default="{ formattedDate }">
               <gl-form-input
@@ -259,7 +258,6 @@ export default {
               data-testid="rotation-end-date"
               :value="form.endsAt.date"
               @input="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
-              @blur="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
             >
               <template #default="{ formattedDate }">
                 <gl-form-input
