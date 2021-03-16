@@ -190,7 +190,8 @@ module Gitlab
             user_preferences_usage,
             ingress_modsecurity_usage,
             container_expiration_policies_usage,
-            service_desk_counts
+            service_desk_counts,
+            email_campaign_counts
           ).tap do |data|
             data[:snippets] = add(data[:personal_snippets], data[:project_snippets])
           end
@@ -821,6 +822,23 @@ module Gitlab
             )
           )
         }
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def email_campaign_counts
+        series_amount = Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS.count
+
+        # rubocop: disable UsageData/LargeTable:
+        Namespaces::InProductMarketingEmail.tracks.keys.each_with_object({}) do |track, result|
+          0.upto(series_amount - 1).map do |series|
+            for_series_and_track = ::Namespaces::InProductMarketingEmail.where(track: track, series: series)
+            # rubocop: enable UsageData/LargeTable:
+
+            result["#{track}_#{series}_sent"] = count(for_series_and_track)
+            result["#{track}_#{series}_cta_clicked"] = count(for_series_and_track.where.not(cta_clicked_at: nil))
+          end
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

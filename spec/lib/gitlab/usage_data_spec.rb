@@ -1410,6 +1410,46 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     end
   end
 
+  describe '.email_campaign_counts' do
+    subject { described_class.send(:email_campaign_counts) }
+
+    before do
+      create(:in_product_marketing_email, track: :create, series: 0, cta_clicked_at: Time.zone.now)
+      create(:in_product_marketing_email, track: :verify, series: 0)
+    end
+
+    it 'gathers email campaign data' do
+      expected_data = {
+        "create_0_sent" => 1,
+        "create_0_cta_clicked" => 1,
+        "create_1_sent" => 0,
+        "create_1_cta_clicked" => 0,
+        "create_2_sent" => 0,
+        "create_2_cta_clicked" => 0,
+        "verify_0_sent" => 1,
+        "verify_0_cta_clicked" => 0,
+        "verify_1_sent" => 0,
+        "verify_1_cta_clicked" => 0,
+        "verify_2_sent" => 0,
+        "verify_2_cta_clicked" => 0,
+        "trial_0_sent" => 0,
+        "trial_0_cta_clicked" => 0,
+        "trial_1_sent" => 0,
+        "trial_1_cta_clicked" => 0,
+        "trial_2_sent" => 0,
+        "trial_2_cta_clicked" => 0,
+        "team_0_sent" => 0,
+        "team_0_cta_clicked" => 0,
+        "team_1_sent" => 0,
+        "team_1_cta_clicked" => 0,
+        "team_2_sent" => 0,
+        "team_2_cta_clicked" => 0
+      }
+
+      expect(subject).to eq(expected_data)
+    end
+  end
+
   describe '.snowplow_event_counts' do
     let_it_be(:time_period) { { collector_tstamp: 8.days.ago..1.day.ago } }
 
