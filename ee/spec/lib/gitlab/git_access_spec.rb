@@ -915,6 +915,38 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
+  describe '#check_sso_session!' do
+    before do
+      allow(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive_messages(:new, :access_restricted?).and_return(allowed?)
+
+      project.add_developer(user)
+    end
+
+    context 'user with a sso session' do
+      let(:allowed?) { true }
+
+      it 'allows pull changes' do
+        expect { pull_changes }.not_to raise_error
+      end
+
+      it 'allows push changes' do
+        expect { push_changes }.not_to raise_error
+      end
+    end
+
+    context 'user without a sso session' do
+      let(:allowed?) { false }
+
+      it 'does not allow pull changes' do
+        expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+      end
+
+      it 'does not allow push changes' do
+        expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+      end
+    end
+  end
+
   describe '#check_maintenance_mode!' do
     let(:changes) { Gitlab::GitAccess::ANY }
 

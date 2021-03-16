@@ -14,6 +14,7 @@ module EE
         check_geo_license!
         check_smartcard_access!
         check_otp_session!
+        check_sso_session!
 
         super
       end
@@ -104,10 +105,16 @@ module EE
 
         if ::Gitlab::Auth::Otp::SessionEnforcer.new(actor).access_restricted?
           message = "OTP verification is required to access the repository.\n\n"\
-                  "   Use: #{build_ssh_otp_verify_command}"
+          "   Use: #{build_ssh_otp_verify_command}"
 
           raise ::Gitlab::GitAccess::ForbiddenError, message
         end
+      end
+
+      def check_sso_session!
+        return unless ::Gitlab::Auth::GroupSaml::SessionEnforcer.new(actor, group).access_restricted?
+
+        raise ::Gitlab::GitAccess::ForbiddenError, "Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in"
       end
 
       def build_ssh_otp_verify_command
