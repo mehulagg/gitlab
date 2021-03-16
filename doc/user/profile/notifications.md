@@ -50,16 +50,16 @@ These notification settings apply only to you. They do not affect the notificati
 
 ## Global notification settings
 
-Your **Global notification settings** are the default settings unless you select different values for a project or a group.
+Your **Global notification settings** are the default settings unless you select
+different values for a project or a group.
 
-- Notification email
-  - This is the email address your notifications are sent to.
-- Global notification level
-  - This is the default [notification level](#notification-levels) which applies to all your notifications.
-- Receive product marketing emails
-  - Check this checkbox if you want to receive periodic emails related to GitLab features.
-- Receive notifications about your own activity.
-  - Check this checkbox if you want to receive notification about your own activity. Default: Not checked.
+- **Notification email**: The email address your notifications are sent to.
+- **Global notification level**: The default [notification level](#notification-levels)
+  which applies to all your notifications.
+- **Receive product marketing emails**: Select this check box to receive periodic
+  emails about GitLab features.
+- **Receive notifications about your own activity**: Select this check box to receive
+  notifications about your own activity. Not selected by default.
 
 ### Notification scope
 
