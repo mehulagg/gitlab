@@ -92,6 +92,7 @@ describe('On-call schedule', () => {
     const timezone = lastTz.identifier;
     const offset = `(UTC ${lastTz.formatted_offset})`;
     const description = findSchedule().text();
+    expect(description).toContain(mockSchedule.description);
     expect(description).toContain(timezone);
     expect(description).toContain(offset);
   });

@@ -194,7 +194,7 @@ export default {
         </div>
       </template>
       <p class="gl-text-gray-500 gl-mb-5" data-testid="scheduleBody">
-        {{ schedule.timezone }} | {{ offset }}
+        {{ schedule.description }} | {{ offset }} {{ schedule.timezone }}
       </p>
       <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
         <div class="gl-display-flex gl-align-items-center">
