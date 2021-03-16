@@ -58,7 +58,6 @@ GitLab administrators can configure a new default branch name at the
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221013) in GitLab 13.2.
 > - It's deployed behind a feature flag, enabled by default.
-> - It's enabled on GitLab.com.
 > - It cannot be enabled or disabled per-project.
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-custom-initial-branch-name).
