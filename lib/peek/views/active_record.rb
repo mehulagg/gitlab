@@ -21,7 +21,22 @@ module Peek
         @thresholds ||= THRESHOLDS.fetch(Rails.env.to_sym, DEFAULT_THRESHOLDS)
       end
 
+      def results
+        super.merge(summary: summary)
+      end
+
       private
+
+      def summary
+        cached = 0
+        transactions = 0
+        detail_store.each do |item|
+          cached += 1 if item[:cached].present?
+          transactions += 1 if item[:transaction].present?
+        end
+
+        ["#{cached} cached", "#{transactions} in transaction"]
+      end
 
       def setup_subscribers
         super

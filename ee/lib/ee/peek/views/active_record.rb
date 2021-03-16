@@ -16,6 +16,18 @@ module EE
 
           detail
         end
+
+        override :summary
+        def summary
+          return super unless ::Gitlab::Database::LoadBalancing.enable?
+
+          role_summary =
+            detail_store
+            .group_by { |item| item[:db_role] }
+            .map { |group, items| "#{items.length} #{group}" }
+
+          role_summary + super
+        end
       end
     end
   end

@@ -18,7 +18,7 @@ module Peek
       }.freeze
 
       def key
-        'external'
+        'external-http'
       end
 
       def results

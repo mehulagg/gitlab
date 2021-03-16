@@ -68,7 +68,8 @@ export default {
       keys: ['request', 'body'],
     },
     {
-      metric: 'external',
+      metric: 'external-http',
+      title: 'external',
       header: s__('PerformanceBar|External Http calls'),
       keys: ['label', 'code', 'proxy', 'error'],
     },
@@ -149,6 +150,7 @@ export default {
         :metric="metric.metric"
         :title="metric.title"
         :header="metric.header"
+        :summary="metric.summary"
         :keys="metric.keys"
       />
       <div
