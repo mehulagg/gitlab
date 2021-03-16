@@ -246,7 +246,11 @@ kubectl create namespace gitlab-kubernetes-agent
 
 #### One-liner installation
 
-Replace the value of `agent-token` below with the token received from the previous step. Also, replace `kas-address` with the configured access of the Kubernetes Agent Server:
+To perform a one-liner installation, run the command below. Make sure to replace:
+
+- `your-agent-token` with the token received from the previous step.
+- `gitlab-kubernetes-agent` with the namespace also defined in the previous step.
+- `wss://kas.gitlab.example.com` with the configured access of the Kubernetes Agent Server.
 
 ```shell
 docker run --rm registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --agent-token=your-agent-token --kas-address=wss://kas.gitlab.example.com --agent-version latest --namespace gitlab-kubernetes-agent | kubectl apply -f -
@@ -268,11 +272,11 @@ Otherwise, you can follow below for fully manual, detailed installation steps.
 
 After generating the token, you must apply it to the Kubernetes cluster.
 
-Run the following command to create your Secret:
+To create your Secret, run:
 
-   ```shell
-   kubectl create secret generic -n <YOUR-DESIRED-NAMESPACE> gitlab-agent-token --from-literal=token='YOUR_AGENT_TOKEN'
-   ```
+```shell
+kubectl create secret generic -n <YOUR-DESIRED-NAMESPACE> gitlab-agent-token --from-literal=token='YOUR_AGENT_TOKEN'
+```
 
 The following example file contains the
 Kubernetes resources required for the Agent to be installed. You can modify this
