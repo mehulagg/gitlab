@@ -97,6 +97,13 @@ export default {
       default: () => ({}),
     },
   },
+  computed: {
+    startDate() {
+      const { date } = this.form.startDate;
+
+      return this.form.startDate.date instanceof Date ? date : null;
+    },
+  },
   methods: {
     format24HourTimeStringFromInt,
   },
@@ -190,20 +197,16 @@ export default {
         <div class="gl-display-flex gl-align-items-center">
           <gl-datepicker
             class="gl-mr-3"
+            data-testid="rotation-start-date"
             :value="form.startsAt.date"
             @input="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
+            @blur="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
           >
             <template #default="{ formattedDate }">
               <gl-form-input
                 class="gl-w-full"
                 :value="formattedDate"
                 :placeholder="__(`YYYY-MM-DD`)"
-                @blur="
-                  $emit('update-rotation-form', {
-                    type: 'startsAt.date',
-                    value: $event.target.value,
-                  })
-                "
               />
             </template>
           </gl-datepicker>
@@ -253,20 +256,16 @@ export default {
           <div class="gl-display-flex gl-align-items-center">
             <gl-datepicker
               class="gl-mr-3"
+              data-testid="rotation-end-date"
               :value="form.endsAt.date"
               @input="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
+              @blur="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
             >
               <template #default="{ formattedDate }">
                 <gl-form-input
                   class="gl-w-full"
                   :value="formattedDate"
                   :placeholder="__(`YYYY-MM-DD`)"
-                  @blur="
-                    $emit('update-rotation-form', {
-                      type: 'endsAt.date',
-                      value: $event.target.value,
-                    })
-                  "
                 />
               </template>
             </gl-datepicker>
