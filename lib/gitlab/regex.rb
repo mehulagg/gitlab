@@ -180,10 +180,6 @@ module Gitlab
         /ix.freeze
       end
 
-      def generic_package_version_regex
-        /\A\d+\.\d+\.\d+\z/
-      end
-
       def generic_package_name_regex
         maven_file_name_regex
       end

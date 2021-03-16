@@ -326,6 +326,21 @@ RSpec.describe API::GenericPackages do
               end
             end
           end
+
+          context 'with version with a semver label' do
+            let(:version) { '1.0.0-rc1' }
+
+            it 'creates the package' do
+              headers = workhorse_headers.merge(auth_header)
+
+              expect { upload_file(params, headers, package_version: version) }
+                .to change { project.packages.count }.by(1)
+              expect(response).to have_gitlab_http_status(:created)
+
+              pkg = project.packages.order_created.last
+              expect(pkg.version).to eq(version)
+            end
+          end
         end
       end
 
@@ -418,8 +433,8 @@ RSpec.describe API::GenericPackages do
       end
     end
 
-    def upload_file(params, request_headers, send_rewritten_field: true, package_name: 'mypackage', file_name: 'myfile.tar.gz')
-      url = "/projects/#{project.id}/packages/generic/#{package_name}/0.0.1/#{file_name}"
+    def upload_file(params, request_headers, send_rewritten_field: true, package_name: 'mypackage', package_version: '0.0.1', file_name: 'myfile.tar.gz')
+      url = "/projects/#{project.id}/packages/generic/#{package_name}/#{package_version}/#{file_name}"
 
       workhorse_finalize(
         api(url),

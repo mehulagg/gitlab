@@ -42,6 +42,7 @@ class Packages::Package < ApplicationRecord
   validate :valid_conan_package_recipe, if: :conan?
   validate :valid_composer_global_name, if: :composer?
   validate :package_already_taken, if: :npm?
+  validate :forbidden_debian_changes, if: :debian?
   validates :name, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
   validates :name, format: { with: Gitlab::Regex.npm_package_name_regex }, if: :npm?
@@ -53,17 +54,9 @@ class Packages::Package < ApplicationRecord
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
   validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
   validates :version, format: { with: Gitlab::Regex.prefixed_semver_regex }, if: :golang?
-  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { composer_tag_version? || npm? }
-
-  validates :version,
-    presence: true,
-    format: { with: Gitlab::Regex.generic_package_version_regex },
-    if: :generic?
-  validates :version,
-    presence: true,
-    format: { with: Gitlab::Regex.debian_version_regex },
-    if: :debian_package?
-  validate :forbidden_debian_changes, if: :debian?
+  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { composer_tag_version? || npm? || generic? }
+  validates :version, format: { with: Gitlab::Regex.debian_version_regex }, if: :debian?
+  validates :version, presence: true, if: -> { generic? || debian? }
 
   enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5,
                        composer: 6, generic: 7, golang: 8, debian: 9,

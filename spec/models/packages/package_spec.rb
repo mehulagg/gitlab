@@ -185,18 +185,25 @@ RSpec.describe Packages::Package, type: :model do
     end
 
     describe '#version' do
-      RSpec.shared_examples 'validating version to be SemVer compliant for' do |factory_name|
+      shared_examples 'validating version to be SemVer compliant for' do |factory_name|
         context "for #{factory_name}" do
           subject { build_stubbed(factory_name) }
 
           it { is_expected.to allow_value('1.2.3').for(:version) }
           it { is_expected.to allow_value('1.2.3-beta').for(:version) }
           it { is_expected.to allow_value('1.2.3-alpha.3').for(:version) }
+          it { is_expected.to allow_value('1.3.350-20201230123456').for(:version) }
           it { is_expected.not_to allow_value('1').for(:version) }
           it { is_expected.not_to allow_value('1.2').for(:version) }
           it { is_expected.not_to allow_value('1./2.3').for(:version) }
           it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
           it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+          it { is_expected.not_to allow_value('..1.2.3').for(:version) }
+          it { is_expected.not_to allow_value('  1.2.3').for(:version) }
+          it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
+          it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
+          it { is_expected.not_to allow_value('1.2.3-4/../../').for(:version) }
+          it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
         end
       end
 
@@ -336,18 +343,8 @@ RSpec.describe Packages::Package, type: :model do
       context 'generic package' do
         subject { build_stubbed(:generic_package) }
 
-        it { is_expected.to validate_presence_of(:version) }
-        it { is_expected.to allow_value('1.2.3').for(:version) }
-        it { is_expected.to allow_value('1.3.350').for(:version) }
-        it { is_expected.not_to allow_value('1.3.350-20201230123456').for(:version) }
-        it { is_expected.not_to allow_value('..1.2.3').for(:version) }
-        it { is_expected.not_to allow_value('  1.2.3').for(:version) }
-        it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
-        it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
-        it { is_expected.not_to allow_value('1.2.3-4/../../').for(:version) }
-        it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
-        it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
-        it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+        it_behaves_like 'validating version to be SemVer compliant for', :generic_package
+
         it { is_expected.not_to allow_value('').for(:version) }
         it { is_expected.not_to allow_value(nil).for(:version) }
       end
