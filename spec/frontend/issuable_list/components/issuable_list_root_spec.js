@@ -1,5 +1,6 @@
 import { GlSkeletonLoading, GlPagination } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import VueDraggable from 'vuedraggable';
 
 import { TEST_HOST } from 'helpers/test_constants';
 
@@ -11,7 +12,7 @@ import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filte
 import { mockIssuableListProps, mockIssuables } from '../mock_data';
 
 const createComponent = ({ props = mockIssuableListProps, data = {} } = {}) =>
-  mount(IssuableListRoot, {
+  shallowMount(IssuableListRoot, {
     propsData: props,
     data() {
       return data;
@@ -24,10 +25,15 @@ const createComponent = ({ props = mockIssuableListProps, data = {} } = {}) =>
       <p class="js-issuable-empty-state">Issuable empty state</p>
     `,
     },
+    stubs: {
+      IssuableTabs,
+    },
   });
 
 describe('IssuableListRoot', () => {
   let wrapper;
+
+  const findVueDraggable = () => wrapper.findComponent(VueDraggable);
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -343,6 +349,46 @@ describe('IssuableListRoot', () => {
 
       wrapper.find(GlPagination).vm.$emit('input');
       expect(wrapper.emitted('page-change')).toBeTruthy();
+    });
+  });
+
+  describe('manual sorting', () => {
+    describe('when enabled', () => {
+      beforeEach(() => {
+        wrapper = createComponent({
+          props: {
+            ...mockIssuableListProps,
+            isManualOrdering: true,
+          },
+        });
+      });
+
+      it('renders VueDraggable component', () => {
+        expect(findVueDraggable().exists()).toBe(true);
+      });
+
+      it('IssuableItem has grab cursor', () => {
+        expect(wrapper.findComponent(IssuableItem).classes()).toContain('gl-cursor-grab');
+      });
+
+      it('emits a "reorder" event when user updates the issue order', () => {
+        const oldIndex = 4;
+        const newIndex = 6;
+
+        findVueDraggable().vm.$emit('update', { oldIndex, newIndex });
+
+        expect(wrapper.emitted('reorder')).toEqual([[{ oldIndex, newIndex }]]);
+      });
+    });
+
+    describe('when disabled', () => {
+      beforeEach(() => {
+        wrapper = createComponent();
+      });
+
+      it('does not render VueDraggable component', () => {
+        expect(findVueDraggable().exists()).toBe(false);
+      });
     });
   });
 });

@@ -1,16 +1,21 @@
 <script>
 import { GlSkeletonLoading, GlPagination } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
+import VueDraggable from 'vuedraggable';
 
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-
 import { DEFAULT_SKELETON_COUNT } from '../constants';
 import IssuableBulkEditSidebar from './issuable_bulk_edit_sidebar.vue';
 import IssuableItem from './issuable_item.vue';
 import IssuableTabs from './issuable_tabs.vue';
 
 export default {
+  vueDraggableAttributes: {
+    animation: 200,
+    ghostClass: 'gl-visibility-hidden',
+    tag: 'ul',
+  },
   components: {
     GlSkeletonLoading,
     IssuableTabs,
@@ -18,6 +23,7 @@ export default {
     IssuableItem,
     IssuableBulkEditSidebar,
     GlPagination,
+    VueDraggable,
   },
   props: {
     namespace: {
@@ -127,6 +133,11 @@ export default {
       required: false,
       default: null,
     },
+    isManualOrdering: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -158,6 +169,9 @@ export default {
         }
         return acc;
       }, []);
+    },
+    issuablesWrapper() {
+      return this.isManualOrdering ? VueDraggable : 'ul';
     },
   },
   watch: {
@@ -208,6 +222,9 @@ export default {
         this.checkedIssuables[issuableId].checked = value;
       });
     },
+    handleVueDraggableUpdate({ newIndex, oldIndex }) {
+      this.$emit('reorder', { newIndex, oldIndex });
+    },
   },
 };
 </script>
@@ -253,13 +270,18 @@ export default {
           <gl-skeleton-loading />
         </li>
       </ul>
-      <ul
+      <component
+        :is="issuablesWrapper"
         v-if="!issuablesLoading && issuables.length"
         class="content-list issuable-list issues-list"
+        :class="{ 'manual-ordering': isManualOrdering }"
+        v-bind="$options.vueDraggableAttributes"
+        @update="handleVueDraggableUpdate"
       >
         <issuable-item
           v-for="issuable in issuables"
           :key="issuableId(issuable)"
+          :class="{ 'gl-cursor-grab': isManualOrdering }"
           :issuable-symbol="issuableSymbol"
           :issuable="issuable"
           :enable-label-permalinks="enableLabelPermalinks"
@@ -284,7 +306,7 @@ export default {
             <slot name="statistics" :issuable="issuable"></slot>
           </template>
         </issuable-item>
-      </ul>
+      </component>
       <slot v-if="!issuablesLoading && !issuables.length" name="empty-state"></slot>
       <gl-pagination
         v-if="showPaginationControls"
