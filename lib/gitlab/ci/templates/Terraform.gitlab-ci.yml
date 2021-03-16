@@ -58,4 +58,5 @@ apply:
     - plan
   when: manual
   only:
-    - master
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
