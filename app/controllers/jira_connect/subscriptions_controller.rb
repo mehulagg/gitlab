@@ -44,6 +44,19 @@ class JiraConnect::SubscriptionsController < JiraConnect::ApplicationController
     end
   end
 
+  def new_branch
+    branch_name = "#{params[:issue][:key].dasherize}-#{params[:issue][:title].dasherize}"
+
+    namespaces = current_jira_installation.subscriptions.map(:namespace)
+    @projects = Project.from_union(namespaces.map { |namespace| GroupProjectsFinder.new(group: namespace).execute })
+
+    render json: { branch_name: branch_name, projects: @projects.map(&:as_json) }
+  end
+
+  def create_branch
+    render json: params
+  end
+
   private
 
   def create_service

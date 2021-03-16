@@ -12,5 +12,10 @@ namespace :jira_connect do
     post 'uninstalled'
   end
 
-  resources :subscriptions, only: [:index, :create, :destroy]
+  resources :subscriptions, only: [:index, :create, :destroy] do
+    collection do
+      get :new_branch
+      post :create_branch
+    end
+  end
 end
