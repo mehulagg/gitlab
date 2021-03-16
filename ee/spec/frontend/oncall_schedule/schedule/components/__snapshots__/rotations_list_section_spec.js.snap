@@ -12,7 +12,9 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
         <span
-          class="gl-text-truncated"
+          aria-label="Rotation 242"
+          class="gl-text-truncate"
+          data-testid="rotation-name-gid://gitlab/IncidentManagement::OncallRotation/2"
         >
           Rotation 242
         </span>
