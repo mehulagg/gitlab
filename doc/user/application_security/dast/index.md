@@ -22,11 +22,14 @@ to protect your organization, download our
 ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
 whitepaper.
 
-In GitLab, DAST is commonly initiated by a merge request, and runs as a CI/CD
-pipeline job. When run, DAST analyzes a running web application for known
-vulnerabilities. GitLab then examines the DAST report for discovered
-vulnerabilities between the source and target branches, and displays any relevant
-findings with the merge request.
+You can use DAST to examine your web applications:
+
+* When initiated by a merge request, running as CI/CD pipeline job.
+* On demand, outside the CI/CD pipeline.
+
+After DAST creates its report, GitLab evaluates it for discovered
+vulnerabilities between the source and target branches. Relevant
+findings are noted in the merge request.
 
 The comparison logic uses only the latest pipeline executed for the target
 branch's base commit. Running the pipeline on other commits has no effect on
