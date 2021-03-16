@@ -1,0 +1,5 @@
+---
+title: Support SemVer versions on generic packages
+merge_request: 56755
+author:
+type: fixed
