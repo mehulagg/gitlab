@@ -153,15 +153,23 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
     Gitlab::PollingInterval.set_header(response, interval: 10_000)
 
-    render json: {
-      pipelines: PipelineSerializer
+
+    pipeline_json =
+      PipelineSerializer
         .new(project: @project, current_user: @current_user)
         .with_pagination(request, response)
-        .represent(@pipelines),
-      count: {
-        all: @pipelines.count
+        .represent(@pipelines, cache: { expires_in: 1.week })
+
+    output = <<~JSON
+    {
+      "pipelines": #{pipeline_json},
+      "count": {
+        "all": #{@pipelines.count}
       }
     }
+    JSON
+
+    render json: output
   end
 
   def sast_reports

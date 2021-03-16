@@ -197,6 +197,64 @@ module Gitlab
       end
     end
 
+    # Wrapper class used to skip JSON dumping on Grape endpoints.
+
+    class PrecompiledJson
+      UnsupportedFormatError = Class.new(StandardError)
+
+      # @overload PrecompiledJson.new("foo")
+      #   @param value [String]
+      #
+      # @overload PrecompiledJson.new(["foo", "bar"])
+      #   @param value [Array<String>]
+      def initialize(value)
+        @value = value
+      end
+
+      # Convert the value to a String. This will invoke
+      # `#to_s` on the members of the value if it's an array.
+      #
+      # @return [String]
+      # @raise [NoMethodError] if the objects in an array doesn't support to_s
+      # @raise [PrecompiledJson::UnsupportedFormatError] if the value is neither a String or Array
+      def to_s
+        return @value if @value.is_a?(String)
+        return "[#{@value.join(',')}]" if @value.is_a?(Array)
+
+        raise UnsupportedFormatError
+      end
+    end
+
+    # Wrapper class used to skip JSON dumping on Grape endpoints.
+
+    class PrecompiledJson
+      UnsupportedFormatError = Class.new(StandardError)
+
+      # @overload PrecompiledJson.new("foo")
+      #   @param value [String]
+      #
+      # @overload PrecompiledJson.new(["foo", "bar"])
+      #   @param value [Array<String>]
+      def initialize(value)
+        @value = value
+      end
+
+      # Convert the value to a String. This will invoke
+      # `#to_s` on the members of the value if it's an array.
+      #
+      # @return [String]
+      # @raise [NoMethodError] if the objects in an array doesn't support to_s
+      # @raise [PrecompiledJson::UnsupportedFormatError] if the value is neither a String or Array
+      def to_s
+        return @value if @value.is_a?(String)
+        return "[#{@value.join(',')}]" if @value.is_a?(Array)
+
+        raise UnsupportedFormatError
+      end
+
+      alias_method :to_json, :to_s
+    end
+
     class LimitedEncoder
       LimitExceeded = Class.new(StandardError)
 

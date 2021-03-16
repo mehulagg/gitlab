@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PipelineSerializer < BaseSerializer
+class PipelineSerializer < CachingSerializer
   include WithPagination
   entity PipelineDetailsEntity
 
@@ -71,6 +71,12 @@ class PipelineSerializer < BaseSerializer
           :user
         ]
       }
+    ]
+  end
+
+  def cache_context(pipeline)
+    [
+      #can?(request.current_user, :read_job_artifacts, artifact.job)
     ]
   end
 end
