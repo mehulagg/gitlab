@@ -415,6 +415,43 @@ RSpec.describe Gitlab::Database::LoadBalancing do
   # instrumentaiton) while triggering real queries from the defined model.
   # - We assert the desinations (replica/primary) of the queries in order.
   describe 'LoadBalancing integration tests', :delete do
+    shared_context 'LoadBalancing setup' do
+      let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
+      let(:hosts) { [ActiveRecord::Base.configurations["development"]['host']] }
+      let(:model) do
+        Class.new(ApplicationRecord) do
+          self.table_name = "load_balancing_test"
+        end
+      end
+
+      before do
+        ActiveRecord::Schema.define do
+          create_table :load_balancing_test, force: true do |t|
+            t.string :name, null: true
+          end
+        end
+        # Preloading testing class
+        model.singleton_class.prepend ::Gitlab::Database::LoadBalancing::ActiveRecordProxy
+
+        # Setup load balancing
+        subject.clear_configuration
+        allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
+        subject.configure_proxy(::Gitlab::Database::LoadBalancing::ConnectionProxy.new(hosts))
+        allow(ActiveRecord::Base.configurations[Rails.env])
+          .to receive(:[])
+          .with('load_balancing')
+          .and_return('hosts' => hosts)
+        ::Gitlab::Database::LoadBalancing::Session.clear_session
+      end
+
+      after do
+        subject.clear_configuration
+        ActiveRecord::Schema.define do
+          drop_table :load_balancing_test, force: true
+        end
+      end
+    end
+
     where(:queries, :include_transaction, :expected_results) do
       [
         # Read methods
@@ -573,7 +610,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           false, [:primary]
         ],
 
-        # use_replica_if_possible inside use_primary!
+        # use_replica_if_possible inside use_primary
         [
           -> {
             ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
@@ -583,45 +620,36 @@ RSpec.describe Gitlab::Database::LoadBalancing do
             end
           },
           false, [:primary]
+        ],
+
+        # use_primary inside use_replica_if_possible
+        [
+          -> {
+            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+              ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
+                model.first
+              end
+            end
+          },
+          false, [:primary]
+        ],
+
+        # A write query inside use_replica_if_possible
+        [
+          -> {
+            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+              model.first
+              model.delete_all
+              model.where(name: 'test1').to_a
+            end
+          },
+          false, [:replica, :primary, :primary]
         ]
       ]
     end
 
     with_them do
-      let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
-      let(:hosts) { [ActiveRecord::Base.configurations["development"]['host']] }
-      let(:model) do
-        Class.new(ApplicationRecord) do
-          self.table_name = "load_balancing_test"
-        end
-      end
-
-      before do
-        ActiveRecord::Schema.define do
-          create_table :load_balancing_test, force: true do |t|
-            t.string :name, null: true
-          end
-        end
-        # Preloading testing class
-        model.singleton_class.prepend ::Gitlab::Database::LoadBalancing::ActiveRecordProxy
-
-        # Setup load balancing
-        subject.clear_configuration
-        allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
-        subject.configure_proxy(::Gitlab::Database::LoadBalancing::ConnectionProxy.new(hosts))
-        allow(ActiveRecord::Base.configurations[Rails.env])
-          .to receive(:[])
-          .with('load_balancing')
-          .and_return('hosts' => hosts)
-        ::Gitlab::Database::LoadBalancing::Session.clear_session
-      end
-
-      after do
-        subject.clear_configuration
-        ActiveRecord::Schema.define do
-          drop_table :load_balancing_test, force: true
-        end
-      end
+      include_context 'LoadBalancing setup'
 
       it 'redirects queries to the right roles' do
         roles = []
@@ -651,6 +679,21 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         expect(roles).to eql(expected_results)
       ensure
         ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+      end
+    end
+
+    context 'a write inside a transaction inside use_replica_if_possible block' do
+      include_context 'LoadBalancing setup'
+
+      it 'raises an exception' do
+        expect do
+          ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            model.transaction do
+              model.first
+              model.create!(name: 'hello')
+            end
+          end
+        end.to raise_error(Gitlab::Database::LoadBalancing::ConnectionProxy::WriteInsideReadOnlyTransactionError)
       end
     end
   end

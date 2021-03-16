@@ -116,44 +116,69 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
     end
 
     context 'session prefers to use a replica' do
+      let(:replica) { double(:connection) }
+
       before do
         allow(session).to receive(:use_replica?).and_return(true)
         allow(session).to receive(:use_primary?).and_return(false)
-      end
-
-      it 'runs the transaction and any nested queries on the replica' do
-        replica = double(:connection)
-
         allow(replica).to receive(:transaction).and_yield
         allow(replica).to receive(:select)
+      end
 
-        expect(proxy.load_balancer).to receive(:read)
-          .twice.and_yield(replica)
-        expect(proxy.load_balancer).not_to receive(:read_write)
-        expect(session).not_to receive(:write!)
+      context 'with a read query' do
+        it 'runs the transaction and any nested queries on the replica' do
+          expect(proxy.load_balancer).to receive(:read)
+            .twice.and_yield(replica)
+          expect(proxy.load_balancer).not_to receive(:read_write)
+          expect(session).not_to receive(:write!)
 
-        proxy.transaction { proxy.select('true') }
+          proxy.transaction { proxy.select('true') }
+        end
+      end
+
+      context 'with a write query' do
+        it 'raises an exception' do
+          allow(proxy.load_balancer).to receive(:read).and_yield(replica)
+          allow(proxy.load_balancer).to receive(:read_write).and_yield(replica)
+
+          expect do
+            proxy.transaction { proxy.insert('something') }
+          end.to raise_error(Gitlab::Database::LoadBalancing::ConnectionProxy::WriteInsideReadOnlyTransactionError)
+        end
       end
     end
 
     context 'session does not prefer to use a replica' do
+      let(:primary) { double(:connection) }
+
       before do
         allow(session).to receive(:use_replica?).and_return(false)
         allow(session).to receive(:use_primary?).and_return(true)
-      end
-
-      it 'runs the transaction and any nested queries on the primary and stick to it' do
-        primary = double(:connection)
-
         allow(primary).to receive(:transaction).and_yield
         allow(primary).to receive(:select)
+        allow(primary).to receive(:insert)
+      end
 
-        expect(proxy.load_balancer).to receive(:read_write)
-          .twice.and_yield(primary)
-        expect(proxy.load_balancer).not_to receive(:read)
-        expect(session).to receive(:write!)
+      context 'with a read query' do
+        it 'runs the transaction and any nested queries on the primary and stick to it' do
+          expect(proxy.load_balancer).to receive(:read_write)
+            .twice.and_yield(primary)
+          expect(proxy.load_balancer).not_to receive(:read)
+          expect(session).to receive(:write!)
 
-        proxy.transaction { proxy.select('true') }
+          proxy.transaction { proxy.select('true') }
+        end
+      end
+
+      context 'with a write query' do
+        it 'runs the transaction and any nested queries on the primary and stick to it' do
+          expect(proxy.load_balancer).to receive(:read_write)
+            .twice.and_yield(primary)
+          expect(proxy.load_balancer).not_to receive(:read)
+          expect(session).to receive(:write!).twice
+
+          proxy.transaction { proxy.insert('something') }
+        end
       end
     end
   end
