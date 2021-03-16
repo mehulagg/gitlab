@@ -12,14 +12,19 @@ module Ci
 
     private
 
-    # rubocop: disable Cop/InBatches
     def bulk_abort!(pipelines, status:)
-      pipelines.each_batch do |pipeline_batch|
-        Ci::Stage.in_pipelines(pipeline_batch).cancelable.in_batches.update_all(status: status)
-        CommitStatus.in_pipelines(pipeline_batch).cancelable.in_batches.update_all(status: status)
+      pipelines.each_batch(of: 100) do |pipeline_batch|
+        update_status_for(Ci::Stage, pipeline_batch, status)
+        update_status_for(CommitStatus, pipeline_batch, status)
         pipeline_batch.update_all(status: status)
       end
     end
-    # rubocop: enable Cop/InBatches
+
+    def update_status_for(klass, pipelines, status)
+      klass.in_pipelines(pipelines)
+        .cancelable
+        .in_batches(of: 150) # rubocop:disable Cop/InBatches
+        .update_all(status: status)
+    end
   end
 end
