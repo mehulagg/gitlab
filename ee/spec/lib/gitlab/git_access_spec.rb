@@ -917,13 +917,15 @@ RSpec.describe Gitlab::GitAccess do
 
   describe '#check_sso_session!' do
     before do
-      allow(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive_messages(:new, :access_restricted?).and_return(allowed?)
+      allow_next_instance_of(Gitlab::Auth::GroupSaml::SessionEnforcer) do |enforcer|
+        allow(enforcer).to receive(:access_restricted?).and_return(access_restricted?)
+      end
 
       project.add_developer(user)
     end
 
     context 'user with a sso session' do
-      let(:allowed?) { true }
+      let(:access_restricted?) { false }
 
       it 'allows pull and push changes' do
         expect { pull_changes }.not_to raise_error
@@ -932,12 +934,12 @@ RSpec.describe Gitlab::GitAccess do
     end
 
     context 'user without a sso session' do
-      let(:allowed?) { false }
+      let(:access_restricted?) { true }
 
       it 'does not allow pull or push changes' do
         aggregate_failures do
-          expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
-          expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+          expect { pull_changes }.to raise_forbidden("Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in")
+          expect { push_changes }.to raise_forbidden("Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in")
         end
       end
     end

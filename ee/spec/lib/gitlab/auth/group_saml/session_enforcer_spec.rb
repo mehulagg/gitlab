@@ -34,6 +34,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::SessionEnforcer do
 
         context 'with sub-group' do
           let(:group) { create(:group, parent: root_group) }
+
           subject { described_class.new(user, group).access_restricted? }
 
           it { is_expected.to be_falsey }
