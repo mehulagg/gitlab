@@ -24,8 +24,8 @@ whitepaper.
 
 You can use DAST to examine your web applications:
 
-* When initiated by a merge request, running as CI/CD pipeline job.
-* On demand, outside the CI/CD pipeline.
+- When initiated by a merge request, running as CI/CD pipeline job.
+- On demand, outside the CI/CD pipeline.
 
 After DAST creates its report, GitLab evaluates it for discovered
 vulnerabilities between the source and target branches. Relevant
