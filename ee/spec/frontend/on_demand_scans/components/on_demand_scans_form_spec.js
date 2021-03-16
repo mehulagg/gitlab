@@ -12,6 +12,7 @@ import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graph
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import createApolloProvider from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
+import waitForPromises from 'helpers/wait_for_promises';
 import { redirectTo, setUrlParams } from '~/lib/utils/url_utility';
 import RefSelector from '~/ref/components/ref_selector.vue';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
@@ -113,7 +114,6 @@ describe('OnDemandScansForm', () => {
       dastSiteProfiles: jest.fn().mockResolvedValue(responses.dastSiteProfiles()),
       ...handlers,
     };
-
     return createApolloProvider([
       [dastScannerProfilesQuery, requestHandlers.dastScannerProfiles],
       [dastSiteProfilesQuery, requestHandlers.dastSiteProfiles],
@@ -499,13 +499,15 @@ describe('OnDemandScansForm', () => {
   `('when there is a single $profileType profile', ({ query, selector, profiles }) => {
     const [profile] = profiles;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mountShallowSubject(
         {},
         {
           [query]: jest.fn().mockResolvedValue(responses[query]([profile])),
         },
       );
+
+      await waitForPromises();
     });
 
     it('automatically selects the only available profile', () => {
@@ -534,14 +536,17 @@ describe('OnDemandScansForm', () => {
     it('renders all fields correctly', async () => {
       await selectSiteProfile(authEnabledProfile);
       const summary = subject.find(SiteProfileSelector).text();
+      const defaultPassword = '••••••••';
+      const defaultRequestHeaders = '[Redacted]';
 
       expect(summary).toMatch(authEnabledProfile.targetUrl);
       expect(summary).toMatch(authEnabledProfile.excludedUrls.join(','));
-      expect(summary).toMatch(authEnabledProfile.requestHeaders);
       expect(summary).toMatch(authEnabledProfile.auth.url);
       expect(summary).toMatch(authEnabledProfile.auth.username);
       expect(summary).toMatch(authEnabledProfile.auth.usernameField);
       expect(summary).toMatch(authEnabledProfile.auth.passwordField);
+      expect(summary).toMatch(defaultPassword);
+      expect(summary).toMatch(defaultRequestHeaders);
     });
   });
 

@@ -90,7 +90,7 @@ module EE
                 desc: 'Array of Group IDs to set as approvers.'
             end
             put 'approvers' do
-              ::Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/8883')
+              ::Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/8883')
 
               merge_request = find_merge_request_with_access(params[:merge_request_iid], :update_approvers)
 

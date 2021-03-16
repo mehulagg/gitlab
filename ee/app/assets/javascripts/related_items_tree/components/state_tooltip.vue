@@ -38,7 +38,7 @@ export default {
   },
   computed: {
     stateText() {
-      return this.isOpen ? __('Opened') : __('Closed');
+      return this.isOpen ? __('Created') : __('Closed');
     },
     createdAtInWords() {
       return this.getTimestampInWords(this.createdAt);

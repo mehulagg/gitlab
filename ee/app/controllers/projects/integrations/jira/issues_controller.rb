@@ -15,10 +15,6 @@ module Projects
         before_action :check_feature_enabled!
         before_action :check_issues_show_enabled!, only: :show
 
-        before_action do
-          push_frontend_feature_flag(:jira_issues_list, project, type: :development)
-        end
-
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::IntegrationError, with: :render_integration_error
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::RequestError, with: :render_request_error
 

@@ -13,7 +13,6 @@ module Geo
 
     def perform
       return unless Gitlab::Geo.secondary?
-      return unless Feature.enabled?(:geo_secondary_usage_data_collection)
 
       try_obtain_lease do
         SecondaryUsageData.update_metrics!

@@ -8,6 +8,8 @@ module Dast
     belongs_to :dast_site_profile
     belongs_to :dast_scanner_profile
 
+    has_many :secret_variables, through: :dast_site_profile, class_name: 'Dast::SiteProfileSecretVariable'
+
     validates :description, length: { maximum: 255 }
     validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
     validates :branch_name, length: { maximum: 255 }

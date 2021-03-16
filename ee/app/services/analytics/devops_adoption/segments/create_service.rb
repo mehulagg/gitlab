@@ -15,7 +15,7 @@ module Analytics
         def execute
           authorize!
 
-          segment.assign_attributes(attributes)
+          segment.assign_attributes(namespace: namespace)
 
           if segment.save
             Analytics::DevopsAdoption::CreateSnapshotWorker.perform_async(segment.id)
@@ -34,8 +34,8 @@ module Analytics
           { segment: segment }
         end
 
-        def attributes
-          params.slice(:namespace, :namespace_id)
+        def namespace
+          params[:namespace]
         end
       end
     end

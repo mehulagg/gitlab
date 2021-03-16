@@ -250,10 +250,10 @@ RSpec.describe GlobalPolicy do
     let_it_be(:guest) { build_stubbed(:user) }
 
     where(:role, :licensed, :allowed) do
-      :admin      | true  | true
-      :admin      | false | false
-      :guest      | true  | false
-      :guest      | false | false
+      :admin | true | true
+      :admin | false | false
+      :guest | true | false
+      :guest | false | false
     end
 
     with_them do
@@ -307,6 +307,28 @@ RSpec.describe GlobalPolicy do
         end
 
         it { is_expected.to be_allowed(policy) }
+      end
+    end
+  end
+
+  describe ':view_instance_devops_adoption & :manage_devops_adoption_segments', :enable_admin_mode do
+    let(:current_user) { admin }
+
+    context 'when license does not include the feature' do
+      before do
+        stub_licensed_features(instance_level_devops_adoption: false)
+      end
+
+      it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_segments) }
+    end
+
+    context 'when feature is enabled and license include the feature' do
+      it { is_expected.to be_allowed(:view_instance_devops_adoption, :manage_devops_adoption_segments) }
+
+      context 'for non-admins' do
+        let(:current_user) { user }
+
+        it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_segments) }
       end
     end
   end

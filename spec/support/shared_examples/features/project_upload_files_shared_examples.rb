@@ -10,7 +10,7 @@ RSpec.shared_examples 'it uploads and commit a new text file' do
       wait_for_requests
     end
 
-    drop_in_dropzone(File.join(Rails.root, 'spec', 'fixtures', 'doc_sample.txt'))
+    attach_file('upload_file', File.join(Rails.root, 'spec', 'fixtures', 'doc_sample.txt'), make_visible: true)
 
     page.within('#modal-upload-blob') do
       fill_in(:commit_message, with: 'New commit message')
@@ -42,7 +42,7 @@ RSpec.shared_examples 'it uploads and commit a new image file' do
       wait_for_requests
     end
 
-    drop_in_dropzone(File.join(Rails.root, 'spec', 'fixtures', 'logo_sample.svg'))
+    attach_file('upload_file', File.join(Rails.root, 'spec', 'fixtures', 'logo_sample.svg'), make_visible: true)
 
     page.within('#modal-upload-blob') do
       fill_in(:commit_message, with: 'New commit message')
@@ -70,9 +70,11 @@ RSpec.shared_examples 'it uploads and commit a new file to a forked project' do
 
     expect(page).to have_content(fork_message)
 
+    wait_for_all_requests
+
     find('.add-to-tree').click
     click_link('Upload file')
-    drop_in_dropzone(File.join(Rails.root, 'spec', 'fixtures', 'doc_sample.txt'))
+    attach_file('upload_file', File.join(Rails.root, 'spec', 'fixtures', 'doc_sample.txt'), make_visible: true)
 
     page.within('#modal-upload-blob') do
       fill_in(:commit_message, with: 'New commit message')
@@ -95,11 +97,17 @@ RSpec.shared_examples 'it uploads and commit a new file to a forked project' do
   end
 end
 
-RSpec.shared_examples 'uploads and commits a new text file via "upload file" button' do
-  it 'uploads and commits a new text file via "upload file" button', :js do
-    find('.js-upload-file-experiment-trigger', text: 'Upload file').click
+RSpec.shared_examples 'it uploads a file to a sub-directory' do
+  it 'uploads a file to a sub-directory', :js do
+    click_link 'files'
 
-    drop_in_dropzone(File.join(Rails.root, 'spec', 'fixtures', 'doc_sample.txt'))
+    page.within('.repo-breadcrumb') do
+      expect(page).to have_content('files')
+    end
+
+    find('.add-to-tree').click
+    click_link('Upload file')
+    attach_file('upload_file', File.join(Rails.root, 'spec', 'fixtures', 'doc_sample.txt'), make_visible: true)
 
     page.within('#modal-upload-blob') do
       fill_in(:commit_message, with: 'New commit message')
@@ -107,7 +115,26 @@ RSpec.shared_examples 'uploads and commits a new text file via "upload file" but
 
     click_button('Upload file')
 
-    wait_for_requests
+    expect(page).to have_content('New commit message')
+
+    page.within('.repo-breadcrumb') do
+      expect(page).to have_content('files')
+      expect(page).to have_content('doc_sample.txt')
+    end
+  end
+end
+
+RSpec.shared_examples 'uploads and commits a new text file via "upload file" button' do
+  it 'uploads and commits a new text file via "upload file" button', :js do
+    find('[data-testid="upload-file-button"]').click
+
+    attach_file('upload_file', File.join(Rails.root, 'spec', 'fixtures', 'doc_sample.txt'), make_visible: true)
+
+    page.within('#details-modal-upload-blob') do
+      fill_in(:commit_message, with: 'New commit message')
+    end
+
+    click_button('Upload file')
 
     expect(page).to have_content('New commit message')
     expect(page).to have_content('Lorem ipsum dolor sit amet')

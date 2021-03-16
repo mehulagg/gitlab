@@ -29,13 +29,21 @@ module EE
         end
       end
 
+      condition(:instance_devops_adoption_available) do
+        ::License.feature_available?(:instance_level_devops_adoption)
+      end
+
       rule { ~anonymous & operations_dashboard_available }.enable :read_operations_dashboard
+
+      rule { admin & instance_devops_adoption_available }.policy do
+        enable :manage_devops_adoption_segments
+        enable :view_instance_devops_adoption
+      end
 
       rule { admin }.policy do
         enable :read_licenses
         enable :destroy_licenses
         enable :read_all_geo
-        enable :manage_devops_adoption_segments
         enable :manage_subscription
       end
 

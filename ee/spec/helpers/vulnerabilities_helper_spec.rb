@@ -39,10 +39,11 @@ RSpec.describe VulnerabilitiesHelper do
                     :project,
                     :remediations,
                     :solution,
-                    :uuid)
+                    :uuid,
+                    :details)
     end
 
-    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid] }
+    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid details] }
 
     before do
       vulnerability_serializer_stub = instance_double("VulnerabilitySerializer")
@@ -268,7 +269,8 @@ RSpec.describe VulnerabilitiesHelper do
         evidence_source: anything,
         assets: kind_of(Array),
         supporting_messages: kind_of(Array),
-        uuid: kind_of(String)
+        uuid: kind_of(String),
+        details: kind_of(Hash)
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))

@@ -442,7 +442,7 @@ describe('Grouped security reports app', () => {
     });
 
     it('renders', () => {
-      expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(true);
+      expect(wrapper.find('.js-coverage-fuzzing-widget').exists()).toBe(true);
     });
   });
 
@@ -556,7 +556,7 @@ describe('Grouped security reports app', () => {
     });
 
     it('shows the scanned URLs count and opens a modal', async () => {
-      const jobLink = wrapper.find('[data-qa-selector="dast-ci-job-link"]');
+      const jobLink = wrapper.find('[data-testid="dast-ci-job-link"]');
 
       expect(wrapper.text()).toContain('211 URLs scanned');
       expect(jobLink.exists()).toBe(true);
@@ -596,7 +596,7 @@ describe('Grouped security reports app', () => {
 
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         expect(wrapper.text()).not.toContain('0 URLs scanned');
-        expect(wrapper.find('[data-qa-selector="dast-ci-job-link"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="dast-ci-job-link"]').exists()).toBe(false);
       });
     });
   });
@@ -624,7 +624,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should render the component', () => {
-        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(true);
+        expect(wrapper.find('[data-testid="secret-scan-report"]').exists()).toBe(true);
       });
 
       it('should set diffEndpoint', () => {
@@ -646,7 +646,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not render the component', () => {
-        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="secret-scan-report"]').exists()).toBe(false);
       });
     });
   });

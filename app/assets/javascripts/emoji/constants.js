@@ -1,8 +1,12 @@
+export const FREQUENTLY_USED_KEY = 'frequently_used';
+export const FREQUENTLY_USED_COOKIE_KEY = 'frequently_used_emojis';
+
 export const CATEGORY_ICON_MAP = {
-  activity: 'dumbbell',
+  [FREQUENTLY_USED_KEY]: 'history',
   people: 'smiley',
   nature: 'nature',
   food: 'food',
+  activity: 'dumbbell',
   travel: 'car',
   objects: 'object',
   symbols: 'heart',

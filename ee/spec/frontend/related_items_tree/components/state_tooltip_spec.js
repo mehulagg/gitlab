@@ -48,13 +48,13 @@ describe('RelatedItemsTree', () => {
 
     describe('computed', () => {
       describe('stateText', () => {
-        it('returns string `Opened` when `isOpen` prop is true', () => {
+        it('returns string `Created` when `isOpen` prop is true', () => {
           wrapper.setProps({
             isOpen: true,
           });
 
           return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateText).toBe('Opened');
+            expect(wrapper.vm.stateText).toBe('Created');
           });
         });
 

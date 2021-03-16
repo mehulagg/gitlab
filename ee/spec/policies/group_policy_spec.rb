@@ -90,7 +90,7 @@ RSpec.describe GroupPolicy do
       stub_licensed_features(iterations: false)
     end
 
-    it { is_expected.to be_disallowed(:read_iteration, :create_iteration, :admin_iteration, :create_iteration_cadence) }
+    it { is_expected.to be_disallowed(:read_iteration, :create_iteration, :admin_iteration, :create_iteration_cadence, :admin_iteration_cadence) }
   end
 
   context 'when iterations feature is enabled' do
@@ -101,14 +101,14 @@ RSpec.describe GroupPolicy do
     context 'when user is a developer' do
       let(:current_user) { developer }
 
-      it { is_expected.to be_allowed(:read_iteration, :create_iteration, :admin_iteration, :read_iteration_cadence, :create_iteration_cadence) }
+      it { is_expected.to be_allowed(:read_iteration, :create_iteration, :admin_iteration, :read_iteration_cadence, :create_iteration_cadence, :admin_iteration_cadence) }
     end
 
     context 'when user is a guest' do
       let(:current_user) { guest }
 
       it { is_expected.to be_allowed(:read_iteration, :read_iteration_cadence) }
-      it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iteration_cadence) }
+      it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iteration_cadence, :admin_iteration_cadence) }
     end
 
     context 'when user is logged out' do
@@ -124,7 +124,7 @@ RSpec.describe GroupPolicy do
         let(:current_user) { nil }
 
         it { is_expected.to be_allowed(:read_iteration, :read_iteration_cadence) }
-        it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iteration_cadence) }
+        it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iteration_cadence, :admin_iteration_cadence) }
       end
     end
   end
@@ -1569,7 +1569,7 @@ RSpec.describe GroupPolicy do
   end
 
   describe 'compliance framework permissions' do
-    shared_context 'compliance framework permissions' do
+    shared_examples 'compliance framework permissions' do
       using RSpec::Parameterized::TableSyntax
 
       where(:role, :licensed, :feature_flag, :admin_mode, :allowed) do
@@ -1590,7 +1590,7 @@ RSpec.describe GroupPolicy do
 
         before do
           stub_licensed_features(licensed_feature => licensed)
-          stub_feature_flags(ff_custom_compliance_frameworks: feature_flag)
+          stub_feature_flags(feature_flag_name => feature_flag)
           enable_admin_mode!(current_user) if admin_mode
         end
 
@@ -1601,15 +1601,17 @@ RSpec.describe GroupPolicy do
     context ':admin_compliance_framework' do
       let(:policy) { :admin_compliance_framework }
       let(:licensed_feature) { :custom_compliance_frameworks }
+      let(:feature_flag_name) { :ff_custom_compliance_frameworks }
 
-      include_context 'compliance framework permissions'
+      include_examples 'compliance framework permissions'
     end
 
     context ':admin_compliance_pipeline_configuration' do
       let(:policy) { :admin_compliance_pipeline_configuration }
       let(:licensed_feature) { :evaluate_group_level_compliance_pipeline }
+      let(:feature_flag_name) { :ff_evaluate_group_level_compliance_pipeline }
 
-      include_context 'compliance framework permissions'
+      include_examples 'compliance framework permissions'
     end
   end
 

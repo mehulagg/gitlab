@@ -85,6 +85,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
   context 'Manual ordering' do
     before do
+      stub_feature_flags(value_stream_analytics_path_navigation: false)
       select_group(group)
     end
 
@@ -150,25 +151,6 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       context 'dragging stages in the middle', :js do
         it_behaves_like 'draggable stage', default_custom_stage_order, stages_near_middle_swapped, 2, 3
       end
-    end
-  end
-
-  context 'Add a stage button' do
-    before do
-      select_group(group)
-    end
-
-    it 'displays the custom stage form when clicked' do
-      expect(page).not_to have_text(s_('CustomCycleAnalytics|New stage'))
-
-      expect(page).to have_selector(add_stage_button, visible: true)
-      expect(page).to have_text(s_('CustomCycleAnalytics|Add a stage'))
-      expect(page).not_to have_selector("#{add_stage_button}.active")
-
-      page.find(add_stage_button).click
-
-      expect(page).to have_selector("#{add_stage_button}.active")
-      expect(page).to have_text(s_('CustomCycleAnalytics|New stage'))
     end
   end
 
@@ -309,57 +291,81 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     end
   end
 
-  context 'with a group' do
-    context 'selected' do
+  context 'With the path navigation feature flag disabled' do
+    before do
+      stub_feature_flags(value_stream_analytics_path_navigation: false)
+    end
+
+    context 'with a group' do
+      context 'selected' do
+        before do
+          select_group(group)
+        end
+
+        it_behaves_like 'can create custom stages' do
+          let(:first_label) { group_label1 }
+          let(:second_label) { group_label2 }
+          let(:other_label) { label }
+        end
+      end
+
+      context 'with a custom stage created', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273045' do
+        before do
+          create_custom_stage
+          select_group(group)
+
+          expect(page).to have_text custom_stage_name
+        end
+
+        it_behaves_like 'can edit custom stages'
+      end
+    end
+
+    context 'with a sub group' do
+      context 'selected' do
+        before do
+          select_group(sub_group)
+        end
+
+        it_behaves_like 'can create custom stages' do
+          let(:first_label) { sub_group_label1 }
+          let(:second_label) { sub_group_label2 }
+          let(:other_label) { label }
+        end
+      end
+
+      context 'with a custom stage created' do
+        before do
+          create_custom_stage(sub_group)
+          select_group(sub_group)
+
+          expect(page).to have_text custom_stage_name
+        end
+
+        it_behaves_like 'can edit custom stages'
+      end
+    end
+
+    context 'Add a stage button' do
       before do
+        stub_feature_flags(value_stream_analytics_path_navigation: false)
         select_group(group)
       end
 
-      it_behaves_like 'can create custom stages' do
-        let(:first_label) { group_label1 }
-        let(:second_label) { group_label2 }
-        let(:other_label) { label }
+      it 'displays the custom stage form when clicked' do
+        expect(page).not_to have_text(s_('CustomCycleAnalytics|New stage'))
+
+        expect(page).to have_selector(add_stage_button, visible: true)
+        expect(page).to have_text(s_('CustomCycleAnalytics|Add a stage'))
+        expect(page).not_to have_selector("#{add_stage_button}.active")
+
+        page.find(add_stage_button).click
+
+        expect(page).to have_selector("#{add_stage_button}.active")
+        expect(page).to have_text(s_('CustomCycleAnalytics|New stage'))
       end
     end
 
-    context 'with a custom stage created', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273045' do
-      before do
-        create_custom_stage
-        select_group(group)
-
-        expect(page).to have_text custom_stage_name
-      end
-
-      it_behaves_like 'can edit custom stages'
-    end
-  end
-
-  context 'with a sub group' do
-    context 'selected' do
-      before do
-        select_group(sub_group)
-      end
-
-      it_behaves_like 'can create custom stages' do
-        let(:first_label) { sub_group_label1 }
-        let(:second_label) { sub_group_label2 }
-        let(:other_label) { label }
-      end
-    end
-
-    context 'with a custom stage created' do
-      before do
-        create_custom_stage(sub_group)
-        select_group(sub_group)
-
-        expect(page).to have_text custom_stage_name
-      end
-
-      it_behaves_like 'can edit custom stages'
-    end
-  end
-
-  context 'Stage table' do
     context 'default stages' do
       def open_recover_stage_dropdown
         find(add_stage_button).click
@@ -371,6 +377,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       end
 
       before do
+        stub_feature_flags(value_stream_analytics_path_navigation: false)
         select_group(group)
 
         toggle_more_options(first_default_stage)
@@ -422,6 +429,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
     context 'custom stages' do
       before do
+        stub_feature_flags(value_stream_analytics_path_navigation: false)
         create_custom_stage
         select_group(group)
 
@@ -478,6 +486,8 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
     context 'hidden stage' do
       before do
+        stub_feature_flags(value_stream_analytics_path_navigation: false)
+        select_group(group)
         toggle_more_options(first_default_stage)
 
         click_button(_('Hide stage'))

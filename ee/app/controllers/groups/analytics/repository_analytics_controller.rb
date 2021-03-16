@@ -12,7 +12,7 @@ class Groups::Analytics::RepositoryAnalyticsController < Groups::Analytics::Appl
   end
 
   def show
-    track_event(**pageview_tracker_params)
+    Gitlab::Tracking.event(self.class.name, 'show', **pageview_tracker_params)
   end
 
   private

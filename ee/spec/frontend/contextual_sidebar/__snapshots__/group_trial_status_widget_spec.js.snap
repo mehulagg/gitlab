@@ -2,6 +2,9 @@
 
 exports[`TrialStatusWidget component without the optional containerId prop matches the snapshot 1`] = `
 <gl-link-stub
+  data-track-event="click_link"
+  data-track-label="trial_status_widget"
+  data-track-property="experiment:show_trial_status_in_sidebar"
   href="billing/path-for/group"
   title="Ultimate Trial – 20 days left"
 >

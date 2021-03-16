@@ -65,8 +65,7 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = [], requestHeaders = '', auth = {} } =
-      this.siteProfile || {};
+    const { name = '', targetUrl = '', excludedUrls = [], auth = {} } = this.siteProfile || {};
 
     const form = {
       state: false,
@@ -80,7 +79,7 @@ export default {
           skipValidation: true,
         }),
         requestHeaders: initFormField({
-          value: requestHeaders,
+          value: '',
           required: false,
           skipValidation: true,
         }),
@@ -107,6 +106,9 @@ export default {
   computed: {
     isEdit() {
       return Boolean(this.siteProfile?.id);
+    },
+    hasRequestHeaders() {
+      return Boolean(this.siteProfile?.requestHeaders);
     },
     i18n() {
       const { isEdit } = this;
@@ -138,8 +140,10 @@ export default {
           tooltip: s__(
             'DastProfiles|Request header names and values. Headers are added to every request made by DAST.',
           ),
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          placeholder: 'Cache-control: no-cache, User-Agent: DAST/1.0',
+          placeholder: this.hasRequestHeaders
+            ? __('[Redacted]')
+            : // eslint-disable-next-line @gitlab/require-i18n-strings
+              'Cache-control: no-cache, User-Agent: DAST/1.0',
         },
       };
     },

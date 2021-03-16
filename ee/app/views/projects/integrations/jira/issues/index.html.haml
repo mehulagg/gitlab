@@ -1,23 +1,10 @@
 - page_title _('Jira Issues')
 - add_page_specific_style 'page_bundles/issues_list'
 
-- if Feature.enabled?(:jira_issues_list, @project, type: :development)
-  #js-jira-issues-list{ data: { issues_fetch_path: project_integrations_jira_issues_path(@project, format: :json),
-    page: params[:page],
-    initial_state: params[:state],
-    initial_sort_by: params[:sort],
-    project_full_path: @project.full_path,
-    issue_create_url: @project.external_issue_tracker.new_issue_url,
-    empty_state_path: image_path('illustrations/issues.svg') } }
-- else
-  .top-area.gl-border-b-0.gl-mt-6
-    = render 'shared/issuable/nav', type: :issues, display_count: false
-    = render 'projects/integrations/jira/issues/nav_btns'
-
-  .js-issuables-list{ data: { endpoint: project_integrations_jira_issues_path(@project, format: :json),
-    'can-bulk-edit': false,
-    'empty-state-meta': { svg_path: image_path('illustrations/issues.svg') },
-    'sort-key': @sort,
-    type: 'jira',
-    'project-path': @project.full_path,
-    'scoped-labels-available': scoped_labels_available?(@project).to_json } }
+.js-jira-issues-list{ data: { issues_fetch_path: project_integrations_jira_issues_path(@project, format: :json),
+  page: params[:page],
+  initial_state: params[:state],
+  initial_sort_by: params[:sort],
+  project_full_path: @project.full_path,
+  issue_create_url: @project.external_issue_tracker.new_issue_url,
+  empty_state_path: image_path('illustrations/issues.svg') } }

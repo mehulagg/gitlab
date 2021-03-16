@@ -115,7 +115,7 @@ module API
         at_least_one_of :title, :description, :start_date_fixed, :start_date_is_fixed, :due_date_fixed, :due_date_is_fixed, :labels, :add_labels, :remove_labels, :state_event, :confidential
       end
       put ':id/(-/)epics/:epic_iid' do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/194104')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/194104')
 
         authorize_can_admin_epic!
 

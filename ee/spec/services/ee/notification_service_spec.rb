@@ -655,7 +655,7 @@ RSpec.describe EE::NotificationService, :mailer do
 
       shared_examples 'is not able to send notifications' do
         it 'does not send any notification' do
-          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: epic.class, object_id: epic.id)
+          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: epic.class.to_s, object_id: epic.id)
 
           execute
 

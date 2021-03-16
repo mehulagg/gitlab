@@ -1,9 +1,9 @@
 [{
     "id": "gid://gitlab/IncidentManagement::OncallRotation/2",
     "name": "Rotation 242",
-    "startsAt": "2021-01-13T10:04:56.333Z",
-    "endsAt": "2021-03-13T10:04:56.333Z",
-    "length": 1,
+    "startsAt": "2021-01-13T11:04:56.333Z",
+    "endsAt": "2021-03-13T15:04:56.333Z",
+    "length": 2,
     "lengthUnit": "WEEKS",
     "activePeriod": {
       "startTime": "02:00",
@@ -15,7 +15,8 @@
           "user": {
             "id": "gid://gitlab/IncidentManagement::OncallParticipant/49",
             "username": "nora.schaden",
-            "avatarUrl": "/url"
+            "avatarUrl": "/url",
+            "name": "nora"
           },
           "colorWeight": "500",
           "colorPalette": "blue"
@@ -32,7 +33,8 @@
             "user": {
               "id": "1",
               "username": "nora.schaden",
-              "avatarUrl": "/url"
+              "avatarUrl": "/url",
+              "name": "nora"
             }
           },
           "startsAt": "2021-01-12T10:04:56.333Z",
@@ -46,7 +48,8 @@
             "user": {
               "id": "2",
               "username": "racheal.loving",
-              "avatarUrl": "/url"
+              "avatarUrl": "/url",
+              "name": "racheal"
             }
           },
           "startsAt": "2021-01-16T10:04:56.333Z",
@@ -58,8 +61,8 @@
   {
     "id": "gid://gitlab/IncidentManagement::OncallRotation/55",
     "name": "Rotation 242",
-    "startsAt": "2021-01-13T10:04:56.333Z",
-    "endsAt": "2021-03-13T10:04:56.333Z",
+    "startsAt": "2021-01-13T11:04:56.333Z",
+    "endsAt": "2021-03-13T15:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
     "activePeriod": {
@@ -72,7 +75,8 @@
           "user": {
             "id": "gid://gitlab/IncidentManagement::OncallParticipant/99",
             "username": "david.oregan",
-            "avatarUrl": "/url"
+            "avatarUrl": "/url",
+            "name": "david"
           },
           "colorWeight": "500",
           "colorPalette": "aqua"
@@ -87,7 +91,8 @@
             "colorWeight": "500",
             "colorPalette": "aqua",
             "user": {
-              "username": "david.oregan"
+              "username": "david.oregan",
+              "name": "david"
             }
           },
           "startsAt": "2021-01-14T10:04:56.333Z",
@@ -99,7 +104,8 @@
             "colorWeight": "500",
             "colorPalette": "green",
             "user": {
-              "username": "david.keagan"
+              "username": "david.keagan",
+              "name": "david k"
             }
           },
           "startsAt": "2021-01-21T10:04:56.333Z",
@@ -125,7 +131,8 @@
           "user": {
             "id": "gid://gitlab/IncidentManagement::OncallParticipant/48",
             "username": "root",
-            "avatarUrl": "/url"
+            "avatarUrl": "/url",
+            "name": "Administrator"
           },
           "colorWeight": "500",
           "colorPalette": "magenta"
@@ -140,11 +147,12 @@
             "colorWeight": "500",
             "colorPalette": "magenta",
             "user": {
-              "username": "root"
+              "username": "root",
+              "name": "Administrator"
             }
           },
           "startsAt": "2021-01-10T10:04:56.333Z",
-          "endsAt": "2021-01-13T10:04:56.333Z"
+          "endsAt": "2021-01-13T11:04:56.333Z"
         },
         {
           "participant": {
@@ -152,7 +160,8 @@
             "colorWeight": "600",
             "colorPalette": "blue",
             "user": {
-              "username": "root2"
+              "username": "root2",
+              "name": "Administrator 2"
             }
           },
           "startsAt": "2021-01-15T10:04:56.333Z",
@@ -178,7 +187,8 @@
         "user": {
           "id": "gid://gitlab/IncidentManagement::OncallParticipant/51",
           "username": "oregand",
-          "avatarUrl": "/url"
+          "avatarUrl": "/url",
+          "name": "david"
         },
         "colorWeight": "600",
         "colorPalette": "orange"
@@ -193,7 +203,8 @@
           "colorWeight": "600",
           "colorPalette": "orange",
           "user": {
-            "username": "oregand"
+            "username": "oregand",
+            "name": "david"
           }
         },
         "startsAt": "2021-01-12T10:04:56.333Z",
@@ -205,7 +216,8 @@
           "colorWeight": "600",
           "colorPalette": "aqua",
           "user": {
-            "username": "sarah.w"
+            "username": "sarah.w",
+            "name": "sarah"
           }
         },
         "startsAt": "2021-01-16T10:04:56.333Z",

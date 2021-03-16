@@ -120,16 +120,6 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
           travel_to(existing_shift.ends_at + (3 * rotation.shift_cycle_duration)) { example.run }
         end
 
-        context 'when feature flag is not enabled' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it 'does not create shifts' do
-            expect { perform }.not_to change { IncidentManagement::OncallShift.count }
-          end
-        end
-
         it 'creates multiple shifts' do
           expect { perform }.to change { rotation.shifts.count }.by(3)
 

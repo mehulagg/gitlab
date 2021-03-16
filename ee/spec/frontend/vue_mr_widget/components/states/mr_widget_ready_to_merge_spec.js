@@ -78,7 +78,7 @@ describe('ReadyToMerge', () => {
   const findResolveItemsMessage = () => wrapper.find(GlSprintf);
   const findPipelineConflictMessage = () =>
     wrapper.find('[data-testid="pipeline-succeed-conflict"]');
-  const findMergeButton = () => wrapper.find('.qa-merge-button');
+  const findMergeButton = () => wrapper.find('[data-testid="merge-button"]');
   const findMergeButtonDropdown = () => wrapper.find('.js-merge-moment');
   const findMergeImmediatelyButton = () => wrapper.find('.js-merge-immediately-button');
   const findMergeTrainHelperText = () => wrapper.find(MergeTrainHelperText);

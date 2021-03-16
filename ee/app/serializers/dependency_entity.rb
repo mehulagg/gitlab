@@ -13,7 +13,7 @@ class DependencyEntity < Grape::Entity
   end
 
   class VulnerabilityEntity < Grape::Entity
-    expose :name, :severity
+    expose :name, :severity, :id, :url
   end
 
   class LicenseEntity < Grape::Entity

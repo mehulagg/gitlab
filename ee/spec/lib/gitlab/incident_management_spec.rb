@@ -10,18 +10,9 @@ RSpec.describe Gitlab::IncidentManagement do
 
     before do
       stub_licensed_features(oncall_schedules: true)
-      stub_feature_flags(oncall_schedules_mvc: project)
     end
 
     it { is_expected.to be_truthy }
-
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(oncall_schedules_mvc: false)
-      end
-
-      it { is_expected.to be_falsey }
-    end
 
     context 'when there is no license' do
       before do

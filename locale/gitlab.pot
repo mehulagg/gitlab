@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-msgid " %{project_name}#%{issuable_iid} &middot; opened %{issuable_created} by %{author} &middot; updated %{issuable_updated}"
+msgid " %{project_name}#%{issuable_iid} &middot; created %{issuable_created} by %{author} &middot; updated %{issuable_updated}"
 msgstr ""
 
 msgid " %{start} to %{end}"
@@ -205,6 +205,11 @@ msgstr[1] ""
 
 msgid "%d failed security job"
 msgid_plural "%d failed security jobs"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%d file"
+msgid_plural "%d files"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -537,7 +542,7 @@ msgstr ""
 msgid "%{group_name} uses group managed accounts. You need to create a new GitLab account which will be managed by %{group_name}."
 msgstr ""
 
-msgid "%{group_name}&%{epic_iid} &middot; opened %{epic_created} by %{author}"
+msgid "%{group_name}&%{epic_iid} &middot; created %{epic_created} by %{author}"
 msgstr ""
 
 msgid "%{hook_type} was deleted"
@@ -4875,6 +4880,11 @@ msgstr ""
 msgid "Boards and Board Lists"
 msgstr ""
 
+msgid "Boards|+ %{displayedIssuablesCount} more %{issuableType}"
+msgid_plural "Boards|+ %{displayedIssuablesCount} more %{issuableType}s"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Boards|An error occurred while creating the issue. Please try again."
 msgstr ""
 
@@ -4917,6 +4927,11 @@ msgstr ""
 msgid "Boards|An error occurred while updating the list. Please try again."
 msgstr ""
 
+msgid "Boards|Blocked by %{blockedByCount} %{issuableType}"
+msgid_plural "Boards|Blocked by %{blockedByCount} %{issuableType}s"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Boards|Board"
 msgstr ""
 
@@ -4927,6 +4942,15 @@ msgid "Boards|Edit board"
 msgstr ""
 
 msgid "Boards|Expand"
+msgstr ""
+
+msgid "Boards|Failed to fetch blocking %{issuableType}s"
+msgstr ""
+
+msgid "Boards|Retrieving blocking %{issuableType}s"
+msgstr ""
+
+msgid "Boards|View all blocking %{issuableType}s"
 msgstr ""
 
 msgid "Boards|View scope"
@@ -5495,6 +5519,9 @@ msgstr ""
 msgid "Canceled deployment to"
 msgstr ""
 
+msgid "Cancelled"
+msgstr ""
+
 msgid "Cancelling Preview"
 msgstr ""
 
@@ -5642,6 +5669,9 @@ msgstr ""
 msgid "ChangeTypeAction|Pick into branch"
 msgstr ""
 
+msgid "ChangeTypeAction|Pick into project"
+msgstr ""
+
 msgid "ChangeTypeAction|Revert"
 msgstr ""
 
@@ -5651,10 +5681,16 @@ msgstr ""
 msgid "ChangeTypeAction|Search branches"
 msgstr ""
 
+msgid "ChangeTypeAction|Search projects"
+msgstr ""
+
 msgid "ChangeTypeAction|Start a %{newMergeRequest} with these changes"
 msgstr ""
 
 msgid "ChangeTypeAction|Switch branch"
+msgstr ""
+
+msgid "ChangeTypeAction|Switch project"
 msgstr ""
 
 msgid "ChangeTypeAction|This will create a new commit in order to revert the existing changes."
@@ -8014,7 +8050,7 @@ msgstr ""
 msgid "Container does not exist"
 msgstr ""
 
-msgid "Container must be a project."
+msgid "Container must be a project or a group."
 msgstr ""
 
 msgid "Container registry images"
@@ -8811,9 +8847,6 @@ msgstr ""
 msgid "Create new file or directory"
 msgstr ""
 
-msgid "Create new issue in Jira"
-msgstr ""
-
 msgid "Create new label"
 msgstr ""
 
@@ -8989,6 +9022,9 @@ msgid "CreateValueStreamForm|Value Stream name"
 msgstr ""
 
 msgid "Created"
+msgstr ""
+
+msgid "Created %{epicTimeagoDate}"
 msgstr ""
 
 msgid "Created %{timestamp}"
@@ -10640,10 +10676,7 @@ msgstr ""
 msgid "DevOps Report"
 msgstr ""
 
-msgid "DevopsAdoption|%{selectedCount} group selected"
-msgstr ""
-
-msgid "DevopsAdoption|%{selectedCount} groups selected"
+msgid "DevopsAdoption|Add / remove groups"
 msgstr ""
 
 msgid "DevopsAdoption|Add Group"
@@ -10658,7 +10691,7 @@ msgstr ""
 msgid "DevopsAdoption|An error occurred while removing the group. Please try again."
 msgstr ""
 
-msgid "DevopsAdoption|An error occurred while saving the group. Please try again."
+msgid "DevopsAdoption|An error occurred while saving changes. Please try again."
 msgstr ""
 
 msgid "DevopsAdoption|Approvals"
@@ -11168,6 +11201,9 @@ msgid "Edit files in the editor and commit changes here"
 msgstr ""
 
 msgid "Edit fork in Web IDE"
+msgstr ""
+
+msgid "Edit group application"
 msgstr ""
 
 msgid "Edit group: %{group_name}"
@@ -13218,10 +13254,10 @@ msgstr ""
 msgid "Filter by %{issuable_type} that are currently closed."
 msgstr ""
 
-msgid "Filter by %{issuable_type} that are currently opened."
+msgid "Filter by %{issuable_type} that are currently open."
 msgstr ""
 
-msgid "Filter by %{page_context_word} that are currently opened."
+msgid "Filter by %{page_context_word} that are currently open."
 msgstr ""
 
 msgid "Filter by Git revision"
@@ -13254,7 +13290,7 @@ msgstr ""
 msgid "Filter by test cases that are currently archived."
 msgstr ""
 
-msgid "Filter by test cases that are currently opened."
+msgid "Filter by test cases that are currently open."
 msgstr ""
 
 msgid "Filter by two-factor authentication"
@@ -14520,6 +14556,12 @@ msgstr ""
 msgid "Group Wikis"
 msgstr ""
 
+msgid "Group application: %{name}"
+msgstr ""
+
+msgid "Group applications"
+msgstr ""
+
 msgid "Group avatar"
 msgstr ""
 
@@ -15706,6 +15748,9 @@ msgid_plural "Importing %d repositories"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Importing..."
+msgstr ""
+
 msgid "Improve customer support with Service Desk"
 msgstr ""
 
@@ -16837,6 +16882,9 @@ msgid "InviteMember|Add members to this project and start collaborating with you
 msgstr ""
 
 msgid "InviteMember|Don't worry, you can always invite teammates later"
+msgstr ""
+
+msgid "InviteMember|Invite Member"
 msgstr ""
 
 msgid "InviteMember|Invite Members (optional)"
@@ -18509,6 +18557,9 @@ msgid "Manage all notifications"
 msgstr ""
 
 msgid "Manage applications that can use GitLab as an OAuth provider, and applications that you've authorized to use your account."
+msgstr ""
+
+msgid "Manage applications that can use GitLab as an OAuth provider."
 msgstr ""
 
 msgid "Manage applications that you've authorized to use your account."
@@ -21479,9 +21530,6 @@ msgid "Open: %{open}"
 msgstr ""
 
 msgid "Opened"
-msgstr ""
-
-msgid "Opened %{epicTimeagoDate}"
 msgstr ""
 
 msgid "Opened MRs"
@@ -26292,9 +26340,6 @@ msgstr ""
 msgid "Running"
 msgstr ""
 
-msgid "Running…"
-msgstr ""
-
 msgid "Runs a number of housekeeping tasks within the current repository, such as compressing file revisions and removing unreachable objects."
 msgstr ""
 
@@ -26434,9 +26479,6 @@ msgid "Schedules"
 msgstr ""
 
 msgid "Schedules to merge this merge request (%{strategy})."
-msgstr ""
-
-msgid "Scheduling"
 msgstr ""
 
 msgid "Scheduling Pipelines"
@@ -35118,7 +35160,7 @@ msgstr ""
 msgid "[No reason]"
 msgstr ""
 
-msgid "[Unchanged]"
+msgid "[Redacted]"
 msgstr ""
 
 msgid "`end_time` should not exceed one month after `start_time`"
@@ -36045,9 +36087,6 @@ msgstr ""
 msgid "mrWidget|Fork project merge requests do not create merge request pipelines that validate a post merge result unless invoked by a project member."
 msgstr ""
 
-msgid "mrWidget|If the %{branch} branch exists in your local repository, you can merge this merge request manually using the"
-msgstr ""
-
 msgid "mrWidget|If the %{missingBranchName} branch exists in your local repository, you can merge this merge request manually using the command line"
 msgstr ""
 
@@ -36198,16 +36237,10 @@ msgstr ""
 msgid "mrWidget|You can merge after removing denied licenses"
 msgstr ""
 
-msgid "mrWidget|You can merge this merge request manually using the"
-msgstr ""
-
 msgid "mrWidget|Your password"
 msgstr ""
 
 msgid "mrWidget|branch does not exist."
-msgstr ""
-
-msgid "mrWidget|command line"
 msgstr ""
 
 msgid "mrWidget|into"

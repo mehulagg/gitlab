@@ -38,7 +38,6 @@ import {
   ERROR_MESSAGES,
   SCANNER_PROFILES_QUERY,
   SITE_PROFILES_QUERY,
-  SITE_PROFILES_EXTENDED_QUERY,
   TYPE_SITE_PROFILE,
   TYPE_SCANNER_PROFILE,
 } from '../settings';
@@ -101,15 +100,11 @@ export default {
       'selectedScannerProfileId',
       SCANNER_PROFILES_QUERY,
     ),
-    siteProfiles() {
-      return createProfilesApolloOptions(
-        'siteProfiles',
-        'selectedSiteProfileId',
-        this.glFeatures.securityDastSiteProfilesAdditionalFields
-          ? SITE_PROFILES_EXTENDED_QUERY
-          : SITE_PROFILES_QUERY,
-      );
-    },
+    siteProfiles: createProfilesApolloOptions(
+      'siteProfiles',
+      'selectedSiteProfileId',
+      SITE_PROFILES_QUERY,
+    ),
   },
   inject: {
     dastSiteValidationDocsPath: {
@@ -232,6 +227,9 @@ export default {
         selectedScannerProfileId,
         selectedSiteProfileId,
       };
+    },
+    hasExcludedUrls() {
+      return this.selectedSiteProfile.excludedUrls?.length > 0;
     },
   },
   created() {
@@ -499,6 +497,10 @@ export default {
                   :label="s__('DastProfiles|Username')"
                   :value="selectedSiteProfile.auth.username"
                 />
+                <profile-selector-summary-cell
+                  :label="s__('DastProfiles|Password')"
+                  value="••••••••"
+                />
               </div>
               <div class="row">
                 <profile-selector-summary-cell
@@ -513,12 +515,14 @@ export default {
             </template>
             <div class="row">
               <profile-selector-summary-cell
+                v-if="hasExcludedUrls"
                 :label="s__('DastProfiles|Excluded URLs')"
                 :value="selectedSiteProfile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
               />
               <profile-selector-summary-cell
+                v-if="selectedSiteProfile.requestHeaders"
                 :label="s__('DastProfiles|Request headers')"
-                :value="selectedSiteProfile.requestHeaders"
+                :value="__('[Redacted]')"
               />
             </div>
           </template>

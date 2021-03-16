@@ -6,31 +6,44 @@ module Resolvers
       module DevopsAdoption
         class SegmentsResolver < BaseResolver
           include Gitlab::Graphql::Authorize::AuthorizeResource
+          include Gitlab::Allowable
 
           type Types::Admin::Analytics::DevopsAdoption::SegmentType, null: true
 
-          def resolve
-            authorize!
+          argument :parent_namespace_id, ::Types::GlobalIDType[::Namespace],
+                   required: false,
+                   description: 'Filter by ancestor namespace.'
 
-            if segments_feature_available?
-              ::Analytics::DevopsAdoption::Segment.ordered_by_name
-            else
-              ::Analytics::DevopsAdoption::Segment.none
-            end
+          argument :direct_descendants_only, ::GraphQL::BOOLEAN_TYPE,
+                   required: false,
+                   description: 'Limits segments to direct descendants of specified parent.'
+
+          def resolve(parent_namespace_id: nil, direct_descendants_only: false, **)
+            parent = GlobalID::Locator.locate(parent_namespace_id) if parent_namespace_id
+
+            authorize!(parent)
+
+            ::Analytics::DevopsAdoption::SegmentsFinder.new(current_user, params: {
+              parent_namespace: parent, direct_descendants_only: direct_descendants_only
+            }).execute
           end
 
           private
 
-          def segments_feature_available?
-            License.feature_available?(:instance_level_devops_adoption)
+          def authorize!(parent)
+            parent ? authorize_with_namespace!(parent) : authorize_global!
           end
 
-          def authorize!
-            admin? || raise_resource_not_available_error!
+          def authorize_global!
+            unless can?(current_user, :view_instance_devops_adoption)
+              raise_resource_not_available_error!
+            end
           end
 
-          def admin?
-            context[:current_user].present? && context[:current_user].admin?
+          def authorize_with_namespace!(parent)
+            unless can?(current_user, :view_group_devops_adoption, parent)
+              raise_resource_not_available_error!
+            end
           end
         end
       end

@@ -7,6 +7,8 @@ import TrialStatusPopover from 'ee/contextual_sidebar/components/trial_status_po
 describe('TrialStatusPopover component', () => {
   let wrapper;
 
+  const getGlButton = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+
   const createComponent = () => {
     return shallowMount(TrialStatusPopover, {
       propsData: {
@@ -31,6 +33,20 @@ describe('TrialStatusPopover component', () => {
 
   it('matches the snapshot', () => {
     expect(wrapper.element).toMatchSnapshot();
+  });
+
+  it('renders the upgrade button with correct tracking data attrs', () => {
+    const attrs = getGlButton('upgradeBtn').attributes();
+    expect(attrs['data-track-event']).toBe('click_button');
+    expect(attrs['data-track-label']).toBe('upgrade_to_ultimate');
+    expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
+  });
+
+  it('renders the compare plans button with correct tracking data attrs', () => {
+    const attrs = getGlButton('compareBtn').attributes();
+    expect(attrs['data-track-event']).toBe('click_button');
+    expect(attrs['data-track-label']).toBe('compare_all_plans');
+    expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
   });
 
   describe('methods', () => {

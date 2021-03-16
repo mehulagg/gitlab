@@ -54,6 +54,7 @@ RSpec.describe 'Value stream analytics charts', :js do
     end
 
     before do
+      stub_feature_flags(value_stream_analytics_path_navigation: false)
       select_group(group)
     end
 

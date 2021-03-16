@@ -89,6 +89,7 @@ export default {
   methods: {
     setRotationToUpdate(rotation) {
       this.rotationToUpdate = rotation;
+      this.$emit('set-rotation-to-update', rotation);
     },
     cellShouldHideOverflow(index) {
       return index + 1 === this.timeframe.length || this.presetIsDay;
@@ -126,11 +127,9 @@ export default {
         >
           <span class="gl-text-truncated">{{ rotation.name }}</span>
           <gl-button-group class="gl-px-2">
-            <!-- TODO: Un-hide this button when: https://gitlab.com/gitlab-org/gitlab/-/issues/262862 is completed -->
             <gl-button
               v-gl-modal="$options.editRotationModalId"
               v-gl-tooltip
-              class="gl-display-none"
               category="tertiary"
               :title="$options.i18n.editRotationLabel"
               icon="pencil"

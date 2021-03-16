@@ -9,6 +9,11 @@ import Tracking from '~/tracking';
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
 
 export default {
+  tracking: {
+    event: 'click_button',
+    labels: { upgrade: 'upgrade_to_ultimate', compare: 'compare_all_plans' },
+    property: 'experiment:show_trial_status_in_sidebar',
+  },
   components: {
     GlButton,
     GlPopover,
@@ -123,6 +128,10 @@ export default {
         size="small"
         class="gl-mb-0"
         block
+        data-testid="upgradeBtn"
+        :data-track-event="$options.tracking.event"
+        :data-track-label="$options.tracking.labels.upgrade"
+        :data-track-property="$options.tracking.property"
       >
         <span class="gl-font-sm">
           <gl-sprintf :message="$options.i18n.upgradeButtonTitle">
@@ -138,7 +147,11 @@ export default {
         size="small"
         class="gl-mb-0"
         block
+        data-testid="compareBtn"
         :title="$options.i18n.compareAllButtonTitle"
+        :data-track-event="$options.tracking.event"
+        :data-track-label="$options.tracking.labels.compare"
+        :data-track-property="$options.tracking.property"
       >
         <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
       </gl-button>

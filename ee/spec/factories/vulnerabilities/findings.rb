@@ -59,6 +59,17 @@ FactoryBot.define do
     confidence { :medium }
     scanner factory: :vulnerabilities_scanner
     metadata_version { 'sast:1.0' }
+
+    details do
+      {
+        url: {
+          name: 'URL',
+          type: 'url',
+          href: 'http://site.com'
+        }
+      }
+    end
+
     raw_metadata do
       {
         description: 'The cipher does not provide data integrity update 1',
@@ -462,6 +473,7 @@ FactoryBot.define do
       after(:build) do |finding, evaluator|
         finding.report_type = "dependency_scanning"
         finding.name = "Vulnerabilities in libxml2"
+        finding.message = "Vulnerabilities in libxml2 in nokogiri"
         finding.metadata_version = "2.1"
         finding.raw_metadata = {
           "category": "dependency_scanning",

@@ -9,7 +9,7 @@ RSpec.describe 'Merge Request > User views blocked MR', :js do
   let(:project) { blocked_mr.target_project }
   let(:user) { create(:user) }
 
-  let(:merge_button) { find('.qa-merge-button') }
+  let(:merge_button) { find('[data-testid="merge-button"]') }
 
   before do
     project.add_developer(user)

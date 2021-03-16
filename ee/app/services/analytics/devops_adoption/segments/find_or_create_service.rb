@@ -14,21 +14,29 @@ module Analytics
         def execute
           authorize!
 
-          segment = Analytics::DevopsAdoption::Segment.find_by_namespace_id(namespace_id)
+          segment = Analytics::DevopsAdoption::Segment.find_by_namespace_id(namespace.id)
 
           if segment
             ServiceResponse.success(payload: { segment: segment })
           else
-            CreateService.new(current_user: current_user, params: params).execute
+            create_service.execute
           end
+        end
+
+        def authorize!
+          create_service.authorize!
         end
 
         private
 
         attr_reader :params, :current_user
 
-        def namespace_id
-          params.fetch(:namespace_id, params[:namespace]&.id)
+        def namespace
+          params[:namespace]
+        end
+
+        def create_service
+          @create_service ||= CreateService.new(current_user: current_user, params: params)
         end
       end
     end

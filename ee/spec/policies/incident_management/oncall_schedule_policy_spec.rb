@@ -10,7 +10,6 @@ RSpec.describe IncidentManagement::OncallSchedulePolicy do
   subject(:policy) { described_class.new(user, oncall_schedule) }
 
   before do
-    stub_feature_flags(oncall_schedules_mvc: project)
     stub_licensed_features(oncall_schedules: true)
   end
 

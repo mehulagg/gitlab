@@ -9,6 +9,7 @@ RSpec.describe Dast::Profile, type: :model do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:dast_site_profile) }
     it { is_expected.to belong_to(:dast_scanner_profile) }
+    it { is_expected.to have_many(:secret_variables).through(:dast_site_profile).class_name('Dast::SiteProfileSecretVariable') }
   end
 
   describe 'validations' do

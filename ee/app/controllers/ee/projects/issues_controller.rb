@@ -9,8 +9,7 @@ module EE
       prepended do
         include DescriptionDiffActions
 
-        before_action :whitelist_query_limiting_ee, only: [:update]
-
+        before_action :disable_query_limiting_ee, only: [:update]
         before_action only: [:new, :create] do
           populate_vulnerability_id
         end
@@ -43,8 +42,8 @@ module EE
         options.reject { |key| key == 'weight' }
       end
 
-      def whitelist_query_limiting_ee
-        ::Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/4794')
+      def disable_query_limiting_ee
+        ::Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/4794')
       end
 
       def issue_params

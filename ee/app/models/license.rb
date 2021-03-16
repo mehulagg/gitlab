@@ -4,9 +4,10 @@ class License < ApplicationRecord
   include ActionView::Helpers::NumberHelper
   include Gitlab::Utils::StrongMemoize
 
-  STARTER_PLAN = 'starter'.freeze
-  PREMIUM_PLAN = 'premium'.freeze
-  ULTIMATE_PLAN = 'ultimate'.freeze
+  STARTER_PLAN = 'starter'
+  PREMIUM_PLAN = 'premium'
+  ULTIMATE_PLAN = 'ultimate'
+  CLOUD_LICENSE_TYPE = 'cloud'
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
@@ -26,6 +27,7 @@ class License < ApplicationRecord
     group_webhooks
     group_level_devops_adoption
     instance_level_devops_adoption
+    group_level_devops_adoption
     issuable_default_templates
     issue_weights
     iterations
@@ -177,7 +179,6 @@ class License < ApplicationRecord
     subepics
     threat_monitoring
     vulnerability_auto_fix
-    evaluate_group_level_compliance_pipeline
   ]
   EEU_FEATURES.freeze
 
@@ -545,6 +546,10 @@ class License < ApplicationRecord
     starts_at > Date.current
   end
 
+  def cloud?
+    license&.type == CLOUD_LICENSE_TYPE
+  end
+
   def auto_renew
     false
   end
@@ -615,6 +620,7 @@ class License < ApplicationRecord
   end
 
   def check_users_limit
+    return if cloud?
     return unless restricted_user_count
 
     if previous_user_count && (prior_historical_max <= previous_user_count)

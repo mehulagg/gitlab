@@ -99,6 +99,7 @@ export default () => {
       milestoneListsAvailable: parseBoolean($boardApp.dataset.milestoneListsAvailable),
       assigneeListsAvailable: parseBoolean($boardApp.dataset.assigneeListsAvailable),
       iterationListsAvailable: parseBoolean($boardApp.dataset.iterationListsAvailable),
+      issuableType: issuableTypes.issue,
     },
     store,
     apolloProvider,
@@ -332,7 +333,7 @@ export default () => {
       },
       computed: {
         disabled() {
-          if (!this.store) {
+          if (!this.store || !this.store.lists) {
             return true;
           }
           return !this.store.lists.filter((list) => !list.preset).length;

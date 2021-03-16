@@ -19,7 +19,7 @@ module Analytics
 
             ServiceResponse.success(payload: response_payload)
           rescue ActiveRecord::RecordNotDestroyed
-            ServiceResponse.error(message: 'Devops Adoption Segment deletion error', payload: response_payload)
+            ServiceResponse.error(message: 'DevOps Adoption Segment deletion error', payload: response_payload)
           end
         end
 
@@ -28,7 +28,11 @@ module Analytics
         attr_reader :segment, :current_user
 
         def response_payload
-          { segment: @segment }
+          { segment: segment }
+        end
+
+        def namespace
+          segment.namespace
         end
       end
     end

@@ -55,6 +55,11 @@ export default {
       required: false,
       default: '',
     },
+    hasPathNavigation: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -73,29 +78,38 @@ export default {
       return currentStageEvents.length && !isLoading && !isEmptyStage;
     },
     stageHeaders() {
+      const verticalNavHeaders = !this.hasPathNavigation
+        ? [
+            {
+              title: s__('ProjectLifecycle|Stage'),
+              description: __('The phase of the development lifecycle.'),
+              classes: 'stage-header pl-5',
+            },
+            {
+              title: __('Median'),
+              description: __(
+                'The value lying at the midpoint of a series of observed values. E.g., between 3, 5, 9, the median is 5. Between 3, 5, 7, 8, the median is (5+7)/2 = 6.',
+              ),
+              classes: 'median-header',
+            },
+          ]
+        : [];
       return [
-        {
-          title: s__('ProjectLifecycle|Stage'),
-          description: __('The phase of the development lifecycle.'),
-          classes: 'stage-header pl-5',
-        },
-        {
-          title: __('Median'),
-          description: __(
-            'The value lying at the midpoint of a series of observed values. E.g., between 3, 5, 9, the median is 5. Between 3, 5, 7, 8, the median is (5+7)/2 = 6.',
-          ),
-          classes: 'median-header',
-        },
+        ...verticalNavHeaders,
         {
           title: this.stageName,
           description: __('The collection of events added to the data gathered for that stage.'),
-          classes: 'event-header pl-3',
+          classes: !this.hasPathNavigation
+            ? 'event-header pl-3'
+            : 'event-header gl-align-items-flex-start! gl-w-half!',
           displayHeader: !this.customStageFormActive,
         },
         {
           title: __('Time'),
           description: __('The time taken by each data entry gathered by that stage.'),
-          classes: 'total-time-header pr-5 text-right',
+          classes: !this.hasPathNavigation
+            ? 'total-time-header pr-5 text-right'
+            : 'total-time-header gl-align-items-flex-end! gl-text-right! gl-w-half!',
           displayHeader: !this.customStageFormActive,
         },
       ];
@@ -124,7 +138,11 @@ export default {
     <div v-else class="card stage-panel">
       <div class="card-header gl-border-b-0">
         <nav class="col-headers">
-          <ul>
+          <ul
+            :class="{
+              'gl-display-flex! gl-justify-content-space-between! gl-flex-direction-row! gl-px-5!': hasPathNavigation,
+            }"
+          >
             <stage-table-header
               v-for="({ title, description, classes, displayHeader = true }, i) in stageHeaders"
               v-show="displayHeader"
@@ -137,10 +155,14 @@ export default {
         </nav>
       </div>
       <div class="stage-panel-body">
-        <nav ref="stageNav" class="stage-nav gl-pl-2">
+        <nav v-if="!hasPathNavigation" ref="stageNav" class="stage-nav gl-pl-2">
           <slot name="nav"></slot>
         </nav>
-        <div class="section stage-events overflow-auto" :style="{ height: stageEventsHeight }">
+        <div
+          class="section stage-events overflow-auto"
+          :class="{ 'w-100': hasPathNavigation }"
+          :style="{ height: stageEventsHeight }"
+        >
           <slot name="content">
             <gl-loading-icon v-if="isLoadingStage" class="gl-mt-4" size="md" />
             <template v-else>

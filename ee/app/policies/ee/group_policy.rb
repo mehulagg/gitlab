@@ -135,7 +135,7 @@ module EE
 
       condition(:group_level_compliance_pipeline_available) do
         @subject.feature_available?(:evaluate_group_level_compliance_pipeline) &&
-          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
+          ::Feature.enabled?(:ff_evaluate_group_level_compliance_pipeline, @subject, default_enabled: :yaml)
       end
 
       rule { public_group | logged_in_viewable }.policy do
@@ -197,6 +197,7 @@ module EE
       end
 
       rule { reporter & group_devops_adoption_available }.policy do
+        enable :manage_devops_adoption_segments
         enable :view_group_devops_adoption
       end
 
@@ -219,6 +220,7 @@ module EE
         enable :create_iteration
         enable :admin_iteration
         enable :create_iteration_cadence
+        enable :admin_iteration_cadence
       end
 
       rule { reporter & epics_available }.policy do

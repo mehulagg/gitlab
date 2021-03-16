@@ -64,6 +64,10 @@ export const siteProfiles = [
     validationStatus: 'PASSED_VALIDATION',
     auth: {
       enabled: false,
+      url: 'https://foo.com/login',
+      usernameField: 'username',
+      passwordField: 'password',
+      username: 'admin',
     },
     excludedUrls: ['https://bar.com/logout'],
     requestHeaders: 'auth: gitlab-dast',

@@ -1547,14 +1547,6 @@ RSpec.describe ProjectPolicy do
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
 
-        context 'with disabled feature flag' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it { is_expected.to(be_disallowed(policy)) }
-        end
-
         context 'with unavailable license' do
           before do
             stub_licensed_features(oncall_schedules: false)
@@ -1587,14 +1579,6 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { public_send(role) }
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
-
-        context 'with disabled feature flag' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it { is_expected.to(be_disallowed(policy)) }
-        end
 
         context 'with unavailable license' do
           before do

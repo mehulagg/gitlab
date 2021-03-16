@@ -1,2 +1,3 @@
 - unless @project.path_locks.any?
-  $('.locks').load(document.URL + ' .nothing-here-block').hide().fadeIn(1000)
+  var emptyState = document.querySelector('.locks .nothing-here-block.hidden');
+  if (emptyState) emptyState.classList.remove('hidden');

@@ -175,6 +175,33 @@ describe('DastSiteProfileForm', () => {
       expect(findExcludedUrlsInput().attributes('maxlength')).toBe('2048');
       expect(findRequestHeadersInput().attributes('maxlength')).toBe('2048');
     });
+
+    describe('should have correct placeholders', () => {
+      const defaultPlaceholder = 'Cache-control: no-cache, User-Agent: DAST/1.0';
+
+      it('when creating a new profile', async () => {
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe(defaultPlaceholder);
+      });
+
+      it('when updating an existing profile with no request headers set', () => {
+        createFullComponent({
+          propsData: {
+            siteProfile: { ...siteProfileOne, requestHeaders: '' },
+          },
+        });
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe(defaultPlaceholder);
+      });
+
+      it('when updating an existing profile', () => {
+        createFullComponent({
+          propsData: {
+            siteProfile: siteProfileOne,
+          },
+        });
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe('[Redacted]');
+        expect(findByNameAttribute('password').attributes('placeholder')).toBe('••••••••');
+      });
+    });
   });
 
   describe.each`

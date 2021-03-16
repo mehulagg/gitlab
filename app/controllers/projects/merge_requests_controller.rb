@@ -14,7 +14,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   skip_before_action :merge_request, only: [:index, :bulk_update, :export_csv]
   before_action :apply_diff_view_cookie!, only: [:show]
-  before_action :whitelist_query_limiting, only: [:assign_related_issues, :update]
+  before_action :disable_query_limiting, only: [:assign_related_issues, :update]
   before_action :authorize_update_issuable!, only: [:close, :edit, :update, :remove_wip, :sort]
   before_action :authorize_read_actual_head_pipeline!, only: [
     :test_reports,
@@ -45,6 +45,15 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:new_pipelines_table, @project, default_enabled: :yaml)
 
     record_experiment_user(:invite_members_version_b)
+
+    experiment(:invite_members_in_comment, namespace: @project.root_ancestor) do |experiment_instance|
+      experiment_instance.exclude! unless helpers.can_import_members?
+
+      experiment_instance.use {}
+      experiment_instance.try(:invite_member_link) {}
+
+      experiment_instance.track(:view, property: @project.root_ancestor.id.to_s)
+    end
   end
 
   before_action do
@@ -459,9 +468,9 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     access_denied! unless @merge_request.can_be_merged_by?(current_user)
   end
 
-  def whitelist_query_limiting
+  def disable_query_limiting
     # Also see https://gitlab.com/gitlab-org/gitlab-foss/issues/42441
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42438')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42438')
   end
 
   def reports_response(report_comparison, pipeline = nil)

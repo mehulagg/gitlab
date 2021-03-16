@@ -1,15 +1,34 @@
 import { GlLabel } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import IssueCardWeight from 'ee/boards/components/issue_card_weight.vue';
 import BoardCardInner from '~/boards/components/board_card_inner.vue';
+import { issuableTypes } from '~/boards/constants';
 import defaultStore from '~/boards/stores';
 
 describe('Board card component', () => {
   let wrapper;
   let issue;
   let list;
+  let store;
 
-  const createComponent = (props = {}, store = defaultStore) => {
+  const createStore = ({ isShowingLabels = true } = {}) => {
+    store = new Vuex.Store({
+      ...defaultStore,
+      state: {
+        ...defaultStore.state,
+        issuableType: issuableTypes.issue,
+        isShowingLabels,
+      },
+      getters: {
+        isGroupBoard: () => true,
+        isEpicBoard: () => false,
+        isProjectBoard: () => false,
+      },
+    });
+  };
+
+  const createComponent = (props = {}) => {
     wrapper = shallowMount(BoardCardInner, {
       store,
       propsData: {
@@ -55,9 +74,14 @@ describe('Board card component', () => {
     };
   });
 
+  beforeEach(() => {
+    createStore();
+  });
+
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    store = null;
   });
 
   describe('labels', () => {
@@ -95,45 +119,10 @@ describe('Board card component', () => {
     });
 
     it('shows no labels when the isShowingLabels state is false', () => {
-      const store = {
-        ...defaultStore,
-        state: {
-          ...defaultStore.state,
-          isShowingLabels: false,
-        },
-      };
-      createComponent({}, store);
+      createStore({ isShowingLabels: false });
+      createComponent({});
 
       expect(wrapper.findAll('.board-card-labels')).toHaveLength(0);
-    });
-  });
-
-  describe('blocked', () => {
-    const findBlockedIcon = () => wrapper.find('[data-testid="issue-blocked-icon"');
-
-    it('shows blocked icon if issue is blocked, when blocked by multiple issues', () => {
-      createComponent();
-      const blockedIcon = findBlockedIcon();
-
-      expect(blockedIcon.exists()).toBe(true);
-      expect(blockedIcon.attributes('title')).toBe('Blocked by 2 issues');
-    });
-
-    it('shows blocked icon if issue is blocked, when blocked by one issue', () => {
-      issue.blockedByCount = 1;
-      createComponent();
-      const blockedIcon = findBlockedIcon();
-
-      expect(blockedIcon.exists()).toBe(true);
-      expect(blockedIcon.attributes('title')).toBe('Blocked by 1 issue');
-    });
-
-    it('does not show blocked icon if issue is not blocked', () => {
-      issue.blocked = false;
-      issue.blockedByCount = 0;
-      createComponent();
-
-      expect(findBlockedIcon().exists()).toBe(false);
     });
   });
 

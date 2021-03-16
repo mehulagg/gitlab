@@ -29,6 +29,11 @@ module Resolvers
 
         result.payload[:shifts]
       end
+
+      # See https://gitlab.com/gitlab-org/gitlab/-/issues/324421
+      def self.complexity_multiplier(args)
+        0.005
+      end
     end
   end
 end

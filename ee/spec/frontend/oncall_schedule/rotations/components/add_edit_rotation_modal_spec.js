@@ -77,6 +77,7 @@ describe('AddEditRotationModal', () => {
   const createComponentWithApollo = ({
     search = '',
     createHandler = jest.fn().mockResolvedValue(createRotationResponse),
+    props = {},
   } = {}) => {
     createRotationHandler = createHandler;
     localVue.use(VueApollo);
@@ -104,6 +105,7 @@ describe('AddEditRotationModal', () => {
         modalId: addRotationModalId,
         schedule,
         rotation: mockRotation[0],
+        ...props,
       },
       apolloProvider: fakeApollo,
       data() {
@@ -323,7 +325,7 @@ describe('AddEditRotationModal', () => {
 
     it('calls a mutation with correct parameters and creates a rotation', async () => {
       createComponentWithApollo();
-      expect(wrapper.emitted('fetchRotationShifts')).toBeUndefined();
+      expect(wrapper.emitted('fetch-rotation-shifts')).toBeUndefined();
 
       await createRotation(wrapper);
       await awaitApolloDomMock();
@@ -334,7 +336,7 @@ describe('AddEditRotationModal', () => {
         message: i18n.rotationCreated,
         type: FLASH_TYPES.SUCCESS,
       });
-      expect(wrapper.emitted('fetchRotationShifts')).toHaveLength(1);
+      expect(wrapper.emitted('fetch-rotation-shifts')).toHaveLength(1);
     });
 
     it('displays alert if mutation had a recoverable error', async () => {
@@ -348,6 +350,61 @@ describe('AddEditRotationModal', () => {
       const alert = findAlert();
       expect(alert.exists()).toBe(true);
       expect(alert.text()).toContain('Houston, we have a problem');
+    });
+  });
+
+  describe('edit mode', () => {
+    beforeEach(async () => {
+      await createComponentWithApollo({ props: { isEditMode: true } });
+      await awaitApolloDomMock();
+
+      findModal().vm.$emit('show');
+    });
+
+    it('should load name correctly', () => {
+      expect(findForm().props('form')).toMatchObject({
+        name: 'Rotation 242',
+      });
+    });
+
+    it('should load rotation length correctly', () => {
+      expect(findForm().props('form')).toMatchObject({
+        rotationLength: {
+          length: 2,
+          unit: 'WEEKS',
+        },
+      });
+    });
+
+    it('should load participants correctly', () => {
+      expect(findForm().props('form')).toMatchObject({
+        participants: [{ name: 'nora' }],
+      });
+    });
+
+    it('should load startTime correctly', () => {
+      expect(findForm().props('form')).toMatchObject({
+        startsAt: {
+          date: new Date('2021-01-13T00:00:00.000Z'),
+          time: 1,
+        },
+      });
+    });
+
+    it('should load endTime correctly', () => {
+      expect(findForm().props('form')).toMatchObject({
+        endsAt: {
+          date: new Date('2021-03-13T00:00:00.000Z'),
+          time: 5,
+        },
+      });
+    });
+
+    it('should load rotation restriction data successfully', async () => {
+      expect(findForm().props('form')).toMatchObject({
+        isRestrictedToTime: true,
+        restrictedTo: { startTime: 2, endTime: 10 },
+      });
     });
   });
 });

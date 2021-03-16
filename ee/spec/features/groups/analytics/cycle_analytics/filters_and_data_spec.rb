@@ -29,7 +29,9 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
 
   def select_stage(name)
     string_id = "CycleAnalyticsStage|#{name}"
-    page.find('.stage-nav .stage-nav-item .stage-name', text: s_(string_id), match: :prefer_exact).click
+    within '[data-testid="gl-path-nav"]' do
+      page.find('li', text: s_(string_id), match: :prefer_exact).click
+    end
 
     wait_for_requests
   end
@@ -121,32 +123,19 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   shared_examples 'group value stream analytics' do
     context 'stage panel' do
       it 'displays the stage table headers' do
-        expect(page).to have_selector('.stage-header', visible: true)
-        expect(page).to have_selector('.median-header', visible: true)
         expect(page).to have_selector('.event-header', visible: true)
         expect(page).to have_selector('.total-time-header', visible: true)
       end
     end
 
-    context 'stage nav' do
-      it 'displays the list of stages' do
-        expect(page).to have_selector(stage_nav_selector, visible: true)
-      end
-
-      it 'displays the default list of stages' do
-        stage_nav = page.find(stage_nav_selector)
-
-        %w[Issue Plan Code Test Review Staging].each do |item|
-          string_id = "CycleAnalytics|#{item}"
-          expect(stage_nav).to have_content(s_(string_id))
-        end
+    context 'vertical navigation' do
+      it 'does not show the vertical stage navigation' do
+        expect(page).not_to have_selector(stage_nav_selector)
       end
     end
 
-    context 'path nav' do
+    context 'navigation' do
       before do
-        stub_feature_flags(value_stream_analytics_path_navigation: true)
-
         select_group(selected_group)
       end
 
@@ -190,8 +179,34 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       select_group(group)
     end
 
-    it 'shows the path navigation' do
+    it 'does not show the path navigation' do
       expect(page).not_to have_selector(path_nav_selector)
+    end
+
+    it 'shows the vertical stage navigation' do
+      expect(page).to have_selector(stage_nav_selector, visible: true)
+    end
+
+    it 'displays the default list of stages' do
+      stage_nav = page.find(stage_nav_selector)
+
+      %w[Issue Plan Code Test Review Staging].each do |item|
+        string_id = "CycleAnalytics|#{item}"
+        expect(stage_nav).to have_content(s_(string_id))
+      end
+    end
+
+    it 'each stage will have median values', :sidekiq_might_not_need_inline do
+      stage_medians = page.all('.stage-nav .stage-median').collect(&:text)
+
+      expect(stage_medians).to eq(["Not enough data"] * 6)
+    end
+
+    it 'displays the stage table headers' do
+      expect(page).to have_selector('.stage-header', visible: true)
+      expect(page).to have_selector('.median-header', visible: true)
+      expect(page).to have_selector('.event-header', visible: true)
+      expect(page).to have_selector('.total-time-header', visible: true)
     end
   end
 
@@ -306,12 +321,6 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       { title: 'Test', description: 'Total test time for all commits/merges', events_count: 0, median: 'Not enough data' }
     ]
 
-    it 'each stage will have median values', :sidekiq_might_not_need_inline do
-      stage_medians = page.all('.stage-nav .stage-median').collect(&:text)
-
-      expect(stage_medians).to eq(["5 days", "Not enough data", "about 5 hours", "Not enough data", "about 1 hour", "about 1 hour"])
-    end
-
     it 'each stage will display the events description when selected', :sidekiq_might_not_need_inline do
       stages_without_data.each do |stage|
         select_stage(stage[:title])
@@ -341,7 +350,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       [].concat(stages_without_data, stages_with_data).each do |stage|
         select_stage(stage[:title])
 
-        expect(page.find('.stage-nav .active .stage-name').text).to eq(stage[:title])
+        expect(page.find('.js-path-navigation .gl-path-active-item-indigo').text).to eq(stage[:title])
       end
     end
 
@@ -361,12 +370,6 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
         visit "#{group_analytics_cycle_analytics_path(group)}?created_before=2019-12-31&created_after=2019-11-01"
 
         wait_for_stages_to_load
-      end
-
-      it 'will filter the stage median values' do
-        stage_medians = page.all('.stage-nav .stage-median').collect(&:text)
-
-        expect(stage_medians).to eq([_("Not enough data")] * 6)
       end
 
       it 'will filter the data' do
