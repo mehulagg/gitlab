@@ -113,14 +113,18 @@ func TestAcceleratedUpload(t *testing.T) {
 		{"POST", `/uploads/personal_snippet`, true},
 		{"POST", `/uploads/user`, true},
 		{"POST", `/api/v4/projects/1/wikis/attachments`, false},
+		{"POST", `/api/v4/projects/group%2Fproject/wikis/attachments`, false},
 		{"POST", `/api/graphql`, false},
 		{"PUT", "/api/v4/projects/9001/packages/nuget/v1/files", true},
+		{"PUT", "/api/v4/projects/group%2Fproject/packages/nuget/v1/files", true},
 		{"POST", `/api/v4/groups/import`, true},
 		{"POST", `/api/v4/projects/import`, true},
 		{"POST", `/import/gitlab_project`, true},
 		{"POST", `/import/gitlab_group`, true},
 		{"POST", `/api/v4/projects/9001/packages/pypi`, true},
+		{"POST", `/api/v4/projects/group%2Fproject/packages/pypi`, true},
 		{"POST", `/api/v4/projects/9001/issues/30/metric_images`, true},
+		{"POST", `/api/v4/projects/project%2Fgroup/issues/30/metric_images`, true},
 		{"POST", `/my/project/-/requirements_management/requirements/import_csv`, true},
 	}
 
@@ -433,6 +437,11 @@ func TestPackageFilesUpload(t *testing.T) {
 		{"PUT", "/api/v4/projects/2412/packages/generic/mypackage/0.0.1/myfile.tar.gz"},
 		{"PUT", "/api/v4/projects/2412/packages/debian/libsample0_1.2.3~alpha2-1_amd64.deb"},
 		{"POST", "/api/v4/projects/2412/packages/rubygems/api/v1/gems/sample.gem"},
+		{"PUT", "/api/v4/projects/group%2Fproject/packages/conan/v1/files"},
+		{"PUT", "/api/v4/projects/group%2Fproject/packages/maven/v1/files"},
+		{"PUT", "/api/v4/projects/group%2Fproject/packages/generic/mypackage/0.0.1/myfile.tar.gz"},
+		{"PUT", "/api/v4/projects/group%2Fproject/packages/debian/libsample0_1.2.3~alpha2-1_amd64.deb"},
+		{"POST", "/api/v4/projects/group%2Fproject/packages/rubygems/api/v1/gems/sample.gem"},
 	}
 
 	for _, r := range routes {

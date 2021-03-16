@@ -170,6 +170,14 @@ func rebaseUrl(url *url.URL, onto *url.URL, suffix string) *url.URL {
 	newUrl.Scheme = onto.Scheme
 	newUrl.Host = onto.Host
 	if suffix != "" {
+		if newUrl.RawPath != "" {
+			// Since the GitLab API does care about encoded slashes (%2F),
+			// we need to adjust both RawPath and Path for Go
+			// to use the original encoded form.
+			// See https://go-review.googlesource.com/c/go/+/11302/.
+			newUrl.RawPath = singleJoiningSlash(url.RawPath, suffix)
+		}
+
 		newUrl.Path = singleJoiningSlash(url.Path, suffix)
 	}
 	if onto.RawQuery == "" || newUrl.RawQuery == "" {
