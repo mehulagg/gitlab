@@ -87,25 +87,6 @@ module Gitlab
             severity.in?(UNSAFE_SEVERITIES)
           end
 
-          def eql?(other)
-            return false unless report_type == other.report_type && primary_fingerprint == other.primary_fingerprint
-
-            if ::Feature.enabled?(:vulnerability_finding_fingerprints)
-              matches_fingerprints(other.fingerprints, other.uuid)
-            else
-              location.fingerprint == other.location.fingerprint
-            end
-          end
-
-          def hash
-            if Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerints.empty?
-              highest_fingerprint = fingerprints.max_by(&:priority)
-              report_type.hash ^ highest_fingerprint.fingerprint_hex.hash ^ primary_fingerprint.hash
-            else
-              report_type.hash ^ location.fingerprint.hash ^ primary_fingerprint.hash
-            end
-          end
-
           def valid?
             scanner.present? && primary_identifier.present? && location.present? && uuid.present?
           end
