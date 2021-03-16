@@ -10,6 +10,10 @@ module Gitlab
           extend ActiveSupport::Concern
 
           def ordered_items
+            unless items.primary_key.present?
+              raise ArgumentError.new('Relation must have a primary key')
+            end
+
             return super unless Gitlab::Pagination::Keyset::Order.keyset_aware?(items)
 
             items
@@ -39,6 +43,19 @@ module Gitlab
             sliced = slice_nodes(sliced, before, :before) if before.present?
             sliced = slice_nodes(sliced, after, :after) if after.present?
             sliced
+          end
+
+          def items
+            original_items = super
+            return original_items if Gitlab::Pagination::Keyset::Order.keyset_aware?(original_items) || Feature.disabled?(:new_graphql_keyset_pagination)
+
+            rebuilt_items_with_keyset_order = Gitlab::Pagination::Keyset::SimpleOrderBuilder.build(original_items)
+
+            if rebuilt_items_with_keyset_order.is_a?(Symbol) && rebuilt_items_with_keyset_order == :unable_to_order
+              original_items
+            else
+              rebuilt_items_with_keyset_order
+            end
           end
         end
       end

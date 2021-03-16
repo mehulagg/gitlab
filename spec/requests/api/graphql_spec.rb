@@ -216,6 +216,10 @@ RSpec.describe 'GraphQL' do
       GRAPHQL
     end
 
+    before do
+      stub_feature_flags(new_graphql_keyset_pagination: false)
+    end
+
     # TODO: Switch this to use `post_graphql`
     # This is not performing an actual GraphQL request because the
     # variables end up being strings when passed through the `post_graphql`
