@@ -52,7 +52,7 @@ module EE
         }.freeze
 
         state_machine :status do
-          after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
+          after_transition any => (::Ci::Pipeline.completed_statuses + ::Ci::Pipeline::BLOCKED_STATUS.map(&:to_sym)) do |pipeline|
             next unless pipeline.can_store_security_reports?
 
             pipeline.run_after_commit do

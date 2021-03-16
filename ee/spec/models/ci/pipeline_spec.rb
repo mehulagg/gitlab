@@ -405,6 +405,40 @@ RSpec.describe Ci::Pipeline do
           end
         end
       end
+
+      context 'when pipeline status either belongs to completed or block statuses' do
+        let(:pipeline) { create(:ci_empty_pipeline, project: create(:project, :public)) }
+
+        context 'when the security reports can not be stored' do
+
+          before do
+            allow(pipeline).to receive(:can_store_security_reports?).and_return(false) 
+          end
+
+          it 'does not schedule the workers', :aggregate_failures do
+            expect(StoreSecurityReportsWorker).not_to receive(:perform_async)
+            expect(::Security::StoreScansWorker).not_to receive(:perform_async)
+            expect(SyncSecurityReportsToReportApprovalRulesWorker).not_to receive(:perform_async)
+
+            pipeline.block!
+          end
+        end
+
+        context 'when the security reports can be stored' do
+          before do
+            allow(pipeline).to receive(:can_store_security_reports?).and_return(true) 
+            allow(pipeline.project).to receive(:default_branch).and_return(pipeline.ref)
+          end
+
+          it 'schedules the relevant workers', :aggregate_failures do
+            expect(StoreSecurityReportsWorker).to receive(:perform_async)
+            expect(::Security::StoreScansWorker).to receive(:perform_async)
+            expect(SyncSecurityReportsToReportApprovalRulesWorker).to receive(:perform_async)
+
+            pipeline.block!
+          end
+        end
+      end
     end
   end
 
