@@ -95,7 +95,7 @@ GitLab stores files and blobs such as Issue attachments or LFS objects into eith
   - A Storage Appliance that exposes an Object Storage-compatible API.
 
 When using the file system store instead of Object Storage, you need to use network mounted file systems
-to run GitLab when using more than one server.
+to run GitLab when using more than one node.
 
 With respect to replication and verification:
 
