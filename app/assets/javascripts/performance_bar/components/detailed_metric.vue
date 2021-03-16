@@ -49,9 +49,13 @@ export default {
       return this.currentRequest.details[this.metric];
     },
     metricDetailsLabel() {
-      return this.metricDetails.duration
-        ? `${this.metricDetails.duration} / ${this.metricDetails.calls}`
-        : this.metricDetails.calls;
+      if (this.metricDetails.duration && this.metricDetails.calls) {
+        return `${this.metricDetails.duration} / ${this.metricDetails.calls}`
+      } else if (this.metricDetails.calls) {
+        return this.metricDetails.calls
+      }
+
+      return '0';
     },
     detailsList() {
       return this.metricDetails.details;
