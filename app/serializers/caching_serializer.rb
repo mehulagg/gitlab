@@ -5,6 +5,10 @@
 # using their cache_key.
 
 class CachingSerializer < BaseSerializer
+  # We include this for the can? helpers in case
+  # they are used in the cache_context override.
+  include Gitlab::Allowable
+
   def represent(resource, opts = {}, entity_class = nil)
     cache_opts = opts.delete(:cache)
 

@@ -75,9 +75,17 @@ class PipelineSerializer < CachingSerializer
   end
 
   def cache_context(pipeline)
-    [
-      #can?(request.current_user, :read_job_artifacts, artifact.job)
+    context = [
+      can?(@request.current_user, :update_pipeline, pipeline),
+      can?(@request.current_user, :destroy_pipeline, pipeline),
+      (pipeline.merge_request && can?(@request.current_user, :read_merge_request, pipeline.merge_request))
     ]
+
+    pipeline.downloadable_artifacts.each do |artifact|
+      context << can?(@request.current_user, :read_job_artifacts, artifact.job)
+    end
+
+    context
   end
 end
 
