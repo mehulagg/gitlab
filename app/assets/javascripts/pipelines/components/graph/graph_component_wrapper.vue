@@ -2,9 +2,12 @@
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import { __ } from '~/locale';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { DEFAULT, DRAW_FAILURE, LOAD_FAILURE } from '../../constants';
 import { formatForLayers } from '../parsing_utils';
+import { STAGE_VIEW } from './constants';
 import PipelineGraph from './graph_component.vue';
+import GraphViewSelector from './graph_view_selector.vue';
 import {
   getQueryHeaders,
   reportToSentry,
@@ -18,8 +21,10 @@ export default {
   components: {
     GlAlert,
     GlLoadingIcon,
+    GraphViewSelector,
     PipelineGraph,
   },
+  mixins: [glFeatureFlagMixin()],
   inject: {
     graphqlResourceEtag: {
       default: '',
@@ -36,8 +41,9 @@ export default {
   },
   data() {
     return {
-      pipeline: null,
       alertType: null,
+      currentViewType: STAGE_VIEW,
+      pipeline: null,
       showAlert: false,
     };
   },
@@ -158,6 +164,9 @@ export default {
       }
     },
     /* eslint-enable @gitlab/require-i18n-strings */
+    updateViewType(type) {
+      this.currentViewType = type;
+    },
   },
 };
 </script>
@@ -166,6 +175,11 @@ export default {
     <gl-alert v-if="showAlert" :variant="alert.variant" @dismiss="hideAlert">
       {{ alert.text }}
     </gl-alert>
+    <graph-view-selector
+      v-if="glFeatures.pipelineGraphLayersView"
+      :type="currentViewType"
+      @updateViewType="updateViewType"
+    />
     <gl-loading-icon v-if="showLoadingIcon" class="gl-mx-auto gl-my-4" size="lg" />
     <pipeline-graph
       v-if="pipeline"
