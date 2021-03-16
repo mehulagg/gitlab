@@ -1,0 +1,5 @@
+---
+title: 'Fix: update oncall rotation name to truncate'
+merge_request: 56762
+author:
+type: fixed
