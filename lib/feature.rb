@@ -65,11 +65,11 @@ class Feature
             "The thing '#{thing.class.name}' for feature flag '#{key}' needs to include `FeatureGate` or implement `flipper_id`"
         end
 
-        Feature::Definition.valid_usage!(key, type: type, default_enabled: default_enabled)
+        Feature::Definition.valid_usage!(key, type: type, default_enabled: :yaml)
       end
 
       # If `default_enabled: :yaml` we fetch the value from the YAML definition instead.
-      default_enabled = Feature::Definition.default_enabled?(key) if default_enabled == :yaml
+      default_enabled = Feature::Definition.default_enabled?(key)
 
       # During setup the database does not exist yet. So we haven't stored a value
       # for the feature yet and return the default.
