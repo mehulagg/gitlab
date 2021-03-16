@@ -10,6 +10,7 @@ import {
   parseBoolean,
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import { apolloProvider } from '~/sidebar/graphql';
@@ -54,33 +55,31 @@ function getSidebarAssigneeAvailabilityData() {
     );
 }
 
-function mountAssigneesComponent(mediator) {
+function mountAssigneesComponent() {
   const el = document.getElementById('js-vue-sidebar-assignees');
 
   if (!el) return;
 
-  const { iid, fullPath } = getSidebarOptions();
-  const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
+  const { iid, fullPath, editable } = getSidebarOptions();
   // eslint-disable-next-line no-new
   new Vue({
     el,
     apolloProvider,
     components: {
-      SidebarAssignees,
+      SidebarAssigneesWidget,
+    },
+    provide: {
+      canUpdate: editable,
     },
     render: (createElement) =>
-      createElement('sidebar-assignees', {
+      createElement('sidebar-assignees-widget', {
         props: {
-          mediator,
-          issuableIid: String(iid),
-          projectPath: fullPath,
-          field: el.dataset.field,
-          signedIn: el.hasAttribute('data-signed-in'),
+          iid: String(iid),
+          fullPath,
           issuableType:
             isInIssuePage() || isInIncidentPage() || isInDesignPage()
               ? IssuableType.Issue
               : IssuableType.MergeRequest,
-          assigneeAvailabilityStatus,
         },
       }),
   });
