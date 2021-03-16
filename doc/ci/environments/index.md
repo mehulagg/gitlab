@@ -721,11 +721,13 @@ the `review/feature-1` spec takes precedence over `review/*` and `*` specs.
 
 ### The job with `action: stop` doesn't run
 
-In some cases, environments do not automatically [stop when a branch is deleted](#stop-an-environment-when-a-branch-is-deleted).
+In some cases, environments do not [stop when a branch is deleted](#stop-an-environment-when-a-branch-is-deleted).
 
 For example, the environment could start in a stage that also has a job that failed.
 Then the jobs in later stages job don't start. If the job with the `action: stop`
-for the environment is also in a later stage, it could fail to start.
+For example, the environment might start in a stage that also has a job that failed.
+Then the jobs in later stages job don't start. If the job with the `action: stop`
+for the environment is also in a later stage, it can't start and the environment isn't deleted.
 
 To ensure the `action: stop` can always run when needed, you can:
 
