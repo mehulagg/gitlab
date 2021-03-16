@@ -73,10 +73,13 @@ RSpec.describe Gitlab::Tracking do
     it_behaves_like 'delegates to destination', Gitlab::Tracking::Destinations::Snowplow
     it_behaves_like 'delegates to destination', Gitlab::Tracking::Destinations::ProductAnalytics
 
-    it 'rescues errors and writes a log message' do
-      expect(Gitlab::AppLogger).to receive(:warn).with(/Tracking event failed for category: nil, action: "some_action", message: Contract violation/)
+    it 'tracks errors' do
+      expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).with(
+        an_instance_of(ContractError),
+        snowplow_category: nil, snowplow_action: 'some_action'
+      )
 
-      expect { described_class.event(nil, 'some_action') }.not_to raise_error
+      described_class.event(nil, 'some_action')
     end
   end
 
