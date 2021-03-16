@@ -1,7 +1,9 @@
 import AjaxLoadingSpinner from '~/branches/ajax_loading_spinner';
-import DeleteModal from '~/branches/branches_delete_modal';
+import initDeleteBranchButton from '~/branches/init_delete_branch_button';
+import initDeleteBranchModal from '~/branches/init_delete_branch_modal';
 import initDiverganceGraph from '~/branches/divergence_graph';
 
 AjaxLoadingSpinner.init();
-new DeleteModal(); // eslint-disable-line no-new
+initDeleteBranchButton();
+initDeleteBranchModal();
 initDiverganceGraph(document.querySelector('.js-branch-list').dataset.divergingCountsEndpoint);
