@@ -44,7 +44,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['setFileResolveMode', 'setPromptConfirmationState']),
+    ...mapActions(['setFileResolveMode', 'setPromptConfirmationState', 'updateFile']),
     loadEditor() {
       const EditorPromise = import(/* webpackChunkName: 'EditorLite' */ '~/editor/editor_lite');
       const DataPromise = axios.get(this.file.content_path);
@@ -77,12 +77,12 @@ export default {
     saveDiffResolution() {
       this.saved = true;
 
-      // This probably be better placed in the data provider
-      /* eslint-disable vue/no-mutating-props */
-      this.file.content = this.editor.getValue();
-      this.file.resolveEditChanged = this.file.content !== this.originalContent;
-      this.file.promptDiscardConfirmation = false;
-      /* eslint-enable vue/no-mutating-props */
+      this.updateFile({
+        ...this.file,
+        content: this.editor.getValue(),
+        resolveEditChanged: this.file.content !== this.originalContent,
+        promptDiscardConfirmation: false,
+      });
     },
     resetEditorContent() {
       if (this.fileLoaded) {
