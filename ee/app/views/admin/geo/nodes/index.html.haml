@@ -8,7 +8,7 @@
   %h3{ :class => "page-title" }
     = _("Geo Nodes")
   - if @nodes.any?
-    = link_to s_("GeoNodes|New node"), new_admin_geo_node_path, class: 'gl-button btn btn-success ml-auto qa-new-node-link'
+    = link_to s_("GeoNodes|New node"), new_admin_geo_node_path, class: 'gl-button btn btn-confirm ml-auto qa-new-node-link'
 
 %p.page-subtitle.light
   = s_('GeoNodes|With %{geo} you can install a special read-only and replicated instance anywhere. Before you add nodes, follow the %{instructions} in the exact order they appear.').html_safe % { geo: link_to('GitLab Geo', help_page_path('administration/geo/index.md'), target: '_blank'), instructions: link_to('setup instructions', help_page_path('administration/geo/setup/index.md'), target: '_blank') }

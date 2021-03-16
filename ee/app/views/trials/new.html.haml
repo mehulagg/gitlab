@@ -40,6 +40,6 @@
   .form-group.gl-select2-html5-required-fix
     = label_tag :country, _('Country'), class: 'col-form-label'
     = select_tag :country, options_for_select([[_('Please select a country'), '']]), class: 'select2 gl-transparent-pixel', required: true, id: 'country_select', data: { countries_end_point: countries_path, selected_option: params[:country]}
-  = submit_tag _('Continue'), class: 'btn gl-button btn-success btn-block'
+  = submit_tag _('Continue'), class: 'btn gl-button btn-confirm btn-block'
 
 = render 'skip_trial'
