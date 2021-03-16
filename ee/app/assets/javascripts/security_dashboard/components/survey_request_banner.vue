@@ -1,27 +1,45 @@
 <script>
-import { GlButton, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlButton, GlBanner, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import showToast from '~/vue_shared/plugins/global_toast';
+import { SURVEY_REQUEST_LOCAL_STORAGE_KEY, SURVEY_REQUEST_NEVER_SHOW_VALUE } from '../constants';
 
 export default {
-  components: { GlButton, GlIcon },
+  components: { GlButton, GlBanner, LocalStorageSync },
   directives: { SafeHtml },
   inject: ['surveyRequestSvgPath'],
+  data: () => ({
+    surveyShowDate: null,
+  }),
   computed: {
-    style() {
-      return {
-        background: `url(${this.surveyRequestSvgPath}) center/190%`, // eslint-disable-line @gitlab/require-i18n-strings
-        width: '7.5em',
-        height: '7.5em',
-      };
+    shouldShowSurvey() {
+      const date = new Date(this.surveyShowDate);
+
+      // User dismissed the survey by clicking the close icon, never show it again.
+      if (this.surveyShowDate === SURVEY_REQUEST_NEVER_SHOW_VALUE) {
+        return false;
+      }
+      // Date is invalid, we should show the survey.
+      else if (Number.isNaN(date.getDate())) {
+        return true;
+      }
+
+      return date <= Date.now();
     },
   },
   methods: {
     handleClose() {
-      this.$emit('close');
-      // showToast(
-      //   s__('SecurityReports|Your feedback is important to us! We will ask again in 7 days.'),
-      // );
+      this.surveyShowDate = SURVEY_REQUEST_NEVER_SHOW_VALUE;
+    },
+    handleAskLater() {
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      this.surveyShowDate = date.toISOString();
+
+      showToast(
+        s__('SecurityReports|Your feedback is important to us! We will ask again in a week.'),
+      );
     },
   },
   i18n: {
@@ -31,31 +49,27 @@ export default {
       `SecurityReports|At GitLab, we're all about iteration and feedback. That's why we are reaching out to customers like you to help guide what we work on this year for Vulnerability Management. We have a lot of exciting ideas and ask that you assist us by taking a short survey <span class="gl-font-weight-bold">no longer than 10 minutes</span> to evaluate a few of our potential features.`,
     ),
   },
+  storageKey: SURVEY_REQUEST_LOCAL_STORAGE_KEY,
 };
 </script>
 
 <template>
-  <section class="gl-banner">
-    <div class="gl-banner-illustration gl-background-center" :style="style"></div>
-
-    <div class="gl-banner-content">
-      <h1 class="gl-banner-title">{{ $options.i18n.title }}</h1>
+  <local-storage-sync v-model="surveyShowDate" :storage-key="$options.storageKey">
+    <gl-banner
+      v-if="shouldShowSurvey"
+      :title="$options.i18n.title"
+      :button-text="$options.i18n.buttonText"
+      :svg-path="surveyRequestSvgPath"
+      button-link="https://gitlab.fra1.qualtrics.com/jfe/form/SV_7UMsVhPbjmwCp1k"
+      @close="handleClose"
+    >
       <p v-safe-html="$options.i18n.description"></p>
-      <gl-button
-        variant="confirm"
-        target="_blank"
-        href="https://gitlab.fra1.qualtrics.com/jfe/form/SV_7UMsVhPbjmwCp1k"
-      >
-        {{ $options.i18n.buttonText }}
-      </gl-button>
-      <!--      <gl-button variant="link" class="gl-ml-5">{{ __(`Don't show again`) }}</gl-button>-->
-    </div>
-    <gl-button
-      category="tertiary"
-      size="small"
-      icon="close"
-      class="gl-banner-close"
-      @click="handleClose"
-    />
-  </section>
+
+      <gl-button variant="link" @click="handleAskLater">{{ __('Ask again later') }}</gl-button>
+
+      <template #actions>
+        <gl-button variant="link" @click="handleAskLater">{{ __('Ask again later') }}</gl-button>
+      </template>
+    </gl-banner>
+  </local-storage-sync>
 </template>

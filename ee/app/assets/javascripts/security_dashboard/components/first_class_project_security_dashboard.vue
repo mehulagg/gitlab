@@ -9,9 +9,8 @@ import Filters from './first_class_vulnerability_filters.vue';
 import ProjectPipelineStatus from './project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from './project_vulnerabilities.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
-import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 import SurveyRequestBanner from './survey_request_banner.vue';
-import { GlButton } from '@gitlab/ui';
+import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 
 export default {
   components: {
@@ -24,7 +23,6 @@ export default {
     CsvExportButton,
     Filters,
     SurveyRequestBanner,
-    GlButton,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: ['dashboardDocumentation', 'autoFixDocumentation', 'projectFullPath'],
@@ -50,7 +48,6 @@ export default {
     return {
       filters: {},
       shouldShowAutoFixUserCallout,
-      showSurvey: true,
     };
   },
   methods: {
@@ -68,7 +65,7 @@ export default {
 
 <template>
   <div>
-    <survey-request-banner class="gl-mt-5" v-if="showSurvey" @close="showSurvey = false" />
+    <survey-request-banner class="gl-mt-5" />
     <template v-if="pipeline.id">
       <auto-fix-user-callout
         v-if="shouldShowAutoFixUserCallout"
@@ -79,7 +76,6 @@ export default {
         <template #header>
           <div class="gl-mt-6 gl-display-flex">
             <h4 class="gl-flex-grow-1 gl-my-0">{{ __('Vulnerability Report') }}</h4>
-            <gl-button variant="confirm" class="gl-mr-4" v-if="!showSurvey">Take survey</gl-button>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
           <project-pipeline-status :pipeline="pipeline" />
@@ -100,7 +96,6 @@ export default {
       </security-dashboard-layout>
     </template>
     <template v-else>
-      <gl-button variant="confirm" class="gl-mr-4" v-if="!showSurvey">Take survey</gl-button>
       <reports-not-configured :help-path="securityDashboardHelpPath" />
     </template>
   </div>

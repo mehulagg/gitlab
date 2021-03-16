@@ -43,6 +43,7 @@ module Groups::SecurityFeaturesHelper
       group_full_path: group.full_path,
       no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
       empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
+      survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
       dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
       vulnerabilities_export_endpoint: expose_path(api_v4_security_groups_vulnerability_exports_path(id: group.id)),
       scanners: VulnerabilityScanners::ListService.new(group).execute.to_json

@@ -8,6 +8,7 @@ import { createProjectLoadingError } from '../helpers';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/instance_dashboard_not_configured.vue';
 import InstanceSecurityVulnerabilities from './first_class_instance_security_dashboard_vulnerabilities.vue';
+import SurveyRequestBanner from './survey_request_banner.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 
 export default {
@@ -18,6 +19,7 @@ export default {
     Filters,
     DashboardNotConfigured,
     VulnerabilitiesCountList,
+    SurveyRequestBanner,
   },
   props: {
     vulnerabilitiesExportEndpoint: {
@@ -68,22 +70,22 @@ export default {
 <template>
   <security-dashboard-layout>
     <template #header>
-      <div>
-        <header class="gl-my-6 gl-display-flex gl-align-items-center">
-          <h2 class="gl-flex-grow-1 gl-my-0">
-            {{ s__('SecurityReports|Vulnerability Report') }}
-          </h2>
-          <csv-export-button
-            v-if="shouldShowDashboard"
-            :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint"
-          />
-        </header>
-        <vulnerabilities-count-list
+      <survey-request-banner class="gl-mt-5" />
+
+      <header class="gl-my-6 gl-display-flex gl-align-items-center">
+        <h2 class="gl-flex-grow-1 gl-my-0">
+          {{ s__('SecurityReports|Vulnerability Report') }}
+        </h2>
+        <csv-export-button
           v-if="shouldShowDashboard"
-          :scope="$options.vulnerabilitiesSeverityCountScopes.instance"
-          :filters="filters"
+          :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint"
         />
-      </div>
+      </header>
+      <vulnerabilities-count-list
+        v-if="shouldShowDashboard"
+        :scope="$options.vulnerabilitiesSeverityCountScopes.instance"
+        :filters="filters"
+      />
     </template>
     <template #sticky>
       <filters v-if="shouldShowDashboard" :projects="projects" @filterChange="handleFilterChange" />

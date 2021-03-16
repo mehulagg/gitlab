@@ -30,6 +30,7 @@ export default {
   },
   watch: {
     value(newVal) {
+      console.log('watch', newVal);
       this.saveValue(this.serialize(newVal));
     },
     clear(newVal) {

@@ -7,6 +7,7 @@ import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/group_dashboard_not_configured.vue';
+import SurveyRequestBanner from './survey_request_banner.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 
 export default {
@@ -18,6 +19,7 @@ export default {
     DashboardNotConfigured,
     GlLoadingIcon,
     VulnerabilitiesCountList,
+    SurveyRequestBanner,
   },
   props: {
     groupFullPath: {
@@ -70,6 +72,8 @@ export default {
 <template>
   <div>
     <gl-loading-icon v-if="!projectsWereFetched" size="lg" class="gl-mt-6" />
+    <survey-request-banner v-else class="gl-mt-5" />
+
     <dashboard-not-configured v-if="isNotYetConfigured" />
     <security-dashboard-layout v-else :class="{ 'gl-display-none': !projectsWereFetched }">
       <template #header>
