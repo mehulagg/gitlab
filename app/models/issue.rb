@@ -191,7 +191,8 @@ class Issue < ApplicationRecord
   end
 
   def self.relative_positioning_query_base(issue)
-    in_projects(issue.parent_ids)
+    projects = issue.project.group&.root_ancestor&.all_projects || issue.project
+    in_projects(projects)
   end
 
   def self.relative_positioning_parent_column
