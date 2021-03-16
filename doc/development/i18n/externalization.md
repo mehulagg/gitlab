@@ -271,7 +271,28 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   </gl-sprintf>
   ```
 
-  In other cases it may be simpler to use `sprintf`. For example, see below.
+  In other cases it may be simpler to use `sprintf`, perhaps in a computed
+  prop. For example:
+
+  ```html
+  <script>
+  import { __, sprintf } from '~/locale';
+
+  export default {
+    ...
+    computed: {
+      userWelcome() {
+        sprintf(__('Hello %{username}'), { username: this.user.name });
+      }
+    }
+    ...
+  }
+  </script>
+
+  <template>
+    <span>{{ userWelcome }}</span>
+  </template>
+  ```
 
 - In JavaScript:
 
