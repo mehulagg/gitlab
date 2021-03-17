@@ -1,3 +1,12 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/gitlab-experiment.git
+  revision: bc257042752f24c8bad1e8a52b5d001522c4b0bf
+  ref: release-0.5.1
+  specs:
+    gitlab-experiment (0.5.1)
+      activesupport (>= 3.0)
+      scientist (~> 1.6, >= 1.6.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -438,9 +447,6 @@ GEM
       numerizer (~> 0.2)
     gitlab-dangerfiles (0.8.0)
       danger
-    gitlab-experiment (0.5.0)
-      activesupport (>= 3.0)
-      scientist (~> 1.5, >= 1.5.0)
     gitlab-fog-azure-rm (1.0.1)
       azure-storage-blob (~> 2.0)
       azure-storage-common (~> 2.0)
@@ -1422,7 +1428,7 @@ DEPENDENCIES
   github-markup (~> 1.7.0)
   gitlab-chronic (~> 0.10.5)
   gitlab-dangerfiles (~> 0.8.0)
-  gitlab-experiment (~> 0.5.0)
+  gitlab-experiment!
   gitlab-fog-azure-rm (~> 1.0.1)
   gitlab-fog-google (~> 1.13)
   gitlab-labkit (~> 0.16.1)
