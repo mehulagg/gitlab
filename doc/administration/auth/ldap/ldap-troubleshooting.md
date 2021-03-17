@@ -643,7 +643,8 @@ ldapsearch -D "cn=admin,dc=ldap-testing,dc=example,dc=com" \
   -w Password1 \
   -p 389 \
   -h 127.0.0.1 \
-  -b "dc=ldap-testing,dc=example,dc=com"
+  -b "dc=ldap-testing,dc=example,dc=com" \
+  -s sub "(objectclass=*)"
 ```
 
 Note that the `bind_dn`, `password`, `port`, `host`, and `base` are all
