@@ -130,16 +130,6 @@ module API
     formatter :json, Gitlab::Json::GrapeFormatter
     content_type :json, 'application/json'
 
-    before do
-      # the feature flag workaround is only for `.txt`
-      api_format = env[Grape::Env::API_FORMAT]
-      next unless api_format == :txt
-
-      # get all defined content-types for the endpoint
-      api_endpoint = env[Grape::Env::API_ENDPOINT]
-      content_types = api_endpoint&.namespace_stackable_with_hash(:content_types).to_h
-    end
-
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers
     helpers ::API::Helpers::CommonHelpers
