@@ -80,6 +80,7 @@ export default {
             <button
               :class="{ active: isParallel }"
               class="btn gl-button"
+              data-testid="side-by-side"
               @click="setViewType('parallel')"
             >
               {{ __('Side-by-side') }}
@@ -87,22 +88,16 @@ export default {
           </div>
         </div>
         <div class="js-toggle-container">
-          <div class="commit-stat-summary">
+          <div class="commit-stat-summary" data-testid="conflicts-count">
             <gl-sprintf :message="$options.i18n.commitStatSummary">
               <template #conflict>
-                <strong class="cred">
-                  {{ getConflictsCountText }}
-                </strong>
+                <strong class="cred">{{ getConflictsCountText }}</strong>
               </template>
               <template #sourceBranch>
-                <strong class="ref-name">
-                  {{ conflictsData.sourceBranch }}
-                </strong>
+                <strong class="ref-name">{{ conflictsData.sourceBranch }}</strong>
               </template>
               <template #targetBranch>
-                <strong class="ref-name">
-                  {{ conflictsData.targetBranch }}
-                </strong>
+                <strong class="ref-name">{{ conflictsData.targetBranch }}</strong>
               </template>
             </gl-sprintf>
           </div>
@@ -114,9 +109,10 @@ export default {
             v-for="file in conflictsData.files"
             :key="file.blobPath"
             class="diff-file file-holder conflict"
+            data-testid="files"
           >
             <div class="js-file-title file-title file-title-flex-parent cursor-default">
-              <div class="file-header-content">
+              <div class="file-header-content" data-testid="file-name">
                 <file-icon :file-name="file.filePath" :size="18" css-classes="gl-mr-2" />
                 <strong class="file-title-name">{{ file.filePath }}</strong>
               </div>
@@ -126,6 +122,7 @@ export default {
                     :class="{ active: file.resolveMode === 'interactive' }"
                     class="btn gl-button"
                     type="button"
+                    data-testid="interactive-button"
                     @click="onClickResolveModeButton(file, 'interactive')"
                   >
                     {{ __('Interactive mode') }}
@@ -134,6 +131,7 @@ export default {
                     :class="{ active: file.resolveMode === 'edit' }"
                     class="btn gl-button"
                     type="button"
+                    data-testid="inline-button"
                     @click="onClickResolveModeButton(file, 'edit')"
                   >
                     {{ __('Edit inline') }}
@@ -200,6 +198,7 @@ export default {
               <textarea
                 id="commit-message"
                 v-model="commitMessage"
+                data-testid="commit-message"
                 class="form-control js-commit-message"
                 rows="5"
               ></textarea>
