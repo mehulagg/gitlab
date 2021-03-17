@@ -20735,7 +20735,7 @@ msgstr ""
 msgid "No estimate or time spent"
 msgstr ""
 
-msgid "No file chosen."
+msgid "No file chosen"
 msgstr ""
 
 msgid "No file hooks found."
@@ -23407,7 +23407,7 @@ msgstr ""
 msgid "Profiles|Main settings"
 msgstr ""
 
-msgid "Profiles|No file chosen."
+msgid "Profiles|No file chosen"
 msgstr ""
 
 msgid "Profiles|Notification email"
@@ -27302,6 +27302,9 @@ msgid "Select project to choose zone"
 msgstr ""
 
 msgid "Select projects"
+msgstr ""
+
+msgid "Select required regulatory standard."
 msgstr ""
 
 msgid "Select reviewer(s)"
