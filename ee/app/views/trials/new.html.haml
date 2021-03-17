@@ -33,7 +33,7 @@
     = select_tag :company_size, company_size_options_for_select(params[:company_size]), include_blank: true, class: 'select2', required: true
   .form-group
     = label_tag :phone_number, _('Telephone number'), for: :phone_number, class: 'col-form-label'
-    = text_field_tag :phone_number, params[:phone_number], class: 'form-control gl-form-input', required: true
+    = telephone_field_tag :phone_number, params[:phone_number], class: 'form-control gl-form-input', required: true
   .form-group
     = label_tag :number_of_users, _('How many users will be evaluating the trial?'), for: :number_of_users, class: 'col-form-label'
     = number_field_tag :number_of_users, params[:number_of_users], class: 'form-control gl-form-input', required: true, min: 1
