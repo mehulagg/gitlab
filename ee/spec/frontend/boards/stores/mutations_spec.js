@@ -205,7 +205,7 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
   });
 });
 
-describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
+describe('RECEIVE_EPICS_SUCCESS', () => {
   it('populates epics and canAdminEpic with payload', () => {
     state = {
       ...state,
@@ -213,7 +213,7 @@ describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
       canAdminEpic: false,
     };
 
-    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
+    mutations.RECEIVE_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
 
     expect(state.epics).toEqual(mockEpics);
     expect(state.canAdminEpic).toEqual(true);
@@ -224,30 +224,6 @@ describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
       ...state,
       epics: mockEpics,
       canAdminEpic: false,
-    };
-
-    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, mockEpics);
-
-    expect(state.epics).toEqual(mockEpics);
-  });
-});
-
-describe('RECEIVE_EPICS_SUCCESS', () => {
-  it('populates epics with payload', () => {
-    state = {
-      ...state,
-      epics: {},
-    };
-
-    mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
-
-    expect(state.epics).toEqual(mockEpics);
-  });
-
-  it("doesn't add duplicate epics", () => {
-    state = {
-      ...state,
-      epics: mockEpics,
     };
 
     mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
