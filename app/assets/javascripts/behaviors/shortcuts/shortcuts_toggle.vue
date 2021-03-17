@@ -31,7 +31,7 @@ export default {
     <gl-toggle
       v-model="shortcutsEnabled"
       aria-describedby="shortcutsToggle"
-      label="Keyboard shortcuts"
+      :label="__('Keyboard shortcuts')"
       label-position="left"
       @change="onChange"
     />
