@@ -20,21 +20,18 @@ RSpec.describe SurveyResponsesController do
         allow(::Gitlab).to receive(:com?).and_return(true)
       end
 
-      it 'tracks a survey_response event' do
-        expect(Gitlab::Tracking).to receive(:self_describing_event).with(
-          SurveyResponsesController::SURVEY_RESPONSE_SCHEMA_URL,
-          data: { survey_id: 1, response: 'bar' }
-        )
-
+      it 'tracks a survey_response event', :snowplow do
         subject
+
+        expect_snowplow_event(described_class.name, 'submit_response')
       end
     end
 
     context 'not on GitLab.com' do
-      it 'does not track a survey_response event' do
-        expect(Gitlab::Tracking).not_to receive(:self_describing_event)
-
+      it 'does not track a survey_response event', :snowplow do
         subject
+
+        expect_no_snowplow_event
       end
     end
   end
