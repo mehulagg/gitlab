@@ -24,6 +24,10 @@ module Elastic
         search(query_hash, options)
       end
 
+      def preload_indexing_data(relation)
+        relation.includes(noteable: {assignees: []})
+      end
+
       private
 
       def confidentiality_filter(query_hash, options)

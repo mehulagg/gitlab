@@ -208,6 +208,34 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
       expect(described_class.queue_size).to eq(1)
     end
 
+    context 'N+1 queries' do
+      it 'does not have N+1 queries for notes' do
+        notes = []
+
+        2.times do
+          notes << create(:note)
+          notes << create(:discussion_note_on_merge_request)
+          notes << create(:note_on_merge_request)
+          notes << create(:note_on_commit)
+        end
+
+        described_class.track!(*notes)
+
+        control = ActiveRecord::QueryRecorder.new { described_class.new.execute }
+
+        3.times do
+          notes << create(:note)
+          notes << create(:discussion_note_on_merge_request)
+          notes << create(:note_on_merge_request)
+          notes << create(:note_on_commit)
+        end
+
+        described_class.track!(*notes)
+
+        expect { described_class.new.execute }.not_to exceed_all_query_limit(control)
+      end
+    end
+
     def expect_processing(*refs, failures: [])
       expect_next_instance_of(::Gitlab::Elastic::BulkIndexer) do |indexer|
         refs.each { |ref| expect(indexer).to receive(:process).with(ref) }

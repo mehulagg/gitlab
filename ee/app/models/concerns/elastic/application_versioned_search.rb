@@ -47,6 +47,8 @@ module Elastic
         after_commit :maintain_elasticsearch_create, on: :create, if: :maintaining_elasticsearch?
         after_commit :maintain_elasticsearch_update, on: :update, if: :maintaining_elasticsearch?
         after_commit :maintain_elasticsearch_destroy, on: :destroy, if: :maintaining_elasticsearch?
+
+        scope :preload_indexing_data, -> { __elasticsearch__.preload_indexing_data(self) }
       end
     end
 

@@ -31,7 +31,7 @@ module Gitlab
           @refs.group_by(&:klass).each do |klass, group|
             ids = group.map(&:db_id)
 
-            records = klass.id_in(ids)
+            records = klass.id_in(ids).preload_indexing_data
             records_by_id = records.each_with_object({}) { |record, hash| hash[record.id] = record }
 
             group.each do |ref|
