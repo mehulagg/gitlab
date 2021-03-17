@@ -24,7 +24,9 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
       subject_line: subject_line(@track, @series)
     }
 
-    ::Gitlab::Tracking.self_describing_event(EMAIL_CAMPAIGNS_SCHEMA_URL, data: data)
+    context = SnowplowTracker::SelfDescribingJson.new(EMAIL_CAMPAIGNS_SCHEMA_URL, data)
+
+    ::Gitlab::Tracking.event(self.class.name, 'click', context: [context])
   end
 
   def redirect_link
