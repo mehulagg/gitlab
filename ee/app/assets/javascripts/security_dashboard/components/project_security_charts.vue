@@ -132,7 +132,7 @@ export default {
           {
             type: 'slider',
             startValue: this.chartStartDate,
-            handleIcon: this.svgs['status-paused'],
+            handleIcon: this.svgs['scroll-handle'],
             dataBackground: {
               lineStyle: {
                 width: 2,
