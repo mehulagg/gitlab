@@ -584,7 +584,6 @@ via the GitLab UI:
 NOTE:
 Each time you clear the cache manually, the [internal cache name](#where-the-caches-are-stored) is updated. The name uses the format `cache-<index>`, and the index increments by one each time. The old cache is not deleted. You can manually delete these files from the runner storage.
 
-
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
