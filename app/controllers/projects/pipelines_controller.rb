@@ -43,8 +43,15 @@ class Projects::PipelinesController < Projects::ApplicationController
 
     @pipelines_count = limited_pipelines_count(project)
 
+
     respond_to do |format|
-      format.html
+      format.html do
+        experiment(:pipeline_empty_state) do |e|
+          e.use { }
+          e.try(:candidate) { }
+        end.run
+      end
+
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 

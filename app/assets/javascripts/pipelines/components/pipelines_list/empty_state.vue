@@ -1,6 +1,7 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
+import Experiment from '~/experimentation/components/experiment.vue';
 import { s__ } from '~/locale';
 
 export default {
@@ -15,6 +16,7 @@ export default {
   name: 'PipelinesEmptyState',
   components: {
     GlEmptyState,
+    Experiment,
   },
   props: {
     emptyStateSvgPath: {
@@ -35,19 +37,23 @@ export default {
 </script>
 <template>
   <div>
-    <gl-empty-state
-      v-if="canSetCi"
-      :title="$options.i18n.title"
-      :svg-path="emptyStateSvgPath"
-      :description="$options.i18n.description"
-      :primary-button-text="$options.i18n.btnText"
-      :primary-button-link="ciHelpPagePath"
-    />
-    <gl-empty-state
-      v-else
-      title=""
-      :svg-path="emptyStateSvgPath"
-      :description="$options.i18n.noCiDescription"
-    />
+    <experiment name="pipelineEmptyState">
+      <template slot="control">
+        <gl-empty-state
+          v-if="canSetCi"
+          :title="$options.i18n.title"
+          :svg-path="emptyStateSvgPath"
+          :description="$options.i18n.description"
+          :primary-button-text="$options.i18n.btnText"
+          :primary-button-link="ciHelpPagePath"
+        />
+        <gl-empty-state
+          v-else
+          title=""
+          :svg-path="emptyStateSvgPath"
+          :description="$options.i18n.noCiDescription"
+        />
+      </template>
+    </experiment>
   </div>
 </template>
