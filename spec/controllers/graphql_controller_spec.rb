@@ -176,21 +176,22 @@ RSpec.describe GraphqlController do
 
   describe '#append_info_to_payload' do
     let(:graphql_query) { graphql_query_for('project', { 'fullPath' => 'foo' }, %w(id name)) }
-    let(:mock_store) { { graphql_logs: { foo: :bar } } }
+    let(:mock_store) { { graphql_logs: [{ operation_name: 'Foo', foo: :bar }] } }
     let(:log_payload) { {} }
 
     before do
       allow(RequestStore).to receive(:store).and_return(mock_store)
+      allow(GitlabSchema).to receive(:execute)
       allow(controller).to receive(:append_info_to_payload).and_wrap_original do |method, *|
         method.call(log_payload)
       end
     end
 
     it 'appends metadata for logging' do
-      post :execute, params: { query: graphql_query, operationName: 'Foo' }
+      post :execute, params: { query: graphql_query }
 
       expect(controller).to have_received(:append_info_to_payload)
-      expect(log_payload.dig(:metadata, :graphql)).to eq({ operation_name: 'Foo', foo: :bar })
+      expect(log_payload.dig(:metadata, :graphql)).to eq([{ operation_name: 'Foo', foo: :bar }])
     end
   end
 end

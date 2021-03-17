@@ -144,7 +144,7 @@ class GraphqlController < ApplicationController
   end
 
   def logs
-    RequestStore.store[:graphql_logs].to_h
+    RequestStore.store[:graphql_logs].to_a
                 .map { |log| log.except(:duration_s, :query_string) }
   end
 end
