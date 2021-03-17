@@ -13,7 +13,6 @@ module TrialStatusWidgetHelper
 
   def trial_status_widget_data_attrs(group)
     trial_status_common_data_attrs(group).merge(
-      days_remaining: group.trial_days_remaining,
       nav_icon_image_path: image_path('illustrations/golden_tanuki.svg'),
       percentage_complete: group.trial_percentage_complete
     )
@@ -36,6 +35,7 @@ module TrialStatusWidgetHelper
   def trial_status_common_data_attrs(group)
     {
       container_id: 'trial-status-sidebar-widget',
+      days_remaining: group.trial_days_remaining,
       plan_name: group.gitlab_subscription&.plan_title,
       plans_href: group_billings_path(group)
     }

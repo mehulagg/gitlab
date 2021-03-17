@@ -21,6 +21,7 @@ RSpec.describe TrialStatusWidgetHelper do
     let(:shared_expected_attrs) do
       {
         container_id: 'trial-status-sidebar-widget',
+        days_remaining: 12,
         plan_name: 'Ultimate',
         plans_href: '/groups/pants-group/-/billings'
       }
@@ -55,7 +56,6 @@ RSpec.describe TrialStatusWidgetHelper do
       it 'returns the needed data attributes for mounting the Vue component' do
         expect(data_attrs).to match(
           shared_expected_attrs.merge(
-            days_remaining: 12,
             nav_icon_image_path: '/image-path/for-file.svg',
             percentage_complete: 40
           )

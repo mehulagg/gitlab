@@ -12,6 +12,7 @@ describe('TrialStatusPopover component', () => {
   const createComponent = () => {
     return shallowMount(TrialStatusPopover, {
       propsData: {
+        daysRemaining: 13,
         groupName: 'Some Test Group',
         planName: 'Ultimate',
         plansHref: 'billing/path-for/group',

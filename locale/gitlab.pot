@@ -31905,9 +31905,6 @@ msgstr ""
 msgid "Trials|Go back to GitLab"
 msgstr ""
 
-msgid "Trials|Hey there"
-msgstr ""
-
 msgid "Trials|Skip Trial"
 msgstr ""
 
@@ -31925,6 +31922,11 @@ msgstr ""
 
 msgid "Trials|Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab %{planName}. To continue using GitLab %{planName} after your trial ends, you will need to buy a subscription. You can also choose GitLab Premium if its features are sufficient for your needs."
 msgstr ""
+
+msgid "Trials|You’ve got %{num} day remaining on GitLab %{planName}!"
+msgid_plural "Trials|You’ve got %{num} days remaining on GitLab %{planName}!"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Trial|Company name"
 msgstr ""

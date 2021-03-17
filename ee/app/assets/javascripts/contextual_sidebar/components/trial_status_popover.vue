@@ -3,7 +3,7 @@ import { GlButton, GlPopover, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import { s__ } from '~/locale';
+import { n__, s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
@@ -24,6 +24,10 @@ export default {
       type: [String, null],
       required: false,
       default: null,
+    },
+    daysRemaining: {
+      type: Number,
+      required: true,
     },
     groupName: {
       type: String,
@@ -57,7 +61,6 @@ export default {
   },
   i18n: {
     compareAllButtonTitle: s__('Trials|Compare all plans'),
-    popoverTitle: s__('Trials|Hey there'),
     popoverContent: s__(`Trials|Your trial ends on
       %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab
       %{planName}. To continue using GitLab %{planName} after your trial ends,
@@ -68,6 +71,18 @@ export default {
   computed: {
     formattedTrialEndDate() {
       return formatDate(this.trialEndDate, 'yyyy-mm-dd');
+    },
+    popoverTitle() {
+      const i18nPopoverTitle = n__(
+        'Trials|You’ve got %{num} day remaining on GitLab %{planName}!',
+        'Trials|You’ve got %{num} days remaining on GitLab %{planName}!',
+        this.daysRemaining,
+      );
+
+      return sprintf(i18nPopoverTitle, {
+        planName: this.planName,
+        num: this.daysRemaining,
+      });
     },
   },
   created() {
@@ -108,10 +123,7 @@ export default {
     :delay="{ hide: 400 }"
     @shown="onShown"
   >
-    <template #title>
-      {{ $options.i18n.popoverTitle }}
-      <gl-emoji class="gl-vertical-align-baseline font-size-inherit gl-ml-1" data-name="wave" />
-    </template>
+    <template #title>{{ popoverTitle }}</template>
 
     <gl-sprintf :message="$options.i18n.popoverContent">
       <template #bold="{ content }">
