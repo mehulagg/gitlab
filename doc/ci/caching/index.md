@@ -581,7 +581,8 @@ via the GitLab UI:
 
 1. On the next push, your CI/CD job uses a new cache.
 
-NOTE:Clearing the cache will modify your cache name to include an incremental index for each time it has been cleared on an specific project, so your value will change from **cache_name** to **cache_name-#**.
+NOTE:Each time you clear the cache manually, the [internal cache name](#where-the-caches-are-stored) is updated. The name uses the format `cache-<index>`, and the index increments by one each time. The old cache is not deleted. You can manually delete these files from the runner storage.
+
 
 <!-- ## Troubleshooting
 
