@@ -5,6 +5,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'critical',
     confidence: 'high',
+    url: 'http://gitlab.localdev:3000/testgroup/testproject/-/security/vulnerabilities/1',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
