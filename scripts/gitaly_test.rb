@@ -104,7 +104,11 @@ module GitalyTest
     args = ["#{tmp_tests_gitaly_dir}/#{service_binary(service)}"]
     args.push("-config") if service == :praefect
     args.push(config_path(service))
-    pid = spawn(env, *args, [:out, :err] => "log/#{service}-test.log")
+    gitaly_env = env.dup
+    gitaly_env['GRPC_GO_LOG_SEVERITY_LEVEL'] = 'info'
+    gitaly_env['GRPC_GO_LOG_VERBOSITY_LEVEL'] = '99'
+
+    pid = spawn(gitaly_env, *args, [:out, :err] => "log/#{service}-test.log")
 
     begin
       try_connect!(service)
