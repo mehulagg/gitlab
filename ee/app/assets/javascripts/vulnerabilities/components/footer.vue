@@ -105,6 +105,11 @@ export default {
           type: 'url',
           href: 'http://site.com',
         },
+        should_not_render: {
+          name: __('Buz'),
+          type: 'foo',
+          href: 'http://site.com',
+        },
         links: {
           name: __('Links'),
           type: 'list',

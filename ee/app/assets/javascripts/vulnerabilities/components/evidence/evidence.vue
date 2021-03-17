@@ -2,8 +2,10 @@
 import { GlCollapse, GlIcon } from '@gitlab/ui';
 import EvidenceItem from './evidence_item.vue';
 import EvidenceRow from './evidence_row.vue';
+import { supportedTypes } from './types';
 
 export default {
+  supportedTypes,
   components: {
     GlCollapse,
     GlIcon,
@@ -33,6 +35,9 @@ export default {
     isLastRow(i) {
       return i === this.detailsEntries.length - 1;
     },
+    isSupportedType(type) {
+      return type === 'list' || this.$options.supportedTypes.includes(type);
+    },
   },
 };
 </script>
@@ -46,15 +51,17 @@ export default {
       </h3>
     </header>
     <gl-collapse :visible="showSection">
-      <evidence-row
-        v-for="([label, item], i) in detailsEntries"
-        :key="label"
-        :label="item.name"
-        :is-last-row="isLastRow(i)"
-        :debug="i"
-      >
-        <evidence-item :item="item" />
-      </evidence-row>
+      <template v-for="([label, item], i) in detailsEntries">
+        <evidence-row
+          v-if="isSupportedType(item.type)"
+          :key="label"
+          :label="item.name"
+          :is-last-row="isLastRow(i)"
+          :debug="i"
+        >
+          <evidence-item :item="item" />
+        </evidence-row>
+      </template>
     </gl-collapse>
   </section>
 </template>
