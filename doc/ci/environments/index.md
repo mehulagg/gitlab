@@ -473,7 +473,7 @@ To delete a stopped environment in the GitLab UI:
 1. Next to the environment you want to delete, select **Delete environment**.
 1. On the confirmation dialog box, select **Delete environment**.
 
-### Prepare an environment
+### Prepare an environment without creating a deployment
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208655) in GitLab 13.2.
 
