@@ -1,5 +1,6 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { OVERVIEW_STAGE_CONFIG } from 'ee/analytics/cycle_analytics/constants';
 import * as actions from 'ee/analytics/cycle_analytics/store/actions';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
@@ -325,8 +326,6 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('receiveCycleAnalyticsDataError', () => {
-    beforeEach(() => {});
-
     it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a 403 response`, () => {
       const response = { status: 403 };
       return testAction(
@@ -373,8 +372,6 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('receiveGroupStagesSuccess', () => {
-    beforeEach(() => {});
-
     it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage'`, () => {
       return testAction(
         actions.receiveGroupStagesSuccess,
@@ -392,39 +389,108 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('setDefaultSelectedStage', () => {
-    it("dispatches the 'fetchStageData' action", () => {
-      return testAction(
-        actions.setDefaultSelectedStage,
-        null,
-        state,
-        [],
-        [
-          { type: 'setSelectedStage', payload: selectedStage },
-          { type: 'fetchStageData', payload: selectedStageSlug },
-        ],
-      );
+    describe('with the hasPathNavigation=true', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: true,
+          },
+        };
+      });
+
+      afterEach(() => {
+        mock.restore();
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: false,
+          },
+        };
+      });
+
+      it("dispatches the 'setSelectedStage' action", () => {
+        return testAction(
+          actions.setDefaultSelectedStage,
+          null,
+          state,
+          [],
+          [{ type: 'setSelectedStage', payload: OVERVIEW_STAGE_CONFIG }],
+        );
+      });
+
+      it('will select the overview stage', () => {
+        return testAction(
+          actions.setDefaultSelectedStage,
+          null,
+          state,
+          [],
+          [{ type: 'setSelectedStage', payload: OVERVIEW_STAGE_CONFIG }],
+        );
+      });
     });
 
-    it.each`
-      data
-      ${[]}
-      ${null}
-    `('with $data will flash an error', ({ data }) => {
-      actions.setDefaultSelectedStage({ getters: { activeStages: data }, dispatch: () => {} }, {});
-      shouldFlashAMessage(flashErrorMessage);
-    });
+    describe('with the hasPathNavigation=false', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: false,
+          },
+        };
+      });
 
-    it('will select the first active stage', () => {
-      return testAction(
-        actions.setDefaultSelectedStage,
-        null,
-        state,
-        [],
-        [
-          { type: 'setSelectedStage', payload: stages[1] },
-          { type: 'fetchStageData', payload: stages[1].slug },
-        ],
-      );
+      afterEach(() => {
+        mock.restore();
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: true,
+          },
+        };
+      });
+
+      it("dispatches the 'fetchStageData' action", () => {
+        return testAction(
+          actions.setDefaultSelectedStage,
+          null,
+          state,
+          [],
+          [
+            { type: 'setSelectedStage', payload: selectedStage },
+            { type: 'fetchStageData', payload: selectedStageSlug },
+          ],
+        );
+      });
+
+      it.each`
+        data
+        ${[]}
+        ${null}
+      `('with $data will flash an error', ({ data }) => {
+        actions.setDefaultSelectedStage(
+          { getters: { activeStages: data }, dispatch: () => {} },
+          {},
+        );
+        shouldFlashAMessage(flashErrorMessage);
+      });
+
+      it('will select the first active stage', () => {
+        return testAction(
+          actions.setDefaultSelectedStage,
+          null,
+          state,
+          [],
+          [
+            { type: 'setSelectedStage', payload: stages[1] },
+            { type: 'fetchStageData', payload: stages[1].slug },
+          ],
+        );
+      });
     });
   });
 

@@ -2,6 +2,7 @@ import { uniq } from 'lodash';
 import {
   DEFAULT_DAYS_IN_PAST,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
+  OVERVIEW_STAGE_CONFIG,
 } from 'ee/analytics/cycle_analytics/constants';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import mutations from 'ee/analytics/cycle_analytics/store/mutations';
@@ -205,7 +206,7 @@ export const rawTasksByTypeData = transformRawTasksByTypeData(apiTasksByTypeData
 export const transformedTasksByTypeData = getTasksByTypeData(apiTasksByTypeData);
 
 export const transformedStagePathData = transformStagesForPathNavigation({
-  stages: allowedStages,
+  stages: [OVERVIEW_STAGE_CONFIG, ...allowedStages],
   medians,
   selectedStage: issueStage,
 });

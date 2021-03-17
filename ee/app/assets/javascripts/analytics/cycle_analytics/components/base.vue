@@ -101,7 +101,7 @@ export default {
       return !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError;
+      return this.featureFlags.hasPathNavigation && this.selectedStageReady;
     },
     shouldDisplayVerticalNavigation() {
       return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
@@ -245,7 +245,7 @@ export default {
         </div>
       </div>
     </div>
-    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
+    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">
       <gl-empty-state
         v-if="hasNoAccessError"
         class="js-empty-state"
@@ -259,12 +259,12 @@ export default {
       />
       <div v-else>
         <metrics
-          v-if="isOverviewStageSelected"
+          v-if="!featureFlags.hasPathNavigation || isOverviewStageSelected"
           :group-path="currentGroupPath"
           :request-params="cycleAnalyticsRequestParams"
         />
         <stage-table
-          v-if="!isOverviewStageSelected"
+          v-if="!featureFlags.hasPathNavigation || !isOverviewStageSelected"
           :key="stageCount"
           class="js-stage-table"
           :current-stage="selectedStage"

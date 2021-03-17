@@ -376,42 +376,55 @@ describe('Value Stream Analytics component', () => {
       displaysDateRangePicker(true);
     });
 
-    it('displays the metrics', () => {
-      displaysMetrics(true);
-    });
-
-    it('displays the stage table', () => {
-      displaysStageTable(true);
-    });
-
     it('displays the filter bar', () => {
       displaysFilterBar(true);
     });
 
-    it('displays the add stage button', async () => {
-      wrapper = await createComponent({
-        opts: {
-          stubs: {
-            StageTable,
-            StageTableNav,
-            AddStageButton,
-          },
-        },
-        withStageSelected: true,
-      });
-
-      await wrapper.vm.$nextTick();
-      displaysAddStageButton(true);
+    it('displays the metrics', () => {
+      displaysMetrics(true);
     });
 
-    it('displays the tasks by type chart', async () => {
-      wrapper = await createComponent({ shallow: false, withStageSelected: true });
-      await wrapper.vm.$nextTick();
-      expect(wrapper.find('.js-tasks-by-type-chart').exists()).toBe(true);
+    it('displays the type of work chart', async () => {
+      displaysTypeOfWork(true);
     });
 
     it('displays the duration chart', () => {
       displaysDurationChart(true);
+    });
+
+    it('hides the stage table', async () => {
+      displaysStageTable(false);
+    });
+
+    it('hides the add stage button', async () => {
+      displaysAddStageButton(false);
+    });
+
+    describe('Without the overview stage selected', () => {
+      beforeEach(async () => {
+        await store.dispatch('setSelectedStage', mockData.issueStage);
+        await wrapper.vm.$nextTick();
+      });
+
+      it('displays the stage table', async () => {
+        displaysStageTable(true);
+      });
+
+      it('displays the add stage button', async () => {
+        wrapper = await createComponent({
+          opts: {
+            stubs: {
+              StageTable,
+              StageTableNav,
+              AddStageButton,
+            },
+          },
+          withStageSelected: true,
+        });
+
+        await wrapper.vm.$nextTick();
+        displaysAddStageButton(true);
+      });
     });
 
     describe('path navigation', () => {

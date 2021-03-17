@@ -151,8 +151,24 @@ export const receiveGroupStagesError = ({ commit }, error) => {
   createFlash(__('There was an error fetching value stream analytics stages.'));
 };
 
-export const setDefaultSelectedStage = ({ dispatch }) =>
-  dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
+export const setDefaultSelectedStage = ({ dispatch, getters, state: { featureFlags } = {} }) => {
+  if (featureFlags?.hasPathNavigation) {
+    return dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
+  }
+
+  const { activeStages = [] } = getters;
+
+  if (activeStages?.length) {
+    const [firstActiveStage] = activeStages;
+    return Promise.all([
+      dispatch('setSelectedStage', firstActiveStage),
+      dispatch('fetchStageData', firstActiveStage.slug),
+    ]);
+  }
+
+  createFlash(__('There was an error while fetching value stream analytics data.'));
+  return Promise.resolve();
+};
 
 export const receiveGroupStagesSuccess = ({ commit, dispatch }, stages) => {
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
