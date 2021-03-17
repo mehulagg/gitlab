@@ -11,8 +11,14 @@ module API
         success EE::API::Entities::Experiment
       end
       get do
-        experiments = Gitlab::Experimentation::EXPERIMENTS.keys.map do |experiment_key|
-          { key: experiment_key, enabled: Gitlab::Experimentation.active?(experiment_key) }
+        definitions = Feature::Definition.definitions.values.select { |d| d.attributes[:type] == 'experiment' }
+        experiments = definitions.map do |definition|
+          state = Feature.get(definition.attributes[:name]).state
+          {
+            key: definition.attributes[:name].gsub(/_experiment_percentage$/, ''),
+            state: state,
+            enabled: state != :off ? true : false
+          }.merge(definition.attributes)
         end
 
         present experiments, with: EE::API::Entities::Experiment, current_user: current_user

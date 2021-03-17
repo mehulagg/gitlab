@@ -3,9 +3,10 @@
 module EE
   module API
     module Entities
-      class Experiment < Grape::Entity
+      class Experiment < ::API::Entities::Feature::Definition
         expose :key
         expose :enabled
+        expose :state
       end
     end
   end
