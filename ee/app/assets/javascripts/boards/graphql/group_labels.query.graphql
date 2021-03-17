@@ -1,6 +1,11 @@
-query EpicLabels($fullPath: ID!) {
+query EpicLabels($fullPath: ID!, $search: String) {
   group(fullPath: $fullPath) {
-    labels(includeAncestorGroups: true, includeDescendantGroups: true, first: 20) {
+    labels(
+      includeAncestorGroups: true
+      includeDescendantGroups: true
+      first: 20
+      searchTerm: $search
+    ) {
       edges {
         node {
           id
