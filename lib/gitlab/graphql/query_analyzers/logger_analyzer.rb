@@ -24,6 +24,7 @@ module Gitlab
         def call(memo, visit_type, irep_node)
           RequestStore.store[:graphql_logs] ||= []
           RequestStore.store[:graphql_logs] << memo
+          memo
         end
 
         def final_value(memo)
