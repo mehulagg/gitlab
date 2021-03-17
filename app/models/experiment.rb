@@ -21,7 +21,8 @@ class Experiment < ApplicationRecord
   # Create or update the recorded experiment_user row for the user in this experiment.
   def record_user_and_group(user, group_type, context = {})
     experiment_user = experiment_users.find_or_initialize_by(user: user)
-    experiment_user.update!(group_type: group_type, context: merged_context(experiment_user, context))
+    experiment_user.assign_attributes(group_type: group_type, context: merged_context(experiment_user, context))
+    experiment_user.save! if experiment_user.changed?
   end
 
   def record_conversion_event_for_user(user, context = {})

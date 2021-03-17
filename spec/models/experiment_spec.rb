@@ -299,6 +299,16 @@ RSpec.describe Experiment do
         expect { subject }.not_to change(ExperimentUser, :count)
       end
 
+      context 'when group type or context did not change' do
+        let(:context) { {} }
+
+        it 'does not initiate a transaction' do
+          expect(ActiveRecord::Base.connection).not_to receive(:transaction)
+
+          subject
+        end
+      end
+
       context 'but the group_type and context has changed' do
         let(:group) { :experimental }
 
