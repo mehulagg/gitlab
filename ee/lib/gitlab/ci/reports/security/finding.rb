@@ -5,6 +5,8 @@ module Gitlab
     module Reports
       module Security
         class Finding
+          include ::VulnerabilityFindingHelpers
+
           UNSAFE_SEVERITIES = %w[unknown high critical].freeze
 
           attr_reader :compare_key
@@ -98,7 +100,7 @@ module Gitlab
           end
 
           def hash
-            if Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerints.empty?
+            if Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerprints.empty?
               highest_fingerprint = fingerprints.max_by(&:priority)
               report_type.hash ^ highest_fingerprint.fingerprint_hex.hash ^ primary_fingerprint.hash
             else
@@ -120,47 +122,10 @@ module Gitlab
             primary_identifier&.fingerprint
           end
 
-          # this should match the same code as in ee/app/models/vulnerabilities/finding.rb
-          def matches_fingerprints(other_fingerprints, other_uuid)
-            other_fingerprint_types = other_fingerprints.index_by(&:algorithm_type)
-
-            # highest first
-            match_result = nil
-            fingerprints.sort_by(&:priority).reverse_each do |fingerprint|
-              matching_other_fingerprint = other_fingerprint_types[fingerprint.algorithm_type]
-              next if matching_other_fingerprint.nil?
-
-              match_result = matching_other_fingerprint == fingerprint
-              break
-            end
-
-            if match_result.nil?
-              Set.new([uuid, *fingerprint_uuids]).include?(other_uuid)
-            else
-              match_result
-            end
-          end
-
-          def fingerprint_uuids
-            fingerprints.map do |fingerprint|
-              hex_sha = fingerprint.fingerprint_hex
-              Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha))
-            end
-          end
-
           private
 
           def generate_project_fingerprint
             Digest::SHA1.hexdigest(compare_key)
-          end
-
-          def uuid_v5_name(location_fingerprint_value: nil)
-            [
-              report_type,
-              primary_identifier.fingerprint,
-              location_fingerprint_value || location.fingerprint,
-              project_id
-            ].join('-')
           end
         end
       end

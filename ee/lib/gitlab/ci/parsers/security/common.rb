@@ -127,6 +127,8 @@ module Gitlab
             end
 
             if signature_algorithms.empty?
+              # see the comments in VulnerabilityFindingFingerprintHelpers about
+              # creating default signatures from location data
               is_location = [:file_path, :start_line].all? { |x| location.respond_to?(x) }
               type = is_location ? 'location' : 'hash'
               signature_algorithms[type] = [location.fingerprint_data]

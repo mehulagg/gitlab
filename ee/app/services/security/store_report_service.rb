@@ -134,6 +134,12 @@ module Security
       end
     end
 
+    def get_matched_findings(finding, normalized_fingerprints, find_params)
+      project.vulnerability_findings.where(**find_params).filter do |vf|
+        vf.matches_fingerprints(normalized_fingerprints, finding.uuid)
+      end
+    end
+
     def create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
       find_params = {
         # this isn't taking prioritization into account (happens in the filter
@@ -147,12 +153,7 @@ module Security
         ::Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
       end
 
-      get_matched_findings = lambda {
-        project.vulnerability_findings.where(**find_params).filter do |vf|
-          vf.matches_fingerprints(normalized_fingerprints, finding.uuid)
-        end
-      }
-      matched_findings = get_matched_findings.call
+      matched_findings = get_matched_findings(finding, normalized_fingerprints, find_params)
 
       begin
         vulnerability_finding = matched_findings.first
@@ -171,7 +172,7 @@ module Security
 
         vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
-        get_matched_findings.call.first
+        get_matched_findings(finding, normalized_fingerprints, find_params).first
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
