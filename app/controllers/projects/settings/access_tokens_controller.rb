@@ -43,7 +43,7 @@ module Projects
       private
 
       def check_feature_availability
-        render_404 unless project_access_token_available?(@project)
+        render_404 unless current_user.can?(:read_resource_access_tokens, @project)
       end
 
       def create_params
