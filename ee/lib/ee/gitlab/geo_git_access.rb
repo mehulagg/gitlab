@@ -8,8 +8,6 @@ module EE
       include GrapePathHelpers::NamedRouteMatcher
       extend ::Gitlab::Utils::Override
 
-      GEO_SERVER_DOCS_URL = 'https://docs.gitlab.com/ee/administration/geo/replication/using_a_geo_server.html'.freeze
-
       private
 
       def geo_custom_action
@@ -46,16 +44,6 @@ module EE
         return messages unless lag_message
 
         messages + ['', lag_message]
-      end
-
-      def push_to_read_only_message
-        message = super
-
-        if ::Gitlab::Geo.secondary_with_primary?
-          message = "#{message}\nPlease use the primary node URL instead: #{geo_primary_url_to_repo}.\nFor more information: #{GEO_SERVER_DOCS_URL}"
-        end
-
-        message
       end
 
       def geo_primary_url_to_repo
