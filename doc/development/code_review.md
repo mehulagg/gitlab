@@ -257,10 +257,10 @@ In March 18th 2020, an updated process was put in place aimed at efficiently and
 
 Here is a summary of the changes, also reflected in this section above.
 
-* Merge request authors and DRIs stay as Assignees
-* Authors request a review from Reviewers when they are expected to review
-* Reviewers remove themselves after they're done reviewing/approving
-* The last approver stays as Reviewer upon merging
+- Merge request authors and DRIs stay as Assignees
+- Authors request a review from Reviewers when they are expected to review
+- Reviewers remove themselves after they're done reviewing/approving
+- The last approver stays as Reviewer upon merging
 
 ## Best practices
 
