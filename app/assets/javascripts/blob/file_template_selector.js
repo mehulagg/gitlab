@@ -19,6 +19,17 @@ export default class FileTemplateSelector {
     this.$dropdownToggleText = this.$wrapper.find('.dropdown-toggle-text');
 
     this.initDropdown();
+    this.selectInitialTemplate();
+  }
+
+  selectInitialTemplate() {
+    const selected = this.$dropdown.data('selected');
+
+    if (!selected) {
+      return;
+    }
+
+    this.mediator.selectTemplateFile(this, selected, {});
   }
 
   show() {
@@ -60,6 +71,7 @@ export default class FileTemplateSelector {
   reportSelection(options) {
     const { query, e, data } = options;
     e.preventDefault();
+
     return this.mediator.selectTemplateFile(this, query, data);
   }
 
