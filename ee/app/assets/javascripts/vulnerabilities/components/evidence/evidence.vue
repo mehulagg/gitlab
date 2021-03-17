@@ -1,12 +1,14 @@
 <script>
 import { GlCollapse, GlIcon } from '@gitlab/ui';
 import EvidenceItem from './evidence_item.vue';
+import EvidenceRow from './evidence_row.vue';
 
 export default {
   components: {
     GlCollapse,
     GlIcon,
     EvidenceItem,
+    EvidenceRow,
   },
   props: {
     details: {
@@ -19,9 +21,17 @@ export default {
       showSection: false,
     };
   },
+  computed: {
+    detailsEntries() {
+      return Object.entries(this.details);
+    },
+  },
   methods: {
     toggleShowSection() {
       this.showSection = !this.showSection;
+    },
+    isLastRow(i) {
+      return i === this.detailsEntries.length - 1;
     },
   },
 };
@@ -36,7 +46,15 @@ export default {
       </h3>
     </header>
     <gl-collapse :visible="showSection">
-      <evidence-item v-for="[label, item] in Object.entries(details)" :key="label" :item="item" />
+      <evidence-row
+        v-for="([label, item], i) in detailsEntries"
+        :key="label"
+        :label="item.name"
+        :is-last-row="isLastRow(i)"
+        :debug="i"
+      >
+        <evidence-item :item="item" />
+      </evidence-row>
     </gl-collapse>
   </section>
 </template>

@@ -106,12 +106,13 @@ export default {
           href: 'http://site.com',
         },
         links: {
+          name: __('Links'),
           type: 'list',
           items: [
             { type: 'url', href: 'http://foo.bar', name: __('Baz') },
             {
               type: 'list',
-              items: [{ type: 'url', name: __('Quz'), href: 'http://quz.com' }],
+              items: [{ type: 'url', href: 'http://quz.com' }],
             },
           ],
         },

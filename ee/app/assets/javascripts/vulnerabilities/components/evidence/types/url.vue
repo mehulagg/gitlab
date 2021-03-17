@@ -8,15 +8,21 @@ export default {
   props: {
     name: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     href: {
       type: String,
       required: true,
     },
   },
+  computed: {
+    linkText() {
+      return this.name || this.href;
+    },
+  },
 };
 </script>
 <template>
-  <gl-link :href="href" target="_blank">{{ name }}</gl-link>
+  <gl-link :href="href" target="_blank">{{ linkText }}</gl-link>
 </template>

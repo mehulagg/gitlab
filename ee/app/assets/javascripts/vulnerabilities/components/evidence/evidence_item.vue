@@ -19,6 +19,9 @@ export default {
     },
   },
   computed: {
+    nextNestingLevel() {
+      return this.nestingLevel + 1;
+    },
     supportedTypes() {
       return Object.keys(this.$options.components).map((x) => x.toLowerCase());
     },
@@ -42,7 +45,7 @@ export default {
         v-for="listItem in item.items"
         :key="listItem.key"
         :item="listItem"
-        :nesting-level="nestingLevel + 1"
+        :nesting-level="nextNestingLevel"
       />
     </template>
   </div>
