@@ -82,7 +82,8 @@ module Gitlab
             remediations = create_remediations(data['remediations'])
             fingerprints = create_signatures(location, tracking_data(data))
 
-            if ::Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerprints.empty?
+            vulnerability_finding_fingerprints_enabled = ::Feature.enabled?(:vulnerability_finding_fingerprints, report.pipeline.project)
+            if vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
               # NOT the fingerprint_sha256 - the compare key is hashed
               # to create the project_fingerprint
               highest_priority_fingerprint = fingerprints.max_by(&:priority)
@@ -109,7 +110,8 @@ module Gitlab
                 metadata_version: report_version,
                 details: data['details'] || {},
                 signatures: signatures,
-                project_id: report.project_id))
+                project_id: report.project_id,
+                vulnerability_finding_fingerprints_enabled: vulnerability_finding_fingerprints_enabled))
           end
 
           def create_signatures(location, tracking)

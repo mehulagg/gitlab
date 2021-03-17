@@ -31,7 +31,7 @@ module Gitlab
 
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}, signatures: [], project_id: nil) # rubocop:disable Metrics/ParameterLists
+          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}, signatures: [], project_id: nil, vulnerability_finding_fingerprints_enabled: false) # rubocop:disable Metrics/ParameterLists
             @compare_key = compare_key
             @confidence = confidence
             @identifiers = identifiers
@@ -49,6 +49,7 @@ module Gitlab
             @details = details
             @signatures = signatures
             @project_id = project_id
+            @vulnerability_finding_fingerprints_enabled = vulnerability_finding_fingerprints_enabled
 
             @project_fingerprint = generate_project_fingerprint
           end
@@ -92,7 +93,7 @@ module Gitlab
           def eql?(other)
             return false unless report_type == other.report_type && primary_fingerprint == other.primary_fingerprint
 
-            if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+            if @vulnerability_finding_fingerprints_enabled
               matches_fingerprints(other.fingerprints, other.uuid)
             else
               location.fingerprint == other.location.fingerprint
@@ -100,7 +101,7 @@ module Gitlab
           end
 
           def hash
-            if Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerprints.empty?
+            if @vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
               highest_fingerprint = fingerprints.max_by(&:priority)
               report_type.hash ^ highest_fingerprint.fingerprint_hex.hash ^ primary_fingerprint.hash
             else
