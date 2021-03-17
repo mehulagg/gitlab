@@ -173,12 +173,33 @@ class Wiki
   end
 
   def create_page(title, content, format = :markdown, message = nil)
-    commit = commit_details(:created, message, title)
+    if Feature.enabled?(:gitaly_replace_wiki_write_page, user, default_enabled: :yaml)
+      extension = extension_from_format(format)
+      unless extension
+        @error_message = 'Invalid format selected'
 
-    wiki.write_page(title, format.to_sym, content, commit)
-    after_wiki_activity
+        return false
+      end
 
-    true
+      sanitized_path = title.tr(' ', '-') + '.' + extension
+
+      capture_git_error(:created) do
+        repository.create_file(user, sanitized_path, content, **multi_commit_options(:created, message, title))
+
+        after_wiki_activity
+
+        true
+      rescue Gitlab::Git::Index::IndexError => e
+        raise Gitlab::Git::Wiki::DuplicatePageError, e.message
+      end
+    else
+      commit = commit_details(:created, message, title)
+
+      wiki.write_page(title, format.to_sym, content, commit)
+      after_wiki_activity
+
+      true
+    end
   rescue Gitlab::Git::Wiki::DuplicatePageError => e
     @error_message = "Duplicate page: #{e.message}"
     false
@@ -328,6 +349,13 @@ class Wiki
     Gitlab::ErrorTracking.log_exception(error, action: action, wiki_id: wiki.id)
 
     false
+  end
+
+  def extension_from_format(format)
+    return unless Wiki::MARKUPS.value?(format.to_sym)
+
+    normalized_format = format.downcase.to_s
+    normalized_format == 'markdown' ? 'md' : normalized_format
   end
 end
 
