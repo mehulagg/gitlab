@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Project issue boards', :js do
+RSpec.describe 'Project issue boards sidebar time tracking', :js do
   include BoardHelpers
 
   let(:user)         { create(:user) }

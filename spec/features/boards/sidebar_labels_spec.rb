@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Issue Boards', :js do
+RSpec.describe 'Issue Boards labels', :js do
   include BoardHelpers
 
   let(:user)         { create(:user) }
