@@ -22,7 +22,7 @@ import (
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upstream"
 )
 
-// Version is the current version of GitLab Workhorse
+// Version is the current version of GitLab Workhorse - test workhorse change
 var Version = "(unknown version)" // Set at build time in the Makefile
 
 // BuildTime signifies the time the binary was build
