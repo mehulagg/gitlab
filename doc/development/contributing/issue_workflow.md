@@ -76,6 +76,7 @@ The current type labels are:
 - ~bug
 - ~tooling
 - ~"support request"
+- ~feedback
 - ~meta
 - ~documentation
 
