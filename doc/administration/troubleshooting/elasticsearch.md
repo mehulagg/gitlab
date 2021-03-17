@@ -203,7 +203,7 @@ To do this:
    ```rails
    u = User.find_by_email('email_of_user_doing_search')
    s = SearchService.new(u, {:search => 'search_term'})
-   pp s.search_objects.class.name
+   pp s.search_objects.class
    ```
 
 The output from the last command is the key here. If it shows:
