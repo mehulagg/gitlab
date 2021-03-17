@@ -416,6 +416,13 @@ RSpec.shared_examples 'wiki model' do
       expect(subject.error_message).to match(/Duplicate page:/)
     end
 
+    it 'cannot create a page with the same title but different format' do
+      subject.create_page('test page', 'content', :markdown)
+      subject.create_page('test page', 'content', :rdoc)
+
+      expect(subject.error_message).to match(/Duplicate page:/)
+    end
+
     it 'sets the correct commit message' do
       subject.create_page('test page', 'some content', :markdown, 'commit message')
 
