@@ -78,6 +78,7 @@ A database **maintainer**'s role is to:
 - Finally approve the MR and relabel the MR with ~"database::approved"
 - Merge the MR if no other approvals are pending or pass it on to
   other maintainers as required (frontend, backend, docs).
+  - If not merging, remove yourself as a reviewer.
 
 ### Distributing review workload
 
