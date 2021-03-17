@@ -33,66 +33,10 @@ function getSidebarOptions(sidebarOptEl = document.querySelector('.js-sidebar-op
   return JSON.parse(sidebarOptEl.innerHTML);
 }
 
-/**
- * Extracts the list of assignees with availability information from a hidden input
- * field and converts to a key:value pair for use in the sidebar assignees component.
- * The assignee username is used as the key and their busy status is the value
- *
- * e.g { root: 'busy', admin: '' }
- *
- * @returns {Object}
- */
-function getSidebarAssigneeAvailabilityData() {
-  const sidebarAssigneeEl = document.querySelectorAll('.js-sidebar-assignee-data input');
-  return Array.from(sidebarAssigneeEl)
-    .map((el) => el.dataset)
-    .reduce(
-      (acc, { username, availability = '' }) => ({
-        ...acc,
-        [username]: availability,
-      }),
-      {},
-    );
-}
-
-// function mountAssigneesComponentDeprecated(mediator) {
-//   const el = document.getElementById('js-vue-sidebar-assignees');
-
-//   if (!el) return;
-
-//   const { iid, fullPath } = getSidebarOptions();
-//   const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
-//   // eslint-disable-next-line no-new
-//   new Vue({
-//     el,
-//     apolloProvider,
-//     components: {
-//       SidebarAssignees,
-//     },
-//     render: (createElement) =>
-//       createElement('sidebar-assignees', {
-//         props: {
-//           mediator,
-//           issuableIid: String(iid),
-//           projectPath: fullPath,
-//           field: el.dataset.field,
-//           signedIn: el.hasAttribute('data-signed-in'),
-//           issuableType:
-//             isInIssuePage() || isInIncidentPage() || isInDesignPage()
-//               ? IssuableType.Issue
-//               : IssuableType.MergeRequest,
-//           assigneeAvailabilityStatus,
-//         },
-//       }),
-//   });
-// }
-
 function mountAssigneesComponent() {
   const el = document.getElementById('js-vue-sidebar-assignees');
 
   if (!el) return;
-
-  console.log(el.dataset);
 
   const { iid, fullPath, editable } = getSidebarOptions();
   // eslint-disable-next-line no-new
