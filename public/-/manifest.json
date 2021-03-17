@@ -5,7 +5,7 @@
   "start_url": "/explore",
   "background_color": "#fff",
   "icons": [{
-    "src": "icon210.png",
+    "src": "/-/pwa-icons/icon210.png",
     "sizes": "210x210",
     "type": "image/png"
   }]
