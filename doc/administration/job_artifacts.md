@@ -580,3 +580,18 @@ If you need to manually remove **all** job artifacts associated with multiple jo
    - `7.days.ago`
    - `3.months.ago`
    - `1.year.ago`
+
+#### Error `Downloading artifacts from coordinator` with status `404` `not found` in the first run of multi-job pipeline
+
+If a job depends on the artifacts of a previous job,
+and `gitlab.rb` combines the following configurations
+it is possible to encounter the above error due to a race-condition.
+
+````ruby
+gitlab_rails['artifacts_object_store_background_upload'] = false
+gitlab_rails['artifacts_object_store_direct_upload'] = true
+```
+
+To prevent this, comment or remove those lines,
+or switch to their [default values](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template)
+and run `sudo gitlab-ctl reconfigure`.
