@@ -15,6 +15,25 @@ module QA
         Page::Project::Settings::AccessTokens.perform(&:created_access_token)
       end
 
+      def fabricate_via_api!
+        super
+      end
+
+      def api_get_path
+        "/projects/#{project.api_resource[:id]}/access_tokens"
+      end
+
+      def api_post_path
+        api_get_path
+      end
+
+      def api_post_body
+        {
+          name: name || 'api-project-access-token',
+          scopes: ["api"]
+        }
+      end
+
       def resource_web_url(resource)
         super
       rescue ResourceURLMissingError
