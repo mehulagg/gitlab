@@ -133,7 +133,7 @@ If you see a green check mark - your Secure job has run sucessfully and has not 
 
 insert image
 
-If you see a wanrning (!) or an error (X) you can mouse over the icon in the pipeline to see a tooltip, and click the job if you want to see the specific exit code.
+If you see a warning (!) or an error (X) you can mouse over the icon in the pipeline to see a tooltip, and click the job if you want to see the specific exit code.
 
 insert image
 
