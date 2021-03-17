@@ -1,3 +1,5 @@
+# Triggering a pipeline
+
 stages:
   - sync
   - prepare
