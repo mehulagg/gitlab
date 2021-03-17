@@ -3,6 +3,7 @@
 module Iterations
   class Cadence < ApplicationRecord
     include Gitlab::SQL::Pattern
+    include EachBatch
 
     self.table_name = 'iterations_cadences'
 
@@ -22,6 +23,15 @@ module Iterations
     scope :is_automatic, -> (automatic) { where(automatic: automatic) }
     scope :is_active, -> (active) { where(active: active) }
     scope :ordered_by_title, -> { order(:title) }
+
+    scope :for_automated_iterations, -> do
+      is_automatic(true)
+        .joins(:iterations)
+        .where('sprints.due_date > now()')
+        .group('iterations_cadences.id')
+        .having('COUNT(*) < coalesce(iterations_cadences.iterations_in_advance, 1) + 1')
+        .select('iterations_cadences.*', '(coalesce(iterations_cadences.iterations_in_advance, 1) + 1 - count(*)) as next_iterations_count', 'max(sprints.due_date) as last_iteration_due_date')
+    end
 
     def self.search_title(query)
       fuzzy_search(query, [:title])

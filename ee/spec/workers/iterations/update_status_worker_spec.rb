@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe IterationsUpdateStatusWorker do
+RSpec.describe Iterations::UpdateStatusWorker do
   subject(:worker) { described_class.new }
 
   describe '#perform' do
