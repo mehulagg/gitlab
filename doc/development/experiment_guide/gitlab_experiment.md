@@ -501,6 +501,32 @@ Any experiment that's been run in the request lifecycle surfaces in `window.gon.
 and matches [this schema](https://gitlab.com/gitlab-org/iglu/-/blob/master/public/schemas/com.gitlab/gitlab_experiment/jsonschema/1-0-0)
 so you can use it when resolving some concepts around experimentation in the client layer.
 
+### Using experiments in Vue
+
+With the `experiment` component, you can define slots that match the name of the variants pushed to `window.gon.experiment`. For example an experiment with the variants `control` and `candidate` could be implemented the following:
+
+```vue
+<script>
+import Experiment from '~/experimentation/components/experiment.vue';
+
+export default {
+  components: { Experiment }
+}
+</script>
+
+<template>
+  <experiment name="experimentName">
+    <template slot="control">
+      <button class="bg-red">Click me</button>
+    </template>
+
+    <template slot="candidate">
+      <button class="bg-blue">Click me</button>
+    </template>
+  </experiment>
+</template>
+```
+
 ## Notes on feature flags
 
 NOTE:
