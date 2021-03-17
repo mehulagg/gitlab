@@ -2,12 +2,11 @@
 import { labelsFilterParam } from 'ee/integrations/jira/issues_show/constants';
 
 import { __ } from '~/locale';
-
+import CopyableField from '~/vue_shared/components/sidebar/copyable_field.vue';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import Assignee from './assignee.vue';
 import IssueDueDate from './issue_due_date.vue';
 import IssueField from './issue_field.vue';
-import IssueReference from './issue_reference.vue';
 
 export default {
   name: 'JiraIssuesSidebar',
@@ -15,7 +14,7 @@ export default {
     Assignee,
     IssueDueDate,
     IssueField,
-    IssueReference,
+    CopyableField,
     LabelsSelect,
   },
   inject: {
@@ -45,6 +44,8 @@ export default {
   labelsFilterParam,
   i18n: {
     statusTitle: __('Status'),
+    referenceName: __('Reference'),
+    referenceText: __('Reference: %{reference}'),
   },
 };
 </script>
@@ -52,10 +53,8 @@ export default {
 <template>
   <div>
     <assignee class="block" :assignee="assignee" />
-
     <issue-due-date :due-date="issue.dueDate" />
     <issue-field icon="progress" :title="$options.i18n.statusTitle" :value="issue.status" />
-
     <labels-select
       :selected-labels="issue.labels"
       :labels-filter-base-path="issuesListPath"
@@ -65,6 +64,12 @@ export default {
     >
       {{ __('None') }}
     </labels-select>
-    <issue-reference v-if="reference" :reference="reference" />
+    <copyable-field
+      v-if="reference"
+      class="block"
+      :name="$options.i18n.referenceName"
+      :value="reference"
+      :text="sprintf($options.i18n.referenceText, { reference })"
+    />
   </div>
 </template>
