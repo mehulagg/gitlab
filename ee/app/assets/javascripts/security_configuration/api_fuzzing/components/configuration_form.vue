@@ -18,6 +18,7 @@ import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
 import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
 import apiFuzzingCiConfigurationCreate from '../graphql/api_fuzzing_ci_configuration_create.mutation.graphql';
+import { insertTips } from '../utils';
 import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
 
 export default {
@@ -154,6 +155,30 @@ export default {
         fields.push(...this.authenticationSettings);
       }
       return fields.some(({ value }) => isEmptyValue(value));
+    },
+    configurationYamlWithTips() {
+      if (!this.configurationYaml) {
+        return '';
+      }
+      return insertTips(this.configurationYaml, [
+        {
+          tip: s__('APIFuzzing|Tip: Insert this part below all stages'),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          token: 'stages:',
+        },
+        {
+          tip: s__('APIFuzzing|Tip: Insert this part below all include'),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          token: 'include:',
+        },
+        {
+          tip: s__(
+            'APIFuzzing|Tip: Insert the following variables anywhere below stages and include',
+          ),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          token: 'variables:',
+        },
+      ]);
     },
   },
   methods: {
@@ -303,7 +328,7 @@ export default {
     <configuration-snippet-modal
       :ref="$options.CONFIGURATION_SNIPPET_MODAL_ID"
       :ci-yaml-edit-url="ciYamlEditPath"
-      :yaml="configurationYaml"
+      :yaml="configurationYamlWithTips"
     />
   </form>
 </template>
