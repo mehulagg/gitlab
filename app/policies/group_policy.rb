@@ -62,6 +62,7 @@ class GroupPolicy < BasePolicy
 
   with_scope :subject
   condition(:resource_access_token_available) { resource_access_token_available? }
+  condition(:resource_access_token_creation_allowed) { resource_access_token_creation_allowed? }
 
   with_scope :subject
   condition(:has_project_with_service_desk_enabled) { @subject.has_project_with_service_desk_enabled? }
@@ -212,15 +213,15 @@ class GroupPolicy < BasePolicy
   rule { developer & dependency_proxy_available }
     .enable :admin_dependency_proxy
 
-  rule { can?(:admin_group) }.policy do
+  rule { can?(:admin_group) & resource_access_token_available }.policy do
     enable :read_resource_access_tokens
   end
 
-  rule { can?(:admin_group) }.policy do
+  rule { can?(:admin_group) & resource_access_token_available }.policy do
     enable :destroy_resource_access_tokens
   end
 
-  rule { resource_access_token_available & can?(:read_resource_access_tokens) }.policy do
+  rule { resource_access_token_creation_allowed & can?(:read_resource_access_tokens) }.policy do
     enable :create_resource_access_tokens
   end
 
@@ -250,6 +251,10 @@ class GroupPolicy < BasePolicy
   end
 
   def resource_access_token_available?
+    true
+  end
+
+  def resource_access_token_creation_allowed?
     group.root_ancestor.resource_access_token_creation_allowed?
   end
 end
