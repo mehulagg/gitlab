@@ -5,15 +5,13 @@ module Gitlab
     module Reports
       module Security
         class FindingFingerprint
+          include VulnerabilityFindingFingerprintHelpers
+
           attr_accessor :algorithm_type, :fingerprint_value
 
           def initialize(params = {})
             @algorithm_type = params.dig(:algorithm_type)
             @fingerprint_value = params.dig(:fingerprint_value)
-          end
-
-          def priority
-            ::Vulnerabilities::FindingFingerprint.priority(algorithm_type)
           end
 
           def fingerprint_sha256
