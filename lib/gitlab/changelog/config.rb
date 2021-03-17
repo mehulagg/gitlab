@@ -17,7 +17,7 @@ module Gitlab
       # The default template to use for generating release sections.
       DEFAULT_TEMPLATE = File.read(File.join(__dir__, 'template.tpl'))
 
-      attr_accessor :date_format, :categories, :template
+      attr_accessor :date_format, :categories, :template, :tag_regex
 
       def self.from_git(project)
         if (yaml = project.repository.changelog_config)
@@ -46,6 +46,10 @@ module Gitlab
           end
         end
 
+        if (regex = hash['tag_regex'])
+          config.tag_regex = regex
+        end
+
         config
       end
 
@@ -54,6 +58,7 @@ module Gitlab
         @date_format = DEFAULT_DATE_FORMAT
         @template = Parser.new.parse_and_transform(DEFAULT_TEMPLATE)
         @categories = {}
+        @tag_regex = Repositories::PreviousTagFinder::DEFAULT_TAG_REGEX
       end
 
       def contributor?(user)
