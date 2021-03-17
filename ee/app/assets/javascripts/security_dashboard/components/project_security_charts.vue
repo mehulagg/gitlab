@@ -162,7 +162,7 @@ export default {
     this.chartWidth = this.$refs.layout.$el.clientWidth;
   },
   created() {
-    ['marquee-selection', 'redo', 'repeat', 'download', 'status-paused'].forEach(this.setSvg);
+    ['marquee-selection', 'redo', 'repeat', 'download', 'scroll-handle'].forEach(this.setSvg);
   },
   methods: {
     async setSvg(name) {
