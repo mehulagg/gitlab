@@ -23,7 +23,11 @@ RSpec.describe SurveyResponsesController do
       it 'tracks a survey_response event', :snowplow do
         subject
 
-        expect_snowplow_event(described_class.name, 'submit_response')
+        expect_snowplow_event(
+          category: described_class.name,
+          action: 'submit_response',
+          context: [{ schema: described_class::SURVEY_RESPONSE_SCHEMA_URL, data: { response: 'bar', survey_id: 1 } }]
+        )
       end
     end
 
