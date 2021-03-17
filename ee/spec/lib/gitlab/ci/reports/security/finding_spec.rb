@@ -200,13 +200,9 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
   describe '#eql?' do
     where(vulnerability_finding_fingerprints_enabled: [true, false])
     with_them do
-      before do
-        stub_feature_flags(vulnerability_finding_fingerprints: false)
-      end
-
       let(:identifier) { build(:ci_reports_security_identifier) }
       let(:location) { build(:ci_reports_security_locations_sast) }
-      let(:finding) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast, identifiers: [identifier], location: location) }
+      let(:finding) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast, identifiers: [identifier], location: location, vulnerability_finding_fingerprints_enabled: vulnerability_finding_fingerprints_enabled) }
 
       let(:report_type) { :secret_detection }
       let(:identifier_external_id) { 'foo' }
@@ -218,8 +214,11 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
               severity: 'low',
               report_type: report_type,
               identifiers: [other_identifier],
-              location: other_location)
+              location: other_location,
+              vulnerability_finding_fingerprints_enabled: vulnerability_finding_fingerprints_enabled)
       end
+
+      let(:fingerprint) { ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(algorithm_type: 'location', fingerprint_value: 'value1') }
 
       subject { finding.eql?(other_finding) }
 
@@ -238,6 +237,11 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
           let(:identifier_external_id) { identifier.external_id }
 
           context 'when the other finding has same location fingerprint' do
+            before do
+              finding.fingerprints << fingerprint
+              other_finding.fingerprints << fingerprint
+            end
+
             let(:location_start_line) { location.start_line }
 
             it { is_expected.to be(true) }
@@ -360,18 +364,15 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     let(:location) { build(:ci_reports_security_locations_sast) }
     let(:uuid) { SecureRandom.uuid }
 
-    let(:finding) do
-      build(:ci_reports_security_finding,
-            scanner: scanner,
-            identifiers: identifiers,
-            location: location,
-            uuid: uuid,
-            compare_key: '')
-    end
-
     context 'with vulnerability_finding_fingerprints enabled' do
-      before do
-        stub_feature_flags(vulnerability_finding_fingerprints: true)
+      let(:finding) do
+        build(:ci_reports_security_finding,
+              scanner: scanner,
+              identifiers: identifiers,
+              location: location,
+              uuid: uuid,
+              compare_key: '',
+              vulnerability_finding_fingerprints_enabled: true)
       end
 
       let(:low_priority_fingerprint) { ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(algorithm_type: 'location', fingerprint_value: 'value1') }
@@ -392,8 +393,14 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     end
 
     context 'without vulnerability_finding_fingerprints enabled' do
-      before do
-        stub_feature_flags(vulnerability_finding_fingerprints: false)
+      let(:finding) do
+        build(:ci_reports_security_finding,
+              scanner: scanner,
+              identifiers: identifiers,
+              location: location,
+              uuid: uuid,
+              compare_key: '',
+              vulnerability_finding_fingerprints_enabled: false)
       end
 
       it 'returns the expected hash' do
