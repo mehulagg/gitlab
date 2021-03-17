@@ -6473,7 +6473,7 @@ Representation of a GitLab user.
 | `avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | `bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
 | `callouts` | [`UserCalloutConnection`](#usercalloutconnection) | User callouts that belong to the user. |
-| `email` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.7. Use public_email. |
+| `email` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.7. This was renamed. Use: `User.publicEmail`. |
 | `groupCount` | [`Int`](#int) | Group count for the user. Available only when feature flag `user_group_counts` is enabled. |
 | `groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. |
 | `id` | [`ID!`](#id) | ID of the user. |
