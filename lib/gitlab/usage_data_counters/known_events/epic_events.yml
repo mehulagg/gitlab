@@ -3,6 +3,16 @@
 # We are using the same slot of issue events 'project_management' for
 # epic events to allow data aggregation.
 # More information in: https://gitlab.com/gitlab-org/gitlab/-/issues/322405
+- name: epics_usage_total_unique_counts_weekly
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: weekly
+  feature_flag: track_epics_activity
+- name: epics_usage_total_unique_counts_monthly
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: monthly
+  feature_flag: track_epics_activity
 - name: g_project_management_epic_created
   category: epics_usage
   redis_slot: project_management
