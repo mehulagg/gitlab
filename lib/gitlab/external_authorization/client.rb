@@ -46,7 +46,7 @@ module Gitlab
           params[:client_key_pass] = client_key_pass
         end
 
-        params
+        params # ok
       end
 
       def body
@@ -62,7 +62,7 @@ module Gitlab
                     end
 
                     body
-              end
+                  end
       end
     end
   end
