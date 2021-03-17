@@ -62,7 +62,7 @@ module Gitlab
                     end
 
                     body
-                  end
+              end
       end
     end
   end
