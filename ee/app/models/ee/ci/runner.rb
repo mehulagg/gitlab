@@ -9,8 +9,8 @@ module EE
         ##
         # We only stick a runner to primary database to be able to detect the
         # replication lag in `EE::Ci::RegisterJobService#execute`. The
-        # intention here is not execute `Ci::RegisterJobService#execute` on the
-        # primary database.
+        # intention here is not to execute `Ci::RegisterJobService#execute` on
+        # the primary database.
         #
         ::Gitlab::Database::LoadBalancing::Sticking.stick(:runner, id)
 
