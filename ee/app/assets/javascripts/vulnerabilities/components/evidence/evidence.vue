@@ -10,7 +10,7 @@ export default {
   },
   props: {
     details: {
-      type: Array,
+      type: Object,
       required: true,
     },
   },
@@ -36,7 +36,7 @@ export default {
       </h3>
     </header>
     <gl-collapse :visible="showSection">
-      <evidence-item v-for="item in details" :key="item.key" :item="item" />
+      <evidence-item v-for="[label, item] in Object.entries(details)" :key="label" :item="item" />
     </gl-collapse>
   </section>
 </template>

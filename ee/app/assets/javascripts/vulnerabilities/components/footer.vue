@@ -93,6 +93,30 @@ export default {
         pipeline: this.vulnerability.pipeline,
       };
     },
+    mockDetails() {
+      return {
+        site_url: {
+          name: __('Foo'),
+          type: 'url',
+          href: 'http://site.com',
+        },
+        another_site_url: {
+          name: __('Bar'),
+          type: 'url',
+          href: 'http://site.com',
+        },
+        links: {
+          type: 'list',
+          items: [
+            { type: 'url', href: 'http://foo.bar', name: __('Baz') },
+            {
+              type: 'list',
+              items: [{ type: 'url', name: __('Quz'), href: 'http://quz.com' }],
+            },
+          ],
+        },
+      };
+    },
   },
   created() {
     this.fetchDiscussions();
@@ -208,36 +232,7 @@ export default {
 <template>
   <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
-    <evidence
-      class="md"
-      :details="[
-        { type: 'url', key: 1, message: 'yo 1' },
-        { type: 'foo', key: 10, message: 'boooom' },
-        {
-          type: 'list',
-          key: 2,
-          items: [
-            { type: 'url', key: 3, message: 'yo 2' },
-            {
-              type: 'list',
-              key: 4,
-              items: [
-                { type: 'url', key: 5, message: 'yo 3' },
-
-                {
-                  type: 'list',
-                  key: 6,
-                  items: [
-                    { type: 'url', key: 7, message: 'yo 4' },
-                    { type: 'list', key: 8, items: [{ type: 'url', key: 9, message: 'yo 5' }] },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]"
-    />
+    <evidence class="md" :details="mockDetails" />
     <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
       <merge-request-note
         :feedback="vulnerability.mergeRequestFeedback"

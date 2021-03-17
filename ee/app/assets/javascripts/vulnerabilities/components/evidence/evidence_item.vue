@@ -15,7 +15,7 @@ export default {
     nestingLevel: {
       type: Number,
       required: false,
-      default: 0,
+      default: 1,
     },
   },
   computed: {

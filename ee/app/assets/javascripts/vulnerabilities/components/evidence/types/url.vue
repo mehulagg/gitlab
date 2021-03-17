@@ -1,7 +1,16 @@
 <script>
+import { GlLink } from '@gitlab/ui';
+
 export default {
+  components: {
+    GlLink,
+  },
   props: {
-    message: {
+    name: {
+      type: String,
+      required: true,
+    },
+    href: {
       type: String,
       required: true,
     },
@@ -9,6 +18,5 @@ export default {
 };
 </script>
 <template>
-  <!-- eslint-disable-next-line @gitlab/vue-require-i18n-strings -->
-  <p class="gl-my-0!">url: {{ message }}</p>
+  <gl-link :href="href" target="_blank">{{ name }}</gl-link>
 </template>
