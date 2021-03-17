@@ -42,6 +42,9 @@ MARKDOWN
 OPTIONAL_REVIEW_TEMPLATE = '%{role} review is optional for %{category}'
 NOT_AVAILABLE_TEMPLATE = 'No %{role} available'
 
+WORKHORSE_CATEGORY = :workhorse
+WORKHORSE_PROJECT = 'gitlab-workhorse'
+
 def note_for_spins_role(spins, role)
   spins.each do |spin|
     note = note_for_spin_role(spin, role)
@@ -89,6 +92,13 @@ if changes.any?
 
   markdown(MESSAGE)
   markdown(CATEGORY_TABLE_HEADER + rows.join("\n")) unless rows.empty?
+
+  if changes.include?(WORKHORSE_CATEGORY)
+    workhorse_spin = roulette.spin(WORKHORSE_PROJECT, [WORKHORSE_CATEGORY], timezone_experiment: false).first
+    workhorse_row = markdown_row_for_spins(workhorse_spin.category, [workhorse_spin])
+
+    markdown(workhorse_row)
+  end
 
   unknown = changes.fetch(:unknown, [])
   markdown(UNKNOWN_FILES_MESSAGE + helper.markdown_list(unknown)) unless unknown.empty?
