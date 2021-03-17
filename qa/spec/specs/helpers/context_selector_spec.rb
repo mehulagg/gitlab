@@ -44,6 +44,58 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
     described_class.configure_rspec
   end
 
+  describe '.context_matches?' do
+    it 'returns true when url has .com' do
+      QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
+
+      expect(described_class.dot_com?).to be_truthy
+    end
+
+    it 'returns false when url does not have .com' do
+      QA::Runtime::Scenario.define(:gitlab_address, "https://gitlab.test")
+
+      expect(described_class.dot_com?).to be_falsey
+    end
+
+    context 'with arguments' do
+      it 'returns true when :subdomain is set' do
+        QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
+
+        expect(described_class.dot_com?(subdomain: :staging)).to be_truthy
+      end
+
+      it 'matches multiple subdomains' do
+        QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
+
+        expect(described_class.context_matches?(subdomain: [:release, :staging])).to be_truthy
+        expect(described_class.context_matches?(:production, subdomain: [:release, :staging])).to be_truthy
+      end
+
+      it 'matches :production' do
+        QA::Runtime::Scenario.define(:gitlab_address, "https://gitlab.com/")
+
+        expect(described_class.context_matches?(:production)).to be_truthy
+      end
+
+      it 'doesnt match with mismatching switches' do
+        QA::Runtime::Scenario.define(:gitlab_address, 'https://gitlab.test')
+
+        aggregate_failures do
+          expect(described_class.context_matches?(tld: '.net')).to be_falsey
+          expect(described_class.context_matches?(:production)).to be_falsey
+          expect(described_class.context_matches?(subdomain: [:staging])).to be_falsey
+          expect(described_class.context_matches?(domain: 'example')).to be_falsey
+        end
+      end
+    end
+
+    it 'returns false for mismatching' do
+      QA::Runtime::Scenario.define(:gitlab_address, "https://staging.gitlab.com")
+
+      expect(described_class.context_matches?(:production)).to be_falsey
+    end
+  end
+
   describe 'description and context blocks' do
     context 'with environment set' do
       it 'can apply to contexts or descriptions' do
@@ -191,3 +243,70 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
       end
     end
   end
+
+  context 'when excluding contexts' do
+    context 'with job constraints' do
+      context 'without CI_JOB_NAME set' do
+        before do
+          stub_env('CI_JOB_NAME', nil)
+          described_class.configure_rspec
+        end
+
+        it 'runs in any job' do
+          group = describe_successfully do
+            it('runs given a single named job', exclude: { job: 'ee:instance-image' }) {}
+            it('runs given a single regex pattern', exclude: { job: '.*:instance-image' }) {}
+            it('runs given an array of jobs', exclude: { job: %w[ee:instance-image qa-schedules-browser_ui-3_create] }) {}
+            it('runs given an array of regex patterns', exclude: { job: %w[ee:.* qa-schedules-browser_ui.*] }) {}
+            it('runs given a mix of strings and regex patterns', exclude: { job: %w[ee:instance-image qa-schedules-browser_ui.*] }) {}
+          end
+
+          aggregate_failures do
+            group.examples.each do |example|
+              expect(example.execution_result.status).to eq(:passed)
+            end
+          end
+        end
+      end
+
+      context 'with CI_JOB_NAME set' do
+        before do
+          stub_env('CI_JOB_NAME', 'ee:instance-image')
+          described_class.configure_rspec
+        end
+
+        it 'does not run in the specified job' do
+          group = describe_successfully do
+            it('skips given a single named job', exclude: { job: 'ee:instance-image' }) {}
+            it('skips given a single regex pattern', exclude: { job: '.*:instance-image' }) {}
+            it('skips given an array of jobs', exclude: { job: %w[ee:instance-image qa-schedules-browser_ui-3_create] }) {}
+            it('skips given an array of regex patterns', exclude: { job: %w[ee:.* qa-schedules-browser_ui.*] }) {}
+            it('skips given a mix of strings and regex patterns', exclude: { job: %w[ee:instance-image qa-schedules-browser_ui.*] }) {}
+          end
+
+          aggregate_failures do
+            group.examples.each do |example|
+              expect(example.execution_result.status).to eq(:pending)
+            end
+          end
+        end
+
+        it 'runs in jobs that do not match' do
+          group = describe_successfully do
+            it('runs given a single named job', exclude: { job: 'ce:instance-image' }) {}
+            it('runs given a single regex pattern', exclude: { job: '.*:instance-image-quarantine' }) {}
+            it('runs given an array of jobs', exclude: { job: %w[ce:instance-image qa-schedules-browser_ui-3_create] }) {}
+            it('runs given an array of regex patterns', exclude: { job: %w[ce:.* qa-schedules-browser_ui.*] }) {}
+            it('runs given a mix of strings and regex patterns', exclude: { job: %w[ce:instance-image qa-schedules-browser_ui.*] }) {}
+          end
+
+          aggregate_failures do
+            group.examples.each do |example|
+              expect(example.execution_result.status).to eq(:passed)
+            end
+          end
+        end
+      end
+    end
+  end
+end

@@ -51,7 +51,7 @@ module QA
               if quarantine_tag&.is_a?(Hash) && quarantine_tag&.key?(:only)
                 # If the :quarantine hash contains :only, we respect that.
                 # For instance `quarantine: { only: { subdomain: :staging } }` will only quarantine the test when it runs against staging.
-                return unless Runtime::Env.context_matches?(quarantine_tag[:only])
+                return unless ContextSelector.context_matches?(quarantine_tag[:only])
               end
 
               skip(quarantine_message(quarantine_tag))
