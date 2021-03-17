@@ -5,6 +5,8 @@ module Gitlab
     module Reports
       module Security
         class FindingSignature
+          include VulnerabilityFindingFingerprintHelpers
+
           attr_accessor :algorithm_type, :signature_value
 
           def initialize(params = {})

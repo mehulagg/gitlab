@@ -353,4 +353,52 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
 
     it { is_expected.to match_array(expected_keys) }
   end
+
+  describe '#hash' do
+    let(:scanner) { build(:ci_reports_security_scanner) }
+    let(:identifiers) { [build(:ci_reports_security_identifier)] }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+    let(:uuid) { SecureRandom.uuid }
+
+    let(:finding) do
+      build(:ci_reports_security_finding,
+            scanner: scanner,
+            identifiers: identifiers,
+            location: location,
+            uuid: uuid,
+            compare_key: '')
+    end
+
+    context 'with vulnerability_finding_fingerprints enabled' do
+      before do
+        stub_feature_flags(vulnerability_finding_fingerprints: true)
+      end
+
+      let(:low_priority_fingerprint) { ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(algorithm_type: 'location', fingerprint_value: 'value1') }
+      let(:high_priority_fingerprint) { ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(algorithm_type: 'scope_offset', fingerprint_value: 'value2') }
+
+      it 'returns the expected hash with no fingerprints' do
+        expect(finding.fingerprints.length).to eq(0)
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_fingerprint.hash)
+      end
+
+      it 'returns the expected hash with fingerprints' do
+        finding.fingerprints << low_priority_fingerprint
+        finding.fingerprints << high_priority_fingerprint
+
+        expect(finding.fingerprints.length).to eq(2)
+        expect(finding.hash).to eq(finding.report_type.hash ^ high_priority_fingerprint.fingerprint_hex.hash ^ finding.primary_fingerprint.hash)
+      end
+    end
+
+    context 'without vulnerability_finding_fingerprints enabled' do
+      before do
+        stub_feature_flags(vulnerability_finding_fingerprints: false)
+      end
+
+      it 'returns the expected hash' do
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_fingerprint.hash)
+      end
+    end
+  end
 end

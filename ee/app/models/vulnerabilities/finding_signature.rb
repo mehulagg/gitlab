@@ -5,6 +5,9 @@ module Vulnerabilities
     self.table_name = 'vulnerability_finding_signatures'
 
     include BulkInsertSafe
+    include VulnerabilityFindingFingerprintHelpers
+
+    self.table_name = 'vulnerability_finding_fingerprints'
 
     belongs_to :finding, foreign_key: 'finding_id', inverse_of: :signatures, class_name: 'Vulnerabilities::Finding'
 
@@ -12,24 +15,8 @@ module Vulnerabilities
 
     validates :finding, presence: true
 
-    def self.priority(algorithm_type)
-      priorities = {
-        'scope_offset' => 3,
-        'location' => 2,
-        'hash' => 1
-      }
-
-      raise ArgumentError.new("No priority for #{algorithm_type.inspect}") unless priorities.key?(algorithm_type)
-
-      priorities[algorithm_type]
-    end
-
     def fingerprint_hex
       fingerprint_sha256.unpack1("H*")
-    end
-
-    def priority
-      self.class.priority(algorithm_type)
     end
 
     def eql?(other)
