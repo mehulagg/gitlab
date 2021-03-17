@@ -200,6 +200,8 @@
   - 2
 - - issue_rebalancing
   - 1
+- - iterations
+  - 1
 - - jira_connect
   - 1
 - - jira_importer

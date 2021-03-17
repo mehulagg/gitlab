@@ -23208,6 +23208,9 @@ msgstr ""
 msgid "Opens in a new window"
 msgstr ""
 
+msgid "Operation cannot be performed"
+msgstr ""
+
 msgid "Operation completed"
 msgstr ""
 

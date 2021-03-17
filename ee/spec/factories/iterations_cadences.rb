@@ -7,8 +7,8 @@ FactoryBot.define do
 
   factory :iterations_cadence, class: 'Iterations::Cadence' do
     title
-    duration_in_weeks { 0 }
-    iterations_in_advance { 0 }
+    duration_in_weeks { 1 }
+    iterations_in_advance { 1 }
     group
     start_date { generate(:cadence_sequential_date) }
   end
