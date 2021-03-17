@@ -10,6 +10,7 @@ class SamlProvider < ApplicationRecord
   validates :sso_url, presence: true, addressable_url: { schemes: %w(https), ascii_only: true }
   validates :certificate_fingerprint, presence: true, certificate_fingerprint: true
   validates :default_membership_role, presence: true
+  validate :git_check_enforced_allowed
   validate :access_level_inclusion
 
   after_initialize :set_defaults, if: :new_record?
@@ -94,6 +95,13 @@ class SamlProvider < ApplicationRecord
     return if default_membership_role.in?(levels)
 
     errors.add(:default_membership_role, "is not included in the list")
+  end
+
+  def git_check_enforced_allowed
+    return unless git_check_enforced
+    return if enforced_sso?
+
+    errors.add(:git_check_enforced, "is not allowed when SSO is not enforced.")
   end
 
   def set_defaults
