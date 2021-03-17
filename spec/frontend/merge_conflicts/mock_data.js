@@ -53,9 +53,11 @@ export const conflictsMock = {
               old_line: 9,
               new_line: 9,
               text:
+                // eslint-disable-next-line no-template-curly-in-string
                 '    - \'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file README.md ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/my_package/0.0.1/file.txt\'',
               meta_data: null,
               rich_text:
+                // eslint-disable-next-line no-template-curly-in-string
                 '\u003cspan id="LC9" class="line" lang="yaml"\u003e    \u003cspan class="pi"\u003e-\u003c/span\u003e \u003cspan class="s1"\u003e\'\u003c/span\u003e\u003cspan class="s"\u003ecurl\u003c/span\u003e\u003cspan class="nv"\u003e \u003c/span\u003e\u003cspan class="s"\u003e--header\u003c/span\u003e\u003cspan class="nv"\u003e \u003c/span\u003e\u003cspan class="s"\u003e"JOB-TOKEN:\u003c/span\u003e\u003cspan class="nv"\u003e \u003c/span\u003e\u003cspan class="s"\u003e$CI_JOB_TOKEN"\u003c/span\u003e\u003cspan class="nv"\u003e \u003c/span\u003e\u003cspan class="s"\u003e--upload-file\u003c/span\u003e\u003cspan class="nv"\u003e \u003c/span\u003e\u003cspan class="s"\u003eREADME.md\u003c/span\u003e\u003cspan class="nv"\u003e \u003c/span\u003e\u003cspan class="s"\u003e${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/my_package/0.0.1/file.txt\'\u003c/span\u003e\u003c/span\u003e\n',
               can_receive_suggestion: true,
             },
