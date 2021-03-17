@@ -10,7 +10,7 @@ import {
   DOWN_KEY_CODE,
 } from '~/lib/utils/keycodes';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as Flash } from '../flash';
+import createFlash from '../flash';
 import { addClassIfElementExists } from '../lib/utils/dom_utils';
 import { visitUrl } from '../lib/utils/url_utility';
 import FilteredSearchContainer from './container';

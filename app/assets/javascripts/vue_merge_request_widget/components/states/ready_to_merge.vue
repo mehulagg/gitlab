@@ -18,7 +18,7 @@ import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests
 import simplePoll from '~/lib/utils/simple_poll';
 import { __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { deprecatedCreateFlash as Flash } from '../../../flash';
+import createFlash from '../../../flash';
 import MergeRequest from '../../../merge_request';
 import { AUTO_MERGE_STRATEGIES, DANGER, INFO, WARNING } from '../../constants';
 import eventHub from '../../event_hub';

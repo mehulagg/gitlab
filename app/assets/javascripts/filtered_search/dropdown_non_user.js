@@ -1,7 +1,7 @@
 import { __ } from '~/locale';
 import Ajax from '../droplab/plugins/ajax';
 import Filter from '../droplab/plugins/filter';
-import { deprecatedCreateFlash as Flash } from '../flash';
+import createFlash from '../flash';
 import DropdownUtils from './dropdown_utils';
 import FilteredSearchDropdown from './filtered_search_dropdown';
 
