@@ -22,7 +22,7 @@ invalidated.
 Response Code Legend:
 
 - `200` - Accepted
-- `4xx` - Not Accepted
+- `406` - Not Accepted
 - Other Codes - Accepted and Logged
 
 ## Configuration

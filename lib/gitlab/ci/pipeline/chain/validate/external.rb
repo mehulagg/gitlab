@@ -13,6 +13,8 @@ module Gitlab
             VALIDATION_REQUEST_TIMEOUT = 5
 
             def perform!
+              return unless ::Feature.enabled?(:ci_external_validation_service, @pipeline.project, default_enabled: :yaml)
+
               pipeline_authorized = validate_external
 
               log_message = pipeline_authorized ? 'authorized' : 'not authorized'
@@ -31,19 +33,19 @@ module Gitlab
               return true unless validation_service_url
 
               # 200 - accepted
-              # 4xx - not accepted
+              # 406 - not accepted
               # everything else - accepted and logged
               response_code = validate_service_request.code
               case response_code
               when 200
                 true
-              when 400..499
+              when 406
                 false
               else
                 raise InvalidResponseCode, "Unsupported response code received from Validation Service: #{response_code}"
               end
             rescue => ex
-              Gitlab::ErrorTracking.track_exception(ex)
+              Gitlab::ErrorTracking.track_exception(ex, project_id: @pipeline.project.id)
 
               true
             end
