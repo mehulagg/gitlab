@@ -11759,6 +11759,25 @@ CREATE SEQUENCE custom_emoji_id_seq
 
 ALTER SEQUENCE custom_emoji_id_seq OWNED BY custom_emoji.id;
 
+CREATE TABLE dast_profile_pipelines (
+    id bigint NOT NULL,
+    dast_profile_id bigint NOT NULL,
+    ci_pipeline_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+COMMENT ON TABLE dast_profile_pipelines IS '{"owner":"group::dynamic analysis","description":"Relationship between DAST Profile and CI Pipeline"}';
+
+CREATE SEQUENCE dast_profile_pipelines_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE dast_profile_pipelines_id_seq OWNED BY dast_profile_pipelines.id;
+
 CREATE TABLE dast_profiles (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -19174,6 +19193,8 @@ ALTER TABLE ONLY csv_issue_imports ALTER COLUMN id SET DEFAULT nextval('csv_issu
 
 ALTER TABLE ONLY custom_emoji ALTER COLUMN id SET DEFAULT nextval('custom_emoji_id_seq'::regclass);
 
+ALTER TABLE ONLY dast_profile_pipelines ALTER COLUMN id SET DEFAULT nextval('dast_profile_pipelines_id_seq'::regclass);
+
 ALTER TABLE ONLY dast_profiles ALTER COLUMN id SET DEFAULT nextval('dast_profiles_id_seq'::regclass);
 
 ALTER TABLE ONLY dast_scanner_profiles ALTER COLUMN id SET DEFAULT nextval('dast_scanner_profiles_id_seq'::regclass);
@@ -20373,6 +20394,9 @@ ALTER TABLE ONLY csv_issue_imports
 
 ALTER TABLE ONLY custom_emoji
     ADD CONSTRAINT custom_emoji_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY dast_profile_pipelines
+    ADD CONSTRAINT dast_profile_pipelines_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY dast_profiles
     ADD CONSTRAINT dast_profiles_pkey PRIMARY KEY (id);
@@ -22270,6 +22294,10 @@ CREATE INDEX index_custom_emoji_on_creator_id ON custom_emoji USING btree (creat
 CREATE UNIQUE INDEX index_custom_emoji_on_namespace_id_and_name ON custom_emoji USING btree (namespace_id, name);
 
 CREATE UNIQUE INDEX index_daily_build_group_report_results_unique_columns ON ci_daily_build_group_report_results USING btree (project_id, ref_path, date, group_name);
+
+CREATE INDEX index_dast_profile_pipelines_on_ci_pipeline_id ON dast_profile_pipelines USING btree (ci_pipeline_id);
+
+CREATE INDEX index_dast_profile_pipelines_on_dast_profile_id ON dast_profile_pipelines USING btree (dast_profile_id);
 
 CREATE INDEX index_dast_profiles_on_dast_scanner_profile_id ON dast_profiles USING btree (dast_scanner_profile_id);
 
@@ -25579,6 +25607,9 @@ ALTER TABLE ONLY description_versions
 ALTER TABLE ONLY clusters_kubernetes_namespaces
     ADD CONSTRAINT fk_rails_40cc7ccbc3 FOREIGN KEY (cluster_project_id) REFERENCES cluster_projects(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY dast_profile_pipelines
+    ADD CONSTRAINT fk_rails_41cf2b291e FOREIGN KEY (ci_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY geo_node_namespace_links
     ADD CONSTRAINT fk_rails_41ff5fb854 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -26490,6 +26521,9 @@ ALTER TABLE ONLY draft_notes
 
 ALTER TABLE ONLY namespace_package_settings
     ADD CONSTRAINT fk_rails_e773444769 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_profile_pipelines
+    ADD CONSTRAINT fk_rails_e7beadd330 FOREIGN KEY (dast_profile_id) REFERENCES dast_profiles(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY dast_site_tokens
     ADD CONSTRAINT fk_rails_e84f721a8e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
