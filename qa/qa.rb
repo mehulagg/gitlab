@@ -577,6 +577,7 @@ module QA
 
     module Helpers
       autoload :Quarantine, 'qa/specs/helpers/quarantine'
+      autoload :ContextSelector, 'qa/specs/helpers/context_selector'
     end
   end
 
