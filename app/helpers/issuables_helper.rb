@@ -24,9 +24,9 @@ module IssuablesHelper
 
     if include_value
       sanitized_list = sanitize_name(issuable.assignee_list)
-      n_('Assignee: %{users}', 'Assignees: %{users}', assignees.count) % { users: sanitized_list }
+      ns_('Label|Assignee: %{users}', 'Assignees: %{users}', assignees.count) % { users: sanitized_list }
     else
-      n_('Assignee', 'Assignees', assignees.count)
+      ns_(['Label|Assignee', 'Assignees'], assignees.count)
     end
   end
 

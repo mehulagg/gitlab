@@ -4220,11 +4220,6 @@ msgstr ""
 msgid "Assignee(s)"
 msgstr ""
 
-msgid "Assignee: %{users}"
-msgid_plural "Assignees: %{users}"
-msgstr[0] ""
-msgstr[1] ""
-
 msgid "Assignees"
 msgstr ""
 
@@ -17669,6 +17664,26 @@ msgstr ""
 msgid "Labels|Promoting %{labelTitle} will make it available for all projects inside %{groupName}. Existing project labels with the same title will be merged. If a group label with the same title exists, it will also be merged. This action cannot be reversed."
 msgstr ""
 
+msgid "Label|Assignee"
+msgid_plural "Assignees"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Label|Assignee: %{users}"
+msgid_plural "Assignees: %{users}"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Label|Reviewer"
+msgid_plural "Reviewers"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Label|Reviewer: %{users}"
+msgid_plural "Reviewers: %{users}"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Language"
 msgstr ""
 
@@ -26050,17 +26065,12 @@ msgid "ReviewApp|Enable Review App"
 msgstr ""
 
 msgid "Reviewer"
-msgid_plural "Reviewers"
+msgid_plural "%d Reviewers"
 msgstr[0] ""
 msgstr[1] ""
 
 msgid "Reviewer(s)"
 msgstr ""
-
-msgid "Reviewer: %{users}"
-msgid_plural "Reviewers: %{users}"
-msgstr[0] ""
-msgstr[1] ""
 
 msgid "Reviewers"
 msgstr ""

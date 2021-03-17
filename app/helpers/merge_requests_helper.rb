@@ -179,9 +179,9 @@ module MergeRequestsHelper
 
     if include_value
       sanitized_list = sanitize_name(reviewers.map(&:name).to_sentence)
-      n_('Reviewer: %{users}', 'Reviewers: %{users}', reviewers.count) % { users: sanitized_list }
+      ns_('Label|Reviewer: %{users}', 'Reviewers: %{users}', reviewers.count) % { users: sanitized_list }
     else
-      n_('Reviewer', 'Reviewers', reviewers.count)
+      ns_('Label|Reviewer', 'Reviewers', reviewers.count)
     end
   end
 
