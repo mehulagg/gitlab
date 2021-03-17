@@ -1,7 +1,7 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import Experiment from '~/experimentation/components/experiment.vue';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 
 export default {

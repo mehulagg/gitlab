@@ -11,7 +11,7 @@ const defaultSlots = {
 };
 
 const mockVariant = (expectedVariant) => {
-  isExperimentVariant.mockImplementation((_, variant) => variant == expectedVariant);
+  isExperimentVariant.mockImplementation((_, variant) => variant === expectedVariant);
 };
 
 describe('ExperimentComponent', () => {

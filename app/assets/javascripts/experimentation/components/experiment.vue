@@ -15,9 +15,9 @@ export default {
       return;
     }
 
-    const variant =
-      variantNames.find((variant) => isExperimentVariant(this.name, variant)) || variantNames[0];
+    const variant = variantNames.find((v) => isExperimentVariant(this.name, v)) || variantNames[0];
 
+    // eslint-disable-next-line consistent-return
     return this.$slots[variant];
   },
 };
