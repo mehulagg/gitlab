@@ -14,7 +14,7 @@ module ResourceAccessTokens
     end
 
     def execute
-      return error("#{current_user.name} cannot delete #{bot_user.name}") unless can_destroy_bot_member?
+      return error("#{current_user.name} cannot delete #{bot_user.name}") unless can_destroy_token?
       return error("Failed to find bot user") unless find_member
 
       access_token.revoke!
@@ -37,7 +37,7 @@ module ResourceAccessTokens
       DeleteUserWorker.perform_async(current_user.id, bot_user.id, skip_authorization: true)
     end
 
-    def can_destroy_bot_member?
+    def can_destroy_token?
       %w(project group).include?(resource.class.name.downcase) && can?(current_user, :destroy_resource_access_tokens, resource)
     end
 
