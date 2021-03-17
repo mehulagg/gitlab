@@ -117,7 +117,7 @@ export default {
             { type: 'url', href: 'http://foo.bar', name: __('Baz') },
             {
               type: 'list',
-              items: [{ type: 'url', href: 'http://quz.com' }],
+              items: [{ type: 'url', href: 'http://quz.com' }, { type: 'foo' }],
             },
           ],
         },

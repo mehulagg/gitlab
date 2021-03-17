@@ -1,9 +1,7 @@
 import List from './list.vue';
 import Url from './url.vue';
 
-export const typesComponents = {
+export default {
   List,
   Url,
 };
-
-export const supportedTypes = Object.keys(typesComponents).map((x) => x.toLowerCase());

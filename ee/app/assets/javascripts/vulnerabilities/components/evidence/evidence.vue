@@ -2,10 +2,10 @@
 import { GlCollapse, GlIcon } from '@gitlab/ui';
 import EvidenceItem from './evidence_item.vue';
 import EvidenceRow from './evidence_row.vue';
-import { supportedTypes } from './types';
+import { isSupportedReportType } from './types/utils';
 
 export default {
-  supportedTypes,
+  isSupportedReportType,
   components: {
     GlCollapse,
     GlIcon,
@@ -35,9 +35,6 @@ export default {
     isLastRow(i) {
       return i === this.detailsEntries.length - 1;
     },
-    isSupportedType(type) {
-      return type === 'list' || this.$options.supportedTypes.includes(type);
-    },
   },
 };
 </script>
@@ -53,7 +50,7 @@ export default {
     <gl-collapse :visible="showSection">
       <template v-for="([label, item], i) in detailsEntries">
         <evidence-row
-          v-if="isSupportedType(item.type)"
+          v-if="$options.isSupportedReportType(item.type)"
           :key="label"
           :label="item.name"
           :is-last-row="isLastRow(i)"

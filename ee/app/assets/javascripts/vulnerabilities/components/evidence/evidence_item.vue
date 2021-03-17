@@ -1,10 +1,13 @@
 <script>
-import { typesComponents, supportedTypes } from './types';
+import { REPORT_TYPES } from './types/constants';
+import List from './types/list.vue';
+import Url from './types/url.vue';
 
 export default {
-  supportedTypes,
+  REPORT_TYPES,
   components: {
-    ...typesComponents,
+    List,
+    Url,
   },
   props: {
     item: {
@@ -14,18 +17,18 @@ export default {
     nestingLevel: {
       type: Number,
       required: false,
-      default: 1,
+      default: 0,
     },
   },
   computed: {
-    isSupportedType() {
-      return this.$options.supportedTypes.includes(this.item.type);
+    isSupportedReportType() {
+      return this.$options.REPORT_TYPES.includes(this.item.type);
     },
   },
 };
 </script>
 <template>
-  <div v-if="isSupportedType">
+  <div v-if="isSupportedReportType">
     <component :is="item.type" v-bind="item" :nesting-level="nestingLevel" />
   </div>
 </template>
