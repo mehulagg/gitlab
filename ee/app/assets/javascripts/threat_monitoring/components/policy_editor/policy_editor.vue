@@ -16,7 +16,6 @@ import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import EnvironmentPicker from '../environment_picker.vue';
-import NetworkPolicyEditor from '../network_policy_editor.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
@@ -49,7 +48,7 @@ export default {
     GlAlert,
     GlModal,
     EnvironmentPicker,
-    NetworkPolicyEditor,
+    NetworkPolicyEditor: () => import('./network_policy_editor.vue'),
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
