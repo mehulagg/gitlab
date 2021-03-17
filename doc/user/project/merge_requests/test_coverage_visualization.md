@@ -57,7 +57,7 @@ A limit of 100 `<source>` nodes for Cobertura format XML files applies. If your 
 
 ### Artifact expiration
 
-By default the [combined artifact](https://docs.gitlab.com/ee/ci/pipelines/pipeline_artifacts.html#storage) used to decorate the Merge Request will expire **one week** after creation.
+By default the [combined artifact](../../../ci/pipelines/pipeline_artifacts.md#storage) used to decorate the Merge Request will expire **one week** after creation.
 
 ### Automatic class path correction
 
