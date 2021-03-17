@@ -8,6 +8,16 @@ import InlineConflictLines from './components/inline_conflict_lines.vue';
 import ParallelConflictLines from './components/parallel_conflict_lines.vue';
 import { INTERACTIVE_RESOLVE_MODE } from './constants';
 
+/**
+ * A lot of the classes below should
+ * be replaced with GitLab UI components.
+ *
+ * We are just doing it temporarily in order to migrate the template from HAML => Vue in an iterative manner
+ * and are going to clean it up as part of:
+ *
+ * https://gitlab.com/gitlab-org/gitlab/-/issues/321090
+ *
+ */
 export default {
   components: {
     GlSprintf,
@@ -147,18 +157,14 @@ export default {
               </div>
             </div>
             <div class="diff-content diff-wrap-lines">
-              <div
-                v-if="!isParallel && file.resolveMode === 'interactive' && file.type === 'text'"
-                class="file-content"
-              >
-                <inline-conflict-lines :file="file" />
-              </div>
-              <div
-                v-if="isParallel && file.resolveMode === 'interactive' && file.type === 'text'"
-                class="file-content"
-              >
-                <parallel-conflict-lines :file="file" />
-              </div>
+              <template v-if="file.resolveMode === 'interactive' && file.type === 'text'">
+                <div v-if="!isParallel" class="file-content">
+                  <inline-conflict-lines :file="file" />
+                </div>
+                <div v-if="isParallel" class="file-content">
+                  <parallel-conflict-lines :file="file" />
+                </div>
+              </template>
               <div v-if="file.resolveMode === 'edit' || file.type === 'text-editor'">
                 <diff-file-editor :file="file" />
               </div>

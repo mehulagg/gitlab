@@ -2,6 +2,7 @@
 import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import syntaxHighlight from '~/syntax_highlight';
+import { SYNTAX_HIGHLIGHT_CLASS } from '../constants';
 import utilsMixin from '../mixins/line_conflict_utils';
 
 export default {
@@ -9,6 +10,7 @@ export default {
     SafeHtml,
   },
   mixins: [utilsMixin],
+  SYNTAX_HIGHLIGHT_CLASS,
   props: {
     file: {
       type: Object,
@@ -16,7 +18,7 @@ export default {
     },
   },
   mounted() {
-    syntaxHighlight(document.querySelectorAll('.js-syntax-highlight'));
+    syntaxHighlight(document.querySelectorAll(`.${SYNTAX_HIGHLIGHT_CLASS}`));
   },
   methods: {
     ...mapActions(['handleSelected']),
@@ -24,7 +26,7 @@ export default {
 };
 </script>
 <template>
-  <table class="diff-wrap-lines code code-commit js-syntax-highlight">
+  <table :class="['diff-wrap-lines code code-commit', $options.SYNTAX_HIGHLIGHT_CLASS]">
     <!-- Unfortunately there isn't a good key for these sections -->
     <!-- eslint-disable vue/require-v-for-key -->
     <tr v-for="line in file.inlineLines" class="line_holder diff-inline">
