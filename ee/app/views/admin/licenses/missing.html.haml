@@ -13,7 +13,7 @@
 .container.blank-state-container
   .text-center
     = custom_icon("missing_license")
-    %h4{ data: { qa_selector: 'missing_license' } }
+    %h4{ data: { qa_selector: 'missing_license_content' } }
       = s_('License|You do not have a license.')
     - if License.eligible_for_trial?
       %p.trial-description= s_('License|You can start a free trial of GitLab Ultimate without any obligation or payment details.')
