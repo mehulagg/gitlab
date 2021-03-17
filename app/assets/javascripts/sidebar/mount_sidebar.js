@@ -55,10 +55,44 @@ function getSidebarAssigneeAvailabilityData() {
     );
 }
 
+// function mountAssigneesComponentDeprecated(mediator) {
+//   const el = document.getElementById('js-vue-sidebar-assignees');
+
+//   if (!el) return;
+
+//   const { iid, fullPath } = getSidebarOptions();
+//   const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
+//   // eslint-disable-next-line no-new
+//   new Vue({
+//     el,
+//     apolloProvider,
+//     components: {
+//       SidebarAssignees,
+//     },
+//     render: (createElement) =>
+//       createElement('sidebar-assignees', {
+//         props: {
+//           mediator,
+//           issuableIid: String(iid),
+//           projectPath: fullPath,
+//           field: el.dataset.field,
+//           signedIn: el.hasAttribute('data-signed-in'),
+//           issuableType:
+//             isInIssuePage() || isInIncidentPage() || isInDesignPage()
+//               ? IssuableType.Issue
+//               : IssuableType.MergeRequest,
+//           assigneeAvailabilityStatus,
+//         },
+//       }),
+//   });
+// }
+
 function mountAssigneesComponent() {
   const el = document.getElementById('js-vue-sidebar-assignees');
 
   if (!el) return;
+
+  console.log(el.dataset);
 
   const { iid, fullPath, editable } = getSidebarOptions();
   // eslint-disable-next-line no-new
@@ -80,6 +114,7 @@ function mountAssigneesComponent() {
             isInIssuePage() || isInIncidentPage() || isInDesignPage()
               ? IssuableType.Issue
               : IssuableType.MergeRequest,
+          multipleAssignees: !el.dataset.maxAssignees,
         },
       }),
   });
