@@ -134,6 +134,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
 
     before do
       subject.clear_configuration
+      allow(described_class).to receive(:hosts).and_return(%w(foo))
     end
 
     it 'returns false when no hosts are specified' do
@@ -156,7 +157,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     end
 
     it 'returns true when load balancing should be enabled' do
-      allow(described_class).to receive(:hosts).and_return(%w(foo))
       allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(false)
 
       expect(described_class.enable?).to eq(true)
@@ -176,6 +176,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     context 'without a license' do
       before do
         License.destroy_all # rubocop: disable Cop/DestroyAll
+        subject.clear_configuration
       end
 
       it 'is disabled' do
@@ -237,6 +238,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     context 'without a license' do
       before do
         License.destroy_all # rubocop: disable Cop/DestroyAll
+        subject.clear_configuration
       end
 
       it 'is not configured' do
