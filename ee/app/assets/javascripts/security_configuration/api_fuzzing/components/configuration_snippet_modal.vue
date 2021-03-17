@@ -1,13 +1,17 @@
 <script>
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlSafeHtmlDirective } from '@gitlab/ui';
 import Clipboard from 'clipboard';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
+import Prism from '../highlight';
 
 export default {
   CONFIGURATION_SNIPPET_MODAL_ID,
   components: {
     GlModal,
+  },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
   },
   props: {
     ciYamlEditUrl: {
@@ -17,6 +21,15 @@ export default {
     yaml: {
       type: String,
       required: true,
+    },
+  },
+  computed: {
+    highlitSnippet() {
+      performance.mark('highlightStart');
+      const highlit = Prism.highlight(this.yaml, Prism.languages.yaml);
+      performance.mark('highlightEnd');
+      performance.measure('highlight', 'highlightStart', 'highlightEnd');
+      return highlit;
     },
   },
   methods: {
@@ -61,6 +74,6 @@ export default {
     @primary="copySnippet"
     @secondary="copySnippet(false)"
   >
-    <pre><code data-testid="api-fuzzing-modal-yaml-snippet" v-text="yaml"></code></pre>
+    <pre v-safe-html="highlitSnippet" data-testid="api-fuzzing-modal-yaml-snippet"></pre>
   </gl-modal>
 </template>
