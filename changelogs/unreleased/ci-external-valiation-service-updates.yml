@@ -1,0 +1,5 @@
+---
+title: Restrict external pipeline validation to a single not acceptable status code
+merge_request: 56856
+author:
+type: other
