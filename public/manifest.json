@@ -1,0 +1,12 @@
+{
+  "name": "GitLab",
+  "short_name": "GitLab",
+  "description": "The complete DevOps platform. One application with endless possibilities. Organizations rely on GitLab’s source code management, CI/CD, security, and more to deliver software rapidly.",
+  "start_url": "/explore",
+  "background_color": "#fff",
+  "icons": [{
+    "src": "icon210.png",
+    "sizes": "210x210",
+    "type": "image/png"
+  }]
+}
