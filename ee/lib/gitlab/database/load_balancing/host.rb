@@ -33,8 +33,8 @@ module Gitlab
           @online = true
           @last_checked_at = Time.zone.now
 
-          interval = LoadBalancing.replica_check_interval
-          @intervals = (interval..(interval * 2)).step(0.5).to_a
+          @intervals = spread_intervals(LoadBalancing.initial_replica_check_interval)
+          @boot_phase = true
         end
 
         # Disconnects the pool, once all connections are no longer in use.
@@ -96,10 +96,20 @@ module Gitlab
         def refresh_status
           @online = replica_is_up_to_date?
           @last_checked_at = Time.zone.now
+
+          if @online && @boot_phase
+            # After the first successful connection, check replica status less frequently
+            @intervals = spread_intervals(LoadBalancing.replica_check_interval)
+            @boot_phase = false
+          end
         end
 
         def check_replica_status?
           (Time.zone.now - last_checked_at) >= intervals.sample
+        end
+
+        def initial_connection_attempt?
+          @boot_phase
         end
 
         def replica_is_up_to_date?
@@ -192,6 +202,12 @@ module Gitlab
           {}
         ensure
           release_connection
+        end
+
+        private
+
+        def spread_intervals(interval)
+          (interval..(interval * 2)).step(0.5).to_a
         end
       end
     end

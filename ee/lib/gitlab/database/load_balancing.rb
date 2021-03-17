@@ -55,6 +55,12 @@ module Gitlab
         (configuration['replica_check_interval'] || 60).to_f
       end
 
+      # Returns the interval (in seconds) to use for checking the status of a
+      # replica when connecting for the first time (application boot).
+      def self.initial_replica_check_interval
+        (configuration['initial_replica_check_interval'] || 5).to_f
+      end
+
       # Returns the additional hosts to use for load balancing.
       def self.hosts
         configuration['hosts'] || []

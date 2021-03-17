@@ -89,10 +89,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
 
   describe '#online?' do
     context 'when the replica status is recent enough' do
-      before do
-        expect(host).to receive(:check_replica_status?).and_return(false)
-      end
-
       it 'returns the latest status' do
         expect(host).not_to receive(:refresh_status)
         expect(Gitlab::Database::LoadBalancing::Logger).not_to receive(:info)
@@ -186,21 +182,61 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
   end
 
   describe '#check_replica_status?' do
-    it 'returns true when we need to check the replica status' do
-      allow(host)
-        .to receive(:last_checked_at)
-        .and_return(1.year.ago)
+    context 'when we never had a successful connection before (application boot)' do
+      it 'returns true when we need to check the replica status using the initial check interval' do
+        freeze_time do
+          allow(host)
+            .to receive(:last_checked_at)
+            .and_return(Time.zone.now - Gitlab::Database::LoadBalancing.initial_replica_check_interval * 2 - 1.second)
 
-      expect(host.check_replica_status?).to eq(true)
+          expect(host.check_replica_status?).to eq(true)
+        end
+      end
+
+      it 'returns false when we do not need to check the replica status' do
+        freeze_time do
+          allow(host)
+            .to receive(:last_checked_at)
+            .and_return(Time.zone.now)
+
+          expect(host.check_replica_status?).to eq(false)
+        end
+      end
     end
 
-    it 'returns false when we do not need to check the replica status' do
-      freeze_time do
+    context 'when we had a successful connection before' do
+      before do
+        host.refresh_status
+
+        expect(host).to be_online
+      end
+
+      it 'returns true when we need to check the replica status' do
         allow(host)
           .to receive(:last_checked_at)
-          .and_return(Time.zone.now)
+          .and_return(1.year.ago)
 
-        expect(host.check_replica_status?).to eq(false)
+        expect(host.check_replica_status?).to eq(true)
+      end
+
+      it 'returns false even when within the initial check interval' do
+        freeze_time do
+          allow(host)
+            .to receive(:last_checked_at)
+            .and_return(Time.zone.now - Gitlab::Database::LoadBalancing.initial_replica_check_interval * 2 - 1.second)
+
+          expect(host.check_replica_status?).to eq(false)
+        end
+      end
+
+      it 'returns false when we do not need to check the replica status' do
+        freeze_time do
+          allow(host)
+            .to receive(:last_checked_at)
+            .and_return(Time.zone.now)
+
+          expect(host.check_replica_status?).to eq(false)
+        end
       end
     end
   end
