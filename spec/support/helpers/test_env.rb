@@ -78,7 +78,8 @@ module TestEnv
     'invalid-utf8-diff-paths'            => '99e4853',
     'compare-with-merge-head-source'     => 'f20a03d',
     'compare-with-merge-head-target'     => '2f1e176',
-    'trailers'                           => 'f0a5ed6'
+    'trailers'                           => 'f0a5ed6',
+    'main'                               => 'b83d6e3'
   }.freeze
 
   # gitlab-test-fork is a fork of gitlab-fork, but we don't necessarily
@@ -343,7 +344,7 @@ module TestEnv
   end
 
   def setup_factory_repo
-    setup_repo(factory_repo_path, factory_repo_path_bare, factory_repo_name, BRANCH_SHA)
+    setup_repo(factory_repo_path, factory_repo_path_bare, factory_repo_name, BRANCH_SHA, 'main')
   end
 
   # This repo has a submodule commit that is not present in the main test
@@ -352,7 +353,7 @@ module TestEnv
     setup_repo(forked_repo_path, forked_repo_path_bare, forked_repo_name, FORKED_BRANCH_SHA)
   end
 
-  def setup_repo(repo_path, repo_path_bare, repo_name, refs)
+  def setup_repo(repo_path, repo_path_bare, repo_name, refs, branch = 'master')
     clone_url = "https://gitlab.com/gitlab-org/#{repo_name}.git"
 
     unless File.directory?(repo_path)
@@ -363,6 +364,7 @@ module TestEnv
     end
 
     set_repo_refs(repo_path, refs)
+    set_default_branch(repo_path, branch)
 
     unless File.directory?(repo_path_bare)
       puts "\n==> Setting up #{repo_name} bare repository in #{repo_path_bare}..."
@@ -516,6 +518,19 @@ module TestEnv
     unless reset.call
       raise 'Could not fetch test seed repository.' unless system(*%W(#{Gitlab.config.git.bin_path} -C #{repo_path} fetch origin))
       raise "Could not update test seed repository, please delete #{repo_path} and try again" unless reset.call
+    end
+  end
+
+  def set_default_branch(repo_path, branch = 'master')
+    cmd = proc do
+      Dir.chdir(repo_path) do
+        _, exit_status = Gitlab::Popen.popen(%W[#{Gitlab.config.git.bin_path} symbolic-ref HEAD refs/heads/#{branch}])
+        exit_status.zero?
+      end
+    end
+
+    unless cmd.call
+      raise 'Could not set default branch for a test seed repository'
     end
   end
 
