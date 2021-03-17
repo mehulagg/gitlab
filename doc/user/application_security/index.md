@@ -139,7 +139,7 @@ insert image
 
 The default analyzer templates and AutoDevOps as of 14.0 are configured to ['allow_failure:exit_codes'](https://docs.gitlab.com/ee/ci/yaml/#allow_failureexit_codes) for exit code 6 so that you will see the warning icon for jobs that run successfully and have findings, and so that it does not fail your pipeline.
 
-This change was made because we recommend that you do not fail your pipeline as a result of a secure job running successfully and identifying findings. If you wish to restrict the merging of code with findings, we recommend enforcing thuis by utilizing our [secure merge request approvals](https://docs.gitlab.com/ee/user/application_security/index.html#security-approvals-in-merge-requests), which is a specific rule subset of subset of GitLab's [merge request approval](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html) functionality.
+This change was made because we recommend that you do not fail your pipeline as a result of a secure job running successfully and identifying findings. If you wish to restrict the merging of code with findings, we recommend enforcing this by utilizing our [secure merge request approvals](https://docs.gitlab.com/ee/user/application_security/index.html#security-approvals-in-merge-requests), which is a specific rule subset of GitLab's [merge request approval](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html) functionality.
 
 If you wish for more granular policy and rule enforcement than is available through our exit codes and secure merge request approvals, you should review the upcoming features in the [Security Orchestration category](https://about.gitlab.com/direction/protect/security_orchestration/).
 
