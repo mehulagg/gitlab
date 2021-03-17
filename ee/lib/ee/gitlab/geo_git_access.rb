@@ -8,7 +8,7 @@ module EE
       include GrapePathHelpers::NamedRouteMatcher
       extend ::Gitlab::Utils::Override
 
-      GEO_SERVER_DOCS_URL = 'https://docs.gitlab.com/ee/administration/geo/replication/usage.html'.freeze
+      GEO_SERVER_DOCS_URL = 'https://docs.gitlab.com/ee/administration/geo/replication/using_a_geo_server.html'.freeze
 
       private
 
@@ -52,7 +52,7 @@ module EE
         message = super
 
         if ::Gitlab::Geo.secondary_with_primary?
-          message = "#{message}\nUse the primary site URL instead: #{geo_primary_url_to_repo}.\nFor more information: #{GEO_SERVER_DOCS_URL}"
+          message = "#{message}\nPlease use the primary node URL instead: #{geo_primary_url_to_repo}.\nFor more information: #{GEO_SERVER_DOCS_URL}"
         end
 
         message
