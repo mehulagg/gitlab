@@ -98,7 +98,6 @@ module Gitlab
 
           if Rails.env.test?
             socket_filename = options[:gitaly_socket] || "gitaly.socket"
-            prometheus_listen_addr = options[:prometheus_listen_addr]
 
             config = {
               # Override the set gitaly_address since Praefect is in the loop
@@ -107,8 +106,7 @@ module Gitlab
               # Compared to production, tests run in constrained environments. This
               # number is meant to grow with the number of concurrent rails requests /
               # sidekiq jobs, and concurrency will be low anyway in test.
-              git: { catfile_cache_size: 5 },
-              prometheus_listen_addr: prometheus_listen_addr
+              git: { catfile_cache_size: 5 }
             }.compact
 
             storage_path = Rails.root.join('tmp', 'tests', 'second_storage').to_s
