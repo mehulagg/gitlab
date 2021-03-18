@@ -1121,4 +1121,4 @@ Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab wi
 ### `The redirect URI included is not valid.` when using Pages Access Controls
 
 Verify that the **Callback URL**/Redirect URI in the `GitLab Pages` [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
-is using the protocol (HTTP / HTTPS) that `pages_external_url` is configured to use.
+is using the protocol (HTTP or HTTPS) that `pages_external_url` is configured to use.
