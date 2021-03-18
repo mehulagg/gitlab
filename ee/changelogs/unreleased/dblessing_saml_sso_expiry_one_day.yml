@@ -1,5 +1,0 @@
----
-title: Lower SAML SSO session expiry to one day
-merge_request: 54374
-author:
-type: changed

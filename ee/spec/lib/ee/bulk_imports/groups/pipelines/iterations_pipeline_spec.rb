@@ -9,7 +9,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
   let_it_be(:timestamp) { Time.new(2020, 01, 01).utc }
   let_it_be(:bulk_import) { create(:bulk_import, user: user) }
 
-  let(:entity) do
+  let_it_be(:entity) do
     create(
       :bulk_import_entity,
       bulk_import: bulk_import,
@@ -20,7 +20,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
     )
   end
 
-  let(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
   subject { described_class.new(context) }
 
@@ -85,8 +86,6 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
 
         subject.after_run(data)
 
-        tracker = entity.trackers.find_by(relation: :iterations)
-
         expect(tracker.has_next_page).to eq(true)
         expect(tracker.next_page).to eq(cursor)
       end
@@ -99,8 +98,6 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
         expect(subject).not_to receive(:run)
 
         subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :iterations)
 
         expect(tracker.has_next_page).to eq(false)
         expect(tracker.next_page).to be_nil

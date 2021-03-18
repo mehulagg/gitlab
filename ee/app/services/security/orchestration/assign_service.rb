@@ -9,7 +9,7 @@ module Security
         return success if res
 
       rescue ActiveRecord::RecordNotFound => _
-        error(_('Policy project doesn\'t exists'))
+        error(_('Policy project doesn\'t exist'))
       rescue ActiveRecord::RecordInvalid => _
         error(_('Couldn\'t assign policy to project'))
       end
@@ -17,6 +17,10 @@ module Security
       private
 
       def create_or_update_security_policy_configuration
+        if policy_project_id.blank? && has_existing_policy?
+          return unassign_policy_project
+        end
+
         policy_project = Project.find(policy_project_id)
 
         if has_existing_policy?
@@ -28,6 +32,10 @@ module Security
             p.security_policy_management_project_id = policy_project.id
           end
         end
+      end
+
+      def unassign_policy_project
+        project.security_orchestration_policy_configuration.delete
       end
 
       def success

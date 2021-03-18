@@ -1,5 +1,0 @@
----
-title: Remove sast_configuration_ui feature flag
-merge_request: 55680
-author:
-type: changed

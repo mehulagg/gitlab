@@ -10,11 +10,12 @@ RSpec.describe Notes::UpdateService do
     create(:note_on_issue, project: project, author: user)
   end
 
+  let(:note_text) { 'text' }
+  let(:opts) { { note: note_text } }
+
   subject(:service) { described_class.new(project, user, opts) }
 
   describe '#execute' do
-    let(:opts) { { note: note_text } }
-
     describe 'publish to status page' do
       let(:execute) { service.execute(note) }
       let(:issue_id) { note.noteable_id }
@@ -25,8 +26,6 @@ RSpec.describe Notes::UpdateService do
       end
 
       context 'for text-only update' do
-        let(:note_text) { 'text' }
-
         include_examples 'trigger status page publish'
 
         context 'without recognized emoji' do
@@ -47,6 +46,19 @@ RSpec.describe Notes::UpdateService do
 
         include_examples 'no trigger status page publish'
       end
+    end
+  end
+
+  context 'for epics' do
+    let_it_be(:epic) { create(:epic) }
+    let_it_be(:note) { create(:note, noteable: epic) }
+
+    subject(:service) { described_class.new(nil, user, opts) }
+
+    it 'tracks epic note creation' do
+      expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_note_updated_action).with(author: user)
+
+      described_class.new(nil, user, opts).execute(note)
     end
   end
 end

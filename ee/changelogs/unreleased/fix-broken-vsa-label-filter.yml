@@ -1,5 +1,0 @@
----
-title: Ensure task by type filters refresh the chart data
-merge_request: 55958
-author:
-type: fixed

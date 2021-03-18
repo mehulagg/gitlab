@@ -5940,7 +5940,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of users who set personal preference to see Details on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182203_user_preferences_group_overview_details.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182203_user_preferences_group_overview_details.yml)
 
 Group: `group::threat insights`
 
@@ -5952,7 +5952,7 @@ Tiers: `ultimate`
 
 Count of users who set personal preference to see Security Dashboard on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
 
 Group: `group::threat insights`
 
@@ -9807,6 +9807,102 @@ Count of WAU creating epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210305145820_g_product_planning_epic_created_weekly.yml)
 
 Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_destroying_epic_notes_monthly`
+
+Counts of MAU destroying epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315034808_g_project_management_users_destroying_epic_notes_monthly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_destroying_epic_notes_weekly`
+
+Counts of WAU destroying epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315034846_g_project_management_users_destroying_epic_notes_weekly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_fixed_monthly`
+
+Counts of MAU setting epic start date as fixed
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055624_g_project_management_users_setting_epic_start_date_as_fixed_monthly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_fixed_weekly`
+
+Counts of WAU setting epic start date as fixed
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315054905_g_project_management_users_setting_epic_start_date_as_fixed_weekly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_inherited_monthly`
+
+Counts of MAU setting epic start date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055439_g_project_management_users_setting_epic_start_date_as_inherited_monthly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_inherited_weekly`
+
+Counts of WAU setting epic start date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315055342_g_project_management_users_setting_epic_start_date_as_inherited_weekly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_notes_monthly`
+
+Counts of MAU updating epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210314234202_g_project_management_users_updating_epic_notes_monthly.yml)
+
+Group: `group:product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_notes_weekly`
+
+Counts of WAU updating epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210314234041_g_project_management_users_updating_epic_notes_weekly.yml)
+
+Group: `group:product planning`
 
 Status: `implemented`
 
@@ -15408,7 +15504,7 @@ Tiers: `ultimate`
 
 Users who set personal preference to see Details on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182207_user_preferences_group_overview_security_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182207_user_preferences_group_overview_security_dashboard.yml)
 
 Group: `group::threat insights`
 
@@ -17412,7 +17508,7 @@ Tiers: `ultimate`
 
 Users who set personal preference to see Security Dashboard on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182209_user_preferences_group_overview_security_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182209_user_preferences_group_overview_security_dashboard.yml)
 
 Group: `group::threat insights`
 

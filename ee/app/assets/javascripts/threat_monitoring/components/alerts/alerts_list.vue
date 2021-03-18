@@ -137,7 +137,7 @@ export default {
 </script>
 <template>
   <div>
-    <alert-filters @filter-change="handleFilterChange" />
+    <alert-filters :filters="filters" @filter-change="handleFilterChange" />
     <gl-alert v-if="showNoAlertsMsg" data-testid="threat-alerts-unconfigured" :dismissible="false">
       <gl-sprintf :message="$options.i18n.MESSAGES.CONFIGURE">
         <template #link="{ content }">

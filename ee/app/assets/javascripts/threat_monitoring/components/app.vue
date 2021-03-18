@@ -105,7 +105,7 @@ export default {
       </h2>
     </header>
 
-    <gl-tabs>
+    <gl-tabs content-class="gl-pt-0">
       <gl-tab
         v-if="showAlertsTab"
         :title="s__('ThreatMonitoring|Alerts')"

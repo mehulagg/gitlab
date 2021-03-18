@@ -178,23 +178,22 @@ export default {
 
 <template>
   <div>
-    <div class="mb-2">
-      <gl-alert
-        v-if="hasAutoDevopsPolicy"
-        data-testid="autodevopsAlert"
-        variant="info"
-        :dismissible="false"
-      >
-        <gl-sprintf :message="$options.autodevopsNoticeDescription">
-          <template #monospaced="{ content }">
-            <span class="monospace">{{ content }}</span>
-          </template>
-          <template #link="{ content }">
-            <gl-link :href="documentationFullPath">{{ content }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </gl-alert>
-    </div>
+    <gl-alert
+      v-if="hasAutoDevopsPolicy"
+      data-testid="autodevopsAlert"
+      variant="info"
+      :dismissible="false"
+      class="gl-mb-3"
+    >
+      <gl-sprintf :message="$options.autodevopsNoticeDescription">
+        <template #monospaced="{ content }">
+          <span class="gl-font-monospace">{{ content }}</span>
+        </template>
+        <template #link="{ content }">
+          <gl-link :href="documentationFullPath">{{ content }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
 
     <div class="pt-3 px-3 bg-gray-light">
       <div class="row justify-content-between align-items-center">

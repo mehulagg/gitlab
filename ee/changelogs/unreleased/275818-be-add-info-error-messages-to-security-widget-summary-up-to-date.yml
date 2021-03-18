@@ -1,6 +1,0 @@
----
-title: Add securityReportsUpToDateOnTargetBranch field to MergeRequestType to indicate
-  if the security reports are up to date on the target branch
-merge_request: 53907
-author:
-type: changed

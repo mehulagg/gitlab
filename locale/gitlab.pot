@@ -2096,6 +2096,9 @@ msgstr ""
 msgid "Admin Area"
 msgstr ""
 
+msgid "Admin Mode"
+msgstr ""
+
 msgid "Admin Note"
 msgstr ""
 
@@ -3841,6 +3844,9 @@ msgstr ""
 msgid "Approval rules reset to project defaults"
 msgstr ""
 
+msgid "Approval settings"
+msgstr ""
+
 msgid "ApprovalRuleRemove|%d member"
 msgid_plural "ApprovalRuleRemove|%d members"
 msgstr[0] ""
@@ -4856,6 +4862,9 @@ msgstr[1] ""
 msgid "Blocked issue"
 msgstr ""
 
+msgid "Blocking"
+msgstr ""
+
 msgid "Blocking issues"
 msgstr ""
 
@@ -4987,6 +4996,9 @@ msgid "Board|Failed to delete board. Please try again."
 msgstr ""
 
 msgid "Board|Load more issues"
+msgstr ""
+
+msgid "Bold text"
 msgstr ""
 
 msgid "Both project and dashboard_path are required"
@@ -6339,6 +6351,9 @@ msgid "Close %{issueType}"
 msgstr ""
 
 msgid "Close %{tabname}"
+msgstr ""
+
+msgid "Close design"
 msgstr ""
 
 msgid "Close epic"
@@ -12502,6 +12517,9 @@ msgstr ""
 msgid "Expand milestones"
 msgstr ""
 
+msgid "Expand panel"
+msgstr ""
+
 msgid "Expand sidebar"
 msgstr ""
 
@@ -13407,6 +13425,9 @@ msgstr ""
 msgid "FlowdockService|Flowdock is a collaboration web app for technical teams."
 msgstr ""
 
+msgid "Focus filter bar"
+msgstr ""
+
 msgid "FogBugz Email"
 msgstr ""
 
@@ -13875,6 +13896,9 @@ msgstr ""
 msgid "Geo|In sync"
 msgstr ""
 
+msgid "Geo|Internal URL"
+msgstr ""
+
 msgid "Geo|Last repository check run"
 msgstr ""
 
@@ -13899,9 +13923,6 @@ msgstr ""
 msgid "Geo|Next sync scheduled at"
 msgstr ""
 
-msgid "Geo|Node Details"
-msgstr ""
-
 msgid "Geo|Node name can't be blank"
 msgstr ""
 
@@ -13918,6 +13939,9 @@ msgid "Geo|Pending verification"
 msgstr ""
 
 msgid "Geo|Please refer to Geo Troubleshooting."
+msgstr ""
+
+msgid "Geo|Primary Details"
 msgstr ""
 
 msgid "Geo|Primary node"
@@ -13966,6 +13990,9 @@ msgid "Geo|Reverify all"
 msgstr ""
 
 msgid "Geo|Review replication status, and resynchronize and reverify items with the primary node."
+msgstr ""
+
+msgid "Geo|Secondary Details"
 msgstr ""
 
 msgid "Geo|Secondary node"
@@ -14194,6 +14221,9 @@ msgid "GitLab username"
 msgstr ""
 
 msgid "GitLab uses %{jaeger_link} to monitor distributed systems."
+msgstr ""
+
+msgid "GitLab version"
 msgstr ""
 
 msgid "GitLab will run a background job that will produce pseudonymized CSVs of the GitLab database that will be uploaded to your configured object storage directory."
@@ -16650,9 +16680,6 @@ msgstr ""
 msgid "Invalid Insights config file detected"
 msgstr ""
 
-msgid "Invalid Login or password"
-msgstr ""
-
 msgid "Invalid OS"
 msgstr ""
 
@@ -17226,6 +17253,9 @@ msgstr ""
 msgid "It's you"
 msgstr ""
 
+msgid "Italic text"
+msgstr ""
+
 msgid "Iteration"
 msgstr ""
 
@@ -17625,21 +17655,6 @@ msgstr ""
 msgid "KeyboardKey|Ctrl+"
 msgstr ""
 
-msgid "KeyboardShortcuts|Commit (when editing commit message)"
-msgstr ""
-
-msgid "KeyboardShortcuts|Global Shortcuts"
-msgstr ""
-
-msgid "KeyboardShortcuts|Toggle GitLab Next"
-msgstr ""
-
-msgid "KeyboardShortcuts|Toggle the Performance Bar"
-msgstr ""
-
-msgid "KeyboardShortcuts|Web IDE"
-msgstr ""
-
 msgid "Keys"
 msgstr ""
 
@@ -17728,6 +17743,9 @@ msgid "Label actions dropdown"
 msgstr ""
 
 msgid "Label lists show all issues with the selected label."
+msgstr ""
+
+msgid "Label priority"
 msgstr ""
 
 msgid "Label was created"
@@ -18331,6 +18349,9 @@ msgstr ""
 msgid "Link copied"
 msgstr ""
 
+msgid "Link text"
+msgstr ""
+
 msgid "Link title"
 msgstr ""
 
@@ -18617,6 +18638,9 @@ msgid "Manifest file import"
 msgstr ""
 
 msgid "Manifest import"
+msgstr ""
+
+msgid "Manual"
 msgstr ""
 
 msgid "ManualOrdering|Couldn't save the order of the issues"
@@ -19685,6 +19709,9 @@ msgid_plural "Milestones"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Milestone due date"
+msgstr ""
+
 msgid "Milestone lists not available with your current license"
 msgstr ""
 
@@ -19875,6 +19902,9 @@ msgid "Mirroring was successfully disabled."
 msgstr ""
 
 msgid "Mirroring will only be available if the feature is included in the plan of the selected group or user."
+msgstr ""
+
+msgid "Miscellaneous"
 msgstr ""
 
 msgid "Missing"
@@ -20394,6 +20424,12 @@ msgstr ""
 msgid "NetworkPolicies|ports/protocols"
 msgstr ""
 
+msgid "NetworkPolicy|Policy"
+msgstr ""
+
+msgid "NetworkPolicy|Search by policy name"
+msgstr ""
+
 msgid "Never"
 msgstr ""
 
@@ -20607,6 +20643,9 @@ msgid "Next"
 msgstr ""
 
 msgid "Next commit"
+msgstr ""
+
+msgid "Next design"
 msgstr ""
 
 msgid "Next file in diff"
@@ -21563,6 +21602,9 @@ msgid "OpenedNDaysAgo|Opened"
 msgstr ""
 
 msgid "Opens in a new window"
+msgstr ""
+
+msgid "Operation completed"
 msgstr ""
 
 msgid "Operation failed. Check pod logs for %{pod_name} for more details."
@@ -22936,7 +22978,10 @@ msgstr ""
 msgid "Point to any links you like: documentation, built binaries, or other related materials. These can be internal or external links from your GitLab instance. Duplicate URLs are not allowed."
 msgstr ""
 
-msgid "Policy project doesn't exists"
+msgid "Policy project doesn't exist"
+msgstr ""
+
+msgid "Popularity"
 msgstr ""
 
 msgid "Postman collection"
@@ -23104,6 +23149,9 @@ msgstr ""
 msgid "Previous commit"
 msgstr ""
 
+msgid "Previous design"
+msgstr ""
+
 msgid "Previous file in diff"
 msgstr ""
 
@@ -23126,6 +23174,9 @@ msgid "Prioritized Labels"
 msgstr ""
 
 msgid "Prioritized label"
+msgstr ""
+
+msgid "Priority"
 msgstr ""
 
 msgid "Private"
@@ -24011,9 +24062,6 @@ msgid "ProjectSettings|Pages"
 msgstr ""
 
 msgid "ProjectSettings|Pages for project documentation."
-msgstr ""
-
-msgid "ProjectSettings|Pipelines"
 msgstr ""
 
 msgid "ProjectSettings|Pipelines must succeed"
@@ -25876,6 +25924,9 @@ msgstr ""
 msgid "Requests to these domain(s)/address(es) on the local network will be allowed when local requests from hooks and services are not allowed. IP ranges such as 1:0:0:0:0:0:0:0/124 or 127.0.0.0/28 are supported. Domain wildcards are not supported currently. Use comma, semicolon, or newline to separate multiple entries. The allowlist can hold a maximum of 1000 entries. Domains should use IDNA encoding. Ex: example.com, 192.168.1.1, 127.0.0.0/28, xn--itlab-j1a.com."
 msgstr ""
 
+msgid "Require additional authentication for administrative tasks"
+msgstr ""
+
 msgid "Require admin approval for new sign-ups"
 msgstr ""
 
@@ -27709,7 +27760,7 @@ msgstr ""
 msgid "SetPasswordToCloneLink|set a password"
 msgstr ""
 
-msgid "SetStatusModal|\"Busy\" will be shown next to your name"
+msgid "SetStatusModal|A busy indicator is shown next to your name and avatar."
 msgstr ""
 
 msgid "SetStatusModal|Add status emoji"
@@ -27719,6 +27770,9 @@ msgid "SetStatusModal|Busy"
 msgstr ""
 
 msgid "SetStatusModal|Clear status"
+msgstr ""
+
+msgid "SetStatusModal|Clear status after"
 msgstr ""
 
 msgid "SetStatusModal|Edit status"
@@ -27740,6 +27794,9 @@ msgid "SetStatusModal|Status updated"
 msgstr ""
 
 msgid "SetStatusModal|What's your status?"
+msgstr ""
+
+msgid "SetStatusModal|Your status resets on %{date}."
 msgstr ""
 
 msgid "Sets %{epic_ref} as parent epic."
@@ -29193,9 +29250,6 @@ msgid "Succeeded"
 msgstr ""
 
 msgid "Successful purchase image"
-msgstr ""
-
-msgid "Successfull"
 msgstr ""
 
 msgid "Successfully activated"
@@ -31741,6 +31795,9 @@ msgstr ""
 msgid "Toggle focus mode"
 msgstr ""
 
+msgid "Toggle keyboard shortcuts help dialog"
+msgstr ""
+
 msgid "Toggle navigation"
 msgstr ""
 
@@ -33386,6 +33443,9 @@ msgid "View labels"
 msgstr ""
 
 msgid "View log"
+msgstr ""
+
+msgid "View logs"
 msgstr ""
 
 msgid "View merge request"

@@ -7,7 +7,8 @@ RSpec.describe EE::BulkImports::Groups::Transformers::EpicAttributesTransformer 
   let_it_be(:group) { create(:group) }
   let_it_be(:bulk_import) { create(:bulk_import, user: importer_user) }
   let_it_be(:entity) { create(:bulk_import_entity, bulk_import: bulk_import, group: group) }
-  let_it_be(:context) { ::BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
   describe '#transform' do
     it 'transforms the epic attributes' do

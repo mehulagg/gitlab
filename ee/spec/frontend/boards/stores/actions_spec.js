@@ -135,7 +135,7 @@ describe('performSearch', () => {
     });
   });
 
-  it('should dispatch setFilters, resetEpics, fetchEpicsSwimlanes and resetIssues action when isSwimlanesOn', async () => {
+  it('should dispatch setFilters, resetEpics, fetchEpicsSwimlanes, fetchIssueLists and resetIssues action when isSwimlanesOn', async () => {
     const getters = { isSwimlanesOn: true };
     await testAction({
       action: actions.performSearch,
@@ -144,7 +144,8 @@ describe('performSearch', () => {
         { type: 'setFilters', payload: {} },
         { type: 'resetEpics' },
         { type: 'resetIssues' },
-        { type: 'fetchEpicsSwimlanes', payload: {} },
+        { type: 'fetchEpicsSwimlanes' },
+        { type: 'fetchIssueLists' },
       ],
     });
   });
@@ -242,17 +243,17 @@ describe('fetchEpicsSwimlanes', () => {
     },
   };
 
-  it('should commit mutation RECEIVE_EPICS_SUCCESS and UPDATE_CACHED_EPICS on success without lists', (done) => {
+  it('should commit mutation RECEIVE_EPICS_SUCCESS and UPDATE_CACHED_EPICS on success', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
       actions.fetchEpicsSwimlanes,
-      { withLists: false },
+      {},
       state,
       [
         {
           type: types.RECEIVE_EPICS_SUCCESS,
-          payload: [mockEpic],
+          payload: { epics: [mockEpic] },
         },
         {
           type: types.UPDATE_CACHED_EPICS,
@@ -297,12 +298,12 @@ describe('fetchEpicsSwimlanes', () => {
 
     testAction(
       actions.fetchEpicsSwimlanes,
-      { withLists: false },
+      {},
       state,
       [
         {
           type: types.RECEIVE_EPICS_SUCCESS,
-          payload: [mockEpic],
+          payload: { epics: [mockEpic] },
         },
         {
           type: types.UPDATE_CACHED_EPICS,
@@ -312,7 +313,7 @@ describe('fetchEpicsSwimlanes', () => {
       [
         {
           type: 'fetchEpicsSwimlanes',
-          payload: { withLists: false, endCursor: 'ENDCURSOR' },
+          payload: { endCursor: 'ENDCURSOR' },
         },
       ],
       done,
@@ -574,7 +575,7 @@ describe('toggleEpicSwimlanes', () => {
     );
   });
 
-  it('should dispatch fetchEpicsSwimlanes action when isShowingEpicsSwimlanes is true', () => {
+  it('should dispatch fetchEpicsSwimlanes and fetchIssueLists actions when isShowingEpicsSwimlanes is true', () => {
     global.jsdom.reconfigure({
       url: `${TEST_HOST}/groups/gitlab-org/-/boards/1`,
     });
@@ -592,7 +593,7 @@ describe('toggleEpicSwimlanes', () => {
       null,
       state,
       [{ type: types.TOGGLE_EPICS_SWIMLANES }],
-      [{ type: 'fetchEpicsSwimlanes', payload: {} }],
+      [{ type: 'fetchEpicsSwimlanes' }, { type: 'fetchIssueLists' }],
       () => {
         expect(commonUtils.historyPushState).toHaveBeenCalledWith(
           mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href),
@@ -606,7 +607,7 @@ describe('toggleEpicSwimlanes', () => {
 });
 
 describe('setEpicSwimlanes', () => {
-  it('should commit mutation SET_EPICS_SWIMLANES and dispatch fetchEpicsSwimlanes action', () => {
+  it('should commit mutation SET_EPICS_SWIMLANES', () => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue({});
 
     return testAction(
@@ -614,7 +615,7 @@ describe('setEpicSwimlanes', () => {
       null,
       {},
       [{ type: types.SET_EPICS_SWIMLANES }],
-      [{ type: 'fetchEpicsSwimlanes', payload: {} }],
+      [],
     );
   });
 });
@@ -726,7 +727,7 @@ describe('setActiveIssueEpic', () => {
   };
 
   describe('when the updated issue has an assigned epic', () => {
-    it('should commit mutation RECEIVE_FIRST_EPICS_SUCCESS, UPDATE_CACHED_EPICS and UPDATE_ISSUE_BY_ID on success', async () => {
+    it('should commit mutation RECEIVE_EPICS_SUCCESS, UPDATE_CACHED_EPICS and UPDATE_ISSUE_BY_ID on success', async () => {
       jest
         .spyOn(gqlClient, 'mutate')
         .mockResolvedValue({ data: { issueSetEpic: { issue: { epic: epicWithData } } } });
@@ -741,7 +742,7 @@ describe('setActiveIssueEpic', () => {
             payload: true,
           },
           {
-            type: types.RECEIVE_FIRST_EPICS_SUCCESS,
+            type: types.RECEIVE_EPICS_SUCCESS,
             payload: { epics: [epicWithData, ...state.epics] },
           },
           {

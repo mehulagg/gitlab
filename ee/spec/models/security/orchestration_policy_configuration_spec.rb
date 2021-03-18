@@ -21,7 +21,6 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     it { is_expected.to validate_presence_of(:security_policy_management_project) }
 
     it { is_expected.to validate_uniqueness_of(:project) }
-    it { is_expected.to validate_uniqueness_of(:security_policy_management_project) }
   end
 
   describe '#enabled?' do

@@ -136,15 +136,11 @@ export default {
     state.epicsSwimlanesFetchInProgress = false;
   },
 
-  [mutationTypes.RECEIVE_FIRST_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
+  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
     Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
     if (canAdminEpic !== undefined) {
       state.canAdminEpic = canAdminEpic;
     }
-  },
-
-  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
-    Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
   },
 
   [mutationTypes.UPDATE_CACHED_EPICS]: (state, epics) => {

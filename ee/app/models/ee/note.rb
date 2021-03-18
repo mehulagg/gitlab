@@ -76,6 +76,10 @@ module EE
       for_vulnerability? || super
     end
 
+    def usage_ping_track_updated_epic_note(user)
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_note_updated_action(author: user) if for_epic?
+    end
+
     private
 
     def system_note_for_epic?

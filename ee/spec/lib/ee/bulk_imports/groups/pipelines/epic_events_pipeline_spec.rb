@@ -7,8 +7,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:epic) { create(:epic, group: group) }
-  let_it_be(:tracker) { "epic_#{epic.iid}_events" }
   let_it_be(:bulk_import) { create(:bulk_import, user: user) }
+
   let_it_be(:entity) do
     create(
       :bulk_import_entity,
@@ -20,7 +20,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
     )
   end
 
-  let_it_be(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
   before do
     stub_licensed_features(epics: true)
@@ -39,7 +40,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
 
   describe '#run' do
     it 'imports epic events and resource state events' do
-      data = extractor_data(has_next_page: false, cursor: cursor)
+      data = extractor_data(has_next_page: false)
 
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
         allow(extractor)
@@ -102,10 +103,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
 
         subject.after_run(data)
 
-        page_tracker = entity.trackers.find_by(relation: tracker)
-
-        expect(page_tracker.has_next_page).to eq(true)
-        expect(page_tracker.next_page).to eq(cursor)
+        expect(tracker.has_next_page).to eq(true)
+        expect(tracker.next_page).to eq(cursor)
       end
     end
 
@@ -117,10 +116,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
 
         subject.after_run(data)
 
-        page_tracker = entity.trackers.find_by(relation: tracker)
-
-        expect(page_tracker.has_next_page).to eq(false)
-        expect(page_tracker.next_page).to be_nil
+        expect(tracker.has_next_page).to eq(false)
+        expect(tracker.next_page).to be_nil
       end
 
       it 'updates context with next epic iid' do

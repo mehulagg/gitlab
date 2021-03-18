@@ -3,6 +3,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
 import {
+  EPIC_LANE_BASE_HEIGHT,
   IterationFilterType,
   IterationIDs,
   MilestoneFilterType,
@@ -29,6 +30,10 @@ export function fullUserId(userId) {
 
 export function fullEpicBoardId(epicBoardId) {
   return `gid://gitlab/Boards::EpicBoard/${epicBoardId}`;
+}
+
+export function calculateSwimlanesBufferSize(listTopCoordinate) {
+  return Math.ceil((window.innerHeight - listTopCoordinate) / EPIC_LANE_BASE_HEIGHT);
 }
 
 export function formatListEpics(listEpics) {
