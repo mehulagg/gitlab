@@ -106,11 +106,12 @@ GitLab installed, please refer to our [installation
 documentation](https://docs.gitlab.com/ee/install/README.html).
 You can install the KAS within GitLab as explained below according to your GitLab installation method.
 You can also opt to use an [external KAS](#use-an-external-kas-installation).
+
 #### Install with Omnibus
 
 When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
 
-1. Edit `/etc/gitlab/gitlab.rb`:
+1. Edit `/etc/gitlab/gitlab.rb` to enable the Kubernetes Agent Server:
 
    ```plaintext
    gitlab_kas['enable'] = true
