@@ -1,5 +1,6 @@
 <script>
 import {
+  GlAlert,
   GlModal,
   GlDropdown,
   GlDropdownItem,
@@ -22,6 +23,7 @@ import eventHub from '../event_hub';
 export default {
   name: 'InviteMembersModal',
   components: {
+    GlAlert,
     GlDatepicker,
     GlLink,
     GlModal,
@@ -68,6 +70,9 @@ export default {
       newUsersToInvite: [],
       selectedDate: undefined,
       groupToBeSharedWith: {},
+      inviteLoading: false,
+      shouldShowAlert: false,
+      errorAlertMessage: '',
     };
   },
   computed: {
@@ -139,7 +144,6 @@ export default {
       } else {
         this.submitInviteMembers();
       }
-      this.closeModal();
     },
     trackInvite() {
       if (this.source === INVITE_MEMBERS_IN_COMMENT) {
@@ -164,9 +168,12 @@ export default {
 
       apiShareWithGroup(this.id, this.shareWithGroupPostData(this.groupToBeSharedWith.id))
         .then(this.showToastMessageSuccess)
-        .catch(this.showToastMessageError);
+        .catch(this.showErrorAlertMessage);
     },
     submitInviteMembers() {
+      this.inviteLoading=true;
+      this.shouldShowAlert = false;
+
       const [usersToInviteByEmail, usersToAddById] = this.partitionNewUsersToInvite();
       const promises = [];
 
@@ -185,10 +192,12 @@ export default {
 
         promises.push(apiAddByUserId(this.id, this.addByUserIdPostData(usersToAddById)));
       }
-
       this.trackInvite();
+      this.inviteLoading=false;
 
-      Promise.all(promises).then(this.showToastMessageSuccess).catch(this.showToastMessageError);
+      Promise.all(promises)
+       .then(this.showToastMessageSuccess)
+       .catch(this.showErrorAlertMessage);
     },
     inviteByEmailPostData(usersToInviteByEmail) {
       return {
@@ -213,11 +222,11 @@ export default {
     },
     showToastMessageSuccess() {
       this.$toast.show(this.$options.labels.toastMessageSuccessful, this.toastOptions);
+      this.closeModal();
     },
-    showToastMessageError(error) {
-      const message = error.response.data.message || this.$options.labels.toastMessageUnsuccessful;
-
-      this.$toast.show(message, this.toastOptions);
+    showErrorAlertMessage(error) {
+      this.errorAlertMessage = error.response.data.message || this.$options.labels.alertMessageUnsuccessful;
+      this.shouldShowAlert = true;
     },
   },
   labels: {
@@ -254,7 +263,7 @@ export default {
     accessLevel: s__('InviteMembersModal|Choose a role permission'),
     accessExpireDate: s__('InviteMembersModal|Access expiration date (optional)'),
     toastMessageSuccessful: s__('InviteMembersModal|Members were successfully added'),
-    toastMessageUnsuccessful: s__('InviteMembersModal|Some of the members could not be added'),
+    alertMessageUnsuccessful: s__('InviteMembersModal|Some of the members could not be added'),
     readMoreText: s__(`InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions`),
     inviteButtonText: s__('InviteMembersModal|Invite'),
     cancelButtonText: s__('InviteMembersModal|Cancel'),
@@ -279,6 +288,10 @@ export default {
           </template>
         </gl-sprintf>
       </p>
+
+      <gl-alert variant='danger' v-show="shouldShowAlert" @dismiss="shouldShowAlert=false">
+        {{ errorAlertMessage }}
+      </gl-alert>
 
       <label :id="$options.membersTokenSelectLabelId" class="gl-font-weight-bold gl-mt-5">{{
         $options.labels[inviteeType].searchField
@@ -353,6 +366,7 @@ export default {
         <gl-button
           ref="inviteButton"
           :disabled="inviteDisabled"
+          :loading="inviteLoading"
           variant="success"
           data-qa-selector="invite_button"
           @click="sendInvite"
