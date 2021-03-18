@@ -74,6 +74,12 @@ module Emails
       end
     end
 
+    def ssh_key_expired_email(user)
+      return unless user && user.active?
+
+      @user = user
+    end
+
     def unknown_sign_in_email(user, ip, time)
       @user = user
       @ip = ip
