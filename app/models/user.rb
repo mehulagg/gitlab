@@ -391,6 +391,13 @@ class User < ApplicationRecord
             .without_impersonation
             .expired_today_and_not_notified)
   end
+  scope :with_ssh_key_expired_today, -> do
+    where('EXISTS (?)',
+          ::Key
+            .select(1)
+            .where('keys.user_id = users.id')
+            .expired_today_and_not_notified)
+  end
   scope :order_recent_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'DESC')) }
   scope :order_oldest_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'ASC')) }
   scope :order_recent_last_activity, -> { reorder(Gitlab::Database.nulls_last_order('last_activity_on', 'DESC')) }
