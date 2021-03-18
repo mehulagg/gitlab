@@ -221,11 +221,13 @@ When the purchase has been processed, you receive confirmation of your new subsc
 
 ## See your billable users list
 
-To see a list of your billable users on your GitLab group page go to **Settings > Billing**. This page provides information about your subscription and occupied seats for your group which is the list of billable users for your particular group.
+Your GitLab group billing page under **Settings > Billing** provides information about your subscription and occupied seats.
 
-### Remove billablbe user
+To view the list of billable users for your particular group, use the **See usage** button.
 
-To remove a user of your billable users on your GitLab group page go to **Settings > Billing > See usage**. There a user can be remove by selecting **Remove user** from the elipsis menu.
+### Remove billable user
+
+When viewing your list of billable users, you can remove a user by selecting **Remove user** from the ellipsis menu.
 
 ## Subscription expiry
 
