@@ -204,6 +204,20 @@ pre.code,
       }
     }
 
+    &.word-diff {
+      &::before {
+        color: scale-color($line-number-new, $red: -30%, $green: -30%, $blue: -30%);
+      }
+
+      span.idiff.removed {
+        background-color: $line-removed-dark;
+      }
+
+      span.idiff.added {
+        background-color: $line-added-dark;
+      }
+    }
+
     &.match {
       @include match-line;
     }

@@ -475,7 +475,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.9.0.pre.rc1'
+gem 'gitaly', github: 'gitaly', branch: '16950_add_word_diff_mode'
 
 gem 'grpc', '~> 1.30.2'
 
