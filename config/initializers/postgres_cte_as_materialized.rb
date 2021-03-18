@@ -19,7 +19,11 @@ module Arel
 
       # Note this method will be deleted after the minimum PG version is set to 12.0
       def self.materialized_supported?
-        Gitlab::Database.version.match?(/^1[2-9]\./) # version 12.x and above
+        @materialized_supported ||= Gitlab::Database.version.match?(/^1[2-9]\./) # version 12.x and above
+      end
+
+      def self.add_materialized_if_supported
+        materialized_supported? ? 'MATERIALIZED' : ''
       end
     end
   end
@@ -27,7 +31,7 @@ module Arel
   module Visitors
     class Arel::Visitors::ToSql
       def visit_Arel_Nodes_AsWithMaterialized(obj, collector) # rubocop:disable Naming/MethodName
-        collector = visit o.left, collector
+        collector = visit obj.left, collector
         collector << " AS#{obj.expr} "
         visit obj.right, collector
       end

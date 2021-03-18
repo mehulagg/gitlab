@@ -97,7 +97,7 @@ module Gitlab
 
         ActiveRecord::Base.connection.execute <<~SQL
           WITH
-          starting_iids(project_id, iid) as (
+          starting_iids(project_id, iid) as #{Arel::Nodes::AsWithMaterialized.add_materialized_if_supported}(
             SELECT project_id, MAX(COALESCE(iid, 0))
             FROM #{table}
             WHERE project_id BETWEEN #{start_id} AND #{end_id}

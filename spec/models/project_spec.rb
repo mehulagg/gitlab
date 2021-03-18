@@ -4109,7 +4109,7 @@ RSpec.describe Project, factory_default: :keep do
     subject { described_class.wrap_with_cte(projects) }
 
     it 'wrapped query matches original' do
-      expect(subject.to_sql).to match(/^WITH "projects_cte" AS/)
+      expect(subject.to_sql).to match(/^WITH "projects_cte" AS #{Arel::Nodes::AsWithMaterialized.add_materialized_if_supported}/)
       expect(subject).to match_array(projects)
     end
   end

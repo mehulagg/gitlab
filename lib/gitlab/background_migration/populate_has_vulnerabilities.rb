@@ -9,7 +9,7 @@ module Gitlab
         self.table_name = 'project_settings'
 
         UPSERT_SQL = <<~SQL
-          WITH upsert_data (project_id, has_vulnerabilities, created_at, updated_at) AS (
+          WITH upsert_data (project_id, has_vulnerabilities, created_at, updated_at) AS #{Arel::Nodes::AsWithMaterialized.add_materialized_if_supported} (
             SELECT projects.id, true, current_timestamp, current_timestamp FROM projects WHERE projects.id IN (%{project_ids})
           )
           INSERT INTO project_settings

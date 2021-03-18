@@ -58,7 +58,7 @@ class MigrateComplianceFrameworkEnumToDatabaseFrameworkRecord < ActiveRecord::Mi
     # This is our standard recursive namespace query, we use it to determine the root_namespace_id in the same query.
     lateral_join = <<~SQL
       INNER JOIN LATERAL (
-        WITH RECURSIVE "base_and_ancestors" AS (
+        WITH RECURSIVE "base_and_ancestors" AS #{Arel::Nodes::AsWithMaterialized.add_materialized_if_supported} (
           (
             SELECT "ns".* FROM "namespaces" as ns WHERE "ns"."id" = projects.namespace_id
           ) UNION

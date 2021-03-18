@@ -30,7 +30,7 @@ module Gitlab
                 users.require_two_factor_authentication_from_group = TRUE
                 AND users.id BETWEEN #{start_id}
                 AND #{stop_id}) AS users_groups_query
-              INNER JOIN LATERAL ( WITH RECURSIVE "base_and_ancestors" AS (
+              INNER JOIN LATERAL ( WITH RECURSIVE "base_and_ancestors" AS #{Arel::Nodes::AsWithMaterialized.add_materialized_if_supported} (
           (
                     SELECT
                       "namespaces"."type",

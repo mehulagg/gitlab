@@ -59,7 +59,7 @@ class Namespace
       root_id = Integer(@root.id)
 
       """
-      WITH RECURSIVE cte(id, traversal_ids, cycle) AS (
+      WITH RECURSIVE cte(id, traversal_ids, cycle) AS #{Arel::Nodes::AsWithMaterialized.add_materialized_if_supported} (
         VALUES(#{root_id}, ARRAY[#{root_id}], false)
       UNION ALL
         SELECT n.id, cte.traversal_ids || n.id, n.id = ANY(cte.traversal_ids)

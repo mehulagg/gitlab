@@ -48,7 +48,7 @@ module Gitlab
         #   AND %{pkey} < %{batch_end}
         #   AND %{column} IS NOT NULL
         BUCKETED_DATA_SQL = <<~SQL
-          WITH hashed_attributes AS (%{source_query})
+          WITH hashed_attributes AS #{Arel::Nodes::AsWithMaterialized.add_materialized_if_supported} (%{source_query})
           SELECT (attr_hash_32_bits & #{BIT_32_NORMALIZED_BUCKET_ID_MASK})::int AS bucket_num,
             (31 - floor(log(2, min((attr_hash_32_bits & #{BIT_31_MASK})::int))))::int as bucket_hash
           FROM hashed_attributes
