@@ -108,7 +108,7 @@ class ProjectPolicy < BasePolicy
   condition(:service_desk_enabled) { @subject.service_desk_enabled? }
 
   with_scope :subject
-  condition(:resource_access_token_available) { resource_access_token_available? }
+  condition(:resource_access_token_feature_available) { resource_access_feature_token_available? }
   condition(:resource_access_token_creation_allowed) { resource_access_token_creation_allowed? }
 
   # We aren't checking `:read_issue` or `:read_merge_request` in this case
@@ -632,7 +632,7 @@ class ProjectPolicy < BasePolicy
 
   rule { project_bot }.enable :project_bot_access
 
-  rule { can?(:admin_project) & resource_access_token_available }.policy do
+  rule { can?(:admin_project) & resource_access_token_feature_available }.policy do
     enable :read_resource_access_tokens
     enable :destroy_resource_access_tokens
   end
@@ -727,7 +727,7 @@ class ProjectPolicy < BasePolicy
     end
   end
 
-  def resource_access_token_available?
+  def resource_access_token_feature_available?
     true
   end
 
