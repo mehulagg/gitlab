@@ -430,6 +430,7 @@ module Gitlab
         request_params[:ignore_whitespace_change] = options.fetch(:ignore_whitespace_change, false)
         request_params[:enforce_limits] = options.fetch(:limits, true)
         request_params[:collapse_diffs] = !options.fetch(:expanded, true)
+        request_params[:diff_mode] = options.fetch(:word_diff, false) ? Gitaly::CommitDiffRequest::DiffMode::WORDDIFF : Gitaly::CommitDiffRequest::DiffMode::DEFAULT
         request_params.merge!(Gitlab::Git::DiffCollection.limits(options).to_h)
 
         request = Gitaly::CommitDiffRequest.new(request_params)

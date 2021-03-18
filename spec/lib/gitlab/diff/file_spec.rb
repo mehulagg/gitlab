@@ -8,7 +8,8 @@ RSpec.describe Gitlab::Diff::File do
   let(:project) { create(:project, :repository) }
   let(:commit) { project.commit(sample_commit.id) }
   let(:diff) { commit.raw_diffs.first }
-  let(:diff_file) { described_class.new(diff, diff_refs: commit.diff_refs, repository: project.repository) }
+  let(:diff_file) { described_class.new(diff, diff_refs: commit.diff_refs, repository: project.repository, word_diff: word_diff) }
+  let(:word_diff) { false }
 
   def create_file(file_name, content)
     Files::CreateService.new(
@@ -51,11 +52,36 @@ RSpec.describe Gitlab::Diff::File do
     project.commit(branch_name).diffs.diff_files.first
   end
 
+  describe '#word_diff' do
+    subject { diff_file.word_diff }
+
+    it { is_expected.to eq(false) }
+
+    context 'when word_diff is enabled' do
+      let(:word_diff) { true }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
   describe '#diff_lines' do
     let(:diff_lines) { diff_file.diff_lines }
 
     it { expect(diff_lines.size).to eq(30) }
     it { expect(diff_lines.first).to be_kind_of(Gitlab::Diff::Line) }
+
+    context 'when word-diff mode is enabled' do
+      let(:word_diff) { true }
+      let(:diff_line_mock) { [double(Gitlab::Diff::Line)] }
+
+      it 'uses word-diff parser for provided diffs' do
+        expect_next_instance_of(Gitlab::WordDiff::Parser) do |parser|
+          expect(parser).to receive(:parse) { diff_line_mock }
+        end
+
+        expect(diff_file.diff_lines).to eq(diff_line_mock)
+      end
+    end
   end
 
   describe '#highlighted_diff_lines' do

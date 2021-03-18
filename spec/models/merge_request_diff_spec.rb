@@ -458,6 +458,14 @@ RSpec.describe MergeRequestDiff do
         end
       end
 
+      context 'when diff_options include word_diff' do
+        it_behaves_like 'fetching full diffs' do
+          let(:diff_options) do
+            { word_diff: true }
+          end
+        end
+      end
+
       context 'when persisted files available' do
         it 'returns paginated diffs' do
           diffs = diff_with_commits.diffs_in_batch(1, 10, diff_options: diff_options)
@@ -547,6 +555,14 @@ RSpec.describe MergeRequestDiff do
         end
       end
 
+      context 'when diff_options include word_diff' do
+        it_behaves_like 'fetching full diffs' do
+          let(:diff_options) do
+            { word_diff: true }
+          end
+        end
+      end
+
       context 'when persisted files available' do
         it 'returns diffs' do
           diffs = diff_with_commits.diffs(diff_options)
@@ -622,6 +638,15 @@ RSpec.describe MergeRequestDiff do
           expect(diff_with_commits.compare).to receive(:diffs).and_call_original
 
           diff_with_commits.raw_diffs(ignore_whitespace_change: true)
+        end
+      end
+
+      context 'when the :word_diff option is set' do
+        it 'creates a new compare object instead of using preprocessed data' do
+          # expect(diff_with_commits).not_to receive(:load_diffs)
+          # expect(diff_with_commits.compare).to receive(:diffs).and_call_original
+
+          diff_with_commits.raw_diffs(word_diff: true)
         end
       end
 

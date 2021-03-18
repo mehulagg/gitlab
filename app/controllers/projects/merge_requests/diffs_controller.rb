@@ -24,6 +24,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
   def diffs_batch
     diff_options_hash = diff_options
     diff_options_hash[:paths] = params[:paths] if params[:paths]
+    diff_options_hash[:word_diff] = true
 
     diffs = @compare.diffs_in_batch(params[:page], params[:per_page], diff_options: diff_options_hash)
     positions = @merge_request.note_positions_for_paths(diffs.diff_file_paths, current_user)

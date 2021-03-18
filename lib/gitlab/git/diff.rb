@@ -77,9 +77,12 @@ module Gitlab
         #    If false, patch raw data will not be included in the diff after
         #    `max_files`, `max_lines` or any of the limits in `limits` are
         #    exceeded
+        #
+        #  :word_diff ::
+        #    If true, applies --word-diff=porcelain flag to git diff command.
         def filter_diff_options(options, default_options = {})
           allowed_options = [:ignore_whitespace_change, :max_files, :max_lines,
-                             :limits, :expanded]
+                             :limits, :expanded, :word_diff]
 
           if default_options
             actual_defaults = default_options.dup

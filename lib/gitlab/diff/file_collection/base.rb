@@ -11,7 +11,7 @@ module Gitlab
         delegate :count, :size, :real_size, to: :raw_diff_files
 
         def self.default_options
-          ::Commit.max_diff_options.merge(ignore_whitespace_change: false, expanded: false, include_stats: true)
+          ::Commit.max_diff_options.merge(ignore_whitespace_change: false, expanded: false, include_stats: true, word_diff: false)
         end
 
         def initialize(diffable, project:, diff_options: nil, diff_refs: nil, fallback_diff_refs: nil)
@@ -19,6 +19,7 @@ module Gitlab
 
           @diffable = diffable
           @include_stats = diff_options.delete(:include_stats)
+          @word_diff = diff_options[:word_diff]
           @project = project
           @diff_options = diff_options
           @diff_refs = diff_refs
@@ -90,6 +91,8 @@ module Gitlab
 
         private
 
+        attr_reader :word_diff
+
         def diff_stats_collection
           strong_memoize(:diff_stats) do
             next unless fetch_diff_stats?
@@ -113,7 +116,8 @@ module Gitlab
                                  repository: project.repository,
                                  diff_refs: diff_refs,
                                  fallback_diff_refs: fallback_diff_refs,
-                                 stats: stats)
+                                 stats: stats,
+                                 word_diff: word_diff)
         end
 
         def sort_diffs(diffs)

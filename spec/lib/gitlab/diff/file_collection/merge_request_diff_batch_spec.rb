@@ -8,12 +8,13 @@ RSpec.describe Gitlab::Diff::FileCollection::MergeRequestDiffBatch do
   let(:batch_size) { 10 }
   let(:diffable) { merge_request.merge_request_diff }
   let(:diff_files_relation) { diffable.merge_request_diff_files }
+  let(:diff_options) { nil }
 
   subject do
     described_class.new(diffable,
                         batch_page,
                         batch_size,
-                        diff_options: nil)
+                        diff_options: diff_options)
   end
 
   let(:diff_files) { subject.diff_files }
@@ -111,6 +112,14 @@ RSpec.describe Gitlab::Diff::FileCollection::MergeRequestDiffBatch do
 
       it 'returns correct diff files' do
         expect(subject.diffs.map(&:new_path)).to eq(diff_files_relation.page(1).per(batch_size).map(&:new_path))
+      end
+    end
+
+    context 'when word_diff option is enabled' do
+      let(:diff_options) { { word_diff: true } }
+
+      it 'creates Diff::File objects with word-diff option equal true' do
+        expect(diff_files.map(&:word_diff)).to all(be_truthy)
       end
     end
   end

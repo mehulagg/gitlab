@@ -75,6 +75,44 @@ RSpec.describe Gitlab::GitalyClient::CommitService do
     it 'encodes paths correctly' do
       expect { client.diff_from_parent(commit, paths: ['encoding/test.txt', 'encoding/テスト.txt', nil]) }.not_to raise_error
     end
+
+    describe 'Diff modes' do
+      let(:default_request_attributes) do
+        {
+          repository: repository_message,
+          left_commit_id: 'cfe32cf61b73a0d5e9f13e774abde7ff789b1660',
+          right_commit_id: commit.id,
+          collapse_diffs: false,
+          enforce_limits: true,
+          # Tests limitation parameters explicitly
+          max_files: 100,
+          max_lines: 5000,
+          max_bytes: 512000,
+          safe_max_files: 100,
+          safe_max_lines: 5000,
+          safe_max_bytes: 512000,
+          max_patch_bytes: 204800
+        }
+      end
+
+      it 'uses standard diff mode by default' do
+        request = Gitaly::CommitDiffRequest.new(**default_request_attributes.merge(diff_mode: :DEFAULT))
+
+        expect_any_instance_of(Gitaly::DiffService::Stub).to receive(:commit_diff).with(request, kind_of(Hash))
+
+        client.diff_from_parent(commit)
+      end
+
+      context 'when word diff option is enabled' do
+        it 'uses word-diff mode' do
+          request = Gitaly::CommitDiffRequest.new(**default_request_attributes.merge(diff_mode: :WORDDIFF))
+
+          expect_any_instance_of(Gitaly::DiffService::Stub).to receive(:commit_diff).with(request, kind_of(Hash))
+
+          client.diff_from_parent(commit, word_diff: true)
+        end
+      end
+    end
   end
 
   describe '#commit_deltas' do
