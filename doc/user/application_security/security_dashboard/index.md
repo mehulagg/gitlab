@@ -77,10 +77,12 @@ At the project level, the Security Dashboard displays a chart with the number of
 Access it by navigating to **Security & Compliance > Security Dashboard**. We display historical
 data up to 365 days. The chart's data is updated daily.
 
-![Project Security Dashboard](img/project_security_dashboard_chart_v13_6.png)
+![Project Security Dashboard](img/project_security_dashboard_chart_v13_10.png)
 
 Filter the historical data by clicking on the corresponding legend name. The image above, for example, shows
 only the graph for vulnerabilities with **high** severity.
+
+Filter the date range using the icons available at the top of the chart. By selecting the left-most icon, then dragging across the chart, the date range can be restricted to a smaller range. The date range can be reset and an SVG image of the chart can be downloaded using these icons. 
 
 ## Group Security Dashboard
 
