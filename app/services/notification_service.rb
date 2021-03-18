@@ -83,7 +83,7 @@ class NotificationService
   def ssh_key_expired_email(user)
     return unless user.can?(:receive_notifications)
 
-    mailer.access_token_expired_email(user).deliver_later
+    mailer.ssh_key_expired_email(user).deliver_later
   end
 
   # Notify a user when a previously unknown IP or device is used to

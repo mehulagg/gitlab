@@ -12,7 +12,7 @@ module SshKeys
 
       User.with_ssh_key_expired_today.find_each do |user|
         with_context(user: user) do
-          Gitlab::AppLogger.info "#{self.class}: Notifying User #{user.id} about an expired key"
+          Gitlab::AppLogger.info "#{self.class}: Notifying User #{user.id} about expired ssh key(s)"
 
           notification_service.ssh_key_expired_email(user)
 
