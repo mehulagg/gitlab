@@ -215,9 +215,6 @@ class GroupPolicy < BasePolicy
 
   rule { can?(:admin_group) & resource_access_token_available }.policy do
     enable :read_resource_access_tokens
-  end
-
-  rule { can?(:admin_group) & resource_access_token_available }.policy do
     enable :destroy_resource_access_tokens
   end
 

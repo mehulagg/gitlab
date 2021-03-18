@@ -5,7 +5,7 @@ module Projects
     class AccessTokensController < Projects::ApplicationController
       include ProjectsHelper
 
-      before_action :check_feature_availability
+      before_action :check_can_read, only: [:index]
 
       feature_category :authentication_and_authorization
 
@@ -42,7 +42,7 @@ module Projects
 
       private
 
-      def check_feature_availability
+      def check_can_read
         render_404 unless can?(current_user, :read_resource_access_tokens, @project)
       end
 

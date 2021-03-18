@@ -634,9 +634,6 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:admin_project) & resource_access_token_available }.policy do
     enable :read_resource_access_tokens
-  end
-
-  rule { can?(:admin_project) & resource_access_token_available }.policy do
     enable :destroy_resource_access_tokens
   end
 
@@ -737,7 +734,7 @@ class ProjectPolicy < BasePolicy
   def resource_access_token_creation_allowed?
     group = project.group
 
-    return true unless group
+    return true unless group # always enable for projects in personal namespaces
 
     group.resource_access_token_creation_allowed
   end
