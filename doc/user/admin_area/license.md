@@ -102,12 +102,17 @@ license, otherwise you miss all the paid features if your license expires.
 
 ## What happens when your license expires
 
-In case your license expires, GitLab locks down some features like Git pushes,
-and issue creation, and displays a message to all administrators to inform of the expired license.
+In case your license expires, we wait 14 days before removing paid features. You will 
+notice the changes on the 15th day. Additionally, you have 30 days from the date of 
+expiration to renew your self-managed subscription, otherwise, on the 31st day, any renewal 
+will be treated as a new purchase and you will need to re-enter all account information.
 
-To get back all the previous functionality, you must upload a new license.
-To fall back to having only the Free features active, you must delete the
-expired license(s).
+When expirations occur, GitLab displays a message to all administrators to inform them of 
+the expired license.
+
+To get back all the previous functionality, you will need to renew your self-managed subscription 
+and upload a new license. To fall back to having only the Free features active, you must 
+delete the expired license(s).
 
 ### Remove a license
 
