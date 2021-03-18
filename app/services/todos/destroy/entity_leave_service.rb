@@ -66,7 +66,7 @@ module Todos
 
       def remove_group_todos
         Todo
-          .for_group(non_authorized_groups)
+          .for_group(non_authorized_non_public_groups)
           .for_user(user)
           .delete_all
       end
@@ -102,11 +102,11 @@ module Todos
         GroupsFinder.new(user, min_access_level: Gitlab::Access::REPORTER).execute.select(:id)
       end
 
-      def non_authorized_groups
+      def non_authorized_non_public_groups
         return [] unless entity.is_a?(Namespace)
 
         entity.self_and_descendants.select(:id)
-          .id_not_in(GroupsFinder.new(user).execute.select(:id))
+          .id_not_in(GroupsFinder.new(user, all_available: false).execute.select(:id))
       end
 
       def non_authorized_reporter_groups
