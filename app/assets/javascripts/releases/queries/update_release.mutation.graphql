@@ -1,0 +1,10 @@
+#import "./release_for_editing.fragment.graphql"
+
+mutation updateRelease($input: ReleaseUpdateInput!) {
+  releaseUpdate(input: $input) {
+    release {
+      ...ReleaseForEditing
+    }
+    errors
+  }
+}

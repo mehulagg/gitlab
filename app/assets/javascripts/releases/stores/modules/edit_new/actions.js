@@ -2,7 +2,8 @@ import api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import oneReleaseQuery from '~/releases/queries/one_release.query.graphql';
+import oneReleaseForEditingQuery from '~/releases/queries/one_release_for_editing.query.graphql';
+import updateReleaseMutation from '~/releases/queries/update_release.mutation.graphql';
 import {
   releaseToApiJson,
   apiJsonToRelease,
@@ -24,36 +25,25 @@ export const initializeRelease = ({ commit, dispatch, getters }) => {
   return Promise.resolve();
 };
 
-export const fetchRelease = ({ commit, state, rootState }) => {
+export const fetchRelease = ({ commit, state }) => {
   commit(types.REQUEST_RELEASE);
 
-  if (rootState.featureFlags?.graphqlIndividualReleasePage) {
-    return gqClient
-      .query({
-        query: oneReleaseQuery,
-        variables: {
-          fullPath: state.projectPath,
-          tagName: state.tagName,
-        },
-      })
-      .then((response) => {
-        const { data: release } = convertOneReleaseGraphQLResponse(response);
+  return gqClient
+    .query({
+      query: oneReleaseForEditingQuery,
+      variables: {
+        fullPath: state.projectPath,
+        tagName: state.tagName,
+      },
+    })
+    .then((response) => {
+      const { data: release } = convertOneReleaseGraphQLResponse(response);
 
-        commit(types.RECEIVE_RELEASE_SUCCESS, release);
-      })
-      .catch((error) => {
-        commit(types.RECEIVE_RELEASE_ERROR, error);
-        createFlash(s__('Release|Something went wrong while getting the release details'));
-      });
-  }
-
-  return api
-    .release(state.projectId, state.tagName)
-    .then(({ data }) => {
-      commit(types.RECEIVE_RELEASE_SUCCESS, apiJsonToRelease(data));
+      commit(types.RECEIVE_RELEASE_SUCCESS, release);
     })
     .catch((error) => {
       commit(types.RECEIVE_RELEASE_ERROR, error);
+      console.error('error:', error);
       createFlash(s__('Release|Something went wrong while getting the release details'));
     });
 };
@@ -94,9 +84,9 @@ export const removeAssetLink = ({ commit }, linkIdToRemove) => {
   commit(types.REMOVE_ASSET_LINK, linkIdToRemove);
 };
 
-export const receiveSaveReleaseSuccess = ({ commit }, release) => {
+export const receiveSaveReleaseSuccess = ({ commit }, urlToRedirectTo) => {
   commit(types.RECEIVE_SAVE_RELEASE_SUCCESS);
-  redirectTo(release._links.self);
+  redirectTo(urlToRedirectTo);
 };
 
 export const saveRelease = ({ commit, dispatch, getters }) => {
@@ -127,61 +117,68 @@ export const createRelease = ({ commit, dispatch, state, getters }) => {
     });
 };
 
-export const updateRelease = ({ commit, dispatch, state, getters }) => {
-  const apiJson = releaseToApiJson({
-    ...state.release,
-    assets: {
-      links: getters.releaseLinksToCreate,
-    },
-  });
+export const updateRelease = async ({ commit, dispatch, state }) => {
+  try {
+    /**
+     * Currently, we delete all existing links and then
+     * recreate new ones on each edit. This is because the
+     * backend doesn't support bulk updating of Release links,
+     * and updating individual links can lead to validation
+     * race conditions (in particular, the "URLs must be unique")
+     * constraint.
+     *
+     * This isn't ideal since this is no longer an atomic
+     * operation - parts of it can fail while others succeed,
+     * leaving the Release in an inconsistent state.
+     *
+     * This logic should be refactored to take place entirely
+     * in the backend. TODO: Add issue link here.
+     */
+    await gqClient.mutate({
+      mutation: updateReleaseMutation,
+      variables: {
+        input: {
+          projectPath: state.projectPath,
+          tagName: state.tagName,
+          description: state.release.description,
+        },
+      },
+    });
 
-  let updatedRelease = null;
+    dispatch('receiveSaveReleaseSuccess', state.release._links.self);
+  } catch (error) {
+    commit(types.RECEIVE_SAVE_RELEASE_ERROR, error);
+    console.error('error:', error);
+    createFlash(s__('Release|Something went wrong while saving the release details'));
+  }
 
-  return (
-    api
-      .updateRelease(state.projectId, state.tagName, apiJson)
+  // return api
+  //   .updateRelease(state.projectId, state.tagName, apiJson)
 
-      /**
-       * Currently, we delete all existing links and then
-       * recreate new ones on each edit. This is because the
-       * REST API doesn't support bulk updating of Release links,
-       * and updating individual links can lead to validation
-       * race conditions (in particular, the "URLs must be unique")
-       * constraint.
-       *
-       * This isn't ideal since this is no longer an atomic
-       * operation - parts of it can fail while others succeed,
-       * leaving the Release in an inconsistent state.
-       *
-       * This logic should be refactored to use GraphQL once
-       * https://gitlab.com/gitlab-org/gitlab/-/issues/208702
-       * is closed.
-       */
-      .then(({ data }) => {
-        // Save this response since we need it later in the Promise chain
-        updatedRelease = data;
+  //   .then(({ data }) => {
+  //     // Save this response since we need it later in the Promise chain
+  //     updatedRelease = data;
 
-        // Delete all links currently associated with this Release
-        return Promise.all(
-          getters.releaseLinksToDelete.map((l) =>
-            api.deleteReleaseLink(state.projectId, state.release.tagName, l.id),
-          ),
-        );
-      })
-      .then(() => {
-        // Create a new link for each link in the form
-        return Promise.all(
-          apiJson.assets.links.map((l) =>
-            api.createReleaseLink(state.projectId, state.release.tagName, l),
-          ),
-        );
-      })
-      .then(() => {
-        dispatch('receiveSaveReleaseSuccess', apiJsonToRelease(updatedRelease));
-      })
-      .catch((error) => {
-        commit(types.RECEIVE_SAVE_RELEASE_ERROR, error);
-        createFlash(s__('Release|Something went wrong while saving the release details'));
-      })
-  );
+  //     // Delete all links currently associated with this Release
+  //     return Promise.all(
+  //       getters.releaseLinksToDelete.map((l) =>
+  //         api.deleteReleaseLink(state.projectId, state.release.tagName, l.id),
+  //       ),
+  //     );
+  //   })
+  //   .then(() => {
+  //     // Create a new link for each link in the form
+  //     return Promise.all(
+  //       apiJson.assets.links.map((l) =>
+  //         api.createReleaseLink(state.projectId, state.release.tagName, l),
+  //       ),
+  //     );
+  //   })
+  //   .then(() => {
+  //     dispatch('receiveSaveReleaseSuccess', apiJsonToRelease(updatedRelease));
+  //   })
+  //   .catch((error) => {
+  //     commit(types.RECEIVE_SAVE_RELEASE_ERROR, error);
+  //     createFlash(s__('Release|Something went wrong while saving the release details'));
+  //   });
 };
