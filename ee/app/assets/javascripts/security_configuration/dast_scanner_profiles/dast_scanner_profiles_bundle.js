@@ -20,7 +20,7 @@ export default () => {
     props.profile = convertObjectPropsToCamelCase(JSON.parse(el.dataset.scannerProfile));
   }
 
-  const returnToPreviousPage = ({ id }) => {
+  const returnToPreviousPage = ({ id } = {}) => {
     returnToPreviousPageFactory({
       onDemandScansPath,
       profilesLibraryPath,
