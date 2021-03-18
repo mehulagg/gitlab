@@ -178,4 +178,21 @@ RSpec.describe LfsObject do
       expect(described_class.calculate_oid(path)).to eq expected
     end
   end
+
+  describe '.unreferenced_in_batches' do
+    let!(:unreferenced_lfs_object1) { create(:lfs_object, oid: '1') }
+    let!(:unreferenced_lfs_object2) { create(:lfs_object, oid: '2') }
+    let!(:unreferenced_lfs_object3) { create(:lfs_object, oid: '3') }
+
+    it 'returns lfs objects in batches' do
+      stub_const('LfsObject::BATCH_SIZE', 2)
+
+      batches = []
+      described_class.unreferenced_in_batches { |batch| batches << batch }
+
+      expect(batches.size).to eq(2)
+      expect(batches.first).to eq([unreferenced_lfs_object1, unreferenced_lfs_object2])
+      expect(batches.last).to eq([unreferenced_lfs_object3])
+    end
+  end
 end

@@ -9,7 +9,11 @@ class RemoveUnreferencedLfsObjectsWorker # rubocop:disable Scalability/Idempoten
 
   feature_category :git_lfs
 
+  # rubocop: disable Cop/DestroyAll
   def perform
-    LfsObject.destroy_unreferenced
+    LfsObject.unreferenced_in_batches do |lfs_objects_without_projects|
+      lfs_objects_without_projects.destroy_all
+    end
   end
+  # rubocop: enable Cop/DestroyAll
 end
