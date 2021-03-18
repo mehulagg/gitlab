@@ -13,7 +13,6 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
-import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import { initFormField } from 'ee/security_configuration/utils';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
@@ -47,14 +46,6 @@ export default {
       type: String,
       required: true,
     },
-    profilesLibraryPath: {
-      type: String,
-      required: true,
-    },
-    onDemandScansPath: {
-      type: String,
-      required: true,
-    },
     profile: {
       type: Object,
       required: false,
@@ -63,7 +54,7 @@ export default {
   },
   data() {
     const {
-      name = '',
+      profileName = '',
       spiderTimeout = '',
       targetTimeout = '',
       scanType = SCAN_TYPE.PASSIVE,
@@ -72,7 +63,7 @@ export default {
     } = this.profile;
 
     const form = {
-      profileName: initFormField({ value: name }),
+      profileName: initFormField({ value: profileName }),
       spiderTimeout: initFormField({ value: spiderTimeout }),
       targetTimeout: initFormField({ value: targetTimeout }),
       scanType: initFormField({ value: scanType }),
@@ -85,11 +76,6 @@ export default {
       initialFormValues: serializeFormObject(form),
       loading: false,
       showAlert: false,
-      returnToPreviousPage: returnToPreviousPageFactory({
-        onDemandScansPath: this.onDemandScansPath,
-        profilesLibraryPath: this.profilesLibraryPath,
-        urlParamKey: 'scanner_profile_id',
-      }),
     };
   },
   spiderTimeoutRange: {
@@ -210,7 +196,10 @@ export default {
               this.showErrors(errors);
               this.loading = false;
             } else {
-              this.returnToPreviousPage(id);
+              this.$emit('success', {
+                id,
+                // ...serializeFormObject(this.form), // TODO: #...
+              });
             }
           },
         )
@@ -228,7 +217,7 @@ export default {
       }
     },
     discard() {
-      this.returnToPreviousPage();
+      this.$emit('cancel');
     },
     showErrors(errors = []) {
       this.errors = errors;
