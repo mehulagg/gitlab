@@ -51,7 +51,7 @@ module Gitlab
             def validate_service_request
               Gitlab::HTTP.post(
                 validation_service_url, timeout: VALIDATION_REQUEST_TIMEOUT,
-                body: validation_service_payload(@pipeline, @command.yaml_processor_result.stages_attributes)
+                body: validation_service_payload(@pipeline, @command.yaml_processor_result.stages_attributes).to_json
               )
             end
 
@@ -63,12 +63,14 @@ module Gitlab
               {
                 project: {
                   id: pipeline.project.id,
-                  path: pipeline.project.full_path
+                  path: pipeline.project.full_path,
+                  created_at: pipeline.project.created_at&.iso8601
                 },
                 user: {
                   id: pipeline.user.id,
                   username: pipeline.user.username,
-                  email: pipeline.user.email
+                  email: pipeline.user.email,
+                  created_at: pipeline.user.created_at&.iso8601
                 },
                 pipeline: {
                   sha: pipeline.sha,
@@ -76,7 +78,7 @@ module Gitlab
                   type: pipeline.source
                 },
                 builds: builds_validation_payload(stages_attributes)
-              }.to_json
+              }
             end
 
             def builds_validation_payload(stages_attributes)
@@ -103,3 +105,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Ci::Pipeline::Chain::Validate::External.prepend_if_ee('EE::Gitlab::Ci::Pipeline::Chain::Validate::External')

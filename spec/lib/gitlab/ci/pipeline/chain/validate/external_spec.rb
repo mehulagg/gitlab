@@ -128,7 +128,9 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
   end
 
   describe '#validation_service_payload' do
-    subject(:validation_service_payload) { step.send(:validation_service_payload, pipeline, command.yaml_processor_result.stages_attributes) }
+    subject(:validation_service_payload) do
+      step.send(:validation_service_payload, pipeline, command.yaml_processor_result.stages_attributes)
+    end
 
     it 'respects the defined schema' do
       expect(validation_service_payload).to match_schema('/external_validation')
