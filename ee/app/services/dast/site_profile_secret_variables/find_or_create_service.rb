@@ -4,11 +4,11 @@ module Dast
   module SiteProfileSecretVariables
     class FindOrCreateService < BaseContainerService
       def execute
-        return error_response(message: 'Insufficient permissions') unless allowed?
+        return error_response('Insufficient permissions') unless allowed?
 
-        return error_response(message: 'DAST Site Profile param missing') unless site_profile
-        return error_response(message: 'Key param missing') unless key
-        return error_response(message: 'Value param missing') unless param
+        return error_response('Dast site profile param is missing') unless site_profile
+        return error_response('Key param is missing') unless key
+        return error_response('Raw value param is missing') unless raw_value
 
         secret_variable = find_or_create_secret_variable
 
@@ -25,15 +25,15 @@ module Dast
       end
 
       def site_profile
-        params[:site_profile]
+        params[:dast_site_profile]
       end
 
       def key
         params[:key]
       end
 
-      def value
-        params[:value]
+      def raw_value
+        params[:raw_value]
       end
 
       def success_response(secret_variable)
@@ -45,9 +45,13 @@ module Dast
       end
 
       def find_or_create_secret_variable
-        Dast::SiteProfileSecretVariable.safe_find_or_create_by(dast_site_profile: site_profile, key: key) do |variable|
-          variable.raw_value = value
+        secret_variable = Dast::SiteProfileSecretVariable.safe_find_or_create_by(dast_site_profile: site_profile, key: key) do |variable|
+          variable.raw_value = raw_value
         end
+
+        secret_variable.update(raw_value: raw_value)
+
+        secret_variable
       end
     end
   end

@@ -36,6 +36,21 @@ RSpec.describe Dast::SiteProfileSecretVariables::FindOrCreateService do
         stub_licensed_features(security_on_demand_scans: true)
       end
 
+      shared_examples 'it errors when a required param is missing' do |parameter|
+        context "when #{parameter} param is missing" do
+          let(:params) { default_params.except(parameter) }
+
+          it 'communicates failure', :aggregate_failures do
+            expect(subject.status).to eq(:error)
+            expect(subject.message).to eq("#{parameter.to_s.humanize} param is missing")
+          end
+        end
+      end
+
+      it_behaves_like 'it errors when a required param is missing', :dast_site_profile
+      it_behaves_like 'it errors when a required param is missing', :key
+      it_behaves_like 'it errors when a required param is missing', :raw_value
+
       it 'communicates success' do
         expect(subject.status).to eq(:success)
       end
@@ -44,12 +59,21 @@ RSpec.describe Dast::SiteProfileSecretVariables::FindOrCreateService do
         expect { subject }.to change { Dast::SiteProfileSecretVariable.count }.by(1)
       end
 
-      context 'when a param is missing' do
-        let(:params) { default_params.except(:key) }
+      context 'when a variable already exists' do
+        let_it_be(:dast_site_profile_secret_variable) do
+          create(:dast_site_profile_secret_variable, key: default_params[:key], dast_site_profile: dast_profile.dast_site_profile)
+        end
 
-        it 'communicates failure', :aggregate_failures do
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to eq('Key param missing')
+        let(:params) { default_params.merge(raw_value: 'hello, world') }
+
+        it 'does not create a dast_site_profile_secret_variable' do
+          expect { subject }.not_to change { Dast::SiteProfileSecretVariable.count }
+        end
+
+        it 'updates the existing dast_site_profile_secret_variable' do
+          subject
+
+          expect(dast_site_profile_secret_variable.reload.value).to eq(Base64.strict_encode64(params[:raw_value]))
         end
       end
     end
