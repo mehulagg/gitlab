@@ -51,6 +51,11 @@ export default {
       required: false,
       default: () => ({}),
     },
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     const {
@@ -234,7 +239,7 @@ export default {
 
 <template>
   <gl-form @submit.prevent="onSubmit">
-    <h2 class="gl-mb-6">{{ i18n.title }}</h2>
+    <h2 v-if="showHeader" class="gl-mb-6">{{ i18n.title }}</h2>
 
     <gl-alert
       v-if="isPolicyProfile"
