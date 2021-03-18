@@ -48,4 +48,4 @@ UltraAuth has removed their software which supports OmniAuth integration. We hav
 | **User Detail Updating** (not group management) | SCIM (but only Azure)                   | LDAP Sync                                                               |
 | **Authentication**                              | SAML at top-level group (1 provider)    | SAML via OmniAuth (1 provider)<br>LDAP (multiple providers)<br>Kerberos |
 | **Provider-to-GitLab Role Sync**                | SAML Group Sync                         | LDAP Group Sync                                                         |
-| **User Removal**                                | SAML (remove user from top-level group) | LDAP (Blocking User from Instance)                                      |
+| **User Removal**                                | SAML and SCIM (remove user from top-level group) | LDAP (Blocking User from Instance)                                      |
