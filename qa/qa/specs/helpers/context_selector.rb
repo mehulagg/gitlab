@@ -14,10 +14,16 @@ module QA
               if example.metadata.key?(:only)
                 skip('Test is not compatible with this environment, pipeline, or job') unless ContextSelector.context_matches?(example.metadata[:only])
               elsif example.metadata.key?(:exclude)
-                skip('Test is excluded in this environment, pipeline, or job') if ContextSelector.context_matches?(example.metadata[:exclude])
+                skip('Test is excluded in this environment, pipeline, or job') if ContextSelector.exclude?(example.metadata[:exclude])
               end
             end
           end
+        end
+
+        def exclude?(*options)
+          return false unless Runtime::Env.ci_job_name.present?
+
+          context_matches?(*options)
         end
 
         def context_matches?(*options)
@@ -37,7 +43,7 @@ module QA
             if option[:pipeline].present? && Runtime::Env.ci_project_name.present?
               return pipeline_matches?(option[:pipeline])
 
-            elsif option[:job].present? && Runtime::Env.ci_job_name.present?
+            elsif option[:job].present?
               return job_matches?(option[:job])
 
             elsif option[:subdomain].present?
@@ -63,7 +69,7 @@ module QA
           Array(job_patterns).any? do |job|
             pattern = job.is_a?(Regexp) ? job : Regexp.new(job)
             pattern = Regexp.new(pattern.source, pattern.options | Regexp::IGNORECASE)
-            pattern =~ ci_job_name
+            pattern =~ Runtime::Env.ci_job_name
           end
         end
 
