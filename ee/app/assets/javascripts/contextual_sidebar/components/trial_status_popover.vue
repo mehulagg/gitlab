@@ -19,6 +19,7 @@ export default {
     GlPopover,
     GlSprintf,
   },
+  mixins: [Tracking.mixin()],
   props: {
     containerId: {
       type: [String, null],
@@ -85,7 +86,7 @@ export default {
       this.updateDisabledState();
     },
     onShown() {
-      Tracking.event(undefined, 'popover_shown', {
+      this.track('popover_shown', {
         label: 'trial_status_popover',
         property: 'experiment:show_trial_status_in_sidebar',
       });
