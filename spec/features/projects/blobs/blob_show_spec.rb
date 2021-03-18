@@ -7,7 +7,9 @@ RSpec.describe 'File blob', :js do
 
   let(:project) { create(:project, :public, :repository) }
 
-  def visit_blob(path, anchor: nil, ref: 'master')
+  def visit_blob(path, anchor: nil, ref: nil)
+    ref ||= project.default_branch
+
     visit project_blob_path(project, File.join(ref, path), anchor: anchor)
 
     wait_for_requests
@@ -151,8 +153,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add RedCarpet and CommonMark Markdown ",
         file_path: 'files/commonmark/file.md',
         file_content: "1. one\n  - sublist\n"
@@ -182,11 +184,11 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add Markdown in LFS",
         file_path: 'files/lfs/file.md',
-        file_content: project.repository.blob_at('master', 'files/lfs/lfs_object.iso').data
+        file_content: project.repository.blob_at(project.default_branch, 'files/lfs/lfs_object.iso').data
       ).execute
     end
 
@@ -275,8 +277,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add PDF",
         file_path: 'files/test.pdf',
         file_content: project.repository.blob_at('add-pdf-file', 'files/pdf/test.pdf').data
@@ -311,8 +313,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add Jupiter Notebook",
         file_path: 'files/basic.ipynb',
         file_content: project.repository.blob_at('add-ipython-files', 'files/ipython/basic.ipynb').data
@@ -430,8 +432,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add empty file",
         file_path: 'files/empty.md',
         file_content: ''
@@ -498,8 +500,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add .gitlab-ci.yml",
         file_path: '.gitlab-ci.yml',
         file_content: File.read(Rails.root.join('spec/support/gitlab_stubs/gitlab_ci.yml'))
@@ -526,8 +528,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add .gitlab/route-map.yml",
         file_path: '.gitlab/route-map.yml',
         file_content: <<-MAP.strip_heredoc
@@ -558,8 +560,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add .gitlab/dashboards/custom-dashboard.yml",
         file_path: '.gitlab/dashboards/custom-dashboard.yml',
         file_content: file_content
@@ -662,8 +664,8 @@ RSpec.describe 'File blob', :js do
       Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add activerecord.gemspec",
         file_path: 'activerecord.gemspec',
         file_content: <<-SPEC.strip_heredoc
@@ -759,7 +761,7 @@ RSpec.describe 'File blob', :js do
       end
 
       it 'shows open raw and download buttons with external storage URL prepended and user token appended to their href' do
-        path = project_raw_path(project, 'master/README.md')
+        path = project_raw_path(project, "#{project.default_branch}/README.md")
         raw_uri = "https://cdn.gitlab.com#{path}?token=#{user.static_object_token}"
         download_uri = "https://cdn.gitlab.com#{path}?inline=false&token=#{user.static_object_token}"
 
@@ -776,7 +778,7 @@ RSpec.describe 'File blob', :js do
       end
 
       it 'shows open raw and download buttons with external storage URL prepended to their href' do
-        path = project_raw_path(project, 'master/README.md')
+        path = project_raw_path(project, "#{project.default_branch}/README.md")
         raw_uri = "https://cdn.gitlab.com#{path}"
         download_uri = "https://cdn.gitlab.com#{path}?inline=false"
 

@@ -108,7 +108,7 @@ RSpec.describe 'Merge request > User sees diff', :js do
 
         file_name = 'xss_file.rs'
 
-        create_file('master', file_name, file_content)
+        create_file(project.default_branch, file_name, file_content)
         merge_request = create(:merge_request, source_project: project)
         create_file(merge_request.source_branch, file_name, new_file_content)
 
@@ -130,7 +130,7 @@ RSpec.describe 'Merge request > User sees diff', :js do
           allow(Gitlab.config.lfs).to receive(:enabled).and_return(true)
           project.update_attribute(:lfs_enabled, true)
 
-          create_file('master', file_name, project.repository.blob_at('master', 'files/lfs/lfs_object.iso').data)
+          create_file(project.default_branch, file_name, project.repository.blob_at(project.default_branch, 'files/lfs/lfs_object.iso').data)
 
           visit diffs_project_merge_request_path(project, merge_request)
         end

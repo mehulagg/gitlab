@@ -69,7 +69,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       expect(subject.first).to be_utf8
     end
 
-    it { is_expected.to include("master") }
+    it { is_expected.to include(repository.root_ref) }
     it { is_expected.not_to include("branch-from-space") }
 
     it 'gets the branch names from GitalyClient' do
@@ -114,7 +114,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:cache_key) { File.join(repository.gl_repository, SeedRepo::LastCommit::ID) }
 
     let(:append_sha) { true }
-    let(:ref) { 'master' }
+    let(:ref) { repository.root_ref }
     let(:format) { nil }
     let(:path) { nil }
 
@@ -173,11 +173,11 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       where(:append_sha, :ref, :expected_prefix) do
         sha = SeedRepo::LastCommit::ID
 
-        true  | 'master' | "gitlab-git-test-master-#{sha}"
+        true  | 'main' | "gitlab-git-test-main-#{sha}"
         true  | sha      | "gitlab-git-test-#{sha}-#{sha}"
-        false | 'master' | "gitlab-git-test-master"
+        false | 'main' | "gitlab-git-test-main"
         false | sha      | "gitlab-git-test-#{sha}"
-        nil   | 'master' | "gitlab-git-test-master-#{sha}"
+        nil   | 'main' | "gitlab-git-test-main-#{sha}"
         nil   | sha      | "gitlab-git-test-#{sha}"
       end
 
@@ -251,7 +251,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
   end
 
   describe '#submodule_url_for' do
-    let(:ref) { 'master' }
+    let(:ref) { repository.root_ref }
 
     def submodule_url(path)
       repository.submodule_url_for(ref, path)
@@ -288,7 +288,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
   end
 
   describe '#submodule_urls_for' do
-    let(:ref) { 'master' }
+    let(:ref) { repository.root_ref }
 
     it 'returns url mappings for submodules' do
       urls = repository.submodule_urls_for(ref)
@@ -304,18 +304,18 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
   end
 
   describe '#commit_count' do
-    it { expect(repository.commit_count("master")).to eq(25) }
+    it { expect(repository.commit_count(repository.root_ref)).to eq(25) }
     it { expect(repository.commit_count("feature")).to eq(9) }
     it { expect(repository.commit_count("does-not-exist")).to eq(0) }
 
     it_behaves_like 'wrapping gRPC errors', Gitlab::GitalyClient::CommitService, :commit_count do
-      subject { repository.commit_count('master') }
+      subject { repository.commit_count(repository.root_ref) }
     end
   end
 
   describe '#diverging_commit_count' do
     it 'counts 0 for the same branch' do
-      expect(repository.diverging_commit_count('master', 'master', max_count: 1000)).to eq([0, 0])
+      expect(repository.diverging_commit_count(repository.root_ref, repository.root_ref, max_count: 1000)).to eq([0, 0])
     end
 
     context 'max count does not truncate results' do
@@ -399,7 +399,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     end
 
     it_behaves_like 'wrapping gRPC errors', Gitlab::GitalyClient::CommitService, :diverging_commit_count do
-      subject { repository.diverging_commit_count('master', 'master', max_count: 1000) }
+      subject { repository.diverging_commit_count(repository.root_ref, repository.root_ref, max_count: 1000) }
     end
   end
 
@@ -487,7 +487,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     end
 
     it 'displays that branch' do
-      expect(repository.branch_names_contains_sha(head_id)).to include('master', new_branch, utf8_branch)
+      expect(repository.branch_names_contains_sha(head_id)).to include(repository.root_ref, new_branch, utf8_branch)
     end
   end
 
@@ -505,7 +505,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     end
 
     it 'does not error when dereferenced_target is nil' do
-      blob_id = repository.blob_at('master', 'README.md').id
+      blob_id = repository.blob_at(repository.root_ref, 'README.md').id
       repository_rugged.tags.create("refs/tags/blob-tag", blob_id)
 
       expect { subject }.not_to raise_error
@@ -565,7 +565,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
   end
 
   describe '#search_files_by_regexp' do
-    let(:ref) { 'master' }
+    let(:ref) { repository.root_ref }
 
     subject(:result) { mutable_repository.search_files_by_regexp(filter, ref) }
 
@@ -604,7 +604,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       expect_any_instance_of(Gitlab::GitalyClient::RemoteService)
         .to receive(:find_remote_root_ref).and_call_original
 
-      expect(repository.find_remote_root_ref('origin')).to eq 'master'
+      expect(repository.find_remote_root_ref('origin')).to eq repository.root_ref
     end
 
     it 'returns UTF-8' do
@@ -653,11 +653,11 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
       after do
         # Erase our commits so other tests get the original repo
-        repository_rugged.references.update("refs/heads/master", SeedRepo::LastCommit::ID)
+        repository_rugged.references.update(repository.root_ref, SeedRepo::LastCommit::ID)
       end
 
       context "where 'follow' == true" do
-        let(:options) { { ref: "master", follow: true } }
+        let(:options) { { ref: repository.root_ref, follow: true } }
 
         context "and 'path' is a directory" do
           it "does not follow renames" do
@@ -845,7 +845,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       end
 
       context 'when multiple paths are provided' do
-        let(:options) { { ref: 'master', path: ['PROCESS.md', 'README.md'] } }
+        let(:options) { { ref: repository.root_ref, path: ['PROCESS.md', 'README.md'] } }
 
         def commit_files(commit)
           Gitlab::GitalyClient::StorageSettings.allow_disk_access do
@@ -890,7 +890,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
   end
 
   describe '#count_commits_between' do
-    subject { repository.count_commits_between('feature', 'master') }
+    subject { repository.count_commits_between('feature', repository.root_ref) }
 
     it { is_expected.to eq(17) }
   end
@@ -950,7 +950,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     describe 'extended commit counting' do
       context 'with after timestamp' do
         it 'returns the number of commits after timestamp' do
-          options = { ref: 'master', after: Time.iso8601('2013-03-03T20:15:01+00:00') }
+          options = { ref: repository.root_ref, after: Time.iso8601('2013-03-03T20:15:01+00:00') }
 
           expect(repository.count_commits(options)).to eq(25)
         end
@@ -966,7 +966,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
       context 'with max_count' do
         it 'returns the number of commits with path' do
-          options = { ref: 'master', max_count: 5 }
+          options = { ref: repository.root_ref, max_count: 5 }
 
           expect(repository.count_commits(options)).to eq(5)
         end
@@ -974,7 +974,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
       context 'with path' do
         it 'returns the number of commits with path' do
-          options = { ref: 'master', path: 'encoding' }
+          options = { ref: repository.root_ref, path: 'encoding' }
 
           expect(repository.count_commits(options)).to eq(2)
         end
@@ -1012,7 +1012,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
       context 'with max_count' do
         it 'returns the number of commits up to the passed limit' do
-          options = { ref: 'master', max_count: 10, after: Time.iso8601('2013-03-03T20:15:01+00:00') }
+          options = { ref: repository.root_ref, max_count: 10, after: Time.iso8601('2013-03-03T20:15:01+00:00') }
 
           expect(repository.count_commits(options)).to eq(10)
         end
@@ -1035,11 +1035,11 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
   end
 
   describe '#find_branch' do
-    it 'returns a Branch for master' do
-      branch = repository.find_branch('master')
+    it 'returns a Branch for the root ref' do
+      branch = repository.find_branch(repository.root_ref)
 
       expect(branch).to be_a_kind_of(Gitlab::Git::Branch)
-      expect(branch.name).to eq('master')
+      expect(branch.name).to eq(repository.root_ref)
     end
 
     it 'handles non-existent branch' do
@@ -1051,8 +1051,8 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
   describe '#ref_name_for_sha' do
     let(:ref_path) { 'refs/heads' }
-    let(:sha) { repository.find_branch('master').dereferenced_target.id }
-    let(:ref_name) { 'refs/heads/master' }
+    let(:sha) { repository.find_branch(repository.root_ref).dereferenced_target.id }
+    let(:ref_name) { "refs/heads/#{repository.root_ref}" }
 
     it 'returns the ref name for the given sha' do
       expect(repository.ref_name_for_sha(ref_path, sha)).to eq(ref_name)
@@ -1078,7 +1078,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       let(:repository) { mutable_repository }
 
       before do
-        create_remote_branch('joe', 'remote_branch', 'master')
+        create_remote_branch('joe', 'remote_branch', repository.root_ref)
         repository.create_branch('local_branch')
       end
 
@@ -1104,7 +1104,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       let(:repository) { mutable_repository }
 
       before do
-        create_remote_branch('joe', 'remote_branch', 'master')
+        create_remote_branch('joe', 'remote_branch', repository.root_ref)
         repository.create_branch('local_branch')
       end
 
@@ -1175,7 +1175,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
   describe '#diff_stats' do
     let(:left_commit_id) { 'feature' }
-    let(:right_commit_id) { 'master' }
+    let(:right_commit_id) { repository.root_ref }
 
     it 'returns a DiffStatsCollection' do
       collection = repository.diff_stats(left_commit_id, right_commit_id)
@@ -1202,7 +1202,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       expect_any_instance_of(Gitlab::GitalyClient::CommitService)
         .not_to receive(:diff_stats)
 
-      collection = repository.diff_stats(nil, 'master')
+      collection = repository.diff_stats(nil, repository.root_ref)
 
       expect(collection).to be_a(Gitlab::Git::DiffStatsCollection)
       expect(collection).to be_a(Enumerable)
@@ -1213,7 +1213,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       expect_any_instance_of(Gitlab::GitalyClient::CommitService)
         .not_to receive(:diff_stats)
 
-      collection = repository.diff_stats(Gitlab::Git::BLANK_SHA, 'master')
+      collection = repository.diff_stats(Gitlab::Git::BLANK_SHA, repository.root_ref)
 
       expect(collection).to be_a(Gitlab::Git::DiffStatsCollection)
       expect(collection).to be_a(Enumerable)
@@ -1282,24 +1282,24 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
   end
 
   describe "#ls_files" do
-    let(:master_file_paths) { repository.ls_files("master") }
+    let(:file_paths) { repository.ls_files(repository.root_ref) }
     let(:utf8_file_paths) { repository.ls_files("ls-files-utf8") }
     let(:not_existed_branch) { repository.ls_files("not_existed_branch") }
 
-    it "read every file paths of master branch" do
-      expect(master_file_paths.length).to equal(40)
+    it "read every file paths of default branch" do
+      expect(file_paths.length).to equal(40)
     end
 
-    it "reads full file paths of master branch" do
-      expect(master_file_paths).to include("files/html/500.html")
+    it "reads full file paths of default branch" do
+      expect(file_paths).to include("files/html/500.html")
     end
 
-    it "does not read submodule directory and empty directory of master branch" do
-      expect(master_file_paths).not_to include("six")
+    it "does not read submodule directory and empty directory of default branch" do
+      expect(file_paths).not_to include("six")
     end
 
     it "does not include 'nil'" do
-      expect(master_file_paths).not_to include(nil)
+      expect(file_paths).not_to include(nil)
     end
 
     it "returns empty array when not existed branch" do
@@ -1342,7 +1342,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
     context "with no .gitattrbutes" do
       before do
-        repository.copy_gitattributes("master")
+        repository.copy_gitattributes(repository.root_ref)
       end
 
       it "does not have an info/attributes" do
@@ -1384,7 +1384,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     context "with no .gitattrbutes in HEAD but with previous info/attributes" do
       before do
         repository.copy_gitattributes("gitattributes")
-        repository.copy_gitattributes("master")
+        repository.copy_gitattributes(repository.root_ref)
       end
 
       it "does not have an info/attributes" do
@@ -1423,7 +1423,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
   describe '#ref_exists?' do
     it 'returns true for an existing tag' do
-      expect(repository.ref_exists?('refs/heads/master')).to eq(true)
+      expect(repository.ref_exists?("refs/heads/#{repository.root_ref}")).to eq(true)
     end
 
     it 'returns false for a non-existing tag' do
@@ -1453,7 +1453,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
   describe '#branch_exists?' do
     it 'returns true for an existing branch' do
-      expect(repository.branch_exists?('master')).to eq(true)
+      expect(repository.branch_exists?(repository.root_ref)).to eq(true)
     end
 
     it 'returns false for a non-existing branch' do
@@ -1469,7 +1469,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:repository) { mutable_repository }
 
     before do
-      create_remote_branch('joe', 'remote_branch', 'master')
+      create_remote_branch('joe', 'remote_branch', repository.root_ref)
       repository.create_branch('local_branch')
     end
 
@@ -1541,7 +1541,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       let(:repository) { project.repository.raw_repository }
 
       before do
-        project.repository.delete_file(project.owner, 'LICENSE', message: 'remove license', branch_name: 'master')
+        project.repository.delete_file(project.owner, 'LICENSE', message: 'remove license', branch_name: repository.root_ref)
       end
 
       it { is_expected.to be_nil }
@@ -1578,7 +1578,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       end
 
       context 'when the commit exists locally' do
-        let(:source_branch) { 'master' }
+        let(:source_branch) { repository.root_ref }
         let(:expected_oid) { SeedRepo::LastCommit::ID }
 
         it 'writes the ref' do
@@ -1592,7 +1592,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     end
 
     context 'when the branch does not exist' do
-      let(:source_branch) { 'definitely-not-master' }
+      let(:source_branch) { 'non-existent' }
 
       it 'does not write the ref' do
         expect(repository.fetch_source_branch!(source_repository, source_branch, local_ref)).to eq(false)
@@ -1743,8 +1743,8 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:repository) { mutable_repository }
     let(:branch_head) { '6d394385cf567f80a8fd85055db1ab4c5295806f' }
     let(:left_sha) { 'cfe32cf61b73a0d5e9f13e774abde7ff789b1660' }
-    let(:right_branch) { 'test-master' }
-    let(:first_parent_ref) { 'refs/heads/test-master' }
+    let(:right_branch) { 'test-main' }
+    let(:first_parent_ref) { 'refs/heads/test-main' }
     let(:target_ref) { 'refs/merge-requests/999/merge' }
     let(:allow_conflicts) { false }
 
@@ -1894,7 +1894,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       expect(repository.ref_exists?("refs/also-delete/b")).to be(false)
       expect(repository.ref_exists?("refs/keep/c")).to be(true)
       expect(repository.ref_exists?("refs/also-keep/d")).to be(true)
-      expect(repository.ref_exists?("refs/heads/master")).to be(true)
+      expect(repository.ref_exists?("refs/heads/#{repository.root_ref}")).to be(true)
     end
   end
 
@@ -1994,10 +1994,10 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
         expect(instance.source_repo).to eq(:source_repository)
         expect(instance.target_repo).to eq(repository)
 
-        expect(instance).to receive(:compare).with('feature', 'master', straight: :straight)
+        expect(instance).to receive(:compare).with('feature', repository.root_ref, straight: :straight)
       end
 
-      repository.compare_source_branch('master', :source_repository, 'feature', straight: :straight)
+      repository.compare_source_branch(repository.root_ref, :source_repository, 'feature', straight: :straight)
     end
   end
 
@@ -2056,7 +2056,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:admin_dir) { File.join(repository_path, 'worktrees') }
 
     it 'cleans up the files' do
-      create_worktree = %W[git -C #{repository_path} worktree add --detach #{gitlab_worktree_path} master]
+      create_worktree = %W[git -C #{repository_path} worktree add --detach #{gitlab_worktree_path} #{repository.root_ref}]
       raise 'preparation failed' unless system(*create_worktree, err: '/dev/null')
 
       FileUtils.touch(gitlab_worktree_path, mtime: Time.now - 8.hours)
@@ -2131,7 +2131,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
         after do
           # Erase our commits so other tests get the original repo
-          repository_rugged.references.update('refs/heads/master', SeedRepo::LastCommit::ID)
+          repository_rugged.references.update(repository.root_ref, SeedRepo::LastCommit::ID)
         end
 
         it 'does not include the renamed file in the sparse checkout' do

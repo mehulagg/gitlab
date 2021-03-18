@@ -6,7 +6,7 @@ RSpec.describe SnippetRepository do
   let_it_be(:user) { create(:user) }
   let(:snippet) { create(:personal_snippet, :repository, author: user) }
   let(:snippet_repository) { snippet.snippet_repository }
-  let(:commit_opts) { { branch_name: 'master', message: 'whatever' } }
+  let(:commit_opts) { { branch_name: snippet.default_branch, message: 'whatever' } }
 
   describe 'associations' do
     it { is_expected.to belong_to(:shard) }
@@ -113,7 +113,7 @@ RSpec.describe SnippetRepository do
       before do
         allow(snippet).to receive(:repository).and_return(repo)
         allow(repo).to receive(:ls_files).and_return([])
-        allow(repo).to receive(:root_ref).and_return('master')
+        allow(repo).to receive(:root_ref).and_return(snippet.default_branch)
       end
 
       it 'infers the commit action based on the parameters if not present' do
@@ -309,10 +309,10 @@ RSpec.describe SnippetRepository do
   end
 
   def blob_at(snippet, path)
-    snippet.repository.blob_at('master', path)
+    snippet.repository.blob_at(snippet.default_branch, path)
   end
 
   def first_blob(snippet)
-    snippet.repository.blob_at('master', snippet.repository.ls_files(snippet.default_branch).first)
+    snippet.repository.blob_at(snippet.default_branch, snippet.repository.ls_files(snippet.default_branch).first)
   end
 end

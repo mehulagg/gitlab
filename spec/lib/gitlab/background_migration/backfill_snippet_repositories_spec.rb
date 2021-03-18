@@ -304,7 +304,7 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillSnippetRepositories, :migrat
   end
 
   def blob_at(snippet, path)
-    raw_repository(snippet).blob_at('master', path)
+    raw_repository(snippet).blob_at(project.default_branch, path)
   end
 
   def repository_exists?(snippet)

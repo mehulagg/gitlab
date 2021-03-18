@@ -139,7 +139,7 @@ RSpec.describe API::Snippets, factory_default: :keep do
     end
 
     it_behaves_like 'snippet access with different users' do
-      let(:path) { "/snippets/#{snippet.id}/files/master/%2Egitattributes/raw" }
+      let(:path) { "/snippets/#{snippet.id}/files/#{snippet.default_branch}/%2Egitattributes/raw" }
     end
   end
 
@@ -223,7 +223,7 @@ RSpec.describe API::Snippets, factory_default: :keep do
       it 'commit the files to the repository' do
         subject
 
-        blob = snippet.repository.blob_at('master', file_path)
+        blob = snippet.repository.blob_at(snippet.default_branch, file_path)
 
         expect(blob.data).to eq file_content
       end

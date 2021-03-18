@@ -138,7 +138,7 @@ RSpec.describe API::ProjectSnippets do
         aggregate_failures do
           expect(snippet.repository.exists?).to be_truthy
 
-          blob = snippet.repository.blob_at('master', file_path)
+          blob = snippet.repository.blob_at(snippet.default_branch, file_path)
 
           expect(blob.data).to eq file_content
         end
@@ -434,7 +434,7 @@ RSpec.describe API::ProjectSnippets do
     end
 
     it_behaves_like 'project snippet access levels' do
-      let(:path) { "/projects/#{snippet.project.id}/snippets/#{snippet.id}/files/master/%2Egitattributes/raw" }
+      let(:path) { "/projects/#{snippet.project.id}/snippets/#{snippet.id}/files/#{ref}/%2Egitattributes/raw" }
     end
   end
 end

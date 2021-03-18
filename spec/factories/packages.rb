@@ -149,7 +149,7 @@ FactoryBot.define do
       package_type { :composer }
 
       transient do
-        sha { project.repository.find_branch('master').target }
+        sha { project.commit.id }
         json { { name: name, version: version } }
       end
 

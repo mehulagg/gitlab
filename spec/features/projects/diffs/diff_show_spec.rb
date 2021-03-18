@@ -31,11 +31,11 @@ RSpec.describe 'Diff file viewer', :js do
       @commit_id = Files::CreateService.new(
         project,
         project.creator,
-        start_branch: 'master',
-        branch_name: 'master',
+        start_branch: project.default_branch,
+        branch_name: project.default_branch,
         commit_message: "Add Ruby file in LFS",
         file_path: 'files/lfs/ruby.rb',
-        file_content: project.repository.blob_at('master', 'files/lfs/lfs_object.iso').data
+        file_content: project.repository.blob_at(project.default_branch, 'files/lfs/lfs_object.iso').data
       ).execute[:result]
     end
 

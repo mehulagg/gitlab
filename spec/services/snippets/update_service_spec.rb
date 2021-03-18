@@ -112,7 +112,7 @@ RSpec.describe Snippets::UpdateService do
 
           expect(snippet.blobs.count).to eq 1
 
-          blob = snippet.repository.blob_at('master', options[:file_name])
+          blob = snippet.repository.blob_at(snippet.default_branch, options[:file_name])
 
           expect(blob.data).to eq options[:content]
         end
@@ -151,8 +151,8 @@ RSpec.describe Snippets::UpdateService do
 
           expect(subject).to be_success
 
-          new_blob = snippet.repository.blob_at('master', file_path)
-          created_file = snippet.repository.blob_at('master', created_file_path)
+          new_blob = snippet.repository.blob_at(snippet.default_branch, file_path)
+          created_file = snippet.repository.blob_at(snippet.default_branch, created_file_path)
 
           expect(new_blob.data).to eq db_content
           expect(created_file.data).to eq content
@@ -374,7 +374,7 @@ RSpec.describe Snippets::UpdateService do
       it 'commits the files to the repository' do
         subject
 
-        blob = snippet.repository.blob_at('master', file_path)
+        blob = snippet.repository.blob_at(snippet.default_branch, file_path)
 
         expect(blob.data).to eq content
       end
@@ -662,7 +662,7 @@ RSpec.describe Snippets::UpdateService do
         end
 
         def blob(path)
-          snippet.repository.blob_at('master', path)
+          snippet.repository.blob_at(snippet.default_branch, path)
         end
       end
     end
@@ -680,7 +680,7 @@ RSpec.describe Snippets::UpdateService do
           response = subject
           snippet = response.payload[:snippet]
 
-          blob = snippet.repository.blob_at('master', file_name)
+          blob = snippet.repository.blob_at(snippet.default_branch, file_name)
 
           expect(blob).not_to be_nil
           expect(response).to be_success
@@ -713,7 +713,7 @@ RSpec.describe Snippets::UpdateService do
         response = subject
         snippet = response.payload[:snippet]
 
-        blob = snippet.repository.blob_at('master', snippet.blobs.first.path)
+        blob = snippet.repository.blob_at(snippet.default_branch, snippet.blobs.first.path)
 
         expect(blob).not_to be_nil
         expect(response).to be_success

@@ -21,7 +21,7 @@ RSpec.describe 'User creates new blob', :js do
       ide_commit
 
       expect(page).to have_content('All changes are committed')
-      expect(project.repository.blob_at('master', 'dummy-file').data).to eql("Hello world\n")
+      expect(project.repository.blob_at(project.default_branch, 'dummy-file').data).to eq("Hello world\n")
     end
   end
 

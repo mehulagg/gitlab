@@ -17,7 +17,7 @@ RSpec.describe Repository do
   let(:message) { 'Test message' }
 
   let(:merge_commit) do
-    merge_request = create(:merge_request, source_branch: 'feature', target_branch: 'master', source_project: project)
+    merge_request = create(:merge_request, source_branch: 'feature', target_branch: project.default_branch, source_project: project)
 
     merge_commit_id = repository.merge(user,
                                        merge_request.diff_head_sha,
@@ -45,7 +45,7 @@ RSpec.describe Repository do
 
     subject { repository.branch_names_contains(sample_commit.id) }
 
-    it { is_expected.to include('master') }
+    it { is_expected.to include(project.default_branch) }
     it { is_expected.not_to include('feature') }
     it { is_expected.not_to include('fix') }
 
@@ -153,7 +153,7 @@ RSpec.describe Repository do
   describe '#ref_exists?' do
     context 'when ref exists' do
       it 'returns true' do
-        expect(repository.ref_exists?('refs/heads/master')).to be true
+        expect(repository.ref_exists?("refs/heads/#{project.default_branch}")).to be true
       end
     end
 
@@ -165,7 +165,7 @@ RSpec.describe Repository do
 
     context 'when ref format is incorrect' do
       it 'returns false' do
-        expect(repository.ref_exists?('refs/heads/invalid:master')).to be false
+        expect(repository.ref_exists?("refs/heads/invalid:#{project.default_branch}")).to be false
       end
     end
   end
@@ -255,13 +255,13 @@ RSpec.describe Repository do
 
     context 'with filename with pathspec characters' do
       let(:filename) { ':wq' }
-      let(:newrev) { project.repository.commit('master').sha }
+      let(:newrev) { project.repository.commit(project.default_branch).sha }
 
       before do
-        create_file_in_repo(project, 'master', 'master', filename, 'Test file')
+        create_file_in_repo(project, project.default_branch, project.default_branch, filename, 'Test file')
       end
 
-      subject { repository.last_commit_for_path('master', filename, literal_pathspec: true).id }
+      subject { repository.last_commit_for_path(project.default_branch, filename, literal_pathspec: true).id }
 
       it 'returns a commit SHA' do
         expect(subject).to eq(newrev)
@@ -294,13 +294,13 @@ RSpec.describe Repository do
 
     context 'with filename with pathspec characters' do
       let(:filename) { ':wq' }
-      let(:newrev) { project.repository.commit('master').sha }
+      let(:newrev) { project.repository.commit(project.default_branch).sha }
 
       before do
-        create_file_in_repo(project, 'master', 'master', filename, 'Test file')
+        create_file_in_repo(project, project.default_branch, project.default_branch, filename, 'Test file')
       end
 
-      subject { repository.last_commit_id_for_path('master', filename, literal_pathspec: true) }
+      subject { repository.last_commit_id_for_path(project.default_branch, filename, literal_pathspec: true) }
 
       it 'returns a commit SHA' do
         expect(subject).to eq(newrev)
@@ -317,12 +317,12 @@ RSpec.describe Repository do
 
     context 'when ref is passed' do
       it 'returns every commit from the specified ref' do
-        expect(repository.commits('master', limit: 60).size).to eq(37)
+        expect(repository.commits(project.default_branch, limit: 60).size).to eq(37)
       end
 
       context 'when all' do
         it 'returns every commit from the repository' do
-          expect(repository.commits('master', limit: 60, all: true).size).to eq(60)
+          expect(repository.commits(project.default_branch, limit: 60, all: true).size).to eq(60)
         end
       end
 
@@ -330,14 +330,14 @@ RSpec.describe Repository do
         it 'sets follow when it is a single path' do
           expect(Gitlab::Git::Commit).to receive(:where).with(a_hash_including(follow: true)).and_call_original.twice
 
-          repository.commits('master', limit: 1, path: 'README.md')
-          repository.commits('master', limit: 1, path: ['README.md'])
+          repository.commits(project.default_branch, limit: 1, path: 'README.md')
+          repository.commits(project.default_branch, limit: 1, path: ['README.md'])
         end
 
         it 'does not set follow when it is multiple paths' do
           expect(Gitlab::Git::Commit).to receive(:where).with(a_hash_including(follow: false)).and_call_original
 
-          repository.commits('master', limit: 1, path: ['README.md', 'CHANGELOG'])
+          repository.commits(project.default_branch, limit: 1, path: ['README.md', 'CHANGELOG'])
         end
       end
 
@@ -345,7 +345,7 @@ RSpec.describe Repository do
         it 'does not set follow' do
           expect(Gitlab::Git::Commit).to receive(:where).with(a_hash_including(follow: false)).and_call_original
 
-          repository.commits('master', limit: 1)
+          repository.commits(project.default_branch, limit: 1)
         end
       end
     end
@@ -375,7 +375,7 @@ RSpec.describe Repository do
       it 'passes order option to perform the query' do
         expect(Gitlab::Git::Commit).to receive(:where).with(a_hash_including(order: 'topo')).and_call_original
 
-        repository.commits('master', limit: 1, order: 'topo')
+        repository.commits(project.default_branch, limit: 1, order: 'topo')
       end
     end
   end
@@ -511,7 +511,7 @@ RSpec.describe Repository do
     end
 
     context 'default branch' do
-      subject { repository.merged_to_root_ref?('master') }
+      subject { repository.merged_to_root_ref?(project.default_branch) }
 
       it { is_expected.to be_falsey }
     end
@@ -658,7 +658,7 @@ RSpec.describe Repository do
 
   describe '#can_be_merged?' do
     context 'mergeable branches' do
-      subject { repository.can_be_merged?('0b4bc9a49b562e85de7cc9e834518ea6828729b9', 'master') }
+      subject { repository.can_be_merged?('0b4bc9a49b562e85de7cc9e834518ea6828729b9', project.default_branch) }
 
       it { is_expected.to be_truthy }
     end
@@ -685,7 +685,7 @@ RSpec.describe Repository do
   describe '#commit' do
     context 'when ref exists' do
       it 'returns commit object' do
-        expect(repository.commit('master'))
+        expect(repository.commit(project.default_branch))
           .to be_an_instance_of Commit
       end
     end
@@ -698,7 +698,7 @@ RSpec.describe Repository do
 
     context 'when ref is not specified' do
       it 'is using a root ref' do
-        expect(repository).to receive(:find_commit).with('master')
+        expect(repository).to receive(:find_commit).with(project.default_branch)
 
         repository.commit
       end
@@ -707,7 +707,7 @@ RSpec.describe Repository do
     context 'when ref is not valid' do
       context 'when preceding tree element exists' do
         it 'returns nil' do
-          expect(repository.commit('master:ref')).to be_nil
+          expect(repository.commit("#{project.default_branch}:ref")).to be_nil
         end
       end
 
@@ -723,10 +723,10 @@ RSpec.describe Repository do
     it "commits a change that creates a new directory" do
       expect do
         repository.create_dir(user, 'newdir',
-          message: 'Create newdir', branch_name: 'master')
-      end.to change { repository.count_commits(ref: 'master') }.by(1)
+          message: 'Create newdir', branch_name: project.default_branch)
+      end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
-      newdir = repository.tree('master', 'newdir')
+      newdir = repository.tree(project.default_branch, 'newdir')
       expect(newdir.path).to eq('newdir')
     end
 
@@ -737,8 +737,8 @@ RSpec.describe Repository do
         expect do
           repository.create_dir(user, 'newdir',
             message: 'Create newdir', branch_name: 'patch',
-            start_branch_name: 'master', start_project: forked_project)
-        end.to change { repository.count_commits(ref: 'master') }.by(0)
+            start_branch_name: project.default_branch, start_project: forked_project)
+        end.to change { repository.count_commits(ref: project.default_branch) }.by(0)
 
         expect(repository.branch_exists?('patch')).to be_truthy
         expect(forked_project.repository.branch_exists?('patch')).to be_falsy
@@ -753,9 +753,9 @@ RSpec.describe Repository do
         expect do
           repository.create_dir(user, 'newdir',
             message: 'Add newdir',
-            branch_name: 'master',
+            branch_name: project.default_branch,
             author_email: author_email, author_name: author_name)
-        end.to change { repository.count_commits(ref: 'master') }.by(1)
+        end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
         last_commit = repository.commit
 
@@ -770,10 +770,10 @@ RSpec.describe Repository do
       expect do
         repository.create_file(user, 'NEWCHANGELOG', 'Changelog!',
                                message: 'Create changelog',
-                               branch_name: 'master')
-      end.to change { repository.count_commits(ref: 'master') }.by(1)
+                               branch_name: project.default_branch)
+      end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
-      blob = repository.blob_at('master', 'NEWCHANGELOG')
+      blob = repository.blob_at(project.default_branch, 'NEWCHANGELOG')
 
       expect(blob.data).to eq('Changelog!')
     end
@@ -782,19 +782,19 @@ RSpec.describe Repository do
       expect do
         repository.create_file(user, 'new_dir/new_file.txt', 'File!',
                                message: 'Create new_file with new_dir',
-                               branch_name: 'master')
-      end.to change { repository.count_commits(ref: 'master') }.by(1)
+                               branch_name: project.default_branch)
+      end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
-      expect(repository.tree('master', 'new_dir').path).to eq('new_dir')
-      expect(repository.blob_at('master', 'new_dir/new_file.txt').data).to eq('File!')
+      expect(repository.tree(project.default_branch, 'new_dir').path).to eq('new_dir')
+      expect(repository.blob_at(project.default_branch, 'new_dir/new_file.txt').data).to eq('File!')
     end
 
     it 'respects the autocrlf setting' do
       repository.create_file(user, 'hello.txt', "Hello,\r\nWorld",
                              message: 'Add hello world',
-                             branch_name: 'master')
+                             branch_name: project.default_branch)
 
-      blob = repository.blob_at('master', 'hello.txt')
+      blob = repository.blob_at(project.default_branch, 'hello.txt')
 
       expect(blob.data).to eq("Hello,\nWorld")
     end
@@ -804,10 +804,10 @@ RSpec.describe Repository do
         expect do
           repository.create_file(user, 'NEWREADME', 'README!',
                                  message: 'Add README',
-                                 branch_name: 'master',
+                                 branch_name: project.default_branch,
                                  author_email: author_email,
                                  author_name: author_name)
-        end.to change { repository.count_commits(ref: 'master') }.by(1)
+        end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
         last_commit = repository.commit
 
@@ -822,10 +822,10 @@ RSpec.describe Repository do
       expect do
         repository.update_file(user, 'CHANGELOG', 'Changelog!',
                                message: 'Update changelog',
-                               branch_name: 'master')
-      end.to change { repository.count_commits(ref: 'master') }.by(1)
+                               branch_name: project.default_branch)
+      end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
-      blob = repository.blob_at('master', 'CHANGELOG')
+      blob = repository.blob_at(project.default_branch, 'CHANGELOG')
 
       expect(blob.data).to eq('Changelog!')
     end
@@ -833,12 +833,12 @@ RSpec.describe Repository do
     it 'updates filename successfully' do
       expect do
         repository.update_file(user, 'NEWLICENSE', 'Copyright!',
-                                     branch_name: 'master',
+                                     branch_name: project.default_branch,
                                      previous_path: 'LICENSE',
                                      message: 'Changes filename')
-      end.to change { repository.count_commits(ref: 'master') }.by(1)
+      end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
-      files = repository.ls_files('master')
+      files = repository.ls_files(project.default_branch)
 
       expect(files).not_to include('LICENSE')
       expect(files).to include('NEWLICENSE')
@@ -848,12 +848,12 @@ RSpec.describe Repository do
       it "uses the given email/name to set the commit's author" do
         expect do
           repository.update_file(user, 'README', 'Updated README!',
-                                 branch_name: 'master',
+                                 branch_name: project.default_branch,
                                  previous_path: 'README',
                                  message: 'Update README',
                                  author_email: author_email,
                                  author_name: author_name)
-        end.to change { repository.count_commits(ref: 'master') }.by(1)
+        end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
         last_commit = repository.commit
 
@@ -867,19 +867,19 @@ RSpec.describe Repository do
     it 'removes file successfully' do
       expect do
         repository.delete_file(user, 'README',
-          message: 'Remove README', branch_name: 'master')
-      end.to change { repository.count_commits(ref: 'master') }.by(1)
+          message: 'Remove README', branch_name: project.default_branch)
+      end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
-      expect(repository.blob_at('master', 'README')).to be_nil
+      expect(repository.blob_at(project.default_branch, 'README')).to be_nil
     end
 
     context "when an author is specified" do
       it "uses the given email/name to set the commit's author" do
         expect do
           repository.delete_file(user, 'README',
-            message: 'Remove README', branch_name: 'master',
+            message: 'Remove README', branch_name: project.default_branch,
             author_email: author_email, author_name: author_name)
-        end.to change { repository.count_commits(ref: 'master') }.by(1)
+        end.to change { repository.count_commits(ref: project.default_branch) }.by(1)
 
         last_commit = repository.commit
 
@@ -890,33 +890,33 @@ RSpec.describe Repository do
   end
 
   describe "search_files_by_content" do
-    let(:results) { repository.search_files_by_content('feature', 'master') }
+    let(:results) { repository.search_files_by_content('feature', project.default_branch) }
 
     subject { results }
 
     it { is_expected.to be_an Array }
 
     it 'regex-escapes the query string' do
-      results = repository.search_files_by_content("test\\", 'master')
+      results = repository.search_files_by_content("test\\", project.default_branch)
 
       expect(results.first).not_to start_with('fatal:')
     end
 
     it 'properly handles an unmatched parenthesis' do
-      results = repository.search_files_by_content("test(", 'master')
+      results = repository.search_files_by_content("test(", project.default_branch)
 
       expect(results.first).not_to start_with('fatal:')
     end
 
     it 'properly handles when query is not present' do
-      results = repository.search_files_by_content('', 'master')
+      results = repository.search_files_by_content('', project.default_branch)
 
       expect(results).to match_array([])
     end
 
     it 'properly handles query when repo is empty' do
       repository = create(:project, :empty_repo).repository
-      results = repository.search_files_by_content('test', 'master')
+      results = repository.search_files_by_content('test', project.default_branch)
 
       expect(results).to match_array([])
     end
@@ -924,7 +924,7 @@ RSpec.describe Repository do
     describe 'when storage is broken', :broken_storage do
       it 'raises a storage error' do
         expect_to_raise_storage_error do
-          broken_repository.search_files_by_content('feature', 'master')
+          broken_repository.search_files_by_content('feature', project.default_branch)
         end
       end
     end
@@ -933,31 +933,31 @@ RSpec.describe Repository do
       subject { results.first }
 
       it { is_expected.to be_an String }
-      it { expect(subject.lines[2]).to eq("master:CHANGELOG\x00190\x00  - Feature: Replace teams with group membership\n") }
+      it { expect(subject.lines[2]).to eq("#{project.default_branch}:CHANGELOG\x00190\x00  - Feature: Replace teams with group membership\n") }
     end
   end
 
   describe "search_files_by_name" do
-    let(:results) { repository.search_files_by_name('files', 'master') }
+    let(:results) { repository.search_files_by_name('files', project.default_branch) }
 
     it 'returns result' do
       expect(results.first).to eq('files/html/500.html')
     end
 
     it 'ignores leading slashes' do
-      results = repository.search_files_by_name('/files', 'master')
+      results = repository.search_files_by_name('/files', project.default_branch)
 
       expect(results.first).to eq('files/html/500.html')
     end
 
     it 'properly handles when query is only slashes' do
-      results = repository.search_files_by_name('//', 'master')
+      results = repository.search_files_by_name('//', project.default_branch)
 
       expect(results).to match_array([])
     end
 
     it 'properly handles when query is not present' do
-      results = repository.search_files_by_name('', 'master')
+      results = repository.search_files_by_name('', project.default_branch)
 
       expect(results).to match_array([])
     end
@@ -965,20 +965,20 @@ RSpec.describe Repository do
     it 'properly handles query when repo is empty' do
       repository = create(:project, :empty_repo).repository
 
-      results = repository.search_files_by_name('test', 'master')
+      results = repository.search_files_by_name('test', project.default_branch)
 
       expect(results).to match_array([])
     end
 
     describe 'when storage is broken', :broken_storage do
       it 'raises a storage error' do
-        expect_to_raise_storage_error { broken_repository.search_files_by_name('files', 'master') }
+        expect_to_raise_storage_error { broken_repository.search_files_by_name('files', project.default_branch) }
       end
     end
   end
 
   describe '#search_files_by_wildcard_path' do
-    let(:ref) { 'master' }
+    let(:ref) { project.default_branch }
 
     subject(:result) { repository.search_files_by_wildcard_path(path, ref) }
 
@@ -1030,14 +1030,14 @@ RSpec.describe Repository do
 
   describe '#async_remove_remote' do
     before do
-      masterrev = repository.find_branch('master').dereferenced_target
-      create_remote_branch('joe', 'remote_branch', masterrev)
+      rev = repository.find_branch(project.default_branch).dereferenced_target
+      create_remote_branch('joe', 'remote_branch', rev)
     end
 
     context 'when worker is scheduled successfully' do
       before do
-        masterrev = repository.find_branch('master').dereferenced_target
-        create_remote_branch('remote_name', 'remote_branch', masterrev)
+        rev = repository.find_branch(project.default_branch).dereferenced_target
+        create_remote_branch('remote_name', 'remote_branch', rev)
 
         allow(RepositoryRemoveRemoteWorker).to receive(:perform_async).and_return('1234')
       end
@@ -1130,13 +1130,13 @@ RSpec.describe Repository do
   describe "#license_blob", :use_clean_rails_memory_store_caching do
     before do
       repository.delete_file(
-        user, 'LICENSE', message: 'Remove LICENSE', branch_name: 'master')
+        user, 'LICENSE', message: 'Remove LICENSE', branch_name: project.default_branch)
     end
 
     it 'handles when HEAD points to non-existent ref' do
       repository.create_file(
         user, 'LICENSE', 'Copyright!',
-        message: 'Add LICENSE', branch_name: 'master')
+        message: 'Add LICENSE', branch_name: project.default_branch)
 
       allow(repository).to receive(:root_ref).and_raise(Gitlab::Git::Repository::NoRepository)
 
@@ -1155,7 +1155,7 @@ RSpec.describe Repository do
 
     it 'detects license file with no recognizable open-source license content' do
       repository.create_file(user, 'LICENSE', 'Copyright!',
-        message: 'Add LICENSE', branch_name: 'master')
+        message: 'Add LICENSE', branch_name: project.default_branch)
 
       expect(repository.license_blob.path).to eq('LICENSE')
     end
@@ -1164,7 +1164,7 @@ RSpec.describe Repository do
       it "detects '#{filename}'" do
         repository.create_file(user, filename,
           Licensee::License.new('mit').content,
-          message: "Add #{filename}", branch_name: 'master')
+          message: "Add #{filename}", branch_name: project.default_branch)
 
         expect(repository.license_blob.name).to eq(filename)
       end
@@ -1174,7 +1174,7 @@ RSpec.describe Repository do
   describe '#license_key', :use_clean_rails_memory_store_caching do
     before do
       repository.delete_file(user, 'LICENSE',
-        message: 'Remove LICENSE', branch_name: 'master')
+        message: 'Remove LICENSE', branch_name: project.default_branch)
     end
 
     it 'returns nil when no license is detected' do
@@ -1189,7 +1189,7 @@ RSpec.describe Repository do
 
     it 'returns other when the content is not recognizable' do
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
-        message: 'Add LICENSE', branch_name: 'master')
+        message: 'Add LICENSE', branch_name: project.default_branch)
 
       expect(repository.license_key).to eq('other')
     end
@@ -1200,8 +1200,8 @@ RSpec.describe Repository do
       expect(repository.license_key).to be_nil
     end
 
-    it 'returns nil when master does not exist' do
-      repository.rm_branch(user, 'master')
+    it 'returns nil when default branch does not exist' do
+      repository.rm_branch(user, project.default_branch)
 
       expect(repository.license_key).to be_nil
     end
@@ -1209,7 +1209,7 @@ RSpec.describe Repository do
     it 'returns the license key' do
       repository.create_file(user, 'LICENSE',
         Licensee::License.new('mit').content,
-        message: 'Add LICENSE', branch_name: 'master')
+        message: 'Add LICENSE', branch_name: project.default_branch)
 
       expect(repository.license_key).to eq('mit')
     end
@@ -1218,7 +1218,7 @@ RSpec.describe Repository do
   describe '#license' do
     before do
       repository.delete_file(user, 'LICENSE',
-        message: 'Remove LICENSE', branch_name: 'master')
+        message: 'Remove LICENSE', branch_name: project.default_branch)
     end
 
     it 'returns nil when no license is detected' do
@@ -1234,7 +1234,7 @@ RSpec.describe Repository do
     it 'returns other when the content is not recognizable' do
       license = Licensee::License.new('other')
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
-        message: 'Add LICENSE', branch_name: 'master')
+        message: 'Add LICENSE', branch_name: project.default_branch)
 
       expect(repository.license).to eq(license)
     end
@@ -1243,7 +1243,7 @@ RSpec.describe Repository do
       license = Licensee::License.new('mit')
       repository.create_file(user, 'LICENSE',
         license.content,
-        message: 'Add LICENSE', branch_name: 'master')
+        message: 'Add LICENSE', branch_name: project.default_branch)
 
       expect(repository.license).to eq(license)
     end
@@ -1275,8 +1275,8 @@ RSpec.describe Repository do
 
     context 'when ref is ambiguous' do
       before do
-        repository.add_tag(project.creator, ref, 'master')
-        repository.add_branch(project.creator, ref, 'master')
+        repository.add_tag(project.creator, ref, project.default_branch)
+        repository.add_branch(project.creator, ref, project.default_branch)
       end
 
       it 'is true' do
@@ -1286,7 +1286,7 @@ RSpec.describe Repository do
 
     context 'when ref is not ambiguous' do
       before do
-        repository.add_tag(project.creator, ref, 'master')
+        repository.add_tag(project.creator, ref, project.default_branch)
       end
 
       it 'is false' do
@@ -1328,7 +1328,7 @@ RSpec.describe Repository do
     subject { repository.expand_ref(ref) }
 
     context 'when ref is not tag or branch name' do
-      let(:ref) { 'refs/heads/master' }
+      let(:ref) { "refs/heads/#{project.default_branch}" }
 
       it 'returns nil' do
         is_expected.to be_nil
@@ -1337,7 +1337,7 @@ RSpec.describe Repository do
 
     context 'when ref is tag name' do
       before do
-        repository.add_tag(project.creator, ref, 'master')
+        repository.add_tag(project.creator, ref, project.default_branch)
       end
 
       it 'returns the tag ref' do
@@ -1347,7 +1347,7 @@ RSpec.describe Repository do
 
     context 'when ref is branch name' do
       before do
-        repository.add_branch(project.creator, ref, 'master')
+        repository.add_branch(project.creator, ref, project.default_branch)
       end
 
       it 'returns the branch ref' do
@@ -1358,7 +1358,7 @@ RSpec.describe Repository do
 
   describe '#add_branch' do
     let(:branch_name) { 'new_feature' }
-    let(:target) { 'master' }
+    let(:target) { project.default_branch }
 
     subject { repository.add_branch(user, branch_name, target) }
 
@@ -1553,13 +1553,13 @@ RSpec.describe Repository do
     let(:empty_repository) { create(:project_empty_repo).repository }
 
     it 'returns empty array for an empty repository' do
-      expect(empty_repository.blobs_at(%w[master foobar])).to eq([])
+      expect(empty_repository.blobs_at([project.default_branch, 'foobar'])).to eq([])
     end
 
     it 'returns blob array for a non-empty repository' do
-      repository.create_file(User.last, 'foobar', 'CONTENT', message: 'message', branch_name: 'master')
+      repository.create_file(User.last, 'foobar', 'CONTENT', message: 'message', branch_name: project.default_branch)
 
-      blobs = repository.blobs_at([%w[master foobar]])
+      blobs = repository.blobs_at([[project.default_branch, 'foobar']])
 
       expect(blobs.first.name).to eq('foobar')
       expect(blobs.size).to eq(1)
@@ -1574,7 +1574,7 @@ RSpec.describe Repository do
     it 'caches the output' do
       expect(repository.raw_repository).to receive(:root_ref)
         .once
-        .and_return('master')
+        .and_return(project.default_branch)
 
       repository.root_ref
       repository.root_ref
@@ -1665,7 +1665,7 @@ RSpec.describe Repository do
   end
 
   describe '#merge' do
-    let(:merge_request) { create(:merge_request, source_branch: 'feature', target_branch: 'master', source_project: project) }
+    let(:merge_request) { create(:merge_request, source_branch: 'feature', target_branch: project.default_branch, source_project: project) }
     let(:message) { 'Test \r\n\r\n message' }
 
     it 'merges the code and returns the commit id' do
@@ -1693,7 +1693,7 @@ RSpec.describe Repository do
   describe '#merge_to_ref' do
     let(:merge_request) do
       create(:merge_request, source_branch: 'feature',
-                             target_branch: 'master',
+                             target_branch: project.default_branch,
                              source_project: project)
     end
 
@@ -1743,7 +1743,7 @@ RSpec.describe Repository do
   end
 
   describe '#rebase' do
-    let(:merge_request) { create(:merge_request, source_branch: 'feature', target_branch: 'master', source_project: project) }
+    let(:merge_request) { create(:merge_request, source_branch: 'feature', target_branch: project.default_branch, source_project: project) }
 
     shared_examples_for 'a method that can rebase successfully' do
       it 'returns the rebase commit sha' do
@@ -1823,31 +1823,31 @@ RSpec.describe Repository do
 
     context 'when there is a conflict' do
       it 'raises an error' do
-        expect { repository.revert(user, new_image_commit, 'master', message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
+        expect { repository.revert(user, new_image_commit, project.default_branch, message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
       end
     end
 
     context 'when commit was already reverted' do
       it 'raises an error' do
-        repository.revert(user, update_image_commit, 'master', message)
+        repository.revert(user, update_image_commit, project.default_branch, message)
 
-        expect { repository.revert(user, update_image_commit, 'master', message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
+        expect { repository.revert(user, update_image_commit, project.default_branch, message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
       end
     end
 
     context 'when commit can be reverted' do
       it 'reverts the changes' do
-        expect(repository.revert(user, update_image_commit, 'master', message)).to be_truthy
+        expect(repository.revert(user, update_image_commit, project.default_branch, message)).to be_truthy
       end
     end
 
     context 'reverting a merge commit' do
       it 'reverts the changes' do
         merge_commit
-        expect(repository.blob_at_branch('master', 'files/ruby/feature.rb')).to be_present
+        expect(repository.blob_at_branch(project.default_branch, 'files/ruby/feature.rb')).to be_present
 
-        repository.revert(user, merge_commit, 'master', message)
-        expect(repository.blob_at_branch('master', 'files/ruby/feature.rb')).not_to be_present
+        repository.revert(user, merge_commit, project.default_branch, message)
+        expect(repository.blob_at_branch(project.default_branch, 'files/ruby/feature.rb')).not_to be_present
       end
     end
   end
@@ -1860,21 +1860,21 @@ RSpec.describe Repository do
 
     context 'when there is a conflict' do
       it 'raises an error' do
-        expect { repository.cherry_pick(user, conflict_commit, 'master', message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
+        expect { repository.cherry_pick(user, conflict_commit, project.default_branch, message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
       end
     end
 
     context 'when commit was already cherry-picked' do
       it 'raises an error' do
-        repository.cherry_pick(user, pickable_commit, 'master', message)
+        repository.cherry_pick(user, pickable_commit, project.default_branch, message)
 
-        expect { repository.cherry_pick(user, pickable_commit, 'master', message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
+        expect { repository.cherry_pick(user, pickable_commit, project.default_branch, message) }.to raise_error(Gitlab::Git::Repository::CreateTreeError)
       end
     end
 
     context 'when commit can be cherry-picked' do
       it 'cherry-picks the changes' do
-        expect(repository.cherry_pick(user, pickable_commit, 'master', message)).to be_truthy
+        expect(repository.cherry_pick(user, pickable_commit, project.default_branch, message)).to be_truthy
       end
     end
 
@@ -2038,10 +2038,10 @@ RSpec.describe Repository do
         .and_call_original
 
       expect(repository).to receive(:expire_branch_cache)
-        .with('master')
+        .with(project.default_branch)
         .and_call_original
 
-      repository.after_push_commit('master')
+      repository.after_push_commit(project.default_branch)
     end
   end
 
@@ -2125,7 +2125,7 @@ RSpec.describe Repository do
 
   describe "#copy_gitattributes" do
     it 'returns true with a valid ref' do
-      expect(repository.copy_gitattributes('master')).to be_truthy
+      expect(repository.copy_gitattributes(project.default_branch)).to be_truthy
     end
 
     it 'returns false with an invalid ref' do
@@ -2187,16 +2187,16 @@ RSpec.describe Repository do
 
     context 'with a valid target' do
       it 'creates the tag' do
-        repository.add_tag(user, '8.5', 'master', 'foo')
+        repository.add_tag(user, '8.5', project.default_branch, 'foo')
 
         tag = repository.find_tag('8.5')
         expect(tag).to be_present
         expect(tag.message).to eq('foo')
-        expect(tag.dereferenced_target.id).to eq(repository.commit('master').id)
+        expect(tag.dereferenced_target.id).to eq(repository.commit(project.default_branch).id)
       end
 
       it 'returns a Gitlab::Git::Tag object' do
-        tag = repository.add_tag(user, '8.5', 'master', 'foo')
+        tag = repository.add_tag(user, '8.5', project.default_branch, 'foo')
 
         expect(tag).to be_a(Gitlab::Git::Tag)
       end
@@ -2513,9 +2513,9 @@ RSpec.describe Repository do
 
   describe '#local_branches' do
     it 'returns the local branches' do
-      masterrev = repository.find_branch('master').dereferenced_target
-      create_remote_branch('joe', 'remote_branch', masterrev)
-      repository.add_branch(user, 'local_branch', masterrev.id)
+      rev = repository.find_branch(project.default_branch).dereferenced_target
+      create_remote_branch('joe', 'remote_branch', rev)
+      repository.add_branch(user, 'local_branch', rev.id)
 
       expect(repository.local_branches.any? { |branch| branch.name == 'remote_branch' }).to eq(false)
       expect(repository.local_branches.any? { |branch| branch.name == 'local_branch' }).to eq(true)
@@ -2543,14 +2543,14 @@ RSpec.describe Repository do
 
     context 'with a non-existing repository' do
       it 'returns 0' do
-        expect(project.repository.commit_count_for_ref('master')).to eq(0)
+        expect(project.repository.commit_count_for_ref(project.default_branch)).to eq(0)
       end
     end
 
     context 'with empty repository' do
       it 'returns 0' do
         project.create_repository
-        expect(project.repository.commit_count_for_ref('master')).to eq(0)
+        expect(project.repository.commit_count_for_ref(project.default_branch)).to eq(0)
       end
     end
 
@@ -2577,7 +2577,7 @@ RSpec.describe Repository do
 
   describe '#gitlab_ci_yml_for' do
     before do
-      repository.create_file(User.last, '.gitlab-ci.yml', 'CONTENT', message: 'Add .gitlab-ci.yml', branch_name: 'master')
+      repository.create_file(User.last, '.gitlab-ci.yml', 'CONTENT', message: 'Add .gitlab-ci.yml', branch_name: project.default_branch)
     end
 
     context 'when there is a .gitlab-ci.yml at the commit' do
@@ -2595,7 +2595,7 @@ RSpec.describe Repository do
 
   describe '#route_map_for' do
     before do
-      repository.create_file(User.last, '.gitlab/route-map.yml', 'CONTENT', message: 'Add .gitlab/route-map.yml', branch_name: 'master')
+      repository.create_file(User.last, '.gitlab/route-map.yml', 'CONTENT', message: 'Add .gitlab/route-map.yml', branch_name: project.default_branch)
     end
 
     context 'when there is a .gitlab/route-map.yml at the commit' do
@@ -2679,7 +2679,7 @@ RSpec.describe Repository do
   end
 
   describe '#archive_metadata' do
-    let(:ref) { 'master' }
+    let(:ref) { project.default_branch }
     let(:storage_path) { '/tmp' }
 
     let(:prefix) { [project.path, ref].join('-') }
@@ -2860,7 +2860,7 @@ RSpec.describe Repository do
     it 'only makes one gitaly call' do
       expect(Gitlab::GitalyClient).to receive(:call).once.and_call_original
 
-      repository.merge_base('master', 'fix')
+      repository.merge_base(project.default_branch, 'fix')
     end
   end
 

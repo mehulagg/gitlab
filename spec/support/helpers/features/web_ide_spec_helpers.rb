@@ -138,7 +138,7 @@ module WebIdeSpecHelpers
     dropdown.find('button', text: text).click
   end
 
-  def commit_to_current_branch(option: 'Commit to master branch', message: '')
+  def commit_to_current_branch(option: 'Commit to main branch', message: '')
     within '.multi-file-commit-form' do
       fill_in('commit-message', with: message) if message
 

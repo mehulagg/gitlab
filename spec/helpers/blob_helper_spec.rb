@@ -20,7 +20,7 @@ RSpec.describe BlobHelper do
     let(:namespace) { create(:namespace, name: 'gitlab') }
     let(:project) { create(:project, :repository, namespace: namespace) }
 
-    subject(:link) { helper.edit_blob_button(project, 'master', 'README.md') }
+    subject(:link) { helper.edit_blob_button(project, project.default_branch, 'README.md') }
 
     before do
       allow(helper).to receive(:current_user).and_return(nil)
@@ -32,27 +32,27 @@ RSpec.describe BlobHelper do
       expect(helper).not_to receive(:blob_text_viewable?)
 
       # RADME.md is not a valid file.
-      button = helper.edit_blob_button(project, 'refs/heads/master', 'RADME.md')
+      button = helper.edit_blob_button(project, project.default_branch, 'RADME.md')
 
       expect(button).to eq(nil)
     end
 
     it 'uses the passed blob instead retrieve from repository' do
-      blob = project.repository.blob_at('refs/heads/master', 'README.md')
+      blob = project.repository.blob_at(project.default_branch, 'README.md')
 
       expect(project.repository).not_to receive(:blob_at)
 
-      helper.edit_blob_button(project, 'refs/heads/master', 'README.md', blob: blob)
+      helper.edit_blob_button(project, project.default_branch, 'README.md', blob: blob)
     end
 
     it 'returns a link with the proper route' do
-      expect(Capybara.string(link).find_link('Edit')[:href]).to eq("/#{project.full_path}/-/edit/master/README.md")
+      expect(Capybara.string(link).find_link('Edit')[:href]).to eq("/#{project.full_path}/-/edit/#{project.default_branch}/README.md")
     end
 
     it 'returns a link with the passed link_opts on the expected route' do
-      link_with_mr = helper.edit_blob_button(project, 'master', 'README.md', link_opts: { mr_id: 10 })
+      link_with_mr = helper.edit_blob_button(project, project.default_branch, 'README.md', link_opts: { mr_id: 10 })
 
-      expect(Capybara.string(link_with_mr).find_link('Edit')[:href]).to eq("/#{project.full_path}/-/edit/master/README.md?mr_id=10")
+      expect(Capybara.string(link_with_mr).find_link('Edit')[:href]).to eq("/#{project.full_path}/-/edit/#{project.default_branch}/README.md?mr_id=10")
     end
 
     context 'when edit is the primary button' do
@@ -146,13 +146,13 @@ RSpec.describe BlobHelper do
       before do
         assign(:project, project)
         assign(:blob, blob)
-        assign(:id, File.join('master', blob.path))
+        assign(:id, File.join(project.default_branch, blob.path))
 
         controller.params[:controller] = 'projects/blob'
         controller.params[:action] = 'show'
         controller.params[:namespace_id] = project.namespace.to_param
         controller.params[:project_id] = project.to_param
-        controller.params[:id] = File.join('master', blob.path)
+        controller.params[:id] = File.join(project.default_branch, blob.path)
       end
 
       context 'for error :collapsed' do
@@ -305,9 +305,9 @@ RSpec.describe BlobHelper do
     let_it_be(:project) { create(:project, :repository, namespace: namespace) }
     let_it_be(:current_user) { create(:user) }
     let(:can_push_code) { true }
-    let(:blob) { project.repository.blob_at('refs/heads/master', 'README.md') }
+    let(:blob) { project.repository.blob_at(project.default_branch, 'README.md') }
 
-    subject(:link) { helper.ide_edit_button(project, 'master', 'README.md', blob: blob) }
+    subject(:link) { helper.ide_edit_button(project, project.default_branch, 'README.md', blob: blob) }
 
     before do
       allow(helper).to receive(:current_user).and_return(current_user)
@@ -316,7 +316,7 @@ RSpec.describe BlobHelper do
     end
 
     it 'returns a link with a Web IDE route' do
-      expect(Capybara.string(link).find_link('Web IDE')[:href]).to eq("/-/ide/project/#{project.full_path}/edit/master/-/README.md")
+      expect(Capybara.string(link).find_link('Web IDE')[:href]).to eq("/-/ide/project/#{project.full_path}/edit/#{project.default_branch}/-/README.md")
     end
 
     context 'when edit is the primary button' do
@@ -378,7 +378,7 @@ RSpec.describe BlobHelper do
     it 'returns full IDE path' do
       Rails.application.routes.default_url_options[:script_name] = nil
 
-      expect(helper.ide_edit_path(project, "master", "")).to eq("/-/ide/project/#{project.namespace.path}/#{project.path}/edit/master")
+      expect(helper.ide_edit_path(project, project.default_branch, "")).to eq("/-/ide/project/#{project.namespace.path}/#{project.path}/edit/#{project.default_branch}")
     end
 
     it 'returns full IDE path with second -' do
@@ -390,7 +390,7 @@ RSpec.describe BlobHelper do
     it 'returns IDE path without relative_url_root' do
       Rails.application.routes.default_url_options[:script_name] = "/gitlab"
 
-      expect(helper.ide_edit_path(project, "master", "")).to eq("/gitlab/-/ide/project/#{project.namespace.path}/#{project.path}/edit/master")
+      expect(helper.ide_edit_path(project, project.default_branch, "")).to eq("/gitlab/-/ide/project/#{project.namespace.path}/#{project.path}/edit/#{project.default_branch}")
     end
 
     it 'escapes special characters' do
@@ -410,7 +410,7 @@ RSpec.describe BlobHelper do
       let(:current_user) { nil }
 
       it 'returns IDE path inside the project' do
-        expect(helper.ide_edit_path(project, "master", "")).to eq("/-/ide/project/#{project.namespace.path}/#{project.path}/edit/master")
+        expect(helper.ide_edit_path(project, project.default_branch, "")).to eq("/-/ide/project/#{project.namespace.path}/#{project.path}/edit/#{project.default_branch}")
       end
     end
 
@@ -418,7 +418,7 @@ RSpec.describe BlobHelper do
       let(:can_push_code) { false }
 
       it "returns IDE path with the user's fork" do
-        expect(helper.ide_edit_path(project, "master", "")).to eq("/-/ide/project/#{current_user.namespace.full_path}/#{project.path}/edit/master")
+        expect(helper.ide_edit_path(project, project.default_branch, "")).to eq("/-/ide/project/#{current_user.namespace.full_path}/#{project.path}/edit/#{project.default_branch}")
       end
     end
   end
@@ -452,12 +452,12 @@ RSpec.describe BlobHelper do
         allow(helper).to receive(:can?).and_return(true)
       end
 
-      it 'returns default IDE url with master branch' do
-        expect(helper.ide_merge_request_path(merge_request)).to eq("/-/ide/project/#{project.full_path}/edit/master")
+      it 'returns default IDE url with default branch' do
+        expect(helper.ide_merge_request_path(merge_request)).to eq("/-/ide/project/#{project.full_path}/edit/#{project.default_branch}")
       end
 
       it 'includes file path passed' do
-        expect(helper.ide_merge_request_path(merge_request, 'README.md')).to eq("/-/ide/project/#{project.full_path}/edit/master/-/README.md")
+        expect(helper.ide_merge_request_path(merge_request, 'README.md')).to eq("/-/ide/project/#{project.full_path}/edit/#{project.default_branch}/-/README.md")
       end
 
       context 'when target branch exists' do
@@ -484,11 +484,11 @@ RSpec.describe BlobHelper do
     end
 
     it 'returns path to fork the repo with a redirect param to the full IDE path' do
-      uri = URI(helper.ide_fork_and_edit_path(project, "master", ""))
+      uri = URI(helper.ide_fork_and_edit_path(project, project.default_branch, ""))
       params = CGI.unescape(uri.query)
 
       expect(uri.path).to eq("/#{project.namespace.path}/#{project.path}/-/forks")
-      expect(params).to include("continue[to]=/-/ide/project/#{project.namespace.path}/#{project.path}/edit/master")
+      expect(params).to include("continue[to]=/-/ide/project/#{project.namespace.path}/#{project.path}/edit/#{project.default_branch}")
       expect(params).to include("namespace_key=#{current_user.namespace.id}")
     end
 
@@ -496,7 +496,7 @@ RSpec.describe BlobHelper do
       let(:current_user) { nil }
 
       it 'returns nil' do
-        expect(helper.ide_fork_and_edit_path(project, "master", "")).to be_nil
+        expect(helper.ide_fork_and_edit_path(project, project.default_branch, "")).to be_nil
       end
     end
   end
@@ -513,11 +513,11 @@ RSpec.describe BlobHelper do
     end
 
     it 'returns path to fork the repo with a redirect param to the full edit path' do
-      uri = URI(helper.fork_and_edit_path(project, "master", ""))
+      uri = URI(helper.fork_and_edit_path(project, project.default_branch, ""))
       params = CGI.unescape(uri.query)
 
       expect(uri.path).to eq("/#{project.namespace.path}/#{project.path}/-/forks")
-      expect(params).to include("continue[to]=/#{project.namespace.path}/#{project.path}/-/edit/master/")
+      expect(params).to include("continue[to]=/#{project.namespace.path}/#{project.path}/-/edit/#{project.default_branch}/")
       expect(params).to include("namespace_key=#{current_user.namespace.id}")
     end
 
@@ -525,7 +525,7 @@ RSpec.describe BlobHelper do
       let(:current_user) { nil }
 
       it 'returns nil' do
-        expect(helper.ide_fork_and_edit_path(project, "master", "")).to be_nil
+        expect(helper.ide_fork_and_edit_path(project, project.default_branch, "")).to be_nil
       end
     end
   end

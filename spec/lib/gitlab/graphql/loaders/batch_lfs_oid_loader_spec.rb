@@ -7,8 +7,8 @@ RSpec.describe Gitlab::Graphql::Loaders::BatchLfsOidLoader do
 
   let_it_be(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
-  let(:blob) { Gitlab::Graphql::Representation::TreeEntry.new(repository.blob_at('master', 'files/lfs/lfs_object.iso'), repository) }
-  let(:otherblob) { Gitlab::Graphql::Representation::TreeEntry.new(repository.blob_at('master', 'README'), repository) }
+  let(:blob) { Gitlab::Graphql::Representation::TreeEntry.new(repository.blob_at(project.default_branch, 'files/lfs/lfs_object.iso'), repository) }
+  let(:otherblob) { Gitlab::Graphql::Representation::TreeEntry.new(repository.blob_at(project.default_branch, 'README'), repository) }
 
   describe '#find' do
     it 'batch-resolves LFS blob IDs' do

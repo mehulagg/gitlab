@@ -27,7 +27,7 @@ RSpec.describe 'IDE user commits changes', :js do
     ide_commit
 
     expect(page).to have_content('All changes are committed')
-    expect(project.repository.blob_at('master', 'foo/bar/.gitkeep')).to be_nil
-    expect(project.repository.blob_at('master', 'foo/bar/lorem_ipsum.md').data).to eql(content)
+    expect(project.repository.blob_at(project.default_branch, 'foo/bar/.gitkeep')).to be_nil
+    expect(project.repository.blob_at(project.default_branch, 'foo/bar/lorem_ipsum.md').data).to eq(content)
   end
 end

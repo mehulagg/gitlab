@@ -67,7 +67,7 @@ end
 
 RSpec.shared_examples 'show and render proper snippet blob' do
   before do
-    allow_any_instance_of(Snippet).to receive(:blobs).and_return([snippet.repository.blob_at('master', file_path)])
+    allow_any_instance_of(Snippet).to receive(:blobs).and_return([snippet.repository.blob_at(snippet.default_branch, file_path)])
   end
 
   context 'Ruby file' do

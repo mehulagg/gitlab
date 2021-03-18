@@ -16,7 +16,7 @@ RSpec.describe 'Projects > Files > Project owner sees a link to create a license
     visit project_path(project)
     click_on 'Add LICENSE'
 
-    expect(current_path).to eq("/-/ide/project/#{project.full_path}/edit/master/-/LICENSE")
+    expect(current_path).to eq("/-/ide/project/#{project.full_path}/edit/#{project.default_branch}/-/LICENSE")
 
     expect(page).to have_selector('.qa-file-templates-bar')
 
@@ -27,11 +27,11 @@ RSpec.describe 'Projects > Files > Project owner sees a link to create a license
 
     ide_commit
 
-    expect(current_path).to eq("/-/ide/project/#{project.full_path}/tree/master/-/LICENSE/")
+    expect(current_path).to eq("/-/ide/project/#{project.full_path}/tree/#{project.default_branch}/-/LICENSE/")
 
     expect(page).to have_content('All changes are committed')
 
-    license_file = project.repository.blob_at('master', 'LICENSE').data
+    license_file = project.repository.blob_at(project.default_branch, 'LICENSE').data
     expect(license_file).to have_content('MIT License')
     expect(license_file).to have_content("Copyright (c) #{Time.now.year} #{project.namespace.human_name}")
   end

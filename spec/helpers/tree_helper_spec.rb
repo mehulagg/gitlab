@@ -15,7 +15,7 @@ RSpec.describe TreeHelper do
       filename,
       'test this',
       message: "Automatically created file #{filename}",
-      branch_name: 'master'
+      branch_name: project.default_branch
     )
   end
 
@@ -82,7 +82,7 @@ RSpec.describe TreeHelper do
   end
 
   describe '#web_ide_button_data' do
-    let(:blob) { project.repository.blob_at('refs/heads/master', @path) }
+    let(:blob) { project.repository.blob_at(project.default_branch, @path) }
 
     before do
       @path = ''
@@ -290,13 +290,13 @@ RSpec.describe TreeHelper do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    subject { helper.patch_branch_name('master') }
+    subject { helper.patch_branch_name(project.default_branch) }
 
     it 'returns a patch branch name' do
       freeze_time do
         epoch = Time.now.strftime('%s%L').last(5)
 
-        expect(subject).to eq "#{user.username}-master-patch-#{epoch}"
+        expect(subject).to eq "#{user.username}-#{project.default_branch}-patch-#{epoch}"
       end
     end
 

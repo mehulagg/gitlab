@@ -17,11 +17,11 @@ RSpec.describe Gitlab::Changelog::Committer do
         committer.commit(
           release: release,
           file: 'CHANGELOG.md',
-          branch: 'master',
+          branch: project.default_branch,
           message: 'Test commit'
         )
 
-        content = project.repository.blob_at('master', 'CHANGELOG.md').data
+        content = project.repository.blob_at(project.default_branch, 'CHANGELOG.md').data
 
         expect(content).to eq(<<~MARKDOWN)
           ## 1.0.0 (2020-01-01)
@@ -40,12 +40,12 @@ RSpec.describe Gitlab::Changelog::Committer do
           committer.commit(
             release: release,
             file: 'CHANGELOG.md',
-            branch: 'master',
+            branch: project.default_branch,
             message: 'Test commit'
           )
         end
 
-        content = project.repository.blob_at('master', 'CHANGELOG.md').data
+        content = project.repository.blob_at(project.default_branch, 'CHANGELOG.md').data
 
         expect(content).to eq(<<~MARKDOWN)
           ## 1.0.0 (2020-01-01)
@@ -80,7 +80,7 @@ RSpec.describe Gitlab::Changelog::Committer do
           committer.commit(
             release: release,
             file: 'CHANGELOG.md',
-            branch: 'master',
+            branch: project.default_branch,
             message: 'Test commit'
           )
         end.not_to raise_error
@@ -100,7 +100,7 @@ RSpec.describe Gitlab::Changelog::Committer do
         committer.commit(
           release: release1,
           file: 'CHANGELOG.md',
-          branch: 'master',
+          branch: project.default_branch,
           message: 'Initial commit'
         )
 
@@ -108,7 +108,7 @@ RSpec.describe Gitlab::Changelog::Committer do
           .to receive(:last_for_path)
           .with(
             project.repository,
-            'master',
+            project.default_branch,
             'CHANGELOG.md',
             literal_pathspec: true
           )
@@ -118,7 +118,7 @@ RSpec.describe Gitlab::Changelog::Committer do
           committer.commit(
             release: release2,
             file: 'CHANGELOG.md',
-            branch: 'master',
+            branch: project.default_branch,
             message: 'Test commit'
           )
         end.to raise_error(Gitlab::Changelog::Error)
