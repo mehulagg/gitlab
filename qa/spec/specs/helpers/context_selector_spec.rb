@@ -2,25 +2,6 @@
 
 require 'rspec/core/sandbox'
 
-# We need a reporter for internal tests that's different from the reporter for
-# external tests otherwise the results will be mixed up. We don't care about
-# most reporting, but we do want to know if a test fails
-class RaiseOnFailuresReporter < RSpec::Core::NullReporter
-  def self.example_failed(example)
-    raise example.exception
-  end
-end
-
-# We use an example group wrapper to prevent the state of internal tests
-# expanding into the global state
-# See: https://github.com/rspec/rspec-core/issues/2603
-def describe_successfully(*args, &describe_body)
-  example_group = RSpec.describe(*args, &describe_body)
-  ran_successfully = example_group.run RaiseOnFailuresReporter
-  expect(ran_successfully).to eq true
-  example_group
-end
-
 RSpec.configure do |c|
   c.around do |ex|
     RSpec::Core::Sandbox.sandboxed do |config|
@@ -38,6 +19,7 @@ end
 
 RSpec.describe QA::Specs::Helpers::ContextSelector do
   include Helpers::StubENV
+  include QA::Specs::Helpers::RSpec
 
   before do
     QA::Runtime::Scenario.define(:gitlab_address, 'https://staging.gitlab.com')

@@ -9,7 +9,7 @@ module QA
         extend self
 
         def configure_rspec
-          RSpec.configure do |config|
+          ::RSpec.configure do |config|
             config.before do |example|
               if example.metadata.key?(:only)
                 skip('Test is not compatible with this environment or pipeline') unless ContextSelector.context_matches?(example.metadata[:only])

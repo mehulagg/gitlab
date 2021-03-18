@@ -6,12 +6,12 @@ module QA
   module Specs
     module Helpers
       module Quarantine
-        include RSpec::Core::Pending
+        include ::RSpec::Core::Pending
 
         extend self
 
         def configure_rspec
-          RSpec.configure do |config|
+          ::RSpec.configure do |config|
             config.before(:context, :quarantine) do
               Quarantine.skip_or_run_quarantined_contexts(config.inclusion_filter.rules, self.class)
             end
