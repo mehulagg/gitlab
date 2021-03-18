@@ -3079,10 +3079,10 @@ larger than the [maximum artifact size](../../user/gitlab_com/index.md#gitlab-ci
 Job artifacts are only collected for successful jobs by default, and
 artifacts are restored after [caches](#cache).
 
-By default, all artifacts are downloaded and available in jobs in later stages. You
-can control artifact download behavior with [`dependencies`](#dependencies). If you
-use [`needs`](#artifact-downloads-with-needs), you can download artifacts only from
-the jobs listed in the `needs` configuration.
+By default, all artifacts are made available for jobs in later stages. But some keywords 
+can affect or/and change this behavior. For example, you can control artifacts download behavior 
+with [`dependencies`](#dependencies). And when you use [`needs`](#artifact-downloads-with-needs), 
+you can only download artifacts from the jobs listed in the `needs` configuration.
 
 [Read more about artifacts](../pipelines/job_artifacts.md).
 
