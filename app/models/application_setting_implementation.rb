@@ -50,7 +50,7 @@ module ApplicationSettingImplementation
         container_registry_version: '',
         custom_http_clone_url_root: nil,
         default_artifacts_expire_in: '30 days',
-        default_branch_name: nil,
+        default_branch_name: 'main',
         default_branch_protection: Settings.gitlab['default_branch_protection'],
         default_ci_config_path: nil,
         default_group_visibility: Settings.gitlab.default_projects_features['visibility_level'],
