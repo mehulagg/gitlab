@@ -278,6 +278,8 @@ module Gitlab
         return unless self.class.enabled?
 
         publish(:updated, **updated_params)
+
+        after_verifiable_update
       end
 
       def created_params
