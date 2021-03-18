@@ -5,23 +5,23 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Removing secondary Geo nodes **(PREMIUM SELF)**
+# Removing secondary Geo sites **(PREMIUM SELF)**
 
-**Secondary** nodes can be removed from the Geo cluster using the Geo administration page of the **primary** node. To remove a **secondary** node:
+**Secondary** sites can be removed from the Geo cluster using the Geo administration page of the **primary** site. To remove a **secondary** site:
 
 1. Go to **Admin Area > Geo** (`/admin/geo/nodes`).
-1. Click the **Remove** button for the **secondary** node you want to remove.
+1. Click the **Remove** button for the **secondary** site you want to remove.
 1. Confirm by clicking **Remove** when the prompt appears.
 
-Once removed from the Geo administration page, you must stop and uninstall the **secondary** node:
+Once removed from the Geo administration page, you must stop and uninstall the **secondary** site:
 
-1. On the **secondary** node, stop GitLab:
+1. On the **secondary** site's node(s), stop GitLab:
 
    ```shell
    sudo gitlab-ctl stop
    ```
 
-1. On the **secondary** node, uninstall GitLab:
+1. On the **secondary** site's node(s), uninstall GitLab:
 
    ```shell
    # Stop gitlab and remove its supervision process
@@ -34,9 +34,9 @@ Once removed from the Geo administration page, you must stop and uninstall the *
    sudo rpm --erase gitlab-ee
    ```
 
-Once GitLab has been uninstalled from the **secondary** node, the replication slot must be dropped from the **primary** node's database as follows:
+Once GitLab has been uninstalled from the **secondary** site's node(s), the replication slot must be dropped from the **primary** site's database as follows:
 
-1. On the **primary** node, start a PostgreSQL console session:
+1. On the **primary** site's database node, start a PostgreSQL console session:
 
    ```shell
    sudo gitlab-psql
@@ -51,7 +51,7 @@ Once GitLab has been uninstalled from the **secondary** node, the replication sl
    SELECT * FROM pg_replication_slots;
    ```
 
-1. Remove the replication slot for the **secondary** node:
+1. Remove the replication slot for the **secondary** site:
 
    ```sql
    SELECT pg_drop_replication_slot('<name_of_slot>');
