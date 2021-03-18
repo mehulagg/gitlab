@@ -8,11 +8,31 @@ module Gitlab
                       media_src object_src report_uri script_src style_src worker_src).freeze
 
       def self.default_settings_hash
-        {
-          'enabled' => false,
+        settings_hash = {
+          'enabled' => true,
           'report_only' => false,
-          'directives' => DIRECTIVES.each_with_object({}) { |directive, hash| hash[directive] = nil }
+          'default_src' => "'self'",
+          'base_uri' => "'self'",
+          'child_src' => "'none'",
+          'connect_src' => "'self'",
+          'font_src' => "'self'",
+          'form_action' => "'self'",
+          'frame_ancestors' => "'none'",
+          'frame_src' => "'self'",
+          'img_src' => "'self' data: http: https:",
+          'manifest_src' => "'self'",
+          'media_src' => "'self'",
+          'script_src' => "'strict-dynamic' 'self' 'unsafe-inline' 'unsafe-eval'",
+          'style_src' => "'self' 'unsafe-inline'",
+          'worker_src' => "'self'",
+          'object_src' => "'none'"
         }
+
+        allow_webpack_dev_server(settings_hash) if Rails.env.development?
+        allow_cdn(settings_hash) if ENV['GITLAB_CDN_HOST'].present?
+
+        settings_hash['directives'] = DIRECTIVES.each_with_object({}) { |directive, hash| hash[directive] = settings_hash[directive] }
+        settings_hash
       end
 
       def initialize(csp_directives)
@@ -37,6 +57,26 @@ module Gitlab
         return unless arguments.present? && arguments.is_a?(String)
 
         arguments.strip.split(' ').map(&:strip)
+      end
+
+      def self.allow_webpack_dev_server(settings_hash)
+        secure = Settings.webpack.dev_server['https']
+        host_and_port = "#{Settings.webpack.dev_server['host']}:#{Settings.webpack.dev_server['port']}"
+        http_url = "#{secure ? 'https' : 'http'}://#{host_and_port}"
+        ws_url = "#{secure ? 'wss' : 'ws'}://#{host_and_port}"
+
+        append_to_directive(settings_hash, 'connect_src', "#{http_url} #{ws_url}")
+      end
+
+      def self.allow_cdn(settings_hash)
+        cdn_host = ENV['GITLAB_CDN_HOST']
+
+        append_to_directive(settings_hash, 'script_src', cdn_host)
+        append_to_directive(settings_hash, 'style_src', cdn_host)
+      end
+
+      def self.append_to_directive(settings_hash, directive, text)
+        settings_hash[directive] = "#{settings_hash[directive]} #{text}"
       end
     end
   end

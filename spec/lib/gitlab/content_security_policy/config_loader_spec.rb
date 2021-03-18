@@ -23,13 +23,18 @@ RSpec.describe Gitlab::ContentSecurityPolicy::ConfigLoader do
     it 'returns empty defaults' do
       settings = described_class.default_settings_hash
 
-      expect(settings['enabled']).to be_falsey
+      expect(settings['enabled']).to be_truthy
       expect(settings['report_only']).to be_falsey
 
-      described_class::DIRECTIVES.each do |directive|
-        expect(settings['directives'].has_key?(directive)).to be_truthy
-        expect(settings['directives'][directive]).to be_nil
+      directives = settings['directives']
+      directive_names = (described_class::DIRECTIVES - ['report_uri'])
+      directive_names.each do |directive|
+        expect(directives.has_key?(directive)).to be_truthy
+        expect(directives[directive]).to be_truthy
       end
+
+      expect(directives.has_key?('report_uri')).to be_truthy
+      expect(directives['report_uri']).to be_nil
     end
   end
 
