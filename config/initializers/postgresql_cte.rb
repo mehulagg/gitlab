@@ -121,6 +121,8 @@ module ActiveRecord
           end
         when Arel::Nodes::As
           with_value
+        when Arel::Nodes::AsWithMaterialized
+          with_value
         end
       end
 

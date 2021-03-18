@@ -23,9 +23,10 @@ module Gitlab
       attr_reader :table
 
       # name - The name of the CTE as a String or Symbol.
-      def initialize(name)
+      def initialize(name, materialized: true)
         @table = Arel::Table.new(name)
         @queries = []
+        @materialized = materialized
       end
 
       # Adds a query to the body of the CTE.
@@ -39,7 +40,7 @@ module Gitlab
       def to_arel
         sql = Arel::Nodes::SqlLiteral.new(Union.new(@queries).to_sql)
 
-        Arel::Nodes::As.new(table, Arel::Nodes::Grouping.new(sql))
+        Arel::Nodes::AsWithMaterialized.new(table, Arel::Nodes::Grouping.new(sql), materialized: @materialized)
       end
 
       # Returns an "AS" statement that aliases the CTE name as the given table
