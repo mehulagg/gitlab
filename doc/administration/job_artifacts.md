@@ -580,3 +580,5 @@ If you need to manually remove **all** job artifacts associated with multiple jo
    - `7.days.ago`
    - `3.months.ago`
    - `1.year.ago`
+
+### Job artifact upload fails with 500
