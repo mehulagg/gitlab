@@ -94,18 +94,18 @@ describe('DAST Scanner Profile', () => {
       createComponent();
     });
 
-    describe('is disabled if', () => {
+    describe('is enabled even if', () => {
       it('form contains errors', async () => {
         findProfileNameInput().vm.$emit('input', profileName);
         await findSpiderTimeoutInput().vm.$emit('input', '12312');
-        expect(findSubmitButton().props('disabled')).toBe(true);
+        expect(findSubmitButton().props('disabled')).toBe(false);
       });
 
       it('at least one field is empty', async () => {
         findProfileNameInput().vm.$emit('input', '');
         await findSpiderTimeoutInput().vm.$emit('input', spiderTimeout);
         await findTargetTimeoutInput().vm.$emit('input', targetTimeout);
-        expect(findSubmitButton().props('disabled')).toBe(true);
+        expect(findSubmitButton().props('disabled')).toBe(false);
       });
     });
 
