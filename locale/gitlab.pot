@@ -23857,9 +23857,6 @@ msgstr ""
 msgid "ProjectSettings|Build, test, and deploy your changes."
 msgstr ""
 
-msgid "ProjectSettings|CI/CD"
-msgstr ""
-
 msgid "ProjectSettings|Checkbox is visible and selected by default."
 msgstr ""
 

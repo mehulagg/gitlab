@@ -556,7 +556,7 @@ export default {
       </div>
       <project-setting-row
         ref="pipeline-settings"
-        :label="s__('ProjectSettings|CI/CD')"
+        :label="__('CI/CD')"
         :help-text="s__('ProjectSettings|Build, test, and deploy your changes.')"
       >
         <project-feature-setting
