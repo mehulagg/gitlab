@@ -51,6 +51,10 @@ class Projects::ForksController < Projects::ApplicationController
       format.json do
         namespaces = load_namespaces_with_associations - [project.namespace]
 
+        namespaces = [current_user.namespace] + namespaces if
+          Feature.enabled?(:fork_project_form, project, default_enabled: :yaml) &&
+          ForkTargetsFinder.new(@project, current_user).execute.include?(current_user.namespace)
+
         render json: {
           namespaces: ForkNamespaceSerializer.new.represent(namespaces, project: project, current_user: current_user, memberships: memberships_hash)
         }
