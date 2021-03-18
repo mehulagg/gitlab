@@ -53,6 +53,7 @@
             auto_complete_epics: 'true',
             auto_complete_issues: 'true',
             user_signed_in: current_user.present? ? 'true' : 'false',
+            current_username: current_user&.username,
             allow_sub_epics: allow_sub_epics,
             allow_issuable_health_status: allow_issuable_health_status,
             initial: issuable_initial_data(@epic).to_json } }

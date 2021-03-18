@@ -2,6 +2,8 @@
 import {
   GlButton,
   GlDropdown,
+  GlDropdownDivider,
+  GlDropdownSectionHeader,
   GlDropdownItem,
   GlFormInput,
   GlSearchBoxByType,
@@ -13,12 +15,18 @@ import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { SEARCH_DEBOUNCE } from '../constants';
+import { STORAGE_KEY } from '~/frequent_items/constants';
+import AccessorUtilities from '~/lib/utils/accessor';
+import Api from '~/api';
+import { deprecatedCreateFlash as createFlash, FLASH_TYPES } from '~/flash';
 
 export default {
   components: {
     GlButton,
     GlDropdown,
     GlDropdownItem,
+    GlDropdownSectionHeader,
+    GlDropdownDivider,
     GlFormInput,
     GlSearchBoxByType,
     GlLoadingIcon,
@@ -26,16 +34,22 @@ export default {
   },
   data() {
     return {
+      recentItems: [],
       selectedProject: null,
       searchKey: '',
       title: '',
+      recentItemFetchInProgress:false,
     };
   },
   computed: {
-    ...mapState(['projectsFetchInProgress', 'itemCreateInProgress', 'projects', 'parentItem']),
+    ...mapState(['projectsFetchInProgress', 'itemCreateInProgress', 'projects', 'parentItem', 'currentUsername']),
     dropdownToggleText() {
       if (this.selectedProject) {
-        return this.selectedProject.name_with_namespace;
+        /** When selectedProject is fetched from localStorage
+         * name_with_namespace doesn't exist. Therefore we rely on
+         * namespace directly.
+        **/
+        return this.selectedProject.name_with_namespace || this.selectedProject.namespace;
       }
 
       return __('Select a project');
@@ -49,6 +63,7 @@ export default {
      */
     searchKey: debounce(function debounceSearch() {
       this.fetchProjects(this.searchKey);
+      this.setRecentItems(this.searchKey);
     }, SEARCH_DEBOUNCE),
     /**
      * As Issue Create Form already has `autofocus` set for
@@ -80,8 +95,59 @@ export default {
     },
     handleDropdownShow() {
       this.searchKey = '';
+      this.setRecentItems();
       this.fetchProjects();
     },
+    handleRecentItemSelection(selectedProject) {
+      this.recentItemFetchInProgress = true;
+      this.selectedProject = selectedProject;
+
+      Api.project(selectedProject.id).then((res) => res.data).then((data) => {
+        this.selectedProject = data;
+      }).catch(() => {
+        return createFlash({
+          message: __('Something went wrong while fetching details'),
+          type: FLASH_TYPES.ALERT,
+        });
+      }).finally(() => {
+        this.recentItemFetchInProgress = false;
+      });
+    },
+    setRecentItems(searchTerm) {
+      if (!this.currentUsername) {
+        return [];
+      }
+
+      const storageKey = `${this.currentUsername}/${STORAGE_KEY.projects}`
+
+      if (!AccessorUtilities.isLocalStorageAccessSafe()) {
+        return [];
+      }
+
+      const storedRawItems = localStorage.getItem(storageKey);
+
+      let storedFrequentItems = storedRawItems ? JSON.parse(storedRawItems) : [];
+
+      /* Filter for the current group */
+      storedFrequentItems = storedFrequentItems.filter((item) => {
+        return Boolean(item.webUrl?.slice(1)?.startsWith(this.parentItem.fullPath));
+      });
+
+      if (searchTerm) {
+        storedFrequentItems = storedFrequentItems.filter((item) => {
+          const lowerCasedSearchTerm = searchTerm.toLowerCase();
+          return item.name?.toLowerCase()?.includes(lowerCasedSearchTerm) || item.namespace?.toLowerCase()?.includes(lowerCasedSearchTerm);
+        });
+      }
+
+      this.recentItems = storedFrequentItems.map(item => {
+        item.avatar_url = item.avatarUrl;
+        item.web_url = item.webUrl;
+        return item;
+      });
+
+      return storedFrequentItems;
+    }
   },
 };
 </script>
@@ -116,6 +182,26 @@ export default {
             class="gl-mx-3 gl-mb-2"
             :disabled="projectsFetchInProgress"
           />
+
+          <gl-dropdown-section-header v-if="recentItems.length > 0"
+            >Recently used</gl-dropdown-section-header
+          >
+
+          <div v-if="recentItems.length > 0">
+            <gl-dropdown-item
+              v-for="project in recentItems"
+              :key="`recent-${project.id}`"
+              class="gl-w-full"
+              :secondary-text="project.namespace"
+              @click="() => handleRecentItemSelection(project)"
+            >
+              <project-avatar :project="project" :size="32" />
+              {{ project.name }}
+            </gl-dropdown-item>
+          </div>
+
+          <gl-dropdown-divider v-if="recentItems.length > 0" />
+
           <gl-loading-icon
             v-show="projectsFetchInProgress"
             class="projects-fetch-loading gl-align-items-center gl-p-3"
@@ -147,7 +233,7 @@ export default {
           variant="success"
           category="primary"
           :disabled="!selectedProject || itemCreateInProgress"
-          :loading="itemCreateInProgress"
+          :loading="itemCreateInProgress || recentItemFetchInProgress"
           @click="createIssue"
           >{{ __('Create issue') }}</gl-button
         >

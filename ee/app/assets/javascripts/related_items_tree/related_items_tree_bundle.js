@@ -26,6 +26,7 @@ export default () => {
     autoCompleteEpics,
     autoCompleteIssues,
     userSignedIn,
+    currentUsername,
     allowSubEpics,
     allowIssuableHealthStatus,
   } = el.dataset;
@@ -58,11 +59,13 @@ export default () => {
         epicsEndpoint: initialData.epicLinksEndpoint,
         issuesEndpoint: initialData.issueLinksEndpoint,
         projectsEndpoint: initialData.projectsEndpoint,
+        projectDetailedEndpoint: initialData.projectDetailedEndpoint,
         autoCompleteEpics: parseBoolean(autoCompleteEpics),
         autoCompleteIssues: parseBoolean(autoCompleteIssues),
         userSignedIn: parseBoolean(userSignedIn),
         allowSubEpics: parseBoolean(allowSubEpics),
         allowIssuableHealthStatus: parseBoolean(allowIssuableHealthStatus),
+        currentUsername,
       });
     },
     methods: {

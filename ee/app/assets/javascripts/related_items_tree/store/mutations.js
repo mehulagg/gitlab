@@ -12,9 +12,11 @@ export default {
       autoCompleteEpics,
       autoCompleteIssues,
       projectsEndpoint,
+      projectDetailedEndpoint,
       userSignedIn,
       allowSubEpics,
       allowIssuableHealthStatus,
+      currentUsername,
     },
   ) {
     state.epicsEndpoint = epicsEndpoint;
@@ -22,9 +24,11 @@ export default {
     state.autoCompleteEpics = autoCompleteEpics;
     state.autoCompleteIssues = autoCompleteIssues;
     state.projectsEndpoint = projectsEndpoint;
+    state.projectDetailedEndpoint = projectDetailedEndpoint;
     state.userSignedIn = userSignedIn;
     state.allowSubEpics = allowSubEpics;
     state.allowIssuableHealthStatus = allowIssuableHealthStatus;
+    state.currentUsername = currentUsername;
   },
 
   [types.SET_INITIAL_PARENT_ITEM](state, data) {
