@@ -3,5 +3,5 @@
 %p
   = _('One or more of your ssh keys has expired.')
 %p
-  - ssh_key_link_start =  '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: @target_url }
+  - ssh_key_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: @target_url }
   = html_escape(_('You can create a new one or check them in your %{pat_link_start}ssh key%{pat_link_end} settings')) % { pat_link_start: ssh_key_link_start, pat_link_end: '</a>'.html_safe }
