@@ -157,6 +157,7 @@ class License < ApplicationRecord
     group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
+    inline_codequality
     insights
     issuable_health_status
     jira_vulnerabilities_integration
