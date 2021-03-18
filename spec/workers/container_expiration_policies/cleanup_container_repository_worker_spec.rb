@@ -12,6 +12,10 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
 
   let(:worker) { described_class.new }
 
+  before do
+    stub_feature_flags(container_registry_expiration_policies_loopless: false)
+  end
+
   describe '#perform_work' do
     subject { worker.perform_work }
 
