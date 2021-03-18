@@ -14,9 +14,9 @@ module SshKeys
         with_context(user: user) do
           Gitlab::AppLogger.info "#{self.class}: Notifying User #{user.id} about expired ssh key(s)"
 
-          notification_service.ssh_key_expired_email(user)
+          notification_service.ssh_key_expired(user)
 
-          user.ssh_keys.expired_today_and_not_notified.update_all(on_expiry_notification_delivered: true)
+          user.keys.expired_today_and_not_notified.update_all(on_expiry_notification_delivered: true)
         end
       end
     end

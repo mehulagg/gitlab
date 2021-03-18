@@ -80,7 +80,7 @@ class NotificationService
   end
 
   # Notify the user when at least one of their ssh key has expired today
-  def ssh_key_expired_email(user)
+  def ssh_key_expired(user)
     return unless user.can?(:receive_notifications)
 
     mailer.ssh_key_expired_email(user).deliver_later
