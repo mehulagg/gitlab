@@ -1,4 +1,4 @@
-import { isToday } from '~/lib/utils/datetime_utility';
+import { getDayDifference, isToday } from '~/lib/utils/datetime_utility';
 import {
   DAYS_IN_WEEK,
   HOURS_IN_DAY,
@@ -38,10 +38,12 @@ export default {
     this.$options.currentDate = currentDate;
   },
   methods: {
-    getIndicatorStyles(presetType = PRESET_TYPES.WEEKS) {
+    getIndicatorStyles(presetType = PRESET_TYPES.WEEKS, timeframeStartDate = new Date()) {
       const currentDate = new Date();
       const base = 100 / HOURS_IN_DAY;
       const hours = base * currentDate.getHours();
+      const weeklyOffset = 100 / DAYS_IN_WEEK / 2;
+      const weeklyHourOffset = (weeklyOffset / HOURS_IN_DAY) * currentDate.getHours();
 
       if (presetType === PRESET_TYPES.DAYS) {
         const minutes = base * (currentDate.getMinutes() / 60) - CURRENT_DAY_INDICATOR_OFFSET;
@@ -51,10 +53,16 @@ export default {
         };
       }
 
-      const weeklyDayOffset = 100 / DAYS_IN_WEEK / 2;
-      const weeklyHourOffset = (weeklyDayOffset / HOURS_IN_DAY) * currentDate.getHours();
+      if (currentDate !== timeframeStartDate) {
+        const weeklyDayDifferenceOffset =
+          (100 / DAYS_IN_WEEK) * getDayDifference(timeframeStartDate, currentDate);
+        return {
+          left: `${weeklyDayDifferenceOffset + weeklyOffset + weeklyHourOffset}%`,
+        };
+      }
+
       return {
-        left: `${weeklyDayOffset + weeklyHourOffset}%`,
+        left: `${weeklyOffset + weeklyHourOffset}%`,
       };
     },
   },
