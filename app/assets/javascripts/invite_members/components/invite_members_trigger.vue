@@ -1,11 +1,11 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlLink } from '@gitlab/ui';
 import ExperimentTracking from '~/experimentation/experiment_tracking';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
 
 export default {
-  components: { GlButton },
+  components: { GlButton, GlLink },
   props: {
     displayText: {
       type: String,
@@ -37,6 +37,26 @@ export default {
       required: false,
       default: undefined,
     },
+    triggerElement: {
+      type: String,
+      required: false,
+      default: 'button',
+    },
+    event: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    label: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
+  computed: {
+    isButton() {
+      return this.triggerElement === 'button';
+    },
   },
   mounted() {
     this.trackExperimentOnShow();
@@ -57,7 +77,10 @@ export default {
 
 <template>
   <gl-button
+    v-if="isButton"
     :class="classes"
+    :data-track-event="event"
+    :data-track-label="label"
     :icon="icon"
     :variant="variant"
     data-qa-selector="invite_members_button"
@@ -65,4 +88,14 @@ export default {
   >
     {{ displayText }}
   </gl-button>
+  <gl-link
+    v-else
+    :class="classes"
+    data-is-link="true"
+    :data-track-event="event"
+    :data-track-label="label"
+    data-qa-selector="invite_members_button"
+    @click="openModal"
+    >{{ displayText }}
+  </gl-link>
 </template>
