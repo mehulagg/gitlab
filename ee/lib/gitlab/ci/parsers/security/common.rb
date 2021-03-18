@@ -82,7 +82,7 @@ module Gitlab
             remediations = create_remediations(data['remediations'])
             fingerprints = create_signatures(location, tracking_data(data))
 
-            vulnerability_finding_fingerprints_enabled = ::Feature.enabled?(:vulnerability_finding_fingerprints, report.pipeline.project)
+            vulnerability_finding_fingerprints_enabled = ::Feature.enabled?(:vulnerability_finding_fingerprints, report&.pipeline&.project)
             if vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
               # NOT the fingerprint_sha256 - the compare key is hashed
               # to create the project_fingerprint

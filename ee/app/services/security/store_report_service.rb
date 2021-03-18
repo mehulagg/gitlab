@@ -62,7 +62,6 @@ module Security
       # Vulnerabilities::Finding (`vulnerability_occurrences`)
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
         create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
-        #create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       update_vulnerability_scanner(finding)
 
