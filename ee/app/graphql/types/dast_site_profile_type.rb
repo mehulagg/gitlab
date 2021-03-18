@@ -52,7 +52,7 @@ module Types
     end
 
     def edit_path
-      Rails.application.routes.url_helpers.edit_project_security_configuration_dast_profiles_dast_site_profile_path(object.project, object)
+      Rails.application.routes.url_helpers.edit_project_security_configuration_dast_scans_dast_site_profile_path(object.project, object)
     end
 
     def auth
