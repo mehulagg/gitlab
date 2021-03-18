@@ -76,6 +76,17 @@ describe('DAST Scanner Profile', () => {
   it('form renders properly', () => {
     createComponent();
     expect(findForm().exists()).toBe(true);
+    expect(findForm().text()).toContain('New scanner profile');
+  });
+
+  it('when show header is disabled', () => {
+    createComponent({
+      propsData: {
+        ...defaultProps,
+        showHeader: false,
+      },
+    });
+    expect(findForm().text()).not.toContain('New scanner profile');
   });
 
   describe('submit button', () => {
