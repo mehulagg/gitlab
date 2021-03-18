@@ -50,7 +50,7 @@ class GeoNodeStatus < ApplicationRecord
 
   # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
   def self.replicator_class_status_fields
-    Gitlab::Geo::REPLICATOR_CLASSES.select { |x| !x.eql?(Geo::LfsObjectReplicator) }.map do |replicable_class|
+    Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
       status_fields_for(replicable_class).keys
     end.flatten.map(&:to_s)
   end
@@ -107,7 +107,7 @@ class GeoNodeStatus < ApplicationRecord
 
   # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
   def self.replicator_class_prometheus_metrics
-    Gitlab::Geo::REPLICATOR_CLASSES.select { |x| !x.eql?(Geo::LfsObjectReplicator) }.map do |replicable_class|
+    Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
       status_fields_for(replicable_class)
     end.reduce({}, :merge)
   end
@@ -577,8 +577,6 @@ class GeoNodeStatus < ApplicationRecord
     self.wikis_checksum_total_count = self.projects_count
 
     Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
-      next if replicator.eql?(::Geo::LfsObjectReplicator) && Feature.disabled?(:geo_lfs_object_replication_ssf)
-
       public_send("#{replicator.replicable_name_plural}_checksummed_count=", replicator.checksummed_count) # rubocop:disable GitlabSecurity/PublicSend
       public_send("#{replicator.replicable_name_plural}_checksum_failed_count=", replicator.checksum_failed_count) # rubocop:disable GitlabSecurity/PublicSend
       public_send("#{replicator.replicable_name_plural}_checksum_total_count=", replicator.checksum_total_count) # rubocop:disable GitlabSecurity/PublicSend

@@ -2,9 +2,9 @@
 
 class Geo::LfsObjectRegistry < Geo::BaseRegistry
   # This works for everything, but the ::Geo::Syncable concern
-  if Feature.enabled?(:geo_lfs_object_replication_ssf)
-    Geo::LfsObjectRegistry.prepend(::Geo::ReplicableRegistry)
-  else
+  include ::Geo::ReplicableRegistry
+
+  if Feature.disabled?(:geo_lfs_object_replication_ssf)
     Geo::LfsObjectRegistry.prepend(::ShaAttribute)
     sha_attribute :sha256
     Geo::LfsObjectRegistry.include(::Geo::Syncable)

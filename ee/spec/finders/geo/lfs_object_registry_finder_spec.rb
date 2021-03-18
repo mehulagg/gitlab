@@ -17,13 +17,13 @@ RSpec.describe Geo::LfsObjectRegistryFinder, :geo do
     let!(:replicable_7) { create(:lfs_object, :object_storage) }
     let!(:replicable_8) { create(:lfs_object, :object_storage) }
 
-    let_it_be(:registry_1) { create(:geo_lfs_object_registry, :failed, lfs_object_id: replicable_1.id) }
-    let_it_be(:registry_2) { create(:geo_lfs_object_registry, lfs_object_id: replicable_2.id, missing_on_primary: true) }
-    let_it_be(:registry_3) { create(:geo_lfs_object_registry, :never_synced, lfs_object_id: replicable_3.id) }
-    let_it_be(:registry_4) { create(:geo_lfs_object_registry, :failed, lfs_object_id: replicable_4.id) }
-    let_it_be(:registry_5) { create(:geo_lfs_object_registry, lfs_object_id: replicable_5.id, missing_on_primary: true, retry_at: 1.day.ago) }
-    let!(:registry_6) { create(:geo_lfs_object_registry, :failed, lfs_object_id: replicable_6.id) }
-    let!(:registry_7) { create(:geo_lfs_object_registry, :failed, lfs_object_id: replicable_7.id, missing_on_primary: true) }
-    let!(:registry_8) { create(:geo_lfs_object_registry, :never_synced, lfs_object_id: replicable_8.id) }
+    let_it_be(:registry_1) { create(:geo_lfs_object_registry_nonssf, :failed, lfs_object_id: replicable_1.id) }
+    let_it_be(:registry_2) { create(:geo_lfs_object_registry_nonssf, lfs_object_id: replicable_2.id, missing_on_primary: true) }
+    let_it_be(:registry_3) { create(:geo_lfs_object_registry_nonssf, :never_synced, lfs_object_id: replicable_3.id) }
+    let_it_be(:registry_4) { create(:geo_lfs_object_registry_nonssf, :failed, lfs_object_id: replicable_4.id) }
+    let_it_be(:registry_5) { create(:geo_lfs_object_registry_nonssf, lfs_object_id: replicable_5.id, missing_on_primary: true, retry_at: 1.day.ago) }
+    let!(:registry_6) { create(:geo_lfs_object_registry_nonssf, :failed, lfs_object_id: replicable_6.id) }
+    let!(:registry_7) { create(:geo_lfs_object_registry_nonssf, :failed, lfs_object_id: replicable_7.id, missing_on_primary: true) }
+    let!(:registry_8) { create(:geo_lfs_object_registry_nonssf, :never_synced, lfs_object_id: replicable_8.id) }
   end
 end

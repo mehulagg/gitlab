@@ -47,8 +47,8 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
   it 'does not schedule duplicated jobs' do
     lfs_object_1 = create(:lfs_object, :with_file)
     lfs_object_2 = create(:lfs_object, :with_file)
-    create(:geo_lfs_object_registry, :never_synced, lfs_object: lfs_object_1)
-    create(:geo_lfs_object_registry, :failed, lfs_object: lfs_object_2)
+    create(:geo_lfs_object_registry_nonssf, :never_synced, lfs_object: lfs_object_1)
+    create(:geo_lfs_object_registry_nonssf, :failed, lfs_object: lfs_object_2)
 
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 5)
     secondary.update!(files_max_capacity: 4)
@@ -65,9 +65,9 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
     lfs_object_1 = create(:lfs_object, :with_file)
     lfs_object_2 = create(:lfs_object, :with_file)
     lfs_object_3 = create(:lfs_object, :with_file)
-    create(:geo_lfs_object_registry, :never_synced, lfs_object: lfs_object_1)
-    create(:geo_lfs_object_registry, :never_synced, lfs_object: lfs_object_2)
-    create(:geo_lfs_object_registry, :never_synced, lfs_object: lfs_object_3)
+    create(:geo_lfs_object_registry_nonssf, :never_synced, lfs_object: lfs_object_1)
+    create(:geo_lfs_object_registry_nonssf, :never_synced, lfs_object: lfs_object_2)
+    create(:geo_lfs_object_registry_nonssf, :never_synced, lfs_object: lfs_object_3)
 
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 3)
     secondary.update!(files_max_capacity: 6)
@@ -205,8 +205,8 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
 
       context 'with lfs_object_registry entries' do
         before do
-          create(:geo_lfs_object_registry, :never_synced, lfs_object: lfs_object_local_store)
-          create(:geo_lfs_object_registry, :failed, lfs_object: lfs_object_remote_store)
+          create(:geo_lfs_object_registry_nonssf, :never_synced, lfs_object: lfs_object_local_store)
+          create(:geo_lfs_object_registry_nonssf, :failed, lfs_object: lfs_object_remote_store)
           Geo::LfsObjectRegistry.create!(lfs_object_id: lfs_object_file_missing_on_primary.id, bytes: 1234, success: true, missing_on_primary: true)
         end
 
@@ -372,7 +372,7 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
     result_object = double(:result, success: true, bytes_downloaded: 100, primary_missing_file: false)
     allow_any_instance_of(::Gitlab::Geo::Replication::BaseTransfer).to receive(:download_from_primary).and_return(result_object)
 
-    create_list(:geo_lfs_object_registry, 2, :with_lfs_object, :never_synced)
+    create_list(:geo_lfs_object_registry_nonssf, 2, :with_lfs_object, :never_synced)
     create_list(:geo_upload_registry, 2, :avatar, :with_file, :never_synced)
     create_list(:geo_upload_registry, 2, :attachment, :with_file, :never_synced)
     create(:geo_upload_registry, :favicon, :with_file, :never_synced)

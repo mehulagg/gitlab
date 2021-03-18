@@ -19,13 +19,12 @@ module Gitlab
     # TODO: Avoid having to maintain a list. Discussions related to possible
     # solutions can be found at
     # https://gitlab.com/gitlab-org/gitlab/-/issues/227693
-    REPLICATOR_CLASSES = [
-      ::Geo::LfsObjectReplicator,
+    REPLICATOR_CLASSES = ([
       ::Geo::MergeRequestDiffReplicator,
       ::Geo::PackageFileReplicator,
       ::Geo::TerraformStateVersionReplicator,
       ::Geo::SnippetRepositoryReplicator
-    ].freeze
+    ] + [::Geo::LfsObjectReplicator].select {|x| Feature.enabled?(:geo_lfs_object_replication_ssf)} ).freeze
 
     def self.current_node
       self.cache_value(:current_node, as: GeoNode) { GeoNode.current_node }

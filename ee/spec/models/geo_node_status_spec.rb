@@ -173,7 +173,7 @@ RSpec.describe GeoNodeStatus, :geo do
   describe '#attachments_failed_count' do
     it 'counts failed avatars, attachment, personal snippets and files' do
       # These two should be ignored
-      create(:geo_lfs_object_registry, :with_lfs_object, :failed)
+      create(:geo_lfs_object_registry_nonssf, :with_lfs_object, :failed)
       create(:geo_upload_registry, :with_file)
 
       create(:geo_upload_registry, :with_file, :failed, file_type: :personal_file)
@@ -225,9 +225,9 @@ RSpec.describe GeoNodeStatus, :geo do
       create(:geo_upload_registry, :failed)
       create(:geo_upload_registry, :avatar)
       create(:geo_upload_registry, file_type: :attachment)
-      create(:geo_lfs_object_registry, :failed)
+      create(:geo_lfs_object_registry_nonssf, :failed)
 
-      create(:geo_lfs_object_registry)
+      create(:geo_lfs_object_registry_nonssf)
 
       expect(subject.lfs_objects_synced_count).to eq(1)
     end
@@ -239,9 +239,9 @@ RSpec.describe GeoNodeStatus, :geo do
       create(:geo_upload_registry, :failed)
       create(:geo_upload_registry, :avatar, missing_on_primary: true)
       create(:geo_upload_registry, file_type: :attachment, missing_on_primary: true)
-      create(:geo_lfs_object_registry, :failed)
+      create(:geo_lfs_object_registry_nonssf, :failed)
 
-      create(:geo_lfs_object_registry, missing_on_primary: true)
+      create(:geo_lfs_object_registry_nonssf, missing_on_primary: true)
 
       expect(subject.lfs_objects_synced_missing_on_primary_count).to eq(1)
     end
@@ -253,9 +253,9 @@ RSpec.describe GeoNodeStatus, :geo do
       create(:geo_upload_registry, :failed)
       create(:geo_upload_registry, :avatar, :failed)
       create(:geo_upload_registry, :failed, file_type: :attachment)
-      create(:geo_lfs_object_registry)
+      create(:geo_lfs_object_registry_nonssf)
 
-      create(:geo_lfs_object_registry, :failed)
+      create(:geo_lfs_object_registry_nonssf, :failed)
 
       expect(subject.lfs_objects_failed_count).to eq(1)
     end
@@ -267,10 +267,10 @@ RSpec.describe GeoNodeStatus, :geo do
     end
 
     it 'returns the right percentage' do
-      create(:geo_lfs_object_registry)
-      create(:geo_lfs_object_registry, :failed)
-      create(:geo_lfs_object_registry, :never_synced)
-      create(:geo_lfs_object_registry, :never_synced)
+      create(:geo_lfs_object_registry_nonssf)
+      create(:geo_lfs_object_registry_nonssf, :failed)
+      create(:geo_lfs_object_registry_nonssf, :never_synced)
+      create(:geo_lfs_object_registry_nonssf, :never_synced)
 
       expect(subject.lfs_objects_synced_in_percentage).to be_within(0.0001).of(25)
     end
