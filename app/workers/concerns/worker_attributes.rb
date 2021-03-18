@@ -73,6 +73,9 @@ module WorkerAttributes
 
     def data_consistency(data_consistency, feature_flag: nil)
       raise "Invalid data consistency: #{data_consistency}" unless VALID_DATA_CONSISTENCIES.include?(data_consistency)
+      # Since the deduplication should always take into account the latest binary replication pointer into account,
+      # not the first one, the deduplication will not work with sticky or delayed.
+      # Follow up issue to improve this: https://gitlab.com/gitlab-org/gitlab/-/issues/325291
       raise "Class can't be marked as idempotent if data_consistency is not set to :always" if idempotent? && data_consistency != :always
 
       class_attributes[:data_consistency_feature_flag] = feature_flag if feature_flag
@@ -115,6 +118,9 @@ module WorkerAttributes
     end
 
     def idempotent!
+      # Since the deduplication should always take into account the latest binary replication pointer into account,
+      # not the first one, the deduplication will not work with sticky or delayed.
+      # Follow up issue to improve this: https://gitlab.com/gitlab-org/gitlab/-/issues/325291
       raise "Class can't be marked as idempotent if data_consistency is not set to :always" unless get_data_consistency == :always
 
       class_attributes[:idempotent] = true
