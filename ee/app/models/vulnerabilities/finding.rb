@@ -339,7 +339,6 @@ module Vulnerabilities
       return false unless other.report_type == report_type && other.first_fingerprint == first_fingerprint
 
       if ::Feature.enabled?(:vulnerability_finding_fingerprints, project)
-        # TODO add the uuid + 'hash' fingerprint type
         matches_fingerprints(other.fingerprints, other.uuid)
       else
         other.location_fingerprint == location_fingerprint
