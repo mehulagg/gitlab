@@ -1,0 +1,8 @@
+---
+name: billings_purchase_subscription
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.10'
+type: development
+group: group::purchase
+default_enabled: false

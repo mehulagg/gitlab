@@ -1,0 +1,5 @@
+mutation subscriptionCreate($subscriptionCreateInput: GitlabSubscriptionCreateInput!) {
+  subscriptionCreate(input: $subscriptionCreateInput) @client {
+    errors
+  }
+}
