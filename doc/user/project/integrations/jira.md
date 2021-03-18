@@ -80,7 +80,7 @@ required. Connecting to Jira Server via CAS is not possible. For more informatio
 
 Jira on Atlassian cloud supports authentication through an API token. When connecting to Jira on
 Atlassian cloud, an **email and API token** are required. For more information, see
-[set up a user in Jira on Atlassian cloud](jira_cloud_configuration.md).
+[set up a user in Jira on Atlassian cloud](../../../integration/jira/jira_cloud_configuration.md).
 
 ### Configure GitLab
 

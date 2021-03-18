@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Create an API token in Jira on Atlassian cloud **(FREE)**
 
-For [integrations with Jira](jira.md), an API token is needed when integrating with Jira
+For [integrations with Jira](../../user/project/integrations/jira.md), an API token is needed when integrating with Jira
 on Atlassian cloud. To create an API token:
 
 1. Log in to [`id.atlassian.com`](https://id.atlassian.com/manage-profile/security/api-tokens) with your email address.
@@ -17,11 +17,11 @@ on Atlassian cloud. To create an API token:
 
 1. Click **Create API token**.
 
-   ![Jira API token](img/jira_api_token_menu.png)
+   ![Jira API token](../../user/project/integrations/img/jira_api_token_menu.png)
 
-1. Click **Copy**, or click **View** and write down the new API token. It is required when [configuring GitLab](jira.md#configure-gitlab).
+1. Click **Copy**, or click **View** and write down the new API token. It is required when [configuring GitLab](../../user/project/integrations/jira.md#configure-gitlab).
 
-   ![Jira API token](img/jira_api_token.png)
+   ![Jira API token](../../user/project/integrations/img/jira_api_token.png)
 
 The Jira configuration is complete. You need the newly created token, and the associated email
-address, when [configuring GitLab](jira.md#configure-gitlab).
+address, when [configuring GitLab](../../user/project/integrations/jira.md#configure-gitlab).
