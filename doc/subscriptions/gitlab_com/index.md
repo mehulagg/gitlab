@@ -219,7 +219,7 @@ To upgrade your [GitLab tier](https://about.gitlab.com/pricing/):
 
 When the purchase has been processed, you receive confirmation of your new subscription tier.
 
-## See your billable users list
+## See your subscription and billable users in GitLab.com
 
 Your GitLab group billing page under **Settings > Billing** provides information about your subscription and occupied seats.
 
