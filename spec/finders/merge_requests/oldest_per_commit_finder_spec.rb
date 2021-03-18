@@ -77,6 +77,24 @@ RSpec.describe MergeRequests::OldestPerCommitFinder do
       expect(described_class.new(project).execute(commits)).to eq(sha => mr)
     end
 
+    it 'includes a merge request that was squashed into the target branch' do
+      project = create(:project)
+      sha = Digest::SHA1.hexdigest('foo')
+      mr = create(
+        :merge_request,
+        :merged,
+        target_project: project,
+        squash_commit_sha: sha
+      )
+
+      commits = [double(:commit, id: sha)]
+
+      expect(MergeRequestDiffCommit)
+        .not_to receive(:oldest_merge_request_id_per_commit)
+
+      expect(described_class.new(project).execute(commits)).to eq(sha => mr)
+    end
+
     it 'includes the oldest merge request when a merge commit is present in a newer merge request' do
       project = create(:project)
       sha = Digest::SHA1.hexdigest('foo')

@@ -18,8 +18,8 @@ module MergeRequests
       mapping = {}
       shas = commits.map(&:id)
 
-      # To include merge requests by the commit SHA, we don't need to go through
-      # any diff rows.
+      # To include merge requests by the merge/squash SHA, we don't need to go
+      # through any diff rows.
       #
       # We can't squeeze all this into a single query, as the diff based data
       # relies on a GROUP BY. On the other hand, retrieving MRs by their merge
@@ -27,12 +27,12 @@ module MergeRequests
       @project
         .merge_requests
         .preload_target_project
-        .by_merge_commit_sha(shas)
+        .by_merge_or_squash_commit_sha(shas)
         .each do |mr|
-          # Merge SHAs can't be in the merge request itself. It _is_ possible a
-          # newer merge request includes the merge commit, but in that case we
-          # still want the oldest merge request.
-          mapping[mr.merge_commit_sha] = mr
+          # Merge/squash SHAs can't be in the merge request itself. It _is_
+          # possible a newer merge request includes the commit, but in that case
+          # we still want the oldest merge request.
+          mapping[mr.squash_commit_sha || mr.merge_commit_sha] = mr
         end
 
       remaining = shas - mapping.keys
