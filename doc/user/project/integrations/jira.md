@@ -74,7 +74,7 @@ The process for configuring Jira depends on whether you host Jira on your own se
 
 Jira Server supports basic authentication. When connecting, a **username and password** are
 required. Connecting to Jira Server via CAS is not possible. For more information, see
-[set up a user in Jira Server](jira_server_configuration.md).
+[set up a user in Jira Server](../../../integration/jira/jira_server_configuration.md).
 
 #### Jira on Atlassian cloud
 
