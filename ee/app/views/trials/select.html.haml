@@ -29,6 +29,6 @@
         .gl-form-checkbox.form-check.form-check-inline
           = radio_button_tag :trial_entity, :individual, params[:trial_entity]=='individual', required: true, class: 'form-check-input'
           = label_tag :trial_entity_individual, _('No'), class: 'form-check-label'
-  = submit_tag _('Start your free trial'), class: 'btn btn-success btn-block'
+  = submit_tag _('Start your free trial'), class: 'gl-button btn btn-success btn-block'
 
 = render 'skip_trial'

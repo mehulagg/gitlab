@@ -19,7 +19,7 @@
     .btn-group.mirror-actions-group.float-right{ role: 'group' }
       - ssh_public_key = @project.import_data.ssh_public_key
       - if ssh_public_key
-        = clipboard_button(text: ssh_public_key, class: 'btn btn-default rspec-copy-ssh-public-key', title: _('Copy SSH public key'), qa_selector: 'copy_public_key_button')
+        = clipboard_button(text: ssh_public_key, class: 'gl-button btn btn-default rspec-copy-ssh-public-key', title: _('Copy SSH public key'), qa_selector: 'copy_public_key_button')
       - if import_state.mirror_update_due? || import_state.updating_mirror?
         %button.btn.btn-icon.gl-button.disabled{ type: 'button', data: { container: 'body', toggle: 'tooltip', qa_selector: 'updating_button' }, title: _('Updating') }= sprite_icon("retry", css_class: "spin")
       - elsif @project.archived?
