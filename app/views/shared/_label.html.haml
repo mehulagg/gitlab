@@ -12,9 +12,9 @@
     - if can?(current_user, :admin_label, @project)
       %li.inline.js-toggle-priority{ data: { url: remove_priority_project_label_path(@project, label),
         dom_id: dom_id(label), type: label.type } }
-        %button.label-action.add-priority.gl-button.btn.btn-transparent.has-tooltip{ title: _('Prioritize'), type: 'button', data: { placement: 'bottom' }, aria_label: _('Prioritize label') }
+        %button.label-action.add-priority.gl-button.btn.btn-default.btn-transparent.has-tooltip{ title: _('Prioritize'), type: 'button', data: { placement: 'bottom' }, aria_label: _('Prioritize label') }
           = sprite_icon('star-o')
-        %button.label-action.remove-priority.gl-button.btn.btn-transparent.has-tooltip{ title: _('Remove priority'), type: 'button', data: { placement: 'bottom' }, aria_label: _('Deprioritize label') }
+        %button.label-action.remove-priority.gl-button.btn.btn-default.btn-transparent.has-tooltip{ title: _('Remove priority'), type: 'button', data: { placement: 'bottom' }, aria_label: _('Deprioritize label') }
           = sprite_icon('star')
     - if can?(current_user, :admin_label, label)
       %li.inline
@@ -29,7 +29,7 @@
             %ul
               - if label.project_label? && label.project.group && can?(current_user, :admin_label, label.project.group)
                 %li
-                  %button.js-promote-project-label-button.gl-button.btn.btn-transparent{ disabled: true, type: 'button',
+                  %button.js-promote-project-label-button.gl-button.btn.btn-default.btn-transparent{ disabled: true, type: 'button',
                     data: { url: promote_project_label_path(label.project, label),
                             label_title: label.title,
                             label_color: label.color,

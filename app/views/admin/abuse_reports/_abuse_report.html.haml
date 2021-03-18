@@ -29,6 +29,6 @@
     - if user && !user.blocked?
       = link_to _('Block user'), block_admin_user_path(user), data: {confirm: _('USER WILL BE BLOCKED! Are you sure?')}, method: :put, class: "gl-button btn btn-sm btn-block"
     - else
-      .gl-button.btn.btn-sm.disabled.btn-block
+      .gl-button.btn.btn-default.btn-sm.disabled.btn-block
         = _('Already blocked')
     = link_to _('Remove report'), [:admin, abuse_report], remote: true, method: :delete, class: "gl-button btn btn-sm btn-block btn-close js-remove-tr"
