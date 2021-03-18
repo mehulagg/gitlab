@@ -917,29 +917,44 @@ RSpec.describe Gitlab::GitAccess do
 
   describe '#check_sso_session!' do
     before do
-      allow_next_instance_of(Gitlab::Auth::GroupSaml::SessionEnforcer) do |enforcer|
-        allow(enforcer).to receive(:access_restricted?).and_return(access_restricted?)
-      end
-
       project.add_developer(user)
     end
 
-    context 'user with a sso session' do
-      let(:access_restricted?) { false }
-
+    context 'with project without group' do
       it 'allows pull and push changes' do
-        expect { pull_changes }.not_to raise_error
-        expect { push_changes }.not_to raise_error
+        expect(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive(:new).with(user, nil).and_return(double(access_restricted?: false))
+        pull_changes
       end
     end
 
-    context 'user without a sso session' do
-      let(:access_restricted?) { true }
+    context 'with project with group' do
+      let_it_be(:group) { create(:group) }
 
-      it 'does not allow pull or push changes' do
-        aggregate_failures do
-          expect { pull_changes }.to raise_forbidden("Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in")
-          expect { push_changes }.to raise_forbidden("Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in")
+      before do
+        project.update!(namespace: group)
+      end
+
+      context 'user with a sso session' do
+        let(:access_restricted?) { false }
+
+        it 'allows pull and push changes' do
+          expect(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive(:new).with(user, group).twice.and_return(double(access_restricted?: access_restricted?))
+
+          expect { pull_changes }.not_to raise_error
+          expect { push_changes }.not_to raise_error
+        end
+      end
+
+      context 'user without a sso session' do
+        let(:access_restricted?) { true }
+
+        it 'does not allow pull or push changes' do
+          expect(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive(:new).with(user, group).twice.and_return(double(access_restricted?: access_restricted?))
+
+          aggregate_failures do
+            expect { pull_changes }.to raise_forbidden("Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in")
+            expect { push_changes }.to raise_forbidden("Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in")
+          end
         end
       end
     end
