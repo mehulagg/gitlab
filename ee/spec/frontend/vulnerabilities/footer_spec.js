@@ -4,6 +4,7 @@ import Api from 'ee/api';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import VulnerabilityFooter from 'ee/vulnerabilities/components/footer.vue';
+import GenericReportSection from 'ee/vulnerabilities/components/generic_report/report_section.vue';
 import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
 import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
@@ -329,5 +330,16 @@ describe('Vulnerability Footer', () => {
         });
       },
     );
+  });
+
+  describe('generic report section', () => {
+    const genericReportSection = () => wrapper.findComponent(GenericReportSection);
+    // const vulnerabilityWithDetails = { ...vulnerability, details: {} };
+    const createVulnerability = ({ withDetails=false}) => ({ ...vulnerability, ...(withDetails ? {details: {}} : {})});
+
+    it.each([true, false])('when the vulnerability contains details is %s', (withDetails) => {
+      createWrapper(createVulnerability({ withDetails }));
+      expect(genericReportSection().exists()).toBe(withDetails);
+    });
   });
 });

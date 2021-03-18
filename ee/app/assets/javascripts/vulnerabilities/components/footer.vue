@@ -238,7 +238,11 @@ export default {
 <template>
   <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
-    <generic-report-section class="md" :details="mockDetails" />
+    <generic-report-section
+      v-if="vulnerability.details"
+      class="md"
+      :details="vulnerability.details"
+    />
     <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
       <merge-request-note
         :feedback="vulnerability.mergeRequestFeedback"
