@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Create Jira Server username and password **(FREE)**
 
-For [integrations with Jira](jira.md), you must create a user account in Jira to have access to
+For [integrations with Jira](../../user/project/integrations/jira.md), you must create a user account in Jira to have access to
 all projects that need to integrate with GitLab.
 
 The Jira user account created for the integration must have write access to
@@ -18,7 +18,7 @@ member of a new group named `gitlab-developers`:
 1. Sign in to your Jira instance as an administrator, and
    then go to the gear icon and select **User Management**.
 
-   ![Jira user management link](img/jira_user_management_link.png)
+   ![Jira user management link](../../user/project/integrations/img/jira_user_management_link.png)
 
 1. Create a new user account (for example, `gitlab`) with write access to
    projects in Jira. Enter the user account's name and a valid e-mail address,
@@ -30,11 +30,11 @@ member of a new group named `gitlab-developers`:
    do this by visiting the user profile, looking up the username, and setting a
    password.
 
-   ![Jira create new user](img/jira_create_new_user.png)
+   ![Jira create new user](../../user/project/integrations/img/jira_create_new_user.png)
 
 1. From the sidebar, select **Groups**.
 
-   ![Jira create new user](img/jira_create_new_group.png)
+   ![Jira create new user](../../user/project/integrations/img/jira_create_new_group.png)
 
 1. In the **Add group** section, enter a **Name** for the group (for example,
    `gitlab-developers`), and then select **Add group**.
@@ -43,12 +43,12 @@ member of a new group named `gitlab-developers`:
    The `gitlab-developers` group should be listed in the leftmost box as a
    selected group. In the **Add members to selected group(s)** area, enter `gitlab`.
 
-   ![Jira add user to group](img/jira_add_user_to_group.png)
+   ![Jira add user to group](../../user/project/integrations/img/jira_add_user_to_group.png)
 
    Select **Add selected users**, and `gitlab` should appear in the **Group member(s)**
    area. This membership is saved automatically.
 
-   ![Jira added user to group](img/jira_added_user_to_group.png)
+   ![Jira added user to group](../../user/project/integrations/img/jira_added_user_to_group.png)
 
 1. To give the newly-created group 'write' access, you must create a permission
    scheme. To do this, in the admin menu, go to the gear icon and select **Issues**.
@@ -62,7 +62,7 @@ member of a new group named `gitlab-developers`:
    select **Permissions**. Next to **Administer Projects**, select **Edit**. In
    the **Group** list, select `gitlab-developers`.
 
-   ![Jira group access](img/jira_group_access.png)
+   ![Jira group access](../../user/project/integrations/img/jira_group_access.png)
 
 The Jira configuration is complete. Write down the new Jira username and its
-password, as you need them when [configuring GitLab](jira.md#configure-gitlab).
+password, as you need them when [configuring GitLab](../../user/project/integrations/jira.md#configure-gitlab).
