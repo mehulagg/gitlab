@@ -164,10 +164,11 @@ For GitLab instances installed through Omnibus packages:
 
    ```ruby
    gitlab_kas['enable'] = false
-   
+   gitlab_kas['api_secret_key'] = 'Your shared secret between GitLab and KAS'
+
    gitlab_rails['gitlab_kas_enabled'] = true
-   gitlab_rails['gitlab_kas_external_url'] = 'wss://kas.gitlab.example.com'
-   gitlab_rails['gitlab_kas_internal_url'] = 'grpc://kas.internal.gitlab.example.com'
+   gitlab_rails['gitlab_kas_external_url'] = 'wss://kas.gitlab.example.com' # User-facing URL for the in-cluster agentk
+   gitlab_rails['gitlab_kas_internal_url'] = 'grpc://kas.internal.gitlab.example.com' # Internal URL for the GitLab backend
    ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
