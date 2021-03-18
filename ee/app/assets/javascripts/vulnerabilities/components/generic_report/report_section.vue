@@ -1,7 +1,7 @@
 <script>
 import { GlCollapse, GlIcon } from '@gitlab/ui';
-import EvidenceItem from './evidence_item.vue';
-import EvidenceRow from './evidence_row.vue';
+import ReportItem from './report_item.vue';
+import ReportRow from './report_row.vue';
 import { isSupportedReportType } from './types/utils';
 
 export default {
@@ -9,8 +9,8 @@ export default {
   components: {
     GlCollapse,
     GlIcon,
-    EvidenceItem,
-    EvidenceRow,
+    ReportItem,
+    ReportRow,
   },
   props: {
     details: {
@@ -47,17 +47,17 @@ export default {
         {{ s__('Vulnerability|Evidence') }}
       </h3>
     </header>
-    <gl-collapse :visible="showSection">
+    <gl-collapse class="container" :visible="showSection">
       <template v-for="([label, item], i) in detailsEntries">
-        <evidence-row
+        <report-row
           v-if="$options.isSupportedReportType(item.type)"
           :key="label"
           :label="item.name"
           :is-last-row="isLastRow(i)"
           :debug="i"
         >
-          <evidence-item :item="item" />
-        </evidence-row>
+          <report-item :item="item" />
+        </report-row>
       </template>
     </gl-collapse>
   </section>

@@ -6,7 +6,7 @@ export default {
   isListType,
   maxNestingLevel: 3,
   components: {
-    EvidenceItem: () => import('../evidence_item.vue'),
+    ReportItem: () => import('../report_item.vue'),
   },
   props: {
     items: {
@@ -47,7 +47,7 @@ export default {
   <ul class="gl-list-style-none gl-m-0!">
     <template v-for="item in items">
       <li v-if="shouldRenderItem(item)" :key="item.name" class="gl-m-0!">
-        <evidence-item :item="item" :nesting-level="nextNestingLevel" />
+        <report-item :item="item" :nesting-level="nextNestingLevel" />
       </li>
     </template>
   </ul>
