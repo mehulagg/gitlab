@@ -104,7 +104,8 @@ GitLab](https://docs.gitlab.com/omnibus/) or the [GitLab
 chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
 GitLab installed, please refer to our [installation
 documentation](https://docs.gitlab.com/ee/install/README.html).
-
+You can install the KAS within GitLab as explained below according to your GitLab installation method.
+You can also opt to use an [external KAS](#use-an-external-kas-installation).
 #### Install with Omnibus
 
 When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
@@ -150,7 +151,7 @@ gitlab:
 
 For details, read [Using the GitLab-KAS chart](https://docs.gitlab.com/charts/charts/gitlab/kas/).
 
-#### Configuring GitLab to use an external KAS
+#### Use an external KAS installation
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299850) in GitLab 13.10
 
