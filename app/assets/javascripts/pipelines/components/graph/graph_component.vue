@@ -24,6 +24,10 @@ export default {
       type: Object,
       required: true,
     },
+    viewType: {
+      type: String,
+      required: true,
+    },
     isLinkedPipeline: {
       type: Boolean,
       required: false,
@@ -146,6 +150,7 @@ export default {
             :linked-pipelines="upstreamPipelines"
             :column-title="__('Upstream')"
             :type="$options.pipelineTypeConstants.UPSTREAM"
+            :view-type="viewType"
             @error="onError"
           />
         </template>
@@ -188,6 +193,7 @@ export default {
             :linked-pipelines="downstreamPipelines"
             :column-title="__('Downstream')"
             :type="$options.pipelineTypeConstants.DOWNSTREAM"
+            :view-type="viewType"
             @downstreamHovered="setJob"
             @pipelineExpandToggle="togglePipelineExpanded"
             @scrollContainer="slidePipelineContainer"

@@ -5,7 +5,7 @@ import { __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { DEFAULT, DRAW_FAILURE, LOAD_FAILURE } from '../../constants';
 import { formatForLayers } from '../parsing_utils';
-import { STAGE_VIEW } from './constants';
+import { LAYER_VIEW, STAGE_VIEW } from './constants';
 import PipelineGraph from './graph_component.vue';
 import GraphViewSelector from './graph_view_selector.vue';
 import {
@@ -43,6 +43,8 @@ export default {
     return {
       alertType: null,
       currentViewType: STAGE_VIEW,
+      memoizedLayeredStages: null,
+      memoizedPlainStages: null,
       pipeline: null,
       showAlert: false,
     };
@@ -78,15 +80,16 @@ export default {
         }
 
         const pipelineData = unwrapPipelineData(this.pipelineProjectPath, data);
-        const layeredData = formatForLayers(pipelineData);
 
-        /*
-          Add these back to the stages section of the pipeline data.
-          Note, we don't use spread here even though it looks nice
-          because it can become unperformant to copy large amounts of data.
-        */
+        this.memoizedLayeredStages = null;
+        this.memoizedPlainStages = pipelineData.stages;
 
-        pipelineData.stages = layeredData;
+        if (this.currentViewType === LAYER_VIEW) {
+          const layeredStages = formatForLayers(pipelineData);
+          this.memoizedLayeredStages = layeredStages;
+          pipelineData.stages = layeredStages;
+        }
+
         return pipelineData;
       },
       error(err) {
@@ -148,6 +151,18 @@ export default {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   methods: {
+    calculateLayerData(pipelineData) {
+      const layeredData = formatForLayers(pipelineData);
+
+      /*
+        Add these back to the stages section of the pipeline data.
+        Note, we don't use spread here even though it looks nice
+        because it can become unperformant to copy large amounts of data.
+      */
+
+      this.memoizedLayeredStages = layeredData;
+      return layeredData;
+    },
     hideAlert() {
       this.showAlert = false;
       this.alertType = null;
@@ -166,6 +181,16 @@ export default {
     /* eslint-enable @gitlab/require-i18n-strings */
     updateViewType(type) {
       this.currentViewType = type;
+
+      if (type === LAYER_VIEW) {
+        this.pipeline.stages = !this.memoizedLayeredStages
+          ? this.calculateLayerData(this.pipeline)
+          : this.memoizedLayeredStages;
+      }
+
+      if (type === STAGE_VIEW) {
+        this.pipeline.stages = this.memoizedPlainStages;
+      }
     },
   },
 };
@@ -185,6 +210,7 @@ export default {
       v-if="pipeline"
       :config-paths="configPaths"
       :pipeline="pipeline"
+      :view-type="currentViewType"
       @error="reportFailure"
       @refreshPipelineGraph="refreshPipelineGraph"
     />

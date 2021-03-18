@@ -2,7 +2,7 @@
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import { LOAD_FAILURE } from '../../constants';
 import { formatForLayers } from '../parsing_utils';
-import { ONE_COL_WIDTH, UPSTREAM } from './constants';
+import { ONE_COL_WIDTH, UPSTREAM, LAYER_VIEW, STAGE_VIEW } from './constants';
 import LinkedPipeline from './linked_pipeline.vue';
 import {
   getQueryHeaders,
@@ -36,11 +36,17 @@ export default {
       type: String,
       required: true,
     },
+    viewType: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       currentPipeline: null,
       loadingPipelineId: null,
+      memoizedLayeredStages: null,
+      memoizedPlainStages: null,
       pipelineExpanded: false,
     };
   },
@@ -78,6 +84,26 @@ export default {
       return this.isUpstream ? 0 : this.$options.minWidth;
     },
   },
+  watch: {
+    viewType: {
+      immediate: false,
+      handler(val) {
+        if (!this.currentPipeline) {
+          return;
+        }
+
+        if (val === LAYER_VIEW) {
+          this.currentPipeline.stages = !this.memoizedLayeredStages
+            ? this.calculateLayerData(this.pipeline)
+            : (this.currentPipeline.stages = this.memoizedLayeredStages);
+        }
+
+        if (val === STAGE_VIEW) {
+          this.currentPipeline.stages = this.memoizedPlainStages;
+        }
+      },
+    },
+  },
   methods: {
     getPipelineData(pipeline) {
       const projectPath = pipeline.project.fullPath;
@@ -107,15 +133,16 @@ export default {
           }
 
           const pipelineData = unwrapPipelineData(this.pipelineProjectPath, data);
-          const layeredData = formatForLayers(pipelineData);
 
-          /*
-            Add these back to the stages section of the pipeline data.
-            Note, we don't use spread here even though it looks nice
-            because it can become unperformant to copy large amounts of data.
-          */
+          this.memoizedLayeredStages = null;
+          this.memoizedPlainStages = pipelineData.stages;
 
-          pipelineData.stages = layeredData;
+          if (this.viewType === LAYER_VIEW) {
+            const layeredStages = formatForLayers(pipelineData);
+            this.memoizedLayeredStages = layeredStages;
+            pipelineData.stages = layeredStages;
+          }
+
           return pipelineData;
         },
         result() {
@@ -215,6 +242,7 @@ export default {
               :config-paths="configPaths"
               :pipeline="currentPipeline"
               :is-linked-pipeline="true"
+              :view-type="viewType"
             />
           </div>
         </li>

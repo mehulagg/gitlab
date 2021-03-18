@@ -192,7 +192,6 @@ describe('Pipeline graph wrapper', () => {
       });
 
       it('does not appear', () => {
-        console.log('1', wrapper.html());
         expect(getViewSelector().exists()).toBe(false);
       });
     });
@@ -212,7 +211,6 @@ describe('Pipeline graph wrapper', () => {
       });
 
       it('appears', () => {
-        console.log(wrapper.html());
         expect(getViewSelector().exists()).toBe(true);
       });
     });
