@@ -189,6 +189,9 @@ then you'll need to also add the full paths as shown below:
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. If you're using [Pages Access Control](#access-control), update Redirect URI in the `GitLab Pages`
+[System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
+to use HTTPS protocol.
 
 WARNING:
 Multiple wildcards for one instance is not supported. Only one wildcard per instance can be assigned.
@@ -1114,3 +1117,8 @@ gitlab_pages['env'] = {'TMPDIR' => '<new_tmp_path>'}
 
 Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
 `sudo gitlab-ctl restart`.
+
+### `The redirect URI included is not valid.` when using Pages Access Controls
+
+Verify that the **Callback URL**/Redirect URI in the `GitLab Pages` [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
+is using the protocol (HTTP / HTTPS) that `pages_external_url` is configured to use.
