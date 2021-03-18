@@ -154,23 +154,21 @@ For details, read [Using the GitLab-KAS chart](https://docs.gitlab.com/charts/ch
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299850) in GitLab 13.10
 
-GitLab can be configured to use an externally installed KAS.
+Besides installing KAS with GitLab, you can opt to configure GitLab to use an external KAS.
 
-#### Helm chart
+For GitLab instances installed through the GitLab Helm Chart, see [how to configure your external KAS](https://docs.gitlab.com/charts/charts/globals.html#external-kas).
 
-Refer to [the chart documentation](https://docs.gitlab.com/charts/charts/globals.html#external-kas).
+For GitLab instances installed through Omnibus packages:
 
-#### Omnibus
+1. Edit `/etc/gitlab/gitlab.rb` adding the paths to your external KAS:
 
-1. Edit `/etc/gitlab/gitlab.rb`:
-
-```ruby
-gitlab_kas['enable'] = false
-
-gitlab_rails['gitlab_kas_enabled'] = true
-gitlab_rails['gitlab_kas_external_url'] = 'wss://kas.gitlab.example.com'
-gitlab_rails['gitlab_kas_internal_url'] = 'grpc://kas.internal.gitlab.example.com'
-```
+   ```ruby
+   gitlab_kas['enable'] = false
+   
+   gitlab_rails['gitlab_kas_enabled'] = true
+   gitlab_rails['gitlab_kas_external_url'] = 'wss://kas.gitlab.example.com'
+   gitlab_rails['gitlab_kas_internal_url'] = 'grpc://kas.internal.gitlab.example.com'
+   ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
 
