@@ -272,7 +272,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   ```
 
   In other cases it may be simpler to use `sprintf`, perhaps in a computed
-  prop. For example:
+  property. For example:
 
   ```html
   <script>
