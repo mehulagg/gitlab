@@ -8,11 +8,6 @@ import dastScannerProfileCreateMutation from 'ee/security_configuration/dast_sca
 import dastScannerProfileUpdateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
 import { scannerProfiles, policyScannerProfile } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
-import { redirectTo } from '~/lib/utils/url_utility';
-
-jest.mock('~/lib/utils/url_utility', () => ({
-  redirectTo: jest.fn(),
-}));
 
 const projectFullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/security/configuration/dast_profiles`;
@@ -159,7 +154,7 @@ describe('DAST Scanner Profile', () => {
     });
 
     it('populates the fields with the data passed in via the profile prop or default values', () => {
-      expect(findProfileNameInput().element.value).toBe(profile?.name ?? '');
+      expect(findProfileNameInput().element.value).toBe(profile?.profileName ?? '');
       expect(findScanType().vm.$attrs.checked).toBe(profile?.scanType ?? SCAN_TYPE.PASSIVE);
     });
 
@@ -199,8 +194,9 @@ describe('DAST Scanner Profile', () => {
           });
         });
 
-        it('redirects to the profiles library', () => {
-          expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+        it('emit success event with correct params', () => {
+          expect(wrapper.emitted('success')).toBeTruthy();
+          expect(wrapper.emitted('success')[0]).toStrictEqual([{ id: 30203 }]);
         });
 
         it('does not show an alert', () => {
@@ -258,14 +254,14 @@ describe('DAST Scanner Profile', () => {
         createFullComponent();
       });
 
-      describe('form empty', () => {
-        it('redirects to the profiles library', () => {
+      describe('when form is empty', () => {
+        it('emits cancel event', () => {
           findCancelButton().vm.$emit('click');
-          expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
 
-      describe('form not empty', () => {
+      describe('when form is not empty', () => {
         beforeEach(() => {
           findProfileNameInput().setValue(profileName);
         });
@@ -276,9 +272,9 @@ describe('DAST Scanner Profile', () => {
           expect(findCancelModal().vm.show).toHaveBeenCalled();
         });
 
-        it('redirects to the profiles library if confirmed', () => {
+        it('emits cancel event', () => {
           findCancelModal().vm.$emit('ok');
-          expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
     });
