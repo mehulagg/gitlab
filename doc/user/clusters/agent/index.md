@@ -96,7 +96,7 @@ The available `agentk` and `kas` versions can be found in
 [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3834) in GitLab 13.10,
 the GitLab Kubernetes Agent Server (KAS) is available on GitLab.com under `wss://kas.gitlab.com`.
 If you are a GitLab.com user, skip this step and directly
-[set up the configuration repository](#define-a-configuration-repository) 
+[set up the configuration repository](#define-a-configuration-repository)
 for your agent.
 
 The GitLab Kubernetes Agent Server (KAS) can be deployed using [Omnibus
@@ -149,6 +149,30 @@ gitlab:
 ```
 
 For details, read [Using the GitLab-KAS chart](https://docs.gitlab.com/charts/charts/gitlab/kas/).
+
+#### Configuring GitLab to use an external KAS
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299850) in GitLab 13.10
+
+GitLab can be configured to use an externally installed KAS.
+
+#### Helm chart
+
+Refer to [the chart documentation](https://docs.gitlab.com/charts/charts/globals.html#external-kas).
+
+#### Omnibus
+
+1. Edit `/etc/gitlab/gitlab.rb`:
+
+```ruby
+gitlab_kas['enable'] = false
+
+gitlab_rails['gitlab_kas_enabled'] = true
+gitlab_rails['gitlab_kas_external_url'] = 'wss://kas.gitlab.example.com'
+gitlab_rails['gitlab_kas_internal_url'] = 'grpc://kas.internal.gitlab.example.com'
+```
+
+1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 ### Define a configuration repository
 
