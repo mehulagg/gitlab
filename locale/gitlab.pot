@@ -14569,6 +14569,9 @@ msgstr ""
 msgid "GroupSAML|Certificate fingerprint"
 msgstr ""
 
+msgid "GroupSAML|Check SSO on git activity"
+msgstr ""
+
 msgid "GroupSAML|Configuration"
 msgstr ""
 
@@ -14582,6 +14585,9 @@ msgid "GroupSAML|Default membership role"
 msgstr ""
 
 msgid "GroupSAML|Enable SAML authentication for this group."
+msgstr ""
+
+msgid "GroupSAML|Enforce SSO-check on git activity in this group."
 msgstr ""
 
 msgid "GroupSAML|Enforce SSO-only authentication for this group."
@@ -14678,6 +14684,9 @@ msgid "GroupSAML|The case-sensitive group name that will be sent by the SAML ide
 msgstr ""
 
 msgid "GroupSAML|This will be set as the access level of users added to the group."
+msgstr ""
+
+msgid "GroupSAML|To be able to enable enforced SSO on git activity, you first need to enable SAML authentication."
 msgstr ""
 
 msgid "GroupSAML|To be able to enable enforced SSO, you first need to enable SAML authentication."
