@@ -332,14 +332,29 @@ describe('Vulnerability Footer', () => {
     );
   });
 
-  describe('generic report section', () => {
-    const genericReportSection = () => wrapper.findComponent(GenericReportSection);
-    // const vulnerabilityWithDetails = { ...vulnerability, details: {} };
-    const createVulnerability = ({ withDetails=false}) => ({ ...vulnerability, ...(withDetails ? {details: {}} : {})});
+  describe('generic report', () => {
+    const mockDetails = { foo: { type: 'bar' } };
 
-    it.each([true, false])('when the vulnerability contains details is %s', (withDetails) => {
-      createWrapper(createVulnerability({ withDetails }));
-      expect(genericReportSection().exists()).toBe(withDetails);
+    const genericReportSection = () => wrapper.findComponent(GenericReportSection);
+
+    describe('when a vulnerability contains a details property', () => {
+      beforeEach(() => {
+        createWrapper({ details: mockDetails });
+      });
+
+      it('passes the correct props to the report section', () => {
+        expect(genericReportSection().props()).toMatchObject({
+          details: mockDetails,
+        });
+      });
+    });
+
+    describe('when a vulnerability does not contain a details property', () => {
+      it('does not render the report section', () => {
+        createWrapper();
+
+        expect(genericReportSection().exists()).toBe(false);
+      });
     });
   });
 });
