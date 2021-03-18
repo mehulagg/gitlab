@@ -124,7 +124,7 @@ refer to the **Enable GitLab KAS** section of the
 
 #### Install with the Helm chart
 
-When installing or upgrading the GitLab Helm chart, consider the following Helm v3 example.
+For GitLab's [Helm Chart](https://gitlab.com/gitlab-org/charts/gitlab) installations, consider the following Helm v3 example.
 If you're using Helm v2, you must modify this example. See our [notes regarding deploy with Helm](https://docs.gitlab.com/charts/installation/deployment.html#deploy-using-helm).
 
 You must set `global.kas.enabled=true` for the KAS to be properly installed and configured:
