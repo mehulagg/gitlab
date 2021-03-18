@@ -502,6 +502,68 @@ export const mockUnsortedEpics = [
   },
 ];
 
+export const mockEpicNode1 = {
+  __typename: 'Epic',
+  parent: null,
+  id: 'gid://gitlab/Epic/40',
+  iid: '2',
+  title: 'Marketing epic',
+  description: 'Mock epic description',
+  state: 'opened',
+  startDate: '2017-12-25',
+  dueDate: '2018-03-09',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/marketing/-/epics/1',
+  hasChildren: false,
+  hasParent: false,
+  confidential: false,
+  descendantWeightSum: {
+    closedIssues: 3,
+    openedIssues: 2,
+    __typename: 'EpicDescendantWeights',
+  },
+  descendantCounts: {
+    openedEpics: 3,
+    closedEpics: 2,
+    __typename: 'EpicDescendantCount',
+  },
+  group: {
+    name: 'Gitlab Org',
+    fullName: 'Gitlab Org',
+    fullPath: 'gitlab-org',
+    __typename: 'Group',
+  },
+};
+
+export const mockEpicNode2 = {
+  __typename: 'Epic',
+  parent: null,
+  id: 'gid://gitlab/Epic/41',
+  iid: '3',
+  title: 'Another marketing',
+  startDate: '2017-12-26',
+  dueDate: '2018-03-10',
+  state: 'opened',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/marketing/-/epics/2',
+  descendantWeightSum: {
+    closedIssues: 0,
+    openedIssues: 1,
+    __typename: 'EpicDescendantWeights',
+  },
+  descendantCounts: {
+    openedEpics: 0,
+    closedEpics: 0,
+    __typename: 'EpicDescendantCount',
+  },
+  group: {
+    name: 'Gitlab Org',
+    fullName: 'Gitlab Org',
+    fullPath: 'gitlab-org',
+    __typename: 'Group',
+  },
+};
+
+export const mockGroupEpics = [mockEpicNode1, mockEpicNode2];
+
 export const mockGroupEpicsQueryResponse = {
   data: {
     group: {
@@ -511,64 +573,54 @@ export const mockGroupEpicsQueryResponse = {
         edges: [
           {
             node: {
-              id: 'gid://gitlab/Epic/40',
-              title: 'Marketing epic',
-              startDate: '2017-12-25',
-              dueDate: '2018-03-09',
-              webUrl: '/groups/gitlab-org/marketing/-/epics/1',
-              group: {
-                name: 'Gitlab Org',
-                fullName: 'Gitlab Org',
-              },
+              ...mockEpicNode1,
             },
+            __typename: 'EpicEdge',
           },
           {
             node: {
-              id: 'gid://gitlab/Epic/41',
-              title: 'Another marketing',
-              startDate: '2017-12-26',
-              dueDate: '2018-03-10',
-              webUrl: '/groups/gitlab-org/marketing/-/epics/2',
-              group: {
-                name: 'Gitlab Org',
-                fullName: 'Gitlab Org',
-              },
+              ...mockEpicNode2,
             },
+            __typename: 'EpicEdge',
           },
         ],
+        __typename: 'EpicConnection',
       },
+      __typename: 'Group',
     },
   },
 };
 
-export const mockGroupEpicsQueryResponseFormatted = [
-  {
-    id: 'gid://gitlab/Epic/40',
-    title: 'Marketing epic',
-    startDate: '2017-12-25',
-    dueDate: '2018-03-09',
-    webUrl: '/groups/gitlab-org/marketing/-/epics/1',
-    group: {
-      name: 'Gitlab Org',
-      fullName: 'Gitlab Org',
-    },
-    groupName: 'Gitlab Org',
-    groupFullName: 'Gitlab Org',
+export const mockChildEpicNode1 = {
+  __typename: 'Epic',
+  id: 'gid://gitlab/Epic/70',
+  iid: '10',
+  title: 'child epic title',
+  description: null,
+  state: 'opened',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/-/epics/10',
+  startDate: null,
+  dueDate: null,
+  hasChildren: false,
+  hasParent: true,
+  confidential: false,
+  descendantWeightSum: {
+    closedIssues: 0,
+    openedIssues: 0,
+    __typename: 'EpicDescendantWeights',
   },
-  {
-    id: 'gid://gitlab/Epic/41',
-    title: 'Another marketing',
-    startDate: '2017-12-26',
-    dueDate: '2018-03-10',
-    webUrl: '/groups/gitlab-org/marketing/-/epics/2',
-    group: {
-      name: 'Gitlab Org',
-      fullName: 'Gitlab Org',
-    },
-    groupName: 'Gitlab Org',
-    groupFullName: 'Gitlab Org',
+  descendantCounts: {
+    openedEpics: 0,
+    closedEpics: 0,
+    __typename: 'EpicDescendantCount',
   },
-];
+  group: {
+    name: 'Gitlab Org',
+    fullName: 'Gitlab Org',
+    fullPath: 'gitlab-org',
+    __typename: 'Group',
+  },
+};
 
 export const mockEpicChildEpicsQueryResponse = {
   data: {
@@ -578,54 +630,27 @@ export const mockEpicChildEpicsQueryResponse = {
       epic: {
         id: 'gid://gitlab/Epic/1',
         title: 'Error omnis quos consequatur',
+        hasChildren: true,
         children: {
-          edges: mockGroupEpicsQueryResponse.data.group.epics.edges,
+          edges: [
+            {
+              node: {
+                ...mockChildEpicNode1,
+              },
+              __typename: 'EpicEdge',
+            },
+          ],
+          __typename: 'EpicConnection',
         },
+        __typename: 'Epic',
       },
+      __typename: 'Group',
     },
   },
 };
-
-export const mockEpicChildEpicsQueryResponseFormatted = {
-  data: {
-    group: {
-      id: 'gid://gitlab/Group/2',
-      name: 'Gitlab Org',
-      epic: {
-        id: 'gid://gitlab/Epic/1',
-        title: 'Error omnis quos consequatur',
-        children: [mockFormattedChildEpic1, mockFormattedChildEpic2],
-      },
-    },
-  },
-};
-
-export const rawMilestones = [
-  {
-    id: 'gid://gitlab/Milestone/40',
-    iid: 1,
-    state: 'active',
-    description: null,
-    title: 'Milestone 1',
-    startDate: '2017-12-25',
-    dueDate: '2018-03-09',
-    webPath: '/groups/gitlab-org/-/milestones/1',
-  },
-  {
-    id: 'gid://gitlab/Milestone/41',
-    iid: 2,
-    state: 'active',
-    description: null,
-    title: 'Milestone 2',
-    startDate: '2017-12-26',
-    dueDate: '2018-03-10',
-    webPath: '/groups/gitlab-org/-/milestones/2',
-  },
-];
 
 export const mockMilestone = {
   id: 1,
-  iid: 1,
   state: 'active',
   description:
     'Explicabo et soluta minus praesentium minima ab et voluptatem. Quas architecto vero corrupti voluptatibus labore accusantium consectetur. Aliquam aut impedit voluptates illum molestias aut harum. Aut non odio praesentium aut.\n\nQuo asperiores aliquid sed nobis. Omnis sint iste provident numquam. Qui voluptatem tempore aut aut voluptas dolorem qui.\n\nEst est nemo quod est. Odit modi eos natus cum illo aut. Expedita nostrum ea est omnis magnam ut eveniet maxime. Itaque ipsam provident minima et occaecati ut. Dicta est perferendis sequi perspiciatis rerum voluptatum deserunt.',
@@ -641,7 +666,6 @@ export const mockMilestone = {
 
 export const mockMilestone2 = {
   id: 2,
-  iid: 2,
   state: 'active',
   description:
     'Explicabo et soluta minus praesentium minima ab et voluptatem. Quas architecto vero corrupti voluptatibus labore accusantium consectetur. Aliquam aut impedit voluptates illum molestias aut harum. Aut non odio praesentium aut.\n\nQuo asperiores aliquid sed nobis. Omnis sint iste provident numquam. Qui voluptatem tempore aut aut voluptas dolorem qui.\n\nEst est nemo quod est. Odit modi eos natus cum illo aut. Expedita nostrum ea est omnis magnam ut eveniet maxime. Itaque ipsam provident minima et occaecati ut. Dicta est perferendis sequi perspiciatis rerum voluptatum deserunt.',
@@ -656,7 +680,6 @@ export const mockMilestone2 = {
 
 export const mockFormattedMilestone = {
   id: 1,
-  iid: 1,
   state: 'active',
   title:
     'Cupiditate exercitationem unde harum reprehenderit maxime eius velit recusandae incidunt quia.',
@@ -675,6 +698,36 @@ export const mockFormattedMilestone = {
   newMilestone: undefined,
 };
 
+export const mockGroupMilestoneNode1 = {
+  id: 'gid://gitlab/Milestone/40',
+  title: 'Sprint - Tempore voluptatibus et aut consequatur similique animi dolores veritatis.',
+  description: '',
+  state: 'active',
+  startDate: '2017-12-25',
+  dueDate: '2018-03-09',
+  webPath: '/gitlab-org/gitlab-org/-/milestones/1',
+  projectMilestone: false,
+  groupMilestone: true,
+  subgroupMilestone: false,
+  __typename: 'Milestone',
+};
+
+export const mockGroupMilestoneNode2 = {
+  id: 'gid://gitlab/Milestone/41',
+  description: 'Maiores dolor vel nihil non nam commodi.',
+  title: 'Milestone 2',
+  state: 'active',
+  startDate: '2017-12-26',
+  dueDate: '2018-03-10',
+  webPath: '/gitlab-org/gitlab-test/-/milestones/2',
+  projectMilestone: false,
+  groupMilestone: true,
+  subgroupMilestone: false,
+  __typename: 'Milestone',
+};
+
+export const mockGroupMilestones = [mockGroupMilestoneNode1, mockGroupMilestoneNode2];
+
 export const mockGroupMilestonesQueryResponse = {
   data: {
     group: {
@@ -684,30 +737,20 @@ export const mockGroupMilestonesQueryResponse = {
         edges: [
           {
             node: {
-              iid: 1,
-              id: 'gid://gitlab/Milestone/40',
-              state: 'active',
-              description: null,
-              title: 'Milestone 1',
-              startDate: '2017-12-25',
-              dueDate: '2018-03-09',
-              webPath: '/groups/gitlab-org/-/milestones/1',
+              ...mockGroupMilestoneNode1,
             },
+            __typename: 'MilestoneEdge',
           },
           {
             node: {
-              iid: 2,
-              id: 'gid://gitlab/Milestone/41',
-              state: 'active',
-              description: null,
-              title: 'Milestone 2',
-              startDate: '2017-12-26',
-              dueDate: '2018-03-10',
-              webPath: '/groups/gitlab-org/-/milestones/2',
+              ...mockGroupMilestoneNode2,
             },
+            __typename: 'MilestoneEdge',
           },
         ],
+        __typename: 'MilestoneConnection',
       },
+      __typename: 'Group',
     },
   },
 };

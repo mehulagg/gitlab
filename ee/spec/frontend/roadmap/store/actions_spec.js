@@ -22,10 +22,11 @@ import {
   mockFormattedEpic,
   mockSortedBy,
   mockGroupEpicsQueryResponse,
-  mockGroupEpicsQueryResponseFormatted,
-  mockGroupMilestonesQueryResponse,
+  mockGroupEpics,
   mockEpicChildEpicsQueryResponse,
-  rawMilestones,
+  mockChildEpicNode1,
+  mockGroupMilestonesQueryResponse,
+  mockGroupMilestones,
   mockMilestone,
   mockFormattedMilestone,
 } from '../mock_data';
@@ -223,7 +224,7 @@ describe('Roadmap Vuex Actions', () => {
           [
             {
               type: 'receiveEpicsSuccess',
-              payload: { rawEpics: mockGroupEpicsQueryResponseFormatted },
+              payload: { rawEpics: mockGroupEpics },
             },
           ],
         );
@@ -275,7 +276,7 @@ describe('Roadmap Vuex Actions', () => {
             {
               type: 'receiveEpicsSuccess',
               payload: {
-                rawEpics: mockGroupEpicsQueryResponseFormatted,
+                rawEpics: mockGroupEpics,
                 newEpic: true,
                 timeframeExtended: true,
               },
@@ -504,10 +505,6 @@ describe('Roadmap Vuex Actions', () => {
         itemExpanded: false,
       };
 
-      const children = epicUtils.extractGroupEpics(
-        mockEpicChildEpicsQueryResponse.data.group.epic.children.edges,
-      );
-
       testAction(
         actions.toggleEpic,
         { parentItem },
@@ -522,7 +519,7 @@ describe('Roadmap Vuex Actions', () => {
             type: 'receiveChildrenSuccess',
             payload: {
               parentItemId: parentItem.id,
-              rawChildren: children,
+              rawChildren: [mockChildEpicNode1],
             },
           },
         ],
@@ -668,7 +665,7 @@ describe('Roadmap Vuex Actions', () => {
             },
             {
               type: 'receiveMilestonesSuccess',
-              payload: { rawMilestones },
+              payload: { rawMilestones: mockGroupMilestones },
             },
           ],
         );
@@ -747,7 +744,7 @@ describe('Roadmap Vuex Actions', () => {
 
   describe('refreshMilestoneDates', () => {
     it('should update milestones after refreshing milestone dates to match with updated timeframe', () => {
-      const milestones = rawMilestones.map((milestone) =>
+      const milestones = mockGroupMilestones.map((milestone) =>
         roadmapItemUtils.formatRoadmapItemDetails(
           milestone,
           state.timeframeStartDate,
