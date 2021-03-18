@@ -3448,7 +3448,7 @@ msgid "An error occurred when updating the issue title"
 msgstr ""
 
 msgid "An error occurred when updating the issue weight"
-msgstr "Произошла ошибка при обновлении вес обсуждения"
+msgstr "Произошла ошибка при обновлении весa обсуждения"
 
 msgid "An error occurred while acknowledging the notification. Refresh the page and try again."
 msgstr ""
