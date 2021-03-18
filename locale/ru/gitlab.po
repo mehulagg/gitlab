@@ -5352,7 +5352,7 @@ msgid "Burndown charts are now fixed. This means that removing issues from a mil
 msgstr "Диаграммы сгорания задач стали фиксированными. Это означает, что если убрать обсуждения из этапа, ставшего просроченным, диаграмма не изменится. Прежний вариант диаграммы можно увидеть, нажав на кнопку %{strongStart}Старый вид диаграммы сгорания%{strongEnd}."
 
 msgid "BurndownChartLabel|Open issue weight"
-msgstr "Открыть вес задачи"
+msgstr "Bес открытых задач"
 
 msgid "BurndownChartLabel|Open issues"
 msgstr "Открыть обсуждения"
@@ -6346,13 +6346,13 @@ msgid "Clear templates search input"
 msgstr "Очистить шаблоны ввода данных для поиска"
 
 msgid "Clear weight"
-msgstr "Очистить вес"
+msgstr "Удалить вес"
 
 msgid "Cleared weight."
-msgstr "вес очищен."
+msgstr "Вес удалён."
 
 msgid "Clears weight."
-msgstr "Очищает вес."
+msgstr "Удаляет вес."
 
 msgid "Click %{link_start}here%{link_end} to view the request."
 msgstr ""
@@ -12244,7 +12244,7 @@ msgid "Error occurred while updating the issue status"
 msgstr "Произошла ошибка при обновлении статуса обсуждения"
 
 msgid "Error occurred while updating the issue weight"
-msgstr "Произошла ошибка при изменении вес задачи"
+msgstr "Произошла ошибка при изменении весa обсуждения"
 
 msgid "Error occurred. A blocked user cannot be deactivated"
 msgstr "Произошла ошибка. Заблокированный пользователь не может быть деактивирован"
@@ -31798,7 +31798,7 @@ msgid "Total users"
 msgstr ""
 
 msgid "Total weight"
-msgstr "Итоговый вес"
+msgstr "Общий вес"
 
 msgid "Total: %{total}"
 msgstr "Всего: %{total}"
