@@ -18,7 +18,7 @@ export default {
       allCodequalityIssues: Object.freeze(
         allCodequalityIssues.sort(
           (a, b) =>
-            SEVERITY_SORT_ORDER.indexOf(a.severity) - SEVERITY_SORT_ORDER.indexOf(b.severity),
+            SEVERITY_SORT_ORDER[a.severity] - SEVERITY_SORT_ORDER[b.severity],
         ),
       ),
       pageInfo: Object.assign(state.pageInfo, {
