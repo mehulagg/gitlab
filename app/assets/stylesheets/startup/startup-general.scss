@@ -558,6 +558,9 @@ a.close.disabled {
   .d-sm-none {
     display: none !important;
   }
+  .d-sm-block {
+    display: none !important;
+  }
 }
 
 @media (min-width: 768px) {
