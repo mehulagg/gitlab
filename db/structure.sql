@@ -13926,8 +13926,7 @@ CREATE TABLE keys (
     last_used_at timestamp without time zone,
     fingerprint_sha256 bytea,
     expires_at timestamp with time zone,
-    before_expiry_notification_delivered boolean DEFAULT false NOT NULL,
-    after_expiry_notification_delivered boolean DEFAULT false NOT NULL
+    on_expiry_notification_delivered boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE keys_id_seq
