@@ -43,19 +43,11 @@ module Mutations
                  description: 'The usernames of users participating in the on-call rotation. A maximum limit of 100 participants applies.'
 
         def resolve(iid:, project_path:, participants:, **args)
-          project = Project.find_by_full_path(project_path)
-
-          raise_project_not_found unless project
-
-          schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iid)
-                                                                .execute
-                                                                .first
-
-          raise_schedule_not_found unless schedule
+          schedule = find_schedule!(iid: iid, project_path: project_path)
 
           result = ::IncidentManagement::OncallRotations::CreateService.new(
             schedule,
-            project,
+            schedule.project,
             current_user,
             parsed_params(schedule, participants, args)
           ).execute

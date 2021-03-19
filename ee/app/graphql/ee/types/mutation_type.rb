@@ -68,6 +68,7 @@ module EE
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Create
+        mount_mutation ::Mutations::IncidentManagement::OncallRotation::Preview
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Update
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Destroy
         mount_mutation ::Mutations::AppSec::Fuzzing::Api::CiConfiguration::Create

@@ -18,8 +18,8 @@ module Mutations
                  required: true,
                  description: 'The ID of the on-call rotation to remove.'
 
-        def resolve(project_path:, schedule_iid:, id:)
-          oncall_rotation = authorized_find!(project_path: project_path, schedule_iid: schedule_iid, id: id)
+        def resolve(id:, **args)
+          oncall_rotation = authorized_find!(id: id)
 
           response ::IncidentManagement::OncallRotations::DestroyService.new(
             oncall_rotation,

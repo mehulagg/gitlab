@@ -58,25 +58,13 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Destroy do
         end
       end
 
-      describe 'error cases' do
-        context 'project path incorrect' do
-          before do
-            args[:project_path] = "something/incorrect"
-          end
-
-          it 'raises an error' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
+      context 'license disabled' do
+        before do
+          stub_licensed_features(oncall_schedules: false)
         end
 
-        context 'license disabled' do
-          before do
-            stub_licensed_features(oncall_schedules: false)
-          end
-
-          it 'raises an error' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-          end
+        it 'raises an error' do
+          expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
       end
     end

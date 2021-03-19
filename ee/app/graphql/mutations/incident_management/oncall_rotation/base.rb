@@ -23,18 +23,20 @@ module Mutations
           }
         end
 
-        def find_object(project_path:, schedule_iid:, **args)
+        def find_object(id:)
+          GitlabSchema.object_from_id(id, expected_type: ::IncidentManagement::OncallRotation)
+        end
+
+        def find_schedule!(iid:, project_path:)
           project = Project.find_by_full_path(project_path)
 
-          return unless project
+          raise_project_not_found unless project
 
-          schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: schedule_iid).execute.first
+          schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iid).execute.first
 
-          return unless schedule
+          raise_schedule_not_found unless schedule
 
-          args = args.merge(id: args[:id].model_id)
-
-          ::IncidentManagement::OncallRotationsFinder.new(current_user, project, schedule, args).execute.first
+          schedule
         end
 
         def parsed_params(schedule, participants, args)

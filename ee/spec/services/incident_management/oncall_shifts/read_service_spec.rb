@@ -50,6 +50,26 @@ RSpec.describe ::IncidentManagement::OncallShifts::ReadService do
       end
     end
 
+    shared_examples 'returns exepected shifts for preview' do
+      context 'when the rotation is being previewed' do
+        let(:rotation) { build(:incident_management_oncall_rotation, :utc, length: 1, length_unit: :days) }
+        let(:participant) { build(:incident_management_oncall_participant, user: user_with_permissions, rotation: rotation) }
+        let(:project) { rotation.project }
+
+        let(:first_shift) { build(:incident_management_oncall_shift, participant: participant) }
+        let(:second_shift) { build(:incident_management_oncall_shift, participant: participant, starts_at: first_shift.ends_at) }
+        let(:third_shift) { build(:incident_management_oncall_shift, participant: participant, starts_at: second_shift.ends_at) }
+        let(:expected_shifts) { [first_shift, second_shift, third_shift] }
+
+        before do
+          project.add_reporter(user_with_permissions)
+          rotation.active_participants = [participant]
+        end
+
+        include_examples 'returns expected shifts'
+      end
+    end
+
     subject(:execute) { service.execute }
 
     context 'when the current_user is anonymous' do
@@ -101,6 +121,7 @@ RSpec.describe ::IncidentManagement::OncallShifts::ReadService do
         let(:expected_shifts) { [persisted_first_shift, second_shift, third_shift] }
 
         include_examples 'returns expected shifts'
+        include_examples 'returns exepected shifts for preview'
       end
 
       context 'when timeframe is entirely in the past' do
@@ -108,6 +129,7 @@ RSpec.describe ::IncidentManagement::OncallShifts::ReadService do
         let(:expected_shifts) { [persisted_first_shift] }
 
         include_examples 'returns expected shifts'
+        include_examples 'returns exepected shifts for preview'
       end
 
       context 'when timeframe is entirely in the future' do
@@ -115,6 +137,7 @@ RSpec.describe ::IncidentManagement::OncallShifts::ReadService do
         let(:expected_shifts) { [first_shift, second_shift, third_shift] }
 
         include_examples 'returns expected shifts'
+        include_examples 'returns exepected shifts for preview'
       end
     end
   end

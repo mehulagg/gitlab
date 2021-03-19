@@ -48,16 +48,6 @@ module Mutations
 
           response(result)
         end
-
-        private
-
-        def find_object(id:)
-          GitlabSchema.object_from_id(id, expected_type: ::IncidentManagement::OncallRotation)
-        end
-
-        def raise_rotation_not_found
-          raise Gitlab::Graphql::Errors::ArgumentError, 'The rotation could not be found'
-        end
       end
     end
   end

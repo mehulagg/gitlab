@@ -23,6 +23,7 @@ module IncidentManagement
         return error_no_permissions unless allowed?
         return error_invalid_range unless start_before_end?
         return error_excessive_range unless under_max_timeframe?
+        return success(generate_shifts) if preview?
 
         persisted_shifts = find_shifts
         generated_shifts = generate_shifts
@@ -46,9 +47,15 @@ module IncidentManagement
         ::IncidentManagement::OncallShiftGenerator
           .new(rotation)
           .for_timeframe(
-            starts_at: [start_time, current_time].max,
+            starts_at: generation_start_time,
             ends_at: end_time
           )
+      end
+
+      def generation_start_time
+        return start_time if preview?
+
+        [start_time, current_time].max
       end
 
       def combine_shifts(persisted_shifts, generated_shifts)
@@ -75,6 +82,10 @@ module IncidentManagement
 
       def under_max_timeframe?
         end_time.to_date <= start_time.to_date + MAXIMUM_TIMEFRAME
+      end
+
+      def preview?
+        !rotation.persisted?
       end
 
       def error(message)
