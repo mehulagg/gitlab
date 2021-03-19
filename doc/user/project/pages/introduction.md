@@ -286,12 +286,11 @@ For a list of known issues, visit the GitLab [public issue tracker](https://gitl
 
 ### 404 error when accessing a GitLab Pages site URL
 
-This problem most likely results from a missing `index.html` file in the public directory. If after deploying a Pages site,
+This problem most likely results from a missing `index.html` file in the public directory. If after deploying a Pages site
 a 404 is encountered, confirm that the public directory contains an `index.html` file. If the file contains a different name
-such as `test.html`, the Pages site can still be accessed, but the full path would be needed. For example: `https//group-name.pages.example.com/project-name/test.html`
+such as `test.html`, the Pages site can still be accessed, but the full path would be needed. For example: `https//group-name.pages.example.com/project-name/test.html`.
 
-The contents of the public directory can be confirmed by browsing the artifacts from the latest pipeline. To view the
-artifacts, navigate to **Project -> CI/CD -> Jobs**. Then click on the latest job, then under **Job artifacts** click **Browse**.
+The contents of the public directory can be confirmed by [browsing the artifacts](../../../ci/pipelines/job_artifacts.md#browsing-artifacts) from the latest pipeline.
 
 Files listed under the public directory can be accessed through the Pages URL for the project.
 
