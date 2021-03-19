@@ -599,6 +599,7 @@ the below steps to do a no downtime transfer to a new storage location.
 1. Verify Pages are still being served up as expected.
 
 ## Configure listener for reverse proxy requests
+
 > [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2533) in Omnibus GitLab 11.1.
 
 Follow the steps below to configure the proxy listener of GitLab Pages.
