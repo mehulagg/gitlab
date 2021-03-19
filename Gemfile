@@ -440,6 +440,9 @@ gem 'octokit', '~> 4.15'
 
 # https://gitlab.com/gitlab-org/gitlab/issues/207207
 gem 'gitlab-mail_room', '~> 0.0.10', require: false
+# Ruby v3.0 promoted net-http and net-imap from stdlib. Adding net-http as a
+# dependency avoids "already initialized constant errors" if net-imap is installed.
+gem 'net-http', '~> 0.1'
 
 gem 'email_reply_trimmer', '~> 0.1'
 gem 'html2text'
