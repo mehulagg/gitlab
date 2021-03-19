@@ -109,7 +109,7 @@ module Routable
     return (route&.name || build_full_name) unless persisted? && Feature.enabled?(:cached_route_lookups, type: :ops, default_enabled: :yaml)
 
     # If the route is already preloaded, return directly, preventing an extra load
-    return route.name if association(:route).loaded?
+    return route.name if association(:route).loaded? && route.present?
 
     Gitlab::Cache.fetch_once([routable_cache_key, :full_name]) do
       route&.name || build_full_name
@@ -121,7 +121,7 @@ module Routable
     return (route&.path || build_full_path) unless persisted? && Feature.enabled?(:cached_route_lookups, type: :ops, default_enabled: :yaml)
 
     # If the route is already preloaded, return directly, preventing an extra load
-    return route.path if association(:route).loaded?
+    return route.path if association(:route).loaded? && route.present?
 
     Gitlab::Cache.fetch_once([routable_cache_key, :full_path]) do
       route&.path || build_full_path
