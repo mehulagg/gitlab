@@ -24622,7 +24622,7 @@ msgid "Promotions|Weight"
 msgstr ""
 
 msgid "Promotions|Weighting your issue"
-msgstr "Обозначить вес обсуждения"
+msgstr "Установка веса обсуждения"
 
 msgid "Promotions|When you have a lot of issues, it can be hard to get an overview. By adding a weight to your issues, you can get a better idea of the effort, cost, required time, or value of each, and so better manage them."
 msgstr "При большом количестве обсуждений сложно оценить общую картину. Добавив вес к вашим обсуждениям, вы можете получить лучшее представление о затрачиваемых усилиях, времени, стоимости или значимости каждого из них и, таким образом, лучше ими управлять."
@@ -27688,7 +27688,7 @@ msgid "Set weight"
 msgstr "Установить вес"
 
 msgid "Set weight to %{weight}."
-msgstr "Установить вес на %{weight}."
+msgstr "Установить вес в следующее количество единиц: %{weight}."
 
 msgid "Set what should be replicated by this secondary node."
 msgstr ""
@@ -27748,7 +27748,7 @@ msgid "Sets time estimate to %{time_estimate}."
 msgstr "Задаёт оценку времени в %{time_estimate}."
 
 msgid "Sets weight to %{weight}."
-msgstr "Устанавливает вес на %{weight}."
+msgstr "Устанавливает вес в следующее количество единиц: %{weight}."
 
 msgid "Setting this to 0 means using the system default timeout value."
 msgstr ""
