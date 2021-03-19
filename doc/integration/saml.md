@@ -175,18 +175,17 @@ Your identity provider may require additional configuration, such as the followi
 |-------|-------|-------|
 | SAML profile | Web browser SSO profile | GitLab uses SAML to sign users in through their browser. No requests are made directly to the identity provider. |
 | SAML request binding | HTTP Redirect | GitLab (the service provider) redirects users to your identity provider with a base64 encoded `SAMLRequest` HTTP parameter. |
-| SAML response binding | HTTP POST | Your identity provider responds to users with an HTTP form including the `SAMLResponse`, which a user's browser submits back to GitLab. |
-| Sign SAML response | Yes | Required to prevent tampering. |
-| X.509 certificate in response | Yes | Used to sign the response and checked against the provided fingerprint. |
-| Fingerprint algorithm | SHA-1  | A SHA-1 hash of the certificate is used to sign the SAML Response. |
-| Signature algorithm | SHA-1/SHA-256/SHA-384/SHA-512 | Also known as the digest method, this can be specified in the SAML response. It determines how a response is signed. |
-| Encrypt SAML assertion | No | TLS is used between your identity provider, the user's browser, and GitLab. |
-| Sign SAML assertion | Optional | Assertions do not need to be signed. We validate their integrity by requiring the whole response to be signed. |
-| Check SAML request signature | No | GitLab does not sign SAML requests, but does check the signature on the SAML response. |
-| Default RelayState | Optional | The URL users should end up on after signing in through a button on your identity provider's list of apps. |
-| NameID format | `Persistent` | See [NameID format details](../user/group/saml_sso/index.md#nameid-format). |
-| Additional URLs | | You may need to use the issuer (or identifier) or the assertion consumer service URL in other fields on some providers. |
-| Single sign out URL | | Not supported |
+| SAML response binding | HTTP POST | Specifies how the SAML token is sent by your identity provider. Includes the `SAMLResponse`, which a user's browser submits back to GitLab. |
+| Sign SAML response | Required | Prevents tampering. |
+| X.509 certificate in response | Required | Signs the response and checks against the provided fingerprint. |
+| Fingerprint algorithm | SHA-1  | Signs the SAML response with a SHA-1 hash of the certificate. |
+| Signature algorithm | SHA-1/SHA-256/SHA-384/SHA-512 | Determines how a response is signed. Also known as the digest method, this can be specified in the SAML response. |
+| Encrypt SAML assertion | Optional | Uses TLS between your identity provider, the user's browser, and GitLab. |
+| Sign SAML assertion | Optional | Validates the integrity of a SAML assertion. When active, signs the whole response. |
+| Check SAML request signature | Optional | Checks the signature on the SAML response. |
+| Default RelayState | Optional | Specifies the URL users should end up on after successfully signing in through SAML at your identity provider. |
+| NameID format | Persistent | See [NameID format details](../user/group/saml_sso/index.md#nameid-format). |
+| Additional URLs | Optional | May include the issuer (or identifier) or the assertion consumer service URL in other fields on some providers. |
 
 For example configurations, see the [notes on specific providers](#providers).
 
