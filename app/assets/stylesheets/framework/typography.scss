@@ -432,7 +432,9 @@
     }
   }
 
-  a.with-attachment-icon {
+  a.with-attachment-icon,
+  a[href*='/uploads/'],
+  a[href*='storage.googleapis.com/google-code-attachments/'] {
     &::before {
       margin-right: 4px;
 
@@ -446,8 +448,6 @@
 
   a[href*='/uploads/'],
   a[href*='storage.googleapis.com/google-code-attachments/'] {
-    @extend .with-attachment-icon;
-
     &.no-attachment-icon {
       &::before {
         display: none;
@@ -533,7 +533,7 @@
   .admonitionblock td.icon .icon-tip::before {
     content: '💡';
   }
-  
+
   .fa-thumb-tack::before,
   .admonitionblock td.icon .icon-note::before {
     content: '📌';
@@ -661,12 +661,13 @@ code {
 .commit-sha,
 .ref-name,
 .pipeline-number {
-  @extend .monospace;
+  font-family: $monospace-font;
   font-size: 95%;
 }
 
 .git-revision-dropdown .dropdown-content ul li a {
-  @extend .ref-name;
+  font-family: $monospace-font;
+  font-size: 95%;
   word-break: break-all;
 }
 
