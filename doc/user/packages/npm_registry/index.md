@@ -263,6 +263,16 @@ npm publish
 
 To view the package, go to your project's **Packages & Registries**.
 
+Additionally, your project can also have ["publishConfig"](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#publishconfig) defined in `package.json`. For example:
+
+```json
+{
+"publishConfig": { "@foo:registry":" https://gitlab.example.com/api/v4/projects/<your_project_id>/packages/npm/" }
+}
+```
+
+This will force the package to be published only to the specified registry.
+
 If you try to publish a package [with a name that already exists](#publishing-packages-with-the-same-name-or-version) within
 a given scope, you get a `403 Forbidden!` error.
 
@@ -402,6 +412,8 @@ Due to a bug in npm 6.9.0, deleting distribution tags fails. Make sure your npm 
 
 ## Troubleshooting
 
+When troubleshooting npm issues, first run the same command with `--verbose` flag to confirm what registry you are hitting. 
+
 ### Error running Yarn with the Package Registry for npm registry
 
 If you are using [Yarn](https://classic.yarnpkg.com/en/) with the npm registry, you may get
@@ -471,6 +483,7 @@ If you get this error, ensure that:
 - Your token is not expired and has appropriate permissions.
 - [Your token does not begin with `-`](https://gitlab.com/gitlab-org/gitlab/-/issues/235473).
 - A package with the same name or version doesn't already exist within the given scope.
+- Your NPM package name does not contain a dot `.`. This is a [known issue](https://gitlab.com/gitlab-org/gitlab-ee/issues/10248) in GitLab 11.9 and older. 
 - The scoped packages URL includes a trailing slash:
   - Correct: `//gitlab.example.com/api/v4/packages/npm/`
   - Incorrect: `//gitlab.example.com/api/v4/packages/npm`
