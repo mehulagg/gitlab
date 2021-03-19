@@ -523,7 +523,7 @@ msgid "%{completedCount} completed weight"
 msgstr ""
 
 msgid "%{completedWeight} of %{totalWeight} weight completed"
-msgstr "Завершено %{completedWeight} из %{totalWeight} веса"
+msgstr "Завершено %{completedWeight} из %{totalWeight} единиц веса"
 
 msgid "%{containerScanningLinkStart}Container Scanning%{containerScanningLinkEnd} and/or %{dependencyScanningLinkStart}Dependency Scanning%{dependencyScanningLinkEnd} must be enabled. %{securityBotLinkStart}GitLab-Security-Bot%{securityBotLinkEnd} will be the author of the auto-created merge request. %{moreInfoLinkStart}More information%{moreInfoLinkEnd}."
 msgstr ""
@@ -1258,7 +1258,7 @@ msgstr[2] "- Пользователи"
 msgstr[3] "- Пользователи"
 
 msgid "- of - weight completed"
-msgstr "- из - веса завершено"
+msgstr "- из - единиц веса завершено"
 
 msgid "- show less"
 msgstr "- свернуть"
@@ -5352,7 +5352,7 @@ msgid "Burndown charts are now fixed. This means that removing issues from a mil
 msgstr "Диаграммы сгорания задач стали фиксированными. Это означает, что если убрать обсуждения из этапа, ставшего просроченным, диаграмма не изменится. Прежний вариант диаграммы можно увидеть, нажав на кнопку %{strongStart}Старый вид диаграммы сгорания%{strongEnd}."
 
 msgid "BurndownChartLabel|Open issue weight"
-msgstr "Bес открытых задач"
+msgstr "Bес открытых обсуждений"
 
 msgid "BurndownChartLabel|Open issues"
 msgstr "Открыть обсуждения"
