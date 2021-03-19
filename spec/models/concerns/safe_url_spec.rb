@@ -28,10 +28,10 @@ RSpec.describe SafeUrl do
 
       it { is_expected.to eq('http://*****:*****@example.com')}
 
-      context 'when username is whitelisted' do
-        subject { test_class.safe_url(usernames_whitelist: usernames_whitelist) }
+      context 'when username is allowed' do
+        subject { test_class.safe_url(allowed_usernames: usernames) }
 
-        let(:usernames_whitelist) { %w[foo] }
+        let(:usernames) { %w[foo] }
 
         it 'does expect the whitelisted username not to be masked' do
           is_expected.to eq('http://foo:*****@example.com')
