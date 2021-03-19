@@ -165,6 +165,14 @@ RSpec.describe Group, 'Routable' do
     end
   end
 
+  describe '#routable_cache_key' do
+    it 'includes the parent cache key' do
+      group.parent = create(:namespace)
+
+      expect(group.routable_cache_key).to eq("#{group.parent.routable_cache_key}:groups/#{group.id}-#{group.updated_at.utc.to_s(group.cache_timestamp_format)}")
+    end
+  end
+
   describe '#full_path' do
     it { expect(group.full_path).to eq(group.path) }
     it { expect(nested_group.full_path).to eq("#{group.full_path}/#{nested_group.path}") }
@@ -176,8 +184,9 @@ RSpec.describe Group, 'Routable' do
   end
 end
 
-RSpec.describe Project, 'Routable' do
-  let_it_be(:project) { create(:project) }
+RSpec.describe Project, 'Routable', :with_clean_rails_cache do
+  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:project) { create(:project, namespace: namespace) }
 
   it_behaves_like '.find_by_full_path' do
     let_it_be(:record) { project }
@@ -191,11 +200,17 @@ RSpec.describe Project, 'Routable' do
     expect(described_class.find_by_full_path(redirect_route.path, follow_redirects: true)).to be_nil
   end
 
+  describe '#routable_cache_key' do
+    it 'includes the parent cache key' do
+      expect(project.routable_cache_key).to eq("#{namespace.routable_cache_key}:projects/#{project.id}-#{project.updated_at.utc.to_s(project.cache_timestamp_format)}")
+    end
+  end
+
   describe '#full_path' do
-    it { expect(project.full_path).to eq "#{project.namespace.full_path}/#{project.path}" }
+    it { expect(project.full_path).to eq "#{namespace.full_path}/#{project.path}" }
   end
 
   describe '#full_name' do
-    it { expect(project.full_name).to eq "#{project.namespace.human_name} / #{project.name}" }
+    it { expect(project.full_name).to eq "#{namespace.human_name} / #{project.name}" }
   end
 end
