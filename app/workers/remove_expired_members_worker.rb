@@ -12,7 +12,8 @@ class RemoveExpiredMembersWorker # rubocop:disable Scalability/IdempotentWorker
     Member.expired.preload(:user, :source).find_each do |member|
       context = {
         user: member.user,
-        # The ApplicationContext will reject type-mismatches. So a group member
+        # The ApplicationContext will reject type-mismatches. So a GroupMemeber will only populate `namespace`.
+        # while a `ProjectMember` will populate `project
         project: member.source,
         namespace: member.source
       }
