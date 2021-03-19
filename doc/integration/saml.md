@@ -162,12 +162,12 @@ will be returned to GitLab and will be signed in.
 
 ### Notes on configuring your identity provider
 
-A SAML app should be configured in the identity provider at minimum with:
+When configuring a SAML app on the IdP, you need at least:
 
-- assertion consumer service URL
-- issuer
+- Assertion consumer service URL
+- Issuer
 - [`NameID`](../user/group/saml_sso/index.md#nameid)
-- [email assertion claim](#assertions)
+- [Email address claim](#assertions)
 
 Your identity provider may require additional configuration, such as the following:
 
@@ -200,10 +200,10 @@ For example configurations, see the [notes on specific providers](#providers).
 | First Name      | `first_name`, `firstname`, `firstName` |
 | Last Name       | `last_name`, `lastname`, `lastName` |
 
-If username is not specified, the email will be used to automatically generate the GitLab username.
+If a username is not specified, the email address is used to generate the GitLab username.
 
 Please refer to [the OmniAuth SAML gem](https://github.com/omniauth/omniauth-saml/blob/master/lib/omniauth/strategies/saml.rb)
-for a full list of supported claims.
+for a full list of supported assertions.
 
 ## SAML Groups
 
@@ -695,7 +695,9 @@ Group SAML on a self-managed instance is limited when compared to the recommende
 
 ## Providers
 
-The SAML standard means that a wide range of identity providers will work with GitLab. Your identity provider may have relevant documentation. It may be generic SAML documentation, or specifically targeted for GitLab.
+GitLab support of SAML means that you can sign in to GitLab with a wide range of identity providers.
+Your identity provider may have additional documentation. Some identity providers include
+documentation on how to use SAML to sign in to GitLab.
 
 Examples:
 
