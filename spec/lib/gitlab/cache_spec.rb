@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Gitlab::Cache, :request_store do
   describe "#fetch_once" do
     subject do
-      Proc.new do
+      proc do
         described_class.fetch_once([:test, "key"], expires_in: 10.minutes) do
           "return value"
         end
@@ -20,7 +20,7 @@ RSpec.describe Gitlab::Cache, :request_store do
     end
 
     it "always returns from the request store" do
-      expect(Gitlab::SafeRequestStore).to receive(:fetch).with([:test, "key"]).exactly(2).times.and_call_original
+      expect(Gitlab::SafeRequestStore).to receive(:fetch).twice.with([:test, "key"]).and_call_original
 
       expect(subject.call).to eq("return value")
       expect(subject.call).to eq("return value")

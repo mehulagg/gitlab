@@ -99,13 +99,13 @@ module Routable
   # usually need to include all the namespace keys in, for example,
   # the project cache key.
   def routable_cache_key
-    return nil unless persisted?
+    return unless persisted?
 
     "#{parent&.routable_cache_key}:#{cache_key}"
   end
 
   def full_name
-    return (route&.name || build_full_name) if routable_cache_key.nil?
+    return (route&.name || build_full_name) if routable_cache_key.nil? || Feature.disabled?(:cached_route_lookups, type: :ops, default_enabled: :yaml)
 
     Gitlab::Cache.fetch_once([routable_cache_key, :full_name]) do
       route&.name || build_full_name
@@ -113,7 +113,7 @@ module Routable
   end
 
   def full_path
-    return (route&.path || build_full_path) if routable_cache_key.nil?
+    return (route&.path || build_full_path) if routable_cache_key.nil? || Feature.disabled?(:cached_route_lookups, type: :ops, default_enabled: :yaml)
 
     Gitlab::Cache.fetch_once([routable_cache_key, :full_path]) do
       route&.path || build_full_path
