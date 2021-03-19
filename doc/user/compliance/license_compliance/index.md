@@ -262,6 +262,23 @@ license_scanning:
     LM_PYTHON_VERSION: 2
 ```
 
+If your project requires other non-latest version of Python. You need to first define the version by setting `ASDF_PYTHON_VERSION` CI/CD variable and pass a custom script to `SETUP_CMD` CI/CD variable to install the required version and dependancies. For example: 
+
+```yaml
+include:
+  - template: Security/License-Scanning.gitlab-ci.yml
+
+license_scanning:
+    SETUP_CMD: ./license.sh
+  script:
+    - echo "asdf install python 3.7.2 && pip install -r requirements.txt" > license.sh
+    - chmod +x license.sh
+    - export ASDF_PYTHON_VERSION=3.7.2
+    - apt-get -y update
+    - apt-get -y install build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+    - /run.sh analyze .
+```
+
 ### Custom root certificates for Python
 
 You can supply a custom root certificate to complete TLS verification by using the
