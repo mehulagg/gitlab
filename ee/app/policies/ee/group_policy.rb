@@ -287,7 +287,10 @@ module EE
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard
 
-      rule { can?(:read_group_security_dashboard) }.enable :create_vulnerability_export
+      rule { can?(:read_group_security_dashboard) }.policy do
+        enable :create_vulnerability_export
+        enable :read_vulnerability
+      end
 
       rule { admin | owner }.policy do
         enable :read_group_compliance_dashboard
