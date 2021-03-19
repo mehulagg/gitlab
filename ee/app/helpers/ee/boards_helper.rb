@@ -21,15 +21,26 @@ module EE
         board_iteration_title: board.iteration&.title,
         board_iteration_id: board.iteration_id,
         board_assignee_username: board.assignee&.username,
+        board_assignee_id: board.assignee&.id,
         label_ids: board.label_ids,
         labels: board.labels.to_json(only: [:id, :title, :color, :text_color] ),
         board_weight: board.weight,
         weight_feature_available: current_board_parent.feature_available?(:issue_weights).to_s,
+        milestone_lists_available: current_board_parent.feature_available?(:board_milestone_lists).to_s,
+        assignee_lists_available: current_board_parent.feature_available?(:board_assignee_lists).to_s,
+        iteration_lists_available: current_board_parent.feature_available?(:board_iteration_lists).to_s,
         show_promotion: show_feature_promotion,
         scoped_labels: current_board_parent.feature_available?(:scoped_labels)&.to_s
       }
 
       super.merge(data)
+    end
+
+    override :board_base_url
+    def board_base_url
+      return group_epic_boards_url(@group) if board.is_a?(::Boards::EpicBoard)
+
+      super
     end
 
     override :recent_boards_path

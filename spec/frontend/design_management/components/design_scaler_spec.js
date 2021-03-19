@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import DesignScaler from '~/design_management/components/design_scaler.vue';
 
 describe('Design management design scaler component', () => {
@@ -10,7 +10,7 @@ describe('Design management design scaler component', () => {
   const getResetScaleButton = () => getButtons().at(1);
   const getIncreaseScaleButton = () => getButtons().at(2);
 
-  const setScale = scale => wrapper.vm.setScale(scale);
+  const setScale = (scale) => wrapper.vm.setScale(scale);
 
   const createComponent = () => {
     wrapper = shallowMount(DesignScaler);

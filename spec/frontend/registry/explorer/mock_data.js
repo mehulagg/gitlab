@@ -8,7 +8,6 @@ export const imagesListResponse = [
     location: '0.0.0.0:5000/gitlab-org/gitlab-test/rails-12009',
     canDelete: true,
     createdAt: '2020-11-03T13:29:21Z',
-    tagsCount: 18,
     expirationPolicyStartedAt: null,
   },
   {
@@ -20,7 +19,6 @@ export const imagesListResponse = [
     location: '0.0.0.0:5000/gitlab-org/gitlab-test/rails-20572',
     canDelete: true,
     createdAt: '2020-09-21T06:57:43Z',
-    tagsCount: 1,
     expirationPolicyStartedAt: null,
   },
 ];
@@ -117,8 +115,13 @@ export const containerRepositoryMock = {
   updatedAt: '2020-11-03T13:29:21Z',
   tagsCount: 13,
   expirationPolicyStartedAt: null,
+  expirationPolicyCleanupStatus: 'UNSCHEDULED',
   project: {
     visibility: 'public',
+    containerExpirationPolicy: {
+      enabled: false,
+      nextRunAt: '2020-11-27T08:59:27Z',
+    },
     __typename: 'Project',
   },
 };
@@ -140,7 +143,7 @@ export const tagsMock = [
     revision: 'c2613843ab33aabf847965442b13a8b55a56ae28837ce182627c0716eb08c02b',
     shortRevision: 'c2613843a',
     createdAt: '2020-11-03T13:29:38+00:00',
-    totalSize: 105,
+    totalSize: '1099511627776',
     canDelete: true,
     __typename: 'ContainerRepositoryTag',
   },
@@ -152,13 +155,13 @@ export const tagsMock = [
     revision: 'df44e7228f0f255c73e35b6f0699624a615f42746e3e8e2e4b3804a6d6fc3292',
     shortRevision: 'df44e7228',
     createdAt: '2020-11-03T13:29:32+00:00',
-    totalSize: 104,
+    totalSize: '536870912000',
     canDelete: true,
     __typename: 'ContainerRepositoryTag',
   },
 ];
 
-export const graphQLImageDetailsMock = override => ({
+export const graphQLImageDetailsMock = (override) => ({
   data: {
     containerRepository: {
       ...containerRepositoryMock,
@@ -208,4 +211,33 @@ export const dockerCommands = {
   dockerBuildCommand: 'foofoo',
   dockerPushCommand: 'barbar',
   dockerLoginCommand: 'bazbaz',
+};
+
+export const graphQLProjectImageRepositoriesDetailsMock = {
+  data: {
+    project: {
+      containerRepositories: {
+        nodes: [
+          {
+            id: 'gid://gitlab/ContainerRepository/26',
+            tagsCount: 4,
+            __typename: 'ContainerRepository',
+          },
+          {
+            id: 'gid://gitlab/ContainerRepository/11',
+            tagsCount: 1,
+            __typename: 'ContainerRepository',
+          },
+        ],
+        __typename: 'ContainerRepositoryConnection',
+      },
+      __typename: 'Project',
+    },
+  },
+};
+
+export const graphQLEmptyImageDetailsMock = {
+  data: {
+    containerRepository: null,
+  },
 };

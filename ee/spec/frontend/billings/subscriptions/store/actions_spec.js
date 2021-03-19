@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 
-import state from 'ee/billings/subscriptions/store/state';
-import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import * as actions from 'ee/billings/subscriptions/store/actions';
+import * as types from 'ee/billings/subscriptions/store/mutation_types';
+import state from 'ee/billings/subscriptions/store/state';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
+import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
 
 describe('subscription actions', () => {

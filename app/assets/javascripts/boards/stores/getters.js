@@ -1,33 +1,51 @@
 import { find } from 'lodash';
-import { inactiveId } from '../constants';
+import { BoardType, inactiveId } from '../constants';
 
 export default {
-  isSidebarOpen: state => state.activeId !== inactiveId,
+  isGroupBoard: (state) => state.boardType === BoardType.group,
+  isProjectBoard: (state) => state.boardType === BoardType.project,
+  isSidebarOpen: (state) => state.activeId !== inactiveId,
   isSwimlanesOn: () => false,
-  getIssueById: state => id => {
-    return state.issues[id] || {};
+  getBoardItemById: (state) => (id) => {
+    return state.boardItems[id] || {};
   },
 
-  getIssuesByList: (state, getters) => listId => {
-    const listIssueIds = state.issuesByListId[listId] || [];
-    return listIssueIds.map(id => getters.getIssueById(id));
+  getBoardItemsByList: (state, getters) => (listId) => {
+    const listItemsIds = state.boardItemsByListId[listId] || [];
+    return listItemsIds.map((id) => getters.getBoardItemById(id));
   },
 
-  activeIssue: state => {
-    return state.issues[state.activeId] || {};
+  activeIssue: (state) => {
+    return state.boardItems[state.activeId] || {};
+  },
+
+  groupPathForActiveIssue: (_, getters) => {
+    const { referencePath = '' } = getters.activeIssue;
+    return referencePath.slice(0, referencePath.indexOf('/'));
   },
 
   projectPathForActiveIssue: (_, getters) => {
-    const referencePath = getters.activeIssue.referencePath || '';
+    const { referencePath = '' } = getters.activeIssue;
     return referencePath.slice(0, referencePath.indexOf('#'));
   },
 
-  getListByLabelId: state => labelId => {
-    return find(state.boardLists, l => l.label?.id === labelId);
+  activeGroupProjects: (state) => {
+    return state.groupProjects.filter((p) => !p.archived);
   },
 
-  getListByTitle: state => title => {
-    return find(state.boardLists, l => l.title === title);
+  getListByLabelId: (state) => (labelId) => {
+    if (!labelId) {
+      return null;
+    }
+    return find(state.boardLists, (l) => l.label?.id === labelId);
+  },
+
+  getListByTitle: (state) => (title) => {
+    return find(state.boardLists, (l) => l.title === title);
+  },
+
+  isEpicBoard: () => {
+    return false;
   },
 
   shouldUseGraphQL: () => {

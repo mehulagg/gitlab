@@ -1,7 +1,7 @@
 <script>
 import { GlModal } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 
@@ -26,11 +26,11 @@ export default {
     onSubmit() {
       return axios
         .post(this.url)
-        .then(response => {
+        .then((response) => {
           // follow the rediect to refresh the page
           redirectTo(response.request.responseURL);
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash(s__('AdminArea|Stopping jobs failed'));
           throw error;
         });

@@ -74,6 +74,18 @@ module EE
       def epic_param_present?
         params.key?(:epic) || params.key?(:epic_id)
       end
+
+      def filter_iteration
+        return unless params[:sprint_id]
+        return params[:sprint_id] = '' if params[:sprint_id] == IssuableFinder::Params::NONE
+
+        groups = project.group&.self_and_ancestors&.select(:id)
+
+        iteration =
+          ::Iteration.for_projects_and_groups([project.id], groups).find_by_id(params[:sprint_id])
+
+        params[:sprint_id] = '' unless iteration
+      end
     end
   end
 end

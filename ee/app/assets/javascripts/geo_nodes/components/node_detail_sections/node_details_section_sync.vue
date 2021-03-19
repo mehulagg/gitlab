@@ -1,6 +1,6 @@
 <script>
-import { s__, __ } from '~/locale';
 import { parseSeconds, stringifyTime } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 
 import { VALUE_TYPE, CUSTOM_TYPE } from '../../constants';
 

@@ -50,6 +50,7 @@ module EE
         :elasticsearch_analyzers_kuromoji_search,
         :enforce_namespace_storage_limit,
         :enforce_pat_expiration,
+        :enforce_ssh_key_expiration,
         :geo_node_allowed_ips,
         :geo_status_timeout,
         :help_text,
@@ -110,6 +111,7 @@ module EE
        %i[
         email_additional_text
         file_template_project_id
+        git_two_factor_session_expiry
         group_owners_can_manage_default_branch_protection
         default_project_deletion_protection
         deletion_adjourned_period

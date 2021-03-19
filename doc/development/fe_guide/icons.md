@@ -26,11 +26,11 @@ To use a sprite Icon in HAML or Rails we use a specific helper function:
 sprite_icon(icon_name, size: nil, css_class: '')
 ```
 
-- **icon_name**: Use the icon_name for the SVG sprite in the list of
+- **`icon_name`**: Use the `icon_name` for the SVG sprite in the list of
   ([GitLab SVGs](https://gitlab-org.gitlab.io/gitlab-svgs)).
-- **size (optional)**: Use one of the following sizes : 16, 24, 32, 48, 72 (this
+- **`size` (optional)**: Use one of the following sizes : 16, 24, 32, 48, 72 (this
   is translated into a `s16` class)
-- **css_class (optional)**: If you want to add additional CSS classes.
+- **`css_class` (optional)**: If you want to add additional CSS classes.
 
 **Example**
 
@@ -100,11 +100,11 @@ by the examples that follow:
 - `container` (optional): wraps the loading icon in a container, which centers the loading icon using the `text-center` CSS property.
 - `color` (optional): either `orange` (default), `light`, or `dark`.
 - `size` (optional): either `sm` (default), `md`, `lg`, or `xl`.
-- `css_class` (optional): defaults to an empty string, but can be useful for utility classes to fine-tune alignment or spacing.
+- `css_class` (optional): defaults to an empty string, but can be used for utility classes to fine-tune alignment or spacing.
 
 **Example 1:**
 
-The following HAML expression generates a loading icon’s markup and
+The following HAML expression generates a loading icon's markup and
 centers the icon by wrapping it in a `gl-spinner-container` element.
 
 ```haml
@@ -121,7 +121,7 @@ centers the icon by wrapping it in a `gl-spinner-container` element.
 
 **Example 2:**
 
-The following HAML expression generates a loading icon’s markup
+The following HAML expression generates a loading icon's markup
 with a custom size. It also appends a margin utility class.
 
 ```haml
@@ -137,7 +137,7 @@ with a custom size. It also appends a margin utility class.
 ### Usage in Vue
 
 The [GitLab UI](https://gitlab-org.gitlab.io/gitlab-ui/) components library provides a
-`GlLoadingIcon` component. See the component’s
+`GlLoadingIcon` component. See the component's
 [storybook](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-loading-icon--default)
 for more information about its usage.
 
@@ -164,8 +164,8 @@ export default {
 
 ## SVG Illustrations
 
-Please use from now on for any SVG based illustrations simple `img` tags to show an illustration by simply using either `image_tag` or `image_path` helpers.
-Please use the class `svg-content` around it to ensure nice rendering.
+From now on, use `img` tags to display any SVG based illustrations with either `image_tag` or `image_path` helpers.
+Using the class `svg-content` around it ensures nice rendering.
 
 ### Usage in HAML/Rails
 

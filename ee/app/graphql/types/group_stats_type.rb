@@ -9,6 +9,6 @@ module Types
 
     field :release_stats, Types::GroupReleaseStatsType,
           null: true, method: :itself,
-          description: 'Statistics related to releases within the group'
+          description: 'Statistics related to releases within the group.'
   end
 end

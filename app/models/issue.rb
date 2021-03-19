@@ -88,7 +88,6 @@ class Issue < ApplicationRecord
     test_case: 2 ## EE-only
   }
 
-  alias_attribute :parent_ids, :project_id
   alias_method :issuing_parent, :project
 
   alias_attribute :external_author, :service_desk_reply_to
@@ -132,7 +131,7 @@ class Issue < ApplicationRecord
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
-  scope :inc_relations_for_view, -> { includes(author: :status) }
+  scope :inc_relations_for_view, -> { includes(author: :status, assignees: :status) }
 
   # An issue can be uniquely identified by project_id and iid
   # Takes one or more sets of composite IDs, expressed as hash-like records of
@@ -191,7 +190,8 @@ class Issue < ApplicationRecord
   end
 
   def self.relative_positioning_query_base(issue)
-    in_projects(issue.parent_ids)
+    projects = issue.project.group&.root_ancestor&.all_projects || issue.project
+    in_projects(projects)
   end
 
   def self.relative_positioning_parent_column
@@ -434,8 +434,16 @@ class Issue < ApplicationRecord
     moved_to || duplicated_to
   end
 
+  def supports_assignee?
+    issue_type_supports?(:assignee)
+  end
+
   def email_participants_emails
     issue_email_participants.pluck(:email)
+  end
+
+  def email_participants_emails_downcase
+    issue_email_participants.pluck(IssueEmailParticipant.arel_table[:email].lower)
   end
 
   private

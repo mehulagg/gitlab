@@ -1,7 +1,7 @@
 import { within } from '@testing-library/dom';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { member as memberMock, members } from 'jest/members/mock_data';
+import { member as memberMock, directMember, members } from 'jest/members/mock_data';
 import MembersTable from '~/members/components/table/members_table.vue';
 
 const localVue = createLocalVue();
@@ -26,7 +26,7 @@ describe('MemberList', () => {
     });
   };
 
-  const createComponent = state => {
+  const createComponent = (state) => {
     wrapper = mount(MembersTable, {
       localVue,
       store: createStore(state),
@@ -43,6 +43,13 @@ describe('MemberList', () => {
     });
   };
 
+  const getByTestId = (id, options) =>
+    createWrapper(within(wrapper.element).getByTestId(id, options));
+  const findTableCellByMemberId = (tableCellLabel, memberId) =>
+    getByTestId(`members-table-row-${memberId}`).find(
+      `[data-label="${tableCellLabel}"][role="cell"]`,
+    );
+
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
@@ -51,16 +58,30 @@ describe('MemberList', () => {
   describe('fields', () => {
     describe('"Actions" field', () => {
       const memberCanOverride = {
-        ...memberMock,
-        source: { ...memberMock.source, id: 1 },
+        ...directMember,
         canOverride: true,
+      };
+
+      const memberNoPermissions = {
+        ...memberMock,
+        id: 2,
       };
 
       describe('when one of the members has `canOverride` permissions', () => {
         it('renders the "Actions" field', () => {
-          createComponent({ members: [memberCanOverride], tableFields: ['actions'] });
+          createComponent({
+            members: [memberNoPermissions, memberCanOverride],
+            tableFields: ['actions'],
+          });
 
           expect(within(wrapper.element).queryByTestId('col-actions')).not.toBe(null);
+
+          expect(
+            findTableCellByMemberId('Actions', memberNoPermissions.id).classes(),
+          ).toStrictEqual(['col-actions', 'gl-display-none!', 'gl-lg-display-table-cell!']);
+          expect(findTableCellByMemberId('Actions', memberCanOverride.id).classes()).toStrictEqual([
+            'col-actions',
+          ]);
         });
       });
 

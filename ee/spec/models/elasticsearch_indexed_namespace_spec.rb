@@ -43,7 +43,7 @@ RSpec.describe ElasticsearchIndexedNamespace do
     let_it_be(:namespaces) { create_list(:namespace, 3) }
     let_it_be(:subscription1) { create(:gitlab_subscription, namespace: namespaces[2]) }
     let_it_be(:subscription2) { create(:gitlab_subscription, namespace: namespaces[0]) }
-    let_it_be(:subscription3) { create(:gitlab_subscription, :silver, namespace: namespaces[1]) }
+    let_it_be(:subscription3) { create(:gitlab_subscription, :premium, namespace: namespaces[1]) }
 
     before do
       stub_ee_application_setting(elasticsearch_indexing: false)
@@ -65,17 +65,17 @@ RSpec.describe ElasticsearchIndexedNamespace do
 
         ids = namespaces.map(&:id)
 
-        described_class.index_first_n_namespaces_of_plan('gold', 1)
+        described_class.index_first_n_namespaces_of_plan('ultimate', 1)
 
         expect(get_indexed_namespaces).to eq([ids[0]])
         expect_queue_to_contain(ids[0], "index")
 
-        described_class.index_first_n_namespaces_of_plan('gold', 2)
+        described_class.index_first_n_namespaces_of_plan('ultimate', 2)
 
         expect(get_indexed_namespaces).to eq([ids[0], ids[2]])
         expect_queue_to_contain(ids[2], "index")
 
-        described_class.index_first_n_namespaces_of_plan('silver', 1)
+        described_class.index_first_n_namespaces_of_plan('premium', 1)
 
         expect(get_indexed_namespaces).to eq([ids[0], ids[2], ids[1]])
         expect_queue_to_contain(ids[1], "index")
@@ -84,8 +84,8 @@ RSpec.describe ElasticsearchIndexedNamespace do
 
     describe '.unindex_last_n_namespaces_of_plan' do
       before do
-        described_class.index_first_n_namespaces_of_plan('gold', 2)
-        described_class.index_first_n_namespaces_of_plan('silver', 1)
+        described_class.index_first_n_namespaces_of_plan('ultimate', 2)
+        described_class.index_first_n_namespaces_of_plan('premium', 1)
       end
 
       it 'creates records, scoped by plan and ordered by namespace id' do
@@ -95,17 +95,17 @@ RSpec.describe ElasticsearchIndexedNamespace do
 
         expect(get_indexed_namespaces).to contain_exactly(ids[0], ids[2], ids[1])
 
-        described_class.unindex_last_n_namespaces_of_plan('gold', 1)
+        described_class.unindex_last_n_namespaces_of_plan('ultimate', 1)
 
         expect(get_indexed_namespaces).to contain_exactly(ids[0], ids[1])
         expect_queue_to_contain(ids[2], "delete")
 
-        described_class.unindex_last_n_namespaces_of_plan('silver', 1)
+        described_class.unindex_last_n_namespaces_of_plan('premium', 1)
 
         expect(get_indexed_namespaces).to contain_exactly(ids[0])
         expect_queue_to_contain(ids[1], "delete")
 
-        described_class.unindex_last_n_namespaces_of_plan('gold', 1)
+        described_class.unindex_last_n_namespaces_of_plan('ultimate', 1)
 
         expect(get_indexed_namespaces).to be_empty
         expect_queue_to_contain(ids[0], "delete")

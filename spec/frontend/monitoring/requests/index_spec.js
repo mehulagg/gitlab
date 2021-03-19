@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
-import { backoffMockImplementation } from 'jest/helpers/backoff_helper';
+import { backoffMockImplementation } from 'helpers/backoff_helper';
 import axios from '~/lib/utils/axios_utils';
-import statusCodes from '~/lib/utils/http_status';
 import * as commonUtils from '~/lib/utils/common_utils';
-import { metricsDashboardResponse } from '../fixture_data';
+import statusCodes from '~/lib/utils/http_status';
 import { getDashboard, getPrometheusQueryData } from '~/monitoring/requests';
+import { metricsDashboardResponse } from '../fixture_data';
 
 describe('monitoring metrics_requests', () => {
   let mock;
@@ -31,7 +31,7 @@ describe('monitoring metrics_requests', () => {
     it('returns a dashboard response', () => {
       mock.onGet(dashboardEndpoint).reply(statusCodes.OK, response);
 
-      return getDashboard(dashboardEndpoint, params).then(data => {
+      return getDashboard(dashboardEndpoint, params).then((data) => {
         expect(data).toEqual(metricsDashboardResponse);
       });
     });
@@ -41,7 +41,7 @@ describe('monitoring metrics_requests', () => {
       mock.onGet(dashboardEndpoint).replyOnce(statusCodes.NO_CONTENT);
       mock.onGet(dashboardEndpoint).reply(statusCodes.OK, response);
 
-      return getDashboard(dashboardEndpoint, params).then(data => {
+      return getDashboard(dashboardEndpoint, params).then((data) => {
         expect(data).toEqual(metricsDashboardResponse);
         expect(mock.history.get).toHaveLength(3);
       });
@@ -50,7 +50,7 @@ describe('monitoring metrics_requests', () => {
     it('rejects after getting an error', () => {
       mock.onGet(dashboardEndpoint).reply(500);
 
-      return getDashboard(dashboardEndpoint, params).catch(error => {
+      return getDashboard(dashboardEndpoint, params).catch((error) => {
         expect(error).toEqual(expect.any(Error));
         expect(mock.history.get).toHaveLength(1);
       });
@@ -74,7 +74,7 @@ describe('monitoring metrics_requests', () => {
     it('returns a dashboard response', () => {
       mock.onGet(prometheusEndpoint).reply(statusCodes.OK, response);
 
-      return getPrometheusQueryData(prometheusEndpoint, params).then(data => {
+      return getPrometheusQueryData(prometheusEndpoint, params).then((data) => {
         expect(data).toEqual(response.data);
       });
     });
@@ -85,7 +85,7 @@ describe('monitoring metrics_requests', () => {
       mock.onGet(prometheusEndpoint).replyOnce(statusCodes.NO_CONTENT);
       mock.onGet(prometheusEndpoint).reply(statusCodes.OK, response); // 3rd attempt
 
-      return getPrometheusQueryData(prometheusEndpoint, params).then(data => {
+      return getPrometheusQueryData(prometheusEndpoint, params).then((data) => {
         expect(data).toEqual(response.data);
         expect(mock.history.get).toHaveLength(3);
       });
@@ -94,10 +94,10 @@ describe('monitoring metrics_requests', () => {
     it('rejects after getting an HTTP 500 error', () => {
       mock.onGet(prometheusEndpoint).reply(500, {
         status: 'error',
-        error: 'An error ocurred',
+        error: 'An error occurred',
       });
 
-      return getPrometheusQueryData(prometheusEndpoint, params).catch(error => {
+      return getPrometheusQueryData(prometheusEndpoint, params).catch((error) => {
         expect(error).toEqual(new Error('Request failed with status code 500'));
       });
     });
@@ -106,10 +106,10 @@ describe('monitoring metrics_requests', () => {
       // Mock multiple attempts while the cache is filling up and fails
       mock.onGet(prometheusEndpoint).reply(statusCodes.UNAUTHORIZED, {
         status: 'error',
-        error: 'An error ocurred',
+        error: 'An error occurred',
       });
 
-      return getPrometheusQueryData(prometheusEndpoint, params).catch(error => {
+      return getPrometheusQueryData(prometheusEndpoint, params).catch((error) => {
         expect(error).toEqual(new Error('Request failed with status code 401'));
       });
     });
@@ -120,10 +120,10 @@ describe('monitoring metrics_requests', () => {
       mock.onGet(prometheusEndpoint).replyOnce(statusCodes.NO_CONTENT);
       mock.onGet(prometheusEndpoint).reply(500, {
         status: 'error',
-        error: 'An error ocurred',
+        error: 'An error occurred',
       }); // 3rd attempt
 
-      return getPrometheusQueryData(prometheusEndpoint, params).catch(error => {
+      return getPrometheusQueryData(prometheusEndpoint, params).catch((error) => {
         expect(error).toEqual(new Error('Request failed with status code 500'));
         expect(mock.history.get).toHaveLength(3);
       });
@@ -140,7 +140,7 @@ describe('monitoring metrics_requests', () => {
         error: reason,
       });
 
-      return getPrometheusQueryData(prometheusEndpoint, params).catch(error => {
+      return getPrometheusQueryData(prometheusEndpoint, params).catch((error) => {
         expect(error).toEqual(new Error(reason));
         expect(mock.history.get).toHaveLength(1);
       });

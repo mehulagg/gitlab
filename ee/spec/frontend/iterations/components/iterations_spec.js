@@ -65,7 +65,7 @@ describe('Iterations', () => {
 
   describe('pagination', () => {
     const findPagination = () => wrapper.find(GlPagination);
-    const setPage = page => {
+    const setPage = (page) => {
       findPagination().vm.$emit('input', page);
       return findPagination().vm.$nextTick();
     };

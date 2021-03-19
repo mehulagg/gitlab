@@ -440,6 +440,7 @@ RSpec.describe API::MergeRequests do
             milestone: milestone,
             author: user,
             assignees: [user],
+            reviewers: [user2],
             source_project: project,
             target_project: project,
             source_branch: 'what',
@@ -496,6 +497,71 @@ RSpec.describe API::MergeRequests do
           expect(json_response.length).to eq(5)
           json_response.each do |mr|
             expect(mr['assignee']['id']).not_to eq(user2.id)
+          end
+        end
+
+        context 'filter by reviewer' do
+          context 'with reviewer_id' do
+            context 'with an id' do
+              let(:params) { { not: { reviewer_id: user2.id } } }
+
+              it 'returns merge requests that do not have the given reviewer' do
+                get api(endpoint_path, user), params: { not: { reviewer_id: user2.id } }
+
+                expect(response).to have_gitlab_http_status(:ok)
+                expect(json_response).to be_an(Array)
+                expect(json_response.length).to eq(4)
+                expect(json_response.map { |mr| mr['id'] }).not_to include(merge_request2)
+              end
+            end
+
+            context 'with Any' do
+              let(:params) { { not: { reviewer_id: 'Any' } } }
+
+              it 'returns a 400' do
+                # Any is not supported for negated filter
+                get api(endpoint_path, user), params: params
+
+                expect(response).to have_gitlab_http_status(:bad_request)
+                expect(json_response['error']).to eq('not[reviewer_id] is invalid')
+              end
+            end
+
+            context 'with None' do
+              let(:params) { { not: { reviewer_id: 'None' } } }
+
+              it 'returns a 400' do
+                # None is not supported for negated filter
+                get api(endpoint_path, user), params: params
+
+                expect(response).to have_gitlab_http_status(:bad_request)
+                expect(json_response['error']).to eq('not[reviewer_id] is invalid')
+              end
+            end
+          end
+
+          context 'with reviewer_username' do
+            let(:params) { { not: { reviewer_username: user2.username } } }
+
+            it 'returns merge requests that do not have the given reviewer' do
+              get api(endpoint_path, user), params: params
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(json_response).to be_an(Array)
+              expect(json_response.length).to eq(4)
+              expect(json_response.map { |mr| mr['id'] }).not_to include(merge_request2)
+            end
+          end
+
+          context 'when both reviewer_id and reviewer_username' do
+            let(:params) { { not: { reviewer_id: user2.id, reviewer_username: user2.username } } }
+
+            it 'returns a 400' do
+              get api('/merge_requests', user), params: params
+
+              expect(response).to have_gitlab_http_status(:bad_request)
+              expect(json_response['error']).to eq('not[reviewer_id], not[reviewer_username] are mutually exclusive')
+            end
           end
         end
       end
@@ -662,6 +728,79 @@ RSpec.describe API::MergeRequests do
             expect(response).to have_gitlab_http_status(:bad_request)
             expect(json_response['error']).to eq(
               'author_id, author_username are mutually exclusive')
+          end
+        end
+      end
+
+      context 'filter by reviewer' do
+        let_it_be(:review_requested_mr1) do
+          create(:merge_request, :unique_branches, author: user, reviewers: [user2], source_project: project2, target_project: project2)
+        end
+
+        let_it_be(:review_requested_mr2) do
+          create(:merge_request, :unique_branches, author: user2, reviewers: [user], source_project: project2, target_project: project2)
+        end
+
+        let(:params) { { scope: :all } }
+
+        context 'with reviewer_id' do
+          let(:params) { super().merge(reviewer_id: reviewer_id) }
+
+          context 'with an id' do
+            let(:reviewer_id) { user2.id }
+
+            it 'returns review requested merge requests for the given user' do
+              get api('/merge_requests', user), params: params
+
+              expect_response_contain_exactly(review_requested_mr1.id)
+            end
+          end
+
+          context 'with Any' do
+            let(:reviewer_id) { 'Any' }
+
+            it 'returns review requested merge requests for any user' do
+              get api('/merge_requests', user), params: params
+
+              expect_response_contain_exactly(review_requested_mr1.id, review_requested_mr2.id)
+            end
+          end
+
+          context 'with None' do
+            let(:reviewer_id) { 'None' }
+
+            it 'returns merge requests that has no assigned reviewers' do
+              get api('/merge_requests', user), params: params
+
+              expect_response_contain_exactly(
+                merge_request.id,
+                merge_request_closed.id,
+                merge_request_merged.id,
+                merge_request_locked.id,
+                merge_request2.id
+              )
+            end
+          end
+        end
+
+        context 'with reviewer_username' do
+          let(:params) { super().merge(reviewer_username: user2.username) }
+
+          it 'returns review requested merge requests for the given user' do
+            get api('/merge_requests', user), params: params
+
+            expect_response_contain_exactly(review_requested_mr1.id)
+          end
+        end
+
+        context 'with both reviewer_id and reviewer_username' do
+          let(:params) { super().merge(reviewer_id: user2.id, reviewer_username: user2.username) }
+
+          it 'returns a 400' do
+            get api('/merge_requests', user), params: params
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(json_response['error']).to eq('reviewer_id, reviewer_username are mutually exclusive')
           end
         end
       end
@@ -1087,6 +1226,12 @@ RSpec.describe API::MergeRequests do
       end
     end
 
+    context 'when merge request author has only guest access' do
+      it_behaves_like 'rejects user from accessing merge request info' do
+        let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}" }
+      end
+    end
+
     context 'merge_request_metrics' do
       let(:pipeline) { create(:ci_empty_pipeline) }
 
@@ -1177,7 +1322,16 @@ RSpec.describe API::MergeRequests do
     end
 
     context 'Work in Progress' do
-      let!(:merge_request_wip) { create(:merge_request, author: user, assignees: [user], source_project: project, target_project: project, title: "WIP: Test", created_at: base_time + 1.second) }
+      let!(:merge_request_wip) do
+        create(:merge_request,
+          author: user,
+          assignees: [user],
+          source_project: project,
+          target_project: project,
+          title: "WIP: Test",
+          created_at: base_time + 1.second
+        )
+      end
 
       it "returns merge request" do
         get api("/projects/#{project.id}/merge_requests/#{merge_request_wip.iid}", user)
@@ -1263,6 +1417,12 @@ RSpec.describe API::MergeRequests do
     it_behaves_like 'issuable participants endpoint' do
       let(:entity) { create(:merge_request, :simple, milestone: milestone1, author: user, assignees: [user], source_project: project, target_project: project, source_branch: 'markdown', title: "Test", created_at: base_time) }
     end
+
+    context 'when merge request author has only guest access' do
+      it_behaves_like 'rejects user from accessing merge request info' do
+        let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}/participants" }
+      end
+    end
   end
 
   describe 'GET /projects/:id/merge_requests/:merge_request_iid/commits' do
@@ -1287,6 +1447,12 @@ RSpec.describe API::MergeRequests do
       get api("/projects/#{project.id}/merge_requests/#{merge_request.id}/commits", user)
 
       expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    context 'when merge request author has only guest access' do
+      it_behaves_like 'rejects user from accessing merge request info' do
+        let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}/commits" }
+      end
     end
   end
 
@@ -1363,6 +1529,12 @@ RSpec.describe API::MergeRequests do
       expect(response).to have_gitlab_http_status(:not_found)
     end
 
+    context 'when merge request author has only guest access' do
+      it_behaves_like 'rejects user from accessing merge request info' do
+        let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}/changes" }
+      end
+    end
+
     it_behaves_like 'find an existing merge request'
     it_behaves_like 'accesses diffs via raw_diffs'
 
@@ -1403,9 +1575,9 @@ RSpec.describe API::MergeRequests do
         end
       end
 
-      context 'when access_raw_diffs is passed as an option' do
+      context 'when access_raw_diffs is true' do
         it_behaves_like 'accesses diffs via raw_diffs' do
-          let(:params) { { access_raw_diffs: true } }
+          let(:params) { { access_raw_diffs: "true" } }
         end
       end
     end
@@ -1450,6 +1622,12 @@ RSpec.describe API::MergeRequests do
         get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/pipelines", guest)
 
         expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'when merge request author has only guest access' do
+      it_behaves_like 'rejects user from accessing merge request info' do
+        let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}/pipelines" }
       end
     end
   end
@@ -1594,6 +1772,36 @@ RSpec.describe API::MergeRequests do
         expect(json_response['assignees'].count).to eq(1)
         expect(json_response['assignees'].first['name']).to eq(user.name)
         expect(json_response.dig('assignee', 'name')).to eq(user.name)
+      end
+    end
+
+    context 'accepts reviewer_ids' do
+      let(:params) do
+        {
+          title: 'Test merge request',
+          source_branch: 'feature_conflict',
+          target_branch: 'master',
+          author_id: user.id,
+          reviewer_ids: [user2.id]
+        }
+      end
+
+      it 'creates a new merge request with a reviewer' do
+        post api("/projects/#{project.id}/merge_requests", user), params: params
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(json_response['title']).to eq('Test merge request')
+        expect(json_response['reviewers'].first['name']).to eq(user2.name)
+      end
+
+      it 'creates a new merge request with no reviewer' do
+        params[:reviewer_ids] = []
+
+        post api("/projects/#{project.id}/merge_requests", user), params: params
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(json_response['title']).to eq('Test merge request')
+        expect(json_response['reviewers']).to be_empty
       end
     end
 
@@ -1941,6 +2149,34 @@ RSpec.describe API::MergeRequests do
   describe 'PUT /projects/:id/merge_reuests/:merge_request_iid' do
     it_behaves_like 'issuable update endpoint' do
       let(:entity) { merge_request }
+    end
+
+    context 'accepts reviewer_ids' do
+      let(:params) do
+        {
+          title: 'Updated merge request',
+          reviewer_ids: [user2.id]
+        }
+      end
+
+      it 'adds a reviewer to the existing merge request' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['title']).to eq('Updated merge request')
+        expect(json_response['reviewers'].first['name']).to eq(user2.name)
+      end
+
+      it 'removes a reviewer from the existing merge request' do
+        merge_request.reviewers = [user2]
+        params[:reviewer_ids] = []
+
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['title']).to eq('Updated merge request')
+        expect(json_response['reviewers']).to be_empty
+      end
     end
   end
 
@@ -2301,7 +2537,7 @@ RSpec.describe API::MergeRequests do
       end
     end
 
-    describe "the should_remove_source_branch param" do
+    describe "the should_remove_source_branch param", :sidekiq_inline do
       let(:source_repository) { merge_request.source_project.repository }
       let(:source_branch) { merge_request.source_branch }
 
@@ -2316,7 +2552,7 @@ RSpec.describe API::MergeRequests do
       end
     end
 
-    context "with a merge request that has force_remove_source_branch enabled" do
+    context "with a merge request that has force_remove_source_branch enabled", :sidekiq_inline do
       let(:source_repository) { merge_request.source_project.repository }
       let(:source_branch) { merge_request.source_branch }
 

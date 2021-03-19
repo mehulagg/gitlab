@@ -243,7 +243,7 @@ RSpec.describe API::Groups do
         let(:user) { admin }
 
         where(:feature_enabled, :setting_enabled, :default_branch_protection) do
-          false | false | Gitlab::Access::PROTECTION_NONE
+          true  | true  | Gitlab::Access::PROTECTION_NONE
           false | true  | Gitlab::Access::PROTECTION_NONE
           true  | false | Gitlab::Access::PROTECTION_NONE
           false | false | Gitlab::Access::PROTECTION_NONE
@@ -266,7 +266,7 @@ RSpec.describe API::Groups do
 
       context 'authenticated a normal user' do
         where(:feature_enabled, :setting_enabled, :default_branch_protection) do
-          false | false | Gitlab::Access::PROTECTION_NONE
+          true  | true  | Gitlab::Access::PROTECTION_NONE
           false | true  | Gitlab::Access::PROTECTION_NONE
           true  | false | Gitlab::Access::PROTECTION_FULL
           false | false | Gitlab::Access::PROTECTION_NONE
@@ -414,6 +414,100 @@ RSpec.describe API::Groups do
         end
       end
     end
+
+    context 'when creating group on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it 'does not create a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.not_to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+
+        it 'creates a subgroup' do
+          parent = create(:group)
+          parent.add_owner(admin)
+
+          expect do
+            post api("/groups", admin), params: { parent_id: parent.id, name: 'foo', path: 'foo' }
+          end.to change { Group.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+    end
+
+    context 'when creating group on self-managed' do
+      context 'when top_level_group_creation_enabled feature flag is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+
+        it 'creates a subgroup' do
+          parent = create(:group)
+          parent.add_owner(admin)
+
+          expect do
+            post api("/groups", admin), params: { parent_id: parent.id, name: 'foo', path: 'foo' }
+          end.to change { Group.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+    end
   end
 
   describe 'POST /groups/:id/ldap_sync' do
@@ -519,7 +613,7 @@ RSpec.describe API::Groups do
       subject { get api("/groups/#{group.id}/projects", user), params: { with_security_reports: true } }
 
       context 'when security dashboard is enabled for a group' do
-        let(:group) { create(:group_with_plan, plan: :gold_plan) } # overriding group from parent context
+        let(:group) { create(:group_with_plan, plan: :ultimate_plan) } # overriding group from parent context
 
         before do
           stub_licensed_features(security_dashboard: true)

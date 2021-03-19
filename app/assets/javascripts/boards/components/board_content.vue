@@ -1,18 +1,23 @@
 <script>
+import { GlAlert } from '@gitlab/ui';
+import { sortBy } from 'lodash';
 import Draggable from 'vuedraggable';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { sortBy } from 'lodash';
-import { GlAlert } from '@gitlab/ui';
-import BoardColumn from './board_column.vue';
-import BoardColumnNew from './board_column_new.vue';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import defaultSortableConfig from '~/sortable/sortable_config';
+import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
 import { sortableEnd, sortableStart } from '~/boards/mixins/sortable_default_options';
+import defaultSortableConfig from '~/sortable/sortable_config';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import BoardColumn from './board_column.vue';
+import BoardColumnDeprecated from './board_column_deprecated.vue';
 
 export default {
   components: {
-    BoardColumn: gon.features?.graphqlBoardLists ? BoardColumnNew : BoardColumn,
-    BoardContentSidebar: () => import('ee_component/boards/components/board_content_sidebar.vue'),
+    BoardAddNewColumn,
+    BoardColumn:
+      gon.features?.graphqlBoardLists || gon.features?.epicBoards
+        ? BoardColumn
+        : BoardColumnDeprecated,
+    BoardContentSidebar: () => import('~/boards/components/board_content_sidebar.vue'),
     EpicsSwimlanes: () => import('ee_component/boards/components/epics_swimlanes.vue'),
     GlAlert,
   },
@@ -20,7 +25,8 @@ export default {
   props: {
     lists: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     canAdminList: {
       type: Boolean,
@@ -32,15 +38,18 @@ export default {
     },
   },
   computed: {
-    ...mapState(['boardLists', 'error']),
-    ...mapGetters(['isSwimlanesOn']),
+    ...mapState(['boardLists', 'error', 'addColumnForm']),
+    ...mapGetters(['isSwimlanesOn', 'isEpicBoard']),
+    addColumnFormVisible() {
+      return this.addColumnForm?.visible;
+    },
     boardListsToUse() {
-      return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn
+      return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn || this.isEpicBoard
         ? sortBy([...Object.values(this.boardLists)], 'position')
         : this.lists;
     },
     canDragColumns() {
-      return this.glFeatures.graphqlBoardLists && this.canAdminList;
+      return !this.isEpicBoard && this.glFeatures.graphqlBoardLists && this.canAdminList;
     },
     boardColumnWrapper() {
       return this.canDragColumns ? Draggable : 'div';
@@ -53,20 +62,25 @@ export default {
         fallbackOnBody: false,
         group: 'boards-list',
         tag: 'div',
-        value: this.lists,
+        value: this.boardListsToUse,
       };
 
       return this.canDragColumns ? options : {};
     },
   },
   methods: {
-    ...mapActions(['moveList']),
+    ...mapActions(['moveList', 'unsetError']),
+    afterFormEnters() {
+      const el = this.canDragColumns ? this.$refs.list.$el : this.$refs.list;
+      el.scrollTo({ left: el.scrollWidth, behavior: 'smooth' });
+    },
     handleDragOnStart() {
       sortableStart();
     },
 
     handleDragOnEnd(params) {
       sortableEnd();
+      if (this.isEpicBoard) return;
 
       const { item, newIndex, oldIndex, to } = params;
 
@@ -86,7 +100,7 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="error" variant="danger" :dismissible="false">
+    <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="unsetError">
       {{ error }}
     </gl-alert>
     <component
@@ -99,23 +113,30 @@ export default {
       @end="handleDragOnEnd"
     >
       <board-column
-        v-for="list in boardListsToUse"
-        :key="list.id"
+        v-for="(list, index) in boardListsToUse"
+        :key="index"
         ref="board"
         :can-admin-list="canAdminList"
         :list="list"
         :disabled="disabled"
       />
+
+      <transition name="slide" @after-enter="afterFormEnters">
+        <board-add-new-column v-if="addColumnFormVisible" />
+      </transition>
     </component>
 
-    <template v-else>
-      <epics-swimlanes
-        ref="swimlanes"
-        :lists="boardListsToUse"
-        :can-admin-list="canAdminList"
-        :disabled="disabled"
-      />
-      <board-content-sidebar />
-    </template>
+    <epics-swimlanes
+      v-else
+      ref="swimlanes"
+      :lists="boardListsToUse"
+      :can-admin-list="canAdminList"
+      :disabled="disabled"
+    />
+
+    <board-content-sidebar
+      v-if="isSwimlanesOn || glFeatures.graphqlBoardLists"
+      class="issue-boards-sidebar"
+    />
   </div>
 </template>

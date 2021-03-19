@@ -1,7 +1,7 @@
 <script>
 import { GlIcon, GlTooltipDirective, GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import { __ } from '~/locale';
 import { approximateDuration } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
 import StageCardListItem from './stage_card_list_item.vue';
 
 const ERROR_MESSAGES = {

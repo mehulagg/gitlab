@@ -8,7 +8,10 @@ module EE
 
       override :filter_params
       def filter_params(issue)
+        params.delete(:sprint_id) unless can_admin_issuable?(issue)
+
         handle_epic(issue)
+        filter_iteration
 
         super
       end

@@ -1,29 +1,23 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
 
 require_relative '../../../../rubocop/cop/graphql/resolver_type'
 
-RSpec.describe RuboCop::Cop::Graphql::ResolverType, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::Graphql::ResolverType do
   subject(:cop) { described_class.new }
 
-  it 'adds an offense when there is no type annotaion' do
-    lacks_type = <<-SRC
+  it 'adds an offense when there is no type annotation' do
+    expect_offense(<<~SRC)
       module Resolvers
         class FooResolver < BaseResolver
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Missing type annotation: Please add `type` DSL method call. e.g: type UserType.connection_type, null: true
           def resolve(**args)
             [:thing]
           end
         end
       end
     SRC
-
-    inspect_source(lacks_type)
-
-    expect(cop.offenses.size).to eq 1
   end
 
   it 'does not add an offense for resolvers that have a type call' do
@@ -41,9 +35,10 @@ RSpec.describe RuboCop::Cop::Graphql::ResolverType, type: :rubocop do
   end
 
   it 'ignores type calls on other objects' do
-    lacks_type = <<-SRC
+    expect_offense(<<~SRC)
       module Resolvers
         class FooResolver < BaseResolver
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Missing type annotation: Please add `type` DSL method call. e.g: type UserType.connection_type, null: true
           class FalsePositive < BaseObject
             type RedHerringType, null: true
           end
@@ -54,10 +49,6 @@ RSpec.describe RuboCop::Cop::Graphql::ResolverType, type: :rubocop do
         end
       end
     SRC
-
-    inspect_source(lacks_type)
-
-    expect(cop.offenses.size).to eq 1
   end
 
   it 'does not add an offense unless the class is named using the Resolver convention' do

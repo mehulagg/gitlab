@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/file_finder.html'
 ---
 
-# File finder
+# File finder **(FREE)**
 
 > [Introduced](https://github.com/gitlabhq/gitlabhq/pull/9889) in GitLab 8.4.
 
@@ -17,8 +17,8 @@ project.
 
 ![Find file button](img/file_finder_find_button_v12_10.png)
 
-For those who prefer to keep their fingers on the keyboard, there is a
-[shortcut button](../../shortcuts.md) as well, which you can invoke from _anywhere_
+If you prefer to keep their fingers on the keyboard, use the
+[shortcut button](../../shortcuts.md), which you can invoke from anywhere
 in a project.
 
 Press `t` to launch the File search function when in **Issues**,

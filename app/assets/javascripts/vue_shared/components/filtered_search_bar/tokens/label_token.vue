@@ -9,12 +9,11 @@ import {
 import { debounce } from 'lodash';
 
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-
-import { stripQuotes } from '../filtered_search_utils';
 import { DEFAULT_LABELS, DEBOUNCE_DELAY } from '../constants';
+import { stripQuotes } from '../filtered_search_utils';
 
 export default {
   components: {
@@ -47,7 +46,7 @@ export default {
     },
     activeLabel() {
       return this.labels.find(
-        label => label.title.toLowerCase() === stripQuotes(this.currentValue),
+        (label) => label.title.toLowerCase() === stripQuotes(this.currentValue),
       );
     },
     containerStyle() {
@@ -74,7 +73,7 @@ export default {
       this.loading = true;
       this.config
         .fetchLabels(searchTerm)
-        .then(res => {
+        .then((res) => {
           // We'd want to avoid doing this check but
           // labels.json and /groups/:id/labels & /projects/:id/labels
           // return response differently.

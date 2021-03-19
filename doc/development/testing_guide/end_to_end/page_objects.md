@@ -145,7 +145,7 @@ for each element defined.
 
 In our case, `data-qa-selector="login_field"`, `data-qa-selector="password_field"` and `data-qa-selector="sign_in_button"`
 
-**app/views/my/view.html.haml**
+`app/views/my/view.html.haml`
 
 ```haml
 = f.text_field :login, class: "form-control top", autofocus: "autofocus", autocapitalize: "off", autocorrect: "off", required: true, title: "This field is required.", data: { qa_selector: 'login_field' }
@@ -201,7 +201,7 @@ We can select on that specific issue by matching on the Rails model.
 ```ruby
 class Page::Project::Issues::Index < Page::Base
   def has_issue?(issue)
-    has_element? :issue, issue_title: issue
+    has_element?(:issue, issue_title: issue)
   end
 end
 ```

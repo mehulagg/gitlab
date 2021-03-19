@@ -1,12 +1,12 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlButton, GlFormInput, GlFormGroup, GlSprintf } from '@gitlab/ui';
-import { __ } from '~/locale';
-import MarkdownField from '~/vue_shared/components/markdown/field.vue';
-import { BACK_URL_PARAM } from '~/releases/constants';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { getParameterByName } from '~/lib/utils/common_utils';
-import AssetLinksForm from './asset_links_form.vue';
+import { __ } from '~/locale';
 import MilestoneCombobox from '~/milestones/components/milestone_combobox.vue';
+import { BACK_URL_PARAM } from '~/releases/constants';
+import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import AssetLinksForm from './asset_links_form.vue';
 import TagField from './tag_field.vue';
 
 export default {
@@ -86,12 +86,11 @@ export default {
       ];
     },
   },
-  mounted() {
-    // eslint-disable-next-line promise/catch-or-return
-    this.initializeRelease().then(() => {
-      // Focus the first non-disabled input element
-      this.$el.querySelector('input:enabled').focus();
-    });
+  async mounted() {
+    await this.initializeRelease();
+
+    // Focus the first non-disabled input or button element
+    this.$el.querySelector('input:enabled, button:enabled').focus();
   },
   methods: {
     ...mapActions('detail', [

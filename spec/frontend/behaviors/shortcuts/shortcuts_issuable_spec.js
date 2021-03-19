@@ -13,9 +13,7 @@ describe('ShortcutsIssuable', () => {
   const snippetShowFixtureName = 'snippets/show.html';
   const mrShowFixtureName = 'merge_requests/merge_request_of_current_user.html';
 
-  preloadFixtures(snippetShowFixtureName, mrShowFixtureName);
-
-  beforeAll(done => {
+  beforeAll((done) => {
     initCopyAsGFM();
 
     // Fake call to nodeToGfm so the import of lazy bundle happened
@@ -81,7 +79,7 @@ describe('ShortcutsIssuable', () => {
         stubSelection('<p>Selected text.</p>');
       });
 
-      it('leaves existing input intact', done => {
+      it('leaves existing input intact', (done) => {
         $(FORM_SELECTOR).val('This text was already here.');
 
         expect($(FORM_SELECTOR).val()).toBe('This text was already here.');
@@ -96,7 +94,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `input`', done => {
+      it('triggers `input`', (done) => {
         let triggered = false;
         $(FORM_SELECTOR).on('input', () => {
           triggered = true;
@@ -110,7 +108,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -122,7 +120,7 @@ describe('ShortcutsIssuable', () => {
     });
 
     describe('with a one-line selection', () => {
-      it('quotes the selection', done => {
+      it('quotes the selection', (done) => {
         stubSelection('<p>This text has been selected.</p>');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -134,7 +132,7 @@ describe('ShortcutsIssuable', () => {
     });
 
     describe('with a multi-line selection', () => {
-      it('quotes the selected lines as a group', done => {
+      it('quotes the selected lines as a group', (done) => {
         stubSelection(
           '<p>Selected line one.</p>\n<p>Selected line two.</p>\n<p>Selected line three.</p>',
         );
@@ -154,7 +152,7 @@ describe('ShortcutsIssuable', () => {
         stubSelection('<p>Selected text.</p>', true);
       });
 
-      it('does not add anything to the input', done => {
+      it('does not add anything to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -163,7 +161,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -179,7 +177,7 @@ describe('ShortcutsIssuable', () => {
         stubSelection('<div class="md">Selected text.</div><p>Invalid selected text.</p>', true);
       });
 
-      it('only adds the valid part to the input', done => {
+      it('only adds the valid part to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -188,7 +186,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -198,7 +196,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `input`', done => {
+      it('triggers `input`', (done) => {
         let triggered = false;
         $(FORM_SELECTOR).on('input', () => {
           triggered = true;
@@ -233,7 +231,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('adds the quoted selection to the input', done => {
+      it('adds the quoted selection to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -242,7 +240,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -252,7 +250,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `input`', done => {
+      it('triggers `input`', (done) => {
         let triggered = false;
         $(FORM_SELECTOR).on('input', () => {
           triggered = true;
@@ -287,7 +285,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('does not add anything to the input', done => {
+      it('does not add anything to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -296,7 +294,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -308,7 +306,7 @@ describe('ShortcutsIssuable', () => {
     });
 
     describe('with a valid selection with no text content', () => {
-      it('returns the proper markdown', done => {
+      it('returns the proper markdown', (done) => {
         stubSelection('<img src="https://gitlab.com/logo.png" alt="logo" />');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -334,7 +332,7 @@ describe('ShortcutsIssuable', () => {
         '.sidebar-source-branch button',
       );
 
-      [sidebarCollapsedBtn, sidebarExpandedBtn].forEach(btn => jest.spyOn(btn, 'click'));
+      [sidebarCollapsedBtn, sidebarExpandedBtn].forEach((btn) => jest.spyOn(btn, 'click'));
     });
 
     afterEach(() => {

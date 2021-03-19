@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { debounce } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 import { RULE_TYPE_ANY_APPROVER } from '../../constants';
 
 const ANY_RULE_NAME = 'All Members';
@@ -21,7 +21,7 @@ export default {
     ...mapState(['settings']),
   },
   created() {
-    this.onInputChangeDebounced = debounce(event => {
+    this.onInputChangeDebounced = debounce((event) => {
       this.onInputChange(event);
     }, 1000);
   },

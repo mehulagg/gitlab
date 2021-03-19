@@ -1,6 +1,6 @@
-import { members, member } from 'jest/members/mock_data';
-import mutations from 'ee/members/store/mutations';
 import * as types from 'ee/members/store/mutation_types';
+import mutations from 'ee/members/store/mutations';
+import { members, member } from 'jest/members/mock_data';
 
 describe('Vuex members mutations', () => {
   describe(types.RECEIVE_LDAP_OVERRIDE_SUCCESS, () => {

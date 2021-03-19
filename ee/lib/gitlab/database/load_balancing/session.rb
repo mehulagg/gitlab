@@ -19,14 +19,21 @@ module Gitlab
           RequestStore.delete(CACHE_KEY)
         end
 
+        def self.without_sticky_writes(&block)
+          current.ignore_writes(&block)
+        end
+
         def initialize
           @use_primary = false
           @performed_write = false
+          @ignore_writes = false
         end
 
         def use_primary?
           @use_primary
         end
+
+        alias_method :using_primary?, :use_primary?
 
         def use_primary!
           @use_primary = true
@@ -40,8 +47,19 @@ module Gitlab
           @use_primary = used_primary || @performed_write
         end
 
+        def ignore_writes(&block)
+          @ignore_writes = true
+
+          yield
+        ensure
+          @ignore_writes = false
+        end
+
         def write!
           @performed_write = true
+
+          return if @ignore_writes
+
           use_primary!
         end
 

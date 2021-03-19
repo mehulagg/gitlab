@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage', quarantine: { only: :production, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/290717', type: :bug } do
+  # This test is disabled on staging due to `top_level_group_creation_enabled` set to false.
+  # See: https://gitlab.com/gitlab-org/gitlab/-/issues/324808#note_531060031
+  # The bug issue link in the rspec metadata below is for production only.
+  # When unquarantining on staging, it should continue to remain in quarantine in production until the bug is resolved.
+  RSpec.describe 'Manage', quarantine: { only: [:staging, :production], issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/324808', type: :bug } do
     describe 'prevent forking outside group' do
       let!(:group_for_fork) do
         Resource::Sandbox.fabricate_via_api! do |sandbox_group|
@@ -21,7 +25,7 @@ module QA
           set_prevent_forking_outside_group('disabled')
         end
 
-        it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1070' do
+        it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1681' do
           visit_project_and_search_group_for_fork
 
           expect(page).to have_text(group_for_fork.path)
@@ -34,7 +38,7 @@ module QA
           set_prevent_forking_outside_group('enabled')
         end
 
-        it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1107' do
+        it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1682' do
           visit_project_and_search_group_for_fork
 
           expect(page).not_to have_text(group_for_fork.path)

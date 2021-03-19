@@ -29,7 +29,7 @@ module Security
     end
 
     def execute
-      return unless can_use_security_findings?
+      return unless has_security_findings?
 
       ResultSet.new(security_findings, findings)
     end
@@ -38,10 +38,6 @@ module Security
 
     attr_reader :pipeline, :params
     delegate :project, :has_security_findings?, to: :pipeline, private: true
-
-    def can_use_security_findings?
-      Feature.enabled?(:store_security_findings, project) && has_security_findings?
-    end
 
     def findings
       security_findings.map(&method(:build_vulnerability_finding))
@@ -67,7 +63,7 @@ module Security
     end
 
     def report_finding_for(security_finding)
-      security_reports[security_finding.build.id].findings[security_finding.position]
+      report_findings.dig(security_finding.build.id, security_finding.uuid)
     end
 
     def vulnerability_for(security_finding)
@@ -93,10 +89,13 @@ module Security
       security_findings.map(&:project_fingerprint)
     end
 
-    def security_reports
-      @security_reports ||= begin
+    def report_findings
+      @report_findings ||= begin
         builds.each_with_object({}) do |build, memo|
-          memo[build.id] = build.job_artifacts.map(&:security_report).compact.first
+          report = build.job_artifacts.map(&:security_report).compact.first
+          next unless report
+
+          memo[build.id] = report.findings.group_by(&:uuid).transform_values(&:first)
         end
       end
     end

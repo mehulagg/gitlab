@@ -1,5 +1,5 @@
 <script>
-/* eslint-disable vue/require-default-prop, vue/no-v-html */
+/* eslint-disable vue/require-default-prop */
 import {
   GlIcon,
   GlLink,
@@ -7,12 +7,15 @@ import {
   GlSprintf,
   GlTooltip,
   GlTooltipDirective,
+  GlSafeHtmlDirective,
 } from '@gitlab/ui';
 import mrWidgetPipelineMixin from 'ee_else_ce/vue_merge_request_widget/mixins/mr_widget_pipeline';
 import { s__, n__ } from '~/locale';
-import PipelineStage from '~/pipelines/components/pipelines_list/stage.vue';
+import PipelineMiniGraph from '~/pipelines/components/pipelines_list/pipeline_mini_graph.vue';
+import PipelineArtifacts from '~/pipelines/components/pipelines_list/pipelines_artifacts.vue';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
+import { MT_MERGE_STRATEGY } from '../constants';
 
 export default {
   name: 'MRWidgetPipeline',
@@ -23,13 +26,15 @@ export default {
     GlIcon,
     GlSprintf,
     GlTooltip,
-    PipelineStage,
+    PipelineArtifacts,
+    PipelineMiniGraph,
     TooltipOnTruncate,
     LinkedPipelinesMiniList: () =>
       import('ee_component/vue_shared/components/linked_pipelines_mini_list.vue'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml: GlSafeHtmlDirective,
   },
   mixins: [mrWidgetPipelineMixin],
   props: {
@@ -76,6 +81,11 @@ export default {
       type: String,
       required: true,
     },
+    mergeStrategy: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     hasPipeline() {
@@ -90,12 +100,13 @@ export default {
         : {};
     },
     hasStages() {
-      return (
-        this.pipeline.details && this.pipeline.details.stages && this.pipeline.details.stages.length
-      );
+      return this.pipeline?.details?.stages?.length > 0;
     },
     hasCommitInfo() {
       return this.pipeline.commit && Object.keys(this.pipeline.commit).length > 0;
+    },
+    hasArtifacts() {
+      return this.pipeline?.details?.artifacts?.length > 0;
     },
     isMergeRequestPipeline() {
       return Boolean(this.pipeline.flags && this.pipeline.flags.merge_request_pipeline);
@@ -123,6 +134,9 @@ export default {
         this.buildsWithCoverage.length,
       );
     },
+    isMergeTrain() {
+      return this.mergeStrategy === MT_MERGE_STRATEGY;
+    },
   },
   errorText: s__(
     'Pipeline|Could not retrieve the pipeline status. For troubleshooting steps, read the %{linkStart}documentation%{linkEnd}.',
@@ -134,45 +148,38 @@ export default {
   <div class="ci-widget media">
     <template v-if="hasCIError">
       <gl-icon name="status_failed" class="gl-text-red-500" :size="24" />
-      <div
-        class="gl-flex-fill-1 gl-ml-5"
-        tabindex="0"
-        role="text"
-        :aria-label="$options.errorText"
-        data-testid="ci-error-message"
-      >
+      <p class="gl-flex-fill-1 gl-ml-5 gl-mb-0" data-testid="ci-error-message">
         <gl-sprintf :message="$options.errorText">
           <template #link="{ content }">
             <gl-link :href="mrTroubleshootingDocsPath">{{ content }}</gl-link>
           </template>
         </gl-sprintf>
-      </div>
+      </p>
     </template>
     <template v-else-if="!hasPipeline">
       <gl-loading-icon size="md" />
-      <div class="gl-flex-fill-1 gl-display-flex gl-ml-5" data-testid="monitoring-pipeline-message">
-        <span tabindex="0" role="text" :aria-label="$options.monitoringPipelineText">
-          <gl-sprintf :message="$options.monitoringPipelineText" />
-        </span>
+      <p
+        class="gl-flex-fill-1 gl-display-flex gl-ml-5 gl-mb-0"
+        data-testid="monitoring-pipeline-message"
+      >
+        {{ $options.monitoringPipelineText }}
         <gl-link
+          v-gl-tooltip
           :href="ciTroubleshootingDocsPath"
           target="_blank"
+          :title="__('About this feature')"
           class="gl-display-flex gl-align-items-center gl-ml-2"
-          tabindex="0"
         >
           <gl-icon
             name="question"
-            :size="12"
-            tabindex="0"
-            role="text"
             :aria-label="__('Link to go to GitLab pipeline documentation')"
           />
         </gl-link>
-      </div>
+      </p>
     </template>
     <template v-else-if="hasPipeline">
       <a :href="status.details_path" class="align-self-start gl-mr-3">
-        <ci-icon :status="status" :size="24" :borderless="true" class="add-border" />
+        <ci-icon :status="status" :size="24" />
       </a>
       <div class="ci-widget-container d-flex">
         <div class="ci-widget-content">
@@ -203,10 +210,10 @@ export default {
               <template v-if="showSourceBranch">
                 {{ s__('Pipeline|on') }}
                 <tooltip-on-truncate
+                  v-safe-html="sourceBranchLink"
                   :title="sourceBranch"
                   truncate-target="child"
                   class="label-branch label-truncate gl-font-weight-normal"
-                  v-html="sourceBranchLink"
                 />
               </template>
             </div>
@@ -218,7 +225,6 @@ export default {
                 data-testid="pipeline-coverage-delta"
                 >({{ pipelineCoverageDelta }}%)</span
               >
-
               {{ pipelineCoverageJobNumberText }}
               <span ref="pipelineCoverageQuestion">
                 <gl-icon name="question" :size="12" />
@@ -243,21 +249,20 @@ export default {
           <span class="mr-widget-pipeline-graph">
             <span class="stage-cell">
               <linked-pipelines-mini-list v-if="triggeredBy.length" :triggered-by="triggeredBy" />
-              <template v-if="hasStages">
-                <div
-                  v-for="(stage, i) in pipeline.details.stages"
-                  :key="i"
-                  :class="{
-                    'has-downstream': hasDownstream(i),
-                  }"
-                  class="stage-container dropdown mr-widget-pipeline-stages"
-                  data-testid="widget-mini-pipeline-graph"
-                >
-                  <pipeline-stage :stage="stage" />
-                </div>
-              </template>
+              <pipeline-mini-graph
+                v-if="hasStages"
+                class="gl-display-inline-block"
+                stages-class="mr-widget-pipeline-stages"
+                :stages="pipeline.details.stages"
+                :is-merge-train="isMergeTrain"
+              />
             </span>
             <linked-pipelines-mini-list v-if="triggered.length" :triggered="triggered" />
+            <pipeline-artifacts
+              v-if="hasArtifacts"
+              :artifacts="pipeline.details.artifacts"
+              class="gl-ml-3"
+            />
           </span>
         </div>
       </div>

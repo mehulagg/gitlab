@@ -25,7 +25,8 @@ module EE
           }.freeze
 
           ALLOWLISTED_SIGN_IN_ROUTES = {
-            'sessions' => %w{create}
+            'sessions' => %w{create},
+            'oauth/tokens' => %w{create}
           }.freeze
 
           private
@@ -51,7 +52,10 @@ module EE
           end
 
           def admin_settings_update?
-            request.path.start_with?('/api/v4/application/settings')
+            return false if ::Gitlab::Geo.secondary?
+
+            request.path.start_with?('/api/v4/application/settings',
+                                     '/admin/application_settings/general')
           end
 
           def geo_node_update_route?
@@ -87,7 +91,7 @@ module EE
           end
 
           def sign_in_route?
-            return unless request.post? && request.path.start_with?('/users/sign_in')
+            return unless request.post? && request.path.start_with?('/users/sign_in', '/oauth/token')
 
             ALLOWLISTED_SIGN_IN_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
           end

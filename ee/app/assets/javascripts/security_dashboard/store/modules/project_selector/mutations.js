@@ -9,12 +9,12 @@ export default {
     state.searchQuery = query;
   },
   [types.SELECT_PROJECT](state, project) {
-    if (!state.selectedProjects.some(p => p.id === project.id)) {
+    if (!state.selectedProjects.some((p) => p.id === project.id)) {
       state.selectedProjects.push(project);
     }
   },
   [types.DESELECT_PROJECT](state, project) {
-    state.selectedProjects = state.selectedProjects.filter(p => p.id !== project.id);
+    state.selectedProjects = state.selectedProjects.filter((p) => p.id !== project.id);
   },
   [types.REQUEST_ADD_PROJECTS](state) {
     state.isAddingProjects = true;

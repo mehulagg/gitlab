@@ -29,7 +29,7 @@ export default {
   },
   computed: {
     selectedOption() {
-      return SORTING_OPTIONS.find(option => option.key === this.sortBy) || SORTING_OPTIONS[0];
+      return SORTING_OPTIONS.find((option) => option.key === this.sortBy) || SORTING_OPTIONS[0];
     },
   },
   methods: {

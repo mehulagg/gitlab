@@ -1,14 +1,11 @@
 import { mount } from '@vue/test-utils';
 import EnvironmentAlert from 'ee/environments/components/environment_alert.vue';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
-import { useFakeDate } from 'helpers/fake_date';
 
 describe('Environment Alert', () => {
   let wrapper;
   const DEFAULT_PROVIDE = { projectPath: 'test-org/test' };
   const DEFAULT_PROPS = { environment: { name: 'staging' } };
-
-  useFakeDate();
 
   const factory = (props = {}, provide = {}) => {
     wrapper = mount(EnvironmentAlert, {
@@ -22,6 +19,8 @@ describe('Environment Alert', () => {
       },
     });
   };
+
+  const findSeverityBadge = () => wrapper.find(SeverityBadge);
 
   beforeEach(() => {
     factory();
@@ -59,14 +58,17 @@ describe('Environment Alert', () => {
       expect(link.attributes('href')).toBe('/alert/details');
     });
 
-    it('should show a severity badge', () => {
-      expect(wrapper.find(SeverityBadge).props('severity')).toBe('CRITICAL');
+    it('should show a severity badge with the correct severity', () => {
+      const badge = findSeverityBadge();
+      expect(badge.exists()).toBe(true);
+      expect(badge.props('severity')).toBe('CRITICAL');
     });
   });
 
   describe('has no alert', () => {
     it('should display nothing', () => {
       expect(wrapper.find('[data-testid="alert"]').exists()).toBe(false);
+      expect(findSeverityBadge().exists()).toBe(false);
     });
   });
 });

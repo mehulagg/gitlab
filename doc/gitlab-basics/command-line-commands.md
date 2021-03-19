@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: howto, reference
 ---
 
-# Edit files through the command line
+# Edit files through the command line **(FREE)**
 
 When [working with Git from the command line](start-using-git.md), you need to
 use more than just the Git commands. There are several basic commands that you should
@@ -33,9 +33,9 @@ The list below is not exhaustive, but contains many of the most commonly used co
 |--------------------------------|---------------------------------------------|
 | `cd NAME-OF-DIRECTORY`         | Go into a directory to work in it           |
 | `cd ..`                        | Go back one directory                       |
-| `ls`                           | List what’s in the current directory        |
-| `ls a*`                        | List what’s in the current directory that starts with `a` |
-| `ls *.md`                      | List what’s in the current directory that ends with `.md` |
+| `ls`                           | List what's in the current directory        |
+| `ls a*`                        | List what's in the current directory that starts with `a` |
+| `ls *.md`                      | List what's in the current directory that ends with `.md` |
 | `mkdir NAME-OF-YOUR-DIRECTORY` | Create a new directory                      |
 | `cat README.md`                | Display the contents of a [text file you created previously](#create-a-text-file-in-the-current-directory) |
 | `pwd`                          | Show the current directory                  |
@@ -106,9 +106,9 @@ WARNING:
 Be careful of the commands you run with `sudo`. Certain commands may cause
 damage to your data or system.
 
-## Sample Git taskflow
+## Sample Git task flow
 
-If you're completely new to Git, looking through some [sample taskflows](https://rogerdudler.github.io/git-guide/)
+If you're completely new to Git, looking through some [sample task flows](https://rogerdudler.github.io/git-guide/)
 may help you understand the best practices for using these commands as you work.
 
 <!-- ## Troubleshooting

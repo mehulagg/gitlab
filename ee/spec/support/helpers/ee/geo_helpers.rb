@@ -67,6 +67,10 @@ module EE
           true
         end
 
+        def handle_after_checksum_succeeded
+          true
+        end
+
         protected
 
         def consume_event_test(user:, other:)

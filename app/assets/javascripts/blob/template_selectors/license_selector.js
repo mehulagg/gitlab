@@ -1,5 +1,5 @@
-import FileTemplateSelector from '../file_template_selector';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import FileTemplateSelector from '../file_template_selector';
 
 export default class BlobLicenseSelector extends FileTemplateSelector {
   constructor({ mediator }) {
@@ -22,7 +22,7 @@ export default class BlobLicenseSelector extends FileTemplateSelector {
       search: {
         fields: ['name'],
       },
-      clicked: options => {
+      clicked: (options) => {
         const { e } = options;
         const el = options.$el;
         const query = options.selectedObj;
@@ -30,6 +30,7 @@ export default class BlobLicenseSelector extends FileTemplateSelector {
         const data = {
           project: this.$dropdown.data('project'),
           fullname: this.$dropdown.data('fullname'),
+          source_template_project_id: query.project_id,
         };
 
         this.reportSelection({
@@ -39,7 +40,7 @@ export default class BlobLicenseSelector extends FileTemplateSelector {
           data,
         });
       },
-      text: item => item.name,
+      text: (item) => item.name,
     });
   }
 }

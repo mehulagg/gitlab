@@ -5,13 +5,19 @@ import { uniqueId } from 'lodash';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
-import IssuableTabs from './issuable_tabs.vue';
-import IssuableItem from './issuable_item.vue';
-import IssuableBulkEditSidebar from './issuable_bulk_edit_sidebar.vue';
-
 import { DEFAULT_SKELETON_COUNT } from '../constants';
+import IssuableBulkEditSidebar from './issuable_bulk_edit_sidebar.vue';
+import IssuableItem from './issuable_item.vue';
+import IssuableTabs from './issuable_tabs.vue';
+
+const VueDraggable = () => import('vuedraggable');
 
 export default {
+  vueDraggableAttributes: {
+    animation: 200,
+    ghostClass: 'gl-visibility-hidden',
+    tag: 'ul',
+  },
   components: {
     GlSkeletonLoading,
     IssuableTabs,
@@ -19,6 +25,7 @@ export default {
     IssuableItem,
     IssuableBulkEditSidebar,
     GlPagination,
+    VueDraggable,
   },
   props: {
     namespace: {
@@ -123,6 +130,16 @@ export default {
       required: false,
       default: true,
     },
+    labelFilterParam: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    isManualOrdering: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -155,6 +172,9 @@ export default {
         return acc;
       }, []);
     },
+    issuablesWrapper() {
+      return this.isManualOrdering ? VueDraggable : 'ul';
+    },
   },
   watch: {
     issuables(list) {
@@ -181,7 +201,7 @@ export default {
       handler(params) {
         if (Object.keys(params).length) {
           updateHistory({
-            url: setUrlParams(params, window.location.href, true),
+            url: setUrlParams(params, window.location.href, true, false, true),
             title: document.title,
             replace: true,
           });
@@ -200,9 +220,12 @@ export default {
       this.checkedIssuables[this.issuableId(issuable)].checked = value;
     },
     handleAllIssuablesCheckedInput(value) {
-      Object.keys(this.checkedIssuables).forEach(issuableId => {
+      Object.keys(this.checkedIssuables).forEach((issuableId) => {
         this.checkedIssuables[issuableId].checked = value;
       });
+    },
+    handleVueDraggableUpdate({ newIndex, oldIndex }) {
+      this.$emit('reorder', { newIndex, oldIndex });
     },
   },
 };
@@ -230,7 +253,7 @@ export default {
       :initial-sort-by="initialSortBy"
       :show-checkbox="showBulkEditSidebar"
       :checkbox-checked="allIssuablesChecked"
-      class="gl-flex-grow-1 row-content-block"
+      class="gl-flex-grow-1 gl-border-t-none row-content-block"
       @checked-input="handleAllIssuablesCheckedInput"
       @onFilter="$emit('filter', $event)"
       @onSort="$emit('sort', $event)"
@@ -249,16 +272,22 @@ export default {
           <gl-skeleton-loading />
         </li>
       </ul>
-      <ul
+      <component
+        :is="issuablesWrapper"
         v-if="!issuablesLoading && issuables.length"
         class="content-list issuable-list issues-list"
+        :class="{ 'manual-ordering': isManualOrdering }"
+        v-bind="$options.vueDraggableAttributes"
+        @update="handleVueDraggableUpdate"
       >
         <issuable-item
           v-for="issuable in issuables"
           :key="issuableId(issuable)"
+          :class="{ 'gl-cursor-grab': isManualOrdering }"
           :issuable-symbol="issuableSymbol"
           :issuable="issuable"
           :enable-label-permalinks="enableLabelPermalinks"
+          :label-filter-param="labelFilterParam"
           :show-checkbox="showBulkEditSidebar"
           :checked="issuableChecked(issuable)"
           @checked-input="handleIssuableCheckedInput(issuable, $event)"
@@ -275,8 +304,11 @@ export default {
           <template #status>
             <slot name="status" :issuable="issuable"></slot>
           </template>
+          <template #statistics>
+            <slot name="statistics" :issuable="issuable"></slot>
+          </template>
         </issuable-item>
-      </ul>
+      </component>
       <slot v-if="!issuablesLoading && !issuables.length" name="empty-state"></slot>
       <gl-pagination
         v-if="showPaginationControls"

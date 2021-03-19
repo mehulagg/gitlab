@@ -4,7 +4,7 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
   include ApplicationWorker
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-  feature_category :license_compliance
+  feature_category :license
   worker_resource_boundary :cpu
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -16,6 +16,9 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
       tuples = []
 
       subscriptions.each do |subscription|
+        # This should be removed after https://gitlab.com/gitlab-org/gitlab/-/issues/243496
+        # Because there should not be any NULL namespace_id gitlab_subscription after the merge
+        # request https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40537
         unless subscription.namespace
           track_error(subscription)
           next

@@ -1,8 +1,8 @@
 <script>
 import { GlToggle, GlLoadingIcon, GlTooltip, GlAlert } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 import {
   DEBOUNCE_TOGGLE_DELAY,
   ERROR_MESSAGE,
@@ -82,7 +82,7 @@ export default {
         .then(() => {
           this.isLoading = false;
         })
-        .catch(error => {
+        .catch((error) => {
           const message = [
             error.response?.data?.error || __('An error occurred while updating configuration.'),
             ERROR_MESSAGE,

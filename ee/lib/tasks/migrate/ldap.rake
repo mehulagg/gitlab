@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 desc "GitLab | Migrate provider names to multiple LDAP setup"
 namespace :gitlab do
   task migrate_ldap_providers: :environment do

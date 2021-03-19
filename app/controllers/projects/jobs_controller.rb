@@ -15,9 +15,6 @@ class Projects::JobsController < Projects::ApplicationController
   before_action :verify_api_request!, only: :terminal_websocket_authorize
   before_action :authorize_create_proxy_build!, only: :proxy_websocket_authorize
   before_action :verify_proxy_request!, only: :proxy_websocket_authorize
-  before_action only: :index do
-    frontend_experimentation_tracking_data(:jobs_empty_state, 'click_button')
-  end
 
   layout 'project'
 
@@ -49,21 +46,25 @@ class Projects::JobsController < Projects::ApplicationController
   # rubocop: enable CodeReuse/ActiveRecord
 
   def trace
-    @build.trace.read do |stream|
-      respond_to do |format|
-        format.json do
-          @build.trace.being_watched!
+    @build.trace.being_watched! if @build.running?
 
-          build_trace = Ci::BuildTrace.new(
-            build: @build,
-            stream: stream,
-            state: params[:state])
+    if @build.has_trace?
+      @build.trace.read do |stream|
+        respond_to do |format|
+          format.json do
+            build_trace = Ci::BuildTrace.new(
+              build: @build,
+              stream: stream,
+              state: params[:state])
 
-          render json: BuildTraceSerializer
-            .new(project: @project, current_user: @current_user)
-            .represent(build_trace)
+            render json: BuildTraceSerializer
+              .new(project: @project, current_user: @current_user)
+              .represent(build_trace)
+          end
         end
       end
+    else
+      head :no_content
     end
   end
 

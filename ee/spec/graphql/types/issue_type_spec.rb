@@ -9,6 +9,7 @@ RSpec.describe GitlabSchema.types['Issue'] do
   it { expect(described_class).to have_graphql_field(:health_status) }
   it { expect(described_class).to have_graphql_field(:blocked) }
   it { expect(described_class).to have_graphql_field(:blocked_by_count) }
+  it { expect(described_class).to have_graphql_field(:blocked_by_issues) }
   it { expect(described_class).to have_graphql_field(:sla_due_at) }
   it { expect(described_class).to have_graphql_field(:metric_images) }
 
@@ -30,7 +31,7 @@ RSpec.describe GitlabSchema.types['Issue'] do
 
         blocked_issue2 = create(:issue, project: project)
         blocking_issue2 = create(:issue, project: project)
-        create :issue_link, source: blocked_issue2, target: blocking_issue2, link_type: IssueLink::TYPE_IS_BLOCKED_BY
+        create :issue_link, source: blocking_issue2, target: blocked_issue2, link_type: IssueLink::TYPE_BLOCKS
 
         project2 = create(:project, :public, group: group)
         create(:issue, project: project2)

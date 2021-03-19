@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
 import { getJSONFixture } from 'helpers/fixtures';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import * as actions from '~/pipelines/stores/test_reports/actions';
 import * as types from '~/pipelines/stores/test_reports/mutation_types';
-import { TEST_HOST } from '../../../helpers/test_constants';
-import testAction from '../../../helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash.js');
 
@@ -16,7 +16,7 @@ describe('Actions TestReports Store', () => {
   const testReports = getJSONFixture('pipelines/test_report.json');
   const summary = { total_count: 1 };
 
-  const suiteEndpoint = `${TEST_HOST}/tests/:suite_name.json`;
+  const suiteEndpoint = `${TEST_HOST}/tests/suite.json`;
   const summaryEndpoint = `${TEST_HOST}/test_reports/summary.json`;
   const defaultState = {
     suiteEndpoint,
@@ -39,7 +39,7 @@ describe('Actions TestReports Store', () => {
       mock.onGet(summaryEndpoint).replyOnce(200, summary, {});
     });
 
-    it('sets testReports and shows tests', done => {
+    it('sets testReports and shows tests', (done) => {
       testAction(
         actions.fetchSummary,
         null,
@@ -50,7 +50,7 @@ describe('Actions TestReports Store', () => {
       );
     });
 
-    it('should create flash on API error', done => {
+    it('should create flash on API error', (done) => {
       testAction(
         actions.fetchSummary,
         null,
@@ -69,13 +69,12 @@ describe('Actions TestReports Store', () => {
     beforeEach(() => {
       const buildIds = [1];
       testReports.test_suites[0].build_ids = buildIds;
-      const endpoint = suiteEndpoint.replace(':suite_name', testReports.test_suites[0].name);
       mock
-        .onGet(endpoint, { params: { build_ids: buildIds } })
+        .onGet(suiteEndpoint, { params: { build_ids: buildIds } })
         .replyOnce(200, testReports.test_suites[0], {});
     });
 
-    it('sets test suite and shows tests', done => {
+    it('sets test suite and shows tests', (done) => {
       const suite = testReports.test_suites[0];
       const index = 0;
 
@@ -89,7 +88,7 @@ describe('Actions TestReports Store', () => {
       );
     });
 
-    it('should create flash on API error', done => {
+    it('should create flash on API error', (done) => {
       const index = 0;
 
       testAction(
@@ -106,7 +105,7 @@ describe('Actions TestReports Store', () => {
     });
 
     describe('when we already have the suite data', () => {
-      it('should not fetch suite', done => {
+      it('should not fetch suite', (done) => {
         const index = 0;
         testReports.test_suites[0].hasFullSuite = true;
 
@@ -116,7 +115,7 @@ describe('Actions TestReports Store', () => {
   });
 
   describe('set selected suite index', () => {
-    it('sets selectedSuiteIndex', done => {
+    it('sets selectedSuiteIndex', (done) => {
       const selectedSuiteIndex = 0;
 
       testAction(
@@ -131,7 +130,7 @@ describe('Actions TestReports Store', () => {
   });
 
   describe('remove selected suite index', () => {
-    it('sets selectedSuiteIndex to null', done => {
+    it('sets selectedSuiteIndex to null', (done) => {
       testAction(
         actions.removeSelectedSuiteIndex,
         {},
@@ -144,11 +143,11 @@ describe('Actions TestReports Store', () => {
   });
 
   describe('toggles loading', () => {
-    it('sets isLoading to true', done => {
+    it('sets isLoading to true', (done) => {
       testAction(actions.toggleLoading, {}, state, [{ type: types.TOGGLE_LOADING }], [], done);
     });
 
-    it('toggles isLoading to false', done => {
+    it('toggles isLoading to false', (done) => {
       testAction(
         actions.toggleLoading,
         {},

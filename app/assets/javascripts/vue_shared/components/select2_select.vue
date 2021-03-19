@@ -20,13 +20,19 @@ export default {
     },
   },
 
+  watch: {
+    value() {
+      $(this.$refs.dropdownInput).val(this.value).trigger('change');
+    },
+  },
+
   mounted() {
     loadCSSFile(gon.select2_css_path)
       .then(() => {
         $(this.$refs.dropdownInput)
           .val(this.value)
           .select2(this.options)
-          .on('change', event => this.$emit('input', event.target.value));
+          .on('change', (event) => this.$emit('input', event.target.value));
       })
       .catch(() => {});
   },

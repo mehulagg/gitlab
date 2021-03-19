@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import InsertVideoModal from '~/vue_shared/components/rich_content_editor/modals/insert_video_modal.vue';
 
 describe('Insert Video Modal', () => {
@@ -8,7 +8,7 @@ describe('Insert Video Modal', () => {
   const findModal = () => wrapper.find(GlModal);
   const findUrlInput = () => wrapper.find({ ref: 'urlInput' });
 
-  const triggerInsertVideo = url => {
+  const triggerInsertVideo = (url) => {
     const preventDefault = jest.fn();
     findUrlInput().vm.$emit('input', url);
     findModal().vm.$emit('primary', { preventDefault });

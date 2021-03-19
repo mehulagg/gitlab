@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlFormCheckbox,
@@ -7,12 +6,15 @@ import {
   GlSprintf,
   GlIcon,
 } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
+import { DASHBOARD_TYPES } from '../store/constants';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
-import { DASHBOARD_TYPES } from '../store/constants';
 
 export default {
   name: 'SecurityDashboardTableRow',
@@ -41,9 +43,6 @@ export default {
   computed: {
     ...mapState(['dashboardType']),
     ...mapState('vulnerabilities', ['selectedVulnerabilities']),
-    severity() {
-      return this.vulnerability.severity || ' ';
-    },
     vulnerabilityIdentifier() {
       return getPrimaryIdentifier(this.vulnerability.identifiers, 'external_type');
     },
@@ -88,12 +87,20 @@ export default {
     },
   },
   methods: {
-    ...mapActions('vulnerabilities', ['openModal', 'selectVulnerability', 'deselectVulnerability']),
+    ...mapActions('vulnerabilities', [
+      'setModalData',
+      'selectVulnerability',
+      'deselectVulnerability',
+    ]),
     toggleVulnerability() {
       if (this.isSelected) {
         return this.deselectVulnerability(this.vulnerability);
       }
       return this.selectVulnerability(this.vulnerability);
+    },
+    openModal(payload) {
+      this.setModalData(payload);
+      this.$root.$emit(BV_SHOW_MODAL, VULNERABILITY_MODAL_ID);
     },
   },
 };
@@ -116,7 +123,11 @@ export default {
     <div class="table-section section-15">
       <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Severity') }}</div>
       <div class="table-mobile-content">
-        <severity-badge :severity="severity" class="text-right text-md-left" />
+        <severity-badge
+          v-if="vulnerability.severity"
+          :severity="vulnerability.severity"
+          class="text-right text-md-left"
+        />
       </div>
     </div>
 
@@ -130,7 +141,8 @@ export default {
         <template v-else>
           <gl-button
             ref="vulnerability-title"
-            class="text-body"
+            class="text-body gl-display-grid"
+            button-text-classes="gl-text-left gl-white-space-normal! gl-pr-4!"
             variant="link"
             @click="openModal({ vulnerability })"
             >{{ vulnerability.name }}</gl-button
@@ -151,7 +163,7 @@ export default {
             :issue="vulnerability.issue_feedback"
             :project-name="vulnerability.project.name"
           />
-          <br />
+
           <small v-if="vulnerabilityNamespace" class="gl-text-gray-500 gl-word-break-all">
             {{ vulnerabilityNamespace }}
           </small>

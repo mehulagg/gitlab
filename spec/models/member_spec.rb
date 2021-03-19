@@ -24,7 +24,7 @@ RSpec.describe Member do
       it { is_expected.to allow_value(nil).for(:expires_at) }
     end
 
-    it_behaves_like 'an object with email-formated attributes', :invite_email do
+    it_behaves_like 'an object with email-formatted attributes', :invite_email do
       subject { build(:project_member) }
     end
 
@@ -130,14 +130,18 @@ RSpec.describe Member do
       @maintainer_user = create(:user).tap { |u| project.add_maintainer(u) }
       @maintainer = project.members.find_by(user_id: @maintainer_user.id)
 
-      @blocked_user = create(:user).tap do |u|
+      @blocked_maintainer_user = create(:user).tap do |u|
         project.add_maintainer(u)
+
+        u.block!
+      end
+      @blocked_developer_user = create(:user).tap do |u|
         project.add_developer(u)
 
         u.block!
       end
-      @blocked_maintainer = project.members.find_by(user_id: @blocked_user.id, access_level: Gitlab::Access::MAINTAINER)
-      @blocked_developer = project.members.find_by(user_id: @blocked_user.id, access_level: Gitlab::Access::DEVELOPER)
+      @blocked_maintainer = project.members.find_by(user_id: @blocked_maintainer_user.id, access_level: Gitlab::Access::MAINTAINER)
+      @blocked_developer = project.members.find_by(user_id: @blocked_developer_user.id, access_level: Gitlab::Access::DEVELOPER)
 
       @invited_member = create(:project_member, :developer,
                               project: project,
@@ -161,13 +165,50 @@ RSpec.describe Member do
 
     describe '.access_for_user_ids' do
       it 'returns the right access levels' do
-        users = [@owner_user.id, @maintainer_user.id, @blocked_user.id]
+        users = [@owner_user.id, @maintainer_user.id, @blocked_maintainer_user.id]
         expected = {
           @owner_user.id => Gitlab::Access::OWNER,
           @maintainer_user.id => Gitlab::Access::MAINTAINER
         }
 
         expect(described_class.access_for_user_ids(users)).to eq(expected)
+      end
+    end
+
+    describe '.in_hierarchy' do
+      let(:root_ancestor) { create(:group) }
+      let(:project) { create(:project, group: root_ancestor) }
+      let(:subgroup) { create(:group, parent: root_ancestor) }
+      let(:subgroup_project) { create(:project, group: subgroup) }
+
+      let!(:root_ancestor_member) { create(:group_member, group: root_ancestor) }
+      let!(:project_member) { create(:project_member, project: project) }
+      let!(:subgroup_member) { create(:group_member, group: subgroup) }
+      let!(:subgroup_project_member) { create(:project_member, project: subgroup_project) }
+
+      let(:hierarchy_members) do
+        [
+          root_ancestor_member,
+          project_member,
+          subgroup_member,
+          subgroup_project_member
+        ]
+      end
+
+      subject { Member.in_hierarchy(project) }
+
+      it { is_expected.to contain_exactly(*hierarchy_members) }
+
+      context 'with scope prefix' do
+        subject { Member.where.not(source: project).in_hierarchy(subgroup) }
+
+        it { is_expected.to contain_exactly(root_ancestor_member, subgroup_member, subgroup_project_member) }
+      end
+
+      context 'with scope suffix' do
+        subject { Member.in_hierarchy(project).where.not(source: project) }
+
+        it { is_expected.to contain_exactly(root_ancestor_member, subgroup_member, subgroup_project_member) }
       end
     end
 
@@ -251,6 +292,21 @@ RSpec.describe Member do
       it { is_expected.to include(expiring_tomorrow, not_expiring) }
     end
 
+    describe '.created_today' do
+      let_it_be(:now) { Time.current }
+      let_it_be(:created_today) { create(:group_member, created_at: now.beginning_of_day) }
+      let_it_be(:created_yesterday) { create(:group_member, created_at: now - 1.day) }
+
+      before do
+        travel_to now
+      end
+
+      subject { described_class.created_today }
+
+      it { is_expected.not_to include(created_yesterday) }
+      it { is_expected.to include(created_today) }
+    end
+
     describe '.last_ten_days_excluding_today' do
       let_it_be(:now) { Time.current }
       let_it_be(:created_today) { create(:group_member, created_at: now.beginning_of_day) }
@@ -330,6 +386,20 @@ RSpec.describe Member do
       it { is_expected.not_to include @member_with_minimal_access }
     end
 
+    describe '.blocked' do
+      subject { described_class.blocked.to_a }
+
+      it { is_expected.not_to include @owner }
+      it { is_expected.not_to include @maintainer }
+      it { is_expected.not_to include @invited_member }
+      it { is_expected.not_to include @accepted_invite_member }
+      it { is_expected.not_to include @requested_member }
+      it { is_expected.not_to include @accepted_request_member }
+      it { is_expected.to include @blocked_maintainer }
+      it { is_expected.to include @blocked_developer }
+      it { is_expected.not_to include @member_with_minimal_access }
+    end
+
     describe '.active_without_invites_and_requests' do
       subject { described_class.active_without_invites_and_requests.to_a }
 
@@ -373,12 +443,10 @@ RSpec.describe Member do
         end
 
         context 'when admin mode is disabled' do
-          # Skipped because `Group#max_member_access_for_user` needs to be migrated to use admin mode
-          # https://gitlab.com/gitlab-org/gitlab/-/issues/207950
-          xit 'rejects setting members.created_by to the given admin current_user' do
+          it 'rejects setting members.created_by to the given admin current_user' do
             member = described_class.add_user(source, user, :maintainer, current_user: admin)
 
-            expect(member.created_by).not_to be_persisted
+            expect(member.created_by).to be_nil
           end
         end
 

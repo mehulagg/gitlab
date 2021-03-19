@@ -1,8 +1,8 @@
+import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
-import List from '~/ide/components/merge_requests/list.vue';
 import Item from '~/ide/components/merge_requests/item.vue';
+import List from '~/ide/components/merge_requests/list.vue';
 import TokenedInput from '~/ide/components/shared/tokened_input.vue';
 import { mergeRequests as mergeRequestsMock } from '../../mock_data';
 
@@ -151,8 +151,8 @@ describe('IDE merge requests list', () => {
 
       it('shows search types', () => {
         const buttons = findSearchTypeButtons();
-        expect(buttons.wrappers.map(x => x.text().trim())).toEqual(
-          wrapper.vm.$options.searchTypes.map(x => x.label),
+        expect(buttons.wrappers.map((x) => x.text().trim())).toEqual(
+          wrapper.vm.$options.searchTypes.map((x) => x.label),
         );
       });
 

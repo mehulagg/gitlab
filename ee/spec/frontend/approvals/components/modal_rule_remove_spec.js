@@ -1,6 +1,8 @@
+import { GlSprintf } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ModalRuleRemove from 'ee/approvals/components/modal_rule_remove.vue';
+import { stubComponent } from 'helpers/stub_component';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 const MODAL_MODULE = 'deleteModal';
@@ -20,6 +22,8 @@ describe('Approvals ModalRuleRemove', () => {
   let wrapper;
   let actions;
   let deleteModalState;
+
+  const findModal = () => wrapper.findComponent(GlModalVuex);
 
   const factory = (options = {}) => {
     const store = new Vuex.Store({
@@ -42,6 +46,12 @@ describe('Approvals ModalRuleRemove', () => {
       localVue,
       store,
       propsData,
+      stubs: {
+        GlModalVuex: stubComponent(GlModalVuex, {
+          props: ['modalModule', 'modalId', 'actionPrimary', 'actionCancel'],
+        }),
+        GlSprintf,
+      },
     });
   };
 
@@ -57,13 +67,18 @@ describe('Approvals ModalRuleRemove', () => {
   it('renders modal', () => {
     factory();
 
-    const modal = wrapper.find(GlModalVuex);
+    const modal = findModal();
 
     expect(modal.exists()).toBe(true);
     expect(modal.props()).toEqual(
       expect.objectContaining({
         modalModule: MODAL_MODULE,
         modalId: TEST_MODAL_ID,
+        actionPrimary: {
+          text: 'Remove approvers',
+          attributes: [{ variant: 'danger' }],
+        },
+        actionCancel: { text: 'Cancel' },
       }),
     );
   });
@@ -71,10 +86,7 @@ describe('Approvals ModalRuleRemove', () => {
   it('shows message', () => {
     factory();
 
-    const modal = wrapper.find(GlModalVuex);
-
-    expect(modal.text()).toContain(TEST_RULE.name);
-    expect(modal.text()).toContain(`${TEST_RULE.approvers.length} members`);
+    expect(findModal().element).toMatchSnapshot();
   });
 
   it('shows singular message', () => {
@@ -84,9 +96,7 @@ describe('Approvals ModalRuleRemove', () => {
     };
     factory();
 
-    const modal = wrapper.find(GlModalVuex);
-
-    expect(modal.text()).toContain('1 member');
+    expect(findModal().element).toMatchSnapshot();
   });
 
   it('deletes rule when modal is submitted', () => {
@@ -94,7 +104,7 @@ describe('Approvals ModalRuleRemove', () => {
 
     expect(actions.deleteRule).not.toHaveBeenCalled();
 
-    const modal = wrapper.find(GlModalVuex);
+    const modal = findModal();
     modal.vm.$emit('ok', new Event('submit'));
 
     expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);

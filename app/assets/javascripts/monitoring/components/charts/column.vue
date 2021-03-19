@@ -1,12 +1,12 @@
 <script>
 import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { makeDataSeries } from '~/helpers/monitor_helper';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { chartHeight } from '../../constants';
-import { makeDataSeries } from '~/helpers/monitor_helper';
+import { timezones } from '../../format_date';
 import { graphDataValidatorForValues } from '../../utils';
 import { getTimeAxisOptions, getYAxisOptions, getChartGrid } from './options';
-import { timezones } from '../../format_date';
 
 export default {
   components: {
@@ -90,7 +90,7 @@ export default {
     },
     setSvg(name) {
       getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }

@@ -1,12 +1,14 @@
 <script>
-import Vue from 'vue';
 import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
-import { joinPaths } from '~/lib/utils/url_utility';
+import Vue from 'vue';
+import api from '~/api';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
+import { joinPaths } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import SelectProjectsDropdown from './select_projects_dropdown.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
+import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
 export default {
   name: 'TestCoverageTable',
@@ -19,24 +21,31 @@ export default {
     SelectProjectsDropdown,
     TimeAgoTooltip,
   },
+  mixins: [glFeatureFlagsMixin()],
+  inject: {
+    groupFullPath: {
+      default: '',
+    },
+  },
   apollo: {
     projects: {
       query: getProjectsTestCoverage,
       debounce: 500,
       variables() {
         return {
-          projectIds: this.selectedProjectIds,
+          groupFullPath: this.groupFullPath,
+          projectIds: this.projectIdsToFetch,
         };
       },
       result({ data }) {
+        const projects = data.group.projects.nodes;
         // Keep data from all queries so that we don't
         // fetch the same data more than once
         this.allCoverageData = [
           ...this.allCoverageData,
-          // Remove the projects that don't have any code coverage
-          ...data.projects.nodes
-            .filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary))
-            .map(project => ({
+          ...projects
+            .filter(({ id }) => !this.allCoverageData.some((project) => project.id === id))
+            .map((project) => ({
               ...project,
               codeCoveragePath: joinPaths(
                 gon.relative_url_root || '',
@@ -44,6 +53,9 @@ export default {
               ),
             })),
         ];
+      },
+      update(data) {
+        return data.group.projects.nodes;
       },
       error() {
         this.handleError();
@@ -59,10 +71,11 @@ export default {
   data() {
     return {
       allProjectsSelected: false,
-      allCoverageData: [],
+      allCoverageData: [], // All data we have ever received whether selected or not
       hasError: false,
       isLoading: false,
-      projectIds: {},
+      selectedProjectIds: {},
+      projects: {},
     };
   },
   computed: {
@@ -71,16 +84,28 @@ export default {
     },
     skipQuery() {
       // Skip if we haven't selected any projects yet
-      return !this.selectedProjectIds.length;
+      return !this.allProjectsSelected && !this.projectIdsToFetch.length;
     },
-    selectedProjectIds() {
+    /**
+     * projectIdsToFetch is a subset of selectedProjectIds
+     * The difference is that it only returns the projects
+     * that we have selected but haven't requested yet
+     */
+    projectIdsToFetch() {
+      if (this.allProjectsSelected) {
+        return null;
+      }
       // Get the IDs of the projects that we haven't requested yet
-      return Object.keys(this.projectIds).filter(
-        id => !this.allCoverageData.some(project => project.id === id),
+      return Object.keys(this.selectedProjectIds).filter(
+        (id) => !this.allCoverageData.some((project) => project.id === id),
       );
     },
     selectedCoverageData() {
-      return this.allCoverageData.filter(({ id }) => this.projectIds[id]);
+      if (this.allProjectsSelected) {
+        return this.allCoverageData;
+      }
+
+      return this.allCoverageData.filter(({ id }) => this.selectedProjectIds[id]);
     },
     sortedCoverageData() {
       // Sort the table by most recently updated coverage report
@@ -98,25 +123,29 @@ export default {
     handleError() {
       this.hasError = true;
     },
-    selectAllProjects(allProjects) {
-      this.projectIds = Object.fromEntries(allProjects.map(({ id }) => [id, true]));
+    onProjectClick() {
+      if (this.glFeatures.usageDataITestingGroupCodeCoverageProjectClickTotal) {
+        api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
+      }
+    },
+    selectAllProjects() {
       this.allProjectsSelected = true;
     },
     toggleProject({ id }) {
       if (this.allProjectsSelected) {
         // Reset all project selections to false
         this.allProjectsSelected = false;
-        this.projectIds = Object.fromEntries(
-          Object.entries(this.projectIds).map(([key]) => [key, false]),
+        this.selectedProjectIds = Object.fromEntries(
+          Object.entries(this.selectedProjectIds).map(([key]) => [key, false]),
         );
       }
 
-      if (Object.prototype.hasOwnProperty.call(this.projectIds, id)) {
-        Vue.set(this.projectIds, id, !this.projectIds[id]);
+      if (Object.prototype.hasOwnProperty.call(this.selectedProjectIds, id)) {
+        Vue.set(this.selectedProjectIds, id, !this.selectedProjectIds[id]);
         return;
       }
 
-      Vue.set(this.projectIds, id, true);
+      Vue.set(this.selectedProjectIds, id, true);
     },
   },
   tableFields: [
@@ -154,6 +183,7 @@ export default {
     totalHeight: 15,
   },
   averageCoverageFormatter: getFormatter(SUPPORTED_FORMATS.percentHundred),
+  usagePingProjectEvent: 'i_testing_group_code_coverage_project_click_total',
 };
 </script>
 <template>
@@ -211,7 +241,12 @@ export default {
       </template>
 
       <template #cell(project)="{ item }">
-        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`">
+        <gl-link
+          target="_blank"
+          :href="item.codeCoveragePath"
+          :data-testid="`${item.id}-name`"
+          @click.once="onProjectClick"
+        >
           {{ item.name }}
         </gl-link>
       </template>

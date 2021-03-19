@@ -8,7 +8,7 @@ module Mutations
 
         ADMIN_MESSAGE = 'You must be an admin to use this mutation'
 
-        Labkit::Context::KNOWN_KEYS.each do |key|
+        Gitlab::ApplicationContext::KNOWN_KEYS.each do |key|
           argument key,
                    GraphQL::STRING_TYPE,
                    required: false,
@@ -18,12 +18,12 @@ module Mutations
         argument :queue_name,
                  GraphQL::STRING_TYPE,
                  required: true,
-                 description: 'The name of the queue to delete jobs from'
+                 description: 'The name of the queue to delete jobs from.'
 
         field :result,
               Types::Admin::SidekiqQueues::DeleteJobsResponseType,
               null: true,
-              description: 'Information about the status of the deletion request'
+              description: 'Information about the status of the deletion request.'
 
         def ready?(**args)
           unless current_user&.admin?

@@ -37,9 +37,24 @@ describe('metrics reports mutations', () => {
       };
       mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
 
-      expect(mockState.existingMetrics[0].name).toEqual(data.existing_metrics[0].name);
-      expect(mockState.existingMetrics[0].value).toEqual(data.existing_metrics[0].value);
+      expect(mockState.unchangedMetrics).toEqual(data.existing_metrics);
       expect(mockState.numberOfChanges).toEqual(0);
+      expect(mockState.isLoading).toEqual(false);
+    });
+
+    it('should set metrics with a new metric', () => {
+      const data = {
+        new_metrics: [
+          {
+            name: 'name',
+            value: 'value',
+          },
+        ],
+      };
+      mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
+
+      expect(mockState.newMetrics).toEqual(data.new_metrics);
+      expect(mockState.numberOfChanges).toEqual(1);
       expect(mockState.isLoading).toEqual(false);
     });
 
@@ -55,12 +70,7 @@ describe('metrics reports mutations', () => {
       };
       mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
 
-      expect(mockState.existingMetrics[0].name).toEqual(data.existing_metrics[0].name);
-      expect(mockState.existingMetrics[0].value).toEqual(data.existing_metrics[0].value);
-      expect(mockState.existingMetrics[0].previous_value).toEqual(
-        data.existing_metrics[0].previous_value,
-      );
-
+      expect(mockState.changedMetrics).toEqual(data.existing_metrics);
       expect(mockState.numberOfChanges).toEqual(1);
       expect(mockState.isLoading).toEqual(false);
     });

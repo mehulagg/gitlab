@@ -260,7 +260,6 @@
 }
 
 .pipeline-quota {
-  border-top: 1px solid $table-border-color;
   border-bottom: 1px solid $table-border-color;
   margin: 0 0 $gl-padding;
 
@@ -518,10 +517,6 @@ table.pipeline-project-metrics tr td {
 
     > span:first-child {
       margin-left: 25px;
-    }
-
-    .item-visibility {
-      margin-right: 0;
     }
 
     .last-updated {

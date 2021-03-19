@@ -2,6 +2,7 @@
 
 class PostReceive # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+  include Gitlab::Experiment::Dsl
 
   feature_category :source_code_management
   urgency :high
@@ -121,6 +122,8 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   end
 
   def after_project_changes_hooks(project, user, refs, changes)
+    experiment(:new_project_readme, actor: user).track_initial_writes(project)
+    experiment(:empty_repo_upload, project: project).track(:initial_write) if project.empty_repo?
     repository_update_hook_data = Gitlab::DataBuilder::Repository.update(project, user, changes, refs)
     SystemHooksService.new.execute_hooks(repository_update_hook_data, :repository_update_hooks)
     Gitlab::UsageDataCounters::SourceCodeCounter.count(:pushes)

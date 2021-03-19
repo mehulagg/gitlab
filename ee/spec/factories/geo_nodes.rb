@@ -19,6 +19,10 @@ FactoryBot.define do
       sync_object_storage { false }
     end
 
+    trait :secondary do
+      primary { false }
+    end
+
     trait :local_storage_only do
       sync_object_storage { false }
     end

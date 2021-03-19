@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import GraphGroup from '~/monitoring/components/graph_group.vue';
 
 describe('Graph group component', () => {
@@ -11,7 +11,7 @@ describe('Graph group component', () => {
   const findCaretIcon = () => wrapper.find(GlIcon);
   const findToggleButton = () => wrapper.find('[data-testid="group-toggle-button"]');
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(GraphGroup, {
       propsData,
     });

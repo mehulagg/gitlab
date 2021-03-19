@@ -26,14 +26,19 @@ module ApplicationSettingsHelper
     end
   end
 
-  def storage_weights
-    ApplicationSetting.repository_storages_weighted_attributes.map do |attribute|
-      storage = attribute.to_s.delete_prefix('repository_storages_weighted_')
+  def kroki_available_formats
+    ApplicationSetting.kroki_formats_attributes.map do |key, value|
       {
-        name: attribute,
-        label: storage,
-        value: @application_setting.repository_storages_weighted[storage] || 0
+        name: "kroki_formats_#{key}",
+        label: value[:label],
+        value: @application_setting.kroki_formats[key] || false
       }
+    end
+  end
+
+  def storage_weights
+    Gitlab.config.repositories.storages.keys.each_with_object(OpenStruct.new) do |storage, weights|
+      weights[storage.to_sym] = @application_setting.repository_storages_weighted[storage] || 0
     end
   end
 
@@ -97,15 +102,20 @@ module ApplicationSettingsHelper
   def oauth_providers_checkboxes
     button_based_providers.map do |source|
       disabled = @application_setting.disabled_oauth_sign_in_sources.include?(source.to_s)
-      css_class = ['btn']
-      css_class << 'active' unless disabled
-      checkbox_name = 'application_setting[enabled_oauth_sign_in_sources][]'
       name = Gitlab::Auth::OAuth::Provider.label_for(source)
+      checkbox_name = 'application_setting[enabled_oauth_sign_in_sources][]'
+      checkbox_id = "application_setting_enabled_oauth_sign_in_sources_#{name.parameterize(separator: '_')}"
 
-      label_tag(checkbox_name, class: css_class.join(' ')) do
-        check_box_tag(checkbox_name, source, !disabled,
-                      autocomplete: 'off',
-                      id: name.tr(' ', '_')) + name
+      content_tag :div, class: 'form-check' do
+        check_box_tag(
+          checkbox_name,
+          source,
+          !disabled,
+          autocomplete: 'off',
+          id: checkbox_id,
+          class: 'form-check-input'
+        ) +
+        label_tag(checkbox_id, name, class: 'form-check-label')
       end
     end
   end
@@ -169,6 +179,7 @@ module ApplicationSettingsHelper
   def visible_attributes
     [
       :abuse_notification_email,
+      :admin_mode,
       :after_sign_out_path,
       :after_sign_up_text,
       :akismet_api_key,
@@ -181,7 +192,7 @@ module ApplicationSettingsHelper
       :asset_proxy_enabled,
       :asset_proxy_secret_key,
       :asset_proxy_url,
-      :asset_proxy_whitelist,
+      :asset_proxy_allowlist,
       :static_objects_external_storage_auth_token,
       :static_objects_external_storage_url,
       :authorized_keys_enabled,
@@ -242,6 +253,8 @@ module ApplicationSettingsHelper
       :housekeeping_incremental_repack_period,
       :html_emails_enabled,
       :import_sources,
+      :in_product_marketing_emails_enabled,
+      :invisible_captcha_enabled,
       :max_artifacts_size,
       :max_attachment_size,
       :max_import_size,
@@ -258,6 +271,7 @@ module ApplicationSettingsHelper
       :personal_access_token_prefix,
       :kroki_enabled,
       :kroki_url,
+      :kroki_formats,
       :plantuml_enabled,
       :plantuml_url,
       :polling_interval_multiplier,
@@ -327,6 +341,8 @@ module ApplicationSettingsHelper
       :email_restrictions_enabled,
       :email_restrictions,
       :issues_create_limit,
+      :notes_create_limit,
+      :notes_create_limit_allowlist_raw,
       :raw_blob_request_limit,
       :project_import_limit,
       :project_export_limit,
@@ -335,7 +351,11 @@ module ApplicationSettingsHelper
       :group_export_limit,
       :group_download_export_limit,
       :wiki_page_max_content_bytes,
-      :container_registry_delete_tags_service_timeout
+      :container_registry_delete_tags_service_timeout,
+      :rate_limiting_response_text,
+      :container_registry_expiration_policies_worker_capacity,
+      :container_registry_cleanup_tags_service_max_list_size,
+      :keep_latest_artifact
     ]
   end
 
@@ -351,9 +371,11 @@ module ApplicationSettingsHelper
     ]
   end
 
+  # ok to remove in REST API v5
   def deprecated_attributes
     [
-      :admin_notification_email # ok to remove in REST API v5
+      :admin_notification_email,
+      :asset_proxy_whitelist
     ]
   end
 

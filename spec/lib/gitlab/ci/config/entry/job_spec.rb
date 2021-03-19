@@ -537,7 +537,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
       it 'overrides default config' do
         expect(entry[:image].value).to eq(name: 'some_image')
-        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
+        expect(entry[:cache].value).to eq([key: 'test', policy: 'pull-push', when: 'on_success'])
       end
     end
 
@@ -552,7 +552,43 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
       it 'uses config from default entry' do
         expect(entry[:image].value).to eq 'specified'
-        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
+        expect(entry[:cache].value).to eq([key: 'test', policy: 'pull-push', when: 'on_success'])
+      end
+    end
+
+    context 'with multiple_cache_per_job FF disabled' do
+      before do
+        stub_feature_flags(multiple_cache_per_job: false)
+      end
+
+      context 'when job config overrides default config' do
+        before do
+          entry.compose!(deps)
+        end
+
+        let(:config) do
+          { script: 'rspec', image: 'some_image', cache: { key: 'test' } }
+        end
+
+        it 'overrides default config' do
+          expect(entry[:image].value).to eq(name: 'some_image')
+          expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
+        end
+      end
+
+      context 'when job config does not override default config' do
+        before do
+          allow(default).to receive('[]').with(:image).and_return(specified)
+
+          entry.compose!(deps)
+        end
+
+        let(:config) { { script: 'ls', cache: { key: 'test' } } }
+
+        it 'uses config from default entry' do
+          expect(entry[:image].value).to eq 'specified'
+          expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
+        end
       end
     end
 
@@ -762,16 +798,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
         it 'returns allow_failure_criteria' do
           expect(entry.value[:allow_failure_criteria]).to match(exit_codes: [42])
-        end
-
-        context 'with ci_allow_failure_with_exit_codes disabled' do
-          before do
-            stub_feature_flags(ci_allow_failure_with_exit_codes: false)
-          end
-
-          it 'does not return allow_failure_criteria' do
-            expect(entry.value.key?(:allow_failure_criteria)).to be_falsey
-          end
         end
       end
     end

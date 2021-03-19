@@ -60,10 +60,12 @@ RSpec.describe Groups::GroupMembersController do
     describe 'POST #override' do
       let(:group) { create(:group_with_ldap_group_link) }
 
-      it 'is successful' do
+      before do
         allow(Ability).to receive(:allowed?).and_call_original
         allow(Ability).to receive(:allowed?).with(user, :override_group_member, membership) { true }
+      end
 
+      it 'is successful' do
         post :override,
              params: {
                group_id: group,
@@ -73,6 +75,40 @@ RSpec.describe Groups::GroupMembersController do
              format: :js
 
         expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'when user has minimal access' do
+        let(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
+
+        it 'is not successful' do
+          post :override,
+               params: {
+                 group_id: group,
+                 id: membership,
+                 group_member: { override: true }
+               },
+               format: :js
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+
+        context 'when minimal_access_role feature is available' do
+          before do
+            stub_licensed_features(minimal_access_role: true)
+          end
+
+          it 'is successful' do
+            post :override,
+                 params: {
+                   group_id: group,
+                   id: membership,
+                   group_member: { override: true }
+                 },
+                 format: :js
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
       end
     end
   end

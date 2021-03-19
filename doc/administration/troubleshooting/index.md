@@ -14,15 +14,8 @@ installation.
 - [SSL](ssl.md)
 - [Geo](../geo/replication/troubleshooting.md)
 - [Elasticsearch](elasticsearch.md)
-- [PostgreSQL](postgresql.md)
-- [Sidekiq](sidekiq.md)
-- [Group SAML and SCIM troubleshooting](group_saml_scim.md) **(SILVER ONLY)**
-- [GitLab Pages](../pages/index.md#troubleshooting)
-- [LDAP](../auth/ldap/ldap-troubleshooting.md)
-
-## Helpful Resources
-
 - [GitLab Rails console cheat sheet](gitlab_rails_cheat_sheet.md)
+- [Group SAML and SCIM troubleshooting](group_saml_scim.md) **(PREMIUM SAAS)**
 - [Kubernetes cheat sheet](kubernetes_cheat_sheet.md)
 - [Linux cheat sheet](linux_cheat_sheet.md)
 - [Parsing GitLab logs with `jq`](log_parsing.md)

@@ -18,7 +18,8 @@
     "wiki_page_events",
     "job_events",
     "deployment_events",
-    "releases_events"
+    "releases_events",
+    "subgroup_events"
   ],
   "properties": {
     "id": { "type": "integer" },
@@ -38,7 +39,8 @@
     "wiki_page_events": { "type": "boolean" },
     "job_events": { "type": "boolean" },
     "deployment_events": { "type": "boolean" },
-    "releases_events": { "type": "boolean" }
+    "releases_events": { "type": "boolean" },
+    "subgroup_events": { "type": "boolean" }
   },
   "additionalProperties": false
 }

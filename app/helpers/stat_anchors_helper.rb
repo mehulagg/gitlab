@@ -5,20 +5,21 @@ module StatAnchorsHelper
     {}.tap do |attrs|
       attrs[:class] = %w(nav-link gl-display-flex gl-align-items-center) << extra_classes(anchor)
       attrs[:itemprop] = anchor.itemprop if anchor.itemprop
+      attrs[:data] = anchor.data if anchor.data
     end
   end
 
   private
 
   def button_attribute(anchor)
-    "btn-#{anchor.class_modifier || 'missing'}"
+    anchor.class_modifier || 'btn-dashed'
   end
 
   def extra_classes(anchor)
     if anchor.is_link
       'stat-link'
     else
-      "btn #{button_attribute(anchor)}"
+      "gl-button btn #{button_attribute(anchor)}"
     end
   end
 end

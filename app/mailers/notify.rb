@@ -21,6 +21,7 @@ class Notify < ApplicationMailer
   include Emails::Groups
   include Emails::Reviews
   include Emails::ServiceDesk
+  include Emails::InProductMarketing
 
   helper TimeboxesHelper
   helper MergeRequestsHelper
@@ -32,6 +33,7 @@ class Notify < ApplicationMailer
   helper AvatarsHelper
   helper GitlabRoutingHelper
   helper IssuablesHelper
+  helper InProductMarketingHelper
 
   def test_email(recipient_email, subject, body)
     mail(to: recipient_email,
@@ -68,7 +70,7 @@ class Notify < ApplicationMailer
     return unless sender = User.find(sender_id)
 
     address = default_sender_address
-    address.display_name = sender_name.presence || sender.name
+    address.display_name = sender_name.presence || "#{sender.name} (#{sender.to_reference})"
 
     if send_from_user_email && can_send_from_user_email?(sender)
       address.address = sender.email

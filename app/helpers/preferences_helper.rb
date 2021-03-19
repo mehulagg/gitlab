@@ -29,6 +29,7 @@ module PreferencesHelper
       stars:    _("Starred Projects"),
       project_activity: _("Your Projects' Activity"),
       starred_project_activity: _("Starred Projects' Activity"),
+      followed_user_activity: _("Followed Users' Activity"),
       groups: _("Your Groups"),
       todos: _("Your To-Do List"),
       issues: _("Assigned Issues"),
@@ -82,7 +83,7 @@ module PreferencesHelper
 
   def integration_views
     [].tap do |views|
-      views << { name: 'gitpod', message: gitpod_enable_description, message_url: 'https://gitpod.io/', help_link: help_page_path('integration/gitpod.md') } if Gitlab::Gitpod.feature_and_settings_enabled?
+      views << { name: 'gitpod', message: gitpod_enable_description, message_url: 'https://gitpod.io/', help_link: help_page_path('integration/gitpod.md') } if Gitlab::CurrentSettings.gitpod_enabled
       views << { name: 'sourcegraph', message: sourcegraph_url_message, message_url: Gitlab::CurrentSettings.sourcegraph_url, help_link: help_page_path('user/profile/preferences.md', anchor: 'sourcegraph') } if Gitlab::Sourcegraph.feature_available? && Gitlab::CurrentSettings.sourcegraph_enabled
     end
   end

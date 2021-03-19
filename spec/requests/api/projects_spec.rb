@@ -886,6 +886,7 @@ RSpec.describe API::Projects do
         merge_method: 'ff'
       }).tap do |attrs|
         attrs[:operations_access_level] = 'disabled'
+        attrs[:analytics_access_level] = 'disabled'
       end
 
       post api('/projects', user), params: project
@@ -1139,7 +1140,7 @@ RSpec.describe API::Projects do
     let!(:public_project) { create(:project, :public, name: 'public_project', creator_id: user4.id, namespace: user4.namespace) }
 
     it 'returns error when user not found' do
-      get api('/users/0/projects/')
+      get api("/users/#{non_existing_record_id}/projects/")
 
       expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 User Not Found')
@@ -1477,6 +1478,120 @@ RSpec.describe API::Projects do
     end
   end
 
+  describe "GET /projects/:id/groups" do
+    let_it_be(:root_group) { create(:group, :public, name: 'root group') }
+    let_it_be(:project_group) { create(:group, :public, parent: root_group, name: 'project group') }
+    let_it_be(:shared_group_with_dev_access) { create(:group, :private, parent: root_group, name: 'shared group') }
+    let_it_be(:shared_group_with_reporter_access) { create(:group, :private) }
+    let_it_be(:private_project) { create(:project, :private, group: project_group) }
+    let_it_be(:public_project) { create(:project, :public, group: project_group) }
+
+    before_all do
+      create(:project_group_link, :developer, group: shared_group_with_dev_access, project: private_project)
+      create(:project_group_link, :reporter, group: shared_group_with_reporter_access, project: private_project)
+    end
+
+    shared_examples_for 'successful groups response' do
+      it 'returns an array of groups' do
+        request
+
+        aggregate_failures do
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.map { |g| g['name'] }).to match_array(expected_groups.map(&:name))
+        end
+      end
+    end
+
+    context 'when unauthenticated' do
+      it 'does not return groups for private projects' do
+        get api("/projects/#{private_project.id}/groups")
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      context 'for public projects' do
+        let(:request) { get api("/projects/#{public_project.id}/groups") }
+
+        it_behaves_like 'successful groups response' do
+          let(:expected_groups) { [root_group, project_group] }
+        end
+      end
+    end
+
+    context 'when authenticated as user' do
+      context 'when user does not have access to the project' do
+        it 'does not return groups' do
+          get api("/projects/#{private_project.id}/groups", user)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'when user has access to the project' do
+        let(:request) { get api("/projects/#{private_project.id}/groups", user), params: params }
+        let(:params) { {} }
+
+        before do
+          private_project.add_developer(user)
+        end
+
+        it_behaves_like 'successful groups response' do
+          let(:expected_groups) { [root_group, project_group] }
+        end
+
+        context 'when search by root group name' do
+          let(:params) { { search: 'root' } }
+
+          it_behaves_like 'successful groups response' do
+            let(:expected_groups) { [root_group] }
+          end
+        end
+
+        context 'with_shared option is on' do
+          let(:params) { { with_shared: true } }
+
+          it_behaves_like 'successful groups response' do
+            let(:expected_groups) { [root_group, project_group, shared_group_with_dev_access, shared_group_with_reporter_access] }
+          end
+
+          context 'when shared_min_access_level is set' do
+            let(:params) { super().merge(shared_min_access_level: Gitlab::Access::DEVELOPER) }
+
+            it_behaves_like 'successful groups response' do
+              let(:expected_groups) { [root_group, project_group, shared_group_with_dev_access] }
+            end
+          end
+
+          context 'when search by shared group name' do
+            let(:params) { super().merge(search: 'shared') }
+
+            it_behaves_like 'successful groups response' do
+              let(:expected_groups) { [shared_group_with_dev_access] }
+            end
+          end
+
+          context 'when skip_groups is set' do
+            let(:params) { super().merge(skip_groups: [shared_group_with_dev_access.id, root_group.id]) }
+
+            it_behaves_like 'successful groups response' do
+              let(:expected_groups) { [shared_group_with_reporter_access, project_group] }
+            end
+          end
+        end
+      end
+    end
+
+    context 'when authenticated as admin' do
+      let(:request) { get api("/projects/#{private_project.id}/groups", admin) }
+
+      it_behaves_like 'successful groups response' do
+        let(:expected_groups) { [root_group, project_group] }
+      end
+    end
+  end
+
   describe 'GET /projects/:id' do
     context 'when unauthenticated' do
       it 'does not return private projects' do
@@ -1539,7 +1654,42 @@ RSpec.describe API::Projects do
     end
 
     context 'when authenticated as an admin' do
-      it 'returns a project by id' do
+      before do
+        stub_container_registry_config(enabled: true, host_port: 'registry.example.org:5000')
+      end
+
+      let(:project_attributes_file) { 'spec/requests/api/project_attributes.yml' }
+      let(:project_attributes) { YAML.load_file(project_attributes_file) }
+
+      let(:expected_keys) do
+        keys = project_attributes.map do |relation, relation_config|
+          begin
+            actual_keys = project.send(relation).attributes.keys
+          rescue NoMethodError
+            actual_keys = ["#{relation} is nil"]
+          end
+          unexposed_attributes = relation_config['unexposed_attributes'] || []
+          remapped_attributes = relation_config['remapped_attributes'] || {}
+          computed_attributes = relation_config['computed_attributes'] || []
+          actual_keys - unexposed_attributes - remapped_attributes.keys + remapped_attributes.values + computed_attributes
+        end.flatten
+
+        unless Gitlab.ee?
+          keys -= %w[
+            approvals_before_merge
+            compliance_frameworks
+            mirror
+            requirements_enabled
+            security_and_compliance_enabled
+            issues_template
+            merge_requests_template
+          ]
+        end
+
+        keys
+      end
+
+      it 'returns a project by id', :aggregate_failures do
         project
         project_member
         group = create(:group)
@@ -1557,6 +1707,7 @@ RSpec.describe API::Projects do
         expect(json_response['ssh_url_to_repo']).to be_present
         expect(json_response['http_url_to_repo']).to be_present
         expect(json_response['web_url']).to be_present
+        expect(json_response['container_registry_image_prefix']).to eq("registry.example.org:5000/#{project.full_path}")
         expect(json_response['owner']).to be_a Hash
         expect(json_response['name']).to eq(project.name)
         expect(json_response['path']).to be_present
@@ -1583,8 +1734,30 @@ RSpec.describe API::Projects do
         expect(json_response['shared_with_groups'][0]['group_access_level']).to eq(link.group_access)
         expect(json_response['only_allow_merge_if_pipeline_succeeds']).to eq(project.only_allow_merge_if_pipeline_succeeds)
         expect(json_response['allow_merge_on_skipped_pipeline']).to eq(project.allow_merge_on_skipped_pipeline)
+        expect(json_response['restrict_user_defined_variables']).to eq(project.restrict_user_defined_variables?)
         expect(json_response['only_allow_merge_if_all_discussions_are_resolved']).to eq(project.only_allow_merge_if_all_discussions_are_resolved)
         expect(json_response['operations_access_level']).to be_present
+      end
+
+      it 'exposes all necessary attributes' do
+        create(:project_group_link, project: project)
+
+        get api("/projects/#{project.id}", admin)
+
+        diff = Set.new(json_response.keys) ^ Set.new(expected_keys)
+
+        expect(diff).to be_empty, failure_message(diff)
+      end
+
+      def failure_message(diff)
+        <<~MSG
+          It looks like project's set of exposed attributes is different from the expected set.
+
+          The following attributes are missing or newly added:
+          #{diff.to_a.to_sentence}
+
+          Please update #{project_attributes_file} file"
+        MSG
       end
     end
 
@@ -1592,9 +1765,10 @@ RSpec.describe API::Projects do
       before do
         project
         project_member
+        stub_container_registry_config(enabled: true, host_port: 'registry.example.org:5000')
       end
 
-      it 'returns a project by id' do
+      it 'returns a project by id', :aggregate_failures do
         group = create(:group)
         link = create(:project_group_link, project: project, group: group)
 
@@ -1610,6 +1784,7 @@ RSpec.describe API::Projects do
         expect(json_response['ssh_url_to_repo']).to be_present
         expect(json_response['http_url_to_repo']).to be_present
         expect(json_response['web_url']).to be_present
+        expect(json_response['container_registry_image_prefix']).to eq("registry.example.org:5000/#{project.full_path}")
         expect(json_response['owner']).to be_a Hash
         expect(json_response['name']).to eq(project.name)
         expect(json_response['path']).to be_present
@@ -1654,6 +1829,7 @@ RSpec.describe API::Projects do
         expect(json_response['shared_with_groups'][0]).to have_key('expires_at')
         expect(json_response['only_allow_merge_if_pipeline_succeeds']).to eq(project.only_allow_merge_if_pipeline_succeeds)
         expect(json_response['allow_merge_on_skipped_pipeline']).to eq(project.allow_merge_on_skipped_pipeline)
+        expect(json_response['restrict_user_defined_variables']).to eq(project.restrict_user_defined_variables?)
         expect(json_response['only_allow_merge_if_all_discussions_are_resolved']).to eq(project.only_allow_merge_if_all_discussions_are_resolved)
         expect(json_response['ci_default_git_depth']).to eq(project.ci_default_git_depth)
         expect(json_response['ci_forward_deployment_enabled']).to eq(project.ci_forward_deployment_enabled)
@@ -1685,7 +1861,7 @@ RSpec.describe API::Projects do
       end
 
       it 'returns a 404 error if not found' do
-        get api('/projects/42', user)
+        get api("/projects/#{non_existing_record_id}", user)
         expect(response).to have_gitlab_http_status(:not_found)
         expect(json_response['message']).to eq('404 Project Not Found')
       end
@@ -2046,7 +2222,7 @@ RSpec.describe API::Projects do
       end
 
       it 'returns a 404 error if not found' do
-        get api('/projects/42/users', user)
+        get api("/projects/#{non_existing_record_id}/users", user)
 
         expect(response).to have_gitlab_http_status(:not_found)
         expect(json_response['message']).to eq('404 Project Not Found')
@@ -2152,7 +2328,7 @@ RSpec.describe API::Projects do
         end
 
         it 'fails if forked_from project which does not exist' do
-          post api("/projects/#{project_fork_target.id}/fork/0", admin)
+          post api("/projects/#{project_fork_target.id}/fork/#{non_existing_record_id}", admin)
           expect(response).to have_gitlab_http_status(:not_found)
         end
 
@@ -2396,7 +2572,7 @@ RSpec.describe API::Projects do
     end
 
     it 'returns a 404 error when project does not exist' do
-      delete api("/projects/123/share/#{non_existing_record_id}", user)
+      delete api("/projects/#{non_existing_record_id}/share/#{non_existing_record_id}", user)
 
       expect(response).to have_gitlab_http_status(:not_found)
     end
@@ -2597,6 +2773,18 @@ RSpec.describe API::Projects do
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
+      it 'updates restrict_user_defined_variables', :aggregate_failures do
+        project_param = { restrict_user_defined_variables: true }
+
+        put api("/projects/#{project3.id}", user), params: project_param
+
+        expect(response).to have_gitlab_http_status(:ok)
+
+        project_param.each_pair do |k, v|
+          expect(json_response[k.to_s]).to eq(v)
+        end
+      end
+
       it 'updates avatar' do
         project_param = {
           avatar: fixture_file_upload('spec/fixtures/banana_sample.gif',
@@ -2753,7 +2941,7 @@ RSpec.describe API::Projects do
             Sidekiq::Testing.fake! do
               put(api("/projects/#{new_project.id}", user), params: { repository_storage: unknown_storage, issues_enabled: false })
             end
-          end.not_to change(ProjectUpdateRepositoryStorageWorker.jobs, :size)
+          end.not_to change(Projects::UpdateRepositoryStorageWorker.jobs, :size)
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['issues_enabled']).to eq(false)
@@ -2780,7 +2968,7 @@ RSpec.describe API::Projects do
             Sidekiq::Testing.fake! do
               put(api("/projects/#{new_project.id}", admin), params: { repository_storage: 'test_second_storage' })
             end
-          end.to change(ProjectUpdateRepositoryStorageWorker.jobs, :size).by(1)
+          end.to change(Projects::UpdateRepositoryStorageWorker.jobs, :size).by(1)
 
           expect(response).to have_gitlab_http_status(:ok)
         end
@@ -2941,7 +3129,7 @@ RSpec.describe API::Projects do
       end
 
       it 'returns the proper security headers' do
-        get api('/projects/1/starrers', current_user)
+        get api("/projects/#{public_project.id}/starrers", current_user)
 
         expect(response).to include_security_headers
       end
@@ -3014,7 +3202,7 @@ RSpec.describe API::Projects do
       end
 
       it 'returns not_found(404) for not existing project' do
-        get api("/projects/0/languages", user)
+        get api("/projects/#{non_existing_record_id}/languages", user)
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -3065,7 +3253,7 @@ RSpec.describe API::Projects do
       end
 
       it 'does not remove a non existing project' do
-        delete api('/projects/1328', user)
+        delete api("/projects/#{non_existing_record_id}", user)
         expect(response).to have_gitlab_http_status(:not_found)
       end
 
@@ -3084,7 +3272,7 @@ RSpec.describe API::Projects do
       end
 
       it 'does not remove a non existing project' do
-        delete api('/projects/1328', admin)
+        delete api("/projects/#{non_existing_record_id}", admin)
         expect(response).to have_gitlab_http_status(:not_found)
       end
 
@@ -3163,7 +3351,7 @@ RSpec.describe API::Projects do
       end
 
       it 'fails if project to fork from does not exist' do
-        post api('/projects/424242/fork', user)
+        post api("/projects/#{non_existing_record_id}/fork", user)
 
         expect(response).to have_gitlab_http_status(:not_found)
         expect(json_response['message']).to eq('404 Project Not Found')
@@ -3197,7 +3385,7 @@ RSpec.describe API::Projects do
       end
 
       it 'fails if trying to fork to non-existent namespace' do
-        post api("/projects/#{project.id}/fork", user2), params: { namespace: 42424242 }
+        post api("/projects/#{project.id}/fork", user2), params: { namespace: non_existing_record_id }
 
         expect(response).to have_gitlab_http_status(:not_found)
         expect(json_response['message']).to eq('404 Namespace Not Found')
@@ -3314,8 +3502,8 @@ RSpec.describe API::Projects do
         expect(json_response['message']['path']).to eq(['has already been taken'])
       end
 
-      it 'accepts a name for the target project' do
-        post api("/projects/#{project.id}/fork", user2), params: { name: 'My Random Project' }
+      it 'accepts custom parameters for the target project' do
+        post api("/projects/#{project.id}/fork", user2), params: { name: 'My Random Project', description: 'A description', visibility: 'private' }
 
         expect(response).to have_gitlab_http_status(:created)
         expect(json_response['name']).to eq('My Random Project')
@@ -3323,6 +3511,8 @@ RSpec.describe API::Projects do
         expect(json_response['owner']['id']).to eq(user2.id)
         expect(json_response['namespace']['id']).to eq(user2.namespace.id)
         expect(json_response['forked_from_project']['id']).to eq(project.id)
+        expect(json_response['description']).to eq('A description')
+        expect(json_response['visibility']).to eq('private')
         expect(json_response['import_status']).to eq('scheduled')
         expect(json_response).to include("import_error")
       end
@@ -3354,6 +3544,13 @@ RSpec.describe API::Projects do
         expect(json_response['message']['path']).to eq(['has already been taken'])
         expect(json_response['message']['name']).to eq(['has already been taken'])
       end
+
+      it 'fails to fork with an unknown visibility level' do
+        post api("/projects/#{project.id}/fork", user2), params: { visibility: 'something' }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('visibility does not have a valid value')
+      end
     end
 
     context 'when unauthenticated' do
@@ -3380,10 +3577,10 @@ RSpec.describe API::Projects do
   end
 
   describe 'POST /projects/:id/housekeeping' do
-    let(:housekeeping) { Projects::HousekeepingService.new(project) }
+    let(:housekeeping) { Repositories::HousekeepingService.new(project) }
 
     before do
-      allow(Projects::HousekeepingService).to receive(:new).with(project, :gc).and_return(housekeeping)
+      allow(Repositories::HousekeepingService).to receive(:new).with(project, :gc).and_return(housekeeping)
     end
 
     context 'when authenticated as owner' do
@@ -3397,12 +3594,12 @@ RSpec.describe API::Projects do
 
       context 'when housekeeping lease is taken' do
         it 'returns conflict' do
-          expect(housekeeping).to receive(:execute).once.and_raise(Projects::HousekeepingService::LeaseTaken)
+          expect(housekeeping).to receive(:execute).once.and_raise(Repositories::HousekeepingService::LeaseTaken)
 
           post api("/projects/#{project.id}/housekeeping", user)
 
           expect(response).to have_gitlab_http_status(:conflict)
-          expect(json_response['message']).to match(/Somebody already triggered housekeeping for this project/)
+          expect(json_response['message']).to match(/Somebody already triggered housekeeping for this resource/)
         end
       end
     end

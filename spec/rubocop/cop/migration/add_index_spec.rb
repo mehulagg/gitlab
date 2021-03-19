@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
 require_relative '../../../../rubocop/cop/migration/add_index'
 
-RSpec.describe RuboCop::Cop::Migration::AddIndex, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::Migration::AddIndex do
   subject(:cop) { described_class.new }
 
   context 'in migration' do

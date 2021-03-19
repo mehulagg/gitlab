@@ -24,6 +24,7 @@ uncovered edge cases.
 The default approach is to choose a reviewer from your group or team for the first review.
 This is only a recommendation and the reviewer may be from a different team.
 However, it is recommended to pick someone who is a [domain expert](#domain-experts).
+If your merge request touches more than one domain (for example, Dynamic Analysis and GraphQL), ask for reviews from an expert from each domain.
 
 You can read more about the importance of involving reviewer(s) in the section on the responsibility of the author below.
 
@@ -69,14 +70,17 @@ It picks reviewers and maintainers from the list at the
 [engineering projects](https://about.gitlab.com/handbook/engineering/projects/)
 page, with these behaviors:
 
-1. It doesn't pick people whose [GitLab status](../user/profile/index.md#current-status)
-   contains the string 'OOO', or the emoji is `:palm_tree:` or `:beach:`.
+1. It doesn't pick people whose Slack or [GitLab status](../user/profile/index.md#set-your-current-status):
+    - contains the string 'OOO', 'PTO', 'Parental Leave', or 'Friends and Family'
+    - emoji is `:palm_tree:`, `:beach:`, `:beach_umbrella:`, `:beach_with_umbrella:`, `:ferris_wheel:`, `:thermometer:`, `:face_with_thermometer:`, `:red_circle:`, `:bulb:`, `:sun_with_face:`.
 1. [Trainee maintainers](https://about.gitlab.com/handbook/engineering/workflow/code-review/#trainee-maintainer)
    are three times as likely to be picked as other reviewers.
-1. People whose [GitLab status](../user/profile/index.md#current-status) emoji
-   is `:large_blue_circle:` are more likely to be picked. This applies to both reviewers and trainee maintainers.
+1. Team members whose Slack or [GitLab status](../user/profile/index.md#set-your-current-status) emoji
+   is 🔵 `:large_blue_circle:` are more likely to be picked. This applies to both reviewers and trainee maintainers.
    - Reviewers with `:large_blue_circle:` are two times as likely to be picked as other reviewers.
    - Trainee maintainers with `:large_blue_circle:` are four times as likely to be picked as other reviewers.
+1. People whose [GitLab status](../user/profile/index.md#set-your-current-status) emoji
+   is 🔶 `:large_orange_diamond:` are half as likely to be picked. This applies to both reviewers and trainee maintainers.
 1. It always picks the same reviewers and maintainers for the same
    branch name (unless their OOO status changes, as in point 1). It
    removes leading `ce-` and `ee-`, and trailing `-ce` and `-ee`, so
@@ -103,11 +107,11 @@ with [domain expertise](#domain-experts).
      be **approved by a [frontend foundations member](https://about.gitlab.com/direction/create/ecosystem/frontend-ux-foundations/)**.
    - If the license used by the new library hasn't been approved for use in
      GitLab, the license must be **approved by a [legal department member](https://about.gitlab.com/handbook/legal/)**.
-     More information about license compatiblity can be found in our
+     More information about license compatibility can be found in our
      [GitLab Licensing and Compatibility documentation](licensing.md).
 1. If your merge request includes adding a new UI/UX paradigm (*1*), it must be
    **approved by a [UX lead](https://about.gitlab.com/company/team/)**.
-1. If your merge request includes a new dependency or a filesystem change, it must be
+1. If your merge request includes a new dependency or a file system change, it must be
    **approved by a [Distribution team member](https://about.gitlab.com/company/team/)**. See how to work with the [Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/#how-to-work-with-distribution) for more details.
 1. If your merge request includes documentation changes, it must be **approved
    by a [Technical writer](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments)**, based on
@@ -116,7 +120,9 @@ with [domain expertise](#domain-experts).
    by a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors)**.
 1. If your merge request only includes end-to-end changes (*3*) **or** if the MR author is a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa)**
 1. If your merge request includes a new or updated [application limit](https://about.gitlab.com/handbook/product/product-processes/#introducing-application-limits), it must be **approved by a [product manager](https://about.gitlab.com/company/team/)**.
-1. If your merge request includes Product Analytics (telemetry) changes, it should be reviewed and approved by a [Product analytics engineer](https://gitlab.com/gitlab-org/growth/product-analytics/engineers).
+1. If your merge request includes Product Intelligence (telemetry or analytics) changes, it should be reviewed and approved by a [Product Intelligence engineer](https://gitlab.com/gitlab-org/growth/product_intelligence/engineers).
+1. If your merge request includes an addition of, or changes to a [Feature spec](testing_guide/testing_levels.md#frontend-feature-tests), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa) or [Quality reviewer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_reviewers_qa)**.
+1. If your merge request introduces a new service to GitLab (Puma, Sidekiq, Gitaly are examples), it must be **approved by a [product manager](https://about.gitlab.com/company/team/)**. See the [process for adding a service component to GitLab](adding_service_component.md) for details.
 
 - (*1*): Please note that specs other than JavaScript specs are considered backend code.
 - (*2*): We encourage you to seek guidance from a database maintainer if your merge
@@ -173,8 +179,11 @@ warrant a comment could be:
 
 Avoid:
 
-- Adding comments (referenced above, or TODO items) directly to the source code unless the reviewer requires you to do so. If the comments are added due to an actionable task,
-a link to an issue must be included.
+- Adding TODO comments (referenced above) directly to the source code unless the reviewer requires
+  you to do so. If TODO comments are added due to an actionable task,
+  [include a link to the relevant issue](code_comments.md).
+- Adding comments which only explain what the code is doing. If non-TODO comments are added, they should
+  [_explain why, not what_](https://blog.codinghorror.com/code-tells-you-how-comments-tell-you-why/).
 - Assigning merge requests with failed tests to maintainers. If the tests are failing and you have to assign, ensure you leave a comment with an explanation.
 - Excessively mentioning maintainers through email or Slack (if the maintainer is reachable
 through Slack). If you can't assign a merge request, `@` mentioning a maintainer in a comment is acceptable and in all other cases assigning the merge request is sufficient.
@@ -272,10 +281,11 @@ first time.
   of your shiny new branch, read through the entire diff. Does it make sense?
   Did you include something unrelated to the overall purpose of the changes? Did
   you forget to remove any debugging code?
-<!-- vale gitlab.FutureTense = NO -->
-- Be grateful for the reviewer's suggestions. ("Good call. I'll make that
-  change.")
-<!-- vale gitlab.FutureTense = YES -->
+- Consider providing instructions on how to test the merge request. This can be
+  helpful for reviewers not familiar with the product feature or area of the codebase.
+- If you know your change depends on another being merged first, note it in the
+  description and set an [merge request dependency](../user/project/merge_requests/merge_request_dependencies.md).
+- Be grateful for the reviewer's suggestions. (`Good call. I'll make that change.`)
 - Don't take it personally. The review is of the code, not of you.
 - Explain why the code exists. ("It's like that because of these reasons. Would
   it be more clear if I rename this class/file/method/variable?")
@@ -309,7 +319,7 @@ You can also use `workflow::ready for review` label. That means that your merge 
 When your merge request receives an approval from the first reviewer it can be passed to a maintainer. You should default to choosing a maintainer with [domain expertise](#domain-experts), and otherwise follow the Reviewer Roulette recommendation or use the label `ready for merge`.
 
 Sometimes, a maintainer may not be available for review. They could be out of the office or [at capacity](#review-response-slo).
-You can and should check the maintainer’s availability in their profile. If the maintainer recommended by
+You can and should check the maintainer's availability in their profile. If the maintainer recommended by
 the roulette is not available, choose someone else from that list.
 
 It is responsibility of the author of a merge request that the merge request is reviewed. If it stays in `ready for review` state too long it is recommended to assign it to a specific reviewer.
@@ -336,6 +346,9 @@ experience, refactors the existing code). Then:
     convey your intent.
   - For non-mandatory suggestions, decorate with (non-blocking) so the author knows they can
     optionally resolve within the merge request or follow-up at a later stage.
+  - There's a [Chrome/Firefox add-on](https://gitlab.com/conventionalcomments/conventional-comments-button) which you can use to apply [Conventional Comment](https://conventionalcomments.org/) prefixes.
+- Ensure there are no open dependencies. Check [related issues](../user/project/issues/related_issues.md) for blockers. Clarify with the author(s)
+if necessary. If blocked by one or more open MRs, set an [MR dependency](../user/project/merge_requests/merge_request_dependencies.md).
 - After a round of line notes, it can be helpful to post a summary note such as
   "Looks good to me", or "Just a couple things to address."
 - Assign the merge request to the author if changes are required following your
@@ -373,11 +386,16 @@ When ready to merge:
 - Consider using the [Squash and
   merge](../user/project/merge_requests/squash_and_merge.md#squash-and-merge)
   feature when the merge request has a lot of commits.
-  When merging code a maintainer should only use the squash feature if the
-  author has already set this option or if the merge request clearly contains a
-  messy commit history that is intended to be squashed.
+  When merging code, a maintainer should only use the squash feature if the
+  author has already set this option, or if the merge request clearly contains a
+  messy commit history, it will be more efficient to squash commits instead of
+  circling back with the author about that. Otherwise, if the MR only has a few commits, we'll
+  be respecting the author's setting by not squashing them.
+
 - **Start a new merge request pipeline with the `Run Pipeline` button in the merge
   request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).** Note that:
+  - If **[master is broken](https://about.gitlab.com/handbook/engineering/workflow/#broken-master),
+    do not merge the merge request**. Follow these specific [handbook instructions](https://about.gitlab.com/handbook/engineering/workflow/#maintaining-throughput-during-broken-master).
   - If the **latest [Pipeline for Merged Results](../ci/merge_request_pipelines/pipelines_for_merged_results/#pipelines-for-merged-results)** finished less than 2 hours ago, you
     might merge without starting a new pipeline as the merge request is close
     enough to `master`.
@@ -385,10 +403,6 @@ When ready to merge:
     Before triggering the pipeline, review all changes for **malicious code**.
     If you cannot trigger the pipeline, review the status of the fork relative to `master`.
     If it's more than 100 commits behind, ask the author to rebase it before merging.
-  - If [master is broken](https://about.gitlab.com/handbook/engineering/workflow/#broken-master),
-    in addition to the two above rules, check that any failure also happens
-    in `master` and post a link to the ~"master:broken" issue before clicking the
-    red "Merge" button.
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
   subsequent revisions for anything that would be spotted after that.
 
@@ -505,7 +519,7 @@ and get on with their work quickly.
 
 If you think you are at capacity and are unable to accept any more reviews until
 some have been completed, communicate this through your GitLab status by setting
-the `:red_circle:` emoji and mentioning that you are at capacity in the status
+the 🔴 `:red_circle:` emoji and mentioning that you are at capacity in the status
 text. This guides contributors to pick a different reviewer, helping us to
 meet the SLO.
 
@@ -560,7 +574,7 @@ A good example of collaboration on an MR touching multiple parts of the codebase
 
 ### Credits
 
-Largely based on the [thoughtbot code review guide](https://github.com/thoughtbot/guides/tree/master/code-review).
+Largely based on the [`thoughtbot` code review guide](https://github.com/thoughtbot/guides/tree/master/code-review).
 
 ---
 

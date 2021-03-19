@@ -1,9 +1,8 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 
-import { PathIdSeparator } from '~/related_issues/constants';
-
 import IssuableBody from '~/issue_show/components/app.vue';
+import { PathIdSeparator } from '~/related_issues/constants';
 
 import EpicSidebar from './epic_sidebar.vue';
 
@@ -31,9 +30,6 @@ export default {
       'sidebarCollapsed',
     ]),
     ...mapGetters(['isUserSignedIn']),
-    sidebarStatusClass() {
-      return this.sidebarCollapsed ? 'right-sidebar-collapsed' : 'right-sidebar-expanded';
-    },
   },
 };
 </script>
@@ -45,6 +41,7 @@ export default {
         :endpoint="endpoint"
         :update-endpoint="updateEndpoint"
         :project-path="groupPath"
+        :project-id="0"
         :markdown-preview-path="markdownPreviewPath"
         :markdown-docs-path="markdownDocsPath"
         :can-update="canUpdate"

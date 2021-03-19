@@ -1,5 +1,5 @@
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 
 import * as types from './mutation_types';
@@ -26,7 +26,7 @@ export const fetchConfigData = ({ dispatch }, endpoint) => {
         dispatch('receiveConfigError');
       }
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveConfigError', error.response.data.message);
     });
 };
@@ -45,7 +45,7 @@ export const fetchChartData = ({ dispatch }, { endpoint, chart }) =>
         data,
       }),
     )
-    .catch(error => {
+    .catch((error) => {
       let message = `${__('There was an error gathering the chart data')}`;
 
       if (error.response.data && error.response.data.message) {

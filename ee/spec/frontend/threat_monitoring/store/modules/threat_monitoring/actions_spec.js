@@ -8,7 +8,7 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
-import { mockEnvironmentsResponse } from '../../../mock_data';
+import { mockEnvironmentsResponse } from '../../../mocks/mock_data';
 
 jest.mock('~/flash');
 
@@ -140,7 +140,7 @@ describe('Threat Monitoring actions', () => {
 
     describe('given more than one page of environments', () => {
       beforeEach(() => {
-        const oneEnvironmentPerPage = ({ totalPages }) => config => {
+        const oneEnvironmentPerPage = ({ totalPages }) => (config) => {
           const { page } = config.params;
           const response = [httpStatus.OK, { environments: [{ id: page }] }];
           if (page < totalPages) {

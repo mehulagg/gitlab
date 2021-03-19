@@ -1,5 +1,5 @@
-import { sprintf, s__ } from '~/locale';
 import { spriteIcon } from '~/lib/utils/common_utils';
+import { sprintf, s__ } from '~/locale';
 
 // Securely open external links in a new tab.
 function getLinkStartTag(url) {

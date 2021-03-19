@@ -377,7 +377,12 @@ class GeoNode < ApplicationRecord
   def update_oauth_application!
     return unless uri
 
-    self.build_oauth_application if oauth_application.nil?
+    if oauth_application.nil?
+      self.build_oauth_application
+      self.oauth_application.trusted = true
+      self.oauth_application.confidential = true
+    end
+
     self.oauth_application.name = "Geo node: #{self.url}"
     self.oauth_application.redirect_uri = oauth_callback_url
   end

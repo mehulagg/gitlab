@@ -40,6 +40,32 @@ RSpec.describe Projects::MergeRequestsController do
       get :show, params: params.merge(extra_params)
     end
 
+    context 'with the invite_members_in_comment experiment', :experiment do
+      context 'when user can invite' do
+        before do
+          stub_experiments(invite_members_in_comment: :invite_member_link)
+          project.add_maintainer(user)
+        end
+
+        it 'assigns the candidate experience and tracks the event' do
+          expect(experiment(:invite_member_link)).to track(:view, property: project.root_ancestor.id.to_s)
+                                                       .on_any_instance
+                                                       .for(:invite_member_link)
+                                                       .with_context(namespace: project.root_ancestor)
+
+          go
+        end
+      end
+
+      context 'when user can not invite' do
+        it 'does not track the event' do
+          expect(experiment(:invite_member_link)).not_to track(:view)
+
+          go
+        end
+      end
+    end
+
     context 'with view param' do
       before do
         go(view: 'parallel')
@@ -1118,6 +1144,108 @@ RSpec.describe Projects::MergeRequestsController do
     end
   end
 
+  describe 'GET codequality_mr_diff_reports' do
+    let_it_be(:merge_request) do
+      create(:merge_request,
+        :with_merge_request_pipeline,
+        target_project: project,
+        source_project: project)
+    end
+
+    let(:pipeline) do
+      create(:ci_pipeline,
+        :success,
+        project: merge_request.source_project,
+        ref: merge_request.source_branch,
+        sha: merge_request.diff_head_sha)
+    end
+
+    before do
+      allow_any_instance_of(MergeRequest)
+        .to receive(:find_codequality_mr_diff_reports)
+        .and_return(report)
+
+      allow_any_instance_of(MergeRequest)
+        .to receive(:actual_head_pipeline)
+        .and_return(pipeline)
+    end
+
+    subject(:get_codequality_mr_diff_reports) do
+      get :codequality_mr_diff_reports, params: {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: merge_request.iid
+      },
+      format: :json
+    end
+
+    context 'permissions on a public project with private CI/CD' do
+      let(:project) { create :project, :repository, :public, :builds_private }
+      let(:report) { { status: :parsed, data: { 'files' => {} } } }
+
+      context 'while signed out' do
+        before do
+          sign_out(user)
+        end
+
+        it 'responds with a 404' do
+          get_codequality_mr_diff_reports
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+
+      context 'while signed in as an unrelated user' do
+        before do
+          sign_in(create(:user))
+        end
+
+        it 'responds with a 404' do
+          get_codequality_mr_diff_reports
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+    end
+
+    context 'when pipeline has jobs with codequality mr diff report' do
+      before do
+        allow_any_instance_of(MergeRequest)
+          .to receive(:has_codequality_mr_diff_report?)
+          .and_return(true)
+      end
+
+      context 'when processing codequality mr diff report is in progress' do
+        let(:report) { { status: :parsing } }
+
+        it 'sends polling interval' do
+          expect(Gitlab::PollingInterval).to receive(:set_header)
+
+          get_codequality_mr_diff_reports
+        end
+
+        it 'returns 204 HTTP status' do
+          get_codequality_mr_diff_reports
+
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'when processing codequality mr diff report is completed' do
+        let(:report) { { status: :parsed, data: { 'files' => {} } } }
+
+        it 'returns codequality mr diff report' do
+          get_codequality_mr_diff_reports
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to eq({ 'files' => {} })
+        end
+      end
+    end
+  end
+
   describe 'GET terraform_reports' do
     let_it_be(:merge_request) do
       create(:merge_request,
@@ -1269,7 +1397,6 @@ RSpec.describe Projects::MergeRequestsController do
   describe 'GET test_reports' do
     let_it_be(:merge_request) do
       create(:merge_request,
-        :with_diffs,
         :with_merge_request_pipeline,
         target_project: project,
         source_project: project
@@ -1380,7 +1507,6 @@ RSpec.describe Projects::MergeRequestsController do
   describe 'GET accessibility_reports' do
     let_it_be(:merge_request) do
       create(:merge_request,
-        :with_diffs,
         :with_merge_request_pipeline,
         target_project: project,
         source_project: project
@@ -1501,7 +1627,6 @@ RSpec.describe Projects::MergeRequestsController do
   describe 'GET codequality_reports' do
     let_it_be(:merge_request) do
       create(:merge_request,
-        :with_diffs,
         :with_merge_request_pipeline,
         target_project: project,
         source_project: project
@@ -1942,21 +2067,6 @@ RSpec.describe Projects::MergeRequestsController do
     context 'successfully' do
       it 'enqeues a RebaseWorker' do
         expect_rebase_worker_for(viewer)
-
-        post_rebase
-
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-    end
-
-    context 'with SELECT FOR UPDATE lock' do
-      before do
-        stub_feature_flags(merge_request_rebase_nowait_lock: false)
-      end
-
-      it 'executes rebase' do
-        allow_any_instance_of(MergeRequest).to receive(:with_lock).with(true).and_call_original
-        expect(RebaseWorker).to receive(:perform_async)
 
         post_rebase
 

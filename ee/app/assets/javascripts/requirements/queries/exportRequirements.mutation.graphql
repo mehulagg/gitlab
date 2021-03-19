@@ -1,0 +1,21 @@
+mutation exportRequirements(
+  $projectPath: ID!
+  $state: RequirementState
+  $authorUsername: [String!] = []
+  $search: String = ""
+  $sortBy: Sort = CREATED_DESC
+  $selectedFields: [String!] = []
+) {
+  exportRequirements(
+    input: {
+      projectPath: $projectPath
+      search: $search
+      authorUsername: $authorUsername
+      state: $state
+      sort: $sortBy
+      selectedFields: $selectedFields
+    }
+  ) {
+    errors
+  }
+}

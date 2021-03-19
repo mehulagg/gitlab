@@ -1,14 +1,14 @@
 import Vue from 'vue';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import IdeRouter from '~/ide/ide_router_extension';
 import { joinPaths } from '~/lib/utils/url_utility';
-import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
-import { performanceMarkAndMeasure } from '~/performance/utils';
 import {
   WEBIDE_MARK_FETCH_PROJECT_DATA_START,
   WEBIDE_MARK_FETCH_PROJECT_DATA_FINISH,
   WEBIDE_MEASURE_FETCH_PROJECT_DATA,
 } from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 import { syncRouterAndStore } from './sync_router_and_store';
 
 Vue.use(IdeRouter);
@@ -39,7 +39,7 @@ const EmptyRouterComponent = {
   },
 };
 
-export const createRouter = store => {
+export const createRouter = (store) => {
   const router = new IdeRouter({
     mode: 'history',
     base: joinPaths(gon.relative_url_root || '', '/-/ide/'),
@@ -54,11 +54,11 @@ export const createRouter = store => {
           },
           {
             path: ':targetmode(edit|tree|blob)/:branchid+/',
-            redirect: to => joinPaths(to.path, '/-/'),
+            redirect: (to) => joinPaths(to.path, '/-/'),
           },
           {
             path: ':targetmode(edit|tree|blob)',
-            redirect: to => joinPaths(to.path, '/master/-/'),
+            redirect: (to) => joinPaths(to.path, '/master/-/'),
           },
           {
             path: 'merge_requests/:mrid',
@@ -66,7 +66,7 @@ export const createRouter = store => {
           },
           {
             path: '',
-            redirect: to => joinPaths(to.path, '/edit/master/-/'),
+            redirect: (to) => joinPaths(to.path, '/edit/master/-/'),
           },
         ],
       },
@@ -110,7 +110,7 @@ export const createRouter = store => {
             });
           }
         })
-        .catch(e => {
+        .catch((e) => {
           flash(
             __('Error while loading the project data. Please try again.'),
             'alert',

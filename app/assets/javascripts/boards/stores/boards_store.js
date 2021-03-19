@@ -4,22 +4,22 @@
 import { sortBy } from 'lodash';
 import Vue from 'vue';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import createDefaultClient from '~/lib/graphql';
+import axios from '~/lib/utils/axios_utils';
 import {
   urlParamsToObject,
   getUrlParamsArray,
   parseBoolean,
   convertObjectPropsToCamelCase,
 } from '~/lib/utils/common_utils';
-import createDefaultClient from '~/lib/graphql';
-import axios from '~/lib/utils/axios_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { ListType, flashAnimationDuration } from '../constants';
 import eventHub from '../eventhub';
-import { ListType } from '../constants';
-import IssueProject from '../models/project';
-import ListLabel from '../models/label';
 import ListAssignee from '../models/assignee';
+import ListLabel from '../models/label';
 import ListMilestone from '../models/milestone';
+import IssueProject from '../models/project';
 
 const PER_PAGE = 20;
 export const gqlClient = createDefaultClient();
@@ -101,11 +101,16 @@ const boardsStore = {
   },
   new(listObj) {
     const list = this.addList(listObj);
-    const backlogList = this.findList('type', 'backlog', 'backlog');
+    const backlogList = this.findList('type', 'backlog');
 
     list
       .save()
       .then(() => {
+        list.highlighted = true;
+        setTimeout(() => {
+          list.highlighted = false;
+        }, flashAnimationDuration);
+
         // Remove any new issues from the backlog
         // as they will be visible in the new list
         list.issues.forEach(backlogList.removeIssue.bind(backlogList));
@@ -117,14 +122,13 @@ const boardsStore = {
   },
 
   updateNewListDropdown(listId) {
-    // eslint-disable-next-line no-unused-expressions
     document
       .querySelector(`.js-board-list-${getIdFromGraphQLId(listId)}`)
       ?.classList.remove('is-active');
   },
 
   findIssueLabel(issue, findLabel) {
-    return issue.labels.find(label => label.id === findLabel.id);
+    return issue.labels.find((label) => label.id === findLabel.id);
   },
 
   goToNextPage(list) {
@@ -182,15 +186,15 @@ const boardsStore = {
     }
   },
   findListIssue(list, id) {
-    return list.issues.find(issue => issue.id === id);
+    return list.issues.find((issue) => issue.id === id);
   },
 
-  removeList(id, type = 'blank') {
-    const list = this.findList('id', id, type);
+  removeList(id) {
+    const list = this.findList('id', id);
 
     if (!list) return;
 
-    this.state.lists = this.state.lists.filter(list => list.id !== id);
+    this.state.lists = this.state.lists.filter((list) => list.id !== id);
   },
   moveList(listFrom, orderLists) {
     orderLists.forEach((id, i) => {
@@ -205,7 +209,7 @@ const boardsStore = {
     let moveBeforeId = null;
     let moveAfterId = null;
 
-    const listHasIssues = issues.every(issue => list.findIssue(issue.id));
+    const listHasIssues = issues.every((issue) => list.findIssue(issue.id));
 
     if (!listHasIssues) {
       if (newIndex !== undefined) {
@@ -223,21 +227,21 @@ const boardsStore = {
       }
 
       if (list.label) {
-        issues.forEach(issue => issue.addLabel(list.label));
+        issues.forEach((issue) => issue.addLabel(list.label));
       }
 
       if (list.assignee) {
         if (listFrom && listFrom.type === 'assignee') {
-          issues.forEach(issue => issue.removeAssignee(listFrom.assignee));
+          issues.forEach((issue) => issue.removeAssignee(listFrom.assignee));
         }
-        issues.forEach(issue => issue.addAssignee(list.assignee));
+        issues.forEach((issue) => issue.addAssignee(list.assignee));
       }
 
       if (IS_EE && list.milestone) {
         if (listFrom && listFrom.type === 'milestone') {
-          issues.forEach(issue => issue.removeMilestone(listFrom.milestone));
+          issues.forEach((issue) => issue.removeMilestone(listFrom.milestone));
         }
-        issues.forEach(issue => issue.addMilestone(list.milestone));
+        issues.forEach((issue) => issue.addMilestone(list.milestone));
       }
 
       if (listFrom) {
@@ -249,7 +253,7 @@ const boardsStore = {
   },
 
   removeListIssues(list, removeIssue) {
-    list.issues = list.issues.filter(issue => {
+    list.issues = list.issues.filter((issue) => {
       const matchesRemove = removeIssue.id === issue.id;
 
       if (matchesRemove) {
@@ -261,9 +265,9 @@ const boardsStore = {
     });
   },
   removeListMultipleIssues(list, removeIssues) {
-    const ids = removeIssues.map(issue => issue.id);
+    const ids = removeIssues.map((issue) => issue.id);
 
-    list.issues = list.issues.filter(issue => {
+    list.issues = list.issues.filter((issue) => {
       const matchesRemove = ids.includes(issue.id);
 
       if (matchesRemove) {
@@ -289,9 +293,9 @@ const boardsStore = {
   },
 
   moveMultipleIssuesToList({ listFrom, listTo, issues, newIndex }) {
-    const issueTo = issues.map(issue => listTo.findIssue(issue.id));
-    const issueLists = issues.map(issue => issue.getLists()).flat();
-    const listLabels = issueLists.map(list => list.label);
+    const issueTo = issues.map((issue) => listTo.findIssue(issue.id));
+    const issueLists = issues.map((issue) => issue.getLists()).flat();
+    const listLabels = issueLists.map((list) => list.label);
     const hasMoveableIssues = issueTo.filter(Boolean).length > 0;
 
     if (!hasMoveableIssues) {
@@ -299,30 +303,30 @@ const boardsStore = {
       if (
         listTo.type === ListType.assignee &&
         listFrom.type === ListType.assignee &&
-        issues.some(issue => issue.findAssignee(listTo.assignee))
+        issues.some((issue) => issue.findAssignee(listTo.assignee))
       ) {
-        const targetIssues = issues.map(issue => listTo.findIssue(issue.id));
-        targetIssues.forEach(targetIssue => targetIssue.removeAssignee(listFrom.assignee));
+        const targetIssues = issues.map((issue) => listTo.findIssue(issue.id));
+        targetIssues.forEach((targetIssue) => targetIssue.removeAssignee(listFrom.assignee));
       } else if (listTo.type === 'milestone') {
-        const currentMilestones = issues.map(issue => issue.milestone);
+        const currentMilestones = issues.map((issue) => issue.milestone);
         const currentLists = this.state.lists
-          .filter(list => list.type === 'milestone' && list.id !== listTo.id)
-          .filter(list =>
-            list.issues.some(listIssue => issues.some(issue => listIssue.id === issue.id)),
+          .filter((list) => list.type === 'milestone' && list.id !== listTo.id)
+          .filter((list) =>
+            list.issues.some((listIssue) => issues.some((issue) => listIssue.id === issue.id)),
           );
 
-        issues.forEach(issue => {
-          currentMilestones.forEach(milestone => {
+        issues.forEach((issue) => {
+          currentMilestones.forEach((milestone) => {
             issue.removeMilestone(milestone);
           });
         });
 
-        issues.forEach(issue => {
+        issues.forEach((issue) => {
           issue.addMilestone(listTo.milestone);
         });
 
-        currentLists.forEach(currentList => {
-          issues.forEach(issue => {
+        currentLists.forEach((currentList) => {
+          issues.forEach((issue) => {
             currentList.removeIssue(issue);
           });
         });
@@ -334,36 +338,36 @@ const boardsStore = {
       }
     } else {
       listTo.updateMultipleIssues(issues, listFrom);
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeLabel(listFrom.label);
       });
     }
 
     if (listTo.type === ListType.closed && listFrom.type !== ListType.backlog) {
-      issueLists.forEach(list => {
-        issues.forEach(issue => {
+      issueLists.forEach((list) => {
+        issues.forEach((issue) => {
           list.removeIssue(issue);
         });
       });
 
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeLabels(listLabels);
       });
     } else if (listTo.type === ListType.backlog && listFrom.type === ListType.assignee) {
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeAssignee(listFrom.assignee);
       });
-      issueLists.forEach(list => {
-        issues.forEach(issue => {
+      issueLists.forEach((list) => {
+        issues.forEach((issue) => {
           list.removeIssue(issue);
         });
       });
     } else if (listTo.type === ListType.backlog && listFrom.type === ListType.milestone) {
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeMilestone(listFrom.milestone);
       });
-      issueLists.forEach(list => {
-        issues.forEach(issue => {
+      issueLists.forEach((list) => {
+        issues.forEach((issue) => {
           list.removeIssue(issue);
         });
       });
@@ -380,8 +384,8 @@ const boardsStore = {
     if (issues.length === 1) return true;
 
     // Create list of ids for issues involved.
-    const listIssueIds = list.issues.map(issue => issue.id);
-    const movedIssueIds = issues.map(issue => issue.id);
+    const listIssueIds = list.issues.map((issue) => issue.id);
+    const movedIssueIds = issues.map((issue) => issue.id);
 
     // Check if moved issue IDs is sub-array
     // of source list issue IDs (i.e. contiguous selection).
@@ -391,7 +395,7 @@ const boardsStore = {
   moveIssueToList(listFrom, listTo, issue, newIndex) {
     const issueTo = listTo.findIssue(issue.id);
     const issueLists = issue.getLists();
-    const listLabels = issueLists.map(listIssue => listIssue.label);
+    const listLabels = issueLists.map((listIssue) => listIssue.label);
 
     if (!issueTo) {
       // Check if target list assignee is already present in this issue
@@ -405,12 +409,12 @@ const boardsStore = {
       } else if (listTo.type === 'milestone') {
         const currentMilestone = issue.milestone;
         const currentLists = this.state.lists
-          .filter(list => list.type === 'milestone' && list.id !== listTo.id)
-          .filter(list => list.issues.some(listIssue => issue.id === listIssue.id));
+          .filter((list) => list.type === 'milestone' && list.id !== listTo.id)
+          .filter((list) => list.issues.some((listIssue) => issue.id === listIssue.id));
 
         issue.removeMilestone(currentMilestone);
         issue.addMilestone(listTo.milestone);
-        currentLists.forEach(currentList => currentList.removeIssue(issue));
+        currentLists.forEach((currentList) => currentList.removeIssue(issue));
         listTo.addIssue(issue, listFrom, newIndex);
       } else {
         // Add to new lists issues if it doesn't already exist
@@ -422,7 +426,7 @@ const boardsStore = {
     }
 
     if (listTo.type === 'closed' && listFrom.type !== 'backlog') {
-      issueLists.forEach(list => {
+      issueLists.forEach((list) => {
         list.removeIssue(issue);
       });
       issue.removeLabels(listLabels);
@@ -461,18 +465,11 @@ const boardsStore = {
       moveAfterId: afterId,
     });
   },
-  findList(key, val, type = 'label') {
-    const filteredList = this.state.lists.filter(list => {
-      const byType = type
-        ? list.type === type || list.type === 'assignee' || list.type === 'milestone'
-        : true;
-
-      return list[key] === val && byType;
-    });
-    return filteredList[0];
+  findList(key, val) {
+    return this.state.lists.find((list) => list[key] === val);
   },
   findListByLabelId(id) {
-    return this.state.lists.find(list => list.type === 'label' && list.label.id === id);
+    return this.state.lists.find((list) => list.type === 'label' && list.label.id === id);
   },
 
   toggleFilter(filter) {
@@ -578,7 +575,7 @@ const boardsStore = {
   },
 
   saveList(list) {
-    const entity = list.label || list.assignee || list.milestone;
+    const entity = list.label || list.assignee || list.milestone || list.iteration;
     let entityType = '';
     if (list.label) {
       entityType = 'label_id';
@@ -586,11 +583,13 @@ const boardsStore = {
       entityType = 'assignee_id';
     } else if (IS_EE && list.milestone) {
       entityType = 'milestone_id';
+    } else if (IS_EE && list.iteration) {
+      entityType = 'iteration_id';
     }
 
     return this.createList(entity.id, entityType)
-      .then(res => res.data)
-      .then(data => {
+      .then((res) => res.data)
+      .then((data) => {
         list.id = data.id;
         list.type = data.list_type;
         list.position = data.position;
@@ -607,7 +606,7 @@ const boardsStore = {
     };
 
     if (list.label && data.label_name) {
-      data.label_name = data.label_name.filter(label => label !== list.label.title);
+      data.label_name = data.label_name.filter((label) => label !== list.label.title);
     }
 
     if (emptyIssues) {
@@ -615,8 +614,8 @@ const boardsStore = {
     }
 
     return this.getIssuesForList(list.id, data)
-      .then(res => res.data)
-      .then(data => {
+      .then((res) => res.data)
+      .then((data) => {
         list.loading = false;
         list.issuesSize = data.size;
 
@@ -624,7 +623,7 @@ const boardsStore = {
           list.issues = [];
         }
 
-        data.issues.forEach(issueObj => {
+        data.issues.forEach((issueObj) => {
           list.addIssue(new ListIssue(issueObj));
         });
 
@@ -634,7 +633,7 @@ const boardsStore = {
 
   getIssuesForList(id, filter = {}) {
     const data = { id };
-    Object.keys(filter).forEach(key => {
+    Object.keys(filter).forEach((key) => {
       data[key] = filter[key];
     });
 
@@ -670,13 +669,13 @@ const boardsStore = {
   },
 
   moveListMultipleIssues({ list, issues, oldIndicies, newIndex, moveBeforeId, moveAfterId }) {
-    oldIndicies.reverse().forEach(index => {
+    oldIndicies.reverse().forEach((index) => {
       list.issues.splice(index, 1);
     });
     list.issues.splice(newIndex, 0, ...issues);
 
     return this.moveMultipleIssues({
-      ids: issues.map(issue => issue.id),
+      ids: issues.map((issue) => issue.id),
       fromListId: null,
       toListId: null,
       moveBeforeId,
@@ -703,8 +702,8 @@ const boardsStore = {
     }
 
     return this.newIssue(list.id, issue)
-      .then(res => res.data)
-      .then(data => list.onNewIssueResponse(issue, data));
+      .then((res) => res.data)
+      .then((data) => list.onNewIssueResponse(issue, data));
   },
 
   getBacklog(data) {
@@ -717,7 +716,7 @@ const boardsStore = {
   },
   removeIssueLabel(issue, removeLabel) {
     if (removeLabel) {
-      issue.labels = issue.labels.filter(label => removeLabel.id !== label.id);
+      issue.labels = issue.labels.filter((label) => removeLabel.id !== label.id);
     }
   },
 
@@ -725,6 +724,10 @@ const boardsStore = {
     if (!issue.findAssignee(assignee)) {
       issue.assignees.push(new ListAssignee(assignee));
     }
+  },
+
+  setIssueAssignees(issue, assignees) {
+    issue.assignees = [...assignees];
   },
 
   removeIssueLabels(issue, labels) {
@@ -753,16 +756,12 @@ const boardsStore = {
     return axios.get(this.state.endpoints.recentBoardsEndpoint);
   },
 
-  deleteBoard({ id }) {
-    return axios.delete(this.generateBoardsPath(id));
-  },
-
   setCurrentBoard(board) {
     this.state.currentBoard = board;
   },
 
   toggleMultiSelect(issue) {
-    const selectedIssueIds = this.multiSelect.list.map(issue => issue.id);
+    const selectedIssueIds = this.multiSelect.list.map((issue) => issue.id);
     const index = selectedIssueIds.indexOf(issue.id);
 
     if (index === -1) {
@@ -777,12 +776,12 @@ const boardsStore = {
   },
   removeIssueAssignee(issue, removeAssignee) {
     if (removeAssignee) {
-      issue.assignees = issue.assignees.filter(assignee => assignee.id !== removeAssignee.id);
+      issue.assignees = issue.assignees.filter((assignee) => assignee.id !== removeAssignee.id);
     }
   },
 
   findIssueAssignee(issue, findAssignee) {
-    return issue.assignees.find(assignee => assignee.id === findAssignee.id);
+    return issue.assignees.find((assignee) => assignee.id === findAssignee.id);
   },
 
   clearMultiSelect() {
@@ -837,11 +836,11 @@ const boardsStore = {
     }
 
     if (obj.labels) {
-      issue.labels = obj.labels.map(label => new ListLabel(label));
+      issue.labels = obj.labels.map((label) => new ListLabel(label));
     }
 
     if (obj.assignees) {
-      issue.assignees = obj.assignees.map(a => new ListAssignee(a));
+      issue.assignees = obj.assignees.map((a) => new ListAssignee(a));
     }
   },
   addIssueLabel(issue, label) {

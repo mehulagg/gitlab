@@ -85,17 +85,6 @@ RSpec.describe Ci::Minutes::BatchResetService do
             expect(namespace.last_ci_minutes_usage_notification_level).to be_nil
           end
         end
-
-        it 'touches the shared_runners_seconds_last_reset for all namespaces' do
-          subject
-
-          expect(
-            [
-              namespace_1.reload, namespace_2.reload, namespace_3.reload,
-              namespace_4.reload, namespace_5.reload
-            ].map(&:shared_runners_seconds_last_reset)
-          ).to all(be_within(1.second).of(Time.current))
-        end
       end
 
       context 'when ID range is not provided' do
@@ -120,17 +109,6 @@ RSpec.describe Ci::Minutes::BatchResetService do
           expect(ProjectStatistics.find_by(namespace: namespace_6).shared_runners_seconds_last_reset).to be_present
           expect(namespace_6.last_ci_minutes_notification_at).to be_nil
           expect(namespace_6.last_ci_minutes_usage_notification_level).to be_nil
-        end
-
-        it 'touches the shared_runners_seconds_last_reset for all namespaces' do
-          subject
-
-          expect(
-            [
-              namespace_1.reload, namespace_2.reload, namespace_3.reload,
-              namespace_4.reload, namespace_5.reload, namespace_6.reload
-            ].map(&:shared_runners_seconds_last_reset)
-          ).to all(be_within(1.second).of(Time.current))
         end
       end
 

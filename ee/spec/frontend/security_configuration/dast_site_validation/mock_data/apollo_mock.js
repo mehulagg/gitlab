@@ -15,3 +15,9 @@ export const dastSiteTokenCreate = ({ id = '1', token = '1', errors = [] }) => (
     },
   },
 });
+
+export const dastSiteValidationRevoke = (errors = []) => ({
+  data: {
+    dastSiteValidationRevoke: { errors },
+  },
+});

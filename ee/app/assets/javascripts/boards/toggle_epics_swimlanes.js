@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import ToggleEpicsSwimlanes from './components/toggle_epics_swimlanes.vue';
 import store from '~/boards/stores';
+import ToggleEpicsSwimlanes from './components/toggle_epics_swimlanes.vue';
 
 export default () => {
   const el = document.getElementById('js-board-epics-swimlanes-toggle');

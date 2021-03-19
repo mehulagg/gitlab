@@ -24,7 +24,8 @@
 #     alt_usage_data(fallback: nil) { Gitlab.config.registry.enabled }
 #
 #   * redis_usage_data method
-#     handles ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent
+#     handles ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent,
+#     Gitlab::UsageDataCounters::HLLRedisCounter::EventError
 #     returns -1 when a block is sent or hash with all values -1 when a counter is sent
 #     different behaviour due to 2 different implementations of redis counter
 #
@@ -38,7 +39,12 @@ module Gitlab
       extend self
 
       FALLBACK = -1
+      HISTOGRAM_FALLBACK = { '-1' => -1 }.freeze
       DISTRIBUTED_HLL_FALLBACK = -2
+      ALL_TIME_TIME_FRAME_NAME = "all"
+      SEVEN_DAYS_TIME_FRAME_NAME = "7d"
+      TWENTY_EIGHT_DAYS_TIME_FRAME_NAME = "28d"
+      MAX_BUCKET_SIZE = 100
 
       def count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
         if batch
@@ -61,10 +67,13 @@ module Gitlab
       end
 
       def estimate_batch_distinct_count(relation, column = nil, batch_size: nil, start: nil, finish: nil)
-        Gitlab::Database::PostgresHll::BatchDistinctCounter
+        buckets = Gitlab::Database::PostgresHll::BatchDistinctCounter
           .new(relation, column)
           .execute(batch_size: batch_size, start: start, finish: finish)
-          .estimated_distinct_count
+
+        yield buckets if block_given?
+
+        buckets.estimated_distinct_count
       rescue ActiveRecord::StatementInvalid
         FALLBACK
       # catch all rescue should be removed as a part of feature flag rollout issue
@@ -77,6 +86,81 @@ module Gitlab
       def sum(relation, column, batch_size: nil, start: nil, finish: nil)
         Gitlab::Database::BatchCount.batch_sum(relation, column, batch_size: batch_size, start: start, finish: finish)
       rescue ActiveRecord::StatementInvalid
+        FALLBACK
+      end
+
+      # We don't support batching with histograms.
+      # Please avoid using this method on large tables.
+      # See https://gitlab.com/gitlab-org/gitlab/-/issues/323949.
+      #
+      # rubocop: disable CodeReuse/ActiveRecord
+      def histogram(relation, column, buckets:, bucket_size: buckets.size)
+        # Using lambda to avoid exposing histogram specific methods
+        parameters_valid = lambda do
+          error_message =
+            if buckets.first == buckets.last
+              'Lower bucket bound cannot equal to upper bucket bound'
+            elsif bucket_size == 0
+              'Bucket size cannot be zero'
+            elsif bucket_size > MAX_BUCKET_SIZE
+              "Bucket size #{bucket_size} exceeds the limit of #{MAX_BUCKET_SIZE}"
+            end
+
+          return true unless error_message
+
+          exception = ArgumentError.new(error_message)
+          exception.set_backtrace(caller)
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception)
+
+          false
+        end
+
+        return HISTOGRAM_FALLBACK unless parameters_valid.call
+
+        count_grouped = relation.group(column).select(Arel.star.count.as('count_grouped'))
+        cte = Gitlab::SQL::CTE.new(:count_cte, count_grouped)
+
+        # For example, 9 segements gives 10 buckets
+        bucket_segments = bucket_size - 1
+
+        width_bucket = Arel::Nodes::NamedFunction
+          .new('WIDTH_BUCKET', [cte.table[:count_grouped], buckets.first, buckets.last, bucket_segments])
+          .as('buckets')
+
+        query = cte
+          .table
+          .project(width_bucket, cte.table[:count])
+          .group('buckets')
+          .order('buckets')
+          .with(cte.to_arel)
+
+        # Return the histogram as a Hash because buckets are unique.
+        relation
+          .connection
+          .exec_query(query.to_sql)
+          .rows
+          .to_h
+          # Keys are converted to strings in Usage Ping JSON
+          .stringify_keys
+      rescue ActiveRecord::StatementInvalid => e
+        Gitlab::AppJsonLogger.error(
+          event: 'histogram',
+          relation: relation.table_name,
+          operation: 'histogram',
+          operation_args: [column, buckets.first, buckets.last, bucket_segments],
+          query: query.to_sql,
+          message: e.message
+        )
+
+        HISTOGRAM_FALLBACK
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      def add(*args)
+        return -1 if args.any?(&:negative?)
+
+        args.sum
+      rescue StandardError
         FALLBACK
       end
 
@@ -98,11 +182,13 @@ module Gitlab
         end
       end
 
-      def with_prometheus_client(fallback: nil, verify: true)
+      def with_prometheus_client(fallback: {}, verify: true)
         client = prometheus_client(verify: verify)
         return fallback unless client
 
         yield client
+      rescue
+        fallback
       end
 
       def measure_duration
@@ -120,9 +206,7 @@ module Gitlab
       # @param event_name [String] the event name
       # @param values [Array|String] the values counted
       def track_usage_event(event_name, values)
-        return unless Feature.enabled?(:"usage_data_#{event_name}", default_enabled: true)
-
-        Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name.to_s)
+        Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name.to_s, values: values)
       end
 
       private
@@ -145,7 +229,8 @@ module Gitlab
 
       def prometheus_server_address
         if Gitlab::Prometheus::Internal.prometheus_enabled?
-          Gitlab::Prometheus::Internal.server_address
+          # Stripping protocol from URI
+          Gitlab::Prometheus::Internal.uri&.strip&.sub(%r{^https?://}, '')
         elsif Gitlab::Consul::Internal.api_url
           Gitlab::Consul::Internal.discover_prometheus_server_address
         end
@@ -153,7 +238,7 @@ module Gitlab
 
       def redis_usage_counter
         yield
-      rescue ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent
+      rescue ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent, Gitlab::UsageDataCounters::HLLRedisCounter::EventError
         FALLBACK
       end
 

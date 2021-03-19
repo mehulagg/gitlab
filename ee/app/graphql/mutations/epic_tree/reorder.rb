@@ -10,12 +10,12 @@ module Mutations
       argument :base_epic_id,
                ::Types::GlobalIDType[::Epic],
                required: true,
-               description: 'The ID of the base epic of the tree'
+               description: 'The ID of the base epic of the tree.'
 
       argument :moved,
                Types::EpicTree::EpicTreeNodeInputType,
                required: true,
-               description: 'Parameters for updating the tree positions'
+               description: 'Parameters for updating the tree positions.'
 
       def resolve(args)
         moving_object_id = args[:moved][:id]

@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
-import groupItemComponent from '~/groups/components/group_item.vue';
 import groupFolderComponent from '~/groups/components/group_folder.vue';
-import { getGroupItemMicrodata } from '~/groups/store/utils';
+import groupItemComponent from '~/groups/components/group_item.vue';
 import eventHub from '~/groups/event_hub';
+import { getGroupItemMicrodata } from '~/groups/store/utils';
 import * as urlUtilities from '~/lib/utils/url_utility';
 import { mockParentGroupItem, mockChildren } from '../mock_data';
 
@@ -20,7 +20,7 @@ describe('GroupItemComponent', () => {
   let vm;
 
   beforeEach(() => {
-    Vue.component('group-folder', groupFolderComponent);
+    Vue.component('GroupFolder', groupFolderComponent);
 
     vm = createComponent();
 
@@ -31,7 +31,7 @@ describe('GroupItemComponent', () => {
     vm.$destroy();
   });
 
-  const withMicrodata = group => ({
+  const withMicrodata = (group) => ({
     ...group,
     microdata: getGroupItemMicrodata(group),
   });
@@ -49,7 +49,7 @@ describe('GroupItemComponent', () => {
         const { rowClass } = vm;
 
         expect(Object.keys(rowClass).length).toBe(classes.length);
-        Object.keys(rowClass).forEach(className => {
+        Object.keys(rowClass).forEach((className) => {
           expect(classes.indexOf(className)).toBeGreaterThan(-1);
         });
       });
@@ -188,7 +188,7 @@ describe('GroupItemComponent', () => {
     });
 
     it('should render component template correctly', () => {
-      const visibilityIconEl = vm.$el.querySelector('.item-visibility');
+      const visibilityIconEl = vm.$el.querySelector('[data-testid="group-visibility-icon"]');
 
       expect(vm.$el.getAttribute('id')).toBe('group-55');
       expect(vm.$el.classList.contains('group-row')).toBeTruthy();
@@ -209,8 +209,7 @@ describe('GroupItemComponent', () => {
       expect(vm.$el.querySelector('.title a.no-expand')).toBeDefined();
 
       expect(visibilityIconEl).not.toBe(null);
-      expect(visibilityIconEl.title).toBe(vm.visibilityTooltip);
-      expect(visibilityIconEl.querySelectorAll('svg').length).toBeGreaterThan(0);
+      expect(visibilityIconEl.getAttribute('title')).toBe(vm.visibilityTooltip);
 
       expect(vm.$el.querySelector('.access-type')).toBeDefined();
       expect(vm.$el.querySelector('.description')).toBeDefined();
@@ -220,13 +219,13 @@ describe('GroupItemComponent', () => {
   });
   describe('schema.org props', () => {
     describe('when showSchemaMarkup is disabled on the group', () => {
-      it.each(['itemprop', 'itemtype', 'itemscope'], 'it does not set %s', attr => {
+      it.each(['itemprop', 'itemtype', 'itemscope'], 'it does not set %s', (attr) => {
         expect(vm.$el.getAttribute(attr)).toBeNull();
       });
       it.each(
         ['.js-group-avatar', '.js-group-name', '.js-group-description'],
         'it does not set `itemprop` on sub-nodes',
-        selector => {
+        (selector) => {
           expect(vm.$el.querySelector(selector).getAttribute('itemprop')).toBeNull();
         },
       );

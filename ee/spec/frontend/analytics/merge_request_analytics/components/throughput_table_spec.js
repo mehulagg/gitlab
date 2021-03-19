@@ -57,7 +57,7 @@ describe('ThroughputTable', () => {
     expect(wrapper.find(component).exists()).toBe(visible);
   };
 
-  const additionalData = data => {
+  const additionalData = (data) => {
     wrapper.setData({
       throughputTableData: {
         list: [{ ...throughputTableData[0], ...data }],
@@ -68,7 +68,7 @@ describe('ThroughputTable', () => {
 
   const findTable = () => wrapper.find(GlTable);
 
-  const findCol = testId => findTable().find(`[data-testid="${testId}"]`);
+  const findCol = (testId) => findTable().find(`[data-testid="${testId}"]`);
 
   const findColSubItem = (colTestId, childTetestId) =>
     findCol(colTestId).find(`[data-testid="${childTetestId}"]`);

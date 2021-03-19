@@ -1,13 +1,14 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
-import { s__, __ } from '~/locale';
 import createFlash from '~/flash';
 import { formatDate, getDateInPast } from '~/lib/utils/datetime_utility';
+import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
+import { s__, __ } from '~/locale';
+import projectsHistoryQuery from '../graphql/queries/project_vulnerabilities_by_day_and_count.query.graphql';
 import { createProjectLoadingError } from '../helpers';
 import DashboardNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityChartsLayout from './security_charts_layout.vue';
-import projectsHistoryQuery from '../graphql/project_vulnerabilities_by_day_and_count.graphql';
 
 const MAX_DAYS = 100;
 const ISO_DATE = 'isoDate';
@@ -68,6 +69,7 @@ export default {
     return {
       chartWidth: 0,
       trendsByDay: [],
+      svgs: {},
     };
   },
   computed: {
@@ -90,11 +92,11 @@ export default {
         },
       }));
 
-      this.trendsByDay.forEach(trend => {
+      this.trendsByDay.forEach((trend) => {
         const { date, ...severities } = trend;
 
         SEVERITIES.forEach(({ key }) => {
-          series.find(s => s.key === key).data.push([date, severities[key]]);
+          series.find((s) => s.key === key).data.push([date, severities[key]]);
         });
       });
 
@@ -109,21 +111,49 @@ export default {
     shouldShowEmptyState() {
       return !this.hasVulnerabilities;
     },
+    chartOptions() {
+      return {
+        xAxis: {
+          name: __('Time'),
+          key: 'time',
+          type: 'category',
+        },
+        yAxis: {
+          name: __('Vulnerabilities'),
+          key: 'vulnerabilities',
+          type: 'value',
+          minInterval: 1,
+        },
+        toolbox: {
+          feature: {
+            dataZoom: {
+              icon: { zoom: this.svgs['marquee-selection'], back: this.svgs.redo },
+            },
+            restore: {
+              icon: this.svgs.repeat,
+            },
+            saveAsImage: {
+              icon: this.svgs.download,
+            },
+          },
+        },
+      };
+    },
   },
   mounted() {
     this.chartWidth = this.$refs.layout.$el.clientWidth;
   },
-  chartOptions: {
-    xAxis: {
-      name: __('Time'),
-      key: 'time',
-      type: 'category',
-    },
-    yAxis: {
-      name: __('Vulnerabilities'),
-      key: 'vulnerabilities',
-      type: 'value',
-      minInterval: 1,
+  created() {
+    ['marquee-selection', 'redo', 'repeat', 'download'].forEach(this.setSvg);
+  },
+  methods: {
+    async setSvg(name) {
+      try {
+        this.$set(this.svgs, name, `path://${await getSvgIconPathContent(name)}`);
+      } catch (e) {
+        // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
+        console.error('SVG could not be rendered correctly: ', e);
+      }
     },
   },
 };
@@ -134,12 +164,12 @@ export default {
     <template v-if="shouldShowEmptyState" #empty-state>
       <dashboard-not-configured :help-path="helpPath" />
     </template>
-    <template v-else-if="shouldShowCharts">
+    <template v-else-if="shouldShowCharts" #default>
       <gl-line-chart
         class="gl-mt-6"
         :width="chartWidth"
         :data="dataSeries"
-        :option="$options.chartOptions"
+        :option="chartOptions"
         :include-legend-avg-max="false"
       />
     </template>

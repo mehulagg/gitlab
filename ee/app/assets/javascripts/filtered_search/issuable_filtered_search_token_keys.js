@@ -120,7 +120,7 @@ export const iterationConditions = [
  */
 class IssuesFilteredSearchTokenKeysEE extends FilteredSearchTokenKeys {
   constructor() {
-    const milestoneTokenKeyIndex = tokenKeys.findIndex(tk => tk.key === 'milestone');
+    const milestoneTokenKeyIndex = tokenKeys.findIndex((tk) => tk.key === 'milestone');
     tokenKeys.splice(milestoneTokenKeyIndex + 1, 0, iterationTokenKey);
 
     super([...tokenKeys, epicTokenKey, weightTokenKey], alternativeTokenKeys, [
@@ -135,7 +135,7 @@ class IssuesFilteredSearchTokenKeysEE extends FilteredSearchTokenKeys {
    * Changes assignee token to accept multiple values.
    */
   enableMultipleAssignees() {
-    const assigneeTokenKey = this.tokenKeys.find(tk => tk.key === 'assignee');
+    const assigneeTokenKey = this.tokenKeys.find((tk) => tk.key === 'assignee');
 
     // Add the original as an alternative token key
     this.tokenKeysWithAlternative.push({ ...assigneeTokenKey });
@@ -145,18 +145,11 @@ class IssuesFilteredSearchTokenKeysEE extends FilteredSearchTokenKeys {
   }
 
   removeEpicToken() {
-    this.removeToken(epicTokenKey);
+    this.removeTokensForKeys(epicTokenKey.key);
   }
 
   removeIterationToken() {
-    this.removeToken(iterationTokenKey);
-  }
-
-  removeToken(tokenKey) {
-    const index = this.tokenKeys.findIndex(token => token.key === tokenKey.key);
-    if (index >= 0) {
-      this.tokenKeys.splice(index, 1);
-    }
+    this.removeTokensForKeys(iterationTokenKey.key);
   }
 }
 

@@ -13,6 +13,7 @@ module EE
         check_maintenance_mode!(cmd)
         check_geo_license!
         check_smartcard_access!
+        check_otp_session!
 
         super
       end
@@ -91,6 +92,32 @@ module EE
       def check_smartcard_access!
         unless can_access_without_new_smartcard_login?
           raise ::Gitlab::GitAccess::ForbiddenError, 'Project requires smartcard login. Please login to GitLab using a smartcard.'
+        end
+      end
+
+      def check_otp_session!
+        return unless ::License.feature_available?(:git_two_factor_enforcement)
+        return unless ::Feature.enabled?(:two_factor_for_cli)
+        return unless ssh?
+        return if !key? || deploy_key?
+        return unless user.two_factor_enabled?
+
+        if ::Gitlab::Auth::Otp::SessionEnforcer.new(actor).access_restricted?
+          message = "OTP verification is required to access the repository.\n\n"\
+                  "   Use: #{build_ssh_otp_verify_command}"
+
+          raise ::Gitlab::GitAccess::ForbiddenError, message
+        end
+      end
+
+      def build_ssh_otp_verify_command
+        user = "#{::Gitlab.config.gitlab_shell.ssh_user}@" unless ::Gitlab.config.gitlab_shell.ssh_user.empty?
+        user_host = "#{user}#{::Gitlab.config.gitlab_shell.ssh_host}"
+
+        if ::Gitlab.config.gitlab_shell.ssh_port != 22
+          "ssh #{user_host} -p #{::Gitlab.config.gitlab_shell.ssh_port} 2fa_verify"
+        else
+          "ssh #{user_host} 2fa_verify"
         end
       end
 

@@ -3,8 +3,8 @@ import { GlEmptyState } from '@gitlab/ui';
 import { isUndefined } from 'lodash';
 import { mapActions, mapState } from 'vuex';
 
-import InsightsChart from './insights_chart.vue';
 import { __ } from '~/locale';
+import InsightsChart from './insights_chart.vue';
 
 export default {
   components: {

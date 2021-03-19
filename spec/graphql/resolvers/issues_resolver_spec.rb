@@ -195,11 +195,11 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:priority_issue4) { create(:issue, project: project) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :priority_asc).items).to eq([priority_issue3, priority_issue1, priority_issue2, priority_issue4])
+            expect(resolve_issues(sort: :priority_asc).to_a).to eq([priority_issue3, priority_issue1, priority_issue2, priority_issue4])
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :priority_desc).items).to eq([priority_issue1, priority_issue3, priority_issue2, priority_issue4])
+            expect(resolve_issues(sort: :priority_desc).to_a).to eq([priority_issue1, priority_issue3, priority_issue2, priority_issue4])
           end
         end
 
@@ -214,11 +214,11 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:label_issue4) { create(:issue, project: project) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :label_priority_asc).items).to eq([label_issue3, label_issue1, label_issue2, label_issue4])
+            expect(resolve_issues(sort: :label_priority_asc).to_a).to eq([label_issue3, label_issue1, label_issue2, label_issue4])
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :label_priority_desc).items).to eq([label_issue2, label_issue3, label_issue1, label_issue4])
+            expect(resolve_issues(sort: :label_priority_desc).to_a).to eq([label_issue2, label_issue3, label_issue1, label_issue4])
           end
         end
 
@@ -231,11 +231,11 @@ RSpec.describe Resolvers::IssuesResolver do
           let_it_be(:milestone_issue3) { create(:issue, project: project, milestone: late_milestone) }
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :milestone_due_asc).items).to eq([milestone_issue2, milestone_issue3, milestone_issue1])
+            expect(resolve_issues(sort: :milestone_due_asc).to_a).to eq([milestone_issue2, milestone_issue3, milestone_issue1])
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :milestone_due_desc).items).to eq([milestone_issue3, milestone_issue2, milestone_issue1])
+            expect(resolve_issues(sort: :milestone_due_desc).to_a).to eq([milestone_issue3, milestone_issue2, milestone_issue1])
           end
         end
 
@@ -264,7 +264,7 @@ RSpec.describe Resolvers::IssuesResolver do
       end
 
       it 'finds a specific issue with iid', :request_store do
-        result = batch_sync(max_queries: 4) { resolve_issues(iid: issue1.iid) }
+        result = batch_sync(max_queries: 4) { resolve_issues(iid: issue1.iid).to_a }
 
         expect(result).to contain_exactly(issue1)
       end
@@ -281,7 +281,7 @@ RSpec.describe Resolvers::IssuesResolver do
 
       it 'finds a specific issue with iids', :request_store do
         result = batch_sync(max_queries: 4) do
-          resolve_issues(iids: [issue1.iid])
+          resolve_issues(iids: [issue1.iid]).to_a
         end
 
         expect(result).to contain_exactly(issue1)
@@ -290,7 +290,7 @@ RSpec.describe Resolvers::IssuesResolver do
       it 'finds multiple issues with iids' do
         create(:issue, project: project, author: current_user)
 
-        expect(batch_sync { resolve_issues(iids: [issue1.iid, issue2.iid]) })
+        expect(batch_sync { resolve_issues(iids: [issue1.iid, issue2.iid]).to_a })
           .to contain_exactly(issue1, issue2)
       end
 
@@ -302,7 +302,7 @@ RSpec.describe Resolvers::IssuesResolver do
           create(:issue, project: another_project, iid: iid)
         end
 
-        expect(batch_sync { resolve_issues(iids: iids) }).to contain_exactly(issue1, issue2)
+        expect(batch_sync { resolve_issues(iids: iids).to_a }).to contain_exactly(issue1, issue2)
       end
     end
   end

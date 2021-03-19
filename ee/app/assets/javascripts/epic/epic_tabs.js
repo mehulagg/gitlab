@@ -29,7 +29,7 @@ export default class EpicTabs {
    */
   loadRoadmapBundle() {
     import('ee/roadmap/roadmap_bundle')
-      .then(roadmapBundle => {
+      .then((roadmapBundle) => {
         this.initRoadmap = roadmapBundle.default;
       })
       .catch(() => {});

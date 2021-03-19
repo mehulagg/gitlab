@@ -1,4 +1,4 @@
-import { GlAlert, GlForm, GlModal } from '@gitlab/ui';
+import { GlForm, GlModal } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import merge from 'lodash/merge';
@@ -6,7 +6,7 @@ import DastScannerProfileForm from 'ee/security_configuration/dast_scanner_profi
 import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import dastScannerProfileCreateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
-import { scannerProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
+import { scannerProfiles, policyScannerProfile } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
 import { redirectTo } from '~/lib/utils/url_utility';
 
@@ -16,6 +16,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 
 const projectFullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/security/configuration/dast_profiles`;
+const onDemandScansPath = `${TEST_HOST}/${projectFullPath}/-/on_demand_scans`;
 const defaultProfile = scannerProfiles[0];
 
 const {
@@ -30,14 +31,16 @@ const {
 const defaultProps = {
   profilesLibraryPath,
   projectFullPath,
+  onDemandScansPath,
 };
 
 describe('DAST Scanner Profile', () => {
   let wrapper;
 
   const withinComponent = () => within(wrapper.element);
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"`);
 
+  const findParentFormGroup = () => findByTestId('dast-scanner-parent-group');
   const findForm = () => wrapper.find(GlForm);
   const findProfileNameInput = () => findByTestId('profile-name-input');
   const findSpiderTimeoutInput = () => findByTestId('spider-timeout-input');
@@ -47,10 +50,11 @@ describe('DAST Scanner Profile', () => {
   const findScanType = () => findByTestId('scan-type-option');
 
   const findCancelModal = () => wrapper.find(GlModal);
-  const findAlert = () => wrapper.find(GlAlert);
+  const findAlert = () => findByTestId('dast-scanner-profile-alert');
+  const findPolicyProfileAlert = () => findByTestId('dast-policy-scanner-profile-alert');
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
-  const componentFactory = (mountFn = shallowMount) => options => {
+  const componentFactory = (mountFn = shallowMount) => (options) => {
     wrapper = mountFn(
       DastScannerProfileForm,
       merge(
@@ -120,7 +124,7 @@ describe('DAST Scanner Profile', () => {
       createFullComponent();
     });
 
-    it.each(invalidValues)('is marked as invalid provided an invalid value', async value => {
+    it.each(invalidValues)('is marked as invalid provided an invalid value', async (value) => {
       await finder().find('input').setValue(value);
 
       expect(wrapper.text()).toContain(errorMessage);
@@ -242,7 +246,7 @@ describe('DAST Scanner Profile', () => {
           const alert = findAlert();
 
           expect(alert.exists()).toBe(true);
-          errors.forEach(error => {
+          errors.forEach((error) => {
             expect(alert.text()).toContain(error);
           });
         });
@@ -277,6 +281,46 @@ describe('DAST Scanner Profile', () => {
           expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
         });
       });
+    });
+  });
+
+  describe('when profile does not come from a policy', () => {
+    beforeEach(() => {
+      createComponent({
+        propsData: {
+          profile: defaultProfile,
+        },
+      });
+    });
+
+    it('should enable all form groups', () => {
+      expect(findParentFormGroup().attributes('disabled')).toBe(undefined);
+    });
+
+    it('should show the policy profile alert', () => {
+      expect(findPolicyProfileAlert().exists()).toBe(false);
+    });
+  });
+
+  describe('when profile does comes from a policy', () => {
+    beforeEach(() => {
+      createComponent({
+        propsData: {
+          profile: policyScannerProfile,
+        },
+      });
+    });
+
+    it('should show the policy profile alert', () => {
+      expect(findPolicyProfileAlert().exists()).toBe(true);
+    });
+
+    it('should disable all form groups', () => {
+      expect(findParentFormGroup().attributes('disabled')).toBe('true');
+    });
+
+    it('should disable the save button', () => {
+      expect(findSubmitButton().props('disabled')).toBe(true);
     });
   });
 });

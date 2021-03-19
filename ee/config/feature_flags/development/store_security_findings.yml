@@ -1,8 +1,0 @@
----
-name: store_security_findings
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44312
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/276011
-milestone: '13.6'
-type: development
-group: group::threat insights
-default_enabled: false

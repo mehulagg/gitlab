@@ -801,7 +801,8 @@ module Gitlab
       # forced - should we use --force flag?
       # no_tags - should we use --no-tags flag?
       # prune - should we use --prune flag?
-      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true)
+      # check_tags_changed - should we ask gitaly to calculate whether any tags changed?
+      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true, check_tags_changed: false)
         wrapped_gitaly_errors do
           gitaly_repository_client.fetch_remote(
             remote,
@@ -809,6 +810,7 @@ module Gitlab
             forced: forced,
             no_tags: no_tags,
             prune: prune,
+            check_tags_changed: check_tags_changed,
             timeout: GITLAB_PROJECTS_TIMEOUT
           )
         end
@@ -1013,6 +1015,10 @@ module Gitlab
         return [] if empty? || safe_query.blank?
 
         gitaly_repository_client.search_files_by_name(ref, safe_query)
+      end
+
+      def search_files_by_regexp(filter, ref = 'HEAD')
+        gitaly_repository_client.search_files_by_regexp(ref, filter)
       end
 
       def find_commits_by_message(query, ref, path, limit, offset)

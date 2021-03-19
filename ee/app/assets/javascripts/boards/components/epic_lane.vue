@@ -1,10 +1,10 @@
 <script>
 import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { __, n__, sprintf } from '~/locale';
 import createFlash from '~/flash';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { __, n__, sprintf } from '~/locale';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { statusType } from '../../epic/constants';
 import IssuesLaneList from './issues_lane_list.vue';
 
@@ -72,7 +72,7 @@ export default {
     },
     epicTimeAgoString() {
       return this.isOpen
-        ? sprintf(__(`Opened %{epicTimeagoDate}`), {
+        ? sprintf(__(`Created %{epicTimeagoDate}`), {
             epicTimeagoDate: this.timeFormatted(this.epic.createdAt),
           })
         : sprintf(__(`Closed %{epicTimeagoDate}`), {

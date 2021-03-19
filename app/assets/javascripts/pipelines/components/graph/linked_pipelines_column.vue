@@ -1,9 +1,16 @@
 <script>
-import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
-import LinkedPipeline from './linked_pipeline.vue';
+import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import { LOAD_FAILURE } from '../../constants';
-import { UPSTREAM } from './constants';
-import { unwrapPipelineData, toggleQueryPollingByVisibility } from './utils';
+import { ONE_COL_WIDTH, UPSTREAM } from './constants';
+import LinkedPipeline from './linked_pipeline.vue';
+import {
+  getQueryHeaders,
+  reportToSentry,
+  serializeLoadErrors,
+  toggleQueryPollingByVisibility,
+  unwrapPipelineData,
+  validateConfigPaths,
+} from './utils';
 
 export default {
   components: {
@@ -14,6 +21,11 @@ export default {
     columnTitle: {
       type: String,
       required: true,
+    },
+    configPaths: {
+      type: Object,
+      required: true,
+      validator: validateConfigPaths,
     },
     linkedPipelines: {
       type: Array,
@@ -39,19 +51,14 @@ export default {
     'gl-pl-3',
     'gl-mb-5',
   ],
+  minWidth: `${ONE_COL_WIDTH}px`,
   computed: {
     columnClass() {
       const positionValues = {
-        right: 'gl-ml-11',
-        left: 'gl-mr-7',
+        right: 'gl-ml-6',
+        left: 'gl-mr-6',
       };
       return `graph-position-${this.graphPosition} ${positionValues[this.graphPosition]}`;
-    },
-    graphPosition() {
-      return this.isUpstream ? 'left' : 'right';
-    },
-    isUpstream() {
-      return this.type === UPSTREAM;
     },
     computedTitleClasses() {
       const positionalClasses = this.isUpstream
@@ -59,6 +66,15 @@ export default {
         : [];
 
       return [...this.$options.titleClasses, ...positionalClasses];
+    },
+    graphPosition() {
+      return this.isUpstream ? 'left' : 'right';
+    },
+    isUpstream() {
+      return this.type === UPSTREAM;
+    },
+    minWidth() {
+      return this.isUpstream ? 0 : this.$options.minWidth;
     },
   },
   methods: {
@@ -68,6 +84,9 @@ export default {
       this.$apollo.addSmartQuery('currentPipeline', {
         query: getPipelineDetails,
         pollInterval: 10000,
+        context() {
+          return getQueryHeaders(this.configPaths.graphqlResourceEtag);
+        },
         variables() {
           return {
             projectPath,
@@ -75,13 +94,30 @@ export default {
           };
         },
         update(data) {
+          /*
+            This check prevents the pipeline from being overwritten
+            when a poll times out and the data returned is empty.
+            This can be removed once the timeout behavior is updated.
+            See: https://gitlab.com/gitlab-org/gitlab/-/issues/323213.
+          */
+
+          if (!data?.project?.pipeline) {
+            return this.currentPipeline;
+          }
+
           return unwrapPipelineData(projectPath, data);
         },
         result() {
           this.loadingPipelineId = null;
+          this.$emit('scrollContainer');
         },
-        error() {
-          this.$emit('error', LOAD_FAILURE);
+        error(err) {
+          this.$emit('error', { type: LOAD_FAILURE, skipSentry: true });
+
+          reportToSentry(
+            'linked_pipelines_column',
+            `error type: ${LOAD_FAILURE}, error: ${serializeLoadErrors(err)}`,
+          );
         },
       });
 
@@ -125,6 +161,9 @@ export default {
 
       this.$emit('pipelineExpandToggle', jobName, expanded);
     },
+    showContainer(id) {
+      return this.isExpanded(id) || this.isLoadingPipeline(id);
+    },
   },
 };
 </script>
@@ -153,11 +192,16 @@ export default {
             @pipelineClicked="onPipelineClick(pipeline)"
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
-          <div v-if="isExpanded(pipeline.id)" class="gl-display-inline-block">
+          <div
+            v-if="showContainer(pipeline.id)"
+            :style="{ minWidth }"
+            class="gl-display-inline-block"
+          >
             <pipeline-graph
-              v-if="currentPipeline"
+              v-if="isExpanded(pipeline.id)"
               :type="type"
               class="d-inline-block gl-mt-n2"
+              :config-paths="configPaths"
               :pipeline="currentPipeline"
               :is-linked-pipeline="true"
             />

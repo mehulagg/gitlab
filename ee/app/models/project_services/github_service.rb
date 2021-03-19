@@ -26,10 +26,11 @@ class GithubService < Service
     "See pipeline statuses on GitHub for your commits and pull requests"
   end
 
-  def detailed_description
-    mirror_path = project_settings_repository_path(project)
-    mirror_link = link_to('mirroring your GitHub repository', mirror_path)
-    "This requires #{mirror_link} to this project.".html_safe
+  def help
+    return unless project
+
+    docs_link = link_to _('Learn more'), help_page_url('user/project/repository/repository_mirroring')
+    s_("Integrations|This requires mirroring your GitHub repository to this project. %{docs_link}" % { docs_link: docs_link }).html_safe
   end
 
   def self.to_param

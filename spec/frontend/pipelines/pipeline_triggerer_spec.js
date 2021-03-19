@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import pipelineTriggerer from '~/pipelines/components/pipelines_list/pipeline_triggerer.vue';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
 describe('Pipelines Triggerer', () => {
   let wrapper;
@@ -35,8 +35,8 @@ describe('Pipelines Triggerer', () => {
     wrapper.destroy();
   });
 
-  it('should render a table cell', () => {
-    expect(wrapper.find('.table-section').exists()).toBe(true);
+  it('should render pipeline triggerer table cell', () => {
+    expect(wrapper.find('[data-testid="pipeline-triggerer"]').exists()).toBe(true);
   });
 
   it('should pass triggerer information when triggerer is provided', () => {

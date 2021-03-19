@@ -25,11 +25,21 @@ class ApplicationSetting < ApplicationRecord
   alias_attribute :instance_group_id, :instance_administrators_group_id
   alias_attribute :instance_administrators_group, :instance_group
 
-  def self.repository_storages_weighted_attributes
-    @repository_storages_weighted_atributes ||= Gitlab.config.repositories.storages.keys.map { |k| "repository_storages_weighted_#{k}".to_sym }.freeze
+  def self.kroki_formats_attributes
+    {
+      blockdiag: {
+        label: 'BlockDiag (includes BlockDiag, SeqDiag, ActDiag, NwDiag, PacketDiag and RackDiag)'
+      },
+      bpmn: {
+        label: 'BPMN'
+      },
+      excalidraw: {
+        label: 'Excalidraw'
+      }
+    }
   end
 
-  store_accessor :repository_storages_weighted, *Gitlab.config.repositories.storages.keys, prefix: true
+  store_accessor :kroki_formats, *ApplicationSetting.kroki_formats_attributes.keys, prefix: true
 
   # Include here so it can override methods from
   # `add_authentication_token_field`
@@ -43,6 +53,9 @@ class ApplicationSetting < ApplicationRecord
   serialize :domain_allowlist, Array # rubocop:disable Cop/ActiveRecordSerialize
   serialize :domain_denylist, Array # rubocop:disable Cop/ActiveRecordSerialize
   serialize :repository_storages # rubocop:disable Cop/ActiveRecordSerialize
+
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/300916
+  serialize :asset_proxy_allowlist, Array # rubocop:disable Cop/ActiveRecordSerialize
   serialize :asset_proxy_whitelist, Array # rubocop:disable Cop/ActiveRecordSerialize
 
   cache_markdown_field :sign_in_text
@@ -52,6 +65,7 @@ class ApplicationSetting < ApplicationRecord
 
   default_value_for :id, 1
   default_value_for :repository_storages_weighted, {}
+  default_value_for :kroki_formats, {}
 
   chronic_duration_attr_writer :archive_builds_in_human_readable, :archive_builds_in_seconds
 
@@ -133,6 +147,8 @@ class ApplicationSetting < ApplicationRecord
 
   validate :validate_kroki_url, if: :kroki_enabled
 
+  validates :kroki_formats, json_schema: { filename: 'application_setting_kroki_formats' }
+
   validates :plantuml_url,
             presence: true,
             if: :plantuml_enabled
@@ -171,7 +187,7 @@ class ApplicationSetting < ApplicationRecord
   validates :default_artifacts_expire_in, presence: true, duration: true
 
   validates :container_expiration_policies_enable_historic_entries,
-            inclusion: { in: [true, false], message: 'must be a boolean value' }
+            inclusion: { in: [true, false], message: _('must be a boolean value') }
 
   validates :container_registry_token_expire_delay,
             presence: true,
@@ -303,8 +319,14 @@ class ApplicationSetting < ApplicationRecord
   validates :container_registry_delete_tags_service_timeout,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  validates :container_registry_cleanup_tags_service_max_list_size,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
   validates :container_registry_expiration_policies_worker_capacity,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :invisible_captcha_enabled,
+            inclusion: { in: [true, false], message: _('must be a boolean value') }
 
   SUPPORTED_KEY_TYPES.each do |type|
     validates :"#{type}_key_restriction", presence: true, key_restriction: { type: type }
@@ -400,6 +422,52 @@ class ApplicationSetting < ApplicationRecord
   validates :ci_jwt_signing_key,
             rsa_key: true, allow_nil: true
 
+  validates :rate_limiting_response_text,
+            length: { maximum: 255, message: _('is too long (maximum is %{count} characters)') },
+            allow_blank: true
+
+  validates :throttle_unauthenticated_requests_per_period,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_unauthenticated_period_in_seconds,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_authenticated_api_requests_per_period,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_authenticated_api_period_in_seconds,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_authenticated_web_requests_per_period,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_authenticated_web_period_in_seconds,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_protected_paths_requests_per_period,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_protected_paths_period_in_seconds,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :notes_create_limit,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :notes_create_limit_allowlist,
+            length: { maximum: 100, message: N_('is too long (maximum is 100 entries)') },
+            allow_nil: false
+
+  validates :admin_mode,
+            inclusion: { in: [true, false], message: _('must be a boolean value') }
+
   attr_encrypted :asset_proxy_secret_key,
                  mode: :per_attribute_iv,
                  key: Settings.attr_encrypted_db_key_base_truncated,
@@ -430,9 +498,10 @@ class ApplicationSetting < ApplicationRecord
   attr_encrypted :cloud_license_auth_token, encryption_options_base_truncated_aes_256_gcm
 
   validates :disable_feed_token,
-            inclusion: { in: [true, false], message: 'must be a boolean value' }
+            inclusion: { in: [true, false], message: _('must be a boolean value') }
 
   before_validation :ensure_uuid!
+  before_validation :coerce_repository_storages_weighted, if: :repository_storages_weighted_changed?
 
   before_save :ensure_runners_registration_token
   before_save :ensure_health_check_access_token
@@ -481,6 +550,10 @@ class ApplicationSetting < ApplicationRecord
     current_without_cache
   end
 
+  def self.find_or_create_without_cache
+    current_without_cache || create_from_defaults
+  end
+
   # Due to the frequency with which settings are accessed, it is
   # likely that during a backup restore a running GitLab process
   # will insert a new `application_settings` row before the
@@ -509,10 +582,23 @@ class ApplicationSetting < ApplicationRecord
     recaptcha_enabled || login_recaptcha_protection_enabled
   end
 
-  repository_storages_weighted_attributes.each do |attribute|
-    define_method :"#{attribute}=" do |value|
-      super(value.to_i)
+  kroki_formats_attributes.keys.each do |key|
+    define_method :"kroki_formats_#{key}=" do |value|
+      super(::Gitlab::Utils.to_boolean(value))
     end
+  end
+
+  def kroki_format_supported?(diagram_type)
+    case diagram_type
+    when 'excalidraw'
+      return kroki_formats_excalidraw
+    when 'bpmn'
+      return kroki_formats_bpmn
+    end
+
+    return kroki_formats_blockdiag if ::Gitlab::Kroki::BLOCKDIAG_FORMATS.include?(diagram_type)
+
+    ::AsciidoctorExtensions::Kroki::SUPPORTED_DIAGRAM_NAMES.include?(diagram_type)
   end
 
   private

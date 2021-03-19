@@ -23,8 +23,8 @@ describe('AdminLicenseManagementRow', () => {
     vm = mountComponentWithStore(Component, { props, store });
   };
 
-  const findNthDropdown = num => [...vm.$el.querySelectorAll('.dropdown-item')][num];
-  const findNthDropdownIcon = num => findNthDropdown(num).querySelector('svg');
+  const findNthDropdown = (num) => [...vm.$el.querySelectorAll('.dropdown-item')][num];
+  const findNthDropdownIcon = (num) => findNthDropdown(num).querySelector('svg');
   const findLoadingIcon = () => vm.$el.querySelector('.js-loading-icon');
   const findDropdownToggle = () => vm.$el.querySelector('.dropdown > button');
   const findRemoveButton = () => vm.$el.querySelector('.js-remove-button');
@@ -54,7 +54,7 @@ describe('AdminLicenseManagementRow', () => {
   });
 
   describe('approved license', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       vm.license = { ...approvedLicense, approvalStatus: LICENSE_APPROVAL_STATUS.ALLOWED };
       Vue.nextTick(done);
     });
@@ -89,7 +89,7 @@ describe('AdminLicenseManagementRow', () => {
   });
 
   describe('blacklisted license', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       vm.license = { ...approvedLicense, approvalStatus: LICENSE_APPROVAL_STATUS.DENIED };
       Vue.nextTick(done);
     });

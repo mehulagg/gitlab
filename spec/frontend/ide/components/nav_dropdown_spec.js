@@ -1,8 +1,8 @@
-import $ from 'jquery';
 import { mount } from '@vue/test-utils';
-import { createStore } from '~/ide/stores';
+import $ from 'jquery';
 import NavDropdown from '~/ide/components/nav_dropdown.vue';
 import { PERMISSION_READ_MR } from '~/ide/constants';
+import { createStore } from '~/ide/stores';
 
 const TEST_PROJECT_ID = 'lorem-ipsum';
 
@@ -39,7 +39,7 @@ describe('IDE NavDropdown', () => {
     });
   };
 
-  const findIcon = name => wrapper.find(`[data-testid="${name}-icon"]`);
+  const findIcon = (name) => wrapper.find(`[data-testid="${name}-icon"]`);
   const findMRIcon = () => findIcon('merge-request');
   const findNavForm = () => wrapper.find('.ide-nav-form');
   const showDropdown = () => {
@@ -58,7 +58,7 @@ describe('IDE NavDropdown', () => {
       expect(findNavForm().exists()).toBe(false);
     });
 
-    it('renders nav form when show.bs.dropdown', done => {
+    it('renders nav form when show.bs.dropdown', (done) => {
       showDropdown();
 
       wrapper.vm
@@ -70,7 +70,7 @@ describe('IDE NavDropdown', () => {
         .catch(done.fail);
     });
 
-    it('destroys nav form when closed', done => {
+    it('destroys nav form when closed', (done) => {
       showDropdown();
       hideDropdown();
 

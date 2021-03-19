@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Settings, 'Settings' do
+RSpec.describe API::Settings, 'Settings', :do_not_mock_admin_mode_setting do
   let(:user) { create(:user) }
 
   let_it_be(:admin) { create(:admin) }
@@ -44,6 +44,7 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
       expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
       expect(json_response['personal_access_token_prefix']).to be_nil
+      expect(json_response['admin_mode']).to be(false)
     end
   end
 
@@ -124,7 +125,8 @@ RSpec.describe API::Settings, 'Settings' do
             disabled_oauth_sign_in_sources: 'unknown',
             import_sources: 'github,bitbucket',
             wiki_page_max_content_bytes: 12345,
-            personal_access_token_prefix: "GL-"
+            personal_access_token_prefix: "GL-",
+            admin_mode: true
           }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -169,6 +171,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['import_sources']).to match_array(%w(github bitbucket))
         expect(json_response['wiki_page_max_content_bytes']).to eq(12345)
         expect(json_response['personal_access_token_prefix']).to eq("GL-")
+        expect(json_response['admin_mode']).to be(true)
       end
     end
 
@@ -197,6 +200,14 @@ RSpec.describe API::Settings, 'Settings' do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['allow_local_requests_from_hooks_and_services']).to eq(true)
+    end
+
+    it 'supports legacy asset_proxy_whitelist' do
+      put api("/application/settings", admin),
+        params: { asset_proxy_whitelist: ['example.com', '*.example.com'] }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['asset_proxy_allowlist']).to eq(['example.com', '*.example.com', 'localhost'])
     end
 
     it 'disables ability to switch to legacy storage' do
@@ -362,24 +373,24 @@ RSpec.describe API::Settings, 'Settings' do
             asset_proxy_enabled: true,
             asset_proxy_url: 'http://assets.example.com',
             asset_proxy_secret_key: 'shared secret',
-            asset_proxy_whitelist: ['example.com', '*.example.com']
+            asset_proxy_allowlist: ['example.com', '*.example.com']
           }
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['asset_proxy_enabled']).to be(true)
         expect(json_response['asset_proxy_url']).to eq('http://assets.example.com')
         expect(json_response['asset_proxy_secret_key']).to be_nil
-        expect(json_response['asset_proxy_whitelist']).to eq(['example.com', '*.example.com', 'localhost'])
+        expect(json_response['asset_proxy_allowlist']).to eq(['example.com', '*.example.com', 'localhost'])
       end
 
-      it 'allows a string for asset_proxy_whitelist' do
+      it 'allows a string for asset_proxy_allowlist' do
         put api('/application/settings', admin),
           params: {
-            asset_proxy_whitelist: 'example.com, *.example.com'
+            asset_proxy_allowlist: 'example.com, *.example.com'
           }
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['asset_proxy_whitelist']).to eq(['example.com', '*.example.com', 'localhost'])
+        expect(json_response['asset_proxy_allowlist']).to eq(['example.com', '*.example.com', 'localhost'])
       end
     end
 

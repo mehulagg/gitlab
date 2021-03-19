@@ -91,10 +91,17 @@ RSpec.describe Ci::CreatePipelineService do
           .with({ source: 'push' }, 5)
       end
 
+      it 'tracks included template usage' do
+        expect_next_instance_of(Gitlab::Ci::Pipeline::Chain::TemplateUsage) do |instance|
+          expect(instance).to receive(:perform!)
+        end
+
+        execute_service
+      end
+
       describe 'recording a conversion event' do
         it 'schedules a record conversion event worker' do
-          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:ci_syntax_templates, user.id)
-          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:pipelines_empty_state, user.id)
+          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:ci_syntax_templates_b, user.id)
 
           pipeline
         end
@@ -530,7 +537,7 @@ RSpec.describe Ci::CreatePipelineService do
         it 'pull it from Auto-DevOps' do
           pipeline = execute_service
           expect(pipeline).to be_auto_devops_source
-          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch test])
+          expect(pipeline.builds.map(&:name)).to match_array(%w[brakeman-sast build code_quality eslint-sast secret_detection_default_branch test])
         end
       end
 
@@ -944,9 +951,9 @@ RSpec.describe Ci::CreatePipelineService do
           expect(result).to be_persisted
           expect(deploy_job.resource_group.key).to eq(resource_group_key)
           expect(project.resource_groups.count).to eq(1)
-          expect(resource_group.builds.count).to eq(1)
+          expect(resource_group.processables.count).to eq(1)
           expect(resource_group.resources.count).to eq(1)
-          expect(resource_group.resources.first.build).to eq(nil)
+          expect(resource_group.resources.first.processable).to eq(nil)
         end
 
         context 'when resource group key includes predefined variables' do
@@ -1705,9 +1712,11 @@ RSpec.describe Ci::CreatePipelineService do
         shared_examples 'has errors' do
           it 'contains the expected errors' do
             expect(pipeline.builds).to be_empty
-            expect(pipeline.yaml_errors).to eq("test_a: needs 'build_a'")
-            expect(pipeline.error_messages.map(&:content)).to contain_exactly("test_a: needs 'build_a'")
-            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
+
+            error_message = "'test_a' job needs 'build_a' job, but it was not added to the pipeline"
+            expect(pipeline.yaml_errors).to eq(error_message)
+            expect(pipeline.error_messages.map(&:content)).to contain_exactly(error_message)
+            expect(pipeline.errors[:base]).to contain_exactly(error_message)
           end
         end
 
@@ -2402,16 +2411,6 @@ RSpec.describe Ci::CreatePipelineService do
             expect(build_names).to contain_exactly('regular-job')
           end
 
-          context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-            before do
-              stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-            end
-
-            it 'does not a pipeline' do
-              expect(pipeline).not_to be_persisted
-            end
-          end
-
           context 'when a job requires the same variable' do
             let(:config) do
               <<-EOY
@@ -2440,16 +2439,6 @@ RSpec.describe Ci::CreatePipelineService do
               expect(pipeline).to be_persisted
               expect(build_names).to contain_exactly('build', 'test1', 'test2')
             end
-
-            context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-              before do
-                stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-              end
-
-              it 'does not a pipeline' do
-                expect(pipeline).not_to be_persisted
-              end
-            end
           end
         end
 
@@ -2458,16 +2447,6 @@ RSpec.describe Ci::CreatePipelineService do
 
           it 'does not create a pipeline' do
             expect(pipeline).not_to be_persisted
-          end
-
-          context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-            before do
-              stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-            end
-
-            it 'does not create a pipeline' do
-              expect(pipeline).not_to be_persisted
-            end
           end
 
           context 'when a job requires the same variable' do
@@ -2496,16 +2475,6 @@ RSpec.describe Ci::CreatePipelineService do
 
             it 'does not create a pipeline' do
               expect(pipeline).not_to be_persisted
-            end
-
-            context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-              before do
-                stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-              end
-
-              it 'does not create a pipeline' do
-                expect(pipeline).not_to be_persisted
-              end
             end
           end
         end

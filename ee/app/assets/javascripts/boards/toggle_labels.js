@@ -9,5 +9,5 @@ export default () =>
       ToggleLabels,
     },
     store,
-    render: createElement => createElement('toggle-labels'),
+    render: (createElement) => createElement('toggle-labels'),
   });

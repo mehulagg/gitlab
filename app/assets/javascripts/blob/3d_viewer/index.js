@@ -1,6 +1,6 @@
-import * as THREE from 'three/build/three.module';
-import STLLoaderClass from 'three-stl-loader';
 import OrbitControlsClass from 'three-orbit-controls';
+import STLLoaderClass from 'three-stl-loader';
+import * as THREE from 'three/build/three.module';
 import MeshObject from './mesh_object';
 
 const STLLoader = STLLoaderClass(THREE);
@@ -68,7 +68,7 @@ export default class Renderer {
   }
 
   loadFile() {
-    this.loader.load(this.container.dataset.endpoint, geo => {
+    this.loader.load(this.container.dataset.endpoint, (geo) => {
       const obj = new MeshObject(geo);
 
       this.objects.push(obj);
@@ -99,7 +99,7 @@ export default class Renderer {
   }
 
   changeObjectMaterials(type) {
-    this.objects.forEach(obj => {
+    this.objects.forEach((obj) => {
       obj.changeMaterial(type);
     });
   }

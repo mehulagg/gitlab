@@ -1,7 +1,7 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-
 import { GlButton, GlFormInput, GlLink, GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
+
 import DropdownContentsCreateView from '~/vue_shared/components/sidebar/labels_select_vue/dropdown_contents_create_view.vue';
 
 import labelSelectModule from '~/vue_shared/components/sidebar/labels_select_vue/store';
@@ -24,7 +24,7 @@ const createComponent = (initialState = mockConfig) => {
 
 describe('DropdownContentsCreateView', () => {
   let wrapper;
-  const colors = Object.keys(mockSuggestedColors).map(color => ({
+  const colors = Object.keys(mockSuggestedColors).map((color) => ({
     [color]: mockSuggestedColors[color],
   }));
 

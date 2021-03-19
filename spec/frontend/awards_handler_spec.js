@@ -1,10 +1,10 @@
+import MockAdapter from 'axios-mock-adapter';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import MockAdapter from 'axios-mock-adapter';
 import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
-import axios from '~/lib/utils/axios_utils';
 import loadAwardsHandler from '~/awards_handler';
 import { EMOJI_VERSION } from '~/emoji';
+import axios from '~/lib/utils/axios_utils';
 
 window.gl = window.gl || {};
 window.gon = window.gon || {};
@@ -53,8 +53,13 @@ describe('AwardsHandler', () => {
       d: 'smiling face with sunglasses',
       u: '6.0',
     },
+    grey_question: {
+      c: 'symbols',
+      e: '❔',
+      d: 'white question mark ornament',
+      u: '6.0',
+    },
   };
-  preloadFixtures('snippets/show.html');
 
   const openAndWaitForEmojiMenu = (sel = '.js-add-award') => {
     $(sel).eq(0).click();
@@ -63,7 +68,7 @@ describe('AwardsHandler', () => {
 
     const $menu = $('.emoji-menu');
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       $menu.one('build-emoji-menu-finish', () => {
         resolve();
       });
@@ -183,8 +188,6 @@ describe('AwardsHandler', () => {
 
       expect($thumbsUpEmoji.hasClass('active')).toBe(true);
       expect($thumbsDownEmoji.hasClass('active')).toBe(false);
-      $thumbsUpEmoji.tooltip();
-      $thumbsDownEmoji.tooltip();
       awardsHandler.addAward($votesBlock, awardUrl, 'thumbsdown', true);
 
       expect($thumbsUpEmoji.hasClass('active')).toBe(false);
@@ -212,9 +215,8 @@ describe('AwardsHandler', () => {
       const $thumbsUpEmoji = $votesBlock.find('[data-name=thumbsup]').parent();
       $thumbsUpEmoji.attr('data-title', 'sam, jerry, max, and andy');
       awardsHandler.addAward($votesBlock, awardUrl, 'thumbsup', false);
-      $thumbsUpEmoji.tooltip();
 
-      expect($thumbsUpEmoji.data('originalTitle')).toBe('You, sam, jerry, max, and andy');
+      expect($thumbsUpEmoji.attr('title')).toBe('You, sam, jerry, max, and andy');
     });
 
     it('handles the special case where "You" is not cleanly comma separated', () => {
@@ -223,9 +225,8 @@ describe('AwardsHandler', () => {
       const $thumbsUpEmoji = $votesBlock.find('[data-name=thumbsup]').parent();
       $thumbsUpEmoji.attr('data-title', 'sam');
       awardsHandler.addAward($votesBlock, awardUrl, 'thumbsup', false);
-      $thumbsUpEmoji.tooltip();
 
-      expect($thumbsUpEmoji.data('originalTitle')).toBe('You and sam');
+      expect($thumbsUpEmoji.attr('title')).toBe('You and sam');
     });
   });
 
@@ -237,9 +238,8 @@ describe('AwardsHandler', () => {
       $thumbsUpEmoji.attr('data-title', 'You, sam, jerry, max, and andy');
       $thumbsUpEmoji.addClass('active');
       awardsHandler.addAward($votesBlock, awardUrl, 'thumbsup', false);
-      $thumbsUpEmoji.tooltip();
 
-      expect($thumbsUpEmoji.data('originalTitle')).toBe('sam, jerry, max, and andy');
+      expect($thumbsUpEmoji.attr('title')).toBe('sam, jerry, max, and andy');
     });
 
     it('handles the special case where "You" is not cleanly comma separated', () => {
@@ -249,9 +249,8 @@ describe('AwardsHandler', () => {
       $thumbsUpEmoji.attr('data-title', 'You and sam');
       $thumbsUpEmoji.addClass('active');
       awardsHandler.addAward($votesBlock, awardUrl, 'thumbsup', false);
-      $thumbsUpEmoji.tooltip();
 
-      expect($thumbsUpEmoji.data('originalTitle')).toBe('sam');
+      expect($thumbsUpEmoji.attr('title')).toBe('sam');
     });
   });
 
@@ -283,16 +282,6 @@ describe('AwardsHandler', () => {
       expect($('[data-name=anger]').is(':visible')).toBe(true);
       expect($('[data-name=alien]').is(':visible')).toBe(true);
       expect($('.js-emoji-menu-search').val()).toBe('');
-    });
-
-    it('should fuzzy filter the emoji', async () => {
-      await openAndWaitForEmojiMenu();
-
-      awardsHandler.searchEmojis('sgls');
-
-      expect($('[data-name=angel]').is(':visible')).toBe(false);
-      expect($('[data-name=anger]').is(':visible')).toBe(false);
-      expect($('[data-name=sunglasses]').is(':visible')).toBe(true);
     });
 
     it('should filter by emoji description', async () => {
@@ -356,7 +345,7 @@ describe('AwardsHandler', () => {
       await openAndWaitForEmojiMenu();
 
       const emojiMenu = document.querySelector('.emoji-menu');
-      Array.prototype.forEach.call(emojiMenu.querySelectorAll('.emoji-menu-title'), title => {
+      Array.prototype.forEach.call(emojiMenu.querySelectorAll('.emoji-menu-title'), (title) => {
         expect(title.textContent.trim().toLowerCase()).not.toBe('frequently used');
       });
     });
@@ -369,7 +358,7 @@ describe('AwardsHandler', () => {
       const emojiMenu = document.querySelector('.emoji-menu');
       const hasFrequentlyUsedHeading = Array.prototype.some.call(
         emojiMenu.querySelectorAll('.emoji-menu-title'),
-        title => title.textContent.trim().toLowerCase() === 'frequently used',
+        (title) => title.textContent.trim().toLowerCase() === 'frequently used',
       );
 
       expect(hasFrequentlyUsedHeading).toBe(true);

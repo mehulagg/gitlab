@@ -37,7 +37,7 @@ function humanizeNetworkPolicyRulePorts(rule) {
 function humanizeNetworkPolicyRuleEndpoint({ matchLabels }) {
   const matchSelector = labelSelector(matchLabels);
   const labels = Object.keys(matchSelector)
-    .map(key => `${key}: ${matchSelector[key]}`)
+    .map((key) => `${key}: ${matchSelector[key]}`)
     .join(', ');
   return labels.length === 0
     ? sprintf(s__('NetworkPolicies|%{strongOpen}all%{strongClose} pods'), strongArgs, false)
@@ -104,7 +104,7 @@ function humanizeEndpointSelector({ endpointMatchMode, endpointLabels }) {
 
   const selector = labelSelector(endpointLabels);
   const pods = Object.keys(selector)
-    .map(key => `${key}: ${selector[key]}`)
+    .map((key) => `${key}: ${selector[key]}`)
     .join(', ');
   return sprintf(
     s__('NetworkPolicies|pods %{pods}'),
@@ -124,7 +124,7 @@ export default function humanizeNetworkPolicy(policy) {
 
   const selector = humanizeEndpointSelector(policy);
 
-  const humanizedRules = rules.map(rule => {
+  const humanizedRules = rules.map((rule) => {
     const { direction } = rule;
     const template =
       direction === RuleDirectionInbound

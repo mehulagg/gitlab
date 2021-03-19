@@ -1,3 +1,4 @@
+- add_page_specific_style 'page_bundles/members'
 - add_to_breadcrumbs _("Groups"), admin_groups_path
 - breadcrumb_title @group.name
 - page_title @group.name, _("Groups")
@@ -80,8 +81,9 @@
                 = storage_counter(project.statistics.storage_size)
             %span.float-right.light
               %span.monospace= project.full_path + '.git'
-      .card-footer
-        = paginate @projects, param_name: 'projects_page', theme: 'gitlab'
+      - unless @projects.size < Kaminari.config.default_per_page
+        .card-footer
+          = paginate @projects, param_name: 'projects_page', theme: 'gitlab'
 
     - shared_projects = @group.shared_projects.sort_by(&:name)
     - unless shared_projects.empty?
@@ -116,7 +118,7 @@
             .gl-mt-3
               = select_tag :access_level, options_for_select(@group.access_level_roles), class: "project-access-select select2"
             %hr
-            = button_tag _('Add users to group'), class: "gl-button btn btn-success"
+            = button_tag _('Add users to group'), class: "gl-button btn btn-confirm"
       = render 'shared/members/requests', membership_source: @group, group: @group, requesters: @requesters, force_mobile_view: true
 
     .card
@@ -134,5 +136,6 @@
                            group: @group,
                            show_controls: false,
                            current_user_is_group_owner: current_user_is_group_owner }
-      .card-footer
-        = paginate @members, param_name: 'members_page', theme: 'gitlab'
+      - unless @members.size < Kaminari.config.default_per_page
+        .card-footer
+          = paginate @members, param_name: 'members_page', theme: 'gitlab'

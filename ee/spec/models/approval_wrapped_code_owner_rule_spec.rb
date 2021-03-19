@@ -5,16 +5,17 @@ require 'spec_helper'
 RSpec.describe ApprovalWrappedCodeOwnerRule do
   using RSpec::Parameterized::TableSyntax
 
-  let(:merge_request) { create(:merge_request) }
+  let_it_be_with_reload(:merge_request) { create(:merge_request) }
 
   subject { described_class.new(merge_request, rule) }
 
   describe '#approvals_required' do
-    where(:feature_enabled, :approver_count, :expected_required_approvals) do
-      true  | 0 | 0
-      true  | 2 | 1
-      false | 2 | 0
-      false | 0 | 0
+    where(:feature_enabled, :optional_section, :approver_count, :expected_required_approvals) do
+      true  | false | 0 | 0
+      true  | false | 2 | 1
+      true  | true  | 2 | 0
+      false | false | 2 | 0
+      false | false | 0 | 0
     end
 
     with_them do
@@ -30,6 +31,7 @@ RSpec.describe ApprovalWrappedCodeOwnerRule do
         before do
           allow(subject.project)
             .to receive(:code_owner_approval_required_available?).and_return(true)
+          allow(Gitlab::CodeOwners).to receive(:optional_section?).and_return(optional_section)
         end
 
         context "when the project doesn't require code owner approval on all MRs" do

@@ -18,7 +18,7 @@
           #{issuable_reference(merge_request)}
         %span.issuable-authored.d-none.d-sm-inline-block
           &middot;
-          opened #{time_ago_with_tooltip(merge_request.created_at, placement: 'bottom')}
+          created #{time_ago_with_tooltip(merge_request.created_at, placement: 'bottom')}
           by #{link_to_member(@project, merge_request.author, avatar: false)}
           = render_if_exists 'shared/issuable/gitlab_team_member_badge', author: merge_request.author
         - if merge_request.milestone
@@ -40,12 +40,11 @@
 
     .issuable-meta
       %ul.controls.d-flex.align-items-end
-        %li.issuable-status.d-none.d-sm-inline-block
-          - if merge_request.reverted_by_merge_request?(current_user)
-            = _('MERGED (REVERTED)')
-          - elsif merge_request.merged?
+        - if merge_request.merged?
+          %li.issuable-status.d-none.d-sm-inline-block
             = _('MERGED')
-          - elsif merge_request.closed?
+        - elsif merge_request.closed?
+          %li.issuable-status.d-none.d-sm-inline-block
             = sprite_icon('cancel', css_class: 'gl-vertical-align-text-bottom')
             = _('CLOSED')
         = render 'shared/merge_request_pipeline_status', merge_request: merge_request
@@ -56,7 +55,7 @@
         - if merge_request.assignees.any?
           %li.gl-display-flex.gl-align-items-center
             = render 'shared/issuable/assignees', project: merge_request.project, issuable: merge_request
-        - if Feature.enabled?(:merge_request_reviewers, @project, default_enabled: true) && merge_request.reviewers.any?
+        - if merge_request.reviewers.any?
           %li.gl-display-flex.issuable-reviewers
             = render 'shared/issuable/reviewers', project: merge_request.project, issuable: merge_request
         = render 'projects/merge_requests/approvals_count', merge_request: merge_request

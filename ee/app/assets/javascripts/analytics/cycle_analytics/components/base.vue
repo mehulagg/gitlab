@@ -1,21 +1,21 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { PROJECTS_PER_PAGE } from '../constants';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
+import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
-import DateRange from '../../shared/components/daterange.vue';
-import StageTable from './stage_table.vue';
-import DurationChart from './duration_chart.vue';
-import TypeOfWorkCharts from './type_of_work_charts.vue';
-import UrlSync from '~/vue_shared/components/url_sync.vue';
 import { toYmd } from '../../shared/utils';
-import StageTableNav from './stage_table_nav.vue';
+import { PROJECTS_PER_PAGE } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
-import PathNavigation from './path_navigation.vue';
+import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
-import ValueStreamSelect from './value_stream_select.vue';
 import Metrics from './metrics.vue';
+import PathNavigation from './path_navigation.vue';
+import StageTable from './stage_table.vue';
+import StageTableNav from './stage_table_nav.vue';
+import TypeOfWorkCharts from './type_of_work_charts.vue';
+import ValueStreamSelect from './value_stream_select.vue';
 
 export default {
   name: 'CycleAnalytics',
@@ -92,13 +92,17 @@ export default {
     shouldDisplayTypeOfWorkCharts() {
       return !this.hasNoAccessError;
     },
+    selectedStageReady() {
+      return !this.hasNoAccessError && this.selectedStage;
+    },
     shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
+      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError;
+    },
+    shouldDisplayVerticalNavigation() {
+      return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
     },
     shouldDisplayCreateMultipleValueStreams() {
-      return Boolean(
-        this.featureFlags.hasCreateMultipleValueStreams && !this.isLoadingValueStreams,
-      );
+      return Boolean(!this.shouldRenderEmptyState && !this.isLoadingValueStreams);
     },
     hasDateRangeSet() {
       return this.startDate && this.endDate;
@@ -191,16 +195,21 @@ export default {
       :svg-path="emptyStateSvgPath"
     />
     <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
+      <path-navigation
+        v-if="shouldDisplayPathNavigation"
+        :key="`path_navigation_key_${pathNavigationData.length}`"
+        class="js-path-navigation gl-w-full gl-pb-2"
+        :loading="isLoading"
+        :stages="pathNavigationData"
+        :selected-stage="selectedStage"
+        @selected="onStageSelect"
+      />
       <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
-        <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
-          <path-navigation
-            class="js-path-navigation"
-            :loading="isLoading"
-            :stages="pathNavigationData"
-            :selected-stage="selectedStage"
-            @selected="onStageSelect"
-          />
-        </div>
+        <filter-bar
+          v-if="shouldDisplayFilters"
+          class="js-filter-bar filtered-search-box gl-display-flex gl-mb-2 gl-mr-3 gl-border-none"
+          :group-path="currentGroupPath"
+        />
         <div
           v-if="shouldDisplayFilters"
           class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
@@ -224,11 +233,6 @@ export default {
             @change="setDateRange"
           />
         </div>
-        <filter-bar
-          v-if="shouldDisplayFilters"
-          class="js-filter-bar filtered-search-box gl-display-flex gl-mt-3 gl-mr-3 gl-border-none"
-          :group-path="currentGroupPath"
-        />
       </div>
     </div>
     <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
@@ -239,7 +243,7 @@ export default {
         :svg-path="noAccessSvgPath"
         :description="
           __(
-            'Only \'Reporter\' roles and above on tiers Premium / Silver and above can see Value Stream Analytics.',
+            'Only \'Reporter\' roles and above on tiers Premium and above can see Value Stream Analytics.',
           )
         "
       />
@@ -256,8 +260,9 @@ export default {
           :current-stage-events="currentStageEvents"
           :no-data-svg-path="noDataSvgPath"
           :empty-state-message="selectedStageError"
+          :has-path-navigation="featureFlags.hasPathNavigation"
         >
-          <template #nav>
+          <template v-if="shouldDisplayVerticalNavigation" #nav>
             <stage-table-nav
               :current-stage="selectedStage"
               :stages="activeStages"

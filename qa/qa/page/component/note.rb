@@ -17,7 +17,6 @@ module QA
             element :comment_button
             element :comment_field
             element :discussion_menu_item
-            element :note_dropdown
           end
 
           base.view 'app/assets/javascripts/notes/components/discussion_actions.vue' do
@@ -146,7 +145,7 @@ module QA
 
         def start_discussion(text)
           fill_element :comment_field, text
-          click_element :note_dropdown
+          within_element(:comment_button) { click_button(class: 'dropdown-toggle-split') }
           click_element :discussion_menu_item
           click_element :comment_button
 
@@ -162,10 +161,6 @@ module QA
           fill_element :reply_field, reply_text
         end
 
-        def wait_for_loading
-          has_no_element?(:skeleton_note_placeholer)
-        end
-
         private
 
         def select_filter_with_text(text)
@@ -174,7 +169,7 @@ module QA
             click_element :discussion_filter_dropdown
             find_element(:filter_menu_item, text: text).click
 
-            wait_for_loading
+            wait_for_requests
           end
         end
       end

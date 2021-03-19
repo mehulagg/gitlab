@@ -89,7 +89,7 @@ module EE
 
       def collect_dependency_list_reports!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::DEPENDENCY_LIST_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse!(blob, dependency_list_report)
@@ -101,7 +101,7 @@ module EE
 
       def collect_licenses_for_dependency_list!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse_licenses!(blob, dependency_list_report)
@@ -129,10 +129,6 @@ module EE
         end
 
         requirements_report
-      end
-
-      def retryable?
-        !merge_train_pipeline? && super
       end
 
       def ci_secrets_management_available?
@@ -180,7 +176,7 @@ module EE
         return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault_build_created, default_enabled: true)
         return unless ci_secrets_management_available? && secrets?
 
-        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event(user_id, 'i_ci_secrets_management_vault_build_created')
+        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)
       end
     end
   end

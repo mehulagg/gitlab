@@ -29,7 +29,6 @@ RSpec.describe GroupSamlGroupSyncWorker do
     context 'when the group has group_saml_group_sync feature licensed' do
       before do
         stub_licensed_features(group_saml_group_sync: true)
-        stub_feature_flags(saml_group_links: true)
       end
 
       context 'when SAML is not enabled' do

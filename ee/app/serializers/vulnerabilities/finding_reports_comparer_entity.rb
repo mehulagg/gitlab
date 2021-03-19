@@ -8,5 +8,4 @@ class Vulnerabilities::FindingReportsComparerEntity < Grape::Entity
   expose :head_report_created_at
   expose :added, using: Vulnerabilities::FindingEntity
   expose :fixed, using: Vulnerabilities::FindingEntity
-  expose :existing, using: Vulnerabilities::FindingEntity
 end

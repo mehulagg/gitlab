@@ -7,9 +7,6 @@ class Projects::RequirementsManagement::RequirementsController < Projects::Appli
 
   before_action :authorize_read_requirement!
   before_action :authorize_import_access!, only: [:import_csv, :authorize]
-  before_action do
-    push_frontend_feature_flag(:import_requirements_csv, project, default_enabled: true)
-  end
 
   feature_category :requirements_management
 
@@ -37,8 +34,6 @@ class Projects::RequirementsManagement::RequirementsController < Projects::Appli
   private
 
   def authorize_import_access!
-    render_404 unless Feature.enabled?(:import_requirements_csv, project, default_enabled: true)
-
     return if can?(current_user, :import_requirements, project)
 
     if current_user || action_name == 'authorize'

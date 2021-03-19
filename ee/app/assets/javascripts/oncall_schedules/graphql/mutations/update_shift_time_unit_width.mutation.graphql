@@ -1,0 +1,3 @@
+mutation updateShiftTimeUnitWidth($shiftTimeUnitWidth: Int) {
+  updateShiftTimeUnitWidth(shiftTimeUnitWidth: $shiftTimeUnitWidth) @client
+}

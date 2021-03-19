@@ -44,7 +44,9 @@ RSpec.describe Admin::Licenses::UsageExportsController do
       let(:historical_data_relation) { :historical_data_relation }
 
       before do
-        allow(HistoricalData).to receive(:in_license_term).with(License.current).and_return(historical_data_relation)
+        license = build(:license)
+        allow(License).to receive(:current).and_return(license)
+        allow(license).to receive(:historical_data).and_return(historical_data_relation)
         allow(HistoricalUserData::CsvService).to receive(:new).with(historical_data_relation).and_return(csv_service)
       end
 

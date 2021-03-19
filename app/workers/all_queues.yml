@@ -131,6 +131,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: cronjob:analytics_usage_trends_count_job_trigger
+  :feature_category: :devops_reports
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: cronjob:authorized_project_update_periodic_recalculate
   :feature_category: :source_code_management
   :has_external_dependencies:
@@ -146,6 +154,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: cronjob:ci_pipeline_artifacts_expire_artifacts
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: cronjob:ci_platform_metrics_update_cron
   :feature_category: :continuous_integration
@@ -188,7 +204,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:gitlab_usage_ping
-  :feature_category: :collection
+  :feature_category: :usage_ping
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -243,6 +259,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: cronjob:namespaces_in_product_marketing_emails
+  :feature_category: :subgroups
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:namespaces_prune_aggregation_schedules
   :feature_category: :source_code_management
   :has_external_dependencies:
@@ -250,6 +274,14 @@
   :resource_boundary: :cpu
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: cronjob:packages_composer_cache_cleanup
+  :feature_category: :package_registry
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: cronjob:pages_domain_removal_cron
   :feature_category: :pages
@@ -317,14 +349,6 @@
   :tags: []
 - :name: cronjob:prune_web_hook_logs
   :feature_category: :integrations
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent:
-  :tags: []
-- :name: cronjob:releases_create_evidence
-  :feature_category: :release_evidence
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -445,6 +469,14 @@
   :tags: []
 - :name: cronjob:update_container_registry_info
   :feature_category: :container_registry
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: cronjob:user_status_cleanup_batch
+  :feature_category: :users
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -881,9 +913,25 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: jira_connect:jira_connect_sync_builds
+  :feature_category: :integrations
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: jira_connect:jira_connect_sync_deployments
+  :feature_category: :integrations
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: jira_connect:jira_connect_sync_feature_flags
   :feature_category: :integrations
   :has_external_dependencies: true
   :urgency: :low
@@ -897,7 +945,7 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: jira_connect:jira_connect_sync_project
   :feature_category: :integrations
@@ -1035,6 +1083,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: package_repositories:packages_maven_metadata_sync
+  :feature_category: :package_registry
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: package_repositories:packages_nuget_extraction
   :feature_category: :package_registry
   :has_external_dependencies:
@@ -1050,17 +1106,7 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags:
-  - :requires_disk_io
-- :name: pipeline_background:ci_build_report_result
-  :feature_category: :continuous_integration
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: pipeline_background:ci_build_trace_chunk_flush
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1070,7 +1116,23 @@
   :idempotent: true
   :tags: []
 - :name: pipeline_background:ci_daily_build_group_report_results
-  :feature_category: :continuous_integration
+  :feature_category: :code_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: pipeline_background:ci_pipeline_artifacts_coverage_report
+  :feature_category: :code_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: pipeline_background:ci_pipeline_artifacts_create_quality_report
+  :feature_category: :code_testing
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -1078,14 +1140,6 @@
   :idempotent: true
   :tags: []
 - :name: pipeline_background:ci_pipeline_success_unlock_artifacts
-  :feature_category: :continuous_integration
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
-  :tags: []
-- :name: pipeline_background:ci_pipelines_create_artifact
   :feature_category: :continuous_integration
   :has_external_dependencies:
   :urgency: :low
@@ -1141,24 +1195,6 @@
   :weight: 4
   :idempotent:
   :tags: []
-- :name: pipeline_default:build_coverage
-  :feature_category: :continuous_integration
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 3
-  :idempotent:
-  :tags:
-  - :requires_disk_io
-- :name: pipeline_default:build_trace_sections
-  :feature_category: :continuous_integration
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 3
-  :idempotent:
-  :tags:
-  - :requires_disk_io
 - :name: pipeline_default:ci_create_cross_project_pipeline
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1214,8 +1250,7 @@
   :resource_boundary: :cpu
   :weight: 5
   :idempotent:
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: pipeline_processing:build_queue
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1384,6 +1419,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: analytics_usage_trends_counter_job
+  :feature_category: :devops_reports
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: approve_blocked_pending_approval_users
   :feature_category: :users
   :has_external_dependencies:
@@ -1418,6 +1461,14 @@
   :tags: []
 - :name: bulk_import
   :feature_category: :importers
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: bulk_imports_entity
+  :feature_category: :importers
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown
@@ -1431,8 +1482,7 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: ci_delete_objects
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1592,8 +1642,7 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: export_csv
   :feature_category: :issue_tracking
   :has_external_dependencies:
@@ -1732,9 +1781,9 @@
   :idempotent: true
   :tags: []
 - :name: mailers
-  :feature_category:
+  :feature_category: :issue_tracking
   :has_external_dependencies:
-  :urgency:
+  :urgency: low
   :resource_boundary:
   :weight: 2
   :idempotent:
@@ -1759,6 +1808,14 @@
   :feature_category: :code_review
   :has_external_dependencies:
   :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: merge_requests_delete_source_branch
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :high
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
@@ -1795,8 +1852,24 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: namespaces_onboarding_issue_created
+  :feature_category: :issue_tracking
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: namespaces_onboarding_pipeline_created
   :feature_category: :subgroups
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: namespaces_onboarding_progress
+  :feature_category: :product_analytics
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -1834,6 +1907,14 @@
   :resource_boundary: :cpu
   :weight: 2
   :idempotent:
+  :tags: []
+- :name: packages_composer_cache_update
+  :feature_category: :package_registry
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: pages
   :feature_category: :pages
@@ -1967,6 +2048,30 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: projects_git_garbage_collect
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: projects_schedule_bulk_repository_shard_moves
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: projects_update_repository_storage
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: prometheus_create_default_alerts
   :feature_category: :incident_management
   :has_external_dependencies:
@@ -2037,6 +2142,14 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
+  :idempotent:
+  :tags: []
+- :name: releases_create_evidence
+  :feature_category: :release_evidence
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
   :idempotent:
   :tags: []
 - :name: remote_mirror_notification
@@ -2127,6 +2240,22 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: snippets_schedule_bulk_repository_shard_moves
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: snippets_update_repository_storage
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: system_hook_push
   :feature_category: :source_code_management
   :has_external_dependencies:
@@ -2190,6 +2319,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
+  :tags: []
+- :name: wikis_git_garbage_collect
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
   :tags: []
 - :name: x509_certificate_revoke
   :feature_category: :source_code_management

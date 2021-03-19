@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlSprintf, GlLink, GlIcon } from '@gitlab/ui';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { s__ } from '~/locale';
 
 import gkeDropdownMixin from './gke_dropdown_mixin';
@@ -106,7 +106,7 @@ export default {
     ...mapActions({ setItem: 'setProject' }),
     fetchSuccessHandler() {
       if (this.defaultValue) {
-        const projectToSelect = this.items.find(item => item.projectId === this.defaultValue);
+        const projectToSelect = this.items.find((item) => item.projectId === this.defaultValue);
 
         if (projectToSelect) {
           this.setItem(projectToSelect);

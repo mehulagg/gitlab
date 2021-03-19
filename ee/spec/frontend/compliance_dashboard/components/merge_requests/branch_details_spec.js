@@ -8,7 +8,7 @@ describe('BranchDetails component', () => {
 
   // The truncate component adds left-to-right marks into the text that we have to remove
   const getText = () => wrapper.text().replace(/\u200E/gi, '');
-  const linkExists = testId => wrapper.find(`[data-testid="${testId}"]`).exists();
+  const linkExists = (testId) => wrapper.find(`[data-testid="${testId}"]`).exists();
 
   const createComponent = ({ sourceUri = '', targetUri = '' } = {}) => {
     return mount(BranchDetails, {

@@ -9,6 +9,7 @@ module DastScannerProfiles
 
       dast_scanner_profile = find_dast_scanner_profile(id)
       return ServiceResponse.error(message: "Scanner profile not found for given parameters") unless dast_scanner_profile
+      return ServiceResponse.error(message: "Cannot modify #{dast_scanner_profile.name} referenced in security policy") if referenced_in_security_policy?(dast_scanner_profile)
 
       update_args = {
         name: profile_name,
@@ -30,6 +31,10 @@ module DastScannerProfiles
 
     def unauthorized
       ::ServiceResponse.error(message: _('You are not authorized to update this scanner profile'), http_status: 403)
+    end
+
+    def referenced_in_security_policy?(profile)
+      profile.referenced_in_security_policies.present?
     end
 
     def can_update_scanner_profile?

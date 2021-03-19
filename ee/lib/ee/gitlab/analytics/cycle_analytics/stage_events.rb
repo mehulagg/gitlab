@@ -15,7 +15,6 @@ module EE
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueClosed => 3,
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAddedToBoard => 4,
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAssociatedWithMilestone => 5,
-            ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstMentionedInCommit => 6,
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited => 7,
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelAdded => 8,
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelRemoved => 9,
@@ -148,7 +147,7 @@ module EE
             override :events
             def events
               strong_memoize(:events) do
-                (super + EE_EVENTS).uniq
+                (super + EE_EVENTS)
               end
             end
 

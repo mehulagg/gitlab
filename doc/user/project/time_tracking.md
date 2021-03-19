@@ -40,7 +40,8 @@ Below is an example of how you can use those new quick actions inside a comment.
 
 ![Time tracking example in a comment](img/time_tracking_example_v12_2.png)
 
-Adding time entries (time spent or estimates) is limited to project members.
+Adding time entries (time spent or estimates) is limited to project members
+with [Reporter and higher permission levels](../permissions.md).
 
 ### Estimates
 
@@ -81,7 +82,7 @@ The following time units are available:
 
 Default conversion rates are 1mo = 4w, 1w = 5d and 1d = 8h.
 
-### Limit displayed units to hours **(CORE ONLY)**
+### Limit displayed units to hours **(FREE SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29469/) in GitLab 12.1.
 

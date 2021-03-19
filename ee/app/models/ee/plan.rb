@@ -9,10 +9,12 @@ module EE
       FREE = 'free'.freeze
       BRONZE = 'bronze'.freeze
       SILVER = 'silver'.freeze
+      PREMIUM = 'premium'.freeze
       GOLD = 'gold'.freeze
+      ULTIMATE = 'ultimate'.freeze
 
       EE_DEFAULT_PLANS = (const_get(:DEFAULT_PLANS, false) + [FREE]).freeze
-      PAID_HOSTED_PLANS = [BRONZE, SILVER, GOLD].freeze
+      PAID_HOSTED_PLANS = [BRONZE, SILVER, PREMIUM, GOLD, ULTIMATE].freeze
       EE_ALL_PLANS = (EE_DEFAULT_PLANS + PAID_HOSTED_PLANS).freeze
       PLANS_ELIGIBLE_FOR_TRIAL = EE_DEFAULT_PLANS
 

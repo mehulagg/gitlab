@@ -146,8 +146,8 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         stub_const("#{described_class}::BATCH_SIZE", 3)
       end
 
-      it 'runs a worker per batch' do
-        # Spread evenly accross 8 hours (28800 seconds)
+      it 'runs a worker per batch', :aggregate_failures do
+        # Spread evenly accross 8 hours (28,800 seconds)
         expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(0.seconds, 2, 4)
         expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(7200.seconds, 5, 7)
         expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(14400.seconds, 8, 10)

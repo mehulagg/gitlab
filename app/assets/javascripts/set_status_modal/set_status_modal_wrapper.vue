@@ -1,15 +1,25 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import {
+  GlToast,
+  GlModal,
+  GlTooltipDirective,
+  GlIcon,
+  GlFormCheckbox,
+  GlDropdown,
+  GlDropdownItem,
+} from '@gitlab/ui';
 import $ from 'jquery';
 import Vue from 'vue';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
-import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, s__ } from '~/locale';
-import Api from '~/api';
-import EmojiMenuInModal from './emoji_menu_in_modal';
-import { isUserBusy, isValidAvailibility } from './utils';
 import * as Emoji from '~/emoji';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
+import { __, s__, sprintf } from '~/locale';
+import { updateUserStatus } from '~/rest_api';
+import { timeRanges } from '~/vue_shared/constants';
+import EmojiMenuInModal from './emoji_menu_in_modal';
+import { isUserBusy } from './utils';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
 export const AVAILABILITY_STATUS = {
@@ -19,11 +29,21 @@ export const AVAILABILITY_STATUS = {
 
 Vue.use(GlToast);
 
+const statusTimeRanges = [
+  {
+    label: __('Never'),
+    name: 'never',
+  },
+  ...timeRanges,
+];
+
 export default {
   components: {
     GlIcon,
     GlModal,
     GlFormCheckbox,
+    GlDropdown,
+    GlDropdownItem,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -45,13 +65,17 @@ export default {
     currentAvailability: {
       type: String,
       required: false,
-      validator: isValidAvailibility,
       default: '',
     },
     canSetUserAvailability: {
       type: Boolean,
       required: false,
       default: false,
+    },
+    currentClearStatusAfter: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   data() {
@@ -65,6 +89,10 @@ export default {
       modalId: 'set-user-status-modal',
       noEmoji: true,
       availability: isUserBusy(this.currentAvailability),
+      clearStatusAfter: statusTimeRanges[0].label,
+      clearStatusAfterMessage: sprintf(s__('SetStatusModal|Your status resets on %{date}.'), {
+        date: this.currentClearStatusAfter,
+      }),
     };
   },
   computed: {
@@ -76,14 +104,14 @@ export default {
     },
   },
   mounted() {
-    this.$root.$emit('bv::show::modal', this.modalId);
+    this.$root.$emit(BV_SHOW_MODAL, this.modalId);
   },
   beforeDestroy() {
     this.emojiMenu.destroy();
   },
   methods: {
     closeModal() {
-      this.$root.$emit('bv::hide::modal', this.modalId);
+      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
     },
     setupEmojiListAndAutocomplete() {
       const toggleEmojiMenuButtonSelector = '#set-user-status-modal .js-toggle-emoji-menu';
@@ -161,21 +189,22 @@ export default {
       this.setStatus();
     },
     setStatus() {
-      const { emoji, message, availability } = this;
+      const { emoji, message, availability, clearStatusAfter } = this;
 
-      Api.postUserStatus({
+      updateUserStatus({
         emoji,
         message,
         availability: availability ? AVAILABILITY_STATUS.BUSY : AVAILABILITY_STATUS.NOT_SET,
+        clearStatusAfter:
+          clearStatusAfter === statusTimeRanges[0].label
+            ? null
+            : clearStatusAfter.replace(' ', '_'),
       })
         .then(this.onUpdateSuccess)
         .catch(this.onUpdateFail);
     },
     onUpdateSuccess() {
-      this.$toast.show(s__('SetStatusModal|Status updated'), {
-        type: 'success',
-        position: 'top-center',
-      });
+      this.$toast.show(s__('SetStatusModal|Status updated'));
       this.closeModal();
       window.location.reload();
     },
@@ -186,7 +215,11 @@ export default {
 
       this.closeModal();
     },
+    setClearStatusAfter(after) {
+      this.clearStatusAfter = after;
+    },
   },
+  statusTimeRanges,
 };
 </script>
 
@@ -271,8 +304,29 @@ export default {
           </div>
           <div class="gl-display-flex">
             <span class="gl-text-gray-600 gl-ml-5">
-              {{ s__('SetStatusModal|"Busy" will be shown next to your name') }}
+              {{ s__('SetStatusModal|A busy indicator is shown next to your name and avatar.') }}
             </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="gl-display-flex gl-align-items-baseline">
+            <span class="gl-mr-3">{{ s__('SetStatusModal|Clear status after') }}</span>
+            <gl-dropdown :text="clearStatusAfter" data-testid="clear-status-at-dropdown">
+              <gl-dropdown-item
+                v-for="after in $options.statusTimeRanges"
+                :key="after.name"
+                :data-testid="after.name"
+                @click="setClearStatusAfter(after.label)"
+                >{{ after.label }}</gl-dropdown-item
+              >
+            </gl-dropdown>
+          </div>
+          <div
+            v-if="currentClearStatusAfter.length"
+            class="gl-mt-3 gl-text-gray-400 gl-font-sm"
+            data-testid="clear-status-at-message"
+          >
+            {{ clearStatusAfterMessage }}
           </div>
         </div>
       </div>

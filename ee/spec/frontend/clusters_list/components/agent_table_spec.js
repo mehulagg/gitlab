@@ -9,9 +9,11 @@ const propsData = {
       configFolder: {
         webPath: '/agent/full/path',
       },
+      webPath: '/agent-1',
     },
     {
       name: 'agent-2',
+      webPath: '/agent-2',
     },
   ],
 };
@@ -36,16 +38,17 @@ describe('AgentTable', () => {
 
   describe('agent table', () => {
     it.each`
-      agentName    | lineNumber
-      ${'agent-1'} | ${0}
-      ${'agent-2'} | ${1}
-    `('displays agent name', ({ agentName, lineNumber }) => {
+      agentName    | link          | lineNumber
+      ${'agent-1'} | ${'/agent-1'} | ${0}
+      ${'agent-2'} | ${'/agent-2'} | ${1}
+    `('displays agent link', ({ agentName, link, lineNumber }) => {
       const agents = wrapper.findAll(
         '[data-testid="cluster-agent-list-table"] tbody tr > td:first-child',
       );
-      const agent = agents.at(lineNumber);
+      const agent = agents.at(lineNumber).find(GlLink);
 
       expect(agent.text()).toBe(agentName);
+      expect(agent.attributes('href')).toBe(link);
     });
 
     it.each`

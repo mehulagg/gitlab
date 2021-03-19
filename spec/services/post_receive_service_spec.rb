@@ -46,11 +46,7 @@ RSpec.describe PostReceiveService do
       expect(subject).to be_empty
     end
 
-    it 'does not record a namespace onboarding progress action' do
-      expect(NamespaceOnboardingAction).not_to receive(:create_action)
-
-      subject
-    end
+    it_behaves_like 'does not record an onboarding progress action'
   end
 
   context 'when repository is nil' do
@@ -87,11 +83,8 @@ RSpec.describe PostReceiveService do
       expect(response.reference_counter_decreased).to be(true)
     end
 
-    it 'records a namespace onboarding progress action' do
-      expect(NamespaceOnboardingAction).to receive(:create_action)
-        .with(project.namespace, :git_write)
-
-      subject
+    it_behaves_like 'records an onboarding progress action', :git_write do
+      let(:namespace) { project.namespace }
     end
   end
 

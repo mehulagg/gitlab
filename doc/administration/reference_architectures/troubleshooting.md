@@ -206,13 +206,8 @@ To make sure your configuration is correct:
 
 ## Troubleshooting Gitaly
 
-### Checking versions when using standalone Gitaly nodes
-
-When using standalone Gitaly nodes, you must make sure they are the same version
-as GitLab to ensure full compatibility. Check **Admin Area > Gitaly Servers** on
-your GitLab instance and confirm all Gitaly Servers are `Up to date`.
-
-![Gitaly standalone software versions diagram](../gitaly/img/gitlab_gitaly_version_mismatch_v12_4.png)
+If you have any problems when using standalone Gitaly nodes, first
+[check all the versions are up to date](../gitaly/index.md#check-versions-when-using-standalone-gitaly-servers).
 
 ### `gitaly-debug`
 
@@ -262,7 +257,7 @@ sudo GRPC_TRACE=all GRPC_VERBOSITY=DEBUG gitlab-rake gitlab:gitaly:check
 
 ### Observing `gitaly-ruby` traffic
 
-[`gitaly-ruby`](../gitaly/index.md#gitaly-ruby) is an internal implementation detail of Gitaly,
+[`gitaly-ruby`](../gitaly/configure_gitaly.md#gitaly-ruby) is an internal implementation detail of Gitaly,
 so, there's not that much visibility into what goes on inside
 `gitaly-ruby` processes.
 
@@ -303,10 +298,10 @@ Confirm the following are all true:
 
 - When any user adds or modifies a file from the repository using the GitLab
   UI, it immediately fails with a red `401 Unauthorized` banner.
-- Creating a new project and [initializing it with a README](../../gitlab-basics/create-project.md#blank-projects)
+- Creating a new project and [initializing it with a README](../../user/project/working_with_projects.md#blank-projects)
   successfully creates the project but doesn't create the README.
 - When [tailing the logs](https://docs.gitlab.com/omnibus/settings/logs.html#tail-logs-in-a-console-on-the-server) on an app node and reproducing the error, you get `401` errors
-  when reaching the `/api/v4/internal/allowed` endpoint:
+  when reaching the [`/api/v4/internal/allowed`](../../development/internal_api.md) endpoint:
 
   ```shell
   # api_json.log
@@ -514,38 +509,23 @@ See the suggested fix [in Geo documentation](../geo/replication/troubleshooting.
 
 See the suggested fix [in Geo documentation](../geo/replication/troubleshooting.md#message-log--invalid-ip-mask-md5-name-or-service-not-known).
 
-## Troubleshooting PostgreSQL
+## Troubleshooting PostgreSQL with Patroni
 
-In case you are experiencing any issues connecting through PgBouncer, the first place to check is always the logs:
+In case you are experiencing any issues connecting through PgBouncer, the first place to check is always the logs for PostgreSQL (which is run through Patroni):
 
 ```shell
-sudo gitlab-ctl tail postgresql
+sudo gitlab-ctl tail patroni
 ```
 
-### Consul and PostgreSQL changes not taking effect
+### Consul and PostgreSQL with Patroni changes not taking effect
 
 Due to the potential impacts, `gitlab-ctl reconfigure` only reloads Consul and PostgreSQL, it will not restart the services. However, not all changes can be activated by reloading.
 
-To restart either service, run `gitlab-ctl restart SERVICE`
+To restart either service, run `gitlab-ctl restart consul` or `gitlab-ctl restart patroni` respectively.
 
-For PostgreSQL, it is usually safe to restart the master node by default. Automatic failover defaults to a 1 minute timeout. Provided the database returns before then, nothing else needs to be done. To be safe, you can stop `repmgrd` on the standby nodes first with `gitlab-ctl stop repmgrd`, then start afterwards with `gitlab-ctl start repmgrd`.
+For PostgreSQL with Patroni, to prevent the primary node from being failed over automatically, it's safest to stop all secondaries first, then restart the primary and finally restart the secondaries again.
 
 On the Consul server nodes, it is important to restart the Consul service in a controlled fashion. Read our [Consul documentation](../consul.md#restart-consul) for instructions on how to restart the service.
-
-### `gitlab-ctl repmgr-check-master` command produces errors
-
-If this command displays errors about database permissions it is likely that something failed during
-install, resulting in the `gitlab-consul` database user getting incorrect permissions. Follow these
-steps to fix the problem:
-
-1. On the master database node, connect to the database prompt - `gitlab-psql -d template1`
-1. Delete the `gitlab-consul` user - `DROP USER "gitlab-consul";`
-1. Exit the database prompt - `\q`
-1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) and the user will be re-added with the proper permissions.
-1. Change to the `gitlab-consul` user - `su - gitlab-consul`
-1. Try the check command again - `gitlab-ctl repmgr-check-master`.
-
-Now there should not be errors. If errors still occur then there is another problem.
 
 ### PgBouncer error `ERROR: pgbouncer cannot connect to server`
 

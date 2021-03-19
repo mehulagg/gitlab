@@ -31,6 +31,10 @@ The final merge must be performed by a maintainer.
 
 ## Releases
 
+> Below we describe the legacy release process, from when Workhorse
+> had its own repository. These instructions are still useful for
+> security backports.
+
 New versions of Workhorse can be released by one of the Workhorse
 maintainers. The release process is:
 
@@ -42,6 +46,7 @@ maintainers. The release process is:
 -   the new version will only be deployed to `gitlab.com` if [`GITLAB_WORKHORSE_VERSION`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_WORKHORSE_VERSION) is updated accordingly;
     if applicable, please remind the person who originally asked for a new release to make this change
     (the MR should include a link back to the [version tag](https://gitlab.com/gitlab-org/gitlab-workhorse/-/tags) and a copy of the changelog)
+-   the person who updates GITLAB_WORKHORSE_VERSION should also run `scripts/update-workhorse` after commiting the new GITLAB_WORKHORSE_VERSION. If they forget they will be reminded by CI.
 
 ## Security releases
 

@@ -13,6 +13,8 @@ module EE
           case object.itself
           when Epic
             instance.group_epic_url(object.group, object, **options)
+          when ::Boards::EpicBoard
+            instance.group_epic_board_url(object.group, object, **options)
           when Iteration
             instance.iteration_url(object, **options)
           when ::Vulnerability

@@ -24,7 +24,7 @@ describe('Pipeline Security Dashboard component', () => {
   let store;
   let wrapper;
 
-  const factory = options => {
+  const factory = (options) => {
     store = new Vuex.Store({
       modules: {
         vulnerabilities: {

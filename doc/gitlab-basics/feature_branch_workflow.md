@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/workflow.html'
 ---
 
-# Feature branch workflow
+# Feature branch workflow **(FREE)**
 
 1. Clone project:
 
@@ -35,4 +35,4 @@ disqus_identifier: 'https://docs.gitlab.com/ee/workflow/workflow.html'
 
 1. Create a merge request.
 
-1. Your team lead will review the code &amp; merge it to the main branch.
+1. Your team lead reviews the code and merges it to the main branch.

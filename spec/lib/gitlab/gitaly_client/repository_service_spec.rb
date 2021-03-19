@@ -131,7 +131,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
         known_hosts: '',
         force: false,
         no_tags: false,
-        no_prune: false
+        no_prune: false,
+        check_tags_changed: false
       )
 
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
@@ -139,7 +140,7 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
         .with(expected_request, kind_of(Hash))
         .and_return(double(value: true))
 
-      client.fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, timeout: 1)
+      client.fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, timeout: 1, check_tags_changed: false)
     end
 
     context 'SSH auth' do
@@ -242,6 +243,21 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
         .and_return(double)
 
       client.raw_changes_between('deadbeef', 'deadpork')
+    end
+  end
+
+  describe '#search_files_by_regexp' do
+    subject(:result) { client.search_files_by_regexp('master', '.*') }
+
+    before do
+      expect_any_instance_of(Gitaly::RepositoryService::Stub)
+        .to receive(:search_files_by_name)
+        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .and_return([double(files: ['file1.txt']), double(files: ['file2.txt'])])
+    end
+
+    it 'sends a search_files_by_name message and returns a flatten array' do
+      expect(result).to contain_exactly('file1.txt', 'file2.txt')
     end
   end
 

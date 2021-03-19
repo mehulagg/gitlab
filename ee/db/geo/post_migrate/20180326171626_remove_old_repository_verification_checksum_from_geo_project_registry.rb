@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RemoveOldRepositoryVerificationChecksumFromGeoProjectRegistry < ActiveRecord::Migration[4.2]
   DOWNTIME = false
 

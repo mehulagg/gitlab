@@ -1,11 +1,11 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
-# User-starred metrics dashboards API
+# User-starred metrics dashboards API **(FREE)**
 
 The starred dashboard feature makes navigating to frequently-used dashboards easier
 by displaying favorited dashboards at the top of the select list.

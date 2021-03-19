@@ -1,6 +1,6 @@
-import Cookies from 'js-cookie';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import Cookies from 'js-cookie';
 import Vuex from 'vuex';
 import EpicsListEmpty from 'ee/roadmap/components/epics_list_empty.vue';
 import RoadmapApp from 'ee/roadmap/components/roadmap_app.vue';
@@ -17,7 +17,6 @@ import {
   mockFormattedEpic,
   mockFormattedChildEpic2,
   mockGroupId,
-  mockNewEpicEndpoint,
   mockSortedBy,
   mockSvgPath,
   mockTimeframeInitialDate,
@@ -35,7 +34,6 @@ describe('RoadmapApp', () => {
   const emptyStateIllustrationPath = mockSvgPath;
   const epics = [mockFormattedEpic];
   const hasFiltersApplied = true;
-  const newEpicEndpoint = mockNewEpicEndpoint;
   const presetType = PRESET_TYPES.MONTHS;
   const timeframe = getTimeframeForMonthsView(mockTimeframeInitialDate);
 
@@ -44,11 +42,12 @@ describe('RoadmapApp', () => {
       localVue,
       propsData: {
         emptyStateIllustrationPath,
-        newEpicEndpoint,
         presetType,
       },
       provide: {
         glFeatures: { asyncFiltering: true },
+        groupFullPath: 'gitlab-org',
+        groupMilestonesPath: '/groups/gitlab-org/-/milestones.json',
       },
       store,
     });
@@ -120,10 +119,6 @@ describe('RoadmapApp', () => {
 
     it('contains whether it is child epics', () => {
       expect(wrapper.find(EpicsListEmpty).props('isChildEpics')).toBe(false);
-    });
-
-    it('contains endpoint to create a new epic', () => {
-      expect(wrapper.find(EpicsListEmpty).props('newEpicEndpoint')).toBe(mockNewEpicEndpoint);
     });
 
     it('contains the preset type', () => {

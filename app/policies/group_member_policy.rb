@@ -4,13 +4,17 @@ class GroupMemberPolicy < BasePolicy
   delegate :group
 
   with_scope :subject
-  condition(:last_owner) { @subject.group.last_owner?(@subject.user) }
+  condition(:last_owner) { @subject.group.last_owner?(@subject.user) || @subject.group.last_blocked_owner?(@subject.user) }
 
   desc "Membership is users' own"
   with_score 0
   condition(:is_target_user) { @user && @subject.user_id == @user.id }
 
-  rule { anonymous }.prevent_all
+  rule { anonymous }.policy do
+    prevent :update_group_member
+    prevent :destroy_group_member
+  end
+
   rule { last_owner }.policy do
     prevent :update_group_member
     prevent :destroy_group_member

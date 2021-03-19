@@ -1,4 +1,9 @@
+import { sortBy } from 'lodash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { urlParamsToObject } from '~/lib/utils/common_utils';
+import { objectToQuery } from '~/lib/utils/url_utility';
 import {
+  EPIC_LANE_BASE_HEIGHT,
   IterationFilterType,
   IterationIDs,
   MilestoneFilterType,
@@ -6,8 +11,6 @@ import {
   WeightFilterType,
   WeightIDs,
 } from './constants';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { objectToQuery } from '~/lib/utils/url_utility';
 
 export function getMilestone({ milestone }) {
   return milestone || null;
@@ -23,6 +26,57 @@ export function fullMilestoneId(milestoneId) {
 
 export function fullUserId(userId) {
   return `gid://gitlab/User/${userId}`;
+}
+
+export function fullEpicBoardId(epicBoardId) {
+  return `gid://gitlab/Boards::EpicBoard/${epicBoardId}`;
+}
+
+export function calculateSwimlanesBufferSize(listTopCoordinate) {
+  return Math.ceil((window.innerHeight - listTopCoordinate) / EPIC_LANE_BASE_HEIGHT);
+}
+
+export function formatListEpics(listEpics) {
+  const boardItems = {};
+  let listItemsCount;
+
+  const listData = listEpics.nodes.reduce((map, list) => {
+    listItemsCount = list.epicsCount;
+    let sortedEpics = list.epics.edges.map((epicNode) => ({
+      ...epicNode.node,
+    }));
+    sortedEpics = sortBy(sortedEpics, 'relativePosition');
+
+    return {
+      ...map,
+      [list.id]: sortedEpics.map((i) => {
+        const id = getIdFromGraphQLId(i.id);
+
+        const listEpic = {
+          ...i,
+          id,
+          labels: i.labels?.nodes || [],
+          assignees: i.assignees?.nodes || [],
+        };
+
+        boardItems[id] = listEpic;
+
+        return id;
+      }),
+    };
+  }, {});
+
+  return { listData, boardItems, listItemsCount };
+}
+
+export function formatEpicListsPageInfo(lists) {
+  const listData = lists.nodes.reduce((map, list) => {
+    return {
+      ...map,
+      [list.id]: list.epics.pageInfo,
+    };
+  }, {});
+  return listData;
 }
 
 export function transformBoardConfig(boardConfig) {
@@ -67,7 +121,7 @@ export function transformBoardConfig(boardConfig) {
   let updatedFilterPath = objectToQuery(updatedBoardConfig);
   const filterPath = updatedFilterPath ? updatedFilterPath.split('&') : [];
 
-  boardConfig.labels.forEach(label => {
+  boardConfig.labels.forEach((label) => {
     const labelTitle = encodeURIComponent(label.title);
     const param = `label_name[]=${labelTitle}`;
     const labelIndex = passedFilterParams.label_name?.indexOf(labelTitle);
@@ -86,5 +140,6 @@ export default {
   fullEpicId,
   fullMilestoneId,
   fullUserId,
+  fullEpicBoardId,
   transformBoardConfig,
 };

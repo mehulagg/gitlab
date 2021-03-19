@@ -524,42 +524,130 @@ RSpec.describe ProjectsController do
     end
 
     context 'compliance framework settings' do
-      let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
-      let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
-
-      context 'when unlicensed' do
-        before do
-          stub_licensed_features(compliance_framework: false)
-        end
-
-        it 'ignores any compliance framework params' do
+      shared_examples 'no compliance framework is set' do
+        it 'does not change compliance framework for project' do
           put :update,
-            params: {
+              params: {
                 namespace_id: project.namespace,
                 id: project,
                 project: params
-            }
+              }
           project.reload
 
           expect(project.compliance_framework_setting).to be_nil
         end
       end
 
+      context 'when unlicensed' do
+        let(:framework) { create(:compliance_framework, namespace: project.namespace.root_ancestor) }
+        let(:params) { { compliance_framework_setting_attributes: { framework: framework.id } } }
+
+        before do
+          stub_licensed_features(compliance_framework: false)
+        end
+
+        it_behaves_like 'no compliance framework is set'
+
+        context 'custom frameworks are disabled' do
+          let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
+          let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
+
+          before do
+            stub_feature_flags(ff_custom_compliance_frameworks: false)
+          end
+
+          it_behaves_like 'no compliance framework is set'
+        end
+      end
+
       context 'when licensed' do
+        let(:framework) { create(:compliance_framework, namespace: project.namespace.root_ancestor) }
+        let(:params) { { compliance_framework_setting_attributes: { framework: framework.id } } }
+
         before do
           stub_licensed_features(compliance_framework: true)
         end
 
-        it 'sets the compliance framework' do
-          put :update,
-              params: {
+        context 'current_user is a project owner' do
+          before do
+            sign_in(project.owner)
+          end
+
+          it 'sets the compliance framework' do
+            put :update,
+                params: {
                   namespace_id: project.namespace,
                   id: project,
                   project: params
+                }
+            project.reload
+
+            expect(project.compliance_framework_setting.compliance_management_framework).to eq(framework)
+          end
+
+          context 'custom frameworks are disabled' do
+            let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
+            let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
+
+            before do
+              stub_feature_flags(ff_custom_compliance_frameworks: false)
+            end
+
+            it 'sets the compliance framework based on the framework identifier' do
+              put :update,
+                  params: {
+                    namespace_id: project.namespace,
+                    id: project,
+                    project: params
+                  }
+              project.reload
+
+              expect(project.compliance_framework_setting.compliance_management_framework.name).to eq(framework.name)
+            end
+
+            it 'raises an error when using framework IDs for custom frameworks' do
+              framework = create(:compliance_framework, namespace: project.namespace.root_ancestor)
+              params = { compliance_framework_setting_attributes: { framework: framework.id } }
+
+              expect do
+                put :update,
+                    params: {
+                      namespace_id: project.namespace,
+                      id: project,
+                      project: params
+                    }
+              end.to raise_error(KeyError)
+            end
+          end
+        end
+      end
+    end
+
+    context 'cve_id_request_button feature flag' do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+        end
+
+        it 'handles setting cve_id_request_enabled' do
+          project.project_setting.cve_id_request_enabled = false
+          project.project_setting.save!
+
+          params = {
+            project_setting_attributes: {
+              cve_id_request_enabled: true
+            }
+          }
+          put :update,
+              params: {
+                namespace_id: project.namespace,
+                id: project,
+                project: params
               }
           project.reload
 
-          expect(project.compliance_framework_setting.compliance_management_framework.name).to eq(framework.name)
+          expect(project.project_setting.cve_id_request_enabled).to eq(feature_flag_enabled)
         end
       end
     end

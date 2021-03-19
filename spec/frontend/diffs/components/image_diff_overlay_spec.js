@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import ImageDiffOverlay from '~/diffs/components/image_diff_overlay.vue';
 import { createStore } from '~/mr_notes/stores';
 import { imageDiffDiscussions } from '../mock_data/diff_discussions';
@@ -21,15 +21,17 @@ describe('Diffs image diff overlay component', () => {
 
     wrapper = shallowMount(ImageDiffOverlay, {
       store,
+      parentComponent: {
+        data() {
+          return dimensions;
+        },
+      },
       propsData: {
         discussions: [...imageDiffDiscussions],
         fileHash: 'ABC',
         renderedWidth: 200,
         renderedHeight: 200,
         ...props,
-      },
-      methods: {
-        getImageDimensions: jest.fn().mockReturnValue(dimensions),
       },
     });
   }
@@ -114,7 +116,7 @@ describe('Diffs image diff overlay component', () => {
   describe('comment form', () => {
     const getCommentIndicator = () => wrapper.find('.comment-indicator');
     beforeEach(() => {
-      createComponent({ canComment: true }, store => {
+      createComponent({ canComment: true }, (store) => {
         store.state.diffs.commentForms.push({
           fileHash: 'ABC',
           x: 20,

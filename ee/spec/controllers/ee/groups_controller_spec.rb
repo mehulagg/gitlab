@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe GroupsController do
   include ExternalAuthorizationServiceHelpers
+  using RSpec::Parameterized::TableSyntax
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
@@ -277,8 +278,6 @@ RSpec.describe GroupsController do
     end
 
     context 'when creating a group with `default_branch_protection` attribute' do
-      using RSpec::Parameterized::TableSyntax
-
       subject do
         post :create, params: { group: group_params.merge(default_branch_protection: Gitlab::Access::PROTECTION_NONE) }
       end
@@ -456,8 +455,6 @@ RSpec.describe GroupsController do
     end
 
     context 'when `default_branch_protection` is specified' do
-      using RSpec::Parameterized::TableSyntax
-
       let(:params) do
         { id: group.to_param, group: { default_branch_protection: Gitlab::Access::PROTECTION_NONE } }
       end
@@ -555,8 +552,6 @@ RSpec.describe GroupsController do
     end
 
     context 'when `prevent_forking_outside_group` is specified' do
-      using RSpec::Parameterized::TableSyntax
-
       subject { put :update, params: params }
 
       shared_examples_for 'updates the attribute if needed' do

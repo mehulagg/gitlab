@@ -8,7 +8,7 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
-import { mockWafStatisticsResponse } from '../../../mock_data';
+import { mockWafStatisticsResponse } from '../../../mocks/mock_data';
 
 jest.mock('~/flash');
 

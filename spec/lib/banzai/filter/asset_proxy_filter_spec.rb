@@ -28,26 +28,36 @@ RSpec.describe Banzai::Filter::AssetProxyFilter do
       stub_application_setting(asset_proxy_enabled: true)
       stub_application_setting(asset_proxy_secret_key: 'shared-secret')
       stub_application_setting(asset_proxy_url: 'https://assets.example.com')
-      stub_application_setting(asset_proxy_whitelist: %w(gitlab.com *.mydomain.com))
+      stub_application_setting(asset_proxy_allowlist: %w(gitlab.com *.mydomain.com))
 
       described_class.initialize_settings
 
       expect(Gitlab.config.asset_proxy.enabled).to be_truthy
       expect(Gitlab.config.asset_proxy.secret_key).to eq 'shared-secret'
       expect(Gitlab.config.asset_proxy.url).to eq 'https://assets.example.com'
-      expect(Gitlab.config.asset_proxy.whitelist).to eq %w(gitlab.com *.mydomain.com)
-      expect(Gitlab.config.asset_proxy.domain_regexp).to eq /^(gitlab\.com|.*?\.mydomain\.com)$/i
+      expect(Gitlab.config.asset_proxy.allowlist).to eq %w(gitlab.com *.mydomain.com)
+      expect(Gitlab.config.asset_proxy.domain_regexp).to eq(/^(gitlab\.com|.*?\.mydomain\.com)$/i)
     end
 
-    context 'when whitelist is empty' do
+    context 'when allowlist is empty' do
       it 'defaults to the install domain' do
         stub_application_setting(asset_proxy_enabled: true)
-        stub_application_setting(asset_proxy_whitelist: [])
+        stub_application_setting(asset_proxy_allowlist: [])
 
         described_class.initialize_settings
 
-        expect(Gitlab.config.asset_proxy.whitelist).to eq [Gitlab.config.gitlab.host]
+        expect(Gitlab.config.asset_proxy.allowlist).to eq [Gitlab.config.gitlab.host]
       end
+    end
+
+    it 'supports deprecated whitelist settings' do
+      stub_application_setting(asset_proxy_enabled: true)
+      stub_application_setting(asset_proxy_whitelist: %w(foo.com bar.com))
+      stub_application_setting(asset_proxy_allowlist: [])
+
+      described_class.initialize_settings
+
+      expect(Gitlab.config.asset_proxy.allowlist).to eq %w(foo.com bar.com)
     end
   end
 
@@ -56,8 +66,8 @@ RSpec.describe Banzai::Filter::AssetProxyFilter do
       stub_asset_proxy_setting(enabled: true)
       stub_asset_proxy_setting(secret_key: 'shared-secret')
       stub_asset_proxy_setting(url: 'https://assets.example.com')
-      stub_asset_proxy_setting(whitelist: %W(gitlab.com *.mydomain.com #{Gitlab.config.gitlab.host}))
-      stub_asset_proxy_setting(domain_regexp: described_class.compile_whitelist(Gitlab.config.asset_proxy.whitelist))
+      stub_asset_proxy_setting(allowlist: %W(gitlab.com *.mydomain.com #{Gitlab.config.gitlab.host}))
+      stub_asset_proxy_setting(domain_regexp: described_class.compile_allowlist(Gitlab.config.asset_proxy.allowlist))
       @context = described_class.transform_context({})
     end
 

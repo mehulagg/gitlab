@@ -17,7 +17,8 @@ module QA
             end
 
             def enable_confidential_epic
-              click_element :confidential_epic_checkbox
+              # TODO: Fix this workaround for checkbox hidden by label
+              find_element(:confidential_epic_checkbox, visible: false).click
             end
 
             def set_title(title)

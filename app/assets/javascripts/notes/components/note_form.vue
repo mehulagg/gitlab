@@ -1,21 +1,23 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import { GlButton } from '@gitlab/ui';
 import { mapGetters, mapActions, mapState } from 'vuex';
+import { getDraft, updateDraft } from '~/lib/utils/autosave';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
-import eventHub from '../event_hub';
-import NoteableWarning from '~/vue_shared/components/notes/noteable_warning.vue';
+import { __, sprintf } from '~/locale';
 import markdownField from '~/vue_shared/components/markdown/field.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import eventHub from '../event_hub';
 import issuableStateMixin from '../mixins/issuable_state';
 import resolvable from '../mixins/resolvable';
-import { __, sprintf } from '~/locale';
-import { getDraft, updateDraft } from '~/lib/utils/autosave';
+import CommentFieldLayout from './comment_field_layout.vue';
 
 export default {
   name: 'NoteForm',
   components: {
-    NoteableWarning,
     markdownField,
+    CommentFieldLayout,
+    GlButton,
   },
   mixins: [glFeatureFlagsMixin(), issuableStateMixin, resolvable],
   props: {
@@ -115,7 +117,7 @@ export default {
       'getUserDataByProp',
     ]),
     ...mapState({
-      withBatchComments: state => state.batchComments?.withBatchComments,
+      withBatchComments: (state) => state.batchComments?.withBatchComments,
     }),
     ...mapGetters('batchComments', ['hasDrafts']),
     showBatchCommentsActions() {
@@ -126,8 +128,8 @@ export default {
 
       return (
         this.discussion?.notes
-          .filter(n => n.resolvable)
-          .some(n => n.current_user?.can_resolve_discussion) || this.isDraft
+          .filter((n) => n.resolvable)
+          .some((n) => n.current_user?.can_resolve_discussion) || this.isDraft
       );
     },
     noteHash() {
@@ -199,7 +201,7 @@ export default {
     changedCommentText() {
       return sprintf(
         __(
-          'This comment has changed since you started editing, please review the %{startTag}updated comment%{endTag} to ensure information is not lost.',
+          'This comment changed after you started editing it. Review the %{startTag}updated comment%{endTag} to ensure information is not lost.',
         ),
         {
           startTag: `<a href="${this.noteHash}" target="_blank" rel="noopener noreferrer">`,
@@ -303,6 +305,9 @@ export default {
 
       this.$emit('handleFormUpdateAddToReview', this.updatedNoteBody, shouldResolve);
     },
+    hasEmailParticipants() {
+      return this.getNoteableData.issue_email_participants?.length;
+    },
   },
 };
 </script>
@@ -316,46 +321,41 @@ export default {
     ></div>
     <div class="flash-container timeline-content"></div>
     <form :data-line-code="lineCode" class="edit-note common-note-form js-quick-submit gfm-form">
-      <noteable-warning
-        v-if="hasWarning(getNoteableData)"
-        :is-locked="isLocked(getNoteableData)"
-        :is-confidential="isConfidential(getNoteableData)"
-        :locked-noteable-docs-path="lockedIssueDocsPath"
-        :confidential-noteable-docs-path="confidentialIssueDocsPath"
-      />
-
-      <markdown-field
-        :markdown-preview-path="markdownPreviewPath"
-        :markdown-docs-path="markdownDocsPath"
-        :quick-actions-docs-path="quickActionsDocsPath"
-        :line="line"
-        :note="discussionNote"
-        :can-suggest="canSuggest"
-        :add-spacing-classes="false"
-        :help-page-path="helpPagePath"
-        :show-suggest-popover="showSuggestPopover"
-        :textarea-value="updatedNoteBody"
-        @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
-      >
-        <textarea
-          id="note_note"
-          ref="textarea"
-          slot="textarea"
-          v-model="updatedNoteBody"
-          :data-supports-quick-actions="!isEditing && !glFeatures.tributeAutocomplete"
-          name="note[note]"
-          class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
-          data-qa-selector="reply_field"
-          dir="auto"
-          :aria-label="__('Description')"
-          :placeholder="__('Write a comment or drag your files here…')"
-          @keydown.meta.enter="handleKeySubmit()"
-          @keydown.ctrl.enter="handleKeySubmit()"
-          @keydown.exact.up="editMyLastNote()"
-          @keydown.exact.esc="cancelHandler(true)"
-          @input="onInput"
-        ></textarea>
-      </markdown-field>
+      <comment-field-layout :noteable-data="getNoteableData">
+        <markdown-field
+          :markdown-preview-path="markdownPreviewPath"
+          :markdown-docs-path="markdownDocsPath"
+          :quick-actions-docs-path="quickActionsDocsPath"
+          :line="line"
+          :note="discussionNote"
+          :can-suggest="canSuggest"
+          :add-spacing-classes="false"
+          :help-page-path="helpPagePath"
+          :show-suggest-popover="showSuggestPopover"
+          :textarea-value="updatedNoteBody"
+          @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
+        >
+          <template #textarea>
+            <textarea
+              id="note_note"
+              ref="textarea"
+              v-model="updatedNoteBody"
+              :data-supports-quick-actions="!isEditing && !glFeatures.tributeAutocomplete"
+              name="note[note]"
+              class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
+              data-qa-selector="reply_field"
+              dir="auto"
+              :aria-label="__('Reply to comment')"
+              :placeholder="__('Write a comment or drag your files here…')"
+              @keydown.meta.enter="handleKeySubmit()"
+              @keydown.ctrl.enter="handleKeySubmit()"
+              @keydown.exact.up="editMyLastNote()"
+              @keydown.exact.esc="cancelHandler(true)"
+              @input="onInput"
+            ></textarea>
+          </template>
+        </markdown-field>
+      </comment-field-layout>
       <div class="note-form-actions clearfix">
         <template v-if="showBatchCommentsActions">
           <p v-if="showResolveDiscussionToggle">
@@ -380,61 +380,70 @@ export default {
               </template>
             </label>
           </p>
-          <div>
-            <button
+          <div class="gl-display-sm-flex gl-flex-wrap">
+            <gl-button
               :disabled="isDisabled"
-              type="button"
-              class="btn btn-success"
+              category="primary"
+              variant="success"
+              class="gl-mr-3"
               data-qa-selector="start_review_button"
               @click="handleAddToReview"
             >
               <template v-if="hasDrafts">{{ __('Add to review') }}</template>
               <template v-else>{{ __('Start a review') }}</template>
-            </button>
-            <button
+            </gl-button>
+            <gl-button
               :disabled="isDisabled"
-              type="button"
-              class="btn js-comment-button"
+              category="secondary"
+              variant="default"
               data-qa-selector="comment_now_button"
+              class="gl-mr-3 js-comment-button"
               @click="handleUpdate()"
             >
               {{ __('Add comment now') }}
-            </button>
-            <button
-              class="btn note-edit-cancel js-close-discussion-note-form"
-              type="button"
+            </gl-button>
+            <gl-button
+              class="note-edit-cancel js-close-discussion-note-form"
+              category="secondary"
+              variant="default"
               data-testid="cancelBatchCommentsEnabled"
               @click="cancelHandler(true)"
             >
               {{ __('Cancel') }}
-            </button>
+            </gl-button>
           </div>
         </template>
         <template v-else>
-          <button
-            :disabled="isDisabled"
-            type="button"
-            class="js-vue-issue-save btn btn-success js-comment-button"
-            data-qa-selector="reply_comment_button"
-            @click="handleUpdate()"
-          >
-            {{ saveButtonTitle }}
-          </button>
-          <button
-            v-if="discussion.resolvable"
-            class="btn btn-default gl-mr-3 js-comment-resolve-button"
-            @click.prevent="handleUpdate(true)"
-          >
-            {{ resolveButtonTitle }}
-          </button>
-          <button
-            class="btn btn-cancel note-edit-cancel js-close-discussion-note-form"
-            type="button"
-            data-testid="cancel"
-            @click="cancelHandler(true)"
-          >
-            {{ __('Cancel') }}
-          </button>
+          <div class="gl-display-sm-flex gl-flex-wrap">
+            <gl-button
+              :disabled="isDisabled"
+              category="primary"
+              variant="success"
+              data-qa-selector="reply_comment_button"
+              class="gl-mr-3 js-vue-issue-save js-comment-button"
+              @click="handleUpdate()"
+            >
+              {{ saveButtonTitle }}
+            </gl-button>
+            <gl-button
+              v-if="discussion.resolvable"
+              category="secondary"
+              variant="default"
+              class="gl-mr-3 js-comment-resolve-button"
+              @click.prevent="handleUpdate(true)"
+            >
+              {{ resolveButtonTitle }}
+            </gl-button>
+            <gl-button
+              class="note-edit-cancel js-close-discussion-note-form"
+              category="secondary"
+              variant="default"
+              data-testid="cancel"
+              @click="cancelHandler(true)"
+            >
+              {{ __('Cancel') }}
+            </gl-button>
+          </div>
         </template>
       </div>
     </form>

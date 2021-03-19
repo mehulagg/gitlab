@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import boardsStore from '~/boards/stores/boards_store';
 import vuexStore from '~/boards/stores';
-import ListContainer from './list_container.vue';
+import boardsStore from '~/boards/stores/boards_store';
 import { fullMilestoneId, fullUserId } from '../../boards_util';
+import ListContainer from './list_container.vue';
 
 export default Vue.extend({
   components: {
@@ -37,7 +37,7 @@ export default Vue.extend({
     filterItems(term, items) {
       const query = term.toLowerCase();
 
-      return items.filter(item => {
+      return items.filter((item) => {
         const name = item.name ? item.name.toLowerCase() : item.title.toLowerCase();
         const foundName = name.indexOf(query) > -1;
 

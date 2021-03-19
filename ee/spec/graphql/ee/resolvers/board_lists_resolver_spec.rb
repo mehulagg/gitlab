@@ -25,7 +25,7 @@ RSpec.describe Resolvers::BoardListsResolver do
     end
 
     it 'returns a list of board lists' do
-      lists = resolve_board_lists.items
+      lists = resolve_board_lists
 
       expect(lists.count).to eq 3
       expect(lists.map(&:list_type)).to eq %w(closed assignee milestone)

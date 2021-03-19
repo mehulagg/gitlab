@@ -3,13 +3,13 @@
 import { isEmpty } from 'lodash';
 import { mapActions } from 'vuex';
 import Alerts from 'ee/vue_shared/dashboards/components/alerts.vue';
-import TimeAgo from 'ee/vue_shared/dashboards/components/time_ago.vue';
 import ProjectPipeline from 'ee/vue_shared/dashboards/components/project_pipeline.vue';
+import TimeAgo from 'ee/vue_shared/dashboards/components/time_ago.vue';
 import { STATUS_FAILED, STATUS_RUNNING } from 'ee/vue_shared/dashboards/constants';
 import { __, sprintf } from '~/locale';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import Commit from '~/vue_shared/components/commit.vue';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
 import ProjectHeader from './project_header.vue';
 
 export default {
@@ -37,7 +37,7 @@ export default {
       if (this.project.upgrade_path) {
         return sprintf(
           __(
-            "To see this project's operational details, %{linkStart}upgrade its group plan to Silver%{linkEnd}. You can also remove the project from the dashboard.",
+            "To see this project's operational details, %{linkStart}upgrade its group plan to Premium%{linkEnd}. You can also remove the project from the dashboard.",
           ),
           {
             linkStart: `<a href="${this.project.upgrade_path}" target="_blank" rel="noopener noreferrer">`,

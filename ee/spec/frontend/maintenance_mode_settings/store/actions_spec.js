@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import * as actions from 'ee/maintenance_mode_settings/store/actions';
-import { createState } from 'ee/maintenance_mode_settings/store/state';
 import {
   DEFAULT_MAINTENANCE_ENABLED,
   DEFAULT_BANNER_MESSAGE,
 } from 'ee/maintenance_mode_settings/constants';
+import * as actions from 'ee/maintenance_mode_settings/store/actions';
+import { createState } from 'ee/maintenance_mode_settings/store/state';
+import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { ACTIONS_TEST_DATA } from '../mock_data';

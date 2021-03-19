@@ -2,14 +2,10 @@ import { SET_FILTER, SET_HIDE_DISMISSED } from '../modules/filters/mutation_type
 
 const refreshTypes = [`filters/${SET_FILTER}`, `filters/${SET_HIDE_DISMISSED}`];
 
-export default store => {
-  const refreshVulnerabilities = payload => {
-    store.dispatch('vulnerabilities/fetchVulnerabilities', payload);
-  };
-
+export default (store) => {
   store.subscribe(({ type }) => {
     if (refreshTypes.includes(type)) {
-      refreshVulnerabilities(store.state.filters.filters);
+      store.dispatch('vulnerabilities/fetchVulnerabilities', store.state.filters.filters);
     }
   });
 };

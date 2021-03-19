@@ -7,15 +7,16 @@ import {
   GlButton,
   GlSprintf,
   GlLink,
+  GlAlert,
 } from '@gitlab/ui';
 
-import { s__, __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import IssuableEventHub from '~/issuable_show/event_hub';
+import { s__, __ } from '~/locale';
 
-import TestCaseSidebar from './test_case_sidebar.vue';
 import TestCaseGraphQL from '../mixins/test_case_graphql';
+import TestCaseSidebar from './test_case_sidebar.vue';
 
 const stateEvent = {
   Close: 'CLOSE',
@@ -31,24 +32,28 @@ export default {
     GlButton,
     GlSprintf,
     GlLink,
+    GlAlert,
     IssuableShow,
     TestCaseSidebar,
   },
+  mixins: [TestCaseGraphQL],
   inject: [
     'projectFullPath',
     'testCaseNewPath',
     'testCaseId',
+    'updatePath',
+    'lockVersion',
     'canEditTestCase',
     'descriptionPreviewPath',
     'descriptionHelpPath',
   ],
-  mixins: [TestCaseGraphQL],
   data() {
     return {
       testCase: {},
       editTestCaseFormVisible: false,
       testCaseSaveInProgress: false,
       testCaseStateChangeInProgress: false,
+      taskListUpdateFailed: false,
     };
   },
   computed: {
@@ -76,7 +81,7 @@ export default {
       return todos.length ? todos[0] : null;
     },
     selectedLabels() {
-      return this.testCase.labels.nodes.map(label => ({
+      return this.testCase.labels.nodes.map((label) => ({
         ...label,
         id: getIdFromGraphQLId(label.id),
       }));
@@ -91,12 +96,15 @@ export default {
         },
         errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
       })
-        .then(updatedTestCase => {
+        .then((updatedTestCase) => {
           this.testCase = updatedTestCase;
         })
         .finally(() => {
           this.testCaseStateChangeInProgress = false;
         });
+    },
+    handleTaskListUpdateFailure() {
+      this.taskListUpdateFailed = true;
     },
     handleEditTestCase() {
       this.editTestCaseFormVisible = true;
@@ -110,7 +118,7 @@ export default {
         },
         errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
       })
-        .then(updatedTestCase => {
+        .then((updatedTestCase) => {
           this.testCase = updatedTestCase;
           this.editTestCaseFormVisible = false;
           IssuableEventHub.$emit('update.issuable');
@@ -132,6 +140,13 @@ export default {
 
 <template>
   <div class="test-case-container">
+    <gl-alert v-if="taskListUpdateFailed" variant="danger" @dismiss="taskListUpdateFailed = false">
+      {{
+        __(
+          'Someone edited this test case at the same time you did. The description has been updated and you will need to make your changes again.',
+        )
+      }}
+    </gl-alert>
     <gl-loading-icon v-if="testCaseLoading" size="md" class="gl-mt-3" />
     <issuable-show
       v-if="!testCaseLoading && !testCaseLoadFailed"
@@ -140,10 +155,15 @@ export default {
       :status-icon="statusIcon"
       :enable-edit="canEditTestCase"
       :enable-autocomplete="true"
+      :enable-task-list="true"
       :edit-form-visible="editTestCaseFormVisible"
       :description-preview-path="descriptionPreviewPath"
       :description-help-path="descriptionHelpPath"
+      :task-completion-status="testCase.taskCompletionStatus"
+      :task-list-update-path="updatePath"
+      :task-list-lock-version="lockVersion"
       @edit-issuable="handleEditTestCase"
+      @task-list-update-failure="handleTaskListUpdateFailure"
     >
       <template #status-badge>
         <gl-sprintf

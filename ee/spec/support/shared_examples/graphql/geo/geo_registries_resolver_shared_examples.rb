@@ -20,19 +20,27 @@ RSpec.shared_examples_for 'a Geo registries resolver' do |registry_factory_name|
       context 'when the user has permission to view Geo data' do
         let_it_be(:current_user) { create(:admin) }
 
-        context 'when the ids argument is null' do
-          it 'returns registries, in order' do
-            expect(resolve_registries.to_a).to eq(registries)
+        context 'when admin mode is enabled', :enable_admin_mode do
+          context 'when the ids argument is null' do
+            it 'returns registries, in order' do
+              expect(resolve_registries.to_a).to eq(registries)
+            end
+          end
+
+          context 'when the ids argument is present' do
+            it 'returns the requested registries, in order' do
+              requested_ids = [registry3.to_global_id, registry1.to_global_id]
+              args = { ids: requested_ids }
+              expected = [registry1, registry3]
+
+              expect(resolve_registries(args).to_a).to eq(expected)
+            end
           end
         end
 
-        context 'when the ids argument is present' do
-          it 'returns the requested registries, in order' do
-            requested_ids = [registry3.to_global_id, registry1.to_global_id]
-            args = { ids: requested_ids }
-            expected = [registry1, registry3]
-
-            expect(resolve_registries(args).to_a).to eq(expected)
+        context 'when admin mode is disabled' do
+          it 'returns nothing' do
+            expect(resolve_registries).to be_empty
           end
         end
       end

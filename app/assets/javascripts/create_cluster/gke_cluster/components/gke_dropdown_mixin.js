@@ -1,7 +1,7 @@
 import { GlLoadingIcon } from '@gitlab/ui';
-import DropdownSearchInput from '~/vue_shared/components/dropdown/dropdown_search_input.vue';
-import DropdownHiddenInput from '~/vue_shared/components/dropdown/dropdown_hidden_input.vue';
 import DropdownButton from '~/vue_shared/components/dropdown/dropdown_button.vue';
+import DropdownHiddenInput from '~/vue_shared/components/dropdown/dropdown_hidden_input.vue';
+import DropdownSearchInput from '~/vue_shared/components/dropdown/dropdown_search_input.vue';
 
 import store from '../store';
 
@@ -42,13 +42,13 @@ export default {
         return [];
       }
 
-      return this.items.filter(item => item.name.toLowerCase().indexOf(this.searchQuery) > -1);
+      return this.items.filter((item) => item.name.toLowerCase().indexOf(this.searchQuery) > -1);
     },
   },
   methods: {
     fetchSuccessHandler() {
       if (this.defaultValue) {
-        const itemToSelect = this.items.find(item => item.name === this.defaultValue);
+        const itemToSelect = this.items.find((item) => item.name === this.defaultValue);
 
         if (itemToSelect) {
           this.setItem(itemToSelect.name);

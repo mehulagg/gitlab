@@ -75,7 +75,7 @@ RSpec.describe Elastic::IndexingControl do
         expect_any_instance_of(Gitlab::Elastic::Indexer).not_to receive(:run)
         expect(Elastic::IndexingControlService).to receive(:add_to_waiting_queue!).with(worker.class, worker_args, worker_context)
 
-        Labkit::Context.with_context(worker_context) do
+        Gitlab::ApplicationContext.with_raw_context(worker_context) do
           worker.perform(*worker_args)
         end
       end

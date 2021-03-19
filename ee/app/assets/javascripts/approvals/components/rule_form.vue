@@ -1,12 +1,11 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { groupBy, isNumber } from 'lodash';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
+import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
 import ApproversList from './approvers_list.vue';
 import ApproversSelect from './approvers_select.vue';
 import BranchesSelect from './branches_select.vue';
-import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
 
 const DEFAULT_NAME = 'Default';
 const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
@@ -14,7 +13,7 @@ const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
 const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
 
 function mapServerResponseToValidationErrors(messages) {
-  return Object.entries(messages).flatMap(([key, msgs]) => msgs.map(msg => `${key} ${msg}`));
+  return Object.entries(messages).flatMap(([key, msgs]) => msgs.map((msg) => `${key} ${msg}`));
 }
 
 export default {
@@ -23,8 +22,6 @@ export default {
     ApproversSelect,
     BranchesSelect,
   },
-  // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
-  mixins: [glFeatureFlagsMixin()],
   props: {
     initRule: {
       type: Object,
@@ -44,7 +41,7 @@ export default {
   },
   data() {
     const defaults = {
-      name: '',
+      name: this.defaultRuleName,
       approvalsRequired: 1,
       minApprovalsRequired: 0,
       approvers: [],
@@ -57,10 +54,6 @@ export default {
       serverValidationErrors: [],
       ...this.getInitialData(),
     };
-    // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
-    if (this.glFeatures.approvalSuggestions) {
-      return { ...defaults, name: this.defaultRuleName || defaults.name };
-    }
 
     return defaults;
   },
@@ -71,7 +64,7 @@ export default {
       return this.defaultRuleName ? null : this.initRule;
     },
     approversByType() {
-      return groupBy(this.approvers, x => x.type);
+      return groupBy(this.approvers, (x) => x.type);
     },
     users() {
       return this.approversByType[TYPE_USER] || [];
@@ -80,10 +73,10 @@ export default {
       return this.approversByType[TYPE_GROUP] || [];
     },
     userIds() {
-      return this.users.map(x => x.id);
+      return this.users.map((x) => x.id);
     },
     groupIds() {
-      return this.groups.map(x => x.id);
+      return this.groups.map((x) => x.id);
     },
     validation() {
       if (!this.showValidation) {
@@ -140,12 +133,12 @@ export default {
     invalidBranches() {
       if (this.isMrEdit) return '';
 
-      const invalidTypes = this.branches.filter(id => typeof id !== 'number');
+      const invalidTypes = this.branches.filter((id) => typeof id !== 'number');
 
       return invalidTypes.length ? __('Please select a valid target branch') : '';
     },
     isValid() {
-      return Object.keys(this.validation).every(key => !this.validation[key]);
+      return Object.keys(this.validation).every((key) => !this.validation[key]);
     },
     isMultiSubmission() {
       return this.settings.allowMultiRule && !this.isFallbackSubmission;
@@ -162,13 +155,9 @@ export default {
       return !this.settings.lockedApprovalsRuleName;
     },
     isNameDisabled() {
-      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
-      if (this.glFeatures.approvalSuggestions) {
-        return (
-          Boolean(this.isPersisted || this.defaultRuleName) && READONLY_NAMES.includes(this.name)
-        );
-      }
-      return this.isPersisted && READONLY_NAMES.includes(this.name);
+      return (
+        Boolean(this.isPersisted || this.defaultRuleName) && READONLY_NAMES.includes(this.name)
+      );
     },
     removeHiddenGroups() {
       return this.containsHiddenGroups && !this.approversByType[TYPE_HIDDEN_GROUPS];
@@ -229,7 +218,7 @@ export default {
         submission = this.submitRule();
       }
 
-      submission.catch(failureResponse => {
+      submission.catch((failureResponse) => {
         this.serverValidationErrors = mapServerResponseToValidationErrors(
           failureResponse?.response?.data?.message || {},
         );
@@ -293,9 +282,9 @@ export default {
 
       const { containsHiddenGroups = false, removeHiddenGroups = false } = this.initRule;
 
-      const users = this.initRule.users.map(x => ({ ...x, type: TYPE_USER }));
-      const groups = this.initRule.groups.map(x => ({ ...x, type: TYPE_GROUP }));
-      const branches = this.initRule.protectedBranches?.map(x => x.id) || [];
+      const users = this.initRule.users.map((x) => ({ ...x, type: TYPE_USER }));
+      const groups = this.initRule.groups.map((x) => ({ ...x, type: TYPE_GROUP }));
+      const branches = this.initRule.protectedBranches?.map((x) => x.id) || [];
 
       return {
         name: this.initRule.name || '',
@@ -316,70 +305,59 @@ export default {
 
 <template>
   <form novalidate @submit.prevent.stop="submit">
-    <div class="row">
-      <div v-if="isNameVisible" class="form-group col-sm-6">
-        <label class="label-wrapper">
-          <span class="mb-2 bold inline">{{ s__('ApprovalRule|Rule name') }}</span>
-          <input
-            v-model="name"
-            :class="{ 'is-invalid': validation.name }"
-            :disabled="isNameDisabled"
-            class="form-control"
-            name="name"
-            type="text"
-            data-qa-selector="rule_name_field"
-          />
-          <span class="invalid-feedback">{{ validation.name }}</span>
-          <span class="text-secondary">{{ s__('ApprovalRule|e.g. QA, Security, etc.') }}</span>
-        </label>
-      </div>
-      <div class="form-group col-sm-6">
-        <label class="label-wrapper">
-          <span class="mb-2 bold inline">{{ s__('ApprovalRule|Approvals required') }}</span>
-          <input
-            v-model.number="approvalsRequired"
-            :class="{ 'is-invalid': validation.approvalsRequired }"
-            class="form-control mw-6em"
-            name="approvals_required"
-            type="number"
-            :min="minApprovalsRequired"
-            data-qa-selector="approvals_required_field"
-          />
-          <span class="invalid-feedback">{{ validation.approvalsRequired }}</span>
-        </label>
-      </div>
+    <div v-if="isNameVisible" class="form-group gl-form-group">
+      <label class="col-form-label">{{ s__('ApprovalRule|Rule name') }}</label>
+      <input
+        v-model="name"
+        :class="{ 'is-invalid': validation.name }"
+        :disabled="isNameDisabled"
+        class="gl-form-input form-control"
+        name="name"
+        type="text"
+        data-qa-selector="rule_name_field"
+      />
+      <span class="invalid-feedback">{{ validation.name }}</span>
+      <small class="form-text text-gl-muted">
+        {{ s__('ApprovalRule|Examples: QA, Security.') }}
+      </small>
     </div>
-    <div v-if="showProtectedBranch" class="form-group">
-      <label class="label-bold">{{ s__('ApprovalRule|Target branch') }}</label>
-      <div class="d-flex align-items-start">
-        <div class="w-100">
-          <branches-select
-            v-model="branchesToAdd"
-            :project-id="settings.projectId"
-            :is-invalid="!!validation.branches"
-            :init-rule="rule"
-          />
-          <div class="invalid-feedback">{{ validation.branches }}</div>
-        </div>
-      </div>
-      <p class="text-muted">
+    <div v-if="showProtectedBranch" class="form-group gl-form-group">
+      <label class="col-form-label">{{ s__('ApprovalRule|Target branch') }}</label>
+      <branches-select
+        v-model="branchesToAdd"
+        :project-id="settings.projectId"
+        :is-invalid="Boolean(validation.branches)"
+        :init-rule="rule"
+      />
+      <span class="invalid-feedback">{{ validation.branches }}</span>
+      <small class="form-text text-gl-muted">
         {{ __('Apply this approval rule to any branch or a specific protected branch.') }}
-      </p>
+      </small>
     </div>
-    <div class="form-group">
-      <label class="label-bold">{{ s__('ApprovalRule|Approvers') }}</label>
-      <div class="d-flex align-items-start">
-        <div class="w-100" data-qa-selector="member_select_field">
-          <approvers-select
-            v-model="approversToAdd"
-            :project-id="settings.projectId"
-            :skip-user-ids="userIds"
-            :skip-group-ids="groupIds"
-            :is-invalid="!!validation.approvers"
-          />
-          <div class="invalid-feedback">{{ validation.approvers }}</div>
-        </div>
-      </div>
+    <div class="form-group gl-form-group">
+      <label class="col-form-label">{{ s__('ApprovalRule|Approvals required') }}</label>
+      <input
+        v-model.number="approvalsRequired"
+        :class="{ 'is-invalid': validation.approvalsRequired }"
+        class="gl-form-input form-control mw-6em"
+        name="approvals_required"
+        type="number"
+        :min="minApprovalsRequired"
+        data-qa-selector="approvals_required_field"
+      />
+      <span class="invalid-feedback">{{ validation.approvalsRequired }}</span>
+    </div>
+    <div class="form-group gl-form-group">
+      <label class="col-form-label">{{ s__('ApprovalRule|Add approvers') }}</label>
+      <approvers-select
+        v-model="approversToAdd"
+        :project-id="settings.projectId"
+        :skip-user-ids="userIds"
+        :skip-group-ids="groupIds"
+        :is-invalid="Boolean(validation.approvers)"
+        data-qa-selector="member_select_field"
+      />
+      <span class="invalid-feedback">{{ validation.approvers }}</span>
     </div>
     <div class="bordered-box overflow-auto h-12em">
       <approvers-list v-model="approvers" />

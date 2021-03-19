@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
 require_relative '../../../../rubocop/cop/rspec/top_level_describe_path'
 
-RSpec.describe RuboCop::Cop::RSpec::TopLevelDescribePath, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::RSpec::TopLevelDescribePath do
   subject(:cop) { described_class.new }
 
   context 'when the file ends in _spec.rb' do

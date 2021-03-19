@@ -24,6 +24,10 @@ describe('ee gfm_autocomplete/utils', () => {
       expect(epicsConfig.lookup(epic)).toBe(`${epic.iid}${epic.title}`);
     });
 
+    it('limits the number of rendered items to 100', () => {
+      expect(epicsConfig.menuItemLimit).toBe(100);
+    });
+
     it('shows the iid and title in the menu item', () => {
       expect(epicsConfig.menuItemTemplate({ original: epic })).toMatchSnapshot();
     });

@@ -4,7 +4,8 @@ exports[`StatisticsSummary component renders the anomalous traffic percentage 1`
 <gl-single-stat-stub
   class="col-sm-6 col-md-4 col-lg-3"
   title="Anomalous"
-  value="20%"
+  unit="%"
+  value="20"
   variant="warning"
 />
 `;
@@ -14,6 +15,6 @@ exports[`StatisticsSummary component renders the nominal traffic count 1`] = `
   class="col-sm-6 col-md-4 col-lg-3"
   title="Total"
   value="100"
-  variant="secondary"
+  variant="muted"
 />
 `;

@@ -1,8 +1,8 @@
+import { DATA_TRIGGER } from './constants';
 import HookButton from './hook_button';
 import HookInput from './hook_input';
-import utils from './utils';
 import Keyboard from './keyboard';
-import { DATA_TRIGGER } from './constants';
+import utils from './utils';
 
 class DropLab {
   constructor() {
@@ -28,7 +28,7 @@ class DropLab {
   }
 
   destroy() {
-    this.hooks.forEach(hook => hook.destroy());
+    this.hooks.forEach((hook) => hook.destroy());
     this.hooks = [];
     this.removeEvents();
   }
@@ -51,7 +51,7 @@ class DropLab {
   }
 
   processData(trigger, data, methodName) {
-    this.hooks.forEach(hook => {
+    this.hooks.forEach((hook) => {
       if (Array.isArray(trigger)) hook.list[methodName](trigger);
 
       if (hook.trigger.id === trigger) hook.list[methodName](data);
@@ -70,7 +70,7 @@ class DropLab {
     if (utils.isDropDownParts(thisTag, this.hooks)) return;
     if (utils.isDropDownParts(e.target, this.hooks)) return;
 
-    this.hooks.forEach(hook => hook.list.hide());
+    this.hooks.forEach((hook) => hook.list.hide());
   }
 
   removeEvents() {
@@ -115,7 +115,7 @@ class DropLab {
   }
 
   addHooks(hooks, plugins, config) {
-    hooks.forEach(hook => this.addHook(hook, null, plugins, config));
+    hooks.forEach((hook) => this.addHook(hook, null, plugins, config));
     return this;
   }
 
@@ -147,7 +147,7 @@ class DropLab {
 
     this.fireReady();
 
-    this.queuedData.forEach(data => this.addData(data));
+    this.queuedData.forEach((data) => this.addData(data));
     this.queuedData = [];
 
     return this;

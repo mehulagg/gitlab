@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Kubernetes Agent identity and authentication **(PREMIUM ONLY)**
+# Kubernetes Agent identity and authentication **(PREMIUM SELF)**
 
 This page uses the word `agent` to describe the concept of the
 GitLab Kubernetes Agent. The program that implements the concept is called `agentk`.
@@ -37,9 +37,9 @@ has a different configuration. Some may enable features A and B, and some may
 enable features B and C. This flexibility enables different groups of people to
 use different features of the agent in the same cluster.
 
-For example, [Priyanka (Platform Engineer)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#priyanka-platform-engineer)
+For example, [Priyanka (Platform Engineer)](https://about.gitlab.com/handbook/marketing/strategic-marketing/roles-personas/#priyanka-platform-engineer)
 may want to use cluster-wide features of the agent, while
-[Sasha (Software Developer)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#sasha-software-developer)
+[Sasha (Software Developer)](https://about.gitlab.com/handbook/marketing/strategic-marketing/roles-personas/#sasha-software-developer)
 uses the agent that only has access to a particular namespace.
 
 Each agent is likely running using a
@@ -92,3 +92,15 @@ GitLab provides the following information in its response for a given Agent acce
 
 - Agent configuration Git repository. (The agent doesn't support per-folder authorization.)
 - Agent name.
+
+## Create an agent
+
+You can create an agent by following the [user documentation](../../user/clusters/agent/index.md#create-an-agent-record-in-gitlab), or via Rails console:
+
+```ruby
+project = ::Project.find_by_full_path("path-to/your-configuration-project")
+# agent-name should be the same as specified above in the config.yaml
+agent = ::Clusters::Agent.create(name: "<agent-name>", project: project)
+token = ::Clusters::AgentToken.create(agent: agent)
+token.token # this will print out the token you need to use on the next step
+```

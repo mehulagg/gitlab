@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import UserActionButtons from '~/members/components/action_buttons/user_action_buttons.vue';
-import RemoveMemberButton from '~/members/components/action_buttons/remove_member_button.vue';
 import LeaveButton from '~/members/components/action_buttons/leave_button.vue';
+import RemoveMemberButton from '~/members/components/action_buttons/remove_member_button.vue';
+import UserActionButtons from '~/members/components/action_buttons/user_action_buttons.vue';
 import { member, orphanedMember } from '../../mock_data';
 
 describe('UserActionButtons', () => {
@@ -39,7 +39,7 @@ describe('UserActionButtons', () => {
     it('sets props correctly', () => {
       expect(findRemoveMemberButton().props()).toEqual({
         memberId: member.id,
-        message: `Are you sure you want to remove ${member.user.name} from "${member.source.name}"`,
+        message: `Are you sure you want to remove ${member.user.name} from "${member.source.fullName}"`,
         title: 'Remove member',
         isAccessRequest: false,
         icon: 'remove',
@@ -56,7 +56,7 @@ describe('UserActionButtons', () => {
         });
 
         expect(findRemoveMemberButton().props('message')).toBe(
-          `Are you sure you want to remove this orphaned member from "${orphanedMember.source.name}"`,
+          `Are you sure you want to remove this orphaned member from "${orphanedMember.source.fullName}"`,
         );
       });
     });

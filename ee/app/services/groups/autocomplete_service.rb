@@ -34,7 +34,7 @@ module Groups
       # See https://gitlab.com/gitlab-org/gitlab/issues/6837
       EpicsFinder.new(current_user, finder_params)
         .execute
-        .select(:iid, :title)
+        .select(:iid, :title, :group_id)
     end
 
     def vulnerabilities
@@ -48,7 +48,7 @@ module Groups
     def milestones
       group_ids = group.self_and_ancestors.public_or_visible_to_user(current_user).pluck(:id)
 
-      MilestonesFinder.new(group_ids: group_ids).execute.select(:iid, :title)
+      MilestonesFinder.new(group_ids: group_ids).execute.select(:iid, :title, :due_date)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

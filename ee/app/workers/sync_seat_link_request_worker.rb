@@ -3,7 +3,7 @@
 class SyncSeatLinkRequestWorker
   include ApplicationWorker
 
-  feature_category :provision
+  feature_category :license
 
   # Retry for up to approximately 6 days
   sidekiq_options retry: 20

@@ -1,17 +1,17 @@
 <script>
-import $ from 'jquery';
 import { GlButton } from '@gitlab/ui';
 import { produce } from 'immer';
-import { __ } from '~/locale';
+import $ from 'jquery';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __ } from '~/locale';
 import MergeRequest from '~/merge_request';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import eventHub from '../../event_hub';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import getStateQuery from '../../queries/get_state.query.graphql';
 import workInProgressQuery from '../../queries/states/work_in_progress.query.graphql';
 import removeWipMutation from '../../queries/toggle_wip.mutation.graphql';
 import StatusIcon from '../mr_widget_status_icon.vue';
-import eventHub from '../../event_hub';
 
 export default {
   name: 'WorkInProgress',
@@ -29,7 +29,7 @@ export default {
       variables() {
         return this.mergeRequestQueryVariables;
       },
-      update: data => data.project.mergeRequest.userPermissions,
+      update: (data) => data.project.mergeRequest.userPermissions,
     },
   },
   props: {
@@ -70,7 +70,7 @@ export default {
               data: {
                 mergeRequestSetWip: {
                   errors,
-                  mergeRequest: { workInProgress, title },
+                  mergeRequest: { mergeableDiscussionsState, workInProgress, title },
                 },
               },
             },
@@ -86,10 +86,9 @@ export default {
               variables: mergeRequestQueryVariables,
             });
 
-            const data = produce(sourceData, draftState => {
-              // eslint-disable-next-line no-param-reassign
+            const data = produce(sourceData, (draftState) => {
+              draftState.project.mergeRequest.mergeableDiscussionsState = mergeableDiscussionsState;
               draftState.project.mergeRequest.workInProgress = workInProgress;
-              // eslint-disable-next-line no-param-reassign
               draftState.project.mergeRequest.title = title;
             });
 
@@ -107,6 +106,7 @@ export default {
               errors: [],
               mergeRequest: {
                 __typename: 'MergeRequest',
+                mergeableDiscussionsState: true,
                 title: this.mr.title,
                 workInProgress: false,
               },
@@ -137,8 +137,8 @@ export default {
         this.isMakingRequest = true;
         this.service
           .removeWIP()
-          .then(res => res.data)
-          .then(data => {
+          .then((res) => res.data)
+          .then((data) => {
             eventHub.$emit('UpdateWidgetData', data);
             MergeRequest.toggleDraftStatus(this.mr.title, true);
           })

@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
+import { GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { GlLoadingIcon } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import Vuex from 'vuex';
 import StatisticsPanelApp from '~/admin/statistics_panel/components/app.vue';
 import statisticsLabels from '~/admin/statistics_panel/constants';
 import createStore from '~/admin/statistics_panel/store';
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import mockStatistics from '../mock_data';
 
 const localVue = createLocalVue();
@@ -34,7 +34,7 @@ describe('Admin statistics app', () => {
     wrapper.destroy();
   });
 
-  const findStats = idx => wrapper.findAll('.js-stats').at(idx);
+  const findStats = (idx) => wrapper.findAll('.js-stats').at(idx);
 
   describe('template', () => {
     describe('when app is loading', () => {

@@ -10,8 +10,7 @@ module API
 
     helpers do
       def current_settings
-        @current_setting ||=
-          (ApplicationSetting.current_without_cache || ApplicationSetting.create_from_defaults)
+        @current_setting ||= ApplicationSetting.find_or_create_without_cache
       end
 
       def filter_attributes_using_license(attrs)
@@ -31,6 +30,7 @@ module API
       success Entities::ApplicationSetting
     end
     params do
+      optional :admin_mode, type: Boolean, desc: 'Require admin users to re-authenticate for administrative (i.e. potentially dangerous) operations'
       optional :admin_notification_email, type: String, desc: 'Deprecated: Use :abuse_notification_email instead. Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :abuse_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :after_sign_up_text, type: String, desc: 'Text shown after sign up'
@@ -42,7 +42,8 @@ module API
       optional :asset_proxy_enabled, type: Boolean, desc: 'Enable proxying of assets'
       optional :asset_proxy_url, type: String, desc: 'URL of the asset proxy server'
       optional :asset_proxy_secret_key, type: String, desc: 'Shared secret with the asset proxy server'
-      optional :asset_proxy_whitelist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically whitelisted.'
+      optional :asset_proxy_whitelist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Deprecated: Use :asset_proxy_allowlist instead. Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically whitelisted.'
+      optional :asset_proxy_allowlist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically allowed.'
       optional :container_registry_token_expire_delay, type: Integer, desc: 'Authorization token duration (minutes)'
       optional :default_artifacts_expire_in, type: String, desc: "Set the default expiration time for each job's artifacts"
       optional :default_ci_config_path, type: String, desc: 'The instance default CI configuration path for new projects'
@@ -91,6 +92,8 @@ module API
       optional :import_sources, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce,
                                 values: %w[github bitbucket bitbucket_server gitlab google_code fogbugz git gitlab_project gitea manifest phabricator],
                                 desc: 'Enabled sources for code import during project creation. OmniAuth must be configured for GitHub, Bitbucket, and GitLab.com'
+      optional :in_product_marketing_emails_enabled, type: Boolean, desc: 'By default, in-product marketing emails are enabled. To disable these emails, disable this option.'
+      optional :invisible_captcha_enabled, type: Boolean, desc: 'Enable Invisible Captcha spam detection during signup.'
       optional :max_artifacts_size, type: Integer, desc: "Set the maximum file size for each job's artifacts"
       optional :max_attachment_size, type: Integer, desc: 'Maximum attachment size in MB'
       optional :max_import_size, type: Integer, desc: 'Maximum import size in MB'
@@ -208,6 +211,11 @@ module API
       # support legacy names, can be removed in v5
       if attrs.has_key?(:admin_notification_email)
         attrs[:abuse_notification_email] = attrs.delete(:admin_notification_email)
+      end
+
+      # support legacy names, can be removed in v5
+      if attrs.has_key?(:asset_proxy_whitelist)
+        attrs[:asset_proxy_allowlist] = attrs.delete(:asset_proxy_whitelist)
       end
 
       # since 13.0 it's not possible to disable hashed storage - support can be removed in 14.0

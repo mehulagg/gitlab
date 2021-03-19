@@ -2,8 +2,8 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import COLUMNS from '../constants';
 
-import TableHeader from './table_header.vue';
 import TableBody from './table_body.vue';
+import TableHeader from './table_header.vue';
 
 export default {
   columns: COLUMNS,
@@ -31,6 +31,8 @@ export default {
   },
   methods: {
     handleColumnClick(columnName) {
+      // This is probably a false positive.
+      // eslint-disable-next-line vue/no-mutating-props
       this.store.sortMembers(columnName);
     },
   },

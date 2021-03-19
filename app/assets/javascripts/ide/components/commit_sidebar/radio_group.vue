@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlTooltipDirective } from '@gitlab/ui';
+import { mapActions, mapState, mapGetters } from 'vuex';
 
 export default {
   directives: {
@@ -74,6 +74,7 @@ export default {
       <input
         :placeholder="placeholderBranchName"
         :value="newBranchName"
+        data-testid="ide-new-branch-name"
         type="text"
         class="form-control monospace"
         @input="updateBranchName($event.target.value)"

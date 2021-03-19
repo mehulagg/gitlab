@@ -1,12 +1,12 @@
 <script>
-import { STEPS, SUBSCRIPTON_FLOW_STEPS } from 'ee/registrations/constants';
 import { mapState } from 'vuex';
 import ProgressBar from 'ee/registrations/components/progress_bar.vue';
+import { STEPS, SUBSCRIPTON_FLOW_STEPS } from 'ee/registrations/constants';
 import { s__ } from '~/locale';
-import SubscriptionDetails from './checkout/subscription_details.vue';
 import BillingAddress from './checkout/billing_address.vue';
-import PaymentMethod from './checkout/payment_method.vue';
 import ConfirmOrder from './checkout/confirm_order.vue';
+import PaymentMethod from './checkout/payment_method.vue';
+import SubscriptionDetails from './checkout/subscription_details.vue';
 
 export default {
   components: { ProgressBar, SubscriptionDetails, BillingAddress, PaymentMethod, ConfirmOrder },

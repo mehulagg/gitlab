@@ -41,6 +41,20 @@ jq -cR 'fromjson?' file.json | jq <COMMAND>
 By default `jq` will error out when it encounters a line that is not valid JSON.
 This skips over all invalid lines and parses the rest.
 
+#### Print a JSON log's time range
+
+```shell
+cat log.json | (head -1; tail -1) | jq '.time'
+```
+
+Use `zcat` if the file has been rotated and compressed:
+
+```shell
+zcat @400000006026b71d1a7af804.s | (head -1; tail -1) | jq '.time'
+
+zcat some_json.log.25.gz | (head -1; tail -1) | jq '.time'
+```
+
 ### Parsing `production_json.log` and `api_json.log`
 
 #### Find all requests with a 5XX status code
@@ -178,4 +192,12 @@ jq --raw-output --slurp '
   109    1420 ms,     962 ms,     875 ms      'groupEF/project56'
   663     106 ms,      96 ms,      94 ms      'groupABC/project123'
   ...
+```
+
+#### Find all projects affected by a fatal Git problem
+
+```shell
+grep "fatal: " /var/log/gitlab/gitaly/current | \
+    jq '."grpc.request.glProjectPath"' | \
+    sort | uniq
 ```

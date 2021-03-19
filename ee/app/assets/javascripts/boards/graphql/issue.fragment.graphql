@@ -20,6 +20,7 @@ fragment IssueNode on Issue {
   relativePosition
   epic {
     id
+    iid
   }
   milestone {
     id

@@ -8,6 +8,8 @@ class Import::BulkImportsController < ApplicationController
 
   feature_category :importers
 
+  POLLING_INTERVAL = 3_000
+
   rescue_from BulkImports::Clients::Http::ConnectionError, with: :bulk_import_connection_error
 
   def configure
@@ -20,7 +22,13 @@ class Import::BulkImportsController < ApplicationController
   def status
     respond_to do |format|
       format.json do
-        render json: { importable_data: serialized_importable_data }
+        data = importable_data
+
+        pagination_headers.each do |header|
+          response.set_header(header, data.headers[header])
+        end
+
+        render json: { importable_data: serialized_data(data.parsed_response) }
       end
       format.html do
         @source_url = session[url_key]
@@ -29,15 +37,29 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def create
-    BulkImportService.new(current_user, create_params, credentials).execute
+    response = BulkImportService.new(current_user, create_params, credentials).execute
 
-    render json: :ok
+    if response.success?
+      render json: response.payload.to_json(only: [:id])
+    else
+      render json: { error: response.message }, status: response.http_status
+    end
+  end
+
+  def realtime_changes
+    Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
+
+    render json: current_user_bulk_imports.to_json(only: [:id], methods: [:status_name])
   end
 
   private
 
-  def serialized_importable_data
-    serializer.represent(importable_data, {}, Import::BulkImportEntity)
+  def pagination_headers
+    %w[x-next-page x-page x-per-page x-prev-page x-total x-total-pages]
+  end
+
+  def serialized_data(data)
+    serializer.represent(data, {}, Import::BulkImportEntity)
   end
 
   def serializer
@@ -45,7 +67,7 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def importable_data
-    client.get('groups', query_params).parsed_response
+    client.get('groups', query_params)
   end
 
   # Default query string params used to fetch groups from GitLab source instance
@@ -66,7 +88,9 @@ class Import::BulkImportsController < ApplicationController
   def client
     @client ||= BulkImports::Clients::Http.new(
       uri: session[url_key],
-      token: session[access_token_key]
+      token: session[access_token_key],
+      per_page: params[:per_page],
+      page: params[:page]
     )
   end
 
@@ -109,7 +133,7 @@ class Import::BulkImportsController < ApplicationController
   rescue Gitlab::UrlBlocker::BlockedUrlError => e
     clear_session_data
 
-    redirect_to new_group_path, alert: _('Specified URL cannot be used: "%{reason}"') % { reason: e.message }
+    redirect_to new_group_path(anchor: 'import-group-pane'), alert: _('Specified URL cannot be used: "%{reason}"') % { reason: e.message }
   end
 
   def allow_local_requests?
@@ -132,7 +156,7 @@ class Import::BulkImportsController < ApplicationController
         }, status: :unprocessable_entity
       end
       format.html do
-        redirect_to new_group_path
+        redirect_to new_group_path(anchor: 'import-group-pane')
       end
     end
   end
@@ -151,5 +175,9 @@ class Import::BulkImportsController < ApplicationController
 
   def sanitized_filter_param
     @filter ||= sanitize(params[:filter])&.downcase
+  end
+
+  def current_user_bulk_imports
+    current_user.bulk_imports.gitlab
   end
 end

@@ -14,6 +14,7 @@ describe('Vulnerabilities app component', () => {
     wrapper = shallowMount(ProjectVulnerabilitiesApp, {
       provide: {
         projectFullPath: '#',
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
       },
       propsData: {
         dashboardDocumentation: '#',
@@ -33,6 +34,11 @@ describe('Vulnerabilities app component', () => {
   const findVulnerabilityList = () => wrapper.find(VulnerabilityList);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
+  const expectLoadingState = ({ initial = false, nextPage = false }) => {
+    expect(findVulnerabilityList().props('isLoading')).toBe(initial);
+    expect(findLoadingIcon().exists()).toBe(nextPage);
+  };
+
   beforeEach(() => {
     createWrapper();
   });
@@ -47,12 +53,8 @@ describe('Vulnerabilities app component', () => {
       createWrapper();
     });
 
-    it('should be in the loading state', () => {
-      expect(findVulnerabilityList().props().isLoading).toBe(true);
-    });
-
-    it('should not render the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
+    it('should show the initial loading state', () => {
+      expectLoadingState({ initial: true });
     });
   });
 
@@ -63,13 +65,11 @@ describe('Vulnerabilities app component', () => {
       createWrapper();
 
       vulnerabilities = generateVulnerabilities();
-      wrapper.setData({
-        vulnerabilities,
-      });
+      wrapper.setData({ vulnerabilities });
     });
 
-    it('should not be in the loading state', () => {
-      expect(findVulnerabilityList().props().isLoading).toBe(false);
+    it('should not show any loading state', () => {
+      expectLoadingState({ initial: false, nextPage: false });
     });
 
     it('should pass the vulnerabilities to the vulnerabilities list', () => {
@@ -93,16 +93,13 @@ describe('Vulnerabilities app component', () => {
     });
 
     it('handles sorting', () => {
-      findVulnerabilityList().vm.$listeners['sort-changed']({
+      findVulnerabilityList().vm.$emit('sort-changed', {
         sortBy: 'description',
         sortDesc: false,
       });
+
       expect(wrapper.vm.sortBy).toBe('description');
       expect(wrapper.vm.sortDirection).toBe('asc');
-    });
-
-    it('should render the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
     });
   });
 
@@ -125,12 +122,12 @@ describe('Vulnerabilities app component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
     });
 
-    it('should render the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(true);
+    it('should render the next page loading spinner', () => {
+      expectLoadingState({ nextPage: true });
     });
   });
 
-  describe("when there's an error loading vulnerabilities", () => {
+  describe(`when there's an error loading vulnerabilities`, () => {
     beforeEach(() => {
       createWrapper();
       wrapper.setData({ errorLoadingVulnerabilities: true });
@@ -138,6 +135,27 @@ describe('Vulnerabilities app component', () => {
 
     it('should render the alert', () => {
       expect(findAlert().exists()).toBe(true);
+    });
+  });
+
+  describe('when filter or sort is changed', () => {
+    beforeEach(() => {
+      createWrapper();
+    });
+
+    it('should show the initial loading state when the filter is changed', () => {
+      wrapper.setProps({ filter: {} });
+
+      expectLoadingState({ initial: true });
+    });
+
+    it('should show the initial loading state when the sort is changed', () => {
+      findVulnerabilityList().vm.$emit('sort-changed', {
+        sortBy: 'description',
+        sortDesc: false,
+      });
+
+      expectLoadingState({ initial: true });
     });
   });
 

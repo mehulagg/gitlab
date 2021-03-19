@@ -104,7 +104,7 @@ describe('Productivity analytics table actions', () => {
         });
       });
 
-      it('dispatches success with received data', done =>
+      it('dispatches success with received data', (done) =>
         testAction(
           actions.fetchMergeRequests,
           null,
@@ -126,7 +126,7 @@ describe('Productivity analytics table actions', () => {
         mock.onGet(mockedState.endpoint).replyOnce(500);
       });
 
-      it('dispatches error', done => {
+      it('dispatches error', (done) => {
         testAction(
           actions.fetchMergeRequests,
           null,
@@ -146,7 +146,7 @@ describe('Productivity analytics table actions', () => {
   });
 
   describe('requestMergeRequests', () => {
-    it('should commit the request mutation', done =>
+    it('should commit the request mutation', (done) =>
       testAction(
         actions.requestMergeRequests,
         null,
@@ -158,7 +158,7 @@ describe('Productivity analytics table actions', () => {
   });
 
   describe('receiveMergeRequestsSuccess', () => {
-    it('should commit received data', done =>
+    it('should commit received data', (done) =>
       testAction(
         actions.receiveMergeRequestsSuccess,
         { headers, data: mockMergeRequests },
@@ -175,7 +175,7 @@ describe('Productivity analytics table actions', () => {
   });
 
   describe('receiveMergeRequestsError', () => {
-    it('should commit error', done =>
+    it('should commit error', (done) =>
       testAction(
         actions.receiveMergeRequestsError,
         { response: { status: 500 } },
@@ -187,7 +187,7 @@ describe('Productivity analytics table actions', () => {
   });
 
   describe('setSortField', () => {
-    it('should commit setSortField', done =>
+    it('should commit setSortField', (done) =>
       testAction(
         actions.setSortField,
         'time_to_last_commit',
@@ -200,7 +200,7 @@ describe('Productivity analytics table actions', () => {
         done,
       ));
 
-    it('should not dispatch setColumnMetric when metric is "days_to_merge"', done =>
+    it('should not dispatch setColumnMetric when metric is "days_to_merge"', (done) =>
       testAction(
         actions.setSortField,
         'days_to_merge',
@@ -212,7 +212,7 @@ describe('Productivity analytics table actions', () => {
   });
 
   describe('toggleSortOrder', () => {
-    it('should commit toggleSortOrder', done =>
+    it('should commit toggleSortOrder', (done) =>
       testAction(
         actions.toggleSortOrder,
         null,
@@ -224,7 +224,7 @@ describe('Productivity analytics table actions', () => {
   });
 
   describe('setColumnMetric', () => {
-    it('should commit setColumnMetric', done =>
+    it('should commit setColumnMetric', (done) =>
       testAction(
         actions.setColumnMetric,
         'time_to_first_comment',
@@ -236,7 +236,7 @@ describe('Productivity analytics table actions', () => {
   });
 
   describe('setPage', () => {
-    it('should commit setPage', done =>
+    it('should commit setPage', (done) =>
       testAction(
         actions.setPage,
         2,

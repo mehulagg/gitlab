@@ -5,6 +5,6 @@ export default () => ({
   timeout: DEFAULT_TIMEOUT,
   allowedIp: DEFAULT_ALLOWED_IP,
   formErrors: Object.keys(FORM_VALIDATION_FIELDS)
-    .map(key => FORM_VALIDATION_FIELDS[key])
+    .map((key) => FORM_VALIDATION_FIELDS[key])
     .reduce((acc, cur) => ({ ...acc, [cur]: '' }), {}),
 });

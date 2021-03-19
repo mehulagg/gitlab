@@ -1,19 +1,22 @@
-import { shallowMount } from '@vue/test-utils';
-
-import { TEST_HOST } from 'jest/helpers/test_constants';
 import { GlModal } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 
-import { visitUrl } from '~/lib/utils/url_utility';
-import boardsStore from '~/boards/stores/boards_store';
 import BoardForm from '~/boards/components/board_form.vue';
-import updateBoardMutation from '~/boards/graphql/board_update.mutation.graphql';
+import { formType } from '~/boards/constants';
 import createBoardMutation from '~/boards/graphql/board_create.mutation.graphql';
+import destroyBoardMutation from '~/boards/graphql/board_destroy.mutation.graphql';
+import updateBoardMutation from '~/boards/graphql/board_update.mutation.graphql';
+import { createStore } from '~/boards/stores';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { visitUrl } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
   stripFinalUrlSegment: jest.requireActual('~/lib/utils/url_utility').stripFinalUrlSegment,
 }));
+jest.mock('~/flash');
 
 const currentBoard = {
   id: 1,
@@ -32,21 +35,12 @@ const defaultProps = {
   labelsPath: `${TEST_HOST}/labels/path`,
   labelsWebUrl: `${TEST_HOST}/-/labels`,
   currentBoard,
+  currentPage: '',
 };
-
-const endpoints = {
-  boardsEndpoint: 'test-endpoint',
-};
-
-const mutate = jest.fn().mockResolvedValue({
-  data: {
-    createBoard: { board: { id: 'gid://gitlab/Board/123' } },
-    updateBoard: { board: { id: 'gid://gitlab/Board/321' } },
-  },
-});
 
 describe('BoardForm', () => {
   let wrapper;
+  let mutate;
 
   const findModal = () => wrapper.find(GlModal);
   const findModalActionPrimary = () => findModal().props('actionPrimary');
@@ -54,6 +48,13 @@ describe('BoardForm', () => {
   const findFormWrapper = () => wrapper.find('[data-testid="board-form-wrapper"]');
   const findDeleteConfirmation = () => wrapper.find('[data-testid="delete-confirmation-message"]');
   const findInput = () => wrapper.find('#board-new-name');
+
+  const store = createStore({
+    getters: {
+      isGroupBoard: () => true,
+      isProjectBoard: () => false,
+    },
+  });
 
   const createComponent = (props, data) => {
     wrapper = shallowMount(BoardForm, {
@@ -64,14 +65,15 @@ describe('BoardForm', () => {
         };
       },
       provide: {
-        endpoints,
+        rootPath: 'root',
       },
       mocks: {
         $apollo: {
           mutate,
         },
       },
-      attachToDocument: true,
+      store,
+      attachTo: document.body,
     });
   };
 
@@ -82,13 +84,12 @@ describe('BoardForm', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
-    boardsStore.state.currentPage = null;
+    mutate = null;
   });
 
   describe('when user can not admin the board', () => {
     beforeEach(() => {
-      boardsStore.state.currentPage = 'new';
-      createComponent();
+      createComponent({ currentPage: formType.new });
     });
 
     it('hides modal footer when user is not a board admin', () => {
@@ -106,8 +107,7 @@ describe('BoardForm', () => {
 
   describe('when user can admin the board', () => {
     beforeEach(() => {
-      boardsStore.state.currentPage = 'new';
-      createComponent({ canAdminBoard: true });
+      createComponent({ canAdminBoard: true, currentPage: formType.new });
     });
 
     it('shows modal footer when user is a board admin', () => {
@@ -124,13 +124,9 @@ describe('BoardForm', () => {
   });
 
   describe('when creating a new board', () => {
-    beforeEach(() => {
-      boardsStore.state.currentPage = 'new';
-    });
-
     describe('on non-scoped-board', () => {
       beforeEach(() => {
-        createComponent({ canAdminBoard: true });
+        createComponent({ canAdminBoard: true, currentPage: formType.new });
       });
 
       it('clears the form', () => {
@@ -156,8 +152,22 @@ describe('BoardForm', () => {
     });
 
     describe('when submitting a create event', () => {
+      const fillForm = () => {
+        findInput().value = 'Test name';
+        findInput().trigger('input');
+        findInput().trigger('keyup.enter', { metaKey: true });
+      };
+
+      beforeEach(() => {
+        mutate = jest.fn().mockResolvedValue({
+          data: {
+            createBoard: { board: { id: 'gid://gitlab/Board/123', webPath: 'test-path' } },
+          },
+        });
+      });
+
       it('does not call API if board name is empty', async () => {
-        createComponent({ canAdminBoard: true });
+        createComponent({ canAdminBoard: true, currentPage: formType.new });
         findInput().trigger('keyup.enter', { metaKey: true });
 
         await waitForPromises();
@@ -166,12 +176,8 @@ describe('BoardForm', () => {
       });
 
       it('calls a correct GraphQL mutation and redirects to correct page from existing board', async () => {
-        window.location = new URL('https://test/boards/1');
-        createComponent({ canAdminBoard: true });
-
-        findInput().value = 'Test name';
-        findInput().trigger('input');
-        findInput().trigger('keyup.enter', { metaKey: true });
+        createComponent({ canAdminBoard: true, currentPage: formType.new });
+        fillForm();
 
         await waitForPromises();
 
@@ -185,42 +191,29 @@ describe('BoardForm', () => {
         });
 
         await waitForPromises();
-        expect(visitUrl).toHaveBeenCalledWith('123');
+        expect(visitUrl).toHaveBeenCalledWith('test-path');
       });
 
-      it('calls a correct GraphQL mutation and redirects to correct page from boards list', async () => {
-        window.location = new URL('https://test/boards');
-        createComponent({ canAdminBoard: true });
-
-        findInput().value = 'Test name';
-        findInput().trigger('input');
-        findInput().trigger('keyup.enter', { metaKey: true });
+      it('shows an error flash if GraphQL mutation fails', async () => {
+        mutate = jest.fn().mockRejectedValue('Houston, we have a problem');
+        createComponent({ canAdminBoard: true, currentPage: formType.new });
+        fillForm();
 
         await waitForPromises();
 
-        expect(mutate).toHaveBeenCalledWith({
-          mutation: createBoardMutation,
-          variables: {
-            input: expect.objectContaining({
-              name: 'test',
-            }),
-          },
-        });
+        expect(mutate).toHaveBeenCalled();
 
         await waitForPromises();
-        expect(visitUrl).toHaveBeenCalledWith('boards/123');
+        expect(visitUrl).not.toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalled();
       });
     });
   });
 
   describe('when editing a board', () => {
-    beforeEach(() => {
-      boardsStore.state.currentPage = 'edit';
-    });
-
     describe('on non-scoped-board', () => {
       beforeEach(() => {
-        createComponent({ canAdminBoard: true });
+        createComponent({ canAdminBoard: true, currentPage: formType.edit });
       });
 
       it('clears the form', () => {
@@ -245,27 +238,115 @@ describe('BoardForm', () => {
       });
     });
 
-    describe('when submitting an update event', () => {
-      it('calls REST and GraphQL API with correct parameters', async () => {
-        window.location = new URL('https://test/boards/1');
-        createComponent({ canAdminBoard: true });
-
-        findInput().trigger('keyup.enter', { metaKey: true });
-
-        await waitForPromises();
-
-        expect(mutate).toHaveBeenCalledWith({
-          mutation: updateBoardMutation,
-          variables: {
-            input: expect.objectContaining({
-              id: `gid://gitlab/Board/${currentBoard.id}`,
-            }),
-          },
-        });
-
-        await waitForPromises();
-        expect(visitUrl).toHaveBeenCalledWith('321');
+    it('calls GraphQL mutation with correct parameters when issues are not grouped', async () => {
+      mutate = jest.fn().mockResolvedValue({
+        data: {
+          updateBoard: { board: { id: 'gid://gitlab/Board/321', webPath: 'test-path' } },
+        },
       });
+      window.location = new URL('https://test/boards/1');
+      createComponent({ canAdminBoard: true, currentPage: formType.edit });
+
+      findInput().trigger('keyup.enter', { metaKey: true });
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalledWith({
+        mutation: updateBoardMutation,
+        variables: {
+          input: expect.objectContaining({
+            id: `gid://gitlab/Board/${currentBoard.id}`,
+          }),
+        },
+      });
+
+      await waitForPromises();
+      expect(visitUrl).toHaveBeenCalledWith('test-path');
+    });
+
+    it('calls GraphQL mutation with correct parameters when issues are grouped by epic', async () => {
+      mutate = jest.fn().mockResolvedValue({
+        data: {
+          updateBoard: { board: { id: 'gid://gitlab/Board/321', webPath: 'test-path' } },
+        },
+      });
+      window.location = new URL('https://test/boards/1?group_by=epic');
+      createComponent({ canAdminBoard: true, currentPage: formType.edit });
+
+      findInput().trigger('keyup.enter', { metaKey: true });
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalledWith({
+        mutation: updateBoardMutation,
+        variables: {
+          input: expect.objectContaining({
+            id: `gid://gitlab/Board/${currentBoard.id}`,
+          }),
+        },
+      });
+
+      await waitForPromises();
+      expect(visitUrl).toHaveBeenCalledWith('test-path?group_by=epic');
+    });
+
+    it('shows an error flash if GraphQL mutation fails', async () => {
+      mutate = jest.fn().mockRejectedValue('Houston, we have a problem');
+      createComponent({ canAdminBoard: true, currentPage: formType.edit });
+      findInput().trigger('keyup.enter', { metaKey: true });
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalled();
+
+      await waitForPromises();
+      expect(visitUrl).not.toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalled();
+    });
+  });
+
+  describe('when deleting a board', () => {
+    it('passes correct primary action text and variant', () => {
+      createComponent({ canAdminBoard: true, currentPage: formType.delete });
+      expect(findModalActionPrimary().text).toBe('Delete');
+      expect(findModalActionPrimary().attributes[0].variant).toBe('danger');
+    });
+
+    it('renders delete confirmation message', () => {
+      createComponent({ canAdminBoard: true, currentPage: formType.delete });
+      expect(findDeleteConfirmation().exists()).toBe(true);
+    });
+
+    it('calls a correct GraphQL mutation and redirects to correct page after deleting board', async () => {
+      mutate = jest.fn().mockResolvedValue({});
+      createComponent({ canAdminBoard: true, currentPage: formType.delete });
+      findModal().vm.$emit('primary');
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalledWith({
+        mutation: destroyBoardMutation,
+        variables: {
+          id: 'gid://gitlab/Board/1',
+        },
+      });
+
+      await waitForPromises();
+      expect(visitUrl).toHaveBeenCalledWith('root');
+    });
+
+    it('shows an error flash if GraphQL mutation fails', async () => {
+      mutate = jest.fn().mockRejectedValue('Houston, we have a problem');
+      createComponent({ canAdminBoard: true, currentPage: formType.delete });
+      findModal().vm.$emit('primary');
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalled();
+
+      await waitForPromises();
+      expect(visitUrl).not.toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalled();
     });
   });
 });

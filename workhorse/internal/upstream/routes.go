@@ -55,11 +55,19 @@ type uploadPreparers struct {
 const (
 	apiPattern           = `^/api/`
 	ciAPIPattern         = `^/ci/api/`
-	gitProjectPattern    = `^/([^/]+/){1,}[^/]+\.git/`
+	gitProjectPattern    = `^/.+\.git/`
 	projectPattern       = `^/([^/]+/){1,}[^/]+/`
 	snippetUploadPattern = `^/uploads/personal_snippet`
 	userUploadPattern    = `^/uploads/user`
 	importPattern        = `^/import/`
+)
+
+var (
+	// For legacy reasons, user uploads are stored in public/uploads.  To
+	// prevent anybody who knows/guesses the URL of a user-uploaded file
+	// from downloading it we configure static.ServeExisting to treat files
+	// under public/uploads/ as if they do not exist.
+	staticExclude = []string{"/uploads/"}
 )
 
 func compileRegexp(regexpStr string) *regexp.Regexp {
@@ -181,20 +189,20 @@ func buildProxy(backend *url.URL, version string, rt http.RoundTripper, cfg conf
 // We match against URI not containing the relativeUrlRoot:
 // see upstream.ServeHTTP
 
-func (u *upstream) configureRoutes() {
+func configureRoutes(u *upstream) {
 	api := apipkg.NewAPI(
 		u.Backend,
 		u.Version,
 		u.RoundTripper,
 	)
 
-	static := &staticpages.Static{DocumentRoot: u.DocumentRoot}
+	static := &staticpages.Static{DocumentRoot: u.DocumentRoot, Exclude: staticExclude}
 	proxy := buildProxy(u.Backend, u.Version, u.RoundTripper, u.Config)
 	cableProxy := proxypkg.NewProxy(u.CableBackend, u.Version, u.CableRoundTripper)
 
 	assetsNotFoundHandler := NotFoundUnless(u.DevelopmentMode, proxy)
 	if u.AltDocumentRoot != "" {
-		altStatic := &staticpages.Static{DocumentRoot: u.AltDocumentRoot}
+		altStatic := &staticpages.Static{DocumentRoot: u.AltDocumentRoot, Exclude: staticExclude}
 		assetsNotFoundHandler = altStatic.ServeExisting(
 			u.URLPrefix,
 			staticpages.CacheExpireMax,
@@ -262,7 +270,10 @@ func (u *upstream) configureRoutes() {
 		u.route("POST", apiPattern+`v4/projects/[0-9]+/packages/pypi`, upload.Accelerate(api, signingProxy, preparers.packages)),
 
 		// Debian Artifact Repository
-		u.route("PUT", apiPattern+`v4/projects/[0-9]+/-/packages/debian/incoming/`, upload.BodyUploader(api, signingProxy, preparers.packages)),
+		u.route("PUT", apiPattern+`v4/projects/[0-9]+/packages/debian/`, upload.BodyUploader(api, signingProxy, preparers.packages)),
+
+		// Gem Artifact Repository
+		u.route("POST", apiPattern+`v4/projects/[0-9]+/packages/rubygems/`, upload.BodyUploader(api, signingProxy, preparers.packages)),
 
 		// We are porting API to disk acceleration
 		// we need to declare each routes until we have fixed all the routes on the rails codebase.
@@ -302,12 +313,6 @@ func (u *upstream) configureRoutes() {
 		u.route("POST", projectPattern+`uploads\z`, upload.Accelerate(api, signingProxy, preparers.uploads)),
 		u.route("POST", snippetUploadPattern, upload.Accelerate(api, signingProxy, preparers.uploads)),
 		u.route("POST", userUploadPattern, upload.Accelerate(api, signingProxy, preparers.uploads)),
-
-		// For legacy reasons, user uploads are stored under the document root.
-		// To prevent anybody who knows/guesses the URL of a user-uploaded file
-		// from downloading it we make sure requests to /uploads/ do _not_ pass
-		// through static.ServeExisting.
-		u.route("", `^/uploads/`, static.ErrorPagesUnless(u.DevelopmentMode, staticpages.ErrorFormatHTML, proxy)),
 
 		// health checks don't intercept errors and go straight to rails
 		// TODO: We should probably not return a HTML deploy page?

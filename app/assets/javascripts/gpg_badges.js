@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import { parseQueryStringIntoObject } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { parseQueryStringIntoObject } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 export default class GpgBadges {
@@ -28,7 +28,7 @@ export default class GpgBadges {
     return axios
       .get(endpoint, { params })
       .then(({ data }) => {
-        data.signatures.forEach(signature => {
+        data.signatures.forEach((signature) => {
           badges.filter(`[data-commit-sha="${signature.commit_sha}"]`).replaceWith(signature.html);
         });
       })

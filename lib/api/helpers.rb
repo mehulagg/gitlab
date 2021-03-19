@@ -3,6 +3,7 @@
 module API
   module Helpers
     include Gitlab::Utils
+    include Helpers::Caching
     include Helpers::Pagination
     include Helpers::PaginationStrategies
 
@@ -119,11 +120,10 @@ module API
     def find_project!(id)
       project = find_project(id)
 
-      if can?(current_user, :read_project, project)
-        project
-      else
-        not_found!('Project')
-      end
+      return project if can?(current_user, :read_project, project)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Project')
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -139,11 +139,10 @@ module API
     def find_group!(id)
       group = find_group(id)
 
-      if can?(current_user, :read_group, group)
-        group
-      else
-        not_found!('Group')
-      end
+      return group if can?(current_user, :read_group, group)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Group')
     end
 
     def check_namespace_access(namespace)
@@ -218,6 +217,10 @@ module API
 
     def find_build!(id)
       user_project.builds.find(id.to_i)
+    end
+
+    def find_job!(id)
+      user_project.processables.find(id.to_i)
     end
 
     def authenticate!
@@ -368,7 +371,7 @@ module API
 
     def forbidden!(reason = nil)
       message = ['403 Forbidden']
-      message << " - #{reason}" if reason
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 403)
     end
 
@@ -465,7 +468,7 @@ module API
     def handle_api_exception(exception)
       if report_exception?(exception)
         define_params_for_grape_middleware
-        Gitlab::ErrorTracking.with_context(current_user) do
+        Gitlab::ApplicationContext.with_context(user: current_user) do
           Gitlab::ErrorTracking.track_exception(exception)
         end
       end
@@ -517,7 +520,7 @@ module API
       case headers['X-Sendfile-Type']
       when 'X-Sendfile'
         header['X-Sendfile'] = path
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       else
         sendfile path
       end
@@ -533,7 +536,7 @@ module API
       else
         header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
-        body ""
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
     end
 
@@ -566,7 +569,7 @@ module API
 
       return unless Feature.enabled?(feature_flag, default_enabled: true)
 
-      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
     rescue => error
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
@@ -651,6 +654,10 @@ module API
 
     def secret_token
       Gitlab::Shell.secret_token
+    end
+
+    def authenticate_non_public?
+      route_authentication_setting[:authenticate_non_public] && !current_user
     end
 
     def send_git_blob(repository, blob)

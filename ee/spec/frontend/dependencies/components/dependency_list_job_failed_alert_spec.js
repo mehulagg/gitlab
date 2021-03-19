@@ -43,7 +43,7 @@ describe('DependencyListJobFailedAlert component', () => {
 
   it.each([undefined, null, ''])(
     'does not include a button if "jobPath" is given but empty',
-    jobPath => {
+    (jobPath) => {
       factory({ propsData: { jobPath } });
 
       expect(wrapper.find(GlAlert).props()).toMatchObject(NO_BUTTON_PROPS);

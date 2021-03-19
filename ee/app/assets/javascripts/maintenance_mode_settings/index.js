@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
-import { createStore } from './store';
 import MaintenanceModeSettingsApp from './components/app.vue';
+import { createStore } from './store';
 
 Vue.use(Translate);
 

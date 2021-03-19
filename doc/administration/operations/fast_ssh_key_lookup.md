@@ -6,9 +6,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Fast lookup of authorized SSH keys in the database
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1631) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
-> - [Available in](https://gitlab.com/gitlab-org/gitlab/-/issues/3953) GitLab Community Edition 10.4.
-
 NOTE:
 This document describes a drop-in replacement for the
 `authorized_keys` file. For normal (non-deploy key) users, consider using
@@ -219,10 +216,8 @@ the database. The following instructions can be used to build OpenSSH 7.5:
 
 ## SELinux support and limitations
 
-> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/2855) in GitLab 10.5.
-
 GitLab supports `authorized_keys` database lookups with [SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux).
 
 Because the SELinux policy is static, GitLab doesn't support the ability to change
-internal Unicorn ports at the moment. Admins would have to create a special `.te`
+internal Unicorn ports at the moment. Administrators would have to create a special `.te`
 file for the environment, since it isn't generated dynamically.

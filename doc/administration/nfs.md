@@ -20,10 +20,10 @@ From GitLab 14.0, technical support for NFS for Git repositories
 will no longer be provided. Upgrade to [Gitaly Cluster](gitaly/praefect.md)
 as soon as possible.
 
-Filesystem performance can impact overall GitLab performance, especially for
+File system performance can impact overall GitLab performance, especially for
 actions that read or write to Git repositories. For steps you can use to test
-filesystem performance, see
-[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md).
+file system performance, see
+[File system Performance Benchmarking](operations/filesystem_benchmarking.md).
 
 ## Known kernel version incompatibilities
 
@@ -365,21 +365,26 @@ You may be able to avoid timeouts and data loss using `actimeo=0` and `lookupcac
 we expect the performance reduction will still be significant. As noted above, we strongly recommend upgrading to
 [Gitaly Cluster](gitaly/praefect.md) as soon as possible.
 
-### Avoid using AWS's Elastic File System (EFS)
+### Avoid using cloud-based file systems
 
-GitLab strongly recommends against using AWS Elastic File System (EFS).
-Our support team will not be able to assist on performance issues related to
-file system access.
+GitLab strongly recommends against using cloud-based file systems such as:
 
-Customers and users have reported that AWS EFS does not perform well for the GitLab
-use-case. Workloads where many small files are written in a serialized manner, like `git`,
-are not well-suited for EFS. EBS with an NFS server on top will perform much better.
+- AWS Elastic File System (EFS).
+- Google Cloud Filestore.
+- Azure Files.
 
-If you do choose to use EFS, avoid storing GitLab log files (e.g. those in `/var/log/gitlab`)
+Our support team cannot assist with performance issues related to cloud-based file system access.
+
+Customers and users have reported that these file systems don't perform well for
+the file system access GitLab requires. Workloads where many small files are written in
+a serialized manner, like `git`, are not well suited to cloud-based file systems.
+
+If you do choose to use these, avoid storing GitLab log files (for example, those in `/var/log/gitlab`)
 there because this will also affect performance. We recommend that the log files be
 stored on a local volume.
 
-For more details on another person's experience with EFS, see this [Commit Brooklyn 2019 video](https://youtu.be/K6OS8WodRBQ?t=313).
+For more details on the experience of using a cloud-based file systems with GitLab,
+see this [Commit Brooklyn 2019 video](https://youtu.be/K6OS8WodRBQ?t=313).
 
 ### Avoid using CephFS and GlusterFS
 
@@ -408,7 +413,7 @@ For supported database architecture, see our documentation about
 ### Finding the requests that are being made to NFS
 
 In case of NFS-related problems, it can be helpful to trace
-the filesystem requests that are being made by using `perf`:
+the file system requests that are being made by using `perf`:
 
 ```shell
 sudo perf trace -e 'nfs4:*' -p $(pgrep -fd ',' puma && pgrep -fd ',' unicorn)

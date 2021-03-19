@@ -11,7 +11,7 @@ const illustrations = {
 describe('LoadingError component', () => {
   let wrapper;
 
-  const createWrapper = errorCode => {
+  const createWrapper = (errorCode) => {
     wrapper = shallowMount(LoadingError, {
       propsData: {
         errorCode,
@@ -25,7 +25,7 @@ describe('LoadingError component', () => {
     wrapper = null;
   });
 
-  describe.each([401, 403])('with error code %s', errorCode => {
+  describe.each([401, 403])('with error code %s', (errorCode) => {
     beforeEach(() => {
       createWrapper(errorCode);
     });

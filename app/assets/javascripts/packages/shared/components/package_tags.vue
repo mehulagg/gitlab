@@ -43,7 +43,7 @@ export default {
       if (this.moreTagsDisplay) {
         return this.tags
           .slice(this.tagDisplayLimit)
-          .map(x => x.name)
+          .map((x) => x.name)
           .join(', ');
       }
 
@@ -91,7 +91,7 @@ export default {
       variant="muted"
       :title="moreTagsTooltip"
       size="sm"
-      class="gl-display-none gl-display-md-flex gl-ml-2"
+      class="gl-display-none gl-md-display-flex gl-ml-2"
       ><gl-sprintf :message="__('+%{tags} more')">
         <template #tags>
           {{ moreTagsDisplay }}
@@ -103,7 +103,7 @@ export default {
       v-if="moreTagsDisplay && hideLabel"
       data-testid="moreBadge"
       variant="muted"
-      class="gl-display-md-none gl-ml-2"
+      class="gl-md-display-none gl-ml-2"
       >{{ tagsDisplay }}</gl-badge
     >
   </div>

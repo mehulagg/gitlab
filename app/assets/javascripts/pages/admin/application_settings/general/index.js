@@ -1,21 +1,27 @@
 import Vue from 'vue';
-import initUserInternalRegexPlaceholder from '../account_and_limits';
 import IntegrationHelpText from '~/vue_shared/components/integrations_help_text.vue';
+import initUserInternalRegexPlaceholder from '../account_and_limits';
 
-document.addEventListener('DOMContentLoaded', () => {
+(() => {
   initUserInternalRegexPlaceholder();
 
-  const gitpodSettingEl = document.querySelector('#js-gitpod-settings-help-text');
-  if (!gitpodSettingEl) {
+  const el = document.querySelector('#js-gitpod-settings-help-text');
+  if (!el) {
     return;
   }
 
+  const { message, messageUrl } = el.dataset;
+
   // eslint-disable-next-line no-new
   new Vue({
-    el: gitpodSettingEl,
-    name: 'GitpodSettings',
-    components: {
-      IntegrationHelpText,
+    el,
+    render(createElement) {
+      return createElement(IntegrationHelpText, {
+        props: {
+          message,
+          messageUrl,
+        },
+      });
     },
   });
-});
+})();

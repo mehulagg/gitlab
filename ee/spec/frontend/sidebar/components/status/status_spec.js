@@ -1,7 +1,7 @@
 import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import Status from 'ee/sidebar/components/status/status.vue';
-import { healthStatus, healthStatusTextMap } from 'ee/sidebar/constants';
+import { healthStatus, healthStatusTextMap, I18N_DROPDOWN } from 'ee/sidebar/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 const getStatusText = (wrapper) => wrapper.find('.value .text-plain').text();
@@ -76,17 +76,54 @@ describe('Status', () => {
   });
 
   describe('edit button', () => {
-    it('is displayed when user can edit', () => {
+    it('is displayed when user can edit and the issue is open', () => {
       const props = {
         isEditable: true,
+        isOpen: true,
       };
 
       shallowMountStatus(props);
 
       expect(getEditButton(wrapper).exists()).toBe(true);
+      expect(getEditButton(wrapper).props().disabled).toBe(false);
     });
 
-    describe('when disabled', () => {
+    describe('when closed and user does not have permission', () => {
+      beforeEach(() => {
+        const props = {
+          isEditable: false,
+          isOpen: false,
+        };
+
+        shallowMountStatus(props);
+      });
+
+      it('does not render the edit button', () => {
+        expect(getEditButton(wrapper).exists()).toBe(false);
+      });
+    });
+
+    describe('when closed and user has permission', () => {
+      beforeEach(() => {
+        const props = {
+          isEditable: true,
+          isOpen: false,
+        };
+
+        shallowMountStatus(props);
+      });
+
+      it('will render a tooltip with an informative message', () => {
+        const tooltipTitle = 'Health status cannot be edited because this issue is closed';
+        expect(getEditButtonTooltipValue(wrapper).title).toBe(tooltipTitle);
+      });
+
+      it('is disabled', () => {
+        expect(getEditButton(wrapper).props().disabled).toBe(true);
+      });
+    });
+
+    describe('when the user does not have permission', () => {
       beforeEach(() => {
         const props = {
           isEditable: false,
@@ -94,13 +131,9 @@ describe('Status', () => {
 
         shallowMountStatus(props);
       });
-      it('is disabled when user cannot edit', () => {
-        expect(getEditButton(wrapper).attributes().disabled).toBe('true');
-      });
 
-      it('will render a tooltip with an informative message', () => {
-        const tooltipTitle = 'Health status cannot be edited because this issue is closed';
-        expect(getEditButtonTooltipValue(wrapper).title).toBe(tooltipTitle);
+      it('does not render the edit button', () => {
+        expect(getEditButton(wrapper).exists()).toBe(false);
       });
     });
   });
@@ -149,7 +182,7 @@ describe('Status', () => {
       });
 
       it('shows "None"', () => {
-        expect(wrapper.find('.no-value').text()).toBe('None');
+        expect(wrapper.find('.no-value').text()).toBe(I18N_DROPDOWN.noneText);
       });
 
       it('shows "Status" in the tooltip', () => {
@@ -198,6 +231,7 @@ describe('Status', () => {
       beforeEach(() => {
         const props = {
           isEditable: true,
+          isOpen: true,
         };
 
         mountStatus(props);
@@ -215,6 +249,7 @@ describe('Status', () => {
       beforeEach(() => {
         const props = {
           isEditable: true,
+          isOpen: true,
         };
 
         mountStatus(props);
@@ -223,9 +258,9 @@ describe('Status', () => {
       });
 
       it('shows text to ask the user to pick an option', () => {
-        const message = 'Assign health status';
-
-        expect(getDropdownElement(wrapper).find('.health-title').text()).toContain(message);
+        expect(getDropdownElement(wrapper).props('headerText')).toBe(
+          I18N_DROPDOWN.dropdownHeaderText,
+        );
       });
 
       it('hides form when the `edit` button is clicked', async () => {

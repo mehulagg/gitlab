@@ -1,18 +1,18 @@
 <script>
 import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
 import dateFormat from 'dateformat';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __ } from '~/locale';
-import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
-import BurndownChart from './burndown_chart.vue';
-import BurnupChart from './burnup_chart.vue';
-import TimeboxSummaryCards from './timebox_summary_cards.vue';
-import OpenTimeboxSummary from './open_timebox_summary.vue';
-import { Namespace } from '../constants';
-import BurnupQuery from '../graphql/burnup.query.graphql';
-import BurndownChartData from '../burn_chart_data';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import BurndownChartData from '../burn_chart_data';
+import { Namespace } from '../constants';
+import BurnupQuery from '../graphql/burnup.query.graphql';
+import BurndownChart from './burndown_chart.vue';
+import BurnupChart from './burnup_chart.vue';
+import OpenTimeboxSummary from './open_timebox_summary.vue';
+import TimeboxSummaryCards from './timebox_summary_cards.vue';
 
 export default {
   components: {
@@ -170,7 +170,7 @@ export default {
 
       axios
         .get(this.burndownEventsPath)
-        .then(burndownResponse => {
+        .then((burndownResponse) => {
           const burndownEvents = burndownResponse.data;
           const burndownChartData = new BurndownChartData(
             burndownEvents,
@@ -178,8 +178,8 @@ export default {
             this.dueDate,
           ).generateBurndownTimeseries();
 
-          this.openIssuesCount = burndownChartData.map(d => [d[0], d[1]]);
-          this.openIssuesWeight = burndownChartData.map(d => [d[0], d[2]]);
+          this.openIssuesCount = burndownChartData.map((d) => [d[0], d[1]]);
+          this.openIssuesWeight = burndownChartData.map((d) => [d[0], d[2]]);
         })
         .catch(() => {
           this.fetchedLegacyData = false;
@@ -187,7 +187,7 @@ export default {
         });
     },
     pluckBurnupDataProperties(total, completed) {
-      return this.burnupData.map(data => {
+      return this.burnupData.map((data) => {
         return [data.date, data[total] - data[completed]];
       });
     },
@@ -203,7 +203,7 @@ export default {
     padSparseBurnupData(sparseBurnupData) {
       // if we don't have data for the startDate, we still want to draw a point at 0
       // on the chart, so add an item to the start of the array
-      const hasDataForStartDate = sparseBurnupData.find(d => d.date === this.startDate);
+      const hasDataForStartDate = sparseBurnupData.find((d) => d.date === this.startDate);
       if (!hasDataForStartDate) {
         sparseBurnupData.unshift({
           date: this.startDate,
@@ -222,7 +222,7 @@ export default {
       // similar to the startDate padding, if we don't have a value for the
       // last item in the array, we should add one. If no events occur on
       // a day then we don't get any data for that day in the response
-      const hasDataForLastDate = sparseBurnupData.find(d => d.date === lastDate);
+      const hasDataForLastDate = sparseBurnupData.find((d) => d.date === lastDate);
       if (!hasDataForLastDate) {
         const lastItem = sparseBurnupData[sparseBurnupData.length - 1];
         sparseBurnupData.push({
@@ -369,6 +369,7 @@ export default {
         :open-issues-count="issuesCount"
         :open-issues-weight="issuesWeight"
         :issues-selected="issuesSelected"
+        :loading="loading"
         class="col-md-6"
       />
       <burnup-chart
@@ -376,6 +377,7 @@ export default {
         :due-date="dueDate"
         :burnup-data="burnupData"
         :issues-selected="issuesSelected"
+        :loading="loading"
         class="col-md-6"
       />
     </div>

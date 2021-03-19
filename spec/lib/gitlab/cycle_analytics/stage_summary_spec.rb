@@ -218,7 +218,7 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
 
     context 'when `to` is given' do
       before do
-        Timecop.freeze(5.days.from_now) { create(:deployment, :success, project: project) }
+        Timecop.freeze(5.days.from_now) { create(:deployment, :success, project: project, finished_at: Time.zone.now) }
       end
 
       it 'finds records created between `from` and `to` range' do
@@ -232,8 +232,9 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
       context 'when `from` and `to` are within a day' do
         it 'returns the number of deployments made on that day' do
           freeze_time do
-            create(:deployment, :success, project: project)
-            options[:from] = options[:to] = Time.now
+            create(:deployment, :success, project: project, finished_at: Time.zone.now)
+            options[:from] = Time.zone.now.at_beginning_of_day
+            options[:to] = Time.zone.now.at_end_of_day
 
             expect(subject).to eq('1')
           end

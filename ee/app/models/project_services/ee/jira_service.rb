@@ -12,7 +12,7 @@ module EE
     end
 
     def jira_vulnerabilities_integration_available?
-      feature_enabled = ::Feature.enabled?(:jira_for_vulnerabilities, parent, default_enabled: false)
+      feature_enabled = ::Feature.enabled?(:jira_for_vulnerabilities, parent, default_enabled: :yaml)
       feature_available = parent.present? ? parent&.feature_available?(:jira_vulnerabilities_integration) : License.feature_available?(:jira_vulnerabilities_integration)
 
       feature_enabled && feature_available
@@ -22,20 +22,10 @@ module EE
       jira_vulnerabilities_integration_available? && vulnerabilities_enabled
     end
 
-    def project_key_required?
-      issues_enabled || vulnerabilities_enabled
-    end
-
     def configured_to_create_issues_from_vulnerabilities?
-      active? && project_key.present? && vulnerabilities_issuetype.present? && jira_vulnerabilities_integration_enabled?
-    end
-
-    def issue_types
-      client
-        .Issuetype
-        .all
-        .reject { |issue_type| issue_type.subtask }
-        .map { |issue_type| { id: issue_type.id, name: issue_type.name, description: issue_type.description } }
+      strong_memoize(:configured_to_create_issues_from_vulnerabilities) do
+        active? && project_key.present? && vulnerabilities_issuetype.present? && jira_vulnerabilities_integration_enabled?
+      end
     end
 
     def test(_)
@@ -53,7 +43,7 @@ module EE
       "#{url}/secure/CreateIssueDetails!init.jspa?pid=#{jira_project_id}&issuetype=#{vulnerabilities_issuetype}&summary=#{escaped_summary}&description=#{escaped_description}"[0..MAX_URL_LENGTH]
     end
 
-    def create_issue(summary, description)
+    def create_issue(summary, description, current_user)
       return if client_url.blank?
 
       jira_request do
@@ -66,14 +56,75 @@ module EE
             description: description
           }
         )
+        log_usage(:create_issue, current_user)
         issue
       end
     end
 
-    def jira_project_id
-      strong_memoize(:jira_project_id) do
-        client_url.present? ? jira_request { client.Project.find(project_key).id } : nil
+    private
+
+    def project_key_required?
+      strong_memoize(:project_key_required) do
+        issues_enabled || vulnerabilities_enabled
       end
+    end
+
+    # Returns internal JIRA Project ID
+    #
+    # @return [String, nil] the internal JIRA ID of the Project
+    def jira_project_id
+      jira_project&.id
+    end
+
+    # Returns JIRA Project for selected Project Key
+    #
+    # @return [JIRA::Resource::Project, nil] the object that represents JIRA Projects
+    def jira_project
+      strong_memoize(:jira_project) do
+        client_url.present? ? jira_request { client.Project.find(project_key) } : nil
+      end
+    end
+
+    # Returns list of Issue Type Scheme IDs in selected JIRA Project
+    #
+    # @return [Array] the array of IDs
+    def project_issuetype_scheme_ids
+      query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'project')
+      query_url.query_values = { 'projectId' => jira_project_id }
+
+      client
+        .get(query_url.to_s)
+        .fetch('values', [])
+        .map { |schemes| schemes.dig('issueTypeScheme', 'id') }
+    end
+
+    # Returns list of Issue Type IDs available in active Issue Type Scheme in selected JIRA Project
+    #
+    # @return [Array] the array of IDs
+    def project_issuetype_ids
+      strong_memoize(:project_issuetype_ids) do
+        query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'mapping')
+        query_url.query_values = { 'issueTypeSchemeId' => project_issuetype_scheme_ids }
+
+        client
+          .get(query_url.to_s)
+          .fetch('values', [])
+          .map { |schemes| schemes['issueTypeId'] }
+      end
+    end
+
+    # Returns list of available Issue tTpes in selected JIRA Project
+    #
+    # @return [Array] the array of objects with JIRA Issuetype ID, Name and Description
+    def issue_types
+      return [] if jira_project.blank?
+
+      client
+        .Issuetype
+        .all
+        .select { |issue_type| issue_type.id.in?(project_issuetype_ids) }
+        .reject { |issue_type| issue_type.subtask }
+        .map { |issue_type| { id: issue_type.id, name: issue_type.name, description: issue_type.description } }
     end
   end
 end

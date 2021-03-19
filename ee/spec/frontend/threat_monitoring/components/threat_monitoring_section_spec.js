@@ -5,7 +5,7 @@ import StatisticsSummary from 'ee/threat_monitoring/components/statistics_summar
 import ThreatMonitoringSection from 'ee/threat_monitoring/components/threat_monitoring_section.vue';
 import createStore from 'ee/threat_monitoring/store';
 
-import { mockNominalHistory, mockAnomalousHistory } from '../mock_data';
+import { mockNominalHistory, mockAnomalousHistory } from '../mocks/mock_data';
 
 describe('ThreatMonitoringSection component', () => {
   let store;

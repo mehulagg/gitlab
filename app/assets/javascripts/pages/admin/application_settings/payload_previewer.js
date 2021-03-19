@@ -1,6 +1,6 @@
+import { deprecatedCreateFlash as flash } from '../../../flash';
 import axios from '../../../lib/utils/axios_utils';
 import { __ } from '../../../locale';
-import { deprecatedCreateFlash as flash } from '../../../flash';
 
 export default class PayloadPreviewer {
   constructor(trigger) {
@@ -14,7 +14,7 @@ export default class PayloadPreviewer {
     this.spinner = this.trigger.querySelector('.js-spinner');
     this.text = this.trigger.querySelector('.js-text');
 
-    this.trigger.addEventListener('click', event => {
+    this.trigger.addEventListener('click', (event) => {
       event.preventDefault();
 
       if (this.isVisible) return this.hidePayload();

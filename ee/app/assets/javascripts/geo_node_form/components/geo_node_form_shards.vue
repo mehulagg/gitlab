@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     toggleShard(shard) {
-      const index = this.selectedShards.findIndex(value => value === shard.value);
+      const index = this.selectedShards.findIndex((value) => value === shard.value);
       if (index > -1) {
         this.$emit('removeSyncOption', { key: SELECTIVE_SYNC_SHARDS, index });
       } else {

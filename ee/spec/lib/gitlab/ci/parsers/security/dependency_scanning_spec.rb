@@ -47,7 +47,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
     end
 
     context "when parsing a vulnerability with a missing location" do
-      let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
+      let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json'), symbolize_names: true) }
 
       before do
         report_hash[:vulnerabilities][0][:location] = nil
@@ -57,7 +57,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
     end
 
     context "when parsing a vulnerability with a missing cve" do
-      let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
+      let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json'), symbolize_names: true) }
 
       before do
         report_hash[:vulnerabilities][0][:cve] = nil

@@ -11,6 +11,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
       category="primary"
       class="flex-grow-1 text-center"
       headertext=""
+      hideheaderborder="true"
       right="true"
       size="medium"
       text="Severity"

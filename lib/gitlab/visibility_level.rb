@@ -44,9 +44,9 @@ module Gitlab
 
       def options
         {
-          N_('VisibilityLevel|Private')  => PRIVATE,
-          N_('VisibilityLevel|Internal') => INTERNAL,
-          N_('VisibilityLevel|Public')   => PUBLIC
+          s_('VisibilityLevel|Private')  => PRIVATE,
+          s_('VisibilityLevel|Internal') => INTERNAL,
+          s_('VisibilityLevel|Public')   => PUBLIC
         }
       end
 
@@ -104,12 +104,7 @@ module Gitlab
       end
 
       def level_name(level)
-        level_name = N_('VisibilityLevel|Unknown')
-        options.each do |name, lvl|
-          level_name = name if lvl == level.to_i
-        end
-
-        s_(level_name)
+        options.key(level.to_i) || s_('VisibilityLevel|Unknown')
       end
 
       def level_value(level)
@@ -121,14 +116,6 @@ module Gitlab
       def string_level(level)
         string_options.key(level)
       end
-    end
-
-    def visibility_level_decreased?
-      return false unless visibility_level_previous_changes
-
-      before, after = visibility_level_previous_changes
-
-      before && after && after < before
     end
 
     def visibility_level_previous_changes

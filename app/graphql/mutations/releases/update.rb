@@ -12,19 +12,19 @@ module Mutations
 
       argument :tag_name, GraphQL::STRING_TYPE,
                required: true, as: :tag,
-               description: 'Name of the tag associated with the release'
+               description: 'Name of the tag associated with the release.'
 
       argument :name, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Name of the release'
+               description: 'Name of the release.'
 
       argument :description, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Description (release notes) of the release'
+               description: 'Description (release notes) of the release.'
 
       argument :released_at, Types::TimeType,
                required: false,
-               description: 'The release date'
+               description: 'The release date.'
 
       argument :milestones, [GraphQL::STRING_TYPE],
                required: false,
@@ -47,7 +47,7 @@ module Mutations
       end
 
       def resolve(project_path:, **scalars)
-        project = authorized_find!(full_path: project_path)
+        project = authorized_find!(project_path)
 
         params = scalars.with_indifferent_access
 

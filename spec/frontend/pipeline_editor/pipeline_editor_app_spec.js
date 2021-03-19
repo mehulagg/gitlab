@@ -1,119 +1,78 @@
-import { nextTick } from 'vue';
-import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
-import {
-  GlAlert,
-  GlButton,
-  GlFormInput,
-  GlFormTextarea,
-  GlLoadingIcon,
-  GlTabs,
-  GlTab,
-} from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { GlAlert, GlButton, GlLoadingIcon, GlTabs } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import httpStatusCodes from '~/lib/utils/http_status';
+import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
+import TextEditor from '~/pipeline_editor/components/editor/text_editor.vue';
 
-import { objectToQuery, redirectTo, refreshCurrentPage } from '~/lib/utils/url_utility';
+import PipelineEditorTabs from '~/pipeline_editor/components/pipeline_editor_tabs.vue';
+import PipelineEditorEmptyState from '~/pipeline_editor/components/ui/pipeline_editor_empty_state.vue';
+import { COMMIT_SUCCESS, COMMIT_FAILURE, LOAD_FAILURE_UNKNOWN } from '~/pipeline_editor/constants';
+import getCiConfigData from '~/pipeline_editor/graphql/queries/ci_config.graphql';
+import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
+import PipelineEditorHome from '~/pipeline_editor/pipeline_editor_home.vue';
 import {
   mockCiConfigPath,
   mockCiConfigQueryResponse,
   mockCiYml,
-  mockCommitSha,
-  mockCommitNextSha,
-  mockCommitMessage,
   mockDefaultBranch,
-  mockProjectPath,
-  mockNewMergeRequestPath,
+  mockProjectFullPath,
 } from './mock_data';
-
-import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
-import getCiConfigData from '~/pipeline_editor/graphql/queries/ci_config.graphql';
-import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
-import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
-import TextEditor from '~/pipeline_editor/components/text_editor.vue';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
-
-jest.mock('~/lib/utils/url_utility', () => ({
-  redirectTo: jest.fn(),
-  refreshCurrentPage: jest.fn(),
-  objectToQuery: jest.requireActual('~/lib/utils/url_utility').objectToQuery,
-  mergeUrlParams: jest.requireActual('~/lib/utils/url_utility').mergeUrlParams,
-}));
 
 const MockEditorLite = {
   template: '<div/>',
 };
 
-describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
+const mockProvide = {
+  ciConfigPath: mockCiConfigPath,
+  defaultBranch: mockDefaultBranch,
+  glFeatures: {
+    pipelineEditorEmptyStateAction: false,
+  },
+  projectFullPath: mockProjectFullPath,
+};
+
+describe('Pipeline editor app component', () => {
   let wrapper;
 
   let mockApollo;
   let mockBlobContentData;
   let mockCiConfigData;
-  let mockMutate;
 
-  const createComponent = ({
-    props = {},
-    blobLoading = false,
-    lintLoading = false,
-    options = {},
-    mountFn = shallowMount,
-    provide = {
-      glFeatures: {
-        ciConfigVisualizationTab: true,
-      },
-    },
-  } = {}) => {
-    mockMutate = jest.fn().mockResolvedValue({
-      data: {
-        commitCreate: {
-          errors: [],
-          commit: {
-            sha: mockCommitNextSha,
-          },
-        },
-      },
-    });
-
-    wrapper = mountFn(PipelineEditorApp, {
-      propsData: {
-        ciConfigPath: mockCiConfigPath,
-        commitSha: mockCommitSha,
-        defaultBranch: mockDefaultBranch,
-        projectPath: mockProjectPath,
-        newMergeRequestPath: mockNewMergeRequestPath,
-        ...props,
-      },
-      provide,
+  const createComponent = ({ blobLoading = false, options = {}, provide = {} } = {}) => {
+    wrapper = shallowMount(PipelineEditorApp, {
+      provide: { ...mockProvide, ...provide },
       stubs: {
         GlTabs,
         GlButton,
         CommitForm,
+        PipelineEditorHome,
+        PipelineEditorTabs,
         EditorLite: MockEditorLite,
-        TextEditor,
+        PipelineEditorEmptyState,
       },
       mocks: {
         $apollo: {
           queries: {
-            content: {
+            initialCiFileContent: {
               loading: blobLoading,
             },
             ciConfigData: {
-              loading: lintLoading,
+              loading: false,
             },
           },
-          mutate: mockMutate,
         },
       },
-      // attachToDocument is required for input/submit events
-      attachToDocument: mountFn === mount,
       ...options,
     });
   };
 
-  const createComponentWithApollo = ({ props = {}, mountFn = shallowMount } = {}) => {
+  const createComponentWithApollo = ({ props = {}, provide = {} } = {}) => {
     const handlers = [[getCiConfigData, mockCiConfigData]];
     const resolvers = {
       Query: {
@@ -134,33 +93,27 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       apolloProvider: mockApollo,
     };
 
-    createComponent({ props, options }, mountFn);
+    createComponent({ props, provide, options });
   };
 
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findAlert = () => wrapper.find(GlAlert);
-  const findTabAt = i => wrapper.findAll(GlTab).at(i);
-  const findVisualizationTab = () => wrapper.find('[data-testid="visualization-tab"]');
-  const findTextEditor = () => wrapper.find(TextEditor);
-  const findEditorLite = () => wrapper.find(MockEditorLite);
-  const findCommitForm = () => wrapper.find(CommitForm);
-  const findPipelineGraph = () => wrapper.find(PipelineGraph);
-  const findCommitBtnLoadingIcon = () => wrapper.find('[type="submit"]').find(GlLoadingIcon);
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findAlert = () => wrapper.findComponent(GlAlert);
+  const findEditorHome = () => wrapper.findComponent(PipelineEditorHome);
+  const findTextEditor = () => wrapper.findComponent(TextEditor);
+  const findEmptyState = () => wrapper.findComponent(PipelineEditorEmptyState);
+  const findEmptyStateButton = () =>
+    wrapper.findComponent(PipelineEditorEmptyState).findComponent(GlButton);
 
   beforeEach(() => {
     mockBlobContentData = jest.fn();
-    mockCiConfigData = jest.fn().mockResolvedValue(mockCiConfigQueryResponse);
+    mockCiConfigData = jest.fn();
   });
 
   afterEach(() => {
     mockBlobContentData.mockReset();
     mockCiConfigData.mockReset();
-    refreshCurrentPage.mockReset();
-    redirectTo.mockReset();
-    mockMutate.mockReset();
 
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays a loading icon if the blob query is loading', () => {
@@ -170,292 +123,181 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
     expect(findTextEditor().exists()).toBe(false);
   });
 
-  describe('tabs', () => {
-    describe('editor tab', () => {
-      beforeEach(() => {
-        createComponent();
-      });
-
-      it('displays the tab and its content', async () => {
-        expect(findTabAt(0).find(TextEditor).exists()).toBe(true);
-      });
-
-      it('displays tab lazily, until editor is ready', async () => {
-        expect(findTabAt(0).attributes('lazy')).toBe('true');
-
-        findTextEditor().vm.$emit('editor-ready');
-
-        await nextTick();
-
-        expect(findTabAt(0).attributes('lazy')).toBe(undefined);
-      });
-    });
-
-    describe('visualization tab', () => {
-      describe('with feature flag on', () => {
-        beforeEach(() => {
-          createComponent();
-        });
-
-        it('display the tab', () => {
-          expect(findVisualizationTab().exists()).toBe(true);
-        });
-
-        it('displays a loading icon if the lint query is loading', () => {
-          createComponent({ lintLoading: true });
-
-          expect(findLoadingIcon().exists()).toBe(true);
-          expect(findPipelineGraph().exists()).toBe(false);
-        });
-      });
-
-      describe('with feature flag off', () => {
-        beforeEach(() => {
-          createComponent({ provide: { glFeatures: { ciConfigVisualizationTab: false } } });
-        });
-
-        it('does not display the tab', () => {
-          expect(findVisualizationTab().exists()).toBe(false);
-        });
-      });
-    });
-  });
-
-  describe('when data is set', () => {
-    beforeEach(async () => {
-      createComponent({ mountFn: mount });
-
-      wrapper.setData({
-        content: mockCiYml,
-        contentModel: mockCiYml,
-      });
-
-      await waitForPromises();
-    });
-
-    it('displays content after the query loads', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
-
-      expect(findEditorLite().attributes('value')).toBe(mockCiYml);
-      expect(findEditorLite().attributes('file-name')).toBe(mockCiConfigPath);
-    });
-
-    it('configures text editor', () => {
-      expect(findTextEditor().props('commitSha')).toBe(mockCommitSha);
-      expect(findTextEditor().props('projectPath')).toBe(mockProjectPath);
-    });
-
-    describe('commit form', () => {
-      const mockVariables = {
-        content: mockCiYml,
-        filePath: mockCiConfigPath,
-        lastCommitId: mockCommitSha,
-        message: mockCommitMessage,
-        projectPath: mockProjectPath,
-        startBranch: mockDefaultBranch,
-      };
-
-      const findInForm = selector => findCommitForm().find(selector);
-
-      const submitCommit = async ({
-        message = mockCommitMessage,
-        branch = mockDefaultBranch,
-        openMergeRequest = false,
-      } = {}) => {
-        await findInForm(GlFormTextarea).setValue(message);
-        await findInForm(GlFormInput).setValue(branch);
-        if (openMergeRequest) {
-          await findInForm('[data-testid="new-mr-checkbox"]').setChecked(openMergeRequest);
-        }
-        await findInForm('[type="submit"]').trigger('click');
-      };
-
-      const cancelCommitForm = async () => {
-        const findCancelBtn = () => wrapper.find('[type="reset"]');
-        await findCancelBtn().trigger('click');
-      };
-
-      describe('when the user commits changes to the current branch', () => {
-        beforeEach(async () => {
-          await submitCommit();
-        });
-
-        it('calls the mutation with the default branch', () => {
-          expect(mockMutate).toHaveBeenCalledWith({
-            mutation: expect.any(Object),
-            variables: {
-              ...mockVariables,
-              branch: mockDefaultBranch,
-            },
-          });
-        });
-
-        it('displays an alert to indicate success', () => {
-          expect(findAlert().text()).toMatchInterpolatedText(
-            'Your changes have been successfully committed.',
-          );
-        });
-
-        it('shows no saving state', () => {
-          expect(findCommitBtnLoadingIcon().exists()).toBe(false);
-        });
-
-        it('a second commit submits the latest sha, keeping the form updated', async () => {
-          await submitCommit();
-
-          expect(mockMutate).toHaveBeenCalledTimes(2);
-          expect(mockMutate).toHaveBeenLastCalledWith({
-            mutation: expect.any(Object),
-            variables: {
-              ...mockVariables,
-              lastCommitId: mockCommitNextSha,
-              branch: mockDefaultBranch,
-            },
-          });
-        });
-      });
-
-      describe('when the user commits changes to a new branch', () => {
-        const newBranch = 'new-branch';
-
-        beforeEach(async () => {
-          await submitCommit({
-            branch: newBranch,
-          });
-        });
-
-        it('calls the mutation with the new branch', () => {
-          expect(mockMutate).toHaveBeenCalledWith({
-            mutation: expect.any(Object),
-            variables: {
-              ...mockVariables,
-              branch: newBranch,
-            },
-          });
-        });
-      });
-
-      describe('when the user commits changes to open a new merge request', () => {
-        const newBranch = 'new-branch';
-
-        beforeEach(async () => {
-          await submitCommit({
-            branch: newBranch,
-            openMergeRequest: true,
-          });
-        });
-
-        it('redirects to the merge request page with source and target branches', () => {
-          const branchesQuery = objectToQuery({
-            'merge_request[source_branch]': newBranch,
-            'merge_request[target_branch]': mockDefaultBranch,
-          });
-
-          expect(redirectTo).toHaveBeenCalledWith(`${mockNewMergeRequestPath}?${branchesQuery}`);
-        });
-      });
-
-      describe('when the commit is ocurring', () => {
-        it('shows a saving state', async () => {
-          await mockMutate.mockImplementationOnce(() => {
-            expect(findCommitBtnLoadingIcon().exists()).toBe(true);
-            return Promise.resolve();
-          });
-
-          await submitCommit({
-            message: mockCommitMessage,
-            branch: mockDefaultBranch,
-            openMergeRequest: false,
-          });
-        });
-      });
-
-      describe('when the commit fails', () => {
-        it('shows an error message', async () => {
-          mockMutate.mockRejectedValueOnce(new Error('commit failed'));
-
-          await submitCommit();
-
-          await waitForPromises();
-
-          expect(findAlert().text()).toMatchInterpolatedText(
-            'The GitLab CI configuration could not be updated. commit failed',
-          );
-        });
-
-        it('shows an unkown error', async () => {
-          mockMutate.mockRejectedValueOnce();
-
-          await submitCommit();
-
-          await waitForPromises();
-
-          expect(findAlert().text()).toMatchInterpolatedText(
-            'The GitLab CI configuration could not be updated.',
-          );
-        });
-      });
-
-      describe('when the commit form is cancelled', () => {
-        const otherContent = 'other content';
-
-        beforeEach(async () => {
-          findTextEditor().vm.$emit('input', otherContent);
-          await nextTick();
-        });
-
-        it('content is restored after cancel is called', async () => {
-          await cancelCommitForm();
-
-          expect(findEditorLite().attributes('value')).toBe(mockCiYml);
-        });
-      });
-    });
-  });
-
-  describe('displays fetch content errors', () => {
-    it('no error is shown when data is set', async () => {
+  describe('when queries are called', () => {
+    beforeEach(() => {
       mockBlobContentData.mockResolvedValue(mockCiYml);
-      createComponentWithApollo();
-
-      await waitForPromises();
-
-      expect(findAlert().exists()).toBe(false);
-      expect(findEditorLite().attributes('value')).toBe(mockCiYml);
+      mockCiConfigData.mockResolvedValue(mockCiConfigQueryResponse);
     });
 
-    it('shows a 404 error message', async () => {
-      mockBlobContentData.mockRejectedValueOnce({
-        response: {
-          status: 404,
-        },
+    describe('when file exists', () => {
+      beforeEach(async () => {
+        createComponentWithApollo();
+
+        await waitForPromises();
       });
-      createComponentWithApollo();
 
-      await waitForPromises();
-
-      expect(findAlert().text()).toBe('No CI file found in this repository, please add one.');
-    });
-
-    it('shows a 400 error message', async () => {
-      mockBlobContentData.mockRejectedValueOnce({
-        response: {
-          status: 400,
-        },
+      it('shows pipeline editor home component', () => {
+        expect(findEditorHome().exists()).toBe(true);
       });
-      createComponentWithApollo();
 
-      await waitForPromises();
+      it('no error is shown when data is set', () => {
+        expect(findAlert().exists()).toBe(false);
+      });
 
-      expect(findAlert().text()).toBe('Repository does not have a default branch, please set one.');
+      it('ci config query is called with correct variables', async () => {
+        createComponentWithApollo();
+
+        await waitForPromises();
+
+        expect(mockCiConfigData).toHaveBeenCalledWith({
+          content: mockCiYml,
+          projectPath: mockProjectFullPath,
+        });
+      });
     });
 
-    it('shows a unkown error message', async () => {
-      mockBlobContentData.mockRejectedValueOnce(new Error('My error!'));
-      createComponentWithApollo();
-      await waitForPromises();
+    describe('when no CI config file exists', () => {
+      describe('in a project without a repository', () => {
+        it('shows an empty state and does not show editor home component', async () => {
+          mockBlobContentData.mockRejectedValueOnce({
+            response: {
+              status: httpStatusCodes.BAD_REQUEST,
+            },
+          });
+          createComponentWithApollo();
 
-      expect(findAlert().text()).toBe('The CI configuration was not loaded, please try again.');
+          await waitForPromises();
+
+          expect(findEmptyState().exists()).toBe(true);
+          expect(findAlert().exists()).toBe(false);
+          expect(findEditorHome().exists()).toBe(false);
+        });
+      });
+
+      describe('in a project with a repository', () => {
+        it('shows an empty state and does not show editor home component', async () => {
+          mockBlobContentData.mockRejectedValueOnce({
+            response: {
+              status: httpStatusCodes.NOT_FOUND,
+            },
+          });
+          createComponentWithApollo();
+
+          await waitForPromises();
+
+          expect(findEmptyState().exists()).toBe(true);
+          expect(findAlert().exists()).toBe(false);
+          expect(findEditorHome().exists()).toBe(false);
+        });
+      });
+
+      describe('because of a fetching error', () => {
+        it('shows a unkown error message', async () => {
+          mockBlobContentData.mockRejectedValueOnce(new Error('My error!'));
+          createComponentWithApollo();
+          await waitForPromises();
+
+          expect(findEmptyState().exists()).toBe(false);
+          expect(findAlert().text()).toBe(wrapper.vm.$options.errorTexts[LOAD_FAILURE_UNKNOWN]);
+          expect(findEditorHome().exists()).toBe(true);
+        });
+      });
+    });
+
+    describe('when landing on the empty state with feature flag on', () => {
+      it('user can click on CTA button and see an empty editor', async () => {
+        mockBlobContentData.mockRejectedValueOnce({
+          response: {
+            status: httpStatusCodes.NOT_FOUND,
+          },
+        });
+
+        createComponentWithApollo({
+          provide: {
+            glFeatures: {
+              pipelineEditorEmptyStateAction: true,
+            },
+          },
+        });
+
+        await waitForPromises();
+
+        expect(findEmptyState().exists()).toBe(true);
+        expect(findTextEditor().exists()).toBe(false);
+
+        await findEmptyStateButton().vm.$emit('click');
+
+        expect(findEmptyState().exists()).toBe(false);
+        expect(findTextEditor().exists()).toBe(true);
+      });
+    });
+
+    describe('when the user commits', () => {
+      const updateFailureMessage = 'The GitLab CI configuration could not be updated.';
+
+      describe('and the commit mutation succeeds', () => {
+        beforeEach(() => {
+          window.scrollTo = jest.fn();
+          createComponent();
+
+          findEditorHome().vm.$emit('commit', { type: COMMIT_SUCCESS });
+        });
+
+        it('shows a confirmation message', () => {
+          expect(findAlert().text()).toBe(wrapper.vm.$options.successTexts[COMMIT_SUCCESS]);
+        });
+
+        it('scrolls to the top of the page to bring attention to the confirmation message', () => {
+          expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+        });
+      });
+      describe('and the commit mutation fails', () => {
+        const commitFailedReasons = ['Commit failed'];
+
+        beforeEach(() => {
+          window.scrollTo = jest.fn();
+          createComponent();
+
+          findEditorHome().vm.$emit('showError', {
+            type: COMMIT_FAILURE,
+            reasons: commitFailedReasons,
+          });
+        });
+
+        it('shows an error message', () => {
+          expect(findAlert().text()).toMatchInterpolatedText(
+            `${updateFailureMessage} ${commitFailedReasons[0]}`,
+          );
+        });
+
+        it('scrolls to the top of the page to bring attention to the error message', () => {
+          expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+        });
+      });
+
+      describe('when an unknown error occurs', () => {
+        const unknownReasons = ['Commit failed'];
+
+        beforeEach(() => {
+          window.scrollTo = jest.fn();
+          createComponent();
+
+          findEditorHome().vm.$emit('showError', {
+            type: COMMIT_FAILURE,
+            reasons: unknownReasons,
+          });
+        });
+
+        it('shows an error message', () => {
+          expect(findAlert().text()).toMatchInterpolatedText(
+            `${updateFailureMessage} ${unknownReasons[0]}`,
+          );
+        });
+
+        it('scrolls to the top of the page to bring attention to the error message', () => {
+          expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+        });
+      });
     });
   });
 });

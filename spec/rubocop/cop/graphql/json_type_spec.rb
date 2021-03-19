@@ -1,33 +1,32 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
 require_relative '../../../../rubocop/cop/graphql/json_type'
 
-RSpec.describe RuboCop::Cop::Graphql::JSONType, type: :rubocop do
-  include CopHelper
+RSpec.describe RuboCop::Cop::Graphql::JSONType do
+  let(:msg) do
+    'Avoid using GraphQL::Types::JSON. See: https://docs.gitlab.com/ee/development/api_graphql_styleguide.html#json'
+  end
 
   subject(:cop) { described_class.new }
 
   context 'fields' do
     it 'adds an offense when GraphQL::Types::JSON is used' do
-      inspect_source(<<~RUBY.strip)
+      expect_offense(<<~RUBY)
         class MyType
           field :some_field, GraphQL::Types::JSON
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{msg}
         end
       RUBY
-
-      expect(cop.offenses.size).to eq(1)
     end
 
     it 'adds an offense when GraphQL::Types::JSON is used with other keywords' do
-      inspect_source(<<~RUBY.strip)
+      expect_offense(<<~RUBY)
         class MyType
           field :some_field, GraphQL::Types::JSON, null: true, description: 'My description'
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{msg}
         end
       RUBY
-
-      expect(cop.offenses.size).to eq(1)
     end
 
     it 'does not add an offense for other types' do
@@ -41,23 +40,21 @@ RSpec.describe RuboCop::Cop::Graphql::JSONType, type: :rubocop do
 
   context 'arguments' do
     it 'adds an offense when GraphQL::Types::JSON is used' do
-      inspect_source(<<~RUBY.strip)
+      expect_offense(<<~RUBY)
         class MyType
           argument :some_arg, GraphQL::Types::JSON
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{msg}
         end
       RUBY
-
-      expect(cop.offenses.size).to eq(1)
     end
 
     it 'adds an offense when GraphQL::Types::JSON is used with other keywords' do
-      inspect_source(<<~RUBY.strip)
+      expect_offense(<<~RUBY)
         class MyType
           argument :some_arg, GraphQL::Types::JSON, null: true, description: 'My description'
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{msg}
         end
       RUBY
-
-      expect(cop.offenses.size).to eq(1)
     end
 
     it 'does not add an offense for other types' do

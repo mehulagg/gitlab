@@ -3,14 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Namespaces::OnboardingUserAddedWorker, '#perform' do
-  include AfterNextHelpers
+  let_it_be(:namespace) { create(:group) }
 
-  let_it_be(:group) { create(:group) }
+  subject { described_class.new.perform(namespace.id) }
 
-  it 'records the event' do
-    expect_next(OnboardingProgressService, group)
-      .to receive(:execute).with(action: :user_added).and_call_original
-
-    expect { subject.perform(group.id) }.to change(NamespaceOnboardingAction, :count).by(1)
-  end
+  it_behaves_like 'records an onboarding progress action', :user_added
 end

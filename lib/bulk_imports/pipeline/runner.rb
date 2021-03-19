@@ -7,100 +7,120 @@ module BulkImports
 
       MarkedAsFailedError = Class.new(StandardError)
 
-      def run(context)
-        raise MarkedAsFailedError if marked_as_failed?(context)
+      def run
+        raise MarkedAsFailedError if context.entity.failed?
 
-        info(context, message: 'Pipeline started', pipeline_class: pipeline)
+        info(message: 'Pipeline started')
 
-        extractors.each do |extractor|
-          data = run_pipeline_step(:extractor, extractor.class.name, context) do
-            extractor.extract(context)
+        extracted_data = extracted_data_from
+
+        extracted_data&.each do |entry|
+          transformers.each do |transformer|
+            entry = run_pipeline_step(:transformer, transformer.class.name) do
+              transformer.transform(context, entry)
+            end
           end
 
-          if data && data.respond_to?(:each)
-            data.each do |entry|
-              transformers.each do |transformer|
-                entry = run_pipeline_step(:transformer, transformer.class.name, context) do
-                  transformer.transform(context, entry)
-                end
-              end
-
-              loaders.each do |loader|
-                run_pipeline_step(:loader, loader.class.name, context) do
-                  loader.load(context, entry)
-                end
-              end
-            end
+          run_pipeline_step(:loader, loader.class.name) do
+            loader.load(context, entry)
           end
         end
 
-        after_run.call(context) if after_run.present?
+        if extracted_data && respond_to?(:after_run)
+          run_pipeline_step(:after_run) do
+            after_run(extracted_data)
+          end
+        end
+
+        info(message: 'Pipeline finished')
       rescue MarkedAsFailedError
-        log_skip(context)
+        skip!('Skipping pipeline due to failed entity')
       end
 
       private # rubocop:disable Lint/UselessAccessModifier
 
-      def run_pipeline_step(type, class_name, context)
-        raise MarkedAsFailedError if marked_as_failed?(context)
+      def run_pipeline_step(step, class_name = nil)
+        raise MarkedAsFailedError if context.entity.failed?
 
-        info(context, type => class_name)
+        info(pipeline_step: step, step_class: class_name)
 
         yield
       rescue MarkedAsFailedError
-        log_skip(context, type => class_name)
+        skip!(
+          'Skipping pipeline due to failed entity',
+          pipeline_step: step,
+          step_class: class_name
+        )
       rescue => e
-        log_import_failure(e, context)
+        log_import_failure(e, step)
 
-        mark_as_failed(context) if abort_on_failure?
+        mark_as_failed if abort_on_failure?
+
+        nil
       end
 
-      def mark_as_failed(context)
-        warn(context, message: 'Pipeline failed', pipeline_class: pipeline)
+      def extracted_data_from
+        run_pipeline_step(:extractor, extractor.class.name) do
+          extractor.extract(context)
+        end
+      end
+
+      def mark_as_failed
+        warn(message: 'Pipeline failed')
 
         context.entity.fail_op!
+        tracker.fail_op!
       end
 
-      def marked_as_failed?(context)
-        return true if context.entity.failed?
+      def skip!(message, extra = {})
+        warn({ message: message }.merge(extra))
 
-        false
+        tracker.skip!
       end
 
-      def log_skip(context, extra = {})
-        log = {
-          message: 'Skipping due to failed pipeline status',
-          pipeline_class: pipeline
-        }.merge(extra)
-
-        info(context, log)
-      end
-
-      def log_import_failure(exception, context)
+      def log_import_failure(exception, step)
         attributes = {
           bulk_import_entity_id: context.entity.id,
           pipeline_class: pipeline,
+          pipeline_step: step,
           exception_class: exception.class.to_s,
           exception_message: exception.message.truncate(255),
           correlation_id_value: Labkit::Correlation::CorrelationId.current_or_new_id
         }
 
+        error(
+          pipeline_step: step,
+          exception_class: exception.class.to_s,
+          exception_message: exception.message
+        )
+
         BulkImports::Failure.create(attributes)
       end
 
-      def warn(context, extra = {})
-        logger.warn(log_base_params(context).merge(extra))
+      def info(extra = {})
+        logger.info(log_params(extra))
       end
 
-      def info(context, extra = {})
-        logger.info(log_base_params(context).merge(extra))
+      def warn(extra = {})
+        logger.warn(log_params(extra))
       end
 
-      def log_base_params(context)
-        {
+      def error(extra = {})
+        logger.error(log_params(extra))
+      end
+
+      def log_params(extra)
+        defaults = {
+          bulk_import_id: context.bulk_import.id,
           bulk_import_entity_id: context.entity.id,
-          bulk_import_entity_type: context.entity.source_type
+          bulk_import_entity_type: context.entity.source_type,
+          pipeline_class: pipeline,
+          context_extra: context.extra
         }
+
+        defaults
+          .merge(extra)
+          .reject { |_key, value| value.blank? }
       end
 
       def logger

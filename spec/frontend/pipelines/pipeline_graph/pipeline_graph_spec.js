@@ -1,11 +1,11 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
-import { pipelineData, singleStageData } from './mock_data';
+import { shallowMount } from '@vue/test-utils';
 import { CI_CONFIG_STATUS_INVALID, CI_CONFIG_STATUS_VALID } from '~/pipeline_editor/constants';
-import { DRAW_FAILURE, EMPTY_PIPELINE_DATA, INVALID_CI_CONFIG } from '~/pipelines/constants';
+import JobPill from '~/pipelines/components/pipeline_graph/job_pill.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import StagePill from '~/pipelines/components/pipeline_graph/stage_pill.vue';
-import JobPill from '~/pipelines/components/pipeline_graph/job_pill.vue';
+import { DRAW_FAILURE, EMPTY_PIPELINE_DATA, INVALID_CI_CONFIG } from '~/pipelines/constants';
+import { pipelineData, singleStageData } from './mock_data';
 
 describe('pipeline graph component', () => {
   const defaultProps = { pipelineData };
@@ -23,7 +23,7 @@ describe('pipeline graph component', () => {
   const findAlert = () => wrapper.find(GlAlert);
   const findAllStagePills = () => wrapper.findAll(StagePill);
   const findAllStageBackgroundElements = () => wrapper.findAll('[data-testid="stage-background"]');
-  const findStageBackgroundElementAt = index => findAllStageBackgroundElements().at(index);
+  const findStageBackgroundElementAt = (index) => findAllStageBackgroundElements().at(index);
   const findAllJobPills = () => wrapper.findAll(JobPill);
 
   afterEach(() => {
@@ -37,7 +37,7 @@ describe('pipeline graph component', () => {
     });
 
     it('renders an empty section', () => {
-      expect(wrapper.text()).toBe(wrapper.vm.$options.warningTexts[EMPTY_PIPELINE_DATA]);
+      expect(wrapper.text()).toBe(wrapper.vm.$options.errorTexts[EMPTY_PIPELINE_DATA]);
       expect(findPipelineGraph().exists()).toBe(false);
       expect(findAllStagePills()).toHaveLength(0);
       expect(findAllJobPills()).toHaveLength(0);
@@ -51,7 +51,7 @@ describe('pipeline graph component', () => {
 
     it('renders an error message and does not render the graph', () => {
       expect(findAlert().exists()).toBe(true);
-      expect(findAlert().text()).toBe(wrapper.vm.$options.warningTexts[INVALID_CI_CONFIG]);
+      expect(findAlert().text()).toBe(wrapper.vm.$options.errorTexts[INVALID_CI_CONFIG]);
       expect(findPipelineGraph().exists()).toBe(false);
     });
   });

@@ -31,9 +31,14 @@ module EE
           expose :requirements_enabled do |project, options|
             project.feature_available?(:requirements, options[:current_user])
           end
+          expose :security_and_compliance_enabled do |project, options|
+            project.feature_available?(:security_and_compliance, options[:current_user])
+          end
           expose :compliance_frameworks do |project, _|
             [project.compliance_framework_setting&.compliance_management_framework&.name].compact
           end
+          expose :issues_template, if: ->(project, _) { project.feature_available?(:issuable_default_templates) }
+          expose :merge_requests_template, if: ->(project, _) { project.feature_available?(:issuable_default_templates) }
         end
       end
     end

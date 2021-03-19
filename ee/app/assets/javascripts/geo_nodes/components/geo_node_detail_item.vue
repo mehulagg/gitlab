@@ -4,9 +4,9 @@ import { s__ } from '~/locale';
 
 import { VALUE_TYPE, CUSTOM_TYPE, REPLICATION_HELP_URL } from '../constants';
 
-import GeoNodeSyncSettings from './geo_node_sync_settings.vue';
 import GeoNodeEventStatus from './geo_node_event_status.vue';
 import GeoNodeSyncProgress from './geo_node_sync_progress.vue';
+import GeoNodeSyncSettings from './geo_node_sync_settings.vue';
 
 export default {
   components: {

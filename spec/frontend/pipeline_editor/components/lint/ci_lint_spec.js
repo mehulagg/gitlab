@@ -1,18 +1,8 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlAlert, GlLink } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
 import CiLint from '~/pipeline_editor/components/lint/ci_lint.vue';
 import { CI_CONFIG_STATUS_INVALID } from '~/pipeline_editor/constants';
-import { mockCiConfigQueryResponse, mockLintHelpPagePath } from '../../mock_data';
-import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
-
-const getCiConfig = mergedConfig => {
-  const { ciConfig } = mockCiConfigQueryResponse.data;
-  return {
-    ...ciConfig,
-    stages: unwrapStagesWithNeeds(ciConfig.stages.nodes),
-    ...mergedConfig,
-  };
-};
+import { mergeUnwrappedCiConfig, mockLintHelpPagePath } from '../../mock_data';
 
 describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
   let wrapper;
@@ -23,16 +13,17 @@ describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
         lintHelpPagePath: mockLintHelpPagePath,
       },
       propsData: {
-        ciConfig: getCiConfig(),
+        ciConfig: mergeUnwrappedCiConfig(),
         ...props,
       },
     });
   };
 
-  const findAllByTestId = selector => wrapper.findAll(`[data-testid="${selector}"]`);
+  const findAllByTestId = (selector) => wrapper.findAll(`[data-testid="${selector}"]`);
   const findAlert = () => wrapper.find(GlAlert);
   const findLintParameters = () => findAllByTestId('ci-lint-parameter');
-  const findLintParameterAt = i => findLintParameters().at(i);
+  const findLintParameterAt = (i) => findLintParameters().at(i);
+  const findLintValueAt = (i) => findAllByTestId('ci-lint-value').at(i);
 
   afterEach(() => {
     wrapper.destroy();
@@ -60,10 +51,24 @@ describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
       expect(findLintParameterAt(2).text()).toBe('Build Job - job_build');
     });
 
+    it('displays jobs details', () => {
+      expect(findLintParameters()).toHaveLength(3);
+
+      expect(findLintValueAt(0).text()).toMatchInterpolatedText(
+        'echo "test 1" Only policy: branches, tags When: on_success',
+      );
+      expect(findLintValueAt(1).text()).toMatchInterpolatedText(
+        'echo "test 2" Only policy: branches, tags When: on_success',
+      );
+      expect(findLintValueAt(2).text()).toMatchInterpolatedText(
+        'echo "build" Only policy: branches, tags When: on_success',
+      );
+    });
+
     it('displays invalid results', () => {
       createComponent(
         {
-          ciConfig: getCiConfig({
+          ciConfig: mergeUnwrappedCiConfig({
             status: CI_CONFIG_STATUS_INVALID,
           }),
         },

@@ -11,12 +11,13 @@ RSpec.describe API::ProjectPackages do
   let!(:another_package) { create(:npm_package) }
   let(:no_package_url) { "/projects/#{project.id}/packages/0" }
   let(:wrong_package_url) { "/projects/#{project.id}/packages/#{another_package.id}" }
+  let(:params) { {} }
 
   describe 'GET /projects/:id/packages' do
     let(:url) { "/projects/#{project.id}/packages" }
     let(:package_schema) { 'public_api/v4/packages/packages' }
 
-    subject { get api(url) }
+    subject { get api(url), params: params }
 
     context 'without the need for a license' do
       context 'project is public' do
@@ -118,6 +119,8 @@ RSpec.describe API::ProjectPackages do
         end
       end
 
+      it_behaves_like 'with versionless packages'
+      it_behaves_like 'with status param'
       it_behaves_like 'does not cause n^2 queries'
     end
   end
@@ -254,6 +257,10 @@ RSpec.describe API::ProjectPackages do
       context 'project is private' do
         let(:project) { create(:project, :private) }
 
+        before do
+          expect(::Packages::Maven::Metadata::SyncWorker).not_to receive(:perform_async)
+        end
+
         it 'returns 404 for non authenticated user' do
           delete api(package_url)
 
@@ -296,6 +303,19 @@ RSpec.describe API::ProjectPackages do
           delete api(package_url, user)
 
           expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'with a maven package' do
+        let_it_be(:package1) { create(:maven_package, project: project) }
+
+        it 'enqueues a sync worker job' do
+          project.add_maintainer(user)
+
+          expect(::Packages::Maven::Metadata::SyncWorker)
+            .to receive(:perform_async).with(user.id, project.id, package1.name)
+
+          delete api(package_url, user)
         end
       end
     end

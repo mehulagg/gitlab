@@ -1,39 +1,32 @@
+import { GlForm, GlSprintf, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
-import { GlDropdown, GlDropdownItem, GlForm, GlSprintf, GlLoadingIcon } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
-import httpStatusCodes from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
-import PipelineNewForm from '~/pipeline_new/components/pipeline_new_form.vue';
-import {
-  mockBranches,
-  mockTags,
-  mockParams,
-  mockPostParams,
-  mockProjectId,
-  mockError,
-} from '../mock_data';
+import httpStatusCodes from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
+import PipelineNewForm from '~/pipeline_new/components/pipeline_new_form.vue';
+import RefsDropdown from '~/pipeline_new/components/refs_dropdown.vue';
+import { mockQueryParams, mockPostParams, mockProjectId, mockError, mockRefs } from '../mock_data';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
 }));
 
+const projectRefsEndpoint = '/root/project/refs';
 const pipelinesPath = '/root/project/-/pipelines';
 const configVariablesPath = '/root/project/-/pipelines/config_variables';
-const postResponse = { id: 1 };
+const newPipelinePostResponse = { id: 1 };
+const defaultBranch = 'master';
 
 describe('Pipeline New Form', () => {
   let wrapper;
   let mock;
-
-  const dummySubmitEvent = {
-    preventDefault() {},
-  };
+  let dummySubmitEvent;
 
   const findForm = () => wrapper.find(GlForm);
-  const findDropdown = () => wrapper.find(GlDropdown);
-  const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findRefsDropdown = () => wrapper.findComponent(RefsDropdown);
+  const findSubmitButton = () => wrapper.find('[data-testid="run_pipeline_button"]');
   const findVariableRows = () => wrapper.findAll('[data-testid="ci-variable-row"]');
   const findRemoveIcons = () => wrapper.findAll('[data-testid="remove-ci-variable-row"]');
   const findKeyInputs = () => wrapper.findAll('[data-testid="pipeline-form-ci-variable-key"]');
@@ -43,26 +36,30 @@ describe('Pipeline New Form', () => {
   const findWarningAlertSummary = () => findWarningAlert().find(GlSprintf);
   const findWarnings = () => wrapper.findAll('[data-testid="run-pipeline-warning"]');
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const getExpectedPostParams = () => JSON.parse(mock.history.post[0].data);
-  const changeRef = i => findDropdownItems().at(i).vm.$emit('click');
+  const getFormPostParams = () => JSON.parse(mock.history.post[0].data);
 
-  const createComponent = (term = '', props = {}, method = shallowMount) => {
+  const selectBranch = (branch) => {
+    // Select a branch in the dropdown
+    findRefsDropdown().vm.$emit('input', {
+      shortName: branch,
+      fullName: `refs/heads/${branch}`,
+    });
+  };
+
+  const createComponent = (props = {}, method = shallowMount) => {
     wrapper = method(PipelineNewForm, {
+      provide: {
+        projectRefsEndpoint,
+      },
       propsData: {
         projectId: mockProjectId,
         pipelinesPath,
         configVariablesPath,
-        branches: mockBranches,
-        tags: mockTags,
-        defaultBranch: 'master',
+        defaultBranch,
+        refParam: defaultBranch,
         settingsLink: '',
         maxWarnings: 25,
         ...props,
-      },
-      data() {
-        return {
-          searchTerm: term,
-        };
       },
     });
   };
@@ -70,6 +67,11 @@ describe('Pipeline New Form', () => {
   beforeEach(() => {
     mock = new MockAdapter(axios);
     mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {});
+    mock.onGet(projectRefsEndpoint).reply(httpStatusCodes.OK, mockRefs);
+
+    dummySubmitEvent = {
+      preventDefault: jest.fn(),
+    };
   });
 
   afterEach(() => {
@@ -79,38 +81,17 @@ describe('Pipeline New Form', () => {
     mock.restore();
   });
 
-  describe('Dropdown with branches and tags', () => {
-    beforeEach(() => {
-      mock.onPost(pipelinesPath).reply(httpStatusCodes.OK, postResponse);
-    });
-
-    it('displays dropdown with all branches and tags', () => {
-      const refLength = mockBranches.length + mockTags.length;
-
-      createComponent();
-
-      expect(findDropdownItems()).toHaveLength(refLength);
-    });
-
-    it('when user enters search term the list is filtered', () => {
-      createComponent('master');
-
-      expect(findDropdownItems()).toHaveLength(1);
-      expect(findDropdownItems().at(0).text()).toBe('master');
-    });
-  });
-
   describe('Form', () => {
     beforeEach(async () => {
-      createComponent('', mockParams, mount);
+      createComponent(mockQueryParams, mount);
 
-      mock.onPost(pipelinesPath).reply(httpStatusCodes.OK, postResponse);
+      mock.onPost(pipelinesPath).reply(httpStatusCodes.OK, newPipelinePostResponse);
 
       await waitForPromises();
     });
 
     it('displays the correct values for the provided query params', async () => {
-      expect(findDropdown().props('text')).toBe('tag-1');
+      expect(findRefsDropdown().props('value')).toEqual({ shortName: 'tag-1' });
       expect(findVariableRows()).toHaveLength(3);
     });
 
@@ -151,25 +132,42 @@ describe('Pipeline New Form', () => {
 
   describe('Pipeline creation', () => {
     beforeEach(async () => {
-      mock.onPost(pipelinesPath).reply(httpStatusCodes.OK, postResponse);
+      mock.onPost(pipelinesPath).reply(httpStatusCodes.OK, newPipelinePostResponse);
 
       await waitForPromises();
     });
+
+    it('does not submit the native HTML form', async () => {
+      createComponent();
+
+      findForm().vm.$emit('submit', dummySubmitEvent);
+
+      expect(dummySubmitEvent.preventDefault).toHaveBeenCalled();
+    });
+
+    it('disables the submit button immediately after submitting', async () => {
+      createComponent();
+
+      expect(findSubmitButton().props('disabled')).toBe(false);
+
+      findForm().vm.$emit('submit', dummySubmitEvent);
+      await waitForPromises();
+
+      expect(findSubmitButton().props('disabled')).toBe(true);
+    });
+
     it('creates pipeline with full ref and variables', async () => {
       createComponent();
 
-      changeRef(0);
-
       findForm().vm.$emit('submit', dummySubmitEvent);
-
       await waitForPromises();
 
-      expect(getExpectedPostParams().ref).toEqual(wrapper.vm.$data.refValue.fullName);
-      expect(redirectTo).toHaveBeenCalledWith(`${pipelinesPath}/${postResponse.id}`);
+      expect(getFormPostParams().ref).toEqual(`refs/heads/${defaultBranch}`);
+      expect(redirectTo).toHaveBeenCalledWith(`${pipelinesPath}/${newPipelinePostResponse.id}`);
     });
-    it('creates a pipeline with short ref and variables', async () => {
-      // query params are used
-      createComponent('', mockParams);
+
+    it('creates a pipeline with short ref and variables from the query params', async () => {
+      createComponent(mockQueryParams);
 
       await waitForPromises();
 
@@ -177,19 +175,19 @@ describe('Pipeline New Form', () => {
 
       await waitForPromises();
 
-      expect(getExpectedPostParams()).toEqual(mockPostParams);
-      expect(redirectTo).toHaveBeenCalledWith(`${pipelinesPath}/${postResponse.id}`);
+      expect(getFormPostParams()).toEqual(mockPostParams);
+      expect(redirectTo).toHaveBeenCalledWith(`${pipelinesPath}/${newPipelinePostResponse.id}`);
     });
   });
 
   describe('When the ref has been changed', () => {
     beforeEach(async () => {
-      createComponent('', {}, mount);
+      createComponent({}, mount);
 
       await waitForPromises();
     });
     it('variables persist between ref changes', async () => {
-      changeRef(0); // change to master
+      selectBranch('master');
 
       await waitForPromises();
 
@@ -199,7 +197,7 @@ describe('Pipeline New Form', () => {
 
       await wrapper.vm.$nextTick();
 
-      changeRef(1); // change to branch-1
+      selectBranch('branch-1');
 
       await waitForPromises();
 
@@ -209,14 +207,14 @@ describe('Pipeline New Form', () => {
 
       await wrapper.vm.$nextTick();
 
-      changeRef(0); // change back to master
+      selectBranch('master');
 
       await waitForPromises();
 
       expect(findKeyInputs().at(0).element.value).toBe('build_var');
       expect(findVariableRows().length).toBe(2);
 
-      changeRef(1); // change back to branch-1
+      selectBranch('branch-1');
 
       await waitForPromises();
 
@@ -225,44 +223,49 @@ describe('Pipeline New Form', () => {
     });
   });
 
-  describe('when feature flag new_pipeline_form_prefilled_vars is enabled', () => {
-    let origGon;
-
+  describe('when yml defines a variable', () => {
     const mockYmlKey = 'yml_var';
     const mockYmlValue = 'yml_var_val';
+    const mockYmlMultiLineValue = `A value
+    with multiple
+    lines`;
     const mockYmlDesc = 'A var from yml.';
 
-    beforeAll(() => {
-      origGon = window.gon;
-      window.gon = { features: { newPipelineFormPrefilledVars: true } };
-    });
+    it('loading icon is shown when content is requested and hidden when received', async () => {
+      createComponent(mockQueryParams, mount);
 
-    afterAll(() => {
-      window.gon = origGon;
-    });
-
-    describe('loading state', () => {
-      it('loading icon is shown when content is requested and hidden when received', async () => {
-        createComponent('', mockParams, mount);
-
-        mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
-          [mockYmlKey]: {
-            value: mockYmlValue,
-            description: mockYmlDesc,
-          },
-        });
-
-        expect(findLoadingIcon().exists()).toBe(true);
-
-        await waitForPromises();
-
-        expect(findLoadingIcon().exists()).toBe(false);
+      mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
+        [mockYmlKey]: {
+          value: mockYmlValue,
+          description: mockYmlDesc,
+        },
       });
+
+      expect(findLoadingIcon().exists()).toBe(true);
+
+      await waitForPromises();
+
+      expect(findLoadingIcon().exists()).toBe(false);
     });
 
-    describe('when yml defines a variable with description', () => {
+    it('multi-line strings are added to the value field without removing line breaks', async () => {
+      createComponent(mockQueryParams, mount);
+
+      mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
+        [mockYmlKey]: {
+          value: mockYmlMultiLineValue,
+          description: mockYmlDesc,
+        },
+      });
+
+      await waitForPromises();
+
+      expect(findValueInputs().at(0).element.value).toBe(mockYmlMultiLineValue);
+    });
+
+    describe('with description', () => {
       beforeEach(async () => {
-        createComponent('', mockParams, mount);
+        createComponent(mockQueryParams, mount);
 
         mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
           [mockYmlKey]: {
@@ -302,9 +305,9 @@ describe('Pipeline New Form', () => {
       });
     });
 
-    describe('when yml defines a variable without description', () => {
+    describe('without description', () => {
       beforeEach(async () => {
-        createComponent('', mockParams, mount);
+        createComponent(mockQueryParams, mount);
 
         mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
           [mockYmlKey]: {
@@ -325,31 +328,70 @@ describe('Pipeline New Form', () => {
   describe('Form errors and warnings', () => {
     beforeEach(() => {
       createComponent();
-
-      mock.onPost(pipelinesPath).reply(httpStatusCodes.BAD_REQUEST, mockError);
-
-      findForm().vm.$emit('submit', dummySubmitEvent);
-
-      return waitForPromises();
     });
 
-    it('shows both error and warning', () => {
-      expect(findErrorAlert().exists()).toBe(true);
-      expect(findWarningAlert().exists()).toBe(true);
+    describe('when the refs cannot be loaded', () => {
+      beforeEach(() => {
+        mock
+          .onGet(projectRefsEndpoint, { params: { search: '' } })
+          .reply(httpStatusCodes.INTERNAL_SERVER_ERROR);
+
+        findRefsDropdown().vm.$emit('loadingError');
+      });
+
+      it('shows both an error alert', () => {
+        expect(findErrorAlert().exists()).toBe(true);
+        expect(findWarningAlert().exists()).toBe(false);
+      });
     });
 
-    it('shows the correct error', () => {
-      expect(findErrorAlert().text()).toBe(mockError.errors[0]);
+    describe('when the error response can be handled', () => {
+      beforeEach(async () => {
+        mock.onPost(pipelinesPath).reply(httpStatusCodes.BAD_REQUEST, mockError);
+
+        findForm().vm.$emit('submit', dummySubmitEvent);
+
+        await waitForPromises();
+      });
+
+      it('shows both error and warning', () => {
+        expect(findErrorAlert().exists()).toBe(true);
+        expect(findWarningAlert().exists()).toBe(true);
+      });
+
+      it('shows the correct error', () => {
+        expect(findErrorAlert().text()).toBe(mockError.errors[0]);
+      });
+
+      it('shows the correct warning title', () => {
+        const { length } = mockError.warnings;
+
+        expect(findWarningAlertSummary().attributes('message')).toBe(`${length} warnings found:`);
+      });
+
+      it('shows the correct amount of warnings', () => {
+        expect(findWarnings()).toHaveLength(mockError.warnings.length);
+      });
+
+      it('re-enables the submit button', () => {
+        expect(findSubmitButton().props('disabled')).toBe(false);
+      });
     });
 
-    it('shows the correct warning title', () => {
-      const { length } = mockError.warnings;
+    describe('when the error response cannot be handled', () => {
+      beforeEach(async () => {
+        mock
+          .onPost(pipelinesPath)
+          .reply(httpStatusCodes.INTERNAL_SERVER_ERROR, 'something went wrong');
 
-      expect(findWarningAlertSummary().attributes('message')).toBe(`${length} warnings found:`);
-    });
+        findForm().vm.$emit('submit', dummySubmitEvent);
 
-    it('shows the correct amount of warnings', () => {
-      expect(findWarnings()).toHaveLength(mockError.warnings.length);
+        await waitForPromises();
+      });
+
+      it('re-enables the submit button', () => {
+        expect(findSubmitButton().props('disabled')).toBe(false);
+      });
     });
   });
 });

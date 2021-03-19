@@ -95,7 +95,7 @@ describe('TestCaseCreateRoot', () => {
                 projectPath: 'gitlab-org/gitlab-test',
                 title: issuableTitle,
                 description: issuableDescription,
-                labelIds: selectedLabels.map(label => label.id),
+                labelIds: selectedLabels.map((label) => label.id),
               },
             },
           }),

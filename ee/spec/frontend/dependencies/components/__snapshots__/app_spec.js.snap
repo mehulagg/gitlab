@@ -3,7 +3,7 @@
 exports[`DependenciesApp component on creation given the dependency list job has not yet run shows only the empty state 1`] = `
 Object {
   "compact": false,
-  "description": "The dependency list details information about the components used within your project.",
+  "description": null,
   "primaryButtonLink": null,
   "primaryButtonText": null,
   "secondaryButtonLink": null,
@@ -17,7 +17,7 @@ Object {
 exports[`DependenciesApp component on creation given there are no dependencies detected shows only the empty state 1`] = `
 Object {
   "compact": false,
-  "description": "It seems like the Dependency Scanning job ran successfully, but no dependencies have been detected in your project.",
+  "description": null,
   "primaryButtonLink": null,
   "primaryButtonText": null,
   "secondaryButtonLink": null,

@@ -24,15 +24,15 @@ import {
   canCreateMergeRequest,
   canDismissVulnerability,
 } from 'ee/vue_shared/security_reports/store/getters';
+import createApiFuzzingState from 'ee/vue_shared/security_reports/store/modules/api_fuzzing/state';
 import createSastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
 import createSecretScanningState from 'ee/vue_shared/security_reports/store/modules/secret_detection/state';
-import createApiFuzzingState from 'ee/vue_shared/security_reports/store/modules/api_fuzzing/state';
 import createState from 'ee/vue_shared/security_reports/store/state';
 import { groupedTextBuilder } from 'ee/vue_shared/security_reports/store/utils';
 
 const MOCK_PATH = 'fake/path.json';
 
-const generateVuln = severity => ({ severity });
+const generateVuln = (severity) => ({ severity });
 
 describe('Security reports getters', () => {
   let state = {};

@@ -2,13 +2,13 @@
 
 module Resolvers
   class DastSiteProfileResolver < BaseResolver
-    alias_method :project, :synchronized_object
+    alias_method :project, :object
 
     type Types::DastSiteProfileType.connection_type, null: true
 
     when_single do
       argument :id, ::Types::GlobalIDType[::DastSiteProfile], required: true,
-               description: "ID of the site profile"
+               description: "ID of the site profile."
     end
 
     def resolve(**args)

@@ -23,6 +23,10 @@ When a feature is no longer necessary, you can [archive the related requirement]
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [GitLab 12.10 Introduces Requirements Management](https://www.youtube.com/watch?v=uSS7oUNSEoU).
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For a more in-depth walkthrough using a [demonstration project](https://gitlab.com/gitlab-org/requiremeents-mgmt),
+see [GitLab Requirements Traceability Walkthrough](https://youtu.be/VIiuTQYFVa0) (Feb 2021).
+
 ![requirements list view](img/requirements_list_v13_5.png)
 
 ## Create a requirement
@@ -34,7 +38,7 @@ Users with Reporter or higher [permissions](../../permissions.md) can create req
 
 To create a requirement:
 
-1. From your project page, go to **Requirements**.
+1. In a project, go to **Requirements**.
 1. Select **New requirement**.
 1. Enter a title and description and select **Create requirement**.
 
@@ -92,18 +96,20 @@ As soon as a requirement is reopened, it no longer appears in the **Archived** t
 
 ## Search for a requirement
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212543) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212543) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - Searching by status [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/224614) in GitLab 13.10.
 
 You can search for a requirement from the requirements list page based on the following criteria:
 
-- Requirement title
+- Title
 - Author's username
+- Status (satisfied, failed, or missing)
 
 To search for a requirement:
 
 1. In a project, go to  **Requirements > List**.
 1. Select the **Search or filter results** field. A dropdown menu appears.
-1. Select the requirement author from the dropdown or enter plain text to search by requirement title.
+1. Select the requirement author or status from the dropdown or enter plain text to search by requirement title.
 1. Press <kbd>Enter</kbd> on your keyboard to filter the list.
 
 You can also sort the requirements list by:
@@ -179,7 +185,7 @@ requirements_confirmation:
 ### Add the manual job to CI conditionally
 
 To configure your CI to include the manual job only when there are some open
-requirements, add a rule which checks `CI_HAS_OPEN_REQUIREMENTS` CI variable.
+requirements, add a rule which checks `CI_HAS_OPEN_REQUIREMENTS` CI/CD variable.
 
 ```yaml
 requirements_confirmation:
@@ -200,10 +206,10 @@ requirements_confirmation:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/246857) in GitLab 13.7.
 
-You can import requirements to a project by uploading a CSV file with the columns
-`title` and `description`.
+You can import requirements to a project by uploading a [CSV file](https://en.wikipedia.org/wiki/Comma-separated_values)
+with the columns `title` and `description`.
 
-The user uploading the CSV file will be set as the author of the imported requirements.
+After the import, the user uploading the CSV file is set as the author of the imported requirements.
 
 Users with Reporter or higher [permissions](../../permissions.md) can import requirements.
 
@@ -213,20 +219,20 @@ Before you import your file:
 
 - Consider importing a test file containing only a few requirements. There is no way to undo a large
   import without using the GitLab API.
-- Ensure your CSV file meets the [file format](#csv-file-format) requirements.
+- Ensure your CSV file meets the [file format](#imported-csv-file-format) requirements.
 
 To import requirements:
 
-1. Navigate to a project's Requirements page.
-   - If the project already has existing requirements, click the import icon (**{import}**) at the
+1. In a project, go to **Requirements**.
+   - If the project already has existing requirements, select the import icon (**{import}**) in the
      top right.
-   - For a project without any requirements, click **Import CSV** in the middle of the page.
-1. Select the file and click **Import requirements**.
+   - For a project without any requirements, select **Import CSV** in the middle of the page.
+1. Select the file and select **Import requirements**.
 
 The file is processed in the background and a notification email is sent
 to you after the import is complete.
 
-### CSV file format
+### Imported CSV file format
 
 When importing requirements from a CSV file, it must be formatted in a certain way:
 
@@ -257,3 +263,61 @@ Another Title,"A description, with a comma"
 The limit depends on the configuration value of Max Attachment Size for the GitLab instance.
 
 For GitLab.com, it is set to 10 MB.
+
+## Export requirements to a CSV file
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290813) in GitLab 13.8.
+> - Revised CSV column headers [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299247) in GitLab 13.9.
+> - Ability to select which fields to export [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290823) in GitLab 13.9.
+
+You can export GitLab requirements to a
+[CSV file](https://en.wikipedia.org/wiki/Comma-separated_values) sent to your default notification
+email as an attachment.
+
+By exporting requirements, you and your team can import them into another tool or share them with
+your customers. Exporting requirements can aid collaboration with higher-level systems, as well as
+audit and regulatory compliance tasks.
+
+Users with Reporter or higher [permissions](../../permissions.md) can export requirements.
+
+To export requirements:
+
+1. In a project, go to **Requirements**.
+1. In the top right, select the **Export as CSV** icon (**{export}**).
+
+   A confirmation modal appears.
+
+1. Under **Advanced export options**, select which fields to export.
+
+   All fields are selected by default. To exclude a field from being exported, clear the checkbox next to it.
+
+1. Select **Export requirements**. The exported CSV file is sent to the email address associated with your user.
+
+### Exported CSV file format
+
+<!-- vale gitlab.Spelling = NO -->
+You can preview the exported CSV file in a spreadsheet editor, such as Microsoft Excel,
+OpenOffice Calc, or Google Sheets.
+<!-- vale gitlab.Spelling = YES -->
+
+The exported CSV file contains the following headers:
+
+- In GitLab 13.8:
+
+  - Requirement ID
+  - Title
+  - Description
+  - Author Username
+  - Latest Test Report State
+  - Latest Test Report Created At (UTC)
+
+- In GitLab 13.9 and later:
+
+  - Requirement ID
+  - Title
+  - Description
+  - Author
+  - Author Username
+  - Created At (UTC)
+  - State
+  - State Updated At (UTC)

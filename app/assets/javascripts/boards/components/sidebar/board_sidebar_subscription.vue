@@ -1,6 +1,6 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
 import { GlToggle } from '@gitlab/ui';
+import { mapGetters, mapActions } from 'vuex';
 import createFlash from '~/flash';
 import { __, s__ } from '~/locale';
 
@@ -15,7 +15,7 @@ export default {
       ),
     },
     updateSubscribedErrorMessage: s__(
-      'IssueBoards|An error occurred while setting notifications status.',
+      'IssueBoards|An error occurred while setting notifications status. Please try again.',
     ),
   },
   components: {
@@ -64,6 +64,8 @@ export default {
       v-if="!activeIssue.emailsDisabled"
       :value="activeIssue.subscribed"
       :is-loading="loading"
+      :label="$options.i18n.header.title"
+      label-position="hidden"
       data-testid="notification-subscribe-toggle"
       @change="handleToggleSubscription"
     />

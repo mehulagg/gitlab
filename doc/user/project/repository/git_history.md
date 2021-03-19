@@ -6,7 +6,7 @@ type: reference, howto
 description: "Documentation on Git file history."
 ---
 
-# Git file history
+# Git file history **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/blob/9ba1224867665844b117fa037e1465bb706b3685/app/controllers/commits_controller.rb) in GitLab 0.8.0
 
@@ -17,13 +17,12 @@ You can find the **History** button with each file in a project.
 
 ![File history button](img/file_history_button_v12_6.png "History button")
 
-When you select the **History** button, you'll see a screen with the
-noted information:
+When you select the **History** button, this information displays:
 
 ![Git log output](img/file_history_output_v12_6.png "History button output")
 
-If you hover over a commit in the UI, you'll see a precise date and time
-that commit was last modified.
+If you hover over a commit in the UI, the precise date and time of the commit modification
+are shown.
 
 ## Associated `git` command
 
@@ -36,7 +35,7 @@ following command:
 git log README.md
 ```
 
-You'll see output similar to the following, which includes the commit
+Git displays output similar to the following, which includes the commit
 time in UTC format:
 
 ```shell

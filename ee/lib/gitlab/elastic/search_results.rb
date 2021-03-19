@@ -89,35 +89,67 @@ module Gitlab
       end
 
       def projects_count
-        @projects_count ||= projects.total_count
+        @projects_count ||= if strong_memoized?(:projects)
+                              projects.total_count
+                            else
+                              projects(count_only: true).total_count
+                            end
       end
 
       def notes_count
-        @notes_count ||= notes.total_count
+        @notes_count ||= if strong_memoized?(:notes)
+                           notes.total_count
+                         else
+                           notes(count_only: true).total_count
+                         end
       end
 
       def blobs_count
-        @blobs_count ||= blobs.total_count
+        @blobs_count ||= if strong_memoized?(:blobs)
+                           blobs.total_count
+                         else
+                           blobs(count_only: true).total_count
+                         end
       end
 
       def wiki_blobs_count
-        @wiki_blobs_count ||= wiki_blobs.total_count
+        @wiki_blobs_count ||= if strong_memoized?(:wiki_blobs)
+                                wiki_blobs.total_count
+                              else
+                                wiki_blobs(count_only: true).total_count
+                              end
       end
 
       def commits_count
-        @commits_count ||= commits.total_count
+        @commits_count ||= if strong_memoized?(:commits)
+                             commits.total_count
+                           else
+                             commits(count_only: true).total_count
+                           end
       end
 
       def issues_count
-        @issues_count ||= issues.total_count
+        @issues_count ||= if strong_memoized?(:issues)
+                            issues.total_count
+                          else
+                            issues(count_only: true).total_count
+                          end
       end
 
       def merge_requests_count
-        @merge_requests_count ||= merge_requests.total_count
+        @merge_requests_count ||= if strong_memoized?(:merge_requests)
+                                    merge_requests.total_count
+                                  else
+                                    merge_requests(count_only: true).total_count
+                                  end
       end
 
       def milestones_count
-        @milestones_count ||= milestones.total_count
+        @milestones_count ||= if strong_memoized?(:milestones)
+                                milestones.total_count
+                              else
+                                milestones(count_only: true).total_count
+                              end
       end
 
       # mbergeron: these aliases act as an adapter to the Gitlab::SearchResults
@@ -208,69 +240,77 @@ module Gitlab
         }
       end
 
-      def projects
-        strong_memoize(:projects) do
-          Project.elastic_search(query, options: base_options)
-        end
-      end
-
-      def issues
-        strong_memoize(:issues) do
-          options = base_options.merge(filters.slice(:order_by, :sort, :confidential, :state))
-
-          Issue.elastic_search(query, options: options)
-        end
-      end
-
-      def milestones
-        strong_memoize(:milestones) do
+      def scope_options(scope)
+        case scope
+        when :merge_requests
+          base_options.merge(filters.slice(:order_by, :sort, :state))
+        when :issues
+          base_options.merge(filters.slice(:order_by, :sort, :confidential, :state))
+        when :milestones
           # Must pass 'issues' and 'merge_requests' to check
           # if any of the features is available for projects in ApplicationClassProxy#project_ids_query
           # Otherwise it will ignore project_ids and return milestones
           # from projects with milestones disabled.
-          options = base_options
-          options[:features] = [:issues, :merge_requests]
-
-          Milestone.elastic_search(query, options: options)
+          base_options.merge(features: [:issues, :merge_requests])
+        else
+          base_options
         end
       end
 
-      def merge_requests
-        strong_memoize(:merge_requests) do
-          options = base_options.merge(filters.slice(:order_by, :sort, :state))
+      def scope_results(scope, klass, count_only:)
+        options = scope_options(scope).merge(count_only: count_only)
 
-          MergeRequest.elastic_search(query, options: options)
+        strong_memoize(memoize_key(scope, count_only: count_only)) do
+          klass.elastic_search(query, options: options)
         end
       end
 
-      def notes
-        strong_memoize(:notes) do
-          Note.elastic_search(query, options: base_options)
-        end
+      def memoize_key(scope, count_only:)
+        count_only ? "#{scope}_results_count".to_sym : scope
       end
 
-      def blobs(page: 1, per_page: DEFAULT_PER_PAGE)
+      def projects(count_only: false)
+        scope_results :projects, Project, count_only: count_only
+      end
+
+      def issues(count_only: false)
+        scope_results :issues, Issue, count_only: count_only
+      end
+
+      def milestones(count_only: false)
+        scope_results :milestones, Milestone, count_only: count_only
+      end
+
+      def merge_requests(count_only: false)
+        scope_results :merge_requests, MergeRequest, count_only: count_only
+      end
+
+      def notes(count_only: false)
+        scope_results :notes, Note, count_only: count_only
+      end
+
+      def blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false)
         return Kaminari.paginate_array([]) if query.blank?
 
-        strong_memoize(:blobs) do
+        strong_memoize(memoize_key(:blobs, count_only: count_only)) do
           Repository.__elasticsearch__.elastic_search_as_found_blob(
             query,
             page: (page || 1).to_i,
             per: per_page,
-            options: base_options
+            options: base_options.merge(count_only: count_only)
           )
         end
       end
 
-      def wiki_blobs(page: 1, per_page: DEFAULT_PER_PAGE)
+      def wiki_blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false)
         return Kaminari.paginate_array([]) if query.blank?
 
-        strong_memoize(:wiki_blobs) do
+        strong_memoize(memoize_key(:wiki_blobs, count_only: count_only)) do
           ProjectWiki.__elasticsearch__.elastic_search_as_wiki_page(
             query,
             page: (page || 1).to_i,
             per: per_page,
-            options: base_options
+            options: base_options.merge(count_only: count_only)
           )
         end
       end
@@ -281,15 +321,15 @@ module Gitlab
       # hitting ES twice for any page that's not page 1, and that's something we want to avoid.
       #
       # It is safe to memoize the page we get here because this method is _always_ called before `#commits_count`
-      def commits(page: 1, per_page: DEFAULT_PER_PAGE, preload_method: nil)
+      def commits(page: 1, per_page: DEFAULT_PER_PAGE, preload_method: nil, count_only: false)
         return Kaminari.paginate_array([]) if query.blank?
 
-        strong_memoize(:commits) do
+        strong_memoize(memoize_key(:commits, count_only: count_only)) do
           Repository.find_commits_by_message_with_elastic(
             query,
             page: (page || 1).to_i,
             per_page: per_page,
-            options: base_options,
+            options: base_options.merge(count_only: count_only),
             preload_method: preload_method
           )
         end

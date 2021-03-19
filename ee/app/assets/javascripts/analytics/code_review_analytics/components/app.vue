@@ -1,8 +1,8 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlBadge, GlLoadingIcon, GlEmptyState, GlPagination } from '@gitlab/ui';
-import MergeRequestTable from './merge_request_table.vue';
+import { mapState, mapActions } from 'vuex';
 import FilterBar from './filter_bar.vue';
+import MergeRequestTable from './merge_request_table.vue';
 
 export default {
   components: {
@@ -34,9 +34,9 @@ export default {
   computed: {
     ...mapState('mergeRequests', {
       isLoading: 'isLoading',
-      perPage: state => state.pageInfo.perPage,
-      totalItems: state => state.pageInfo.total,
-      page: state => state.pageInfo.page,
+      perPage: (state) => state.pageInfo.perPage,
+      totalItems: (state) => state.pageInfo.total,
+      page: (state) => state.pageInfo.page,
     }),
     currentPage: {
       get() {

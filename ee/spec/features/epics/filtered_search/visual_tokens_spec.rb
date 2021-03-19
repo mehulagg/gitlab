@@ -16,6 +16,7 @@ RSpec.describe 'epics list', :js do
 
   before do
     stub_licensed_features(epics: true)
+    stub_feature_flags(vue_epics_list: false)
 
     sign_in(user)
 

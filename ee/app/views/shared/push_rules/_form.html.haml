@@ -1,82 +1,64 @@
 = render 'shared/push_rules/commit_committer_check_setting', form: f, push_rule: f.object, context: context
-
 = render 'shared/push_rules/reject_unsigned_commits_setting', form: f, push_rule: f.object, context: context
+- wiki_syntax_link_url = 'https://github.com/google/re2/wiki/Syntax'
+- wiki_syntax_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: wiki_syntax_link_url }
 
 .form-check
   = f.check_box :deny_delete_tag, class: "form-check-input", data: { qa_selector: 'deny_delete_tag_checkbox' }
   = f.label :deny_delete_tag, class: "label-bold form-check-label" do
-    Do not allow users to remove git tags with
-    %code git push
+    = s_("PushRules|Do not allow users to remove Git tags with %{code_block_start}git push%{code_block_end}").html_safe % { code_block_start: '<code>'.html_safe, code_block_end: '</code>'.html_safe }
+
   %p.text-muted
-    Tags can still be deleted through the web UI.
+    = s_('PushRules|Users can still delete tags through the GitLab UI.')
 
 .form-check
   = f.check_box :member_check, class: "form-check-input", data: { qa_selector: 'restrict_author_checkbox' }
-  = f.label :member_check, "Check whether author is a GitLab user", class: "label-bold form-check-label"
+  = f.label :member_check, "Check whether the commit author is a GitLab user", class: "label-bold form-check-label"
   %p.text-muted
-    Restrict commits by author (email) to existing GitLab users
-
+    = s_('PushRules|Restrict commits to existing GitLab users.')
 
 .form-check
   = f.check_box :prevent_secrets, class: "form-check-input", data: { qa_selector: 'prevent_secrets_checkbox' }
-  = f.label :prevent_secrets, "Prevent committing secrets to Git", class: "label-bold form-check-label"
+  = f.label :prevent_secrets, "Prevent pushing secret files", class: "label-bold form-check-label"
   %p.text-muted
-    GitLab will reject any files that are likely to contain secrets.
-    The list of file names we reject is available in the #{link_to "documentation", help_page_path('push_rules/push_rules')}.
+    - secret_files_link_url = help_page_path('push_rules/push_rules', anchor: 'prevent-pushing-secrets-to-the-repository')
+    - secret_files_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: secret_files_link_url }
+    = s_("PushRules|Reject any files likely to contain secrets. %{secret_files_link_start}What secret files are rejected?%{secret_files_link_end}").html_safe % { secret_files_link_start: secret_files_link_start, secret_files_link_end: '</a>'.html_safe }
 
 .form-group
-  = f.label :commit_message_regex, "Commit message", class: "label-bold"
+  = f.label :commit_message_regex, "Require expression in commit messages", class: "label-bold"
   = f.text_field :commit_message_regex, class: "form-control", placeholder: 'Example: Fixes \d+\..*', data: { qa_selector: 'commit_message_field' }
   .form-text.text-muted
-    All commit messages must match this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
-    If this field is empty it allows any commit message.
-    For example you can require that an issue number is always mentioned in the commit message.
+    = s_("PushRules|All commit messages must match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, commit messages are not required to match any expression.").html_safe % { wiki_syntax_link_start: wiki_syntax_link_start, wiki_syntax_link_end: '</a>'.html_safe }
 
 .form-group
-  = f.label :commit_message_negative_regex, "Commit message negative match", class: 'label-bold'
+  = f.label :commit_message_negative_regex, "Reject expression in commit messages", class: 'label-bold'
   = f.text_field :commit_message_negative_regex, class: "form-control", placeholder: 'Example: ssh\:\/\/', data: { qa_selector: 'deny_commit_message_field' }
   .form-text.text-muted
-    No commit message is allowed to match this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
-    If this field is empty it allows any commit message.
-    For example you can require that no commit message contains any links.
+    = s_("PushRules|Commit messages cannot match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, commit messages are not rejected based on any expression.").html_safe % { wiki_syntax_link_start: wiki_syntax_link_start, wiki_syntax_link_end: '</a>'.html_safe }
 
 .form-group
   = f.label :branch_name_regex, "Branch name", class: "label-bold"
   = f.text_field :branch_name_regex, class: "form-control", placeholder: 'Example: (feature|hotfix)\/*', data: { qa_selector: 'branch_name_field' }
   .form-text.text-muted
-    All branch names must match this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
-    If this field is empty it allows any branch name.
+    = s_("PushRules|All branch names must match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, any branch name is allowed.").html_safe % { wiki_syntax_link_start: wiki_syntax_link_start, wiki_syntax_link_end: '</a>'.html_safe }
 
 .form-group
   = f.label :author_email_regex, "Commit author's email", class: "label-bold"
   = f.text_field :author_email_regex, class: "form-control", placeholder: _('Example: @sub\.company\.com$'), data: { qa_selector: 'author_email_field' }
   .form-text.text-muted
-    All commit author's email must match this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
-    If this field is empty it allows any email.
+    = s_("PushRules|All commit author's email must match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, any email is allowed.").html_safe % { wiki_syntax_link_start: wiki_syntax_link_start, wiki_syntax_link_end: '</a>'.html_safe }
 
 .form-group
   = f.label :file_name_regex, "Prohibited file names", class: "label-bold"
   = f.text_field :file_name_regex, class: "form-control", placeholder: 'Example: (jar|exe)$', data: { qa_selector: 'file_name_field' }
   .form-text.text-muted
-    All committed filenames must not match this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
-    If this field is empty it allows any filenames.
+    = s_('PushRules|All committed filenames cannot match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, any filename is allowed.').html_safe % { wiki_syntax_link_start: wiki_syntax_link_start, wiki_syntax_link_end: '</a>'.html_safe }
 
 .form-group
   = f.label :max_file_size, "Maximum file size (MB)", class: "label-bold"
   = f.number_field :max_file_size, class: "form-control", min: 0, data: { qa_selector: 'file_size_field' }
   .form-text.text-muted
-    Pushes that contain added or updated files that exceed this file size are rejected.
-    Set to 0 to allow files of any size.
-    Files tracked by Git LFS are exempted.
+    = s_('PushRules|Reject file sizes equal to or greater than this size. If set to 0, files of any size are allowed. This rule does not apply to files tracked by Git LFS.')
 
-= f.submit _("Save Push Rules"), class: "btn btn-success", data: { qa_selector: 'submit_settings_button' }
+= f.submit s_("PushRules|Save push rules"), class: "btn gl-button btn-success", data: { qa_selector: 'submit_settings_button' }

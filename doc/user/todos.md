@@ -5,7 +5,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab To-Do List **(CORE)**
+# GitLab To-Do List **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/2817) in GitLab 8.5.
 
@@ -72,7 +72,7 @@ prevent data loss, in the case where a user's access is accidentally revoked.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7926) in GitLab 9.0.
 
-If you're mentioned at the start of a line, the to-do item you receive is 
+If you're mentioned at the start of a line, the to-do item you receive is
 listed as *directly addressed*. For example, in the following comment:
 
 ```markdown

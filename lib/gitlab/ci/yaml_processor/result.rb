@@ -53,6 +53,10 @@ module Gitlab
           @stages ||= @ci_config.stages
         end
 
+        def included_templates
+          @included_templates ||= @ci_config.included_templates
+        end
+
         def build_attributes(name)
           job = jobs.fetch(name.to_sym, {})
 
@@ -97,7 +101,7 @@ module Gitlab
         end
 
         def merged_yaml
-          @ci_config&.to_hash&.to_yaml
+          @ci_config&.to_hash&.deep_stringify_keys&.to_yaml
         end
 
         def variables_with_data
@@ -119,9 +123,7 @@ module Gitlab
         end
 
         def transform_to_yaml_variables(variables)
-          variables.to_h.map do |key, value|
-            { key: key.to_s, value: value, public: true }
-          end
+          ::Gitlab::Ci::Variables::Helpers.transform_to_yaml_variables(variables)
         end
       end
     end

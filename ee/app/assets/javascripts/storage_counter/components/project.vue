@@ -1,9 +1,9 @@
 <script>
 import { GlLink, GlIcon } from '@gitlab/ui';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
-import { numberToHumanSize, isOdd } from '~/lib/utils/number_utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { numberToHumanSize, isOdd } from '~/lib/utils/number_utils';
 import { s__ } from '~/locale';
+import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import StorageRow from './storage_row.vue';
 
 export default {
@@ -105,7 +105,7 @@ export default {
         </div>
         <div class="table-mobile-content gl-display-flex gl-align-items-center">
           <div class="gl-display-flex gl-mr-3 gl-align-items-center">
-            <gl-icon :size="10" :name="iconName" class="gl-mr-2" />
+            <gl-icon :size="10" :name="iconName" use-deprecated-sizes class="gl-mr-2" />
             <gl-icon name="bookmark" />
           </div>
           <div>

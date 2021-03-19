@@ -2,4 +2,5 @@
 
 # Model for join table between ApprovalProjectRule and ProtectedBranch
 class ApprovalProjectRulesProtectedBranch < ApplicationRecord
+  extend SuppressCompositePrimaryKeyWarning
 end

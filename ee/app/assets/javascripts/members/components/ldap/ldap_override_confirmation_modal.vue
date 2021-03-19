@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlModal, GlSprintf } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { __, s__ } from '~/locale';
 import { LDAP_OVERRIDE_CONFIRMATION_MODAL_ID } from '../../constants';
 

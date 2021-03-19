@@ -1,8 +1,8 @@
 <script>
-import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import summaryStatsQuery from '../graphql/iteration_issues_summary.query.graphql';
+import { __ } from '~/locale';
 import { Namespace, Unit } from '../constants';
+import summaryStatsQuery from '../graphql/iteration_issues_summary.query.graphql';
 
 export default {
   apollo: {
@@ -36,13 +36,13 @@ export default {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
     displayValue: {
       type: String,
       required: false,
       default: Unit.count,
-      validator: val => Unit[val],
+      validator: (val) => Unit[val],
     },
   },
   data() {

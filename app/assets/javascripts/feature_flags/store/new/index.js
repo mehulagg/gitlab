@@ -1,10 +1,10 @@
 import Vuex from 'vuex';
 import userLists from '../gitlab_user_list';
-import state from './state';
 import * as actions from './actions';
 import mutations from './mutations';
+import state from './state';
 
-export default data =>
+export default (data) =>
   new Vuex.Store({
     actions,
     mutations,

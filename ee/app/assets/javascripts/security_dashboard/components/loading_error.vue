@@ -27,7 +27,7 @@ export default {
     errorCode: {
       type: Number,
       required: true,
-      validator: value => Object.values(ERROR_CODES).includes(value),
+      validator: (value) => Object.values(ERROR_CODES).includes(value),
     },
     illustrations: {
       type: Object,

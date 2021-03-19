@@ -1,6 +1,6 @@
 <script>
+import { GlAlert, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import {
   WEBIDE_MARK_APP_START,
@@ -10,13 +10,12 @@ import {
   WEBIDE_MEASURE_BEFORE_VUE,
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { modalTypes } from '../constants';
 import eventHub from '../eventhub';
+import { measurePerformance } from '../utils';
 import IdeSidebar from './ide_side_bar.vue';
 import RepoEditor from './repo_editor.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-
-import { measurePerformance } from '../utils';
 
 eventHub.$on(WEBIDE_MEASURE_FILE_AFTER_INTERACTION, () =>
   measurePerformance(
@@ -30,6 +29,7 @@ export default {
   components: {
     IdeSidebar,
     RepoEditor,
+    GlAlert,
     GlButton,
     GlLoadingIcon,
     ErrorMessage: () => import(/* webpackChunkName: 'ide_runtime' */ './error_message.vue'),
@@ -59,12 +59,14 @@ export default {
       'loading',
     ]),
     ...mapGetters([
+      'canPushCodeStatus',
       'activeFile',
       'someUncommittedChanges',
       'isCommitModeActive',
       'allBlobs',
       'emptyRepo',
       'currentTree',
+      'hasCurrentProject',
       'editorTheme',
       'getUrlForPath',
     ]),
@@ -73,7 +75,7 @@ export default {
     },
   },
   mounted() {
-    window.onbeforeunload = e => this.onBeforeUnload(e);
+    window.onbeforeunload = (e) => this.onBeforeUnload(e);
 
     if (this.themeName)
       document.querySelector('.navbar-gitlab').classList.add(`theme-${this.themeName}`);
@@ -118,6 +120,9 @@ export default {
     class="ide position-relative d-flex flex-column align-items-stretch"
     :class="{ [`theme-${themeName}`]: themeName }"
   >
+    <gl-alert v-if="!canPushCodeStatus.isAllowed" :dismissible="false">{{
+      canPushCodeStatus.message
+    }}</gl-alert>
     <error-message v-if="errorMessage" :message="errorMessage" />
     <div class="ide-view flex-grow d-flex">
       <template v-if="loadDeferred">

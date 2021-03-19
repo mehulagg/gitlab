@@ -274,7 +274,7 @@ RSpec.describe MergeRequests::RefreshService do
         expect { subject }
           .to change { merge_request.pipelines_for_merge_request.count }.by(1)
 
-        expect(merge_request.all_pipelines.last).to be_merge_request_pipeline
+        expect(merge_request.all_pipelines.last).to be_merged_result_pipeline
       end
 
       context 'when MergeRequestUpdateWorker is retried by an exception' do

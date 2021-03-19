@@ -1,5 +1,6 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 export default {
@@ -7,23 +8,19 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   components: { GlIcon },
-  mixins: [timeagoMixin],
+  mixins: [timeagoMixin, glFeatureFlagMixin()],
   props: {
-    finishedTime: {
-      type: String,
-      required: true,
-    },
-    duration: {
-      type: Number,
+    pipeline: {
+      type: Object,
       required: true,
     },
   },
   computed: {
-    hasDuration() {
-      return this.duration > 0;
+    duration() {
+      return this.pipeline?.details?.duration;
     },
-    hasFinishedTime() {
-      return this.finishedTime !== '';
+    finishedTime() {
+      return this.pipeline?.details?.finished_at;
     },
     durationFormatted() {
       const date = new Date(this.duration * 1000);
@@ -45,20 +42,49 @@ export default {
 
       return `${hh}:${mm}:${ss}`;
     },
+    legacySectionClass() {
+      return !this.glFeatures.newPipelinesTable ? 'table-section section-15' : '';
+    },
+    legacyTableMobileClass() {
+      return !this.glFeatures.newPipelinesTable ? 'table-mobile-content' : '';
+    },
+    singleStagePipelineManual() {
+      return (
+        this.pipeline.details.manual_actions.length > 0 && this.pipeline.details.stages.length === 1
+      );
+    },
+    showInProgress() {
+      return !this.duration && !this.finishedTime && !this.singleStagePipelineManual;
+    },
+    showSkipped() {
+      return !this.duration && !this.finishedTime && this.singleStagePipelineManual;
+    },
   },
 };
 </script>
 <template>
-  <div class="table-section section-15">
-    <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Duration') }}</div>
-    <div class="table-mobile-content">
-      <p v-if="hasDuration" class="duration">
-        <gl-icon name="timer" class="gl-vertical-align-baseline!" />
+  <div :class="legacySectionClass">
+    <div v-if="!glFeatures.newPipelinesTable" class="table-mobile-header" role="rowheader">
+      {{ s__('Pipeline|Duration') }}
+    </div>
+    <div :class="legacyTableMobileClass">
+      <span v-if="showInProgress" data-testid="pipeline-in-progress">
+        <gl-icon name="hourglass" class="gl-vertical-align-baseline! gl-mr-2" :size="12" />
+        {{ s__('Pipeline|In progress') }}
+      </span>
+
+      <span v-if="showSkipped" data-testid="pipeline-skipped">
+        <gl-icon name="status_skipped_borderless" class="gl-mr-2" :size="16" />
+        {{ s__('Pipeline|Skipped') }}
+      </span>
+
+      <p v-if="duration" class="duration">
+        <gl-icon name="timer" class="gl-vertical-align-baseline!" :size="12" />
         {{ durationFormatted }}
       </p>
 
-      <p v-if="hasFinishedTime" class="finished-at d-none d-md-block">
-        <gl-icon name="calendar" class="gl-vertical-align-baseline!" />
+      <p v-if="finishedTime" class="finished-at d-none d-md-block">
+        <gl-icon name="calendar" class="gl-vertical-align-baseline!" :size="12" />
 
         <time
           v-gl-tooltip

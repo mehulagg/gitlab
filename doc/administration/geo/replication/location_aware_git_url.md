@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Location-aware Git remote URL with AWS Route53 **(PREMIUM ONLY)**
+# Location-aware Git remote URL with AWS Route53 **(PREMIUM SELF)**
 
 You can provide GitLab users with a single remote URL that automatically uses
 the Geo node closest to them. This means users don't need to update their Git
@@ -51,8 +51,8 @@ If you haven't yet set up a Geo _primary_ node and _secondary_ node, see the
 In a Route53 Hosted Zone, traffic policies can be used to set up a variety of
 routing configurations.
 
-1. Navigate to the
-[Route53 dashboard](https://console.aws.amazon.com/route53/home) and click
+1. Go to the
+[Route53 dashboard](https://console.aws.amazon.com/route53/home) and select
 **Traffic policies**.
 
    ![Traffic policies](img/single_git_traffic_policies.png)

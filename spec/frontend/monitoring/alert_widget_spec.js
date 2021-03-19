@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlTooltip, GlSprintf, GlBadge } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
-import AlertWidget from '~/monitoring/components/alert_widget.vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import AlertWidget from '~/monitoring/components/alert_widget.vue';
 
 const mockReadAlert = jest.fn();
 const mockCreateAlert = jest.fn();
@@ -83,7 +83,7 @@ describe('AlertWidget', () => {
     },
   };
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(AlertWidget, {
       stubs: { GlTooltip, GlSprintf },
       propsData: {
@@ -108,7 +108,7 @@ describe('AlertWidget', () => {
   it('displays a loading spinner and disables form when fetching alerts', () => {
     let resolveReadAlert;
     mockReadAlert.mockReturnValue(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolveReadAlert = resolve;
       }),
     );
@@ -131,7 +131,7 @@ describe('AlertWidget', () => {
   it('does not render loading spinner if showLoadingState is false', () => {
     let resolveReadAlert;
     mockReadAlert.mockReturnValue(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolveReadAlert = resolve;
       }),
     );

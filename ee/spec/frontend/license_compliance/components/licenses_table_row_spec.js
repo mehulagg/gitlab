@@ -102,7 +102,7 @@ describe('LicensesTableRow component', () => {
 
       expect(nameSection.find(GlLink).exists()).toBe(true);
       expect(nameSection.find(GlFriendlyWrap).exists()).toBe(true);
-      expect(nameSection.find(GlFriendlyWrap).props().text).toBe(license.name);
+      expect(nameSection.find(GlFriendlyWrap).attributes().text).toBe(license.name);
     });
   });
 

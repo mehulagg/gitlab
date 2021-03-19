@@ -44,6 +44,12 @@ export default {
     emitInput(value) {
       this.$emit('input', value);
     },
+    async emitDropdownShow() {
+      this.$emit('dropdown-show');
+      // Focus on the search box when the dropdown is opened.
+      await this.$nextTick();
+      this.$refs.searchBox?.focusInput();
+    },
   },
 };
 </script>
@@ -56,6 +62,8 @@ export default {
       menu-class="dropdown-extended-height"
       :header-text="name"
       toggle-class="gl-w-full"
+      @show="emitDropdownShow"
+      @hide="$emit('dropdown-hide')"
     >
       <template #button-content>
         <gl-truncate
@@ -69,11 +77,14 @@ export default {
         <gl-icon name="chevron-down" class="gl-flex-shrink-0 gl-ml-auto" />
       </template>
 
-      <gl-search-box-by-type
-        v-if="showSearchBox"
-        :placeholder="__('Filter...')"
-        @input="emitInput"
-      />
+      <template v-if="showSearchBox" #header>
+        <gl-search-box-by-type
+          ref="searchBox"
+          :placeholder="__('Search')"
+          autocomplete="off"
+          @input="emitInput"
+        />
+      </template>
 
       <slot>
         <gl-dropdown-text>

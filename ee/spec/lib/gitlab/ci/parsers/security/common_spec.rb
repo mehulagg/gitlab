@@ -9,12 +9,24 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
     let(:location) { ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(file_path: 'yarn/yarn.lock', package_version: 'v2', package_name: 'saml2') }
+    let(:tracking_data) do
+      {
+        'type' => 'source',
+        'items' => [
+          'fingerprints' => [
+            { 'algorithm' => 'hash', 'value' => 'hash_value' },
+            { 'algorithm' => 'location', 'value' => 'location_value' },
+            { 'algorithm' => 'scope_offset', 'value' => 'scope_offset_value' }
+          ]
+        ]
+      }
+    end
 
     before do
       allow_next_instance_of(described_class) do |parser|
         allow(parser).to receive(:create_location).and_return(location)
+        allow(parser).to receive(:tracking_data).and_return(tracking_data)
       end
-
       artifact.each_blob { |blob| described_class.parse!(blob, report) }
     end
 
@@ -163,14 +175,59 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     describe 'setting the uuid' do
       let(:finding_uuids) { report.findings.map(&:uuid) }
-      let(:uuid_1_components) { "dependency_scanning-4ff8184cd18485b6e85d5b101e341b12eacd1b3b-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
-      let(:uuid_2_components) { "dependency_scanning-d55f9e66e79882ae63af9fd55cc822ab75307e31-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
-      let(:uuid_1) { Gitlab::UUID.v5(uuid_1_components) }
-      let(:uuid_2) { Gitlab::UUID.v5(uuid_2_components) }
+      let(:uuid_1) do
+        Security::VulnerabilityUUID.generate(
+          report_type: "dependency_scanning",
+          primary_identifier_fingerprint: "4ff8184cd18485b6e85d5b101e341b12eacd1b3b",
+          location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+          project_id: pipeline.project_id
+        )
+      end
+
+      let(:uuid_2) do
+        Security::VulnerabilityUUID.generate(
+          report_type: "dependency_scanning",
+          primary_identifier_fingerprint: "d55f9e66e79882ae63af9fd55cc822ab75307e31",
+          location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+          project_id: pipeline.project_id
+        )
+      end
+
       let(:expected_uuids) { [uuid_1, uuid_2, nil] }
 
       it 'sets the UUIDv5 for findings', :aggregate_failures do
         expect(finding_uuids).to match_array(expected_uuids)
+      end
+    end
+
+    describe 'parsing tracking' do
+      context 'with valid tracking information' do
+        it 'creates fingerprints for each algorithm' do
+          finding = report.findings.first
+          expect(finding.fingerprints.size).to eq(3)
+          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location', 'scope_offset'])
+        end
+      end
+
+      context 'with invalid tracking information' do
+        let(:tracking_data) do
+          {
+            'type' => 'source',
+            'items' => [
+              'fingerprints' => [
+                { 'algorithm' => 'hash', 'value' => 'hash_value' },
+                { 'algorithm' => 'location', 'value' => 'location_value' },
+                { 'algorithm' => 'INVALID', 'value' => 'scope_offset_value' }
+              ]
+            ]
+          }
+        end
+
+        it 'ignores invalid algorithm types' do
+          finding = report.findings.first
+          expect(finding.fingerprints.size).to eq(2)
+          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
+        end
       end
     end
   end

@@ -5,8 +5,8 @@ import VueApollo from 'vue-apollo';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
 import ProjectSecurityCharts from 'ee/security_dashboard/components/project_security_charts.vue';
 import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
-import projectsHistoryQuery from 'ee/security_dashboard/graphql/project_vulnerabilities_by_day_and_count.graphql';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import projectsHistoryQuery from 'ee/security_dashboard/graphql/queries/project_vulnerabilities_by_day_and_count.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import {
   mockProjectSecurityChartsWithData,
   mockProjectSecurityChartsWithoutData,
@@ -14,6 +14,10 @@ import {
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
+
+jest.mock('~/lib/utils/icon_utils', () => ({
+  getSvgIconPathContent: jest.fn().mockResolvedValue('mockSvgPathContent'),
+}));
 
 describe('Project Security Charts component', () => {
   let wrapper;
@@ -87,12 +91,23 @@ describe('Project Security Charts component', () => {
       return wrapper.vm.$nextTick();
     });
 
-    it('should display the chart with data', async () => {
+    it('should display the chart with data', () => {
       expect(findLineChart().props('data')).toMatchSnapshot();
     });
 
     it('should not display the loading icon', () => {
       expect(findLoadingIcon().exists()).toBe(false);
+    });
+
+    it.each([['restore'], ['saveAsImage']])('should contain %i icon', (icon) => {
+      const option = findLineChart().props('option').toolbox.feature;
+      expect(option[icon].icon).toBe('path://mockSvgPathContent');
+    });
+
+    it('contains dataZoom config', () => {
+      const option = findLineChart().props('option').toolbox.feature;
+      expect(option.dataZoom.icon.zoom).toBe('path://mockSvgPathContent');
+      expect(option.dataZoom.icon.back).toBe('path://mockSvgPathContent');
     });
   });
 

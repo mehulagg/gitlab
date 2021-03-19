@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
 require 'rubocop/rspec/support'
 require_relative '../../../rubocop/cop/filename_length'
 
-RSpec.describe RuboCop::Cop::FilenameLength, type: :rubocop do
+RSpec.describe RuboCop::Cop::FilenameLength do
   subject(:cop) { described_class.new }
 
   it 'does not flag files with names 100 characters long' do

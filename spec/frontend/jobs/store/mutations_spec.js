@@ -1,6 +1,6 @@
-import state from '~/jobs/store/state';
-import mutations from '~/jobs/store/mutations';
 import * as types from '~/jobs/store/mutation_types';
+import mutations from '~/jobs/store/mutations';
+import state from '~/jobs/store/state';
 
 describe('Jobs Store Mutations', () => {
   let stateCopy;
@@ -153,7 +153,6 @@ describe('Jobs Store Mutations', () => {
       mutations[types.SET_TRACE_TIMEOUT](stateCopy, id);
 
       expect(stateCopy.traceTimeout).toEqual(id);
-      expect(stateCopy.isTraceComplete).toBe(false);
     });
   });
 

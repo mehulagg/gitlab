@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { s__, sprintf } from '~/locale';
 import FileTree from '~/vue_shared/components/file_tree.vue';
 import DiffFileRow from './diff_file_row.vue';
@@ -35,7 +35,7 @@ export default {
       }
 
       return this.allBlobs.reduce((acc, folder) => {
-        const tree = folder.tree.filter(f => f.path.toLowerCase().indexOf(search) >= 0);
+        const tree = folder.tree.filter((f) => f.path.toLowerCase().indexOf(search) >= 0);
 
         if (tree.length) {
           return acc.concat({

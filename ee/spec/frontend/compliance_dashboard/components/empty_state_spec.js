@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlEmptyState } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import EmptyState from 'ee/compliance_dashboard/components/empty_state.vue';
 
@@ -8,7 +8,7 @@ const IMAGE_PATH = 'empty.svg';
 describe('EmptyState component', () => {
   let wrapper;
 
-  const emptyStateProp = prop => wrapper.find(GlEmptyState).props(prop);
+  const emptyStateProp = (prop) => wrapper.find(GlEmptyState).props(prop);
 
   const createComponent = (props = {}) => {
     return shallowMount(EmptyState, {

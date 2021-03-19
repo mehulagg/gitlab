@@ -11,6 +11,10 @@ RSpec.describe AddNewDataToIssuesDocuments, :elastic, :sidekiq_inline do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
 
+    allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+      .with(:migrate_issues_to_separate_index)
+      .and_return(false)
+
     # ensure issues are indexed
     issues
 

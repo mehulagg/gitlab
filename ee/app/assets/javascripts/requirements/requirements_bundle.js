@@ -1,7 +1,7 @@
-import Vue from 'vue';
-import VueApollo from 'vue-apollo';
 import { GlToast } from '@gitlab/ui';
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
@@ -24,7 +24,7 @@ export default () => {
       {},
       {
         cacheConfig: {
-          dataIdFromObject: object =>
+          dataIdFromObject: (object) =>
             // eslint-disable-next-line no-underscore-dangle, @gitlab/require-i18n-strings
             object.__typename === 'Requirement' ? object.iid : defaultDataIdFromObject(object),
         },
@@ -50,6 +50,7 @@ export default () => {
         prev,
         textSearch,
         authorUsernames,
+        status,
         sortBy,
         projectPath,
         emptyStatePath,
@@ -59,6 +60,7 @@ export default () => {
         canCreateRequirement,
         requirementsWebUrl,
         requirementsImportCsvPath: importCsvPath,
+        currentUserEmail,
       } = el.dataset;
       const stateFilterBy = filterBy ? FilterState[filterBy] : FilterState.opened;
 
@@ -70,6 +72,7 @@ export default () => {
         initialFilterBy: stateFilterBy,
         initialTextSearch: textSearch,
         initialAuthorUsernames: authorUsernames ? JSON.parse(authorUsernames) : [],
+        initialStatus: status,
         initialSortBy: sortBy,
         initialRequirementsCount: {
           OPENED,
@@ -84,6 +87,7 @@ export default () => {
         canCreateRequirement,
         requirementsWebUrl,
         importCsvPath,
+        currentUserEmail,
       };
     },
     render(createElement) {
@@ -93,6 +97,7 @@ export default () => {
           initialFilterBy: this.initialFilterBy,
           initialTextSearch: this.initialTextSearch,
           initialAuthorUsernames: this.initialAuthorUsernames,
+          initialStatus: this.initialStatus,
           initialSortBy: this.initialSortBy,
           initialRequirementsCount: this.initialRequirementsCount,
           page: parseInt(this.page, 10) || 1,
@@ -102,6 +107,7 @@ export default () => {
           canCreateRequirement: parseBoolean(this.canCreateRequirement),
           requirementsWebUrl: this.requirementsWebUrl,
           importCsvPath: this.importCsvPath,
+          currentUserEmail: this.currentUserEmail,
         },
       });
     },

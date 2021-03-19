@@ -5,7 +5,6 @@ require 'spec_helper'
 RSpec.describe 'Admin interacts with merge requests approvals settings' do
   include StubENV
 
-  let_it_be(:application_settings) { create(:application_setting) }
   let_it_be(:user) { create(:admin) }
   let_it_be(:project) { create(:project, creator: user) }
 

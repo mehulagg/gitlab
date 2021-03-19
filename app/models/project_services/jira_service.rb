@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Accessible as Project#external_issue_tracker
 class JiraService < IssueTrackerService
   extend ::Gitlab::Utils::Override
   include Gitlab::Routing
@@ -30,7 +31,8 @@ class JiraService < IssueTrackerService
 
   # TODO: we can probably just delegate as part of
   # https://gitlab.com/gitlab-org/gitlab/issues/29404
-  data_field :username, :password, :url, :api_url, :jira_issue_transition_id, :project_key, :issues_enabled, :vulnerabilities_enabled, :vulnerabilities_issuetype
+  data_field :username, :password, :url, :api_url, :jira_issue_transition_id, :project_key, :issues_enabled,
+    :vulnerabilities_enabled, :vulnerabilities_issuetype, :proxy_address, :proxy_port, :proxy_username, :proxy_password
 
   before_update :reset_password
   after_commit :update_deployment_type, on: [:create, :update], if: :update_deployment_type?
@@ -157,8 +159,15 @@ class JiraService < IssueTrackerService
     # support any events.
   end
 
-  def close_issue(entity, external_issue)
-    issue = jira_request { client.Issue.find(external_issue.iid) }
+  def find_issue(issue_key, rendered_fields: false)
+    options = {}
+    options = options.merge(expand: 'renderedFields') if rendered_fields
+
+    jira_request { client.Issue.find(issue_key, options) }
+  end
+
+  def close_issue(entity, external_issue, current_user)
+    issue = find_issue(external_issue.iid)
 
     return if issue.nil? || has_resolution?(issue) || !jira_issue_transition_id.present?
 
@@ -172,8 +181,9 @@ class JiraService < IssueTrackerService
     # Depending on the Jira project's workflow, a comment during transition
     # may or may not be allowed. Refresh the issue after transition and check
     # if it is closed, so we don't have one comment for every commit.
-    issue = jira_request { client.Issue.find(issue.key) } if transition_issue(issue)
+    issue = find_issue(issue.key) if transition_issue(issue)
     add_issue_solved_comment(issue, commit_id, commit_url) if has_resolution?(issue)
+    log_usage(:close_issue, current_user)
   end
 
   def create_cross_reference_note(mentioned, noteable, author)
@@ -181,7 +191,7 @@ class JiraService < IssueTrackerService
       return s_("JiraService|Events for %{noteable_model_name} are disabled.") % { noteable_model_name: noteable.model_name.plural.humanize(capitalize: false) }
     end
 
-    jira_issue = jira_request { client.Issue.find(mentioned.id) }
+    jira_issue = find_issue(mentioned.id)
 
     return unless jira_issue.present?
 
@@ -209,7 +219,7 @@ class JiraService < IssueTrackerService
       }
     }
 
-    add_comment(data, jira_issue)
+    add_comment(data, jira_issue).tap { log_usage(:cross_reference, author) }
   end
 
   def valid_connection?
@@ -268,6 +278,12 @@ class JiraService < IssueTrackerService
       )
       return false
     end
+  end
+
+  def log_usage(action, user)
+    key = "i_ecosystem_jira_service_#{action}"
+
+    Gitlab::UsageDataCounters::HLLRedisCounter.track_event(key, values: user.id)
   end
 
   def add_issue_solved_comment(issue, commit_id, commit_url)

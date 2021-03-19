@@ -36,6 +36,7 @@ RSpec.describe 'Groups::Security::Credentials' do
         it 'contains the relevant filter tabs' do
           expect(page).to have_link('Personal Access Tokens', href: group_security_credentials_path(group_id: group_id, filter: 'personal_access_tokens'))
           expect(page).to have_link('SSH Keys', href: group_security_credentials_path(group_id: group_id, filter: 'ssh_keys'))
+          expect(page).not_to have_link('GPG Keys', href: group_security_credentials_path(group_id: group_id, filter: 'gpg_keys'))
         end
       end
     end
@@ -51,6 +52,16 @@ RSpec.describe 'Groups::Security::Credentials' do
         let(:credentials_path) { group_security_credentials_path(group_id: group_id, filter: 'ssh_keys') }
 
         it_behaves_like 'credentials inventory SSH keys'
+      end
+
+      context 'by GPG Keys' do
+        before do
+          visit group_security_credentials_path(group_id: group_id, filter: 'gpg_keys')
+        end
+
+        it 'returns a 404 not found response' do
+          expect(page.status_code).to eq(404)
+        end
       end
     end
   end

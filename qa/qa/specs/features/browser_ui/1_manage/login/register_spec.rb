@@ -23,6 +23,7 @@ module QA
 
         @personal_access_token = Runtime::Env.personal_access_token
         Runtime::Env.personal_access_token = nil
+
         ldap_username = Runtime::Env.ldap_username
         Runtime::Env.ldap_username = nil
 
@@ -58,7 +59,7 @@ module QA
             # this is the only test that exercise this UI.
             # Other tests should use the API for this purpose.
             Flow::Login.sign_in(as: user)
-            Page::Main::Menu.perform(&:click_settings_link)
+            Page::Main::Menu.perform(&:click_edit_profile_link)
             Page::Profile::Menu.perform(&:click_account)
             Page::Profile::Accounts::Show.perform do |show|
               show.delete_account(user.password)
@@ -70,7 +71,7 @@ module QA
 
             Flow::Login.sign_in(as: user, skip_page_validation: true)
 
-            expect(page).to have_text("Invalid Login or password")
+            expect(page).to have_text("Invalid login or password")
 
             @recreated_user = Resource::User.fabricate_via_browser_ui! do |resource|
               resource.name = user.name
@@ -98,8 +99,10 @@ module QA
         before do
           enable_require_admin_approval_after_user_signup_via_ui
 
-          @user = Resource::User.fabricate_via_browser_ui! do |user|
-            user.expect_fabrication_success = false
+          Support::Retrier.retry_on_exception do
+            @user = Resource::User.fabricate_via_browser_ui! do |user|
+              user.expect_fabrication_success = false
+            end
           end
         end
 
@@ -148,26 +151,34 @@ module QA
     end
 
     def set_require_admin_approval_after_user_signup_via_api(enable_or_disable)
-      return if Runtime::ApplicationSettings.get_application_settings[:require_admin_approval_after_user_signup] == enable_or_disable
+      return if get_require_admin_approval_after_user_signup_via_api == enable_or_disable
 
       Runtime::ApplicationSettings.set_application_settings(require_admin_approval_after_user_signup: enable_or_disable)
 
       sleep 10 # It takes a moment for the setting to come into effect
     end
 
+    def get_require_admin_approval_after_user_signup_via_api
+      Runtime::ApplicationSettings.get_application_settings[:require_admin_approval_after_user_signup]
+    end
+
     def enable_require_admin_approval_after_user_signup_via_ui
-      unless Runtime::ApplicationSettings.get_application_settings[:require_admin_approval_after_user_signup]
-        Flow::Login.while_signed_in_as_admin do
-          Page::Main::Menu.perform(&:go_to_admin_area)
-          QA::Page::Admin::Menu.perform(&:go_to_general_settings)
-          Page::Admin::Settings::General.perform do |setting|
-            setting.expand_sign_up_restrictions do |settings|
-              settings.require_admin_approval_after_user_signup
+      unless get_require_admin_approval_after_user_signup_via_api
+        QA::Support::Retrier.retry_until do
+          Flow::Login.while_signed_in_as_admin do
+            Page::Main::Menu.perform(&:go_to_admin_area)
+            QA::Page::Admin::Menu.perform(&:go_to_general_settings)
+            Page::Admin::Settings::General.perform do |setting|
+              setting.expand_sign_up_restrictions do |settings|
+                settings.require_admin_approval_after_user_signup
+              end
             end
           end
-        end
 
-        sleep 10 # It takes a moment for the setting to come into effect
+          sleep 15 # It takes a moment for the setting to come into effect
+
+          get_require_admin_approval_after_user_signup_via_api
+        end
       end
     end
   end

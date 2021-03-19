@@ -1,5 +1,5 @@
-import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import axios from '~/lib/utils/axios_utils';
+import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import { __, n__, sprintf } from '~/locale';
 import { CRITICAL, HIGH } from '~/vulnerabilities/constants';
 import {
@@ -29,7 +29,7 @@ export const fetchDiffData = (state, endpoint, category) => {
  */
 export const enrichVulnerabilityWithFeedback = (vulnerability, feedback = []) =>
   feedback
-    .filter(fb => fb.project_fingerprint === vulnerability.project_fingerprint)
+    .filter((fb) => fb.project_fingerprint === vulnerability.project_fingerprint)
     .reduce((vuln, fb) => {
       if (fb.feedback_type === FEEDBACK_TYPE_DISMISSAL) {
         return {
@@ -63,7 +63,7 @@ export const enrichVulnerabilityWithFeedback = (vulnerability, feedback = []) =>
  * @returns {Object}
  */
 export const parseDiff = (diff, enrichData) => {
-  const enrichVulnerability = vulnerability => ({
+  const enrichVulnerability = (vulnerability) => ({
     ...enrichVulnerabilityWithFeedback(vulnerability, enrichData),
     category: vulnerability.report_type,
     title: vulnerability.message || vulnerability.name,

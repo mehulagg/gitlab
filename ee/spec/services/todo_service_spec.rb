@@ -114,7 +114,7 @@ RSpec.describe TodoService do
 
           context 'for mentioned users' do
             let(:todo_params) { { action: Todo::MENTIONED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'
@@ -126,7 +126,7 @@ RSpec.describe TodoService do
             end
 
             let(:todo_params) { { action: Todo::DIRECTLY_ADDRESSED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'
@@ -167,6 +167,16 @@ RSpec.describe TodoService do
           let(:todos_not_for) { [skipped] }
 
           include_examples 'todos creation'
+        end
+
+        context 'when toggling task list items' do
+          before do
+            epic.update(description: "- [x] Task 1\n- [x] Task 2 FYI: #{mentions}")
+          end
+
+          it 'does not create todos' do
+            expect { execute }.not_to change { Todo.count }
+          end
         end
       end
 

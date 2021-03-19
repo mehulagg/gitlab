@@ -11,7 +11,7 @@ export default class GeoNodesStore {
   }
 
   setNodes(nodes) {
-    this.state.nodes = nodes.map(node => GeoNodesStore.formatNode(node));
+    this.state.nodes = nodes.map((node) => GeoNodesStore.formatNode(node));
   }
 
   getNodes() {
@@ -67,7 +67,7 @@ export default class GeoNodesStore {
   }
 
   static formatNodeDetails(rawNodeDetails, replicableTypes) {
-    const syncStatuses = replicableTypes.map(replicable => {
+    const syncStatuses = replicableTypes.map((replicable) => {
       return {
         itemEnabled: rawNodeDetails[`${replicable.namePlural}_replication_enabled`],
         itemTitle: replicable.titlePlural,
@@ -76,9 +76,12 @@ export default class GeoNodesStore {
           totalCount: rawNodeDetails[`${replicable.namePlural}_count`],
           successCount: rawNodeDetails[`${replicable.namePlural}_synced_count`],
           failureCount: rawNodeDetails[`${replicable.namePlural}_failed_count`],
+          verificationTotalCount:
+            rawNodeDetails[`${replicable.namePlural}_verification_total_count`],
           verificationSuccessCount: rawNodeDetails[`${replicable.namePlural}_verified_count`],
           verificationFailureCount:
             rawNodeDetails[`${replicable.namePlural}_verification_failed_count`],
+          checksumTotalCount: rawNodeDetails[`${replicable.namePlural}_checksum_total_count`],
           checksumSuccessCount: rawNodeDetails[`${replicable.namePlural}_checksummed_count`],
           checksumFailureCount: rawNodeDetails[`${replicable.namePlural}_checksum_failed_count`],
         },
@@ -87,7 +90,7 @@ export default class GeoNodesStore {
     });
 
     // Adds replicable to array as long as value is defined
-    const verificationStatuses = syncStatuses.filter(s =>
+    const verificationStatuses = syncStatuses.filter((s) =>
       Boolean(
         !isNil(s.itemValue.verificationSuccessCount) ||
           !isNil(s.itemValue.verificationFailureCount),
@@ -95,7 +98,7 @@ export default class GeoNodesStore {
     );
 
     // Adds replicable to array as long as value is defined
-    const checksumStatuses = syncStatuses.filter(s =>
+    const checksumStatuses = syncStatuses.filter((s) =>
       Boolean(!isNil(s.itemValue.checksumSuccessCount) || !isNil(s.itemValue.checksumFailureCount)),
     );
 

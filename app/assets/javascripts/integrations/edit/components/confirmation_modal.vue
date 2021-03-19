@@ -1,6 +1,6 @@
 <script>
-import { mapGetters } from 'vuex';
 import { GlModal } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 import { __ } from '~/locale';
 
 export default {
@@ -13,7 +13,7 @@ export default {
       return {
         text: __('Save'),
         attributes: [
-          { variant: 'success' },
+          { variant: 'confirm' },
           { category: 'primary' },
           { disabled: this.isDisabled },
         ],

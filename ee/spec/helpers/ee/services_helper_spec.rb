@@ -18,6 +18,20 @@ RSpec.describe EE::ServicesHelper do
   subject { controller_class.new }
 
   describe '#integration_form_data' do
+    let(:jira_fields) do
+      {
+        show_jira_issues_integration: 'false',
+        show_jira_vulnerabilities_integration: 'false',
+        enable_jira_issues: 'true',
+        enable_jira_vulnerabilities: 'false',
+        project_key: 'FE',
+        vulnerabilities_issuetype: '10001',
+        gitlab_issues_enabled: 'true',
+        upgrade_plan_path: nil,
+        edit_project_path: edit_project_path(project, anchor: 'js-shared-permissions')
+      }
+    end
+
     subject { helper.integration_form_data(integration) }
 
     before do
@@ -28,7 +42,7 @@ RSpec.describe EE::ServicesHelper do
       let(:integration) { build(:slack_service) }
 
       it 'does not include Jira specific fields' do
-        is_expected.not_to include(:show_jira_issues_integration, :show_jira_vulnerabilities_integration, :enable_jira_issues, :project_key, :gitlab_issues_enabled, :edit_project_path)
+        is_expected.not_to include(*jira_fields.keys)
       end
     end
 
@@ -40,8 +54,8 @@ RSpec.describe EE::ServicesHelper do
           allow(integration).to receive(:jira_vulnerabilities_integration_available?).and_return(false)
         end
 
-        it 'includes Jira specific fields' do
-          is_expected.to include(show_jira_vulnerabilities_integration: 'false')
+        it 'includes default Jira fields' do
+          is_expected.to include(jira_fields)
         end
       end
 
@@ -51,8 +65,8 @@ RSpec.describe EE::ServicesHelper do
           stub_feature_flags(jira_for_vulnerabilities: false)
         end
 
-        it 'includes Jira specific fields' do
-          is_expected.to include(show_jira_vulnerabilities_integration: 'false')
+        it 'includes show_jira_issues_integration' do
+          is_expected.to include(jira_fields.merge(show_jira_issues_integration: 'true'))
         end
       end
 
@@ -62,16 +76,13 @@ RSpec.describe EE::ServicesHelper do
           stub_feature_flags(jira_for_vulnerabilities: true)
         end
 
-        it 'includes Jira specific fields' do
+        it 'includes all Jira fields' do
           is_expected.to include(
-            show_jira_issues_integration: 'true',
-            show_jira_vulnerabilities_integration: 'true',
-            enable_jira_issues: 'true',
-            enable_jira_vulnerabilities: 'true',
-            project_key: 'FE',
-            vulnerabilities_issuetype: '10001',
-            gitlab_issues_enabled: 'true',
-            edit_project_path: edit_project_path(project, anchor: 'js-shared-permissions')
+            jira_fields.merge(
+              show_jira_issues_integration: 'true',
+              show_jira_vulnerabilities_integration: 'true',
+              enable_jira_vulnerabilities: 'true'
+            )
           )
         end
       end
@@ -85,6 +96,19 @@ RSpec.describe EE::ServicesHelper do
 
       expect(slack_link).to start_with('https://slack.com/oauth/authorize')
       expect(slack_link).to include('redirect_uri=http://some-path/project/1&state=a+token')
+    end
+  end
+
+  describe '#jira_issues_show_data' do
+    subject { helper.jira_issues_show_data }
+
+    before do
+      allow(helper).to receive(:params).and_return({ id: 'FE-1' })
+      assign(:project, project)
+    end
+
+    it 'includes Jira issues show data' do
+      is_expected.to include(:issues_show_path)
     end
   end
 end

@@ -1,8 +1,8 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
-import { AWS_ACCESS_KEY_ID } from '~/ci_variable_list/constants';
+import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import CiVariableModal from '~/ci_variable_list/components/ci_variable_modal.vue';
+import { AWS_ACCESS_KEY_ID } from '~/ci_variable_list/constants';
 import createStore from '~/ci_variable_list/store';
 import mockData from '../services/mock_data';
 import ModalStub from '../stubs';
@@ -17,7 +17,7 @@ describe('Ci variable modal', () => {
   const createComponent = (method, options = {}) => {
     store = createStore();
     wrapper = method(CiVariableModal, {
-      attachToDocument: true,
+      attachTo: document.body,
       stubs: {
         GlModal: ModalStub,
       },
@@ -31,11 +31,11 @@ describe('Ci variable modal', () => {
   const findAddorUpdateButton = () =>
     findModal()
       .findAll(GlButton)
-      .wrappers.find(button => button.props('variant') === 'success');
+      .wrappers.find((button) => button.props('variant') === 'success');
   const deleteVariableButton = () =>
     findModal()
       .findAll(GlButton)
-      .wrappers.find(button => button.props('variant') === 'danger');
+      .wrappers.find((button) => button.props('variant') === 'danger');
 
   afterEach(() => {
     wrapper.destroy();

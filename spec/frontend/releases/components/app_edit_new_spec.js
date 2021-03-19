@@ -1,13 +1,13 @@
-import Vuex from 'vuex';
 import { mount } from '@vue/test-utils';
-import { merge } from 'lodash';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { merge } from 'lodash';
+import Vuex from 'vuex';
 import { getJSONFixture } from 'helpers/fixtures';
-import ReleaseEditNewApp from '~/releases/components/app_edit_new.vue';
 import * as commonUtils from '~/lib/utils/common_utils';
-import { BACK_URL_PARAM } from '~/releases/constants';
+import ReleaseEditNewApp from '~/releases/components/app_edit_new.vue';
 import AssetLinksForm from '~/releases/components/asset_links_form.vue';
+import { BACK_URL_PARAM } from '~/releases/constants';
 
 const originalRelease = getJSONFixture('api/releases/release.json');
 const originalMilestones = originalRelease.milestones;
@@ -71,7 +71,7 @@ describe('Release edit/new component', () => {
 
     await wrapper.vm.$nextTick();
 
-    wrapper.element.querySelectorAll('input').forEach(input => jest.spyOn(input, 'focus'));
+    wrapper.element.querySelectorAll('input').forEach((input) => jest.spyOn(input, 'focus'));
   };
 
   beforeEach(() => {
@@ -104,7 +104,7 @@ describe('Release edit/new component', () => {
       const firstEnabledInput = wrapper.element.querySelector('input:enabled');
       const allInputs = wrapper.element.querySelectorAll('input');
 
-      allInputs.forEach(input => {
+      allInputs.forEach((input) => {
         const expectedFocusCalls = input === firstEnabledInput ? 1 : 0;
         expect(input.focus).toHaveBeenCalledTimes(expectedFocusCalls);
       });
@@ -152,7 +152,7 @@ describe('Release edit/new component', () => {
     beforeEach(async () => {
       commonUtils.getParameterByName = jest
         .fn()
-        .mockImplementation(paramToGet => ({ [BACK_URL_PARAM]: backUrl }[paramToGet]));
+        .mockImplementation((paramToGet) => ({ [BACK_URL_PARAM]: backUrl }[paramToGet]));
 
       await factory();
     });

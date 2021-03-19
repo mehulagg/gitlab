@@ -19,7 +19,8 @@ module QA
                     :file_name,
                     :file_content
       attr_writer :no_preparation,
-                  :wait_for_merge
+                  :wait_for_merge,
+                  :template
 
       attribute :merge_when_pipeline_succeeds
       attribute :merge_status
@@ -73,7 +74,8 @@ module QA
         Page::Project::Show.perform(&:new_merge_request)
         Page::MergeRequest::New.perform do |new_page|
           new_page.fill_title(@title)
-          new_page.fill_description(@description)
+          new_page.choose_template(@template) if @template
+          new_page.fill_description(@description) if @description && !@template
           new_page.choose_milestone(@milestone) if @milestone
           new_page.assign_to_me if @assignee == 'me'
           labels.each do |label|
@@ -86,6 +88,8 @@ module QA
       end
 
       def fabricate_via_api!
+        raise ResourceNotFoundError unless id
+
         resource_web_url(api_get)
       rescue ResourceNotFoundError
         populate_target_and_source_if_required
@@ -133,6 +137,14 @@ module QA
           project.wait_for_merge(result[:title]) if @wait_for_merge
 
           result
+        end
+      end
+
+      def reload!
+        # Refabricate so that we can return a new object with updated attributes
+        self.class.fabricate_via_api! do |resource|
+          resource.project = project
+          resource.id = api_resource[:iid]
         end
       end
 

@@ -34,7 +34,10 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
+  include Repositories::CanHousekeepRepository
   include EachBatch
+  include GitlabRoutingHelper
+
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
 
@@ -74,7 +77,7 @@ class Project < ApplicationRecord
   default_value_for :resolve_outdated_diff_discussions, false
   default_value_for :container_registry_enabled, gitlab_config_features.container_registry
   default_value_for(:repository_storage) do
-    pick_repository_storage
+    Repository.pick_storage_shard
   end
 
   default_value_for(:shared_runners_enabled) { Gitlab::CurrentSettings.shared_runners_enabled }
@@ -93,6 +96,9 @@ class Project < ApplicationRecord
   before_validation :mark_remote_mirrors_for_removal, if: -> { RemoteMirror.table_exists? }
 
   before_save :ensure_runners_token
+
+  # https://api.rubyonrails.org/v6.0.3.4/classes/ActiveRecord/AttributeMethods/Dirty.html#method-i-will_save_change_to_attribute-3F
+  before_update :set_container_registry_access_level, if: :will_save_change_to_container_registry_enabled?
 
   after_save :update_project_statistics, if: :saved_change_to_namespace_id?
 
@@ -116,7 +122,7 @@ class Project < ApplicationRecord
 
   use_fast_destroy :build_trace_chunks
 
-  after_destroy -> { run_after_commit { remove_pages } }
+  after_destroy -> { run_after_commit { legacy_remove_pages } }
   after_destroy :remove_exports
 
   after_validation :check_pending_delete
@@ -146,7 +152,6 @@ class Project < ApplicationRecord
   has_many :boards
 
   # Project services
-  has_one :alerts_service
   has_one :campfire_service
   has_one :datadog_service
   has_one :discord_service
@@ -200,6 +205,8 @@ class Project < ApplicationRecord
   # Packages
   has_many :packages, class_name: 'Packages::Package'
   has_many :package_files, through: :packages, class_name: 'Packages::PackageFile'
+  # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
+  has_many :debian_distributions, class_name: 'Packages::Debian::ProjectDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_one :import_state, autosave: true, class_name: 'ProjectImportState', inverse_of: :project
   has_one :import_export_upload, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -216,6 +223,7 @@ class Project < ApplicationRecord
 
   # Merge Requests for target project should be removed with it
   has_many :merge_requests, foreign_key: 'target_project_id', inverse_of: :target_project
+  has_many :merge_request_metrics, foreign_key: 'target_project', class_name: 'MergeRequest::Metrics', inverse_of: :target_project
   has_many :source_of_merge_requests, foreign_key: 'source_project_id', class_name: 'MergeRequest'
   has_many :issues
   has_many :labels, class_name: 'ProjectLabel'
@@ -342,7 +350,7 @@ class Project < ApplicationRecord
 
   has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
 
-  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove', inverse_of: :container
+  has_many :repository_storage_moves, class_name: 'Projects::RepositoryStorageMove', inverse_of: :container
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
@@ -389,7 +397,9 @@ class Project < ApplicationRecord
     :merge_requests_access_level, :forking_access_level, :issues_access_level,
     :wiki_access_level, :snippets_access_level, :builds_access_level,
     :repository_access_level, :pages_access_level, :metrics_dashboard_access_level, :analytics_access_level,
-    :operations_enabled?, :operations_access_level, to: :project_feature, allow_nil: true
+    :operations_enabled?, :operations_access_level, :security_and_compliance_access_level,
+    :container_registry_access_level,
+    to: :project_feature, allow_nil: true
   delegate :show_default_award_emojis, :show_default_award_emojis=,
     :show_default_award_emojis?,
     to: :project_setting, allow_nil: true
@@ -408,6 +418,9 @@ class Project < ApplicationRecord
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
+  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings
+  delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
+    to: :ci_cd_settings
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
@@ -451,7 +464,7 @@ class Project < ApplicationRecord
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
-  validates :variables, variable_duplicates: { scope: :environment_scope }
+  validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
@@ -485,10 +498,22 @@ class Project < ApplicationRecord
       { column: arel_table["description"], multiplier: 0.2 }
     ])
 
-    query = reorder(order_expression.desc, arel_table['id'].desc)
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'similarity',
+        column_expression: order_expression,
+        order_expression: order_expression.desc,
+        order_direction: :desc,
+        distinct: false,
+        add_to_projections: true
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'id',
+        order_expression: Project.arel_table[:id].desc
+      )
+    ])
 
-    query = query.select(*query.arel.projections, order_expression.as('similarity')) if include_in_select
-    query
+    order.apply_cursor_conditions(reorder(order))
   end
 
   scope :with_packages, -> { joins(:packages) }
@@ -829,6 +854,14 @@ class Project < ApplicationRecord
 
   def active_webide_pipelines(user:)
     webide_pipelines.running_or_pending.for_user(user)
+  end
+
+  def default_pipeline_lock
+    if keep_latest_artifacts_available?
+      return :artifacts_locked
+    end
+
+    :unlocked
   end
 
   def autoclose_referenced_issues
@@ -1305,21 +1338,11 @@ class Project < ApplicationRecord
   end
 
   def external_issue_tracker
-    if has_external_issue_tracker.nil?
-      cache_has_external_issue_tracker
-    end
+    cache_has_external_issue_tracker if has_external_issue_tracker.nil?
 
-    if has_external_issue_tracker?
-      strong_memoize(:external_issue_tracker) do
-        services.external_issue_trackers.first
-      end
-    else
-      nil
-    end
-  end
+    return unless has_external_issue_tracker?
 
-  def cache_has_external_issue_tracker
-    update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
+    @external_issue_tracker ||= services.external_issue_trackers.first
   end
 
   def external_references_supported?
@@ -1331,19 +1354,11 @@ class Project < ApplicationRecord
   end
 
   def external_wiki
-    if has_external_wiki.nil?
-      cache_has_external_wiki
-    end
+    cache_has_external_wiki if has_external_wiki.nil?
 
-    if has_external_wiki
-      @external_wiki ||= services.external_wikis.first
-    else
-      nil
-    end
-  end
+    return unless has_external_wiki?
 
-  def cache_has_external_wiki
-    update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
+    @external_wiki ||= services.external_wikis.first
   end
 
   def find_or_initialize_services
@@ -1355,7 +1370,7 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return ['datadog'] unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w(datadog) unless Feature.enabled?(:datadog_ci_integration, self)
 
     []
   end
@@ -1700,8 +1715,8 @@ class Project < ApplicationRecord
     end
   end
 
-  def any_runners?(&block)
-    active_runners.any?(&block)
+  def any_active_runners?(&block)
+    active_runners_with_tags.any?(&block)
   end
 
   def valid_runners_token?(token)
@@ -1796,15 +1811,15 @@ class Project < ApplicationRecord
                .delete_all
   end
 
-  # TODO: what to do here when not using Legacy Storage? Do we still need to rename and delay removal?
+  # TODO: remove this method https://gitlab.com/gitlab-org/gitlab/-/issues/320775
   # rubocop: disable CodeReuse/ServiceClass
-  def remove_pages
+  def legacy_remove_pages
+    return unless Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
+
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
 
     mark_pages_as_not_deployed unless destroyed?
-
-    DestroyPagesDeploymentsWorker.perform_async(id)
 
     # 1. We rename pages to temporary directory
     # 2. We wait 5 minutes, due to NFS caching
@@ -1835,7 +1850,7 @@ class Project < ApplicationRecord
     # where().update_all to perform update in the single transaction with check for null
     ProjectPagesMetadatum
       .where(project_id: id, pages_deployment_id: nil)
-      .update_all(pages_deployment_id: deployment.id)
+      .update_all(deployed: deployment.present?, pages_deployment_id: deployment&.id)
   end
 
   def write_repository_config(gl_full_path: full_path)
@@ -1990,6 +2005,7 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
       .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
+      .append(key: 'CI_CONFIG_PATH', value: ci_config_path_or_default)
   end
 
   def predefined_ci_server_variables
@@ -2027,10 +2043,12 @@ class Project < ApplicationRecord
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       break variables unless Gitlab.config.dependency_proxy.enabled
 
-      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}")
+      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port)
       variables.append(
         key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
-        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+        # The namespace path can include uppercase letters, which
+        # Docker doesn't allow. The proxy expects it to be downcased.
+        value: "#{Gitlab.host_with_port}/#{namespace.root_ancestor.path.downcase}#{DependencyProxy::URL_SUFFIX}"
       )
     end
   end
@@ -2121,18 +2139,6 @@ class Project < ApplicationRecord
     return [] unless auto_devops_enabled?
 
     (auto_devops || build_auto_devops)&.predefined_variables
-  end
-
-  def pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.get(pushes_since_gc_redis_shared_state_key).to_i }
-  end
-
-  def increment_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.incr(pushes_since_gc_redis_shared_state_key) }
-  end
-
-  def reset_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.del(pushes_since_gc_redis_shared_state_key) }
   end
 
   def route_map_for(commit_sha)
@@ -2492,16 +2498,12 @@ class Project < ApplicationRecord
   end
 
   def service_desk_custom_address
-    return unless service_desk_custom_address_enabled?
+    return unless Gitlab::ServiceDeskEmail.enabled?
 
     key = service_desk_setting&.project_key
     return unless key.present?
 
-    ::Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
-  end
-
-  def service_desk_custom_address_enabled?
-    ::Gitlab::ServiceDeskEmail.enabled? && ::Feature.enabled?(:service_desk_custom_address, self, default_enabled: true)
+    Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
   end
 
   def root_namespace
@@ -2547,7 +2549,30 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
+  override :git_garbage_collect_worker_klass
+  def git_garbage_collect_worker_klass
+    Projects::GitGarbageCollectWorker
+  end
+
+  def inherited_issuable_templates_enabled?
+    Feature.enabled?(:inherited_issuable_templates, self, default_enabled: :yaml)
+  end
+
   private
+
+  def set_container_registry_access_level
+    # changes_to_save = { 'container_registry_enabled' => [value_before_update, value_after_update] }
+    value = changes_to_save['container_registry_enabled'][1]
+
+    access_level =
+      if value
+        ProjectFeature::ENABLED
+      else
+        ProjectFeature::DISABLED
+      end
+
+    project_feature.update!(container_registry_access_level: access_level)
+  end
 
   def find_service(services, name)
     services.find { |service| service.to_param == name }
@@ -2639,10 +2664,6 @@ class Project < ApplicationRecord
     from && self != from
   end
 
-  def pushes_since_gc_redis_shared_state_key
-    "projects/#{id}/pushes_since_gc"
-  end
-
   def update_project_statistics
     stats = statistics || build_statistics
     stats.update(namespace_id: namespace_id)
@@ -2703,6 +2724,20 @@ class Project < ApplicationRecord
 
     [].tap do |out|
       objects.each_batch { |relation| out.concat(relation.pluck(:oid)) }
+    end
+  end
+
+  def cache_has_external_wiki
+    update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
+  end
+
+  def cache_has_external_issue_tracker
+    update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
+  end
+
+  def active_runners_with_tags
+    strong_memoize(:active_runners_with_tags) do
+      active_runners.with_tags
     end
   end
 end

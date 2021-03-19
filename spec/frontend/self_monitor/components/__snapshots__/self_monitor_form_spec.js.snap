@@ -45,13 +45,10 @@ exports[`self monitor component When the self monitor project has not been creat
         Enabling this feature creates a project that can be used to monitor the health of your instance.
       </p>
        
-      <gl-form-group-stub
-        label="Create Project"
-        label-for="self-monitor-toggle"
-      >
+      <gl-form-group-stub>
         <gl-toggle-stub
+          label="Create Project"
           labelposition="top"
-          name="self-monitor-toggle"
         />
       </gl-form-group-stub>
     </form>
@@ -60,6 +57,7 @@ exports[`self monitor component When the self monitor project has not been creat
   <gl-modal-stub
     cancel-title="Cancel"
     category="primary"
+    dismisslabel="Close"
     modalclass=""
     modalid="delete-self-monitor-modal"
     ok-title="Delete project"

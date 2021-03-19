@@ -27,6 +27,7 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Limit::JobActivity,
                 Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines,
                 Gitlab::Ci::Pipeline::Chain::Metrics,
+                Gitlab::Ci::Pipeline::Chain::TemplateUsage,
                 Gitlab::Ci::Pipeline::Chain::Pipeline::Process].freeze
 
     # Create a new pipeline in the specified project.
@@ -121,8 +122,9 @@ module Ci
     end
 
     def record_conversion_event
-      Experiments::RecordConversionEventWorker.perform_async(:ci_syntax_templates, current_user.id)
-      Experiments::RecordConversionEventWorker.perform_async(:pipelines_empty_state, current_user.id)
+      return unless project.namespace.recent?
+
+      Experiments::RecordConversionEventWorker.perform_async(:ci_syntax_templates_b, current_user.id)
     end
 
     def create_namespace_onboarding_action

@@ -1,10 +1,7 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlTooltipDirective, GlLink, GlButton } from '@gitlab/ui';
-import { polyfillSticky } from '~/lib/utils/sticky';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __, sprintf } from '~/locale';
-import scrollDown from '../svg/scroll_down.svg';
 
 export default {
   components: {
@@ -14,7 +11,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  scrollDown,
   props: {
     erasePath: {
       type: String,
@@ -54,9 +50,6 @@ export default {
       });
     },
   },
-  mounted() {
-    polyfillSticky(this.$el);
-  },
   methods: {
     handleScrollToTop() {
       this.$emit('scrollJobLogTop');
@@ -91,7 +84,6 @@ export default {
         v-gl-tooltip.body
         :title="s__('Job|Show complete raw')"
         :href="rawPath"
-        class="controllers-buttons"
         data-testid="job-raw-link-controller"
         icon="doc-text"
       />
@@ -102,7 +94,7 @@ export default {
         :title="s__('Job|Erase job log')"
         :href="erasePath"
         :data-confirm="__('Are you sure you want to erase this build?')"
-        class="controllers-buttons"
+        class="gl-ml-3"
         data-testid="job-log-erase-link"
         data-method="post"
         icon="remove"
@@ -110,25 +102,24 @@ export default {
       <!-- eo links -->
 
       <!-- scroll buttons -->
-      <div v-gl-tooltip :title="s__('Job|Scroll to top')" class="controllers-buttons">
+      <div v-gl-tooltip :title="s__('Job|Scroll to top')" class="gl-ml-3">
         <gl-button
           :disabled="isScrollTopDisabled"
-          class="btn-scroll btn-transparent btn-blank"
+          class="btn-scroll"
           data-testid="job-controller-scroll-top"
           icon="scroll_up"
           @click="handleScrollToTop"
         />
       </div>
 
-      <div v-gl-tooltip :title="s__('Job|Scroll to bottom')" class="controllers-buttons">
+      <div v-gl-tooltip :title="s__('Job|Scroll to bottom')" class="gl-ml-3">
         <gl-button
           :disabled="isScrollBottomDisabled"
-          class="js-scroll-bottom btn-scroll btn-transparent btn-blank"
+          class="js-scroll-bottom btn-scroll"
           data-testid="job-controller-scroll-bottom"
           icon="scroll_down"
           :class="{ animate: isScrollingDown }"
           @click="handleScrollToBottom"
-          v-html="$options.scrollDown"
         />
       </div>
       <!-- eo scroll buttons -->

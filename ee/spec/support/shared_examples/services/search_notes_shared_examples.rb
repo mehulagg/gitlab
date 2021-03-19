@@ -32,7 +32,7 @@ RSpec.shared_examples 'search notes shared examples' do
     end
 
     context 'when user can read confidential notes' do
-      it 'does not filter confidental notes' do
+      it 'does not filter confidential notes' do
         noteable.project.add_reporter(user)
 
         expect_search_results(user, 'notes', expected_objects: [not_confidential_note, nil_confidential_note, confidential_note]) do |user|

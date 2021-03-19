@@ -2,8 +2,8 @@
 import { GlButton, GlSafeHtmlDirective as SafeHtml, GlLoadingIcon } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import { __, s__ } from '~/locale';
 import HistoryCommentEditor from './history_comment_editor.vue';
 
 export default {
@@ -100,6 +100,8 @@ export default {
       this.isSavingComment = true;
       const { method, url, data, emitName } = this.getSaveConfig(note);
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios({ method, url, data })
         .then(({ data: responseData }) => {
           this.isEditingComment = false;

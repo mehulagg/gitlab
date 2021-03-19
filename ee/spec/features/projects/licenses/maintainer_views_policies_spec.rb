@@ -21,7 +21,7 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
   context 'when policies are not configured' do
     it 'displays a link to the documentation to configure license compliance' do
       expect(page).to have_content('License Compliance')
-      expect(page).to have_content('Learn more about license compliance')
+      expect(page).to have_content('More Information')
     end
   end
 

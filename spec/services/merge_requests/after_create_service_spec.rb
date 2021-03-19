@@ -27,6 +27,18 @@ RSpec.describe MergeRequests::AfterCreateService do
       execute_service
     end
 
+    it 'calls the merge request activity counter' do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_create_mr_action)
+        .with(user: merge_request.author)
+
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_mr_including_ci_config)
+        .with(user: merge_request.author, merge_request: merge_request)
+
+      execute_service
+    end
+
     it 'creates a new merge request notification' do
       expect(notification_service)
         .to receive(:new_merge_request).with(merge_request, merge_request.author)
@@ -56,11 +68,30 @@ RSpec.describe MergeRequests::AfterCreateService do
       execute_service
     end
 
-    it 'records a namespace onboarding progress action' do
-      expect(NamespaceOnboardingAction).to receive(:create_action)
-        .with(merge_request.target_project.namespace, :merge_request_created).and_call_original
+    it_behaves_like 'records an onboarding progress action', :merge_request_created do
+      let(:namespace) { merge_request.target_project.namespace }
+    end
 
-      expect { execute_service }.to change(NamespaceOnboardingAction, :count).by(1)
+    context 'when merge request is in unchecked state' do
+      before do
+        merge_request.mark_as_unchecked!
+        execute_service
+      end
+
+      it 'does not change its state' do
+        expect(merge_request.reload).to be_unchecked
+      end
+    end
+
+    context 'when merge request is in preparing state' do
+      before do
+        merge_request.mark_as_preparing!
+        execute_service
+      end
+
+      it 'marks the merge request as unchecked' do
+        expect(merge_request.reload).to be_unchecked
+      end
     end
   end
 end

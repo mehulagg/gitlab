@@ -1,10 +1,10 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { setUrlFragment } from '~/lib/utils/url_utility';
 import LoadingSkeleton from './loading_skeleton.vue';
-import StatisticsSummary from './statistics_summary.vue';
 import StatisticsHistory from './statistics_history.vue';
+import StatisticsSummary from './statistics_summary.vue';
 
 export default {
   components: {

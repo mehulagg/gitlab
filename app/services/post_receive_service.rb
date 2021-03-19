@@ -48,7 +48,7 @@ class PostReceiveService
   end
 
   def process_mr_push_options(push_options, changes)
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/61359')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/61359')
     return unless repository
 
     unless repository.repo_type.project?
@@ -94,7 +94,7 @@ class PostReceiveService
   end
 
   def record_onboarding_progress
-    NamespaceOnboardingAction.create_action(project.namespace, :git_write)
+    OnboardingProgressService.new(project.namespace).execute(action: :git_write)
   end
 end
 

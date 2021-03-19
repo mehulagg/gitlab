@@ -1,8 +1,7 @@
 <script>
 import { GlEmptyState, GlButton, GlIcon, GlSprintf } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
-
 import { IssuableStates } from '~/issuable_list/constants';
+import { __, s__ } from '~/locale';
 
 export default {
   FilterStateEmptyMessage: {

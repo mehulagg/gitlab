@@ -2,7 +2,7 @@
 
 module Types
   class DastSiteValidationStrategyEnum < BaseEnum
-    value 'TEXT_FILE', description: 'Text file validation', value: 'text_file'
-    value 'HEADER', description: 'Header validation', value: 'header'
+    value 'TEXT_FILE', description: 'Text file validation.', value: 'text_file'
+    value 'HEADER', description: 'Header validation.', value: 'header'
   end
 end

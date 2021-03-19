@@ -1,8 +1,8 @@
+import MockAdapter from 'axios-mock-adapter';
 import $ from 'jquery';
 import 'vendor/jquery.endless-scroll';
-import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import CommitsList from '~/commits';
+import axios from '~/lib/utils/axios_utils';
 import Pager from '~/pager';
 
 describe('Commits List', () => {
@@ -70,7 +70,7 @@ describe('Commits List', () => {
       mock.restore();
     });
 
-    it('should save the last search string', done => {
+    it('should save the last search string', (done) => {
       commitsList.searchField.val('GitLab');
       commitsList
         .filterResults()
@@ -83,7 +83,7 @@ describe('Commits List', () => {
         .catch(done.fail);
     });
 
-    it('should not make ajax call if the input does not change', done => {
+    it('should not make ajax call if the input does not change', (done) => {
       commitsList
         .filterResults()
         .then(() => {

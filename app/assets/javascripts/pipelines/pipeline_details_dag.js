@@ -1,18 +1,13 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import Dag from './components/dag/dag.vue';
 
 Vue.use(VueApollo);
 
-const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
-});
-
-const createDagApp = () => {
+const createDagApp = (apolloProvider) => {
   const el = document.querySelector('#js-pipeline-dag-vue');
 
-  if (!window.gon?.features?.dagPipelineTab || !el) {
+  if (!el) {
     return;
   }
 

@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Cluster management project
+# Cluster management project **(FREE)**
 
 WARNING:
 This is an _alpha_ feature, and it is subject to change at any time without
@@ -20,7 +20,7 @@ privileges.
 
 This can be useful for:
 
-- Creating pipelines to install cluster-wide applications into your cluster, see [Install using GitLab CI/CD (alpha)](applications.md#install-using-gitlab-cicd) for details.
+- Creating pipelines to install cluster-wide applications into your cluster, see [Install using GitLab CI/CD (beta)](applications.md#install-using-gitlab-cicd) for details.
 - Any jobs that require `cluster-admin` privileges.
 
 ## Permissions

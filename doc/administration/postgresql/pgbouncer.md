@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Working with the bundled PgBouncer service **(PREMIUM ONLY)**
+# Working with the bundled PgBouncer service **(PREMIUM SELF)**
 
 [PgBouncer](http://www.pgbouncer.org/) is used to seamlessly migrate database
 connections between servers in a failover scenario. Additionally, it can be used
@@ -65,6 +65,12 @@ This content has been moved to a [new location](replication_and_failover.md#conf
 1. Run `gitlab-ctl reconfigure`
 
 1. At this point, your instance should connect to the database through PgBouncer. If you are having issues, see the [Troubleshooting](#troubleshooting) section
+
+## Backups
+
+Do not backup or restore GitLab through a PgBouncer connection: this will cause a GitLab outage.
+
+[Read more about this and how to reconfigure backups](../../raketasks/backup_restore.md#backup-and-restore-for-installations-using-pgbouncer).
 
 ## Enable Monitoring
 
@@ -150,7 +156,10 @@ ote_pid | tls
 
 ## Procedure for bypassing PgBouncer
 
-Some database changes have to be done directly, and not through PgBouncer. This includes database restores and GitLab upgrades (because of the database migrations).
+Some database changes have to be done directly, and not through PgBouncer.
+
+Read more about the affected tasks: [database restores](../../raketasks/backup_restore.md#backup-and-restore-for-installations-using-pgbouncer)
+and [GitLab upgrades](https://docs.gitlab.com/omnibus/update/README.html#use-postgresql-ha).
 
 1. To find the primary node, run the following on a database node:
 

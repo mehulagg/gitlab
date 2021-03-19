@@ -1,7 +1,7 @@
-import { __ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __ } from '~/locale';
 import { transformFrontendSettings } from '../utils';
 import * as types from './mutation_types';
 
@@ -63,7 +63,7 @@ export const updateSettings = ({ dispatch, state }) => {
     .then(() => {
       refreshCurrentPage();
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch('receiveSettingsError', err);
     });
 };

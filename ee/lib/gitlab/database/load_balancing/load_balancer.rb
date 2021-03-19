@@ -12,13 +12,13 @@ module Gitlab
       # always returns a connection to the primary.
       class LoadBalancer
         CACHE_KEY = :gitlab_load_balancer_host
-        ENSURE_CACHING_KEY = 'ensure_caching'
 
         attr_reader :host_list
 
         # hosts - The hostnames/addresses of the additional databases.
         def initialize(hosts = [])
           @host_list = HostList.new(hosts.map { |addr| Host.new(addr, self) })
+          @connection_db_roles = {}.compare_by_identity
         end
 
         # Yields a connection that can be used for reads.
@@ -26,14 +26,20 @@ module Gitlab
         # If no secondaries were available this method will use the primary
         # instead.
         def read(&block)
+          connection = nil
           conflict_retried = 0
 
           while host
             ensure_caching!
 
             begin
-              return yield host.connection
+              connection = host.connection
+              @connection_db_roles[connection] = ROLE_REPLICA
+
+              return yield connection
             rescue => error
+              @connection_db_roles.delete(connection) if connection.present?
+
               if serialization_failure?(error)
                 # This error can occur when a query conflicts. See
                 # https://www.postgresql.org/docs/current/static/hot-standby.html#HOT-STANDBY-CONFLICT
@@ -76,16 +82,31 @@ module Gitlab
           )
 
           read_write(&block)
+        ensure
+          @connection_db_roles.delete(connection) if connection.present?
         end
 
         # Yields a connection that can be used for both reads and writes.
         def read_write
+          connection = nil
           # In the event of a failover the primary may be briefly unavailable.
           # Instead of immediately grinding to a halt we'll retry the operation
           # a few times.
           retry_with_backoff do
-            yield ActiveRecord::Base.retrieve_connection
+            connection = ActiveRecord::Base.retrieve_connection
+            @connection_db_roles[connection] = ROLE_PRIMARY
+
+            yield connection
           end
+        ensure
+          @connection_db_roles.delete(connection) if connection.present?
+        end
+
+        # Recognize the role (primary/replica) of the database this connection
+        # is connecting to. If the connection is not issued by this load
+        # balancer, return nil
+        def db_role_for_connection(connection)
+          @connection_db_roles[connection]
         end
 
         # Returns a host to use for queries.
@@ -103,7 +124,6 @@ module Gitlab
             host.release_connection
           end
 
-          RequestStore.delete(ENSURE_CACHING_KEY)
           RequestStore.delete(CACHE_KEY)
         end
 
@@ -180,19 +200,8 @@ module Gitlab
 
         private
 
-        # TODO:
-        # Move enable_query_cache! to ConnectionPool (https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/database.rb#L223)
-        # when the feature flag is removed in https://gitlab.com/gitlab-org/gitlab/-/issues/276203.
         def ensure_caching!
-          # Feature (Flipper gem) reads the data from the database, and it would cause the infinite loop here.
-          # We need to ensure that the code below is executed only once, until the feature flag is removed.
-          return if RequestStore[ENSURE_CACHING_KEY]
-
-          RequestStore[ENSURE_CACHING_KEY] = true
-
-          if Feature.enabled?(:query_cache_for_load_balancing, default_enabled: true)
-            host.enable_query_cache!
-          end
+          host.enable_query_cache! unless host.query_cache_enabled
         end
       end
     end

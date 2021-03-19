@@ -16,6 +16,7 @@ module Vulnerabilities
 
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
     enum category: ::Enums::Vulnerability.report_types
+    declarative_enum DismissalReasonEnum
 
     validates :project, presence: true
     validates :author, presence: true

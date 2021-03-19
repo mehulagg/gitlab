@@ -1,28 +1,28 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlFormInput, GlFormTextarea } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
 
 import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
 
 import { mockCommitMessage, mockDefaultBranch } from '../../mock_data';
 
-describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
+describe('Pipeline Editor | Commit Form', () => {
   let wrapper;
 
   const createComponent = ({ props = {} } = {}, mountFn = shallowMount) => {
     wrapper = mountFn(CommitForm, {
       propsData: {
         defaultMessage: mockCommitMessage,
-        defaultBranch: mockDefaultBranch,
+        currentBranch: mockDefaultBranch,
         ...props,
       },
 
-      // attachToDocument is required for input/submit events
-      attachToDocument: mountFn === mount,
+      // attachTo is required for input/submit events
+      attachTo: mountFn === mount ? document.body : null,
     });
   };
 
-  const findCommitTextarea = () => wrapper.find(GlFormTextarea);
-  const findBranchInput = () => wrapper.find(GlFormInput);
+  const findCommitTextarea = () => wrapper.findComponent(GlFormTextarea);
+  const findBranchInput = () => wrapper.findComponent(GlFormInput);
   const findNewMrCheckbox = () => wrapper.find('[data-testid="new-mr-checkbox"]');
   const findSubmitBtn = () => wrapper.find('[type="submit"]');
   const findCancelBtn = () => wrapper.find('[type="reset"]');
@@ -41,7 +41,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       expect(findCommitTextarea().attributes('value')).toBe(mockCommitMessage);
     });
 
-    it('shows a default branch', () => {
+    it('shows current branch', () => {
       expect(findBranchInput().attributes('value')).toBe(mockDefaultBranch);
     });
 
@@ -66,7 +66,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       expect(wrapper.emitted('submit')[0]).toEqual([
         {
           message: mockCommitMessage,
-          branch: mockDefaultBranch,
+          targetBranch: mockDefaultBranch,
           openMergeRequest: false,
         },
       ]);
@@ -101,7 +101,7 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
       expect(wrapper.emitted('submit')[0]).toEqual([
         {
           message: anotherMessage,
-          branch: anotherBranch,
+          targetBranch: anotherBranch,
           openMergeRequest: true,
         },
       ]);

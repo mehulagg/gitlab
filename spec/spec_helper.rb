@@ -13,6 +13,7 @@ end
 Warning[:deprecated] = true unless ENV.key?('SILENCE_DEPRECATIONS')
 
 require './spec/deprecation_toolkit_env'
+DeprecationToolkitEnv.configure!
 
 require './spec/simplecov_env'
 SimpleCovEnv.start!
@@ -33,6 +34,7 @@ require 'rspec-parameterized'
 require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
 require 'test_prof/factory_default'
+require 'parslet/rig/rspec'
 
 rspec_profiling_is_configured =
   ENV['RSPEC_PROFILING_POSTGRES_URL'].present? ||
@@ -88,6 +90,25 @@ RSpec.configure do |config|
   # Add :full_backtrace tag to an example if full_backtrace output is desired
   config.before(:each, full_backtrace: true) do |example|
     config.full_backtrace = true
+  end
+
+  # Attempt to troubleshoot https://gitlab.com/gitlab-org/gitlab/-/issues/297359
+  if ENV['CI']
+    config.after do |example|
+      if example.exception.is_a?(GRPC::Unavailable)
+        warn "=== gRPC unavailable detected, process list:"
+        processes = `ps -ef | grep toml`
+        warn processes
+        warn "=== free memory"
+        warn `free -m`
+        warn "=== uptime"
+        warn `uptime`
+        warn "=== Prometheus metrics:"
+        warn `curl -s -o log/gitaly-metrics.log http://localhost:9236/metrics`
+        warn "=== Taking goroutine dump in log/goroutines.log..."
+        warn `curl -s -o log/goroutines.log http://localhost:9236/debug/pprof/goroutine?debug=2`
+      end
+    end
   end
 
   unless ENV['CI']
@@ -174,9 +195,12 @@ RSpec.configure do |config|
   if ENV['CI'] || ENV['RETRIES']
     # This includes the first try, i.e. tests will be run 4 times before failing.
     config.default_retry_count = ENV.fetch('RETRIES', 3).to_i + 1
+    config.exceptions_to_hard_fail = [DeprecationToolkitEnv::DeprecationBehaviors::SelectiveRaise::RaiseDisallowedDeprecation]
   end
 
   if ENV['FLAKY_RSPEC_GENERATE_REPORT']
+    require_relative '../tooling/rspec_flaky/listener'
+
     config.reporter.register_listener(
       RspecFlaky::Listener.new,
       :example_passed,
@@ -216,16 +240,9 @@ RSpec.configure do |config|
       # (ie. ApplicationSetting#auto_devops_enabled)
       stub_feature_flags(force_autodevops_on_by_default: false)
 
-      # The following can be removed once Vue Issuable Sidebar
-      # is feature-complete and can be made default in place
-      # of older sidebar.
-      # See https://gitlab.com/groups/gitlab-org/-/epics/1863
-      stub_feature_flags(vue_issuable_sidebar: false)
-      stub_feature_flags(vue_issuable_epic_sidebar: false)
-
       # Merge request widget GraphQL requests are disabled in the tests
       # for now whilst we migrate as much as we can over the GraphQL
-      stub_feature_flags(merge_request_widget_graphql: false)
+      # stub_feature_flags(merge_request_widget_graphql: false)
 
       # Using FortiAuthenticator as OTP provider is disabled by default in
       # tests, until we introduce it in user settings
@@ -248,13 +265,20 @@ RSpec.configure do |config|
 
       stub_feature_flags(unified_diff_components: false)
 
+      # Disable this feature flag as we iterate and
+      # refactor filtered search to use gitlab ui
+      # components to meet feature parody. More details found
+      # https://gitlab.com/groups/gitlab-org/-/epics/5501
+      stub_feature_flags(boards_filtered_search: false)
+
+      # The following `vue_issues_list` stub can be removed once the
+      # Vue issues page has feature parity with the current Haml page
+      stub_feature_flags(vue_issues_list: false)
+
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
     end
-
-    # Enable Marginalia feature for all specs in the test suite.
-    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:
@@ -272,44 +296,16 @@ RSpec.configure do |config|
 
     Sidekiq::Worker.clear_all
 
-    # Temporary patch to force admin mode to be active by default in tests when
-    # using the feature flag :user_mode_in_session, since this will require
-    # modifying a significant number of specs to test both states for admin
-    # mode enabled / disabled.
-    #
-    # This will only be applied to specs below dirs in `admin_mode_mock_dirs`
-    #
-    # See ongoing migration: https://gitlab.com/gitlab-org/gitlab/-/issues/31511
-    #
-    # Until the migration is finished, if it is required to have the real
-    # behaviour in any of the mocked dirs specs that an admin is signed in
-    # with normal user mode and needs to switch to admin mode, it is possible to
-    # mark such tests with the `do_not_mock_admin_mode` metadata tag, e.g:
-    #
-    # context 'some test in mocked dir', :do_not_mock_admin_mode do ... end
-    admin_mode_mock_dirs = %w(
-      ./ee/spec/elastic_integration
-      ./ee/spec/finders
-      ./ee/spec/serializers
-      ./ee/spec/support/shared_examples/finders/geo
-      ./ee/spec/support/shared_examples/graphql/geo
-      ./spec/finders
-      ./spec/serializers
-      ./spec/workers
-    )
-
-    if !example.metadata[:do_not_mock_admin_mode] && example.metadata[:file_path].start_with?(*admin_mode_mock_dirs)
-      allow_any_instance_of(Gitlab::Auth::CurrentUserMode).to receive(:admin_mode?) do |current_user_mode|
-        current_user_mode.send(:user)&.admin?
-      end
-    end
-
     # Administrators have to re-authenticate in order to access administrative
-    # functionality when feature flag :user_mode_in_session is active. Any spec
+    # functionality when application setting admin_mode is active. Any spec
     # that requires administrative access can use the tag :enable_admin_mode
     # to avoid the second auth step (provided the user is already an admin):
     #
     # context 'some test that requires admin mode', :enable_admin_mode do ... end
+    #
+    # Some specs do get admin mode enabled automatically (e.g. `spec/controllers/admin`).
+    # In this case, specs that need to test both admin mode states can use the
+    # :do_not_mock_admin_mode tag to disable auto admin mode.
     #
     # See also spec/support/helpers/admin_mode_helpers.rb
     if example.metadata[:enable_admin_mode] && !example.metadata[:do_not_mock_admin_mode]
@@ -317,6 +313,11 @@ RSpec.configure do |config|
         current_user_mode.send(:user)&.admin?
       end
     end
+
+    # Make sure specs test by default admin mode setting on, unless forced to the opposite
+    stub_application_setting(admin_mode: true) unless example.metadata[:do_not_mock_admin_mode_setting]
+
+    allow(Gitlab::CurrentSettings).to receive(:current_application_settings?).and_return(false)
   end
 
   config.around(:example, :quarantine) do |example|
@@ -335,10 +336,20 @@ RSpec.configure do |config|
     RequestStore.clear!
   end
 
-  config.around do |example|
-    # Wrap each example in it's own context to make sure the contexts don't
-    # leak
-    Labkit::Context.with_context { example.run }
+  if ENV['SKIP_RSPEC_CONTEXT_WRAPPING']
+    config.around(:example, :context_aware) do |example|
+      # Wrap each example in it's own context to make sure the contexts don't
+      # leak
+      Gitlab::ApplicationContext.with_raw_context { example.run }
+    end
+  else
+    config.around do |example|
+      if [:controller, :request, :feature].include?(example.metadata[:type]) || example.metadata[:context_aware]
+        Gitlab::ApplicationContext.with_raw_context { example.run }
+      else
+        example.run
+      end
+    end
   end
 
   config.around do |example|
@@ -361,6 +372,9 @@ RSpec.configure do |config|
 
     # Reset all feature flag stubs to default for testing
     stub_all_feature_flags
+
+    # Re-enable query limiting in case it was disabled
+    Gitlab::QueryLimiting.enable!
   end
 
   config.before(:example, :mailer) do
@@ -396,9 +410,6 @@ end
 
 # Prevent Rugged from picking up local developer gitconfig.
 Rugged::Settings['search_path_global'] = Rails.root.join('tmp/tests').to_s
-
-# Disable timestamp checks for invisible_captcha
-InvisibleCaptcha.timestamp_enabled = false
 
 # Initialize FactoryDefault to use create_default helper
 TestProf::FactoryDefault.init

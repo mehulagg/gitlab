@@ -74,39 +74,17 @@ RSpec.describe RegistrationsController do
       end
     end
 
-    context 'when user signup cap setting is enabled' do
+    context 'when user signup cap is set' do
       before do
-        stub_application_setting(new_user_signups_cap: true)
+        stub_application_setting(new_user_signups_cap: 1)
       end
 
       it_behaves_like 'blocked user by default'
-
-      context 'when feature flag is disabled' do
-        before do
-          stub_feature_flags(admin_new_user_signups_cap: false)
-        end
-
-        context 'when require admin approval setting is disabled' do
-          before do
-            stub_application_setting(require_admin_approval_after_user_signup: false)
-          end
-
-          it_behaves_like 'active user by default'
-        end
-
-        context 'when require admin approval setting is enabled' do
-          before do
-            stub_application_setting(require_admin_approval_after_user_signup: true)
-          end
-
-          it_behaves_like 'blocked user by default'
-        end
-      end
     end
 
-    context 'when user signup cap setting is disabled' do
+    context 'when user signup cap is not set' do
       before do
-        stub_application_setting(admin_new_user_signups_cap: false)
+        stub_application_setting(new_user_signups_cap: nil)
       end
 
       context 'when require admin approval setting is disabled' do
@@ -123,6 +101,31 @@ RSpec.describe RegistrationsController do
         end
 
         it_behaves_like 'blocked user by default'
+      end
+    end
+
+    context 'audit events' do
+      context 'when licensed' do
+        before do
+          stub_licensed_features(admin_audit_log: true)
+        end
+
+        context 'when user registers for the instance' do
+          it 'logs an audit event' do
+            expect { subject }.to change { AuditEvent.count }.by(1)
+          end
+
+          it 'logs the audit event info', :aggregate_failures do
+            subject
+
+            created_user = User.find_by(email: new_user_email)
+            audit_event = AuditEvent.where(author_id: created_user.id).last
+
+            expect(audit_event.ip_address).to eq(created_user.current_sign_in_ip)
+            expect(audit_event.details[:target_details]).to eq(created_user.username)
+            expect(audit_event.details[:custom_message]).to eq('Instance access request')
+          end
+        end
       end
     end
   end

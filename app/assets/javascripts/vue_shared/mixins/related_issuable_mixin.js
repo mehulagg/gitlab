@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash';
-import { sprintf, __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { sprintf, __ } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 const mixins = {
@@ -175,7 +175,7 @@ const mixins = {
         return __('Merged');
       }
 
-      return this.isOpen ? __('Opened') : __('Closed');
+      return this.isOpen ? __('Created') : __('Closed');
     },
     stateTimeInWords() {
       if (this.isMerged) {

@@ -8,8 +8,12 @@ class GroupWiki < Wiki
   def create_wiki_repository
     super
 
+    track_wiki_repository(repository.shard)
+  end
+
+  def track_wiki_repository(shard)
     storage_record = container.group_wiki_repository || container.build_group_wiki_repository
-    storage_record.update!(shard_name: repository.shard, disk_path: storage.disk_path)
+    storage_record.update!(shard_name: shard, disk_path: storage.disk_path)
   end
 
   override :storage
@@ -19,9 +23,7 @@ class GroupWiki < Wiki
 
   override :repository_storage
   def repository_storage
-    strong_memoize(:repository_storage) do
-      container.group_wiki_repository&.shard_name || self.class.pick_repository_storage
-    end
+    container.repository_storage
   end
 
   override :hashed_storage?
@@ -43,7 +45,12 @@ class GroupWiki < Wiki
 
   override :after_post_receive
   def after_post_receive
-    # TODO: Update group wiki storage
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/230465
+    # Update group wiki storage statistics
+    Groups::UpdateStatisticsWorker.perform_async(group.id, [:wiki_size])
+  end
+
+  override :git_garbage_collect_worker_klass
+  def git_garbage_collect_worker_klass
+    GroupWikis::GitGarbageCollectWorker
   end
 end

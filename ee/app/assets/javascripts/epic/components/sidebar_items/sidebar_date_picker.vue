@@ -1,9 +1,9 @@
 <script>
-import { uniqueId } from 'lodash';
 import { GlLoadingIcon, GlButton, GlIcon, GlTooltipDirective, GlPopover, GlLink } from '@gitlab/ui';
+import { uniqueId } from 'lodash';
 
-import { __, s__ } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
+import { __, s__ } from '~/locale';
 
 import DatePicker from '~/vue_shared/components/pikaday.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';

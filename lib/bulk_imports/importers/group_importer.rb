@@ -8,19 +8,18 @@ module BulkImports
       end
 
       def execute
-        entity.start!
-        bulk_import = entity.bulk_import
-        configuration = bulk_import.configuration
+        pipelines.each.with_index do |pipeline, stage|
+          pipeline_tracker = entity.trackers.create!(
+            pipeline_name: pipeline,
+            stage: stage
+          )
 
-        context = BulkImports::Pipeline::Context.new(
-          current_user: bulk_import.user,
-          entity: entity,
-          configuration: configuration
-        )
+          context = BulkImports::Pipeline::Context.new(pipeline_tracker)
 
-        BulkImports::Groups::Pipelines::GroupPipeline.new.run(context)
-        'BulkImports::EE::Groups::Pipelines::EpicsPipeline'.constantize.new.run(context) if Gitlab.ee?
-        BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline.new.run(context)
+          pipeline.new(context).run
+
+          pipeline_tracker.finish!
+        end
 
         entity.finish!
       end
@@ -28,6 +27,18 @@ module BulkImports
       private
 
       attr_reader :entity
+
+      def pipelines
+        [
+          BulkImports::Groups::Pipelines::GroupPipeline,
+          BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
+          BulkImports::Groups::Pipelines::MembersPipeline,
+          BulkImports::Groups::Pipelines::LabelsPipeline,
+          BulkImports::Groups::Pipelines::MilestonesPipeline
+        ]
+      end
     end
   end
 end
+
+BulkImports::Importers::GroupImporter.prepend_if_ee('EE::BulkImports::Importers::GroupImporter')

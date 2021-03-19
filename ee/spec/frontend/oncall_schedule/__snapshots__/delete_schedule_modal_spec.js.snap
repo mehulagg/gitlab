@@ -5,6 +5,7 @@ exports[`DeleteScheduleModal renders delete schedule modal layout 1`] = `
   actioncancel="[object Object]"
   actionprimary="[object Object]"
   data-testid="delete-schedule-modal-37"
+  dismisslabel="Close"
   modalclass=""
   modalid="deleteScheduleModal"
   size="sm"

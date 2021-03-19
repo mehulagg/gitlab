@@ -38,7 +38,7 @@ RSpec.describe AlertManagement::HttpIntegration do
       context 'with valid JSON schema' do
         let(:attribute_mapping) do
           {
-            title: { path: %w(a b c), type: 'string' },
+            title: { path: %w(a b c), type: 'string', label: 'Title' },
             description: { path: %w(a), type: 'string' }
           }
         end
@@ -76,6 +76,32 @@ RSpec.describe AlertManagement::HttpIntegration do
           end
 
           it_behaves_like 'is invalid record'
+        end
+      end
+    end
+  end
+
+  describe 'before validation' do
+    describe '#ensure_payload_example_not_nil' do
+      subject(:integration) { build(:alert_management_http_integration, payload_example: payload_example) }
+
+      context 'when the payload_example is nil' do
+        let(:payload_example) { nil }
+
+        it 'sets the payload_example to empty JSON' do
+          integration.valid?
+
+          expect(integration.payload_example).to eq({})
+        end
+      end
+
+      context 'when the payload_example is not nil' do
+        let(:payload_example) { { 'key' => 'value' } }
+
+        it 'sets the payload_example to specified value' do
+          integration.valid?
+
+          expect(integration.payload_example).to eq(payload_example)
         end
       end
     end

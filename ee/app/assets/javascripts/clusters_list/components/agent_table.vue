@@ -45,6 +45,12 @@ export default {
     </div>
 
     <gl-table :items="agents" :fields="fields" stacked="md" data-testid="cluster-agent-list-table">
+      <template #cell(name)="{ item }">
+        <gl-link :href="item.webPath">
+          {{ item.name }}
+        </gl-link>
+      </template>
+
       <template #cell(configuration)="{ item }">
         <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
         <gl-link v-if="item.configFolder" :href="item.configFolder.webPath">

@@ -19,10 +19,10 @@ export function renderTotalTime(selector, element, totalTime = {}) {
 export const shouldFlashAMessage = (msg = '') =>
   expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(msg);
 
-export const findDropdownItems = wrapper => wrapper.findAll(GlDropdownItem);
+export const findDropdownItems = (wrapper) => wrapper.findAll(GlDropdownItem);
 
-export const findDropdownItemText = wrapper =>
-  findDropdownItems(wrapper).wrappers.map(w => w.text());
+export const findDropdownItemText = (wrapper) =>
+  findDropdownItems(wrapper).wrappers.map((w) => w.text());
 
 export default {
   renderTotalTime,

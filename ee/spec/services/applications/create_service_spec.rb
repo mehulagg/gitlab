@@ -3,15 +3,33 @@
 require 'spec_helper'
 
 RSpec.describe ::Applications::CreateService do
+  include TestRequestHelpers
+
   let(:user) { create(:user) }
+  let(:group) { create(:group) }
   let(:params) { attributes_for(:application) }
-  let(:request) { ActionController::TestRequest.new({ remote_ip: "127.0.0.1" }, ActionController::TestSession.new, nil) }
 
   subject { described_class.new(user, params) }
 
-  it 'creates an AuditEvent' do
-    stub_licensed_features(extended_audit_events: true)
+  describe '#audit_event_service' do
+    using RSpec::Parameterized::TableSyntax
 
-    expect { subject.execute(request) }.to change { AuditEvent.count }.by(1)
+    where(:case_name, :owner, :entity_type) do
+      'instance application' | nil   | 'User'
+      'group application'    | group | 'Group'
+      'user application'     | user  | 'User'
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(extended_audit_events: true)
+        params[:owner] = owner
+      end
+
+      it 'creates AuditEvent with correct entity type' do
+        expect { subject.execute(test_request) }.to change(AuditEvent, :count).by(1)
+        expect(AuditEvent.last.entity_type).to eq(entity_type)
+      end
+    end
   end
 end

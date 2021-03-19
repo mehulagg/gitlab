@@ -1,10 +1,10 @@
-import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
-import Todos from '~/pages/dashboard/todos/index/todos';
+import $ from 'jquery';
 import '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
 import { addDelimiter } from '~/lib/utils/text_utility';
 import { visitUrl } from '~/lib/utils/url_utility';
+import Todos from '~/pages/dashboard/todos/index/todos';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrl'),
@@ -14,7 +14,6 @@ const TEST_COUNT_BIG = 2000;
 const TEST_DONE_COUNT_BIG = 7300;
 
 describe('Todos', () => {
-  preloadFixtures('todos/todos.html');
   let todoItem;
   let mock;
 
@@ -31,10 +30,10 @@ describe('Todos', () => {
   });
 
   describe('goToTodoUrl', () => {
-    it('opens the todo url', done => {
+    it('opens the todo url', (done) => {
       const todoLink = todoItem.dataset.url;
 
-      visitUrl.mockImplementation(url => {
+      visitUrl.mockImplementation((url) => {
         expect(url).toEqual(todoLink);
         done();
       });
@@ -61,7 +60,7 @@ describe('Todos', () => {
       });
 
       it('run native funcionality when avatar is clicked', () => {
-        $('.todos-list a').on('click', e => e.preventDefault());
+        $('.todos-list a').on('click', (e) => e.preventDefault());
         $('.todos-list img').trigger(metakeyEvent);
 
         expect(visitUrl).not.toHaveBeenCalled();
@@ -72,7 +71,7 @@ describe('Todos', () => {
     describe('on done todo click', () => {
       let onToggleSpy;
 
-      beforeEach(done => {
+      beforeEach((done) => {
         const el = document.querySelector('.js-done-todo');
         const path = el.dataset.href;
 

@@ -1,9 +1,11 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { groupBy } from 'lodash';
 import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
-import { glEmojiTag } from '../../emoji';
+import { groupBy } from 'lodash';
+import EmojiPicker from '~/emoji/components/picker.vue';
 import { __, sprintf } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { glEmojiTag } from '../../emoji';
 
 // Internal constant, specific to this component, used when no `currentUserId` is given
 const NO_USER_ID = -1;
@@ -12,10 +14,12 @@ export default {
   components: {
     GlButton,
     GlIcon,
+    EmojiPicker,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     awards: {
       type: Array,
@@ -48,7 +52,7 @@ export default {
     groupedAwards() {
       const { thumbsup, thumbsdown, ...rest } = {
         ...this.groupedDefaultAwards,
-        ...groupBy(this.awards, x => x.name),
+        ...groupBy(this.awards, (x) => x.name),
       };
 
       return [
@@ -73,7 +77,7 @@ export default {
         return false;
       }
 
-      return awardList.some(award => award.user.id === this.currentUserId);
+      return awardList.some((award) => award.user.id === this.currentUserId);
     },
     createAwardList(name, list) {
       return {
@@ -95,11 +99,11 @@ export default {
 
       // Filter myself from list if I am awarded.
       if (hasReactionByCurrentUser) {
-        awardList = awardList.filter(award => award.user.id !== this.currentUserId);
+        awardList = awardList.filter((award) => award.user.id !== this.currentUserId);
       }
 
       // Get only 9-10 usernames to show in tooltip text.
-      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map(award => award.user.name);
+      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map((award) => award.user.name);
 
       // Get the remaining list to use in `and x more` text.
       const remainingAwardList = awardList.slice(TOOLTIP_NAME_COUNT, awardList.length);
@@ -166,7 +170,25 @@ export default {
       <span class="js-counter">{{ awardList.list.length }}</span>
     </gl-button>
     <div v-if="canAwardEmoji" class="award-menu-holder">
+      <emoji-picker
+        v-if="glFeatures.improvedEmojiPicker"
+        toggle-class="add-reaction-button gl-relative!"
+        @click="handleAward"
+      >
+        <template #button-content>
+          <span class="reaction-control-icon reaction-control-icon-neutral">
+            <gl-icon name="slight-smile" />
+          </span>
+          <span class="reaction-control-icon reaction-control-icon-positive">
+            <gl-icon name="smiley" />
+          </span>
+          <span class="reaction-control-icon reaction-control-icon-super-positive">
+            <gl-icon name="smile" />
+          </span>
+        </template>
+      </emoji-picker>
       <gl-button
+        v-else
         v-gl-tooltip.viewport
         :class="addButtonClass"
         class="add-reaction-button js-add-award"

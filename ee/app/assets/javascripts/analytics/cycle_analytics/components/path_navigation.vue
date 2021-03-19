@@ -1,6 +1,5 @@
 <script>
 import { GlPath, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
-import { PATH_BACKGROUND_COLOR } from '../constants';
 
 export default {
   name: 'PathNavigation',
@@ -24,16 +23,9 @@ export default {
       default: () => {},
     },
   },
-  backgroundColor: PATH_BACKGROUND_COLOR,
 };
 </script>
 <template>
   <gl-skeleton-loading v-if="loading" :lines="2" class="h-auto pt-2 pb-1" />
-  <gl-path
-    v-else
-    :key="selectedStage.id"
-    :items="stages"
-    :background-color="$options.backgroundColor"
-    @selected="$emit('selected', $event)"
-  />
+  <gl-path v-else :key="selectedStage.id" :items="stages" @selected="$emit('selected', $event)" />
 </template>

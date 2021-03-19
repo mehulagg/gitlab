@@ -23,7 +23,8 @@ module Gitlab
       ::Geo::MergeRequestDiffReplicator,
       ::Geo::PackageFileReplicator,
       ::Geo::TerraformStateVersionReplicator,
-      ::Geo::SnippetRepositoryReplicator
+      ::Geo::SnippetRepositoryReplicator,
+      ::Geo::GroupWikiRepositoryReplicator
     ].freeze
 
     def self.current_node

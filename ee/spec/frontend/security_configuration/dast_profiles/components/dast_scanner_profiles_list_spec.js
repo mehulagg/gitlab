@@ -1,7 +1,7 @@
 import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import Component from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
 import ProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
+import Component from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
 import { scannerProfiles } from '../mocks/mock_data';
 
 describe('EE - DastScannerProfileList', () => {
@@ -10,9 +10,10 @@ describe('EE - DastScannerProfileList', () => {
   const defaultProps = {
     profiles: [],
     tableLabel: 'Scanner profiles',
-    fields: ['profileName'],
+    fields: [{ key: 'profileName' }, { key: 'scanType' }],
     profilesPerPage: 10,
     errorMessage: '',
+    noProfilesMessage: 'no scanner profiles created yet',
     errorDetails: [],
     fullPath: '/namespace/project',
     hasMoreProfilesToLoad: false,
@@ -30,7 +31,6 @@ describe('EE - DastScannerProfileList', () => {
       ),
     );
   };
-  const createComponent = wrapperFactory();
   const createFullComponent = wrapperFactory(mount);
 
   const findProfileList = () => wrapper.find(ProfilesList);
@@ -40,7 +40,7 @@ describe('EE - DastScannerProfileList', () => {
   });
 
   it('renders profile list properly', () => {
-    createComponent({
+    createFullComponent({
       propsData: { profiles: scannerProfiles },
     });
 
@@ -55,7 +55,7 @@ describe('EE - DastScannerProfileList', () => {
 
   it('sets listeners on profile list component', () => {
     const inputHandler = jest.fn();
-    createComponent({
+    createFullComponent({
       listeners: {
         input: inputHandler,
       },

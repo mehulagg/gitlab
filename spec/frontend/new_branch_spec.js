@@ -9,8 +9,6 @@ describe('Branch', () => {
   });
 
   describe('create a new branch', () => {
-    preloadFixtures('branches/new_branch.html');
-
     function fillNameWith(value) {
       $('.js-branch-name').val(value).trigger('blur');
     }
@@ -21,7 +19,7 @@ describe('Branch', () => {
 
     beforeEach(() => {
       loadFixtures('branches/new_branch.html');
-      $('form').on('submit', e => e.preventDefault());
+      $('form').on('submit', (e) => e.preventDefault());
       testContext.form = new NewBranchForm($('.js-create-branch-form'), []);
     });
 

@@ -16,9 +16,7 @@ module EE
             exactly_one_of :label_id, :milestone_id, :iteration_id, :assignee_id
           end
 
-          # Overrides API::BoardsResponses update_params
-          params :update_params do
-            optional :name, type: String, desc: 'The board name'
+          params :update_params_ee do
             optional :assignee_id, type: Integer, desc: 'The ID of a user to associate with board'
             optional :milestone_id, type: Integer, desc: 'The ID of a milestone to associate with board'
             optional :labels, type: String, desc: 'Comma-separated list of label names'

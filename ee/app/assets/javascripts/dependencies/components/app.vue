@@ -1,13 +1,13 @@
 <script>
+import { GlEmptyState, GlIcon, GlLoadingIcon, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlEmptyState, GlIcon, GlLoadingIcon, GlSprintf, GlLink, GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { DEPENDENCY_LIST_TYPES } from '../store/constants';
+import { REPORT_STATUS } from '../store/modules/list/constants';
 import DependenciesActions from './dependencies_actions.vue';
 import DependencyListIncompleteAlert from './dependency_list_incomplete_alert.vue';
 import DependencyListJobFailedAlert from './dependency_list_job_failed_alert.vue';
 import PaginatedDependenciesTable from './paginated_dependencies_table.vue';
-import { DEPENDENCY_LIST_TYPES } from '../store/constants';
-import { REPORT_STATUS } from '../store/modules/list/constants';
 
 export default {
   name: 'DependenciesApp',
@@ -18,7 +18,6 @@ export default {
     GlLoadingIcon,
     GlSprintf,
     GlLink,
-    GlButton,
     DependencyListIncompleteAlert,
     DependencyListJobFailedAlert,
     PaginatedDependenciesTable,
@@ -79,7 +78,7 @@ export default {
           description: __(
             'The dependency list details information about the components used within your project.',
           ),
-          buttonLabel: __('Learn more about the dependency list'),
+          linkText: __('More Information'),
           link: this.documentationPath,
         },
         [REPORT_STATUS.noDependencies]: {
@@ -87,7 +86,7 @@ export default {
           description: __(
             'It seems like the Dependency Scanning job ran successfully, but no dependencies have been detected in your project.',
           ),
-          buttonLabel: __('View supported languages and frameworks'),
+          linkText: __('View supported languages and frameworks'),
           link: this.supportDocumentationPath,
         },
       };
@@ -122,13 +121,13 @@ export default {
   <gl-empty-state
     v-else-if="showEmptyState"
     :title="emptyStateOptions.title"
-    :description="emptyStateOptions.description"
     :svg-path="emptyStateSvgPath"
   >
-    <template #actions>
-      <gl-button variant="info" :href="emptyStateOptions.link">
-        {{ emptyStateOptions.buttonLabel }}
-      </gl-button>
+    <template #description>
+      {{ emptyStateOptions.description }}
+      <gl-link target="_blank" :href="emptyStateOptions.link">
+        {{ emptyStateOptions.linkText }}
+      </gl-link>
     </template>
   </gl-empty-state>
 

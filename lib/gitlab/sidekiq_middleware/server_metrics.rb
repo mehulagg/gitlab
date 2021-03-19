@@ -20,7 +20,7 @@ module Gitlab
         # in metrics and can use them in the `ThreadsSampler` for setting a label
         Thread.current.name ||= Gitlab::Metrics::Samplers::ThreadsSampler::SIDEKIQ_WORKER_THREAD_NAME
 
-        labels = create_labels(worker.class, queue)
+        labels = create_labels(worker.class, queue, job)
         queue_duration = ::Gitlab::InstrumentationHelper.queue_duration_for_job(job)
 
         @metrics[:sidekiq_jobs_queue_duration_seconds].observe(labels, queue_duration) if queue_duration
@@ -34,7 +34,8 @@ module Gitlab
         monotonic_time_start = Gitlab::Metrics::System.monotonic_time
         job_thread_cputime_start = get_thread_cputime
         begin
-          yield
+          transaction = Gitlab::Metrics::BackgroundTransaction.new
+          transaction.run { yield }
           job_succeeded = true
         ensure
           monotonic_time_end = Gitlab::Metrics::System.monotonic_time

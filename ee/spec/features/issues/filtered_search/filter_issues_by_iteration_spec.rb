@@ -79,6 +79,9 @@ RSpec.describe 'Filter issues by iteration', :js do
 
       context 'when filtering by negated iteration' do
         before do
+          # iterationWildCardId is not yet supported by graphQL https://gitlab.com/gitlab-org/gitlab/-/issues/300115
+          stub_feature_flags(graphql_board_lists: false)
+
           page.within('.filtered-search-wrapper') do
             find('.filtered-search').set('iter')
             click_button('Iteration')
@@ -164,17 +167,11 @@ RSpec.describe 'Filter issues by iteration', :js do
     end
 
     before do
+      # iterationWildCardId is not yet supported by graphQL https://gitlab.com/gitlab-org/gitlab/-/issues/300115
+      stub_feature_flags(graphql_board_lists: false)
       sign_in user
     end
 
     it_behaves_like 'filters by iteration'
-
-    context 'when graphql_board_lists is disabled' do
-      before do
-        stub_feature_flags(graphql_board_lists: false)
-      end
-
-      it_behaves_like 'filters by iteration'
-    end
   end
 end

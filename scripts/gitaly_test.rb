@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file contains environment settings for gitaly when it's running
 # as part of the gitlab-ce/ee test suite.
 #
@@ -10,11 +12,11 @@ require 'logger'
 
 module GitalyTest
   LOGGER = begin
-             default_name = ENV['CI'] ? 'DEBUG' : 'WARN'
-             level_name = ENV['GITLAB_TESTING_LOG_LEVEL']&.upcase
-             level = Logger.const_get(level_name || default_name, true) # rubocop: disable Gitlab/ConstGetInheritFalse
-             Logger.new(STDOUT, level: level, formatter: ->(_, _, _, msg) { msg })
-           end
+    default_name = ENV['CI'] ? 'DEBUG' : 'WARN'
+    level_name = ENV['GITLAB_TESTING_LOG_LEVEL']&.upcase
+    level = Logger.const_get(level_name || default_name, true) # rubocop: disable Gitlab/ConstGetInheritFalse
+    Logger.new(STDOUT, level: level, formatter: ->(_, _, _, msg) { msg })
+  end
 
   def tmp_tests_gitaly_dir
     File.expand_path('../tmp/tests/gitaly', __dir__)
@@ -41,7 +43,7 @@ module GitalyTest
       'HOME' => File.expand_path('tmp/tests'),
       'GEM_PATH' => Gem.path.join(':'),
       'BUNDLE_APP_CONFIG' => File.join(File.dirname(gemfile), '.bundle/config'),
-      'BUNDLE_FLAGS' => "--jobs=4 --retry=3 --quiet",
+      'BUNDLE_FLAGS' => "--jobs=4 --retry=3",
       'BUNDLE_INSTALL_FLAGS' => nil,
       'BUNDLE_GEMFILE' => gemfile,
       'RUBYOPT' => nil,
@@ -52,7 +54,7 @@ module GitalyTest
 
     if ENV['CI']
       bundle_path = File.expand_path('../vendor/gitaly-ruby', __dir__)
-      env_hash['BUNDLE_FLAGS'] << " --path=#{bundle_path}"
+      env_hash['BUNDLE_FLAGS'] += " --path=#{bundle_path}"
     end
 
     env_hash
@@ -76,6 +78,14 @@ module GitalyTest
     when :praefect
       'praefect'
     end
+  end
+
+  def install_gitaly_gems
+    system(env, "make #{tmp_tests_gitaly_dir}/.ruby-bundle", chdir: tmp_tests_gitaly_dir) # rubocop:disable GitlabSecurity/SystemCommandInjection
+  end
+
+  def build_gitaly
+    system(env, 'make', chdir: tmp_tests_gitaly_dir) # rubocop:disable GitlabSecurity/SystemCommandInjection
   end
 
   def start_gitaly

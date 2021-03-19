@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Repository storage Rake tasks **(CORE ONLY)**
+# Repository storage Rake tasks **(FREE SELF)**
 
 This is a collection of Rake tasks to help you list and migrate
 existing projects and their attachments to the new
@@ -82,8 +82,8 @@ Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
 The option to choose between hashed and legacy storage in the admin area has
 been disabled.
 
-This task must be run on any machine that has Rails/Sidekiq configured and will 
-schedule all your existing projects and attachments associated with it to be 
+This task must be run on any machine that has Rails/Sidekiq configured and will
+schedule all your existing projects and attachments associated with it to be
 migrated to the **Hashed** storage type:
 
 - **Omnibus installation**

@@ -1,9 +1,9 @@
 <script>
-import Mousetrap from 'mousetrap';
 import { GlSprintf, GlButton, GlAlert } from '@gitlab/ui';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import Tracking from '~/tracking';
+import Mousetrap from 'mousetrap';
 import { __ } from '~/locale';
+import Tracking from '~/tracking';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import {
   COPY_BUTTON_ACTION,
   DOWNLOAD_BUTTON_ACTION,
@@ -162,7 +162,7 @@ export default {
           :href="profileAccountPath"
           :disabled="proceedButtonDisabled"
           :title="$options.i18n.proceedButton"
-          variant="success"
+          variant="confirm"
           data-qa-selector="proceed_button"
           data-track-event="click_button"
           :data-track-label="`${$options.trackingLabelPrefix}proceed_button`"

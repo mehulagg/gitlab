@@ -5,15 +5,21 @@ import VulnerabilityChart from 'ee/security_dashboard/components/first_class_vul
 import VulnerabilitySeverities from 'ee/security_dashboard/components/first_class_vulnerability_severities.vue';
 import InstanceSecurityCharts from 'ee/security_dashboard/components/instance_security_charts.vue';
 import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
-import vulnerabilityGradesQuery from 'ee/security_dashboard/graphql/instance_vulnerability_grades.query.graphql';
-import vulnerabilityHistoryQuery from 'ee/security_dashboard/graphql/instance_vulnerability_history.query.graphql';
+import vulnerabilityGradesQuery from 'ee/security_dashboard/graphql/queries/instance_vulnerability_grades.query.graphql';
+import vulnerabilityHistoryQuery from 'ee/security_dashboard/graphql/queries/instance_vulnerability_history.query.graphql';
 
-jest.mock('ee/security_dashboard/graphql/instance_vulnerability_grades.query.graphql', () => ({
-  mockGrades: true,
-}));
-jest.mock('ee/security_dashboard/graphql/instance_vulnerability_history.query.graphql', () => ({
-  mockHistory: true,
-}));
+jest.mock(
+  'ee/security_dashboard/graphql/queries/instance_vulnerability_grades.query.graphql',
+  () => ({
+    mockGrades: true,
+  }),
+);
+jest.mock(
+  'ee/security_dashboard/graphql/queries/instance_vulnerability_history.query.graphql',
+  () => ({
+    mockHistory: true,
+  }),
+);
 
 describe('Instance Security Charts component', () => {
   let wrapper;

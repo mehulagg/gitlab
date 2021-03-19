@@ -12,7 +12,7 @@ RSpec.describe UserSerializer do
     create(:approval_project_rule, name: 'Project Rule', project: project, users: [user1], protected_branches: [protected_branch])
   end
 
-  let(:serializer) { described_class.new(options) }
+  let(:serializer) { described_class.new(options.merge({ current_user: user1 })) }
 
   shared_examples 'user without applicable_approval_rules' do
     it 'returns a user without applicable_approval_rules' do

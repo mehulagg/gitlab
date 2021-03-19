@@ -31,7 +31,7 @@ describe('AutoFix Help Text component', () => {
     wrapper = createWrapper();
   });
 
-  const findByTestId = id => wrapper.find(`[data-testid="${id}"]`);
+  const findByTestId = (id) => wrapper.find(`[data-testid="${id}"]`);
 
   it('popover should have wrapping div as target', () => {
     expect(

@@ -14,7 +14,7 @@ describe('EE sast report actions', () => {
   });
 
   describe('updateVulnerability', () => {
-    it(`should commit ${types.UPDATE_VULNERABILITY} with the correct response`, done => {
+    it(`should commit ${types.UPDATE_VULNERABILITY} with the correct response`, (done) => {
       testAction(
         actions.updateVulnerability,
         issue,

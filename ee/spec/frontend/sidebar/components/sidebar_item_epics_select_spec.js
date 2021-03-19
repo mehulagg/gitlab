@@ -97,7 +97,6 @@ describe('SidebarItemEpicsSelect', () => {
   describe('template', () => {
     it('should render epics-select component', () => {
       expect(wrapper.find(EpicsSelect).element).toBe(wrapper.element);
-      expect(wrapper.attributes('blocktitle')).toBe('Epic');
       expect(wrapper.text()).toBe('None');
     });
   });

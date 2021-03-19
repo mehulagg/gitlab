@@ -1,11 +1,10 @@
 <script>
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const createButtonProps = (text, href, testId) => ({ text, href, testId });
 
@@ -16,7 +15,6 @@ export default {
     GlLoadingIcon,
     SubscriptionTableRow,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     planUpgradeHref: {
       default: '',
@@ -36,30 +34,30 @@ export default {
     addSeatsHref: {
       default: '',
     },
+    planName: {
+      default: '',
+    },
   },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
     ...mapGetters(['isFreePlan']),
+    isSubscription() {
+      return !this.isFreePlan;
+    },
     subscriptionHeader() {
-      const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.plan.name);
-      const suffix = !this.isFreePlan && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
+      const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.planName);
+      const suffix = this.isSubscription && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
-    },
-    canAddSeats() {
-      return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
-    },
-    canRenew() {
-      return this.glFeatures.saasManualRenewButton && !this.isFreePlan;
     },
     canUpgrade() {
       return this.isFreePlan || this.plan.upgradable;
     },
     canUpgradeEEPlan() {
-      return !this.isFreePlan && this.planUpgradeHref;
+      return this.isSubscription && this.planUpgradeHref;
     },
     addSeatsButton() {
-      return this.canAddSeats
+      return this.isSubscription
         ? createButtonProps(
             s__('SubscriptionTable|Add seats'),
             this.addSeatsHref,
@@ -80,12 +78,12 @@ export default {
       return this.canUpgradeEEPlan ? this.planUpgradeHref : this.customerPortalUrl;
     },
     renewButton() {
-      return this.canRenew
+      return this.isSubscription
         ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref, 'renew-button')
         : null;
     },
     manageButton() {
-      return !this.isFreePlan
+      return this.isSubscription
         ? createButtonProps(
             s__('SubscriptionTable|Manage'),
             this.customerPortalUrl,

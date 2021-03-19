@@ -1,12 +1,13 @@
 <script>
-import { mapState } from 'vuex';
-import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import { GlAlert } from '@gitlab/ui';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
+import { GlAreaChart } from '@gitlab/ui/dist/charts';
+import { mapState } from 'vuex';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import throughputChartQueryBuilder from '../graphql/throughput_chart_query_builder';
+import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { THROUGHPUT_CHART_STRINGS } from '../constants';
-import { formatThroughputChartData } from '../utils';
+import throughputChartQueryBuilder from '../graphql/throughput_chart_query_builder';
+import { formatThroughputChartData, computeMttmData } from '../utils';
+import ThroughputStats from './throughput_stats.vue';
 
 export default {
   name: 'ThroughputChart',
@@ -14,6 +15,7 @@ export default {
     GlAreaChart,
     GlAlert,
     ChartSkeletonLoader,
+    ThroughputStats,
   },
   inject: ['fullPath'],
   props: {
@@ -62,12 +64,12 @@ export default {
   },
   computed: {
     ...mapState('filters', {
-      selectedSourceBranch: state => state.branches.source.selected,
-      selectedTargetBranch: state => state.branches.target.selected,
-      selectedMilestone: state => state.milestones.selected,
-      selectedAuthor: state => state.authors.selected,
-      selectedAssignee: state => state.assignees.selected,
-      selectedLabelList: state => state.labels.selectedList,
+      selectedSourceBranch: (state) => state.branches.source.selected,
+      selectedTargetBranch: (state) => state.branches.target.selected,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedAuthor: (state) => state.authors.selected,
+      selectedAssignee: (state) => state.assignees.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
     }),
     chartOptions() {
       return {
@@ -75,7 +77,7 @@ export default {
           name: THROUGHPUT_CHART_STRINGS.X_AXIS_TITLE,
           type: 'category',
           axisLabel: {
-            formatter: value => {
+            formatter: (value) => {
               return value.split(' ')[0]; // Aug 2020 => Aug
             },
           },
@@ -88,11 +90,11 @@ export default {
     formattedThroughputChartData() {
       return formatThroughputChartData(this.throughputChartData);
     },
-    chartDataLoading() {
+    isLoading() {
       return !this.hasError && this.$apollo.queries.throughputChartData.loading;
     },
     chartDataAvailable() {
-      return this.formattedThroughputChartData[0]?.data?.some(entry => Boolean(entry[1]));
+      return this.formattedThroughputChartData[0]?.data?.some((entry) => Boolean(entry[1]));
     },
     alertDetails() {
       return {
@@ -101,6 +103,9 @@ export default {
           ? THROUGHPUT_CHART_STRINGS.ERROR_FETCHING_DATA
           : THROUGHPUT_CHART_STRINGS.NO_DATA,
       };
+    },
+    singleStatsValues() {
+      return [computeMttmData(this.throughputChartData)];
     },
   },
   strings: {
@@ -111,11 +116,12 @@ export default {
 </script>
 <template>
   <div>
+    <throughput-stats :stats="singleStatsValues" :is-loading="isLoading" />
     <h4 data-testid="chartTitle">{{ $options.strings.chartTitle }}</h4>
     <div class="gl-text-gray-500" data-testid="chartDescription">
       {{ $options.strings.chartDescription }}
     </div>
-    <chart-skeleton-loader v-if="chartDataLoading" />
+    <chart-skeleton-loader v-if="isLoading" />
     <gl-area-chart
       v-else-if="chartDataAvailable"
       :data="formattedThroughputChartData"

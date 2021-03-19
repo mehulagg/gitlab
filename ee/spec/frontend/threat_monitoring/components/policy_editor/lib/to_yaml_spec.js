@@ -21,6 +21,26 @@ spec:
 `);
   });
 
+  describe('when annotations is not empty', () => {
+    beforeEach(() => {
+      policy.annotations = { 'test annotation': true };
+    });
+
+    it('returns yaml representation', () => {
+      expect(toYaml(policy)).toEqual(`apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-policy
+  annotations:
+    test annotation: true
+spec:
+  endpointSelector:
+    matchLabels:
+      network-policy.gitlab.com/disabled_by: gitlab
+`);
+    });
+  });
+
   describe('when description is not empty', () => {
     beforeEach(() => {
       policy.description = 'test description';
@@ -119,6 +139,26 @@ spec:
   - fromEndpoints:
     - matchLabels:
         foo: bar
+`);
+    });
+  });
+
+  describe('when labels are not empty', () => {
+    beforeEach(() => {
+      policy.labels = { 'app.gitlab.com/proj': '21' };
+    });
+
+    it('returns yaml representation', () => {
+      expect(toYaml(policy)).toEqual(`apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-policy
+  labels:
+    app.gitlab.com/proj: '21'
+spec:
+  endpointSelector:
+    matchLabels:
+      network-policy.gitlab.com/disabled_by: gitlab
 `);
     });
   });

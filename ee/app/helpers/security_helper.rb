@@ -10,7 +10,8 @@ module SecurityHelper
       project_add_endpoint: security_projects_path,
       project_list_endpoint: security_projects_path,
       instance_dashboard_settings_path: settings_security_dashboard_path,
-      vulnerabilities_export_endpoint: expose_path(api_v4_security_vulnerability_exports_path)
+      vulnerabilities_export_endpoint: expose_path(api_v4_security_vulnerability_exports_path),
+      scanners: VulnerabilityScanners::ListService.new(InstanceSecurityDashboard.new(current_user)).execute.to_json
     }
   end
 

@@ -37,26 +37,16 @@ class Feature
           push_frontend_feature_flag(:my_ops_flag, project, type: :ops)
         EOS
       },
-      licensed: {
-        description: 'Permanent feature flags used to temporarily disable licensed features.',
-        deprecated: true,
-        optional: true,
-        rollout_issue: false,
-        ee_only: true,
-        default_enabled: true,
-        example: <<-EOS
-          project.feature_available?(:my_licensed_feature)
-          namespace.feature_available?(:my_licensed_feature)
-        EOS
-      },
       experiment: {
         description: 'Short lived, used specifically to run A/B/n experiments.',
         optional: true,
         rollout_issue: true,
-        ee_only: true,
+        ee_only: false,
         default_enabled: false,
         example: <<-EOS
           experiment(:my_experiment, project: project, actor: current_user) { ...variant code... }
+          # or
+          Gitlab::Experimentation.in_experiment_group?(:my_experiment, subject: current_user)
         EOS
       }
     }.freeze

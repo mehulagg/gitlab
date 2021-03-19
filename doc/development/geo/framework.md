@@ -189,11 +189,6 @@ For example, to add support for files referenced by a `Widget` model with a
 
      mount_uploader :file, WidgetUploader
 
-     def local?
-       # Must to be implemented, Check the uploader's storage types
-       file_store == ObjectStorage::Store::LOCAL
-     end
-
      # @param primary_key_in [Range, Widget] arg to pass to primary_key_in scope
      # @return [ActiveRecord::Relation<Widget>] everything that should be synced to this node, restricted by primary key
      def self.replicables_for_current_secondary(primary_key_in)
@@ -279,22 +274,35 @@ For example, to add support for files referenced by a `Widget` model with a
        unless table_exists?(:widget_registry)
          ActiveRecord::Base.transaction do
            create_table :widget_registry, id: :bigserial, force: :cascade do |t|
-             t.integer :widget_id, null: false
-             t.integer :state, default: 0, null: false, limit: 2
-             t.integer :retry_count, default: 0, limit: 2
-             t.datetime_with_timezone :retry_at
-             t.datetime_with_timezone :last_synced_at
+             t.bigint :widget_id, null: false
              t.datetime_with_timezone :created_at, null: false
-             t.text :last_sync_failure
+             t.datetime_with_timezone :last_synced_at
+             t.datetime_with_timezone :retry_at
+             t.datetime_with_timezone :verified_at
+             t.datetime_with_timezone :verification_started_at
+             t.datetime_with_timezone :verification_retry_at
+             t.integer :state, default: 0, null: false, limit: 2
+             t.integer :verification_state, default: 0, null: false, limit: 2
+             t.integer :retry_count, default: 0, limit: 2
+             t.integer :verification_retry_count, default: 0, limit: 2
+             t.boolean :checksum_mismatch
+             t.binary :verification_checksum
+             t.binary :verification_checksum_mismatched
+             t.string :verification_failure, limit: 255
+             t.string :last_sync_failure, limit: 255
 
-             t.index :widget_id, name: :index_widget_registry_on_widget_id
+             t.index :widget_id, name: :index_widget_registry_on_widget_id, unique: true
              t.index :retry_at
              t.index :state
+             # To optimize performance of WidgetRegistry.verification_failed_batch
+             t.index :verification_retry_at, name:  :widget_registry_failed_verification, order: "NULLS FIRST",  where: "((state = 2) AND (verification_state = 3))"
+             # To optimize performance of WidgetRegistry.needs_verification_count
+             t.index :verification_state, name:  :widget_registry_needs_verification, where: "((state = 2)  AND (verification_state = ANY (ARRAY[0, 3])))"
+             # To optimize performance of WidgetRegistry.verification_pending_batch
+             t.index :verified_at, name: :widget_registry_pending_verification, order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
            end
          end
        end
-
-       add_text_limit :widget_registry, :last_sync_failure, 255
      end
 
      def down
@@ -309,7 +317,8 @@ For example, to add support for files referenced by a `Widget` model with a
    # frozen_string_literal: true
 
    class Geo::WidgetRegistry < Geo::BaseRegistry
-     include Geo::ReplicableRegistry
+     include ::Geo::ReplicableRegistry
+     include ::Geo::VerifiableRegistry
 
      MODEL_CLASS = ::Widget
      MODEL_FOREIGN_KEY = :widget_id
@@ -366,6 +375,7 @@ For example, to add support for files referenced by a `Widget` model with a
      end
 
      include_examples 'a Geo framework registry'
+     include_examples 'a Geo verifiable registry'
 
      describe '.find_registry_differences' do
        ... # To be implemented
@@ -928,7 +938,7 @@ For example, to add support for files referenced by a `Gizmos` model with a
          t.bigint :gizmo_id, null: false
          t.integer :state, default: 0, null: false, limit: 2
          t.integer :retry_count, default: 0, limit: 2
-         t.text :last_sync_failure
+         t.string :last_sync_failure, limit: 255
          t.boolean :force_to_redownload
          t.boolean :missing_on_primary
 
@@ -936,8 +946,6 @@ For example, to add support for files referenced by a `Gizmos` model with a
          t.index :retry_at
          t.index :state
         end
-
-        add_text_limit :gizmo_registry, :last_sync_failure, 255
       end
 
       def down

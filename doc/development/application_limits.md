@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -139,14 +139,14 @@ end
 
 Self-managed:
 
-- `default` - Everyone
+- `default`: Everyone.
 
 GitLab.com:
 
-- `default` - Any system-wide feature
-- `free` - Namespaces and projects with a Free subscription
-- `bronze`- Namespaces and projects with a Bronze subscription
-- `silver` - Namespaces and projects with a Silver subscription
-- `gold` - Namespaces and projects with a Gold subscription
+- `default`: Any system-wide feature.
+- `free`: Namespaces and projects with a Free subscription.
+- `bronze`: Namespaces and projects with a Bronze subscription. This tier is no longer available for purchase.
+- `silver`: Namespaces and projects with a Premium subscription.
+- `gold`: Namespaces and projects with an Ultimate subscription.
 
 The `test` environment doesn't have any plans.

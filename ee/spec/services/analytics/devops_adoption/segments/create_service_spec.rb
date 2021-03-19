@@ -3,68 +3,39 @@
 require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
-  include AdminModeHelper
-
-  let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+  let(:current_user) { reporter }
 
-  let(:params) { { name: 'my service', groups: [group] } }
+  let(:params) { { namespace: group } }
   let(:segment) { subject.payload[:segment] }
 
-  subject { described_class.new(params: params, current_user: admin).execute }
-
-  before do
-    enable_admin_mode!(admin)
-  end
+  subject(:response) { described_class.new(params: params, current_user: current_user).execute }
 
   it 'persists the segment' do
-    expect(subject).to be_success
-    expect(segment.name).to eq('my service')
-    expect(segment.groups).to eq([group])
+    expect(response).to be_success
+    expect(segment.namespace).to eq(group)
   end
 
-  context 'when user is not an admin' do
-    let(:user) { build(:user) }
+  it 'schedules for snapshot creation' do
+    allow(Analytics::DevopsAdoption::CreateSnapshotWorker).to receive(:perform_async).and_call_original
 
-    subject { described_class.new(params: params, current_user: user).execute }
+    response
 
-    it 'does not persist the segment' do
-      expect(subject).to be_error
-      expect(subject.message).to eq('Forbidden')
-      expect(segment).not_to be_persisted
-    end
+    expect(Analytics::DevopsAdoption::CreateSnapshotWorker).to have_received(:perform_async).with(Analytics::DevopsAdoption::Segment.last.id)
   end
 
-  context 'when params are invalid' do
-    before do
-      params.delete(:name)
-    end
+  it 'authorizes for manage_devops_adoption' do
+    expect(::Ability).to receive(:allowed?).with(current_user, :manage_devops_adoption_segments, group).and_return true
 
-    it 'does not persist the segment' do
-      expect(subject).to be_error
-      expect(segment.errors[:name]).not_to be_empty
-    end
+    response
   end
 
-  context 'when groups are not given' do
-    before do
-      params.delete(:groups)
-    end
+  context 'for guests' do
+    let(:current_user) { create(:user) }
 
-    it 'persists the segment without groups' do
-      expect(subject).to be_success
-      expect(segment.segment_selections).to be_empty
-    end
-  end
-
-  context 'when duplicated groups are given' do
-    before do
-      params[:groups] = [group] * 5
-    end
-
-    it 'persists the segments with unique groups' do
-      expect(subject).to be_success
-      expect(segment.groups).to eq([group])
+    it 'returns forbidden error' do
+      expect { response }.to raise_error(Analytics::DevopsAdoption::Segments::AuthorizationError)
     end
   end
 end

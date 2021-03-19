@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Projects > Audit Events', :js do
+  include Spec::Support::Helpers::Features::MembersHelpers
+
   let(:user) { create(:user) }
   let(:pete) { create(:user, name: 'Pete') }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
@@ -38,6 +40,10 @@ RSpec.describe 'Projects > Audit Events', :js do
       allow(License).to receive(:current).and_return(nil)
       stub_application_setting(check_namespace_plan: false)
       allow(LicenseHelper).to receive(:show_promotions?).and_return(true)
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:response) { inspect_requests { visit project_audit_events_path(project) }.first }
     end
 
     it 'returns 200' do
@@ -110,11 +116,9 @@ RSpec.describe 'Projects > Audit Events', :js do
     it "appears in the project's audit events" do
       visit project_project_members_path(project)
 
-      project_member = project.project_member(pete)
-
-      page.within "#project_member_#{project_member.id}" do
+      page.within find_member_row(pete) do
         click_button 'Developer'
-        click_link 'Maintainer'
+        click_button 'Maintainer'
       end
 
       page.within('.qa-project-sidebar') do
@@ -172,5 +176,23 @@ RSpec.describe 'Projects > Audit Events', :js do
     let!(:entity) { project }
 
     it_behaves_like 'audit events date filter'
+  end
+
+  describe 'combined list of authenticated and unauthenticated users' do
+    let!(:audit_event_1) { create(:project_audit_event, :unauthenticated, entity_type: 'Project', entity_id: project.id) }
+    let!(:audit_event_2) { create(:project_audit_event, author_id: non_existing_record_id, entity_type: 'Project', entity_id: project.id) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id) }
+
+    it 'displays the correct authors names' do
+      visit project_audit_events_path(project)
+
+      wait_for_all_requests
+
+      page.within('.audit-log-table') do
+        expect(page).to have_content('An unauthenticated user')
+        expect(page).to have_content("#{audit_event_2.author_name} (removed)")
+        expect(page).to have_content(audit_event_3.user.name)
+      end
+    end
   end
 end

@@ -1,11 +1,11 @@
 <script>
 import { GlPagination, GlTable } from '@gitlab/ui';
 
-import { s__ } from '~/locale';
 import { getParameterValues, setUrlParams } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 
-import UrlTableCell from './table_cells/url_table_cell.vue';
 import HtmlTableCell from './table_cells/html_table_cell.vue';
+import UrlTableCell from './table_cells/url_table_cell.vue';
 
 const TABLE_HEADER_CLASSES = 'bg-transparent border-bottom p-3';
 

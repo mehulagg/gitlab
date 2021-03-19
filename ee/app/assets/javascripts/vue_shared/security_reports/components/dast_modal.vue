@@ -21,8 +21,8 @@ export default {
   modal: {
     modalId: 'dastUrl',
     actionPrimary: {
-      text: __('Close'),
-      attributes: { variant: 'success' },
+      text: __('Done'),
+      attributes: { variant: 'default' },
     },
   },
   computed: {

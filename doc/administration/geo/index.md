@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Geo **(PREMIUM ONLY)**
+# Geo **(PREMIUM SELF)**
 
 > - Introduced in GitLab Enterprise Edition 8.9.
 > - Using Geo in combination with
@@ -291,12 +291,6 @@ This list of limitations only reflects the latest version of GitLab. If you are 
 - Geo **secondary** nodes can not be configured to [use high-availability configurations of PostgreSQL](https://gitlab.com/groups/gitlab-org/-/epics/2536).
 
 ### Limitations on replication/verification
-
-You can keep track of the progress to implement the missing items in
-these epics/issues:
-
-- [Unreplicated Data Types](https://gitlab.com/groups/gitlab-org/-/epics/893)
-- [Verify all replicated data](https://gitlab.com/groups/gitlab-org/-/epics/1430)
 
 There is a complete list of all GitLab [data types](replication/datatypes.md) and [existing support for replication and verification](replication/datatypes.md#limitations-on-replicationverification).
 

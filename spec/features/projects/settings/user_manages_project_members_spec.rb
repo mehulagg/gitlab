@@ -3,6 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe 'Projects > Settings > User manages project members' do
+  include Spec::Support::Helpers::Features::MembersHelpers
+  include Select2Helper
+
   let(:group) { create(:group, name: 'OpenSource') }
   let(:project) { create(:project) }
   let(:project2) { create(:project) }
@@ -19,24 +22,24 @@ RSpec.describe 'Projects > Settings > User manages project members' do
   it 'cancels a team member', :js do
     visit(project_project_members_path(project))
 
-    project_member = project.project_members.find_by(user_id: user_dmitriy.id)
-
-    page.within("#project_member_#{project_member.id}") do
-      # Open modal
-      click_on('Remove user from project')
+    page.within find_member_row(user_dmitriy) do
+      click_button 'Remove member'
     end
 
-    expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
-
-    click_on('Remove member')
+    page.within('[role="dialog"]') do
+      expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
+      click_button('Remove member')
+    end
 
     visit(project_project_members_path(project))
 
-    expect(page).not_to have_content(user_dmitriy.name)
-    expect(page).not_to have_content(user_dmitriy.username)
+    expect(members_table).not_to have_content(user_dmitriy.name)
+    expect(members_table).not_to have_content(user_dmitriy.username)
   end
 
-  it 'imports a team from another project' do
+  it 'imports a team from another project', :js do
+    stub_feature_flags(invite_members_group_modal: false)
+
     project2.add_maintainer(user)
     project2.add_reporter(user_mike)
 
@@ -46,18 +49,13 @@ RSpec.describe 'Projects > Settings > User manages project members' do
       click_link('Import')
     end
 
-    select(project2.full_name, from: 'source_project_id')
-    click_button('Import')
+    select2(project2.id, from: '#source_project_id')
+    click_button('Import project members')
 
-    project_member = project.project_members.find_by(user_id: user_mike.id)
-
-    page.within("#project_member_#{project_member.id}") do
-      expect(page).to have_content('Mike')
-      expect(page).to have_content('Reporter')
-    end
+    expect(find_member_row(user_mike)).to have_content('Reporter')
   end
 
-  it 'shows all members of project shared group' do
+  it 'shows all members of project shared group', :js do
     group.add_owner(user)
     group.add_developer(user_dmitriy)
 
@@ -67,9 +65,8 @@ RSpec.describe 'Projects > Settings > User manages project members' do
 
     visit(project_project_members_path(project))
 
-    page.within('.project-members-groups') do
-      expect(page).to have_content('OpenSource')
-      expect(first('.group_member')).to have_content('Maintainer')
-    end
+    click_link 'Groups'
+
+    expect(find_group_row(group)).to have_content('Maintainer')
   end
 end

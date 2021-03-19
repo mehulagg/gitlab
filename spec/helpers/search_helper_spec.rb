@@ -534,10 +534,11 @@ RSpec.describe SearchHelper do
 
       where(:description, :expected) do
         'test'                                                                 | '<span class="gl-text-gray-900 gl-font-weight-bold">test</span>'
-        '<span style="color: blue;">this test should not be blue</span>'       | '<span>this <span class="gl-text-gray-900 gl-font-weight-bold">test</span> should not be blue</span>'
+        '<span style="color: blue;">this test should not be blue</span>'       | 'this <span class="gl-text-gray-900 gl-font-weight-bold">test</span> should not be blue'
         '<a href="#" onclick="alert(\'XSS\')">Click Me test</a>'               | '<a href="#">Click Me <span class="gl-text-gray-900 gl-font-weight-bold">test</span></a>'
         '<script type="text/javascript">alert(\'Another XSS\');</script> test' | ' <span class="gl-text-gray-900 gl-font-weight-bold">test</span>'
         'Lorem test ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.' | 'Lorem <span class="gl-text-gray-900 gl-font-weight-bold">test</span> ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Don...'
+        '<img src="https://random.foo.com/test.png" width="128" height="128" />some image' | 'some image'
       end
 
       with_them do
@@ -580,7 +581,7 @@ RSpec.describe SearchHelper do
   describe '#issuable_state_to_badge_class' do
     context 'with merge request' do
       it 'returns correct badge based on status' do
-        expect(issuable_state_to_badge_class(build(:merge_request, :merged))).to eq(:primary)
+        expect(issuable_state_to_badge_class(build(:merge_request, :merged))).to eq(:info)
         expect(issuable_state_to_badge_class(build(:merge_request, :closed))).to eq(:danger)
         expect(issuable_state_to_badge_class(build(:merge_request, :opened))).to eq(:success)
       end
@@ -608,6 +609,37 @@ RSpec.describe SearchHelper do
         expect(issuable_state_text(build(:issue, :closed))).to eq(_('Closed'))
         expect(issuable_state_text(build(:issue, :opened))).to eq(_('Open'))
       end
+    end
+  end
+
+  describe '#search_sort_options' do
+    let(:user) { create(:user) }
+
+    mock_created_sort = [
+      {
+        title: _('Created date'),
+        sortable: true,
+        sortParam: {
+          asc: 'created_asc',
+          desc: 'created_desc'
+        }
+      },
+      {
+        title: _('Last updated'),
+        sortable: true,
+        sortParam: {
+          asc: 'updated_asc',
+          desc: 'updated_desc'
+        }
+      }
+    ]
+
+    before do
+      allow(self).to receive(:current_user).and_return(user)
+    end
+
+    it 'returns the correct data' do
+      expect(search_sort_options).to eq(mock_created_sort)
     end
   end
 end

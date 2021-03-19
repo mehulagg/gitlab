@@ -15,28 +15,17 @@ RSpec.describe DastSiteValidations::ValidateService do
   end
 
   describe 'execute!' do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-        expect { subject }.to raise_error(DastSiteValidations::ValidateService::PermissionsError)
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
 
         expect { subject }.to raise_error(DastSiteValidations::ValidateService::PermissionsError)
       end
     end
 
-    context 'when the feature is enabled' do
+    context 'when the feature is available' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
         stub_request(:get, dast_site_validation.validation_url).to_return(body: token, headers: headers)
       end
 
@@ -128,6 +117,14 @@ RSpec.describe DastSiteValidations::ValidateService do
         end
 
         it_behaves_like 'a validation'
+
+        context 'when the http response body has trailing newlines after the token' do
+          let(:token) { dast_site_validation.dast_site_token.token + "\n\n" }
+
+          it 'does not raise an exception' do
+            expect { subject }.not_to raise_error(DastSiteValidations::ValidateService::TokenNotFound)
+          end
+        end
 
         context 'when content type is incorrect' do
           let(:headers) { { 'Content-Type' => 'text/html; charset=UTF-8' } }

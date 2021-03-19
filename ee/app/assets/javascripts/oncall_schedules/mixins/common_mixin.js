@@ -1,4 +1,10 @@
-import { DAYS_IN_WEEK } from '../constants';
+import { isToday } from '~/lib/utils/datetime_utility';
+import {
+  DAYS_IN_WEEK,
+  HOURS_IN_DAY,
+  PRESET_TYPES,
+  CURRENT_DAY_INDICATOR_OFFSET,
+} from '../constants';
 
 export default {
   currentDate: null,
@@ -21,6 +27,9 @@ export default {
         this.$options.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
       );
     },
+    isToday() {
+      return isToday(this.timeframeItem);
+    },
   },
   beforeCreate() {
     const currentDate = new Date();
@@ -29,14 +38,23 @@ export default {
     this.$options.currentDate = currentDate;
   },
   methods: {
-    getIndicatorStyles() {
-      // as we start schedule scale from the current date the indicator will always be on the first date. So we find
-      // the percentage of space one day cell takes and divide it by 2 cause the tick is in the middle of the cell.
-      // It might be updated to more precise position - time of the day
-      const left = 100 / DAYS_IN_WEEK / 2;
+    getIndicatorStyles(presetType = PRESET_TYPES.WEEKS) {
+      const currentDate = new Date();
+      const base = 100 / HOURS_IN_DAY;
+      const hours = base * currentDate.getHours();
 
+      if (presetType === PRESET_TYPES.DAYS) {
+        const minutes = base * (currentDate.getMinutes() / 60) - CURRENT_DAY_INDICATOR_OFFSET;
+
+        return {
+          left: `${hours + minutes}%`,
+        };
+      }
+
+      const weeklyDayOffset = 100 / DAYS_IN_WEEK / 2;
+      const weeklyHourOffset = (weeklyDayOffset / HOURS_IN_DAY) * currentDate.getHours();
       return {
-        left: `${left}%`,
+        left: `${weeklyDayOffset + weeklyHourOffset}%`,
       };
     },
   },

@@ -1,14 +1,14 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { noop } from 'lodash';
-import { members, member } from 'jest/members/mock_data';
-import testAction from 'helpers/vuex_action_helper';
-import * as types from 'ee/members/store/mutation_types';
 import {
   updateLdapOverride,
   showLdapOverrideConfirmationModal,
   hideLdapOverrideConfirmationModal,
 } from 'ee/members/store/actions';
+import * as types from 'ee/members/store/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
+import { members, member } from 'jest/members/mock_data';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 describe('Vuex members actions', () => {

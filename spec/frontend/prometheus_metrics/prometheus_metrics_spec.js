@@ -1,12 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
-import PrometheusMetrics from '~/prometheus_metrics/prometheus_metrics';
 import PANEL_STATE from '~/prometheus_metrics/constants';
+import PrometheusMetrics from '~/prometheus_metrics/prometheus_metrics';
 import { metrics2 as metrics, missingVarMetrics } from './mock_data';
 
 describe('PrometheusMetrics', () => {
   const FIXTURE = 'services/prometheus/prometheus_service.html';
-  preloadFixtures(FIXTURE);
 
   beforeEach(() => {
     loadFixtures(FIXTURE);
@@ -133,7 +132,7 @@ describe('PrometheusMetrics', () => {
       mock.restore();
     });
 
-    it('should show loader animation while response is being loaded and hide it when request is complete', done => {
+    it('should show loader animation while response is being loaded and hide it when request is complete', (done) => {
       mockSuccess();
 
       prometheusMetrics.loadActiveMetrics();
@@ -147,7 +146,7 @@ describe('PrometheusMetrics', () => {
       });
     });
 
-    it('should show empty state if response failed to load', done => {
+    it('should show empty state if response failed to load', (done) => {
       mockError();
 
       prometheusMetrics.loadActiveMetrics();
@@ -159,7 +158,7 @@ describe('PrometheusMetrics', () => {
       });
     });
 
-    it('should populate metrics list once response is loaded', done => {
+    it('should populate metrics list once response is loaded', (done) => {
       jest.spyOn(prometheusMetrics, 'populateActiveMetrics').mockImplementation();
       mockSuccess();
 

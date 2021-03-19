@@ -50,6 +50,7 @@ export default {
       this.$refs.dropdown.$children[0].show();
     },
     selectWeight(weight) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.weight = this.weightInt(weight);
       this.dropdownHidden = true;
     },

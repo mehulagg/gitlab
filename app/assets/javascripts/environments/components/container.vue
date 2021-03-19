@@ -10,11 +10,6 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    canaryDeploymentFeatureId: {
-      type: String,
-      required: false,
-      default: null,
-    },
     isLoading: {
       type: Boolean,
       required: true,
@@ -30,31 +25,6 @@ export default {
     canReadEnvironment: {
       type: Boolean,
       required: true,
-    },
-    deployBoardsHelpPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    helpCanaryDeploymentsPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    lockPromotionSvgPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    showCanaryDeploymentCallout: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    userCalloutsPath: {
-      type: String,
-      required: false,
-      default: '',
     },
   },
   methods: {
@@ -72,16 +42,7 @@ export default {
     <slot name="empty-state"></slot>
 
     <div v-if="!isLoading && environments.length > 0" class="table-holder">
-      <environment-table
-        :environments="environments"
-        :can-read-environment="canReadEnvironment"
-        :canary-deployment-feature-id="canaryDeploymentFeatureId"
-        :show-canary-deployment-callout="showCanaryDeploymentCallout"
-        :user-callouts-path="userCalloutsPath"
-        :lock-promotion-svg-path="lockPromotionSvgPath"
-        :help-canary-deployments-path="helpCanaryDeploymentsPath"
-        :deploy-boards-help-path="deployBoardsHelpPath"
-      />
+      <environment-table :environments="environments" :can-read-environment="canReadEnvironment" />
 
       <table-pagination
         v-if="pagination && pagination.totalPages > 1"

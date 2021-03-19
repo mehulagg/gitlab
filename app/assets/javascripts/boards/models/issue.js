@@ -6,8 +6,8 @@
 import axios from '~/lib/utils/axios_utils';
 import './label';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import IssueProject from './project';
 import boardsStore from '../stores/boards_store';
+import IssueProject from './project';
 
 class ListIssue {
   constructor(obj) {
@@ -53,6 +53,10 @@ class ListIssue {
     return boardsStore.findIssueAssignee(this, findAssignee);
   }
 
+  setAssignees(assignees) {
+    boardsStore.setIssueAssignees(this, assignees);
+  }
+
   removeAssignee(removeAssignee) {
     boardsStore.removeIssueAssignee(this, removeAssignee);
   }
@@ -70,7 +74,7 @@ class ListIssue {
   }
 
   getLists() {
-    return boardsStore.state.lists.filter(list => list.findIssue(this.id));
+    return boardsStore.state.lists.filter((list) => list.findIssue(this.id));
   }
 
   updateData(newData) {

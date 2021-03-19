@@ -14,9 +14,9 @@
         %tr.d-none.d-sm-table-row
           %th.w-25= s_('CodeOwner|Pattern')
           %th= _('Members')
-      %tbody{ data: { qa_selector: "approver_list" } }
+      %tbody{ data: { qa_selector: "approver_list_content" } }
         - code_owner_rules.each do |code_owner_approval_rule|
-          %tr{ data: { qa_selector: "approver" } }
+          %tr{ data: { qa_selector: "approver_content" } }
             %td
               - if code_owner_approval_rule.section != Gitlab::CodeOwners::Entry::DEFAULT_SECTION
                 %span.text-muted.small.d-block= code_owner_approval_rule.section

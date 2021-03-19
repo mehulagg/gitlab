@@ -1,11 +1,13 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { camelCase, kebabCase } from 'lodash';
-import * as Sentry from '~/sentry/wrapper';
-import { s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
+import DastFailedSiteValidations from './dast_failed_site_validations.vue';
 
 export default {
   components: {
@@ -13,7 +15,9 @@ export default {
     GlDropdownItem,
     GlTab,
     GlTabs,
+    DastFailedSiteValidations,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     createNewProfilePaths: {
       type: Object,
@@ -141,7 +145,7 @@ export default {
           variables: { after: pageInfo.endCursor },
           updateQuery: cacheUtils.appendToPreviousResult(profileType),
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,
@@ -173,7 +177,7 @@ export default {
           mutation: deletion.mutation,
           variables: {
             input: {
-              fullPath: projectFullPath,
+              ...(profileType !== 'dastProfiles' ? { fullPath: projectFullPath } : {}),
               id: profileId,
             },
           },
@@ -199,7 +203,7 @@ export default {
           },
           optimisticResponse: deletion.optimisticResponse,
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,
@@ -210,8 +214,8 @@ export default {
   },
   profilesPerPage: 10,
   i18n: {
-    heading: s__('DastProfiles|Manage Profiles'),
-    newProfileDropdownLabel: s__('DastProfiles|New Profile'),
+    heading: s__('DastProfiles|Manage DAST scans'),
+    newProfileDropdownLabel: __('New'),
     subHeading: s__(
       'DastProfiles|Save commonly used configurations for target sites and scan specifications as profiles. Use these with an on-demand scan.',
     ),
@@ -221,6 +225,10 @@ export default {
 
 <template>
   <section>
+    <dast-failed-site-validations
+      v-if="glFeatures.dastFailedSiteValidations"
+      :full-path="projectFullPath"
+    />
     <header>
       <div class="gl-display-flex gl-align-items-center gl-pt-6 gl-pb-4">
         <h2 class="my-0">
@@ -257,6 +265,7 @@ export default {
           :data-testid="`${profileType}List`"
           :error-message="profileTypes[profileType].errorMessage"
           :error-details="profileTypes[profileType].errorDetails"
+          :no-profiles-message="settings.i18n.noProfilesMessage"
           :has-more-profiles-to-load="hasMoreProfiles(profileType)"
           :is-loading="isLoadingProfiles(profileType)"
           :profiles-per-page="$options.profilesPerPage"

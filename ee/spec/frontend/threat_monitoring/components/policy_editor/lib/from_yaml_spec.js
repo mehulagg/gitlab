@@ -20,13 +20,14 @@ describe('fromYaml', () => {
 
   const cidrExample = '20.1.1.1/32 20.1.1.2/32';
   const portExample = '80 81/udp 82/tcp';
-
+  const labels = { 'app.gitlab.com/proj': '21' };
   beforeEach(() => {
     policy = {
       name: 'test-policy',
       endpointLabels: '',
       rules: [],
       isEnabled: true,
+      labels,
     };
   });
 
@@ -37,6 +38,7 @@ describe('fromYaml', () => {
       endpointMatchMode: EndpointMatchModeAny,
       endpointLabels: '',
       rules: [],
+      labels,
     });
   });
 
@@ -285,6 +287,26 @@ spec:
             ports: '80/tcp 81/udp 82/tcp',
           },
         ],
+      });
+    });
+  });
+
+  describe('when annotations is not empty', () => {
+    it('returns policy object', () => {
+      const manifest = `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-policy
+  annotations:
+    app.gitlab.com/alert: 'true'
+spec:
+  endpointSelector:
+    matchLabels:
+      {}
+`;
+
+      expect(fromYaml(manifest)).toMatchObject({
+        annotations: { 'app.gitlab.com/alert': 'true' },
       });
     });
   });

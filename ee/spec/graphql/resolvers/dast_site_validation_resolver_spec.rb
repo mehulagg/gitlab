@@ -17,17 +17,17 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
 
   before do
     project.add_maintainer(current_user)
+    stub_licensed_features(security_on_demand_scans: true)
   end
 
   specify do
     expect(described_class).to have_nullable_graphql_type(Types::DastSiteValidationType.connection_type)
   end
 
-  subject { sync(resolver) }
-
   context 'when resolving multiple DAST site validations' do
+    subject { dast_site_validations(**args) }
+
     let(:args) { {} }
-    let(:resolver) { dast_site_validations(args) }
 
     it { is_expected.to contain_exactly(dast_site_validation3, dast_site_validation2, dast_site_validation1) }
 
@@ -52,7 +52,8 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
 
   private
 
-  def dast_site_validations(args = {}, context = { current_user: current_user })
+  def dast_site_validations(**args)
+    context = { current_user: current_user }
     resolve(described_class, obj: project, args: args, ctx: context)
   end
 end

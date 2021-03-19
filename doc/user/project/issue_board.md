@@ -4,9 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Issue Boards **(CORE)**
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5554) in [GitLab 8.11](https://about.gitlab.com/releases/2016/08/22/gitlab-8-11-released/#issue-board).
+# Issue Boards **(FREE)**
 
 The GitLab Issue Board is a software project management tool used to plan,
 organize, and visualize a workflow for a feature or product release.
@@ -38,10 +36,9 @@ as shown in the following table:
 
 | Tier             | Number of project issue boards | Number of [group issue boards](#group-issue-boards) | [Configurable issue boards](#configurable-issue-boards) | [Assignee lists](#assignee-lists) |
 |------------------|--------------------------------|------------------------------|---------------------------|----------------|
-| Core / Free      | Multiple                       | 1                            | No                        | No             |
-| Starter / Bronze | Multiple                       | 1                            | Yes                       | No             |
-| Premium / Silver | Multiple                       | Multiple                     | Yes                       | Yes            |
-| Ultimate / Gold  | Multiple                       | Multiple                     | Yes                       | Yes            |
+| Free             | Multiple                       | 1                            | No                        | No             |
+| Premium          | Multiple                       | Multiple                     | Yes                       | Yes            |
+| Ultimate         | Multiple                       | Multiple                     | Yes                       | Yes            |
 
 To learn more, visit [GitLab Enterprise features for issue boards](#gitlab-enterprise-features-for-issue-boards) below.
 
@@ -53,11 +50,10 @@ the Issue Board feature.
 
 ## Multiple issue boards
 
-> - [Introduced](https://about.gitlab.com/releases/2016/10/22/gitlab-8-13-released/) in GitLab 8.13.
-> - Multiple issue boards per project [moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53811) to [GitLab Core](https://about.gitlab.com/pricing/) in GitLab 12.1.
-> - Multiple issue boards per group are available in [GitLab Premium](https://about.gitlab.com/pricing/).
+> - Multiple issue boards per project [moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53811) to GitLab Free in 12.1.
+> - Multiple issue boards per group are available in GitLab Premium.
 
-Multiple issue boards allow for more than one issue board for a given project **(CORE)** or group **(PREMIUM)**.
+Multiple issue boards allow for more than one issue board for a given project **(FREE)** or group **(PREMIUM)**.
 This is great for large projects with more than one team or when a repository hosts the code of multiple products.
 
 Using the search box at the top of the menu, you can filter the listed boards.
@@ -91,9 +87,9 @@ To delete the currently active issue board:
 You can tailor GitLab issue boards to your own preferred workflow.
 Here are some common use cases for issue boards.
 
-For examples of using issue boards along with [epics](../group/epics/index.md) **(PREMIUM)**,
-[issue health status](issues/index.md#health-status) **(ULTIMATE)**, and
-[scoped labels](labels.md#scoped-labels) **(PREMIUM)** for various Agile frameworks, check:
+For examples of using issue boards along with [epics](../group/epics/index.md),
+[issue health status](issues/index.md#health-status), and
+[scoped labels](labels.md#scoped-labels) for various Agile frameworks, check:
 
 - The [How to use GitLab for Agile portfolio planning and project management](https://about.gitlab.com/blog/2020/11/11/gitlab-for-agile-portfolio-planning-project-management/) blog post (November 2020)
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
@@ -158,7 +154,7 @@ for them.
 
 NOTE:
 For a broader use case, please see the blog post
-[GitLab Workflow, an Overview](https://about.gitlab.com/blog/2016/10/25/gitlab-workflow-an-overview/#gitlab-workflow-use-case-scenario).
+[GitLab Workflow, an Overview](https://about.gitlab.com/topics/version-control/what-is-gitlab-workflow/#gitlab-workflow-a-use-case-scenario).
 For a real use case example, you can read why
 [Codepen decided to adopt issue boards](https://about.gitlab.com/blog/2017/01/27/codepen-welcome-to-gitlab/#project-management-everything-in-one-place)
 to improve their workflow with multiple boards.
@@ -228,13 +224,13 @@ and vice versa.
 
 ## GitLab Enterprise features for issue boards
 
-GitLab issue boards are available on GitLab Core and GitLab.com Free tiers, but some
+GitLab issue boards are available on the GitLab Free tier, but some
 advanced functionality is present in [higher tiers only](https://about.gitlab.com/pricing/).
 
-### Configurable issue boards **(STARTER)**
+### Configurable issue boards **(PREMIUM)**
 
-> - [Introduced](https://about.gitlab.com/releases/2017/11/22/gitlab-10-2-released/#issue-boards-configuration) in GitLab 10.2.
-> - Setting current iteration as scope [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196804) in GitLab 13.7.
+> - Setting current iteration as scope [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196804) in GitLab 13.8.
+> - Moved to GitLab Premium in 13.9.
 
 An issue board can be associated with a [milestone](milestones/index.md#milestones),
 [labels](labels.md), assignee, weight, and current [iteration](../group/iterations/index.md),
@@ -257,14 +253,15 @@ the Configurable Issue Board feature.
 
 ### Focus mode
 
-> - [Introduced]((https://about.gitlab.com/releases/2017/04/22/gitlab-9-1-released/#issue-boards-focus-mode-ees-eep)) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.1.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28597) to the Free tier of GitLab.com in 12.10.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212331) to GitLab Core in 13.0.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28597) to GitLab Free SaaS in 12.10.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212331) to GitLab Free self-managed in 13.0.
 
 To enable or disable focus mode, select the **Toggle focus mode** button (**{maximize}**) at the top
 right. In focus mode, the navigation UI is hidden, allowing you to focus on issues in the board.
 
-### Sum of issue weights **(STARTER)**
+### Sum of issue weights **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
 
 The top of each list indicates the sum of issue weights for the issues that
 belong to that list. This is useful when using boards for capacity allocation,
@@ -274,14 +271,38 @@ especially in combination with [assignee lists](#assignee-lists).
 
 ### Group issue boards **(PREMIUM)**
 
-> - One group issue board per group introduced in GitLab 10.6.
-> - Multiple group issue boards [introduced](https://about.gitlab.com/releases/2017/09/22/gitlab-10-0-released/#group-issue-boards) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.0.
-
 Accessible at the group navigation level, a group issue board offers the same features as a project-level board.
 It can display issues from all projects in that
 group and its descendant subgroups. Similarly, you can only filter by group labels for these
 boards. When updating milestones and labels for an issue through the sidebar update mechanism, again only
 group-level objects are available.
+
+#### GraphQL-based sidebar for group issue boards **(PREMIUM)**
+
+<!-- When the feature flag is removed, integrate this section into the above ("Group issue boards"). -->
+<!-- This anchor is linked from #blocked-issues as well. -->
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285074) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-graphql-based-sidebar-for-group-issue-boards). **(PREMIUM SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+The work-in-progress GraphQL-based sidebar for group issue boards brings better performance and the
+ability to edit issue titles in the issue sidebar.
+
+To **edit an issue's title** in the issue sidebar:
+
+1. In a group issue board, select the issue card. The issue sidebar opens on the right.
+1. Next to the issue's title, select **Edit**.
+
+This is work in progress as of GitLab 13.9. Learn more about the known issues in
+[MR 51480](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51480).
+
+<!-- Add this at the end of the file -->
 
 ### Assignee lists **(PREMIUM)**
 
@@ -319,9 +340,36 @@ As in other list types, click the trash icon to remove a list.
 
 ![Milestone lists](img/issue_board_milestone_lists_v13_6.png)
 
+### Iteration lists **(PREMIUM)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250479) in GitLab 13.10.
+> - It's [deployed behind the `board_new_lists` feature flag](../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-new-add-list-form).
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You're also able to create lists of an iteration.
+These are lists that filter issues by the assigned
+iteration. To add an iteration list:
+
+1. Select **Create list**.
+1. Select the **Iteration**.
+1. In the dropdown, select an iteration.
+1. Select **Add to board**.
+
+Like the milestone lists, you're able to [drag issues](#drag-issues-between-lists)
+to and from a iteration list to manipulate the iteration of the dragged issues.
+
+![Iteration lists](img/issue_board_iteration_lists_v13_10.png)
+
 ### Group issues in swimlanes **(PREMIUM)**
 
-> Grouping by epic [introduced](https://gitlab.com/groups/gitlab-org/-/epics/3352) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.6.
+> - Grouping by epic [introduced](https://gitlab.com/groups/gitlab-org/-/epics/3352) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.6.
+> - Editing issue titles in the issue sidebar [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232745) in GitLab 13.8.
+> - Editing iteration in the issue sidebar [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290232) in GitLab 13.9.
 
 With swimlanes you can visualize issues grouped by epic.
 Your issue board keeps all the other features, but with a different visual organization of issues.
@@ -337,6 +385,19 @@ To group issues by epic in an issue board:
 
 ![Epics Swimlanes](img/epics_swimlanes_v13.6.png)
 
+To edit an issue without leaving this view, select the issue card (not its title), and a sidebar
+appears on the right. There you can see and edit the issue's:
+
+- Title
+- Assignees
+- Epic **PREMIUM**
+- Milestone
+- Time tracking value (view only)
+- Due date
+- Labels
+- Weight
+- Notifications setting
+
 You can also [drag issues](#drag-issues-between-lists) to change their position and epic assignment:
 
 - To reorder an issue, drag it to the new position within a list.
@@ -346,9 +407,10 @@ You can also [drag issues](#drag-issues-between-lists) to change their position 
 
 ![Drag issues between swimlanes](img/epics_swimlanes_drag_and_drop.png)
 
-## Work In Progress limits **(STARTER)**
+## Work In Progress limits **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11403) in GitLab 12.7
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11403) in GitLab 12.7
+> - Moved to GitLab Premium in 13.9.
 
 You can set a Work In Progress (WIP) limit for each issue list on an issue board. When a limit is
 set, the list's header shows the number of issues in the list and the soft limit of issues.
@@ -371,12 +433,18 @@ To set a WIP limit for a list:
 
 ## Blocked issues
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34723) in GitLab 12.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34723) in GitLab 12.8.
+> - [View blocking issues when hovering over blocked icon](https://gitlab.com/gitlab-org/gitlab/-/issues/210452) in GitLab 13.10.
 
 If an issue is blocked by another issue, an icon appears next to its title to indicate its blocked
 status.
 
-![Blocked issues](img/issue_boards_blocked_icon_v13_6.png)
+When you hover over the blocked icon (**{issue-block}**), a detailed information popover is displayed.
+
+To enable this in group issue boards, enable the [GraphQL-based sidebar](#graphql-based-sidebar-for-group-issue-boards).
+The feature is enabled by default when you use group issue boards with epic swimlanes.
+
+![Blocked issues](img/issue_boards_blocked_icon_v13_10.png)
 
 ## Actions you can take on an issue board
 
@@ -421,13 +489,13 @@ To remove a list from an issue board:
 1. Select **Remove list**. A confirmation dialog appears.
 1. Select **OK**.
 
-### Add issues to a list **(CORE ONLY)**
+### Add issues to a list **(FREE SELF)**
 
 > - Feature flag [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47898) in GitLab 13.7.
 > - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-adding-issues-to-the-list). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-adding-issues-to-the-list). **(FREE SELF)**
 
 You can add issues to a list in a project issue board by clicking the **Add issues** button
 in the top right corner of the issue board. This opens up a modal
@@ -447,31 +515,16 @@ the list by filtering by the following:
 - Release
 - Weight
 
-#### Enable or disable adding issues to the list **(CORE ONLY)**
-
-Adding issues to the list is deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:add_issues_button)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:add_issues_button)
-```
-
 ### Remove an issue from a list
 
-Removing an issue from a list can be done by clicking the issue card and then
-clicking the **Remove from board** button in the sidebar. The
-respective label is removed.
+> The **Remove from board** button was [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229507) in GitLab 13.10.
 
-![Remove issue from list](img/issue_boards_remove_issue_v13_6.png)
+When an issue should no longer belong to a list, you can remove it.
+The steps depend on the scope of the list:
+
+1. To open the right sidebar, select the issue card.
+1. Remove what's keeping the issue in the list.
+   If it's a label list, remove the label. If it's an [assignee list](#assignee-lists), unassign the user.
 
 ### Filter issues
 
@@ -521,7 +574,7 @@ worked on by the designers.
 
 Then, when they're done, all they have to do is
 drag it to the next list, **Backend**. Then, a backend developer can
-eventually pick it up. When they’re done, they move it to **Done**, to close the
+eventually pick it up. When they're done, they move it to **Done**, to close the
 issue.
 
 This process can be seen clearly when visiting an issue. With every move
@@ -533,8 +586,8 @@ to another list, the label changes and a system note is recorded.
 
 When dragging issues between lists, different behavior occurs depending on the source list and the target list.
 
-|                            | To Open            | To Closed    | To label `B` list            | To assignee `Bob` list                |
-|----------------------------|--------------------|--------------|------------------------------|---------------------------------------|
+|                                | To Open            | To Closed    | To label `B` list            | To assignee `Bob` list                |
+| ------------------------------ | ------------------ | ------------ | ---------------------------- | ------------------------------------- |
 | **From Open**                  | -                  | Issue closed | `B` added                    | `Bob` assigned                        |
 | **From Closed**                | Issue reopened     | -            | Issue reopened<br/>`B` added | Issue reopened<br/>`Bob` assigned     |
 | **From label `A` list**        | `A` removed        | Issue closed | `A` removed<br/>`B` added    | `Bob` assigned                        |
@@ -549,7 +602,7 @@ another list. This makes it faster to reorder many issues at once.
 
 To select and move multiple cards:
 
-1. Select each card with <kbd>Ctrl</kbd>+`Click` on Windows or Linux, or <kbd>Cmd</kbd>+`Click` on MacOS.
+1. Select each card with <kbd>Control</kbd>+`Click` on Windows or Linux, or <kbd>Command</kbd>+`Click` on MacOS.
 1. Drag one of the selected cards to another position or list and all selected cards are moved.
 
 ![Multi-select Issue Cards](img/issue_boards_multi_select_v12_4.png)
@@ -584,3 +637,59 @@ A few things to remember:
 - For performance and visibility reasons, each list shows the first 20 issues
   by default. If you have more than 20 issues, start scrolling down and the next
   20 appear.
+
+## Enable or disable GraphQL-based sidebar for group issue boards **(PREMIUM SELF)**
+
+GraphQL-based sidebar for group issue boards is under development and not ready for production use.
+It is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:graphql_board_lists)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:graphql_board_lists)
+```
+
+## Enable or disable adding issues to the list **(FREE SELF)**
+
+Adding issues to the list is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:add_issues_button)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:add_issues_button)
+```
+
+### Enable or disable new add list form **(FREE SELF)**
+
+The new form for adding lists is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:board_new_list)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:board_new_list)
+```

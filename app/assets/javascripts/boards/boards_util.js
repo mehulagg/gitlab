@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash';
-import { ListType } from './constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { ListType, NOT_FILTER } from './constants';
 
 export function getMilestone() {
   return null;
@@ -36,19 +36,19 @@ export function formatIssue(issue) {
 }
 
 export function formatListIssues(listIssues) {
-  const issues = {};
-  let listIssuesCount;
+  const boardItems = {};
+  let listItemsCount;
 
   const listData = listIssues.nodes.reduce((map, list) => {
-    listIssuesCount = list.issues.count;
-    let sortedIssues = list.issues.edges.map(issueNode => ({
+    listItemsCount = list.issues.count;
+    let sortedIssues = list.issues.edges.map((issueNode) => ({
       ...issueNode.node,
     }));
     sortedIssues = sortBy(sortedIssues, 'relativePosition');
 
     return {
       ...map,
-      [list.id]: sortedIssues.map(i => {
+      [list.id]: sortedIssues.map((i) => {
         const id = getIdFromGraphQLId(i.id);
 
         const listIssue = {
@@ -58,14 +58,14 @@ export function formatListIssues(listIssues) {
           assignees: i.assignees?.nodes || [],
         };
 
-        issues[id] = listIssue;
+        boardItems[id] = listIssue;
 
         return id;
       }),
     };
   }, {});
 
-  return { listData, issues, listIssuesCount };
+  return { listData, boardItems, listItemsCount };
 }
 
 export function formatListsPageInfo(lists) {
@@ -86,42 +86,73 @@ export function fullIterationId(id) {
   return `gid://gitlab/Iteration/${id}`;
 }
 
+export function fullUserId(id) {
+  return `gid://gitlab/User/${id}`;
+}
+
+export function fullMilestoneId(id) {
+  return `gid://gitlab/Milestone/${id}`;
+}
+
 export function fullLabelId(label) {
-  if (label.project_id !== null) {
+  if (label.project_id && label.project_id !== null) {
     return `gid://gitlab/ProjectLabel/${label.id}`;
   }
   return `gid://gitlab/GroupLabel/${label.id}`;
 }
 
-export function moveIssueListHelper(issue, fromList, toList) {
-  const updatedIssue = issue;
+export function formatIssueInput(issueInput, boardConfig) {
+  const { labelIds = [], assigneeIds = [] } = issueInput;
+  const { labels, assigneeId, milestoneId } = boardConfig;
+
+  return {
+    milestoneId: milestoneId ? fullMilestoneId(milestoneId) : null,
+    ...issueInput,
+    labelIds: [...labelIds, ...(labels?.map((l) => fullLabelId(l)) || [])],
+    assigneeIds: [...assigneeIds, ...(assigneeId ? [fullUserId(assigneeId)] : [])],
+  };
+}
+
+export function moveItemListHelper(item, fromList, toList) {
+  const updatedItem = item;
   if (
     toList.listType === ListType.label &&
-    !updatedIssue.labels.find(label => label.id === toList.label.id)
+    !updatedItem.labels.find((label) => label.id === toList.label.id)
   ) {
-    updatedIssue.labels.push(toList.label);
+    updatedItem.labels.push(toList.label);
   }
   if (fromList?.label && fromList.listType === ListType.label) {
-    updatedIssue.labels = updatedIssue.labels.filter(label => fromList.label.id !== label.id);
+    updatedItem.labels = updatedItem.labels.filter((label) => fromList.label.id !== label.id);
   }
 
   if (
     toList.listType === ListType.assignee &&
-    !updatedIssue.assignees.find(assignee => assignee.id === toList.assignee.id)
+    !updatedItem.assignees.find((assignee) => assignee.id === toList.assignee.id)
   ) {
-    updatedIssue.assignees.push(toList.assignee);
+    updatedItem.assignees.push(toList.assignee);
   }
   if (fromList?.assignee && fromList.listType === ListType.assignee) {
-    updatedIssue.assignees = updatedIssue.assignees.filter(
-      assignee => assignee.id !== fromList.assignee.id,
+    updatedItem.assignees = updatedItem.assignees.filter(
+      (assignee) => assignee.id !== fromList.assignee.id,
     );
   }
 
-  return updatedIssue;
+  return updatedItem;
 }
 
 export function isListDraggable(list) {
   return list.listType !== ListType.backlog && list.listType !== ListType.closed;
+}
+
+export function transformNotFilters(filters) {
+  return Object.keys(filters)
+    .filter((key) => key.startsWith(NOT_FILTER))
+    .reduce((obj, key) => {
+      return {
+        ...obj,
+        [key.substring(4, key.length - 1)]: filters[key],
+      };
+    }, {});
 }
 
 // EE-specific feature. Find the implementation in the `ee/`-folder
@@ -137,4 +168,5 @@ export default {
   fullLabelId,
   fullIterationId,
   isListDraggable,
+  transformNotFilters,
 };

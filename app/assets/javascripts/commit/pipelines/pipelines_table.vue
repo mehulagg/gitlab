@@ -1,32 +1,27 @@
 <script>
-import { GlButton, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
+import { getParameterByName } from '~/lib/utils/common_utils';
+import PipelinesTableComponent from '~/pipelines/components/pipelines_list/pipelines_table.vue';
+import eventHub from '~/pipelines/event_hub';
+import PipelinesMixin from '~/pipelines/mixins/pipelines_mixin';
 import PipelinesService from '~/pipelines/services/pipelines_service';
 import PipelineStore from '~/pipelines/stores/pipelines_store';
-import pipelinesMixin from '~/pipelines/mixins/pipelines';
-import eventHub from '~/pipelines/event_hub';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
-import { getParameterByName } from '~/lib/utils/common_utils';
-import CIPaginationMixin from '~/vue_shared/mixins/ci_pagination_api_mixin';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
-    TablePagination,
     GlButton,
+    GlEmptyState,
+    GlLink,
     GlLoadingIcon,
     GlModal,
-    GlLink,
+    PipelinesTableComponent,
+    TablePagination,
   },
-  mixins: [pipelinesMixin, CIPaginationMixin],
+  mixins: [PipelinesMixin, glFeatureFlagMixin()],
   props: {
     endpoint: {
-      type: String,
-      required: true,
-    },
-    helpPagePath: {
-      type: String,
-      required: true,
-    },
-    autoDevopsHelpPath: {
       type: String,
       required: true,
     },
@@ -94,6 +89,9 @@ export default {
      */
     canRenderPipelineButton() {
       return this.latestPipelineDetachedFlag;
+    },
+    pipelineButtonClass() {
+      return !this.glFeatures.newPipelinesTable ? 'gl-md-display-none' : 'gl-lg-display-none';
     },
     isForkMergeRequest() {
       return this.sourceProjectFullPath !== this.targetProjectFullPath;
@@ -184,12 +182,12 @@ export default {
       class="prepend-top-20"
     />
 
-    <svg-blank-state
+    <gl-empty-state
       v-else-if="shouldRenderErrorState"
       :svg-path="errorStateSvgPath"
-      :message="
+      :title="
         s__(`Pipelines|There was an error fetching the pipelines.
-      Try again in a few moments or contact your support team.`)
+        Try again in a few moments or contact your support team.`)
       "
     />
 
@@ -197,7 +195,8 @@ export default {
       <gl-button
         v-if="canRenderPipelineButton"
         block
-        class="gl-mt-3 gl-mb-0 gl-display-md-none"
+        class="gl-mt-3 gl-mb-3"
+        :class="pipelineButtonClass"
         variant="success"
         data-testid="run_pipeline_button_mobile"
         :loading="state.isRunningMergeRequestPipeline"
@@ -209,7 +208,6 @@ export default {
       <pipelines-table-component
         :pipelines="state.pipelines"
         :update-graph-dropdown="updateGraphDropdown"
-        :auto-devops-help-path="autoDevopsHelpPath"
         :view-type="viewType"
       >
         <template #table-header-actions>

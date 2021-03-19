@@ -10,14 +10,13 @@ import {
 } from '@gitlab/ui';
 
 import RecentSearchesStorageKeys from 'ee_else_ce/filtered_search/recent_searches_storage_keys';
-import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-
-import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store';
 import RecentSearchesService from '~/filtered_search/services/recent_searches_service';
+import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __ } from '~/locale';
 
-import { stripQuotes, uniqueTokens } from './filtered_search_utils';
 import { SortDirection } from './constants';
+import { stripQuotes, uniqueTokens } from './filtered_search_utils';
 
 export default {
   components: {
@@ -59,7 +58,7 @@ export default {
       type: String,
       required: false,
       default: '',
-      validator: value => value === '' || /(_desc)|(_asc)/g.test(value),
+      validator: (value) => value === '' || /(_desc)|(_asc)/gi.test(value),
     },
     showCheckbox: {
       type: Boolean,
@@ -89,7 +88,7 @@ export default {
     if (this.initialSortBy) {
       selectedSortOption = this.sortOptions
         .filter(
-          sortBy =>
+          (sortBy) =>
             sortBy.sortDirection.ascending === this.initialSortBy ||
             sortBy.sortDirection.descending === this.initialSortBy,
         )
@@ -204,12 +203,12 @@ export default {
 
       this.recentSearchesStore = new RecentSearchesStore({
         isLocalStorageAvailable: RecentSearchesService.isAvailable(),
-        allowedKeys: this.tokens.map(token => token.type),
+        allowedKeys: this.tokens.map((token) => token.type),
       });
 
       this.recentSearchesPromise = this.recentSearchesService
         .fetch()
-        .catch(error => {
+        .catch((error) => {
           if (error.name === 'RecentSearchesServiceError') return undefined;
 
           createFlash(__('An error occurred while parsing recent searches'));
@@ -217,7 +216,7 @@ export default {
           // Gracefully fail to empty array
           return [];
         })
-        .then(searches => {
+        .then((searches) => {
           if (!searches) return;
 
           // Put any searches that may have come in before
@@ -250,13 +249,13 @@ export default {
      * spaces.
      */
     removeQuotesEnclosure(filters = []) {
-      return filters.map(filter => {
+      return filters.map((filter) => {
         if (typeof filter === 'object') {
           const valueString = filter.value.data;
           return {
             ...filter,
             value: {
-              data: stripQuotes(valueString),
+              data: typeof valueString === 'string' ? stripQuotes(valueString) : valueString,
               operator: filter.value.operator,
             },
           };
@@ -305,8 +304,8 @@ export default {
     },
     historyTokenOptionTitle(historyToken) {
       const tokenOption = this.tokens
-        .find(token => token.type === historyToken.type)
-        ?.options?.find(option => option.value === historyToken.value.data);
+        .find((token) => token.type === historyToken.type)
+        ?.options?.find((option) => option.value === historyToken.value.data);
 
       if (!tokenOption?.title) {
         return historyToken.value.data;

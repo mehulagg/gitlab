@@ -21,6 +21,10 @@ RSpec.describe PersonalAccessTokens::Groups::PolicyWorker, type: :worker do
       described_class.new.perform(group.id)
     end
 
+    before do
+      stub_licensed_features(personal_access_token_expiration_policy: true)
+    end
+
     it_behaves_like 'an idempotent worker' do
       let(:job_args) { [group.id] }
 

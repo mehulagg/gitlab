@@ -9,22 +9,6 @@ RSpec.describe Terraform::StateVersion do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
 
-  describe '.with_files_stored_locally' do
-    it 'includes states with local storage' do
-      create_list(:terraform_state_version, 5)
-
-      expect(described_class.with_files_stored_locally).to have_attributes(count: 5)
-    end
-
-    it 'excludes states without local storage' do
-      stub_terraform_state_object_storage
-
-      create_list(:terraform_state_version, 5)
-
-      expect(described_class.with_files_stored_locally).to have_attributes(count: 0)
-    end
-  end
-
   describe '.replicables_for_current_secondary' do
     where(:selective_sync_enabled, :object_storage_sync_enabled, :terraform_object_storage_enabled, :synced_states) do
       true  | true  | true  | 5

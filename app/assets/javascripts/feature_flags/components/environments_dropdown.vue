@@ -1,9 +1,9 @@
 <script>
-import { debounce } from 'lodash';
 import { GlButton, GlSearchBoxByType } from '@gitlab/ui';
+import { debounce } from 'lodash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 /**
  * Creates a searchable input for environments.
@@ -31,6 +31,7 @@ export default {
     GlButton,
     GlSearchBoxByType,
   },
+  inject: ['environmentsEndpoint'],
   props: {
     value: {
       type: String,
@@ -53,7 +54,6 @@ export default {
       required: false,
     },
   },
-  inject: ['environmentsEndpoint'],
   data() {
     return {
       environmentSearch: this.value,

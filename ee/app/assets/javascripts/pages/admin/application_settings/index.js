@@ -1,9 +1,10 @@
 import '~/pages/admin/application_settings/index';
 import $ from 'jquery';
-import groupsSelect from '~/groups_select';
-import { s__ } from '~/locale';
 import Api from '~/api';
+import groupsSelect from '~/groups_select';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { select2AxiosTransport } from '~/lib/utils/select2_utils';
+import { s__ } from '~/locale';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
   $limitByNamespaces.find('.select2').select2('data', null);
@@ -29,12 +30,13 @@ const getDropdownConfig = (placeholder, apiPath, textProp) => ({
     },
     results(data) {
       return {
-        results: data.map(entity => ({
+        results: data.results.map((entity) => ({
           id: entity.id,
           text: entity[textProp],
         })),
       };
     },
+    transport: select2AxiosTransport,
   },
 });
 
@@ -45,7 +47,7 @@ const $container = $('#js-elasticsearch-settings');
 
 $container
   .find('.js-limit-checkbox')
-  .on('change', e =>
+  .on('change', (e) =>
     onLimitCheckboxChange(
       e.currentTarget.checked,
       $container.find('.js-limit-namespaces'),

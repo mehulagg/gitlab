@@ -1,6 +1,6 @@
 <script>
-import { mapState } from 'vuex';
 import { GlModal, GlForm, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import csrf from '~/lib/utils/csrf';
 import { __, s__, sprintf } from '~/locale';
 import { LEAVE_MODAL_ID } from '../../constants';
@@ -35,7 +35,7 @@ export default {
       return this.memberPath.replace(/:id$/, 'leave');
     },
     modalTitle() {
-      return sprintf(s__('Members|Leave "%{source}"'), { source: this.member.source.name });
+      return sprintf(s__('Members|Leave "%{source}"'), { source: this.member.source.fullName });
     },
   },
   methods: {
@@ -59,7 +59,7 @@ export default {
     <gl-form ref="form" :action="leavePath" method="post">
       <p>
         <gl-sprintf :message="$options.modalContent">
-          <template #source>{{ member.source.name }}</template>
+          <template #source>{{ member.source.fullName }}</template>
         </gl-sprintf>
       </p>
 

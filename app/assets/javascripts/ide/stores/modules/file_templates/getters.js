@@ -1,5 +1,5 @@
-import { leftSidebarViews } from '../../../constants';
 import { __ } from '~/locale';
+import { leftSidebarViews } from '../../../constants';
 
 export const templateTypes = () => [
   {
@@ -24,6 +24,6 @@ export const templateTypes = () => [
   },
 ];
 
-export const showFileTemplatesBar = (_, getters, rootState) => name =>
-  getters.templateTypes.find(t => t.name === name) &&
+export const showFileTemplatesBar = (_, getters, rootState) => (name) =>
+  getters.templateTypes.find((t) => t.name === name) &&
   rootState.currentActivityView === leftSidebarViews.edit.name;

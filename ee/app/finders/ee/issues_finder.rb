@@ -16,7 +16,7 @@ module EE
 
       override :negatable_params
       def negatable_params
-        @negatable_params ||= super + [:iteration_title]
+        @negatable_params ||= super + [:iteration_title, :weight]
       end
     end
 
@@ -88,8 +88,15 @@ module EE
     def filter_negated_items(items)
       items = by_negated_epic(items)
       items = by_negated_iteration(items)
+      items = by_negated_weight(items)
 
       super(items)
+    end
+
+    def by_negated_weight(items)
+      return items unless not_params[:weight].present?
+
+      items.without_weights(not_params[:weight])
     end
 
     def by_negated_epic(items)

@@ -16,13 +16,12 @@ describe('EE Approvals MREditApp', () => {
   let store;
   let axiosMock;
 
-  const factory = (mergeRequestReviewers = false, mrCollapsedApprovalRules = false) => {
+  const factory = (mrCollapsedApprovalRules = false) => {
     wrapper = mount(MREditApp, {
       localVue,
       store: new Vuex.Store(store),
       provide: {
         glFeatures: {
-          mergeRequestReviewers,
           mrCollapsedApprovalRules,
         },
       },
@@ -40,6 +39,15 @@ describe('EE Approvals MREditApp', () => {
   afterEach(() => {
     wrapper.destroy();
     axiosMock.restore();
+  });
+
+  it('renders CODEOWNERS tip', () => {
+    store.state.settings.canUpdateApprovers = true;
+    store.state.settings.showCodeOwnerTip = true;
+
+    factory(true);
+
+    expect(wrapper.find('[data-testid="codeowners-tip"]').exists()).toBe(true);
   });
 
   describe('with empty rules', () => {

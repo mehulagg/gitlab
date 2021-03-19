@@ -7,23 +7,27 @@ module EE
       BUY_PIPELINE_MINUTES_NOTIFICATION_DOT = 'buy_pipeline_minutes_notification_dot'
 
       def show_buy_pipeline_minutes?(project, namespace)
-        return false unless experiment_enabled?(:ci_notification_dot)
+        return false unless ::Gitlab.dev_env_or_com?
 
         show_out_of_pipeline_minutes_notification?(project, namespace)
       end
 
       def show_pipeline_minutes_notification_dot?(project, namespace)
-        return false unless experiment_enabled?(:ci_notification_dot)
+        return false unless ::Gitlab.dev_env_or_com?
         return false if notification_dot_acknowledged?
 
         show_out_of_pipeline_minutes_notification?(project, namespace)
       end
 
       def show_buy_pipeline_with_subtext?(project, namespace)
-        return false unless experiment_enabled?(:ci_notification_dot)
+        return false unless ::Gitlab.dev_env_or_com?
         return false unless notification_dot_acknowledged?
 
         show_out_of_pipeline_minutes_notification?(project, namespace)
+      end
+
+      def root_ancestor_namespace(project, namespace)
+        (project || namespace).root_ancestor
       end
 
       private

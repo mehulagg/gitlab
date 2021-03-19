@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import axios from '~/lib/utils/axios_utils';
-import httpStatusCodes from '~/lib/utils/http_status';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import * as actions from '~/error_tracking/store/list/actions';
 import * as types from '~/error_tracking/store/list/mutation_types';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 jest.mock('~/flash.js');
 
@@ -20,7 +20,7 @@ describe('error tracking actions', () => {
   });
 
   describe('startPolling', () => {
-    it('should start polling for data', done => {
+    it('should start polling for data', (done) => {
       const payload = { errors: [{ id: 1 }, { id: 2 }] };
 
       mock.onGet().reply(httpStatusCodes.OK, payload);
@@ -41,7 +41,7 @@ describe('error tracking actions', () => {
       );
     });
 
-    it('should show flash on API error', done => {
+    it('should show flash on API error', (done) => {
       mock.onGet().reply(httpStatusCodes.BAD_REQUEST);
 
       testAction(

@@ -6,10 +6,10 @@ import {
   GlAvatar,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { sprintf, s__, __ } from '~/locale';
-import httpStatusCodes from '~/lib/utils/http_status';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { isNumeric } from '../../../utils';
+import httpStatusCodes from '~/lib/utils/http_status';
+import { isNumeric } from '~/lib/utils/number_utils';
+import { sprintf, s__, __ } from '~/locale';
 
 export default {
   components: {
@@ -105,12 +105,12 @@ export default {
       createFlash(sprintf(message, { type }));
     },
     selectActiveItem(id) {
-      this.activeItem = this.suggestions.find(u => u.id === id);
+      this.activeItem = this.suggestions.find((u) => u.id === id);
     },
     loadView(id) {
       this.viewLoading = true;
       return this.fetchItem(id)
-        .then(data => {
+        .then((data) => {
           this.activeItem = data;
         })
         .catch(this.onApiError)
@@ -121,7 +121,7 @@ export default {
     loadSuggestions(term) {
       this.suggestionsLoading = true;
       return this.fetchSuggestions(term)
-        .then(data => {
+        .then((data) => {
           this.suggestions = data;
         })
         .catch(this.onApiError)

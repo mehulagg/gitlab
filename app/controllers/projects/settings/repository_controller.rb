@@ -3,11 +3,11 @@
 module Projects
   module Settings
     class RepositoryController < Projects::ApplicationController
+      layout 'project_settings'
       before_action :authorize_admin_project!
       before_action :define_variables, only: [:create_deploy_token]
       before_action do
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
-        push_frontend_feature_flag(:deploy_keys_on_protected_branches, @project)
       end
 
       feature_category :source_code_management, [:show, :cleanup]

@@ -33,7 +33,6 @@ class Group < Namespace
   has_many :members_and_requesters, as: :source, class_name: 'GroupMember'
 
   has_many :milestones
-  has_many :iterations
   has_many :services
   has_many :shared_group_links, foreign_key: :shared_with_group_id, class_name: 'GroupGroupLink'
   has_many :shared_with_group_links, foreign_key: :shared_group_id, class_name: 'GroupGroupLink'
@@ -48,6 +47,7 @@ class Group < Namespace
 
   has_many :labels, class_name: 'GroupLabel'
   has_many :variables, class_name: 'Ci::GroupVariable'
+  has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
   has_many :custom_attributes, class_name: 'GroupCustomAttribute'
 
   has_many :boards
@@ -70,10 +70,14 @@ class Group < Namespace
   has_many :group_deploy_keys, through: :group_deploy_keys_groups
   has_many :group_deploy_tokens
   has_many :deploy_tokens, through: :group_deploy_tokens
+  has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
   has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
   has_many :dependency_proxy_manifests, class_name: 'DependencyProxy::Manifest'
+
+  # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
+  has_many :debian_distributions, class_name: 'Packages::Debian::GroupDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   accepts_nested_attributes_for :variables, allow_destroy: true
 
@@ -81,7 +85,7 @@ class Group < Namespace
   validate :visibility_level_allowed_by_sub_groups
   validate :visibility_level_allowed_by_parent
   validate :two_factor_authentication_allowed
-  validates :variables, variable_duplicates: true
+  validates :variables, nested_attributes_duplicates: true
 
   validates :two_factor_grace_period, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
@@ -164,6 +168,15 @@ class Group < Namespace
         .where(type: integration.type)
 
       where('NOT EXISTS (?)', services)
+    end
+
+    # This method can be used only if all groups have the same top-level
+    # group
+    def preset_root_ancestor_for(groups)
+      return groups if groups.size < 2
+
+      root = groups.first.root_ancestor
+      groups.drop(1).each { |group| group.root_ancestor = root }
     end
 
     private
@@ -328,6 +341,13 @@ class Group < Namespace
     has_owner?(user) && members_with_parents.owners.size == 1
   end
 
+  def last_blocked_owner?(user)
+    return false if members_with_parents.owners.any?
+
+    blocked_owners = members.blocked.where(access_level: Gitlab::Access::OWNER)
+    blocked_owners.size == 1 && blocked_owners.exists?(user_id: user)
+  end
+
   def ldap_synced?
     false
   end
@@ -351,21 +371,42 @@ class Group < Namespace
   # rubocop: enable CodeReuse/ServiceClass
 
   # rubocop: disable CodeReuse/ServiceClass
-  def refresh_members_authorized_projects(blocking: true, priority: UserProjectAccessChangedService::HIGH_PRIORITY)
+  def refresh_members_authorized_projects(
+    blocking: true,
+    priority: UserProjectAccessChangedService::HIGH_PRIORITY,
+    direct_members_only: false
+  )
+
+    user_ids = if direct_members_only
+                 users_ids_of_direct_members
+               else
+                 user_ids_for_project_authorizations
+               end
+
     UserProjectAccessChangedService
-      .new(user_ids_for_project_authorizations)
+      .new(user_ids)
       .execute(blocking: blocking, priority: priority)
   end
   # rubocop: enable CodeReuse/ServiceClass
 
+  def users_ids_of_direct_members
+    direct_members.pluck(:user_id)
+  end
+
   def user_ids_for_project_authorizations
-    members_with_parents.pluck(:user_id)
+    members_with_parents.pluck(Arel.sql('DISTINCT members.user_id'))
   end
 
   def self_and_ancestors_ids
     strong_memoize(:self_and_ancestors_ids) do
       self_and_ancestors.pluck(:id)
     end
+  end
+
+  def direct_members
+    GroupMember.active_without_invites_and_requests
+               .non_minimal_access
+               .where(source_id: id)
   end
 
   def members_with_parents
@@ -472,7 +513,7 @@ class Group < Namespace
   # @param only_concrete_membership [Bool] whether require admin concrete membership status
   def max_member_access_for_user(user, only_concrete_membership: false)
     return GroupMember::NO_ACCESS unless user
-    return GroupMember::OWNER if user.admin? && !only_concrete_membership
+    return GroupMember::OWNER if user.can_admin_all_resources? && !only_concrete_membership
 
     max_member_access = members_with_parents.where(user_id: user)
                                             .reorder(access_level: :desc)
@@ -492,15 +533,11 @@ class Group < Namespace
     }
   end
 
-  def ci_variables_for(ref, project)
-    cache_key = "ci_variables_for:group:#{self&.id}:project:#{project&.id}:ref:#{ref}"
+  def ci_variables_for(ref, project, environment: nil)
+    cache_key = "ci_variables_for:group:#{self&.id}:project:#{project&.id}:ref:#{ref}:environment:#{environment}"
 
     ::Gitlab::SafeRequestStore.fetch(cache_key) do
-      list_of_ids = [self] + ancestors
-      variables = Ci::GroupVariable.where(group: list_of_ids)
-      variables = variables.unprotected unless project.protected_for?(ref)
-      variables = variables.group_by(&:group_id)
-      list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
+      uncached_ci_variables_for(ref, project, environment: environment)
     end
   end
 
@@ -741,6 +778,23 @@ class Group < Namespace
 
   def enable_shared_runners!
     update!(shared_runners_enabled: true)
+  end
+
+  def uncached_ci_variables_for(ref, project, environment: nil)
+    list_of_ids = [self] + ancestors
+    variables = Ci::GroupVariable.where(group: list_of_ids)
+    variables = variables.unprotected unless project.protected_for?(ref)
+
+    if Feature.enabled?(:scoped_group_variables, self, default_enabled: :yaml)
+      variables = if environment
+                    variables.on_environment(environment)
+                  else
+                    variables.where(environment_scope: '*')
+                  end
+    end
+
+    variables = variables.group_by(&:group_id)
+    list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
   end
 end
 

@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlToggle, GlFormTextarea, GlForm, GlLoadingIcon } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import MaintenanceModeSettingsApp from 'ee/maintenance_mode_settings/components/app.vue';
 import { MOCK_BASIC_SETTINGS_DATA } from '../mock_data';
 
@@ -16,7 +16,7 @@ describe('MaintenanceModeSettingsApp', () => {
     setBannerMessage: jest.fn(),
   };
 
-  const createComponent = initialState => {
+  const createComponent = (initialState) => {
     const store = new Vuex.Store({
       state: {
         ...MOCK_BASIC_SETTINGS_DATA,
@@ -77,6 +77,12 @@ describe('MaintenanceModeSettingsApp', () => {
   });
 
   describe('GlToggle', () => {
+    it('has label', () => {
+      createComponent();
+
+      expect(findGlToggle().props('label')).toBe(MaintenanceModeSettingsApp.i18n.toggleLabel);
+    });
+
     describe('onChange', () => {
       beforeEach(() => {
         createComponent();

@@ -1,6 +1,6 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
 import { GlDropdown, GlDropdownItem, GlDropdownDivider } from '@gitlab/ui';
+import { mapGetters, mapActions } from 'vuex';
 import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
 import {
   DISCUSSION_FILTERS_DEFAULT_VALUE,
@@ -42,7 +42,7 @@ export default {
     ...mapGetters(['getNotesDataByProp', 'timelineEnabled']),
     currentFilter() {
       if (!this.currentValue) return this.filters[0];
-      return this.filters.find(filter => filter.value === this.currentValue);
+      return this.filters.find((filter) => filter.value === this.currentValue);
     },
   },
   created() {

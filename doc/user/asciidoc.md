@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, howto
 ---
 
-# AsciiDoc
+# AsciiDoc **(FREE)**
 
 GitLab uses the [Asciidoctor](https://asciidoctor.org) gem to convert AsciiDoc content to HTML5.
 Consult the [Asciidoctor User Manual](https://asciidoctor.org/docs/user-manual/) for a complete Asciidoctor reference.
@@ -30,7 +30,7 @@ Line comments, which are lines that start with `//`, are skipped:
 
 A blank line separates paragraphs.
 
-A paragraph with the `[%hardbreaks]` option will preserve line breaks:
+A paragraph with the `[%hardbreaks]` option preserves line breaks:
 
 ```plaintext
 [%hardbreaks]
@@ -40,7 +40,7 @@ Notice how line breaks are now preserved.
 
 An indented (literal) paragraph disables text formatting,
 preserves spaces and line breaks, and is displayed in a
-monospaced font:
+fixed-width font:
 
 ```plaintext
  This literal paragraph is indented with one space.
@@ -186,7 +186,11 @@ Attach a block or paragraph to a list item using a list continuation (which you 
 * [ ] not checked
 ```
 
+<!-- vale gitlab.Spelling = NO -->
+
 #### Callout
+
+<!-- vale gitlab.Spelling = YES -->
 
 ```plaintext
 // enable callout bubbles by adding `:icons: font` to the document header
@@ -370,14 +374,14 @@ comment - content which is not included in the output document
 
 ### Colors
 
-It’s possible to have color written in `HEX`, `RGB`, or `HSL` format rendered with a color indicator.
+It's possible to have color written in `HEX`, `RGB`, or `HSL` format rendered with a color indicator.
 Supported formats (named colors are not supported):
 
 - HEX: `` `#RGB[A]` `` or `` `#RRGGBB[AA]` ``
 - RGB: `` `RGB[A](R, G, B[, A])` ``
 - HSL: `` `HSL[A](H, S, L[, A])` ``
 
-Color written inside backticks will be followed by a color "chip":
+Color written inside backticks is followed by a color "chip":
 
 ```plaintext
 - `#F00`
@@ -395,7 +399,7 @@ Color written inside backticks will be followed by a color "chip":
 
 To activate equation and formula support,
 set the `stem` attribute in the document's header to `latexmath`.
-Equations and formulas will be rendered using [KaTeX](https://katex.org/):
+Equations and formulas are rendered using [KaTeX](https://katex.org/):
 
 ```plaintext
 :stem: latexmath

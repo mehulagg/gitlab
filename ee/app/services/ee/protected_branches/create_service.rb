@@ -23,6 +23,7 @@ module EE
         super
 
         sync_code_owner_approval_rules if project.feature_available?(:code_owners)
+        track_onboarding_progress
 
         protected_branch
       end
@@ -57,6 +58,12 @@ module EE
           .by_target_branch(protected_branch.name)
           .preload_source_project
           .select(&:source_project)
+      end
+
+      def track_onboarding_progress
+        return unless protected_branch.code_owner_approval_required
+
+        OnboardingProgressService.new(project.namespace).execute(action: :code_owners_enabled)
       end
     end
   end

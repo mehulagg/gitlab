@@ -18,7 +18,7 @@ import {
   codeEvents,
 } from '../mock_data';
 
-const generateEvents = n =>
+const generateEvents = (n) =>
   Array(n)
     .fill(issueEvents[0])
     .map((ev, k) => ({ ...ev, title: `event-${k}`, id: k }));

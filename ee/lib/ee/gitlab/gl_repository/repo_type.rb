@@ -8,7 +8,7 @@ module EE
 
         override :identifier_for_container
         def identifier_for_container(container)
-          if container.is_a?(GroupWiki)
+          if container.is_a?(GroupWiki) || (wiki? && container.is_a?(Group))
             "group-#{container.id}-#{name}"
           else
             super

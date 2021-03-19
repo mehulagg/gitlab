@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash';
-import { s__ } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
+import { s__ } from '~/locale';
 import {
   chartKeys,
   metricTypes,
@@ -13,9 +13,9 @@ import {
 } from '../../../constants';
 import { getScatterPlotData, getMedianLineData } from '../../../utils';
 
-export const chartLoading = state => chartKey => state.charts[chartKey].isLoading;
+export const chartLoading = (state) => (chartKey) => state.charts[chartKey].isLoading;
 
-export const chartErrorCode = state => chartKey => state.charts[chartKey].errorCode;
+export const chartErrorCode = (state) => (chartKey) => state.charts[chartKey].errorCode;
 
 /**
  * Creates a series object for the column chart with the given chartKey.
@@ -36,8 +36,8 @@ export const chartErrorCode = state => chartKey => state.charts[chartKey].errorC
  * the itemStyle will be set accordingly in order to highlight the relevant bar.
  *
  */
-export const getColumnChartData = state => chartKey => {
-  const dataWithSelected = Object.keys(state.charts[chartKey].data).map(key => {
+export const getColumnChartData = (state) => (chartKey) => {
+  const dataWithSelected = Object.keys(state.charts[chartKey].data).map((key) => {
     const dataArr = [key, state.charts[chartKey].data[key]];
     let itemStyle = {};
 
@@ -54,7 +54,7 @@ export const getColumnChartData = state => chartKey => {
   return dataWithSelected;
 };
 
-export const chartHasData = state => chartKey => !isEmpty(state.charts[chartKey].data);
+export const chartHasData = (state) => (chartKey) => !isEmpty(state.charts[chartKey].data);
 
 export const getScatterPlotMainData = (state, getters, rootState) =>
   getScatterPlotData(
@@ -77,10 +77,10 @@ export const getScatterPlotMedianData = (state, getters, rootState) =>
     scatterPlotAddonQueryDays,
   );
 
-export const getMetricLabel = state => chartKey =>
-  metricTypes.find(m => m.key === state.charts[chartKey].params.metricType).label;
+export const getMetricLabel = (state) => (chartKey) =>
+  metricTypes.find((m) => m.key === state.charts[chartKey].params.metricType).label;
 
-export const getFilterParams = (state, getters, rootState, rootGetters) => chartKey => {
+export const getFilterParams = (state, getters, rootState, rootGetters) => (chartKey) => {
   const { params: chartParams = {} } = state.charts[chartKey];
 
   // common filter params
@@ -109,7 +109,7 @@ export const getFilterParams = (state, getters, rootState, rootGetters) => chart
  * it will return an empty dataZoom property.
  *
  */
-export const getColumnChartDatazoomOption = state => chartKey => {
+export const getColumnChartDatazoomOption = (state) => (chartKey) => {
   const { data } = state.charts[chartKey];
   const totalItems = Object.keys(data).length;
   const MAX_ITEMS_PER_PAGE = maxColumnChartItemsPerPage[chartKey]
@@ -123,7 +123,7 @@ export const getColumnChartDatazoomOption = state => chartKey => {
   const intervalEnd = Math.ceil((MAX_ITEMS_PER_PAGE / totalItems) * 100);
 
   return {
-    dataZoom: dataZoomOptions.map(item => {
+    dataZoom: dataZoomOptions.map((item) => {
       const result = {
         ...item,
         end: intervalEnd,
@@ -134,7 +134,7 @@ export const getColumnChartDatazoomOption = state => chartKey => {
   };
 };
 
-export const getSelectedMetric = state => chartKey => state.charts[chartKey].params.metricType;
+export const getSelectedMetric = (state) => (chartKey) => state.charts[chartKey].params.metricType;
 
 /**
  * Returns the y axis label for the scatterplot.
@@ -143,16 +143,16 @@ export const getSelectedMetric = state => chartKey => state.charts[chartKey].par
 export const scatterplotYaxisLabel = (_state, getters, rootState) => {
   const selectedMetric = getters.getSelectedMetric(chartKeys.scatterplot);
   const metricTypesInHours = rootState.metricTypes
-    .filter(metric => metric.charts.indexOf(chartKeys.timeBasedHistogram) !== -1)
-    .map(metric => metric.key);
+    .filter((metric) => metric.charts.indexOf(chartKeys.timeBasedHistogram) !== -1)
+    .map((metric) => metric.key);
   if (selectedMetric === daysToMergeMetric.key) return s__('ProductivityAnalytics|Days');
   if (metricTypesInHours.indexOf(selectedMetric) !== -1) return s__('ProductivityAnalytics|Hours');
   return getters.getMetricLabel(chartKeys.scatterplot);
 };
 
-export const hasNoAccessError = state =>
+export const hasNoAccessError = (state) =>
   state.charts[chartKeys.main].errorCode === httpStatus.FORBIDDEN;
 
-export const isChartEnabled = state => chartKey => state.charts[chartKey].enabled;
+export const isChartEnabled = (state) => (chartKey) => state.charts[chartKey].enabled;
 
-export const isFilteringByDaysToMerge = state => state.charts[chartKeys.main].selected.length > 0;
+export const isFilteringByDaysToMerge = (state) => state.charts[chartKeys.main].selected.length > 0;

@@ -10,7 +10,7 @@ module EE
     ].freeze
 
     READONLY_FEATURES_EE = %i[
-      board
+      issue_board
       issue_link
       approvers
       vulnerability_feedback

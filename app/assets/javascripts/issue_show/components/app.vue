@@ -1,20 +1,19 @@
 <script>
 import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
 import Visibility from 'visibilityjs';
-import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { visitUrl } from '~/lib/utils/url_utility';
 import Poll from '~/lib/utils/poll';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { __, s__, sprintf } from '~/locale';
+import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 import eventHub from '../event_hub';
 import Service from '../services/index';
 import Store from '../stores';
-import titleComponent from './title.vue';
 import descriptionComponent from './description.vue';
 import editedComponent from './edited.vue';
 import formComponent from './form.vue';
 import PinnedLinks from './pinned_links.vue';
-import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
-import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
+import titleComponent from './title.vue';
 
 export default {
   components: {
@@ -25,7 +24,6 @@ export default {
     formComponent,
     PinnedLinks,
   },
-  mixins: [recaptchaModalImplementor],
   props: {
     endpoint: {
       required: true,
@@ -130,6 +128,10 @@ export default {
     },
     projectPath: {
       type: String,
+      required: true,
+    },
+    projectId: {
+      type: Number,
       required: true,
     },
     projectNamespace: {
@@ -246,11 +248,12 @@ export default {
     },
   },
   created() {
+    this.flashContainer = null;
     this.service = new Service(this.endpoint);
     this.poll = new Poll({
       resource: this.service,
       method: 'getData',
-      successCallback: res => this.store.updateState(res.data),
+      successCallback: (res) => this.store.updateState(res.data),
       errorCallback(err) {
         throw new Error(err);
       },
@@ -285,7 +288,7 @@ export default {
   methods: {
     handleBeforeUnloadEvent(e) {
       const event = e;
-      if (this.showForm && this.issueChanged && !this.showRecaptcha) {
+      if (this.showForm && this.issueChanged) {
         event.returnValue = __('Are you sure you want to lose your issue information?');
       }
       return undefined;
@@ -294,8 +297,8 @@ export default {
     updateStoreState() {
       return this.service
         .getData()
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           this.store.updateState(data);
         })
         .catch(() => {
@@ -303,7 +306,7 @@ export default {
         });
     },
 
-    updateAndShowForm(templates = []) {
+    updateAndShowForm(templates = {}) {
       if (!this.showForm) {
         this.showForm = true;
         this.store.setFormState({
@@ -320,7 +323,7 @@ export default {
     requestTemplatesAndShowForm() {
       return this.service
         .loadTemplates(this.issuableTemplateNamesPath)
-        .then(res => {
+        .then((res) => {
           this.updateAndShowForm(res.data);
         })
         .catch(() => {
@@ -343,11 +346,11 @@ export default {
     },
 
     updateIssuable() {
+      this.clearFlash();
       return this.service
         .updateIssuable(this.store.formState)
-        .then(res => res.data)
-        .then(data => this.checkForSpam(data))
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
           }
@@ -357,35 +360,29 @@ export default {
           eventHub.$emit('close.form');
         })
         .catch((error = {}) => {
-          const { name, response = {} } = error;
+          const { message, response = {} } = error;
 
-          if (name === 'SpamError') {
-            this.openRecaptcha();
-          } else {
-            let errMsg = this.defaultErrorMessage;
+          this.store.setFormState({
+            updateLoading: false,
+          });
 
-            if (response.data && response.data.errors) {
-              errMsg += `. ${response.data.errors.join(' ')}`;
-            }
+          let errMsg = this.defaultErrorMessage;
 
-            createFlash(errMsg);
+          if (response.data && response.data.errors) {
+            errMsg += `. ${response.data.errors.join(' ')}`;
+          } else if (message) {
+            errMsg += `. ${message}`;
           }
+
+          this.flashContainer = createFlash(errMsg);
         });
-    },
-
-    closeRecaptchaModal() {
-      this.store.setFormState({
-        updateLoading: false,
-      });
-
-      this.closeRecaptcha();
     },
 
     deleteIssuable(payload) {
       return this.service
         .deleteIssuable(payload)
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           // Stop the poll so we don't get 404's with the issuable not existing
           this.poll.stop();
 
@@ -405,6 +402,13 @@ export default {
     showStickyHeader() {
       this.isStickyHeaderShowing = true;
     },
+
+    clearFlash() {
+      if (this.flashContainer) {
+        this.flashContainer.style.display = 'none';
+        this.flashContainer = null;
+      }
+    },
   },
 };
 </script>
@@ -419,18 +423,12 @@ export default {
         :markdown-docs-path="markdownDocsPath"
         :markdown-preview-path="markdownPreviewPath"
         :project-path="projectPath"
+        :project-id="projectId"
         :project-namespace="projectNamespace"
         :show-delete-button="showDeleteButton"
         :can-attach-file="canAttachFile"
         :enable-autocomplete="enableAutocomplete"
         :issuable-type="issuableType"
-      />
-
-      <recaptcha-modal
-        v-show="showRecaptcha"
-        ref="recaptchaModal"
-        :html="recaptchaHTML"
-        @close="closeRecaptchaModal"
       />
     </div>
     <div v-else>

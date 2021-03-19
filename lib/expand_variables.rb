@@ -16,6 +16,12 @@ module ExpandVariables
       end
     end
 
+    def possible_var_reference?(value)
+      return unless value
+
+      %w[$ %].any? { |symbol| value.include?(symbol) }
+    end
+
     private
 
     def replace_with(value, variables)
@@ -38,6 +44,9 @@ module ExpandVariables
     def transform_variables(variables)
       # Lazily initialise variables
       variables = variables.call if variables.is_a?(Proc)
+
+      # Convert Collection to variables
+      variables = variables.to_hash if variables.is_a?(Gitlab::Ci::Variables::Collection)
 
       # Convert hash array to variables
       if variables.is_a?(Array)

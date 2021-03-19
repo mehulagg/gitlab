@@ -9,7 +9,7 @@ RSpec.describe SubscriptionPresenter do
   describe '#plan' do
     subject { presenter.plan }
 
-    it { is_expected.to eq('gold') }
+    it { is_expected.to eq('ultimate') }
   end
 
   describe '#notify_admins?' do

@@ -1,11 +1,10 @@
 .card
-  %p
-    This service allows users to perform common operations on this
-    project by entering slash commands in Slack.
-    = external_link _('View documentation'), help_page_path('user/project/integrations/gitlab_slack_application.md')
-  %p.inline
-    See the list of available commands in Slack after setting up this service
-    by entering
+  .card-body
+    %p
+      = _("This service allows users to perform common operations on this project by entering slash commands in Slack.")
+      = external_link _('View documentation'), help_page_path('user/project/integrations/gitlab_slack_application.md')
+    %p.inline
+      = _("See the list of available commands in Slack after setting up this service by entering")
   %kbd.inline /gitlab help
   - unless @service.template? || @service.instance?
     = render "projects/services/#{@service.to_param}/slack_integration_form"

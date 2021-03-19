@@ -1,7 +1,7 @@
 ---
 # Error: gitlab.ReferenceLinks
 #
-# Checks for the presence of reference-style links that must be inline.
+# Checks for reference-style links that should be converted to inline links.
 #
 # For a list of all options, see https://errata-ai.gitbook.io/vale/getting-started/styles
 extends: existence
@@ -10,4 +10,4 @@ link: https://docs.gitlab.com/ee/development/documentation/styleguide/index.html
 level: error
 scope: raw
 raw:
-  - '\n\[.*\]: .*'
+  - '\n\[[^\]]*\]: .*'

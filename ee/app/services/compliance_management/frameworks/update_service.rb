@@ -3,6 +3,8 @@
 module ComplianceManagement
   module Frameworks
     class UpdateService < BaseService
+      include ::ComplianceManagement::Frameworks
+
       attr_reader :framework, :current_user, :params
 
       def initialize(framework:, current_user:, params:)
@@ -13,6 +15,11 @@ module ComplianceManagement
 
       def execute
         return error unless permitted?
+
+        unless compliance_pipeline_configuration_available?
+          framework.errors.add(:pipeline_configuration_full_path, 'feature is not available')
+          return error
+        end
 
         framework.update(params) ? success : error
       end

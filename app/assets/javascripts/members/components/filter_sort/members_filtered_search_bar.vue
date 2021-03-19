@@ -1,11 +1,11 @@
 <script>
-import { mapState } from 'vuex';
 import { GlFilteredSearchToken } from '@gitlab/ui';
-import { setUrlParams, queryToObject } from '~/lib/utils/url_utility';
+import { mapState } from 'vuex';
 import { getParameterByName } from '~/lib/utils/common_utils';
+import { setUrlParams, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import { SEARCH_TOKEN_TYPE, SORT_PARAM } from '~/members/constants';
+import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
 export default {
   name: 'MembersFilteredSearchBar',
@@ -45,7 +45,7 @@ export default {
   computed: {
     ...mapState(['sourceId', 'filteredSearchBar', 'canManageMembers']),
     tokens() {
-      return this.$options.availableTokens.filter(token => {
+      return this.$options.availableTokens.filter((token) => {
         if (
           Object.prototype.hasOwnProperty.call(token, 'requiredPermissions') &&
           !this[token.requiredPermissions]
@@ -61,8 +61,8 @@ export default {
     const query = queryToObject(window.location.search);
 
     const tokens = this.tokens
-      .filter(token => query[token.type])
-      .map(token => ({
+      .filter((token) => query[token.type])
+      .map((token) => ({
         type: token.type,
         value: {
           data: query[token.type],

@@ -5,13 +5,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# GitLab Rails Console Cheat Sheet **(CORE ONLY)**
+# GitLab Rails Console Cheat Sheet **(FREE SELF)**
 
 This is the GitLab Support Team's collection of information regarding the GitLab Rails
 console, for use while troubleshooting. It is listed here for transparency,
 and it may be useful for users with experience with these tools. If you are currently
-having an issue with GitLab, it is highly recommended that you check your
-[support options](https://about.gitlab.com/support/) first, before attempting to use
+having an issue with GitLab, it is highly recommended that you first check
+our guide on [navigating our Rails console](navigating_gitlab_via_rails_console.md),
+and your [support options](https://about.gitlab.com/support/), before attempting to use
 this information.
 
 WARNING:
@@ -384,7 +385,7 @@ project = Project.find_by_full_path('PROJECT_PATH')
 Projects::ImportExport::ExportService.new(project, user).execute
 ```
 
-If the project you wish to export is available at `https://gitlab.example.com/baltig/pipeline-templates`, the value to use for `PROJECT_PATH` would be `baltig/pipeline-templates`. 
+If the project you wish to export is available at `https://gitlab.example.com/baltig/pipeline-templates`, the value to use for `PROJECT_PATH` would be `baltig/pipeline-templates`.
 
 If this all runs successfully, you will see output like the following before being returned to the Rails console prompt:
 
@@ -392,7 +393,7 @@ If this all runs successfully, you will see output like the following before bei
 => nil
 ```
 
-The exported project will be located within a `.tar.gz` file in `/var/opt/gitlab/gitlab-rails/uploads/-/system/import_export_upload/export_file/`. 
+The exported project will be located within a `.tar.gz` file in `/var/opt/gitlab/gitlab-rails/uploads/-/system/import_export_upload/export_file/`.
 
 ## Repository
 
@@ -562,7 +563,7 @@ service = ::Groups::TransferService.new(group, user)
 service.execute(parent_group)
 ```
 
-### Count unique users in a group and sub-groups
+### Count unique users in a group and subgroups
 
 ```ruby
 group = Group.find_by_path_or_name("groupname")
@@ -598,7 +599,7 @@ group = Group.find_by_path_or_name('group-name')
 group.project_creation_level=0
 ```
 
-### Modify group - disable 2FA requirement 
+### Modify group - disable 2FA requirement
 
 WARNING:
 When disabling the 2FA Requirement on a subgroup, the whole parent group (including all subgroups) is affected by this change.
@@ -743,7 +744,7 @@ m.project.try(:ci_service)
 ```ruby
 project = Project.find_by_full_path 'group/project'
 content = project.repository.gitlab_ci_yml_for(project.repository.root_ref_sha)
-Gitlab::Ci::YamlProcessor.validation_message(content,  user: User.first)
+Gitlab::Ci::Lint.new(project: project,  current_user: User.first).validate(content)
 ```
 
 ### Disable AutoDevOps on Existing Projects
@@ -1042,6 +1043,67 @@ Geo::ProjectRegistry.update_all(resync_repository: true, resync_wiki: true)
 project = Project.find_by_full_path('<group/project>')
 
 Geo::RepositorySyncService.new(project).execute
+```
+
+### Blob types newer than uploads/artifacts/LFS
+
+- `Packages::PackageFile`
+- `Terraform::StateVersion`
+- `MergeRequestDiff`
+
+`Packages::PackageFile` is used in the following examples, but things generally work the same for the other Blob types.
+
+#### The Replicator
+
+The main kinds of classes are Registry, Model, and Replicator. If you have an instance of one of these classes, you can get the others. The Registry and Model mostly manage PostgreSQL DB state. The Replicator knows how to replicate/verify (or it can call a service to do it):
+
+```ruby
+model_record = Packages::PackageFile.last
+model_record.replicator.registry.replicator.model_record # just showing that these methods exist
+```
+
+#### Replicate a package file, synchronously, given an ID
+
+```ruby
+model_record = Packages::PackageFile.find(id)
+model_record.replicator.send(:download)
+```
+
+#### Replicate a package file, synchronously, given a registry ID
+
+```ruby
+registry = Geo::PackageFileRegistry.find(registry_id)
+registry.replicator.send(:download)
+```
+
+### Repository types newer than project/wiki repositories
+
+- `SnippetRepository`
+- `GroupWikiRepository`
+
+`SnippetRepository` is used in the examples below, but things generally work the same for the other Repository types.
+
+#### The Replicator
+
+The main kinds of classes are Registry, Model, and Replicator. If you have an instance of one of these classes, you can get the others. The Registry and Model mostly manage PostgreSQL DB state. The Replicator knows how to replicate/verify (or it can call a service to do it).
+
+```ruby
+model_record = SnippetRepository.last
+model_record.replicator.registry.replicator.model_record # just showing that these methods exist
+```
+
+#### Replicate a snippet repository, synchronously, given an ID
+
+```ruby
+model_record = SnippetRepository.find(id)
+model_record.replicator.send(:sync_repository)
+```
+
+#### Replicate a snippet repository, synchronously, given a registry ID
+
+```ruby
+registry = Geo::SnippetRepositoryRegistry.find(registry_id)
+registry.replicator.send(:sync_repository)
 ```
 
 ### Generate usage ping

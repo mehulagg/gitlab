@@ -2,9 +2,10 @@
 import { GlTooltipDirective as GlTooltip, GlButton, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import Mousetrap from 'mousetrap';
 
+import { keysFor, ISSUABLE_CHANGE_LABEL } from '~/behaviors/shortcuts/keybindings';
 import { s__, __ } from '~/locale';
-import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
 import TestCaseGraphQL from '../mixins/test_case_graphql';
 
@@ -19,6 +20,7 @@ export default {
   directives: {
     GlTooltip,
   },
+  mixins: [TestCaseGraphQL],
   inject: [
     'projectFullPath',
     'testCaseId',
@@ -28,7 +30,6 @@ export default {
     'labelsManagePath',
     'projectsFetchPath',
   ],
-  mixins: [TestCaseGraphQL],
   props: {
     sidebarExpanded: {
       type: Boolean,
@@ -76,10 +77,10 @@ export default {
   },
   mounted() {
     this.sidebarEl = document.querySelector('aside.right-sidebar');
-    Mousetrap.bind('l', this.handleLabelsCollapsedButtonClick);
+    Mousetrap.bind(keysFor(ISSUABLE_CHANGE_LABEL), this.handleLabelsCollapsedButtonClick);
   },
   beforeDestroy() {
-    Mousetrap.unbind('l');
+    Mousetrap.unbind(keysFor(ISSUABLE_CHANGE_LABEL));
   },
   methods: {
     handleTodoButtonClick() {
@@ -130,9 +131,9 @@ export default {
       // either selected or removed aren't leading to same selection
       // as current one, as then we don't want to make network call
       // since nothing has changed.
-      const anyLabelUpdated = labels.some(label => {
+      const anyLabelUpdated = labels.some((label) => {
         // Find this label in existing selection.
-        const existingLabel = this.selectedLabels.find(l => l.id === label.id);
+        const existingLabel = this.selectedLabels.find((l) => l.id === label.id);
 
         // Check either of the two following conditions;
         // 1. A label that's not currently applied is being applied.
@@ -146,12 +147,12 @@ export default {
 
         return this.updateTestCase({
           variables: {
-            addLabelIds: labels.filter(label => label.set).map(label => label.id),
-            removeLabelIds: labels.filter(label => !label.set).map(label => label.id),
+            addLabelIds: labels.filter((label) => label.set).map((label) => label.id),
+            removeLabelIds: labels.filter((label) => !label.set).map((label) => label.id),
           },
           errorMessage: s__('TestCases|Something went wrong while updating the test case labels.'),
         })
-          .then(updatedTestCase => {
+          .then((updatedTestCase) => {
             this.$emit('test-case-updated', updatedTestCase);
           })
           .finally(() => {

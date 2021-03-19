@@ -1,4 +1,6 @@
 import { SUPPORTED_FORMATS } from '~/lib/utils/unit_format';
+import * as urlUtils from '~/lib/utils/url_utility';
+import { NOT_IN_DB_PREFIX } from '~/monitoring/constants';
 import {
   uniqMetricsId,
   parseEnvironmentsResponse,
@@ -10,9 +12,7 @@ import {
   addDashboardMetaDataToLink,
   normalizeCustomDashboardPath,
 } from '~/monitoring/stores/utils';
-import * as urlUtils from '~/lib/utils/url_utility';
 import { annotationsData } from '../mock_data';
-import { NOT_IN_DB_PREFIX } from '~/monitoring/constants';
 
 const projectPath = 'gitlab-org/gitlab-test';
 
@@ -127,7 +127,7 @@ describe('mapToDashboardViewModel', () => {
 
     let dashboard;
 
-    const setupWithPanel = panel => {
+    const setupWithPanel = (panel) => {
       dashboard = {
         panel_groups: [
           {
@@ -340,7 +340,7 @@ describe('mapToDashboardViewModel', () => {
       ],
     });
 
-    const getMappedMetric = dashboard => {
+    const getMappedMetric = (dashboard) => {
       return mapToDashboardViewModel(dashboard).panelGroups[0].panels[0].metrics[0];
     };
 

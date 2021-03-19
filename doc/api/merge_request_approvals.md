@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, api
 ---
 
-# Merge request approvals API **(STARTER)**
+# Merge request approvals API **(PREMIUM)**
 
 Configuration for approvals on all Merge Requests (MR) in the project. Must be authenticated for all endpoints.
 
@@ -13,7 +13,8 @@ Configuration for approvals on all Merge Requests (MR) in the project. Must be a
 
 ### Get Configuration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in GitLab 10.6.
+> - Moved to GitLab Premium in 13.9.
 
 You can request information about a project's approval configuration using the
 following endpoint:
@@ -41,7 +42,8 @@ GET /projects/:id/approvals
 
 ### Change configuration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in GitLab 10.6.
+> - Moved to GitLab Premium in 13.9.
 
 If you are allowed to, you can change approval configuration using the following
 endpoint:
@@ -75,7 +77,8 @@ POST /projects/:id/approvals
 
 ### Get project-level rules
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 > - `protected_branches` property was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/460) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.7.
 
 You can request information about a project's approval rules using the following endpoint:
@@ -273,7 +276,8 @@ GET /projects/:id/approval_rules/:approval_rule_id
 
 ### Create project-level rule
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can create project approval rules using the following endpoint:
 
@@ -375,7 +379,8 @@ POST /projects/:id/approval_rules
 
 ### Update project-level rule
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can update project approval rules using the following endpoint:
 
@@ -383,7 +388,7 @@ You can update project approval rules using the following endpoint:
 PUT /projects/:id/approval_rules/:approval_rule_id
 ```
 
-**Important:** Approvers and groups not in the `users`/`groups` parameters will be **removed**
+**Important:** Approvers and groups not in the `users`/`groups` parameters are **removed**
 
 **Parameters:**
 
@@ -480,7 +485,8 @@ PUT /projects/:id/approval_rules/:approval_rule_id
 
 ### Delete project-level rule
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can delete project approval rules using the following endpoint:
 
@@ -497,7 +503,8 @@ DELETE /projects/:id/approval_rules/:approval_rule_id
 
 ### Change allowed approvers
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in GitLab 10.6.
+> - Moved to GitLab Premium in 13.9.
 
 NOTE:
 This API endpoint has been deprecated. Please use Approval Rule API instead.
@@ -509,7 +516,7 @@ the following endpoint:
 PUT /projects/:id/approvers
 ```
 
-**Important:** Approvers and groups not in the request will be **removed**
+**Important:** Approvers and groups not in the request are **removed**
 
 **Parameters:**
 
@@ -560,13 +567,128 @@ PUT /projects/:id/approvers
 }
 ```
 
+## External Project-level MR approvals **(ULTIMATE)**
+
+Configuration for approvals on a specific Merge Request which makes a call to an external HTTP resource.
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3869) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-external-project-level-mr-approvals). **(ULTIMATE SELF)**
+
+### Get project external approval rules **(ULTIMATE)**
+
+You can request information about a project's external approval rules using the following endpoint:
+
+```plaintext
+GET /projects/:id/external_approval_rules
+```
+
+**Parameters:**
+
+| Attribute           | Type    | Required | Description         |
+|---------------------|---------|----------|---------------------|
+| `id`                | integer | yes      | The ID of a project |
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Compliance Check",
+    "project_id": 6,
+    "external_url": "https://gitlab.com/example/test.json",
+    "protected_branches": [
+      {
+        "id": 14,
+        "project_id": 6,
+        "name": "master",
+        "created_at": "2020-10-12T14:04:50.787Z",
+        "updated_at": "2020-10-12T14:04:50.787Z",
+        "code_owner_approval_required": false
+      }
+    ]
+  }
+]
+```
+
+### Create external approval rule **(ULTIMATE)**
+
+You can create a new external approval rule for a project using the following endpoint:
+
+```plaintext
+POST /projects/:id/external_approval_rules
+```
+
+| Attribute              | Type           | Required | Description                                        |
+|------------------------|----------------|----------|----------------------------------------------------|
+| `id`                   | integer        | yes      | The ID of a project                                |
+| `name`                 | string         | yes      | Display name of approval rule                      |
+| `external_url`         | string         | yes      | URL of external approval resource                  |
+| `protected_branch_ids` | `array<Integer>` | no       | The ids of protected branches to scope the rule by |
+
+### Delete external approval rule **(ULTIMATE)**
+
+You can delete an external approval rule for a project using the following endpoint:
+
+```plaintext
+DELETE /projects/:id/external_approval_rules/:rule_id
+```
+
+| Attribute              | Type           | Required | Description                                        |
+|------------------------|----------------|----------|----------------------------------------------------|
+| `rule_id`              | integer        | yes      | The ID of an approval rule                         |
+| `id`                   | integer        | yes      | The ID of a project                                |
+
+### Update external approval rule **(ULTIMATE)**
+
+You can update an existing external approval rule for a project using the following endpoint:
+
+```plaintext
+PATCH /projects/:id/external_approval_rules/:rule_id
+```
+
+| Attribute              | Type           | Required | Description                                        |
+|------------------------|----------------|----------|----------------------------------------------------|
+| `id`                   | integer        | yes      | The ID of a project                                |
+| `rule_id`              | integer        | yes      | The ID of an external approval rule                |
+| `name`                 | string         | no       | Display name of approval rule                      |
+| `external_url`         | string         | no       | URL of external approval resource                  |
+| `protected_branch_ids` | `array<Integer>` | no       | The ids of protected branches to scope the rule by |
+
+### Enable or disable External Project-level MR approvals **(ULTIMATE SELF)**
+
+Enable or disable External Project-level MR approvals is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../user/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:ff_compliance_approval_gates)
+# For a single project
+Feature.enable(:ff_compliance_approval_gates, Project.find(<project id>))
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:ff_compliance_approval_gates)
+# For a single project
+Feature.disable(:ff_compliance_approval_gates, Project.find(<project id>))
+```
+
 ## Merge Request-level MR approvals
 
 Configuration for approvals on a specific Merge Request. Must be authenticated for all endpoints.
 
 ### Get Configuration
 
-> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 8.9.
+> - Introduced in GitLab 8.9.
+> - Moved to GitLab Premium in 13.9.
 
 You can request information about a merge request's approval status using the
 following endpoint:
@@ -612,7 +734,8 @@ GET /projects/:id/merge_requests/:merge_request_iid/approvals
 
 ### Change approval configuration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in GitLab 10.6.
+> - Moved to GitLab Premium in 13.9.
 
 If you are allowed to, you can change `approvals_required` using the following
 endpoint:
@@ -648,7 +771,8 @@ POST /projects/:id/merge_requests/:merge_request_iid/approvals
 
 ### Change allowed approvers for Merge Request
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in GitLab 10.6.
+> - Moved to GitLab Premium in 13.9.
 
 NOTE:
 This API endpoint has been deprecated. Please use Approval Rule API instead.
@@ -660,7 +784,7 @@ the following endpoint:
 PUT /projects/:id/merge_requests/:merge_request_iid/approvers
 ```
 
-**Important:** Approvers and groups not in the request will be **removed**
+**Important:** Approvers and groups not in the request are **removed**
 
 **Parameters:**
 
@@ -722,7 +846,8 @@ PUT /projects/:id/merge_requests/:merge_request_iid/approvers
 
 ### Get the approval state of merge requests
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13712) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13712) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can request information about a merge request's approval state by using the following endpoint:
 
@@ -730,8 +855,8 @@ You can request information about a merge request's approval state by using the 
 GET /projects/:id/merge_requests/:merge_request_iid/approval_state
 ```
 
-The `approval_rules_overwritten` will be `true` if the merge request level rules
-are created for the merge request. If there's none, it'll be `false`.
+The `approval_rules_overwritten` are `true` if the merge request level rules
+are created for the merge request. If there are none, it is `false`.
 
 This includes additional information about the users who have already approved
 (`approved_by`) and whether a rule is already approved (`approved`).
@@ -794,7 +919,8 @@ This includes additional information about the users who have already approved
 
 ### Get merge request level rules
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13712) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13712) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can request information about a merge request's approval rules using the following endpoint:
 
@@ -871,7 +997,8 @@ GET /projects/:id/merge_requests/:merge_request_iid/approval_rules
 
 ### Create merge request level rule
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can create merge request approval rules using the following endpoint:
 
@@ -892,8 +1019,8 @@ POST /projects/:id/merge_requests/:merge_request_iid/approval_rules
 | `group_ids`                | Array   | no       | The ids of groups as approvers                 |
 
 **Important:** When `approval_project_rule_id` is set, the `name`, `users` and
-`groups` of project-level rule will be copied. The `approvals_required` specified
-will be used.
+`groups` of project-level rule are copied. The `approvals_required` specified
+is used.
 
 ```json
 {
@@ -955,7 +1082,8 @@ will be used.
 
 ### Update merge request level rule
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can update merge request approval rules using the following endpoint:
 
@@ -963,7 +1091,7 @@ You can update merge request approval rules using the following endpoint:
 PUT /projects/:id/merge_requests/:merge_request_iid/approval_rules/:approval_rule_id
 ```
 
-**Important:** Approvers and groups not in the `users`/`groups` parameters will be **removed**
+**Important:** Approvers and groups not in the `users`/`groups` parameters are **removed**
 
 **Important:** Updating a `report_approver` or `code_owner` rule is not allowed.
 These are system generated rules.
@@ -1040,7 +1168,8 @@ These are system generated rules.
 
 ### Delete merge request level rule
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in GitLab 12.3.
+> - Moved to GitLab Premium in 13.9.
 
 You can delete merge request approval rules using the following endpoint:
 
@@ -1061,7 +1190,8 @@ These are system generated rules.
 
 ## Approve Merge Request
 
-> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 8.9.
+> - Introduced in GitLab 8.9.
+> - Moved to GitLab Premium in 13.9.
 
 If you are allowed to, you can approve a merge request using the following
 endpoint:
@@ -1077,12 +1207,12 @@ POST /projects/:id/merge_requests/:merge_request_iid/approve
 | `id`                | integer | yes      | The ID of a project     |
 | `merge_request_iid` | integer | yes      | The IID of MR           |
 | `sha`               | string  | no       | The HEAD of the MR      |
-| `approval_password` **(STARTER)** | string  | no      | Current user's password. Required if [**Require user password to approve**](../user/project/merge_requests/merge_request_approvals.md#require-authentication-when-approving-a-merge-request) is enabled in the project settings. |
+| `approval_password` **(PREMIUM)** | string  | no      | Current user's password. Required if [**Require user password to approve**](../user/project/merge_requests/merge_request_approvals.md#require-authentication-when-approving-a-merge-request) is enabled in the project settings. |
 
 The `sha` parameter works in the same way as
 when [accepting a merge request](merge_requests.md#accept-mr): if it is passed, then it must
 match the current HEAD of the merge request for the approval to be added. If it
-does not match, the response code will be `409`.
+does not match, the response code is `409`.
 
 ```json
 {
@@ -1124,7 +1254,8 @@ does not match, the response code will be `409`.
 
 ## Unapprove Merge Request
 
->Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 9.0.
+> - Introduced in GitLab 9.0.
+> - Moved to GitLab Premium in 13.9.
 
 If you did approve a merge request, you can unapprove it using the following
 endpoint:

@@ -11,20 +11,20 @@ RSpec.describe Security::Finding do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:project_fingerprint) }
-    it { is_expected.to validate_presence_of(:position) }
     it { is_expected.to validate_length_of(:project_fingerprint).is_at_most(40) }
+    it { is_expected.to validate_presence_of(:uuid) }
   end
 
   describe 'delegations' do
     it { is_expected.to delegate_method(:scan_type).to(:scan).allow_nil }
   end
 
-  describe '.by_position' do
-    let!(:finding_1) { create(:security_finding, position: 0) }
-    let!(:finding_2) { create(:security_finding, position: 1) }
+  describe '.by_uuid' do
+    let!(:finding_1) { create(:security_finding) }
+    let!(:finding_2) { create(:security_finding) }
     let(:expected_findings) { [finding_1] }
 
-    subject { described_class.by_position(finding_1.position) }
+    subject { described_class.by_uuid(finding_1.uuid) }
 
     it { is_expected.to match_array(expected_findings) }
   end
@@ -128,5 +128,22 @@ RSpec.describe Security::Finding do
     subject { described_class.deduplicated }
 
     it { is_expected.to eq(expected_findings) }
+  end
+
+  describe '.count_by_scan_type' do
+    let!(:sast_scan) { create(:security_scan, scan_type: :sast) }
+    let!(:dast_scan) { create(:security_scan, scan_type: :dast) }
+    let!(:finding_1) { create(:security_finding, scan: sast_scan) }
+    let!(:finding_2) { create(:security_finding, scan: sast_scan) }
+    let!(:finding_3) { create(:security_finding, scan: dast_scan) }
+
+    subject { described_class.count_by_scan_type }
+
+    it {
+      is_expected.to eq({
+        Security::Scan.scan_types['dast'] => 1,
+        Security::Scan.scan_types['sast'] => 2
+      })
+    }
   end
 end

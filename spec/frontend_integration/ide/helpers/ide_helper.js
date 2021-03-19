@@ -25,6 +25,9 @@ export const getStatusBar = () => document.querySelector('.ide-status-bar');
 export const waitForMonacoEditor = () =>
   new Promise((resolve) => window.monaco.editor.onDidCreateEditor(resolve));
 
+export const waitForEditorModelChange = (instance) =>
+  new Promise((resolve) => instance.onDidChangeModel(resolve));
+
 export const findMonacoEditor = () =>
   screen.findAllByLabelText(/Editor content;/).then(([x]) => x.closest('.monaco-editor'));
 
@@ -69,7 +72,7 @@ const openFileRow = (row) => {
   row.click();
 };
 
-const findAndTraverseToPath = async (path, index = 0, row = null) => {
+export const findAndTraverseToPath = async (path, index = 0, row = null) => {
   if (!path) {
     return row;
   }
@@ -110,6 +113,12 @@ const findAndClickRootAction = async (name) => {
   button.click();
 };
 
+/**
+ * Drop leading "/-/ide" and file path from the current URL
+ */
+export const getBaseRoute = (url = window.location.pathname) =>
+  url.replace(/^\/-\/ide/, '').replace(/\/-\/.*$/, '');
+
 export const clickPreviewMarkdown = () => {
   screen.getByText('Preview Markdown').click();
 };
@@ -138,6 +147,11 @@ export const createFile = async (path, content) => {
   await findAndSetEditorValue(content);
 };
 
+export const updateFile = async (path, content) => {
+  await openFile(path);
+  await findAndSetEditorValue(content);
+};
+
 export const getFilesList = () => {
   return screen.getAllByTestId('file-row-name-container').map((e) => e.textContent.trim());
 };
@@ -162,11 +176,33 @@ export const closeFile = async (path) => {
   button.click();
 };
 
-export const commit = async () => {
+/**
+ * Fill out and submit the commit form in the Web IDE
+ *
+ * @param {Object} options - Used to fill out the commit form in the IDE
+ * @param {Boolean} options.newBranch - Flag for the "Create a new branch" radio.
+ * @param {Boolean} options.newMR - Flag for the "Start a new merge request" checkbox.
+ * @param {String} options.newBranchName - Value to put in the new branch name input field. The Web IDE supports leaving this field blank.
+ */
+export const commit = async ({ newBranch = false, newMR = false, newBranchName = '' } = {}) => {
   switchLeftSidebarTab('Commit');
   screen.getByTestId('begin-commit-button').click();
 
-  await screen.findByLabelText(/Commit to .+ branch/).then((x) => x.click());
+  if (!newBranch) {
+    const option = await screen.findByLabelText(/Commit to .+ branch/);
+    option.click();
+  } else {
+    const option = await screen.findByLabelText('Create a new branch');
+    option.click();
+
+    const branchNameInput = await screen.findByTestId('ide-new-branch-name');
+    fireEvent.input(branchNameInput, { target: { value: newBranchName } });
+
+    const mrCheck = await screen.findByLabelText('Start a new merge request');
+    if (Boolean(mrCheck.checked) !== newMR) {
+      mrCheck.click();
+    }
+  }
 
   screen.getByText('Commit').click();
 };

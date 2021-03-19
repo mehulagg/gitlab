@@ -4,7 +4,7 @@ group: Optimize
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Usage Trends **(CORE)**
+# Usage Trends **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235754) in GitLab 13.5 behind a feature flag, disabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46962) in GitLab 13.6.
@@ -40,22 +40,3 @@ in the categories shown in [Total counts](#total-counts).
 These charts help you visualize how rapidly these records are being created on your instance.
 
 ![Instance Activity Pipelines chart](img/instance_activity_pipelines_chart_v13_6.png)
-
-### Enable or disable Usage Trends
-
-In GitLab version 13.5 only, Usage Trends was under development and not ready for production use.
-It was deployed behind a feature flag that was **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:instance_statistics)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:instance_statistics)
-```

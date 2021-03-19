@@ -8,14 +8,15 @@ import {
   AJAX_USERS_SELECT_OPTIONS_MAP,
   AJAX_USERS_SELECT_PARAMS_MAP,
 } from 'ee_else_ce/users_select/constants';
-import axios from '../lib/utils/axios_utils';
-import { s__, __, sprintf } from '../locale';
-import ModalStore from '../boards/stores/modal_store';
-import { parseBoolean, spriteIcon } from '../lib/utils/common_utils';
-import { getAjaxUsersSelectOptions, getAjaxUsersSelectParams } from './utils';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import { isUserBusy } from '~/set_status_modal/utils';
 import { fixTitle, dispose } from '~/tooltips';
+import ModalStore from '../boards/stores/modal_store';
+import axios from '../lib/utils/axios_utils';
+import { parseBoolean, spriteIcon } from '../lib/utils/common_utils';
 import { loadCSSFile } from '../lib/utils/css_utils';
+import { s__, __, sprintf } from '../locale';
+import { getAjaxUsersSelectOptions, getAjaxUsersSelectParams } from './utils';
 
 // TODO: remove eventHub hack after code splitting refactor
 window.emitSidebarEvent = window.emitSidebarEvent || $.noop;
@@ -145,14 +146,14 @@ function UsersSelect(currentUser, els, options = {}) {
     };
 
     const getMultiSelectDropdownTitle = function (selectedUser, isSelected) {
-      const selectedUsers = getSelected().filter(u => u !== 0);
+      const selectedUsers = getSelected().filter((u) => u !== 0);
 
       const firstUser = getSelectedUserInputs()
         .map((index, input) => ({
           name: input.dataset.meta,
           value: parseInt(input.value, 10),
         }))
-        .filter(u => u.id !== 0)
+        .filter((u) => u.id !== 0)
         .get(0);
 
       if (selectedUsers.length === 0) {
@@ -160,7 +161,7 @@ function UsersSelect(currentUser, els, options = {}) {
       } else if (selectedUsers.length === 1) {
         return firstUser.name;
       } else if (isSelected) {
-        const otherSelected = selectedUsers.filter(s => s !== selectedUser.id);
+        const otherSelected = selectedUsers.filter((s) => s !== selectedUser.id);
         return sprintf(s__('UsersSelect|%{name} + %{length} more'), {
           name: selectedUser.name,
           length: otherSelected.length,
@@ -172,7 +173,7 @@ function UsersSelect(currentUser, els, options = {}) {
       });
     };
 
-    $assignToMeLink.on('click', e => {
+    $assignToMeLink.on('click', (e) => {
       e.preventDefault();
       $(e.currentTarget).hide();
 
@@ -196,7 +197,7 @@ function UsersSelect(currentUser, els, options = {}) {
       }
     });
 
-    $block.on('click', '.js-assign-yourself', e => {
+    $block.on('click', '.js-assign-yourself', (e) => {
       e.preventDefault();
       return assignTo(userSelect.currentUser.id);
     });
@@ -250,7 +251,7 @@ function UsersSelect(currentUser, els, options = {}) {
     return initDeprecatedJQueryDropdown($dropdown, {
       showMenuAbove,
       data(term, callback) {
-        return userSelect.users(term, options, users => {
+        return userSelect.users(term, options, (users) => {
           // GitLabDropdownFilter returns this.instance
           // GitLabDropdownRemote returns this.options.instance
           const deprecatedJQueryDropdown = this.instance || this.options.instance;
@@ -266,14 +267,14 @@ function UsersSelect(currentUser, els, options = {}) {
 
           // Potential duplicate entries when dealing with issue board
           // because issue board is also managed by vue
-          const selectedUsers = uniqBy(selectedInputs, a => a.value)
-            .filter(input => {
+          const selectedUsers = uniqBy(selectedInputs, (a) => a.value)
+            .filter((input) => {
               const userId = parseInt(input.value, 10);
-              const inUsersArray = users.find(u => u.id === userId);
+              const inUsersArray = users.find((u) => u.id === userId);
 
               return !inUsersArray && userId !== 0;
             })
-            .map(input => {
+            .map((input) => {
               const userId = parseInt(input.value, 10);
               const { avatarUrl, avatar_url, name, username, canMerge } = input.dataset;
               return {
@@ -334,7 +335,7 @@ function UsersSelect(currentUser, els, options = {}) {
           }
 
           if ($dropdown.hasClass('js-multiselect')) {
-            const selected = getSelected().filter(i => i !== 0);
+            const selected = getSelected().filter((i) => i !== 0);
 
             if (selected.length > 0) {
               if ($dropdown.data('dropdownHeader')) {
@@ -346,12 +347,12 @@ function UsersSelect(currentUser, els, options = {}) {
               }
 
               const selectedUsers = users
-                .filter(u => selected.indexOf(u.id) !== -1)
+                .filter((u) => selected.indexOf(u.id) !== -1)
                 .sort((a, b) => a.name > b.name);
 
-              users = users.filter(u => selected.indexOf(u.id) === -1);
+              users = users.filter((u) => selected.indexOf(u.id) === -1);
 
-              selectedUsers.forEach(selectedUser => {
+              selectedUsers.forEach((selectedUser) => {
                 showDivider += 1;
                 users.splice(showDivider, 0, selectedUser);
               });
@@ -477,7 +478,7 @@ function UsersSelect(currentUser, els, options = {}) {
             }
           }
 
-          if (getSelected().find(u => u === gon.current_user_id)) {
+          if (getSelected().find((u) => u === gon.current_user_id)) {
             $assignToMeLink.hide();
           } else {
             $assignToMeLink.show();
@@ -544,7 +545,7 @@ function UsersSelect(currentUser, els, options = {}) {
         }
 
         if (selected.length > 0) {
-          getSelected().forEach(selectedId => highlightSelected(selectedId));
+          getSelected().forEach((selectedId) => highlightSelected(selectedId));
         } else if ($dropdown.hasClass('js-issue-board-sidebar')) {
           highlightSelected(0);
         } else {
@@ -559,7 +560,7 @@ function UsersSelect(currentUser, els, options = {}) {
         let selected = false;
 
         if (this.multiSelect) {
-          selected = getSelected().find(u => user.id === u);
+          selected = getSelected().find((u) => user.id === u);
 
           const { fieldName } = this;
           const field = $dropdown
@@ -613,7 +614,7 @@ function UsersSelect(currentUser, els, options = {}) {
                 multiple: $(select).hasClass('multiselect'),
                 minimumInputLength: 0,
                 query(query) {
-                  return userSelect.users(query.term, options, users => {
+                  return userSelect.users(query.term, options, (users) => {
                     let name;
                     const data = {
                       results: users,
@@ -795,13 +796,17 @@ UsersSelect.prototype.renderRow = function (
     ? `data-container="body" data-placement="left" data-title="${tooltip}"`
     : '';
 
+  const name =
+    user?.availability && isUserBusy(user.availability)
+      ? sprintf(__('%{name} (Busy)'), { name: user.name })
+      : user.name;
   return `
     <li data-user-id=${user.id}>
       <a href="#" class="dropdown-menu-user-link d-flex align-items-center ${linkClasses}" ${tooltipAttributes}>
         ${this.renderRowAvatar(issuableType, user, img)}
         <span class="d-flex flex-column overflow-hidden">
           <strong class="dropdown-menu-user-full-name gl-font-weight-bold">
-            ${escape(user.name)}
+            ${escape(name)}
           </strong>
           ${
             username
@@ -834,7 +839,7 @@ UsersSelect.prototype.renderRowAvatar = function (issuableType, user, img) {
 UsersSelect.prototype.renderApprovalRules = function (elsClassName, approvalRules = []) {
   const count = approvalRules.length;
 
-  if (!gon.features?.reviewerApprovalRules || !elsClassName?.includes('reviewer') || !count) {
+  if (!elsClassName?.includes('reviewer') || !count) {
     return '';
   }
 

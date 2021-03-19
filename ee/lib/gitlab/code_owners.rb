@@ -22,6 +22,16 @@ module Gitlab
       Loader.new(project, ref, []).code_owners_sections
     end
 
+    # @param project [Project]
+    # @param ref [String]
+    # @param section [String]
+    # Checks whether all entries are optional
+    def self.optional_section?(project, ref, section)
+      return false unless project.feature_available?(:code_owners)
+
+      Loader.new(project, ref, []).optional_section?(section)
+    end
+
     # @param merge_request [MergeRequest]
     # @param merge_request_diff [MergeRequestDiff]
     #   Find code owners entries at a particular MergeRequestDiff.

@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Managed Apps
+# GitLab Managed Apps **(FREE)**
 
 GitLab provides **GitLab Managed Apps** for various
 applications which can be added directly to your configured cluster. These
@@ -20,10 +20,9 @@ have been deprecated, and are scheduled for removal in GitLab 14.0.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20822) in GitLab 12.6.
 
 WARNING:
-This is an _alpha_ feature, and is subject to change at any time without
-prior notice.
+This is a _beta_ feature, and some applications might miss features to provide full integration with GitLab.
 
-This alternative method allows users to install GitLab-managed
+This primary method for installing applications to clusters allows users to install GitLab-managed
 applications using GitLab CI/CD. It also allows customization of the
 install using Helm `values.yaml` files.
 
@@ -87,10 +86,9 @@ is saved as a [CI job artifact](../../ci/pipelines/job_artifacts.md).
 
 #### Usage in GitLab versions earlier than 13.5
 
-For GitLab versions 13.5 and below, the Ingress, Fluentd, Prometheus,
-and Sentry apps are fetched from the central Helm
-[stable repository](https://kubernetes-charts.storage.googleapis.com/). This repository
-[was deleted](https://github.com/helm/charts#deprecation-timeline)
+For GitLab versions 13.5 and earlier, the Ingress, Fluentd, Prometheus, and Sentry
+apps were fetched from the central Helm stable repository (`https://kubernetes-charts.storage.googleapis.com/`).
+This repository [was deleted](https://github.com/helm/charts#deprecation-timeline)
 on November 13, 2020. This causes the installation CI/CD pipeline to
 fail. Upgrade to GitLab 13.6, or alternatively, you can
 use the following `.gitlab-ci.yml`, which has been tested on GitLab 13.5:
@@ -100,7 +98,7 @@ include:
   - template: Managed-Cluster-Applications.gitlab-ci.yml
 
 apply:
-  image: "registry.gitlab.com/gitlab-org/cluster-integration/cluster-applications:v0.34.1"
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/cluster-applications:v0.37.0"
 ```
 
 ### Use the template with a custom environment
@@ -373,7 +371,7 @@ For GitLab Runner to function, you _must_ specify the following:
 - `runnerRegistrationToken`: The registration token for adding new runners to GitLab.
   This must be [retrieved from your GitLab instance](../../ci/runners/README.md).
 
-These values can be specified using [CI variables](../../ci/variables/README.md):
+These values can be specified using [CI/CD variables](../../ci/variables/README.md):
 
 - `GITLAB_RUNNER_GITLAB_URL` is used for `gitlabUrl`.
 - `GITLAB_RUNNER_REGISTRATION_TOKEN` is used for `runnerRegistrationToken`
@@ -417,6 +415,8 @@ You can check the recommended variables for each cluster type in the official do
 
 - [Google GKE](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-gke/#deploy-cilium)
 - [AWS EKS](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-eks/#deploy-cilium)
+
+Do not use `clusterType` for sandbox environments like [Minikube](https://minikube.sigs.k8s.io/docs/).
 
 You can customize Cilium's Helm variables by defining the
 `.gitlab/managed-apps/cilium/values.yaml` file in your cluster
@@ -729,7 +729,7 @@ Set:
 - "Redirect URI" to `http://<JupyterHub Host>/hub/oauth_callback`.
 - "Scope" to `api read_repository write_repository`.
 
-In addition, the following variables must be specified using [CI variables](../../ci/variables/README.md):
+In addition, the following variables must be specified using [CI/CD variables](../../ci/variables/README.md):
 
 - `JUPYTERHUB_PROXY_SECRET_TOKEN` - Secure string used for signing communications
   from the hub. Read [`proxy.secretToken`](https://zero-to-jupyterhub.readthedocs.io/en/stable/reference/reference.html#proxy-secrettoken).
@@ -1199,53 +1199,8 @@ determine the endpoint of your Ingress or Knative application, you can
 
 #### Determining the external endpoint manually
 
-If the cluster is on GKE, click the **Google Kubernetes Engine** link in the
-**Advanced settings**, or go directly to the
-[Google Kubernetes Engine dashboard](https://console.cloud.google.com/kubernetes/)
-and select the proper project and cluster. Then click **Connect** and execute
-the `gcloud` command in a local terminal or using the **Cloud Shell**.
-
-If the cluster is not on GKE, follow the specific instructions for your
-Kubernetes provider to configure `kubectl` with the right credentials.
-The output of the following examples show the external endpoint of your
-cluster. This information can then be used to set up DNS entries and forwarding
-rules that allow external access to your deployed applications.
-
-- If you installed Ingress using the **Applications**, run the following
-  command:
-
-  ```shell
-  kubectl get service --namespace=gitlab-managed-apps ingress-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-  ```
-
-- Some Kubernetes clusters return a hostname instead, like
-  [Amazon EKS](https://aws.amazon.com/eks/). For these platforms, run:
-
-  ```shell
-  kubectl get service --namespace=gitlab-managed-apps ingress-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-  ```
-
-  If EKS is used, an [Elastic Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/)
-  is also created, which incurs additional AWS costs.
-
-- For Istio/Knative, the command is different:
-
-  ```shell
-  kubectl get svc --namespace=istio-system istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip} '
-  ```
-
-- Otherwise, you can list the IP addresses of all load balancers:
-
-  ```shell
-  kubectl get svc --all-namespaces -o jsonpath='{range.items[?(@.status.loadBalancer.ingress)]}{.status.loadBalancer.ingress[*].ip} '
-  ```
-
-You may see a trailing `%` on some Kubernetes versions. Do not include it.
-
-The Ingress is now available at this address, and routes incoming requests to
-the proper service based on the DNS name in the request. To support this, create
-a wildcard DNS CNAME record for the desired domain name. For example,
-`*.myekscluster.com` would point to the Ingress hostname obtained earlier.
+See the [Base domain section](../project/clusters/index.md#base-domain) for a
+guide on how to determine the external endpoint manually.
 
 #### Using a static IP
 
@@ -1513,7 +1468,7 @@ Kubernetes API, giving you access to more advanced querying capabilities. Log
 data is deleted after 30 days, using [Curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/5.5/about.html).
 
 The Elastic Stack cluster application is intended as a log aggregation solution
-and is not related to our [Advanced Search](../search/advanced_global_search.md)
+and is not related to our [Advanced Search](../search/advanced_search.md)
 functionality, which uses a separate Elasticsearch cluster.
 
 To enable log shipping:
@@ -1699,3 +1654,17 @@ Error: Could not get apiVersions from Kubernetes: unable to retrieve the complet
 
 This is a bug that was introduced in Helm `2.15` and fixed in `3.0.2`. As a workaround,
 ensure [`cert-manager`](#cert-manager) is installed successfully prior to installing Prometheus.
+
+### Unable to create a Persistent Volume Claim with DigitalOcean
+
+Trying to create additional block storage volumes might lead to the following error when using DigitalOcean:
+
+```plaintext
+Server requested
+[Warning] pod has unbound immediate PersistentVolumeClaims (repeated 2 times)
+[Normal] pod didn't trigger scale-up (it wouldn't fit if a new node is added):
+Spawn failed: Timeout
+```
+
+This is due to DigitalOcean imposing a few limits with regards to creating additional block storage volumes.
+[Learn more about DigitalOcean Block Storage Volumes limits.](https://www.digitalocean.com/docs/volumes/#limits)

@@ -5,6 +5,7 @@ module Gitlab
     class CronManager
       COMMON_JOBS = %w[
         geo_metrics_update_worker
+        geo_verification_cron_worker
         repository_check_worker
       ].freeze
 
@@ -20,6 +21,7 @@ module Gitlab
         geo_container_repository_sync_worker
         geo_repository_verification_secondary_scheduler_worker
         geo_secondary_registry_consistency_worker
+        geo_secondary_usage_data_cron_worker
       ].freeze
 
       GEO_JOBS = (COMMON_JOBS + PRIMARY_JOBS + SECONDARY_JOBS).freeze

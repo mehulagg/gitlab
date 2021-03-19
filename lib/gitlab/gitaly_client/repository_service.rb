@@ -70,10 +70,11 @@ module Gitlab
         end.join
       end
 
-      def fetch_remote(remote, ssh_auth:, forced:, no_tags:, timeout:, prune: true)
+      def fetch_remote(remote, ssh_auth:, forced:, no_tags:, timeout:, prune: true, check_tags_changed: false)
         request = Gitaly::FetchRemoteRequest.new(
           repository: @gitaly_repo, remote: remote, force: forced,
-          no_tags: no_tags, timeout: timeout, no_prune: !prune
+          no_tags: no_tags, timeout: timeout, no_prune: !prune,
+          check_tags_changed: check_tags_changed
         )
 
         if ssh_auth&.ssh_mirror_url?
@@ -336,6 +337,11 @@ module Gitlab
         request = Gitaly::SearchFilesByContentRequest.new(repository: @gitaly_repo, ref: ref, query: query)
         response = GitalyClient.call(@storage, :repository_service, :search_files_by_content, request, timeout: GitalyClient.default_timeout)
         search_results_from_response(response, options)
+      end
+
+      def search_files_by_regexp(ref, filter)
+        request = Gitaly::SearchFilesByNameRequest.new(repository: @gitaly_repo, ref: ref, query: '.', filter: filter)
+        GitalyClient.call(@storage, :repository_service, :search_files_by_name, request, timeout: GitalyClient.fast_timeout).flat_map(&:files)
       end
 
       def disconnect_alternates

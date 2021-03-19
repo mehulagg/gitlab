@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 import { mockTracking, triggerEvent } from 'helpers/tracking_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import IssuableLockForm from '~/sidebar/components/lock/issuable_lock_form.vue';
-import EditForm from '~/sidebar/components/lock/edit_form.vue';
-import createStore from '~/notes/stores';
 import { createStore as createMrStore } from '~/mr_notes/stores';
+import createStore from '~/notes/stores';
+import EditForm from '~/sidebar/components/lock/edit_form.vue';
+import IssuableLockForm from '~/sidebar/components/lock/issuable_lock_form.vue';
 import { ISSUABLE_TYPE_ISSUE, ISSUABLE_TYPE_MR } from './constants';
 
 describe('IssuableLockForm', () => {
@@ -12,7 +12,7 @@ describe('IssuableLockForm', () => {
   let store;
   let issuableType; // Either ISSUABLE_TYPE_ISSUE or ISSUABLE_TYPE_MR
 
-  const setIssuableType = pageType => {
+  const setIssuableType = (pageType) => {
     issuableType = pageType;
   };
 
@@ -23,7 +23,7 @@ describe('IssuableLockForm', () => {
   const findSidebarLockStatusTooltip = () =>
     getBinding(findSidebarCollapseIcon().element, 'gl-tooltip');
 
-  const initStore = isLocked => {
+  const initStore = (isLocked) => {
     if (issuableType === ISSUABLE_TYPE_ISSUE) {
       store = createStore();
       store.getters.getNoteableData.targetType = 'issue';

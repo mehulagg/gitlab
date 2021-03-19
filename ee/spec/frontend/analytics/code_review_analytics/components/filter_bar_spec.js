@@ -102,10 +102,10 @@ describe('Filter bar', () => {
   });
 
   const findFilteredSearch = () => wrapper.find(FilteredSearchBar);
-  const getSearchToken = type =>
+  const getSearchToken = (type) =>
     findFilteredSearch()
       .props('tokens')
-      .find(token => token.type === type);
+      .find((token) => token.type === type);
 
   describe('default', () => {
     beforeEach(() => {

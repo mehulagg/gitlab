@@ -6,6 +6,7 @@ RSpec.describe Notes::QuickActionsService do
   let(:project) { create(:project, group: group) }
   let(:user) { create(:user) }
   let(:assignee) { create(:user) }
+  let(:reviewer) { create(:user) }
   let(:issue) { create(:issue, project: project) }
   let(:epic) { create(:epic, group: group)}
 
@@ -267,6 +268,35 @@ RSpec.describe Notes::QuickActionsService do
     end
   end
 
+  describe '/assign_reviewer' do
+    let(:note_text) { %(/assign_reviewer @#{user.username} @#{reviewer.username}\n) }
+
+    let(:multiline_assign_reviewer_text) do
+      <<~HEREDOC
+      /assign_reviewer @#{user.username}
+      /assign_reviewer @#{reviewer.username})
+      HEREDOC
+    end
+
+    before do
+      project.add_maintainer(reviewer)
+      project.add_maintainer(user)
+    end
+
+    context 'with a merge request' do
+      let(:note) { create(:note_on_merge_request, note: note_text, project: project) }
+
+      it_behaves_like 'assigns one or more reviewers to the merge request', multiline: false do
+        let(:target) { note.noteable }
+      end
+
+      it_behaves_like 'assigns one or more reviewers to the merge request', multiline: true do
+        let(:note) { create(:note_on_merge_request, note: multiline_assign_reviewer_text, project: project) }
+        let(:target) { note.noteable }
+      end
+    end
+  end
+
   describe '/assign' do
     let(:note_text) { %(/assign @#{user.username} @#{assignee.username}\n) }
     let(:multiline_assign_note_text) { %(/assign @#{user.username}\n/assign @#{assignee.username}) }
@@ -341,6 +371,35 @@ RSpec.describe Notes::QuickActionsService do
 
       it_behaves_like 'unassigning a not assigned user', true do
         let(:note) { create(:note_on_merge_request, note: multiline_unassign_note_text, project: project) }
+        let(:target) { note.noteable }
+      end
+    end
+  end
+
+  describe '/unassign_reviewer' do
+    let(:note_text) { %(/unassign_reviewer @#{reviewer.username} @#{user.username}\n) }
+
+    let(:multiline_unassign_reviewer_note_text) do
+      <<~HEREDOC
+      /unassign_reviewer @#{reviewer.username}
+      /unassign_reviewer @#{user.username}
+      HEREDOC
+    end
+
+    before do
+      project.add_maintainer(user)
+      project.add_maintainer(reviewer)
+    end
+
+    context 'with a merge request' do
+      let(:note) { create(:note_on_merge_request, note: note_text, project: project) }
+
+      it_behaves_like 'unassigning one or more reviewers', multiline: false do
+        let(:target) { note.noteable }
+      end
+
+      it_behaves_like 'unassigning one or more reviewers', multiline: true do
+        let(:note) { create(:note_on_merge_request, note: multiline_unassign_reviewer_note_text, project: project) }
         let(:target) { note.noteable }
       end
     end

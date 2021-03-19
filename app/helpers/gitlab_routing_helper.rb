@@ -4,6 +4,8 @@
 module GitlabRoutingHelper
   extend ActiveSupport::Concern
 
+  include ::ProjectsHelper
+  include ::ApplicationSettingsHelper
   include API::Helpers::RelatedResourcesHelpers
   included do
     Gitlab::Routing.includes_helpers(self)
@@ -345,6 +347,11 @@ module GitlabRoutingHelper
 
   def wiki_page_path(wiki, page, **options)
     Gitlab::UrlBuilder.wiki_page_url(wiki, page, only_path: true, **options)
+  end
+
+  # GraphQL ETag routes
+  def graphql_etag_pipeline_path(pipeline)
+    [api_graphql_path, "pipelines/id/#{pipeline.id}"].join(':')
   end
 
   private

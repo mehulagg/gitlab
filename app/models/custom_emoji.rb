@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 class CustomEmoji < ApplicationRecord
+  NAME_REGEXP = /[a-z0-9_-]+/.freeze
+
   belongs_to :namespace, inverse_of: :custom_emoji
 
   belongs_to :group, -> { where(type: 'Group') }, foreign_key: 'namespace_id'
+  belongs_to :creator, class_name: "User", inverse_of: :created_custom_emoji
 
   # For now only external emoji are supported. See https://gitlab.com/gitlab-org/gitlab/-/issues/230467
   validates :external, inclusion: { in: [true] }
@@ -13,11 +16,17 @@ class CustomEmoji < ApplicationRecord
   validate :valid_emoji_name
 
   validates :group, presence: true
+  validates :creator, presence: true
   validates :name,
     uniqueness: { scope: [:namespace_id, :name] },
     presence: true,
     length: { maximum: 36 },
-    format: { with: /\A[a-z0-9][a-z0-9\-_]*[a-z0-9]\z/ }
+
+    format: { with: /\A#{NAME_REGEXP}\z/ }
+
+  scope :by_name, -> (names) { where(name: names) }
+
+  alias_attribute :url, :file # this might need a change in https://gitlab.com/gitlab-org/gitlab/-/issues/230467
 
   private
 

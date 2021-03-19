@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :admin do
   resources :users, constraints: { id: %r{[a-zA-Z./0-9_\-]+} } do
     resources :keys, only: [:show, :destroy]
@@ -93,7 +95,8 @@ namespace :admin do
 
   resources :projects, only: [:index]
 
-  resources :instance_statistics, only: :index
+  get '/instance_statistics', to: redirect('admin/usage_trends')
+  resources :usage_trends, only: :index
   resource :dev_ops_report, controller: 'dev_ops_report', only: :show
   resources :cohorts, only: :index
 

@@ -6,7 +6,7 @@ import { createAuditEventSearchQuery } from '../utils';
  * @param {string} exportUrl
  * @returns {string}
  */
-export const buildExportHref = state => exportUrl => {
+export const buildExportHref = (state) => (exportUrl) => {
   return setUrlParams(
     createAuditEventSearchQuery({
       filterValue: state.filterValue,

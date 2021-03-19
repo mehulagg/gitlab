@@ -10,15 +10,17 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import produce from 'immer';
-import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
+import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import getAlerts from '~/graphql_shared/queries/get_alerts.query.graphql';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
+import { joinPaths } from '~/lib/utils/url_utility';
+import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
+import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
 
 export default {
   PAGE_SIZE,
+  DOMAIN,
   i18n: {
     FIELDS,
     MESSAGES,
@@ -42,18 +44,19 @@ export default {
   inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
-      query: getAlerts,
+      query: getAlertsQuery,
       variables() {
         return {
           firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,
+          domain: this.$options.DOMAIN,
           ...this.filters,
         };
       },
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
       result({ data }) {
-        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo;
+        this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo || {};
       },
       error() {
         this.errored = true;
@@ -99,8 +102,7 @@ export default {
         this.$apollo.queries.alerts.fetchMore({
           variables: { nextPageCursor: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, draftData => {
-              // eslint-disable-next-line no-param-reassign
+            const results = produce(fetchMoreResult, (draftData) => {
               draftData.project.alertManagementAlerts.nodes = [
                 ...previousResult.project.alertManagementAlerts.nodes,
                 ...draftData.project.alertManagementAlerts.nodes,
@@ -127,12 +129,15 @@ export default {
     handleStatusUpdate() {
       this.$apollo.queries.alerts.refetch();
     },
+    alertDetailsUrl({ iid }) {
+      return joinPaths(window.location.pathname, 'alerts', iid);
+    },
   },
 };
 </script>
 <template>
   <div>
-    <alert-filters @filter-change="handleFilterChange" />
+    <alert-filters :filters="filters" @filter-change="handleFilterChange" />
     <gl-alert v-if="showNoAlertsMsg" data-testid="threat-alerts-unconfigured" :dismissible="false">
       <gl-sprintf :message="$options.i18n.MESSAGES.CONFIGURE">
         <template #link="{ content }">
@@ -177,12 +182,19 @@ export default {
       </template>
 
       <template #cell(alertLabel)="{ item }">
-        <div
-          class="gl-word-break-all"
+        <gl-link
+          class="gl-word-break-all gl-text-body!"
           :title="`${item.iid} - ${item.title}`"
+          :href="alertDetailsUrl(item)"
           data-testid="threat-alerts-id"
         >
           {{ item.title }}
+        </gl-link>
+      </template>
+
+      <template #cell(eventCount)="{ item }">
+        <div data-testid="threat-alerts-event-count">
+          {{ item.eventCount }}
         </div>
       </template>
 

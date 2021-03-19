@@ -232,6 +232,7 @@ RSpec.describe SearchHelper do
         '<a href="#" onclick="alert(\'XSS\')">Click Me test</a>'               | { 1 => { description: ['<a href="#" onclick="alert(\'XSS\')">Click Me gitlabelasticsearch→test←gitlabelasticsearch</a>'] } } | "<a href='#'>Click Me <span class='gl-text-gray-900 gl-font-weight-bold'>test</span></a>"
         '<script type="text/javascript">alert(\'Another XSS\');</script> test' | { 1 => { description: ['<script type="text/javascript">alert(\'Another XSS\');</script> gitlabelasticsearch→test←gitlabelasticsearch'] } } | "alert(&apos;Another XSS&apos;); <span class='gl-text-gray-900 gl-font-weight-bold'>test</span>"
         'Lorem test ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.' | { 1 => { description: ['Lorem gitlabelasticsearch→test←gitlabelasticsearch ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec.'] } } | "Lorem <span class='gl-text-gray-900 gl-font-weight-bold'>test</span> ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Don..."
+        '<img src="https://random.foo.com/test.png" width="128" height="128" />some image' | { 1 => { description: ['<img src="https://random.foo.com/gitlabelasticsearch→test←gitlabelasticsearch.png" width="128" height="128" />some image'] } } | 'some image'
       end
 
       with_them do
@@ -244,6 +245,54 @@ RSpec.describe SearchHelper do
         it 'sanitizes, truncates, and highlights the search term' do
           expect(subject).to eq(expected)
         end
+      end
+    end
+  end
+
+  describe '#search_sort_options_json' do
+    let(:user) { create(:user) }
+
+    mock_relevant_sort = {
+      title: _('Most relevant'),
+      sortable: false,
+      sortParam: 'relevant'
+    }
+
+    mock_created_sort = {
+      title: _('Created date'),
+      sortable: true,
+      sortParam: {
+        asc: 'created_asc',
+        desc: 'created_desc'
+      }
+    }
+
+    mock_updated_sort = {
+      title: _('Last updated'),
+      sortable: true,
+      sortParam: {
+        asc: 'updated_asc',
+        desc: 'updated_desc'
+      }
+    }
+
+    before do
+      allow(self).to receive(:current_user).and_return(user)
+    end
+
+    context 'with advanced search enabled' do
+      before do
+        stub_ee_application_setting(search_using_elasticsearch: true)
+      end
+
+      it 'returns the correct data' do
+        expect(search_sort_options).to eq([mock_relevant_sort, mock_created_sort, mock_updated_sort])
+      end
+    end
+
+    context 'with basic search enabled' do
+      it 'returns the correct data' do
+        expect(search_sort_options).to eq([mock_created_sort, mock_updated_sort])
       end
     end
   end

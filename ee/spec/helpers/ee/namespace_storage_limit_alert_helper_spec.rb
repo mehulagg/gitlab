@@ -56,22 +56,6 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
     end
   end
 
-  describe '#namespace_storage_usage_link' do
-    subject { helper.namespace_storage_usage_link(namespace) }
-
-    context 'when namespace is a group' do
-      let(:namespace) { build(:group) }
-
-      it { is_expected.to eq(group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')) }
-    end
-
-    context 'when namespace is a user' do
-      let(:namespace) { build(:namespace) }
-
-      it { is_expected.to eq(profile_usage_quotas_path(anchor: 'storage-quota-tab')) }
-    end
-  end
-
   describe '#purchase_storage_url' do
     subject { helper.purchase_storage_url }
 
@@ -181,16 +165,13 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
 
     let_it_be(:namespace) { build(:namespace) }
 
-    where(:buy_storage_link_enabled, :additional_repo_storage_by_namespace_enabled, :result) do
-      false | false | false
-      false | true  | false
-      true  | false | false
-      true  | true  | true
+    where(:additional_repo_storage_by_namespace_enabled, :result) do
+      false | false
+      true  | true
     end
 
     with_them do
       before do
-        stub_feature_flags(buy_storage_link: buy_storage_link_enabled)
         allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
           .and_return(additional_repo_storage_by_namespace_enabled)
       end

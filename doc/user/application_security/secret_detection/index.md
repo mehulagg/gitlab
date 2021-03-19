@@ -5,7 +5,7 @@ group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Secret Detection
+# Secret Detection **(FREE)**
 
 > - [Introduced](https://about.gitlab.com/releases/2019/03/22/gitlab-11-9-released/#detect-secrets-and-credentials-in-the-repository) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.9.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/222788) in 13.3.
@@ -53,6 +53,7 @@ The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/securit
   - Twitter API
 - Cloud SaaS vendors:
   - GitHub API
+  - Shopify API
   - Slack Token
   - Slack Webhook
   - Stripe API
@@ -85,14 +86,14 @@ However not all features are available on every tier. See the breakdown below fo
 Different features are available in different [GitLab tiers](https://about.gitlab.com/pricing/),
 as shown in the following table:
 
-| Capability                                                                | In Core             | In Ultimate        |
-|:--------------------------------------------------------------------------|:--------------------|:-------------------|
-| [Configure Secret Detection Scanners](#configuration)                                 | **{check-circle}**  | **{check-circle}** |
-| [Customize Secret Detection Settings](#customizing-settings)                 | **{check-circle}**  | **{check-circle}** |
-| View [JSON Report](../sast/index.md#reports-json-format)                                  | **{check-circle}**  | **{check-circle}** |
-| Presentation of JSON Report in Merge Request                 | **{dotted-circle}** | **{check-circle}** |
+| Capability                                                      | In Free             | In Ultimate        |
+|:----------------------------------------------------------------|:--------------------|:-------------------|
+| [Configure Secret Detection Scanners](#configuration)           | **{check-circle}**  | **{check-circle}** |
+| [Customize Secret Detection Settings](#customizing-settings)    | **{check-circle}**  | **{check-circle}** |
+| View [JSON Report](../sast/index.md#reports-json-format)        | **{check-circle}**  | **{check-circle}** |
+| Presentation of JSON Report in Merge Request                    | **{dotted-circle}** | **{check-circle}** |
 | [Interaction with Vulnerabilities](../vulnerabilities/index.md) | **{dotted-circle}** | **{check-circle}** |
-| [Access to Security Dashboard](../security_dashboard/index.md)                       | **{dotted-circle}** | **{check-circle}** |
+| [Access to Security Dashboard](../security_dashboard/index.md)  | **{dotted-circle}** | **{check-circle}** |
 
 ## Configuration
 
@@ -101,8 +102,7 @@ as shown in the following table:
 Secret Detection is performed by a [specific analyzer](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Secret-Detection.gitlab-ci.yml)
 during the `secret-detection` job. It runs regardless of your app's programming language.
 
-The Secret Detection analyzer includes [Gitleaks](https://github.com/zricethezav/gitleaks) and
-[TruffleHog](https://github.com/dxa4481/truffleHog) checks.
+The Secret Detection analyzer includes [Gitleaks](https://github.com/zricethezav/gitleaks) checks.
 
 Note that the Secret Detection analyzer ignores Password-in-URL vulnerabilities if the password
 begins with a dollar sign (`$`), as this likely indicates the password is an environment variable.
@@ -111,7 +111,7 @@ For example, `https://username:$password@example.com/path/to/repo` isn't detecte
 
 NOTE:
 You don't have to configure Secret Detection manually as shown in this section if you're using
-[Auto Secret Detection](../../../topics/autodevops/stages.md#auto-secret-detection)
+[Auto Secret Detection](../../../topics/autodevops/stages.md#auto-secret-detection),
 provided by [Auto DevOps](../../../topics/autodevops/index.md).
 
 To enable Secret Detection for GitLab 13.1 and later, you must include the
@@ -147,7 +147,7 @@ Third party cloud and SaaS providers can [express integration interest by fillin
 
 ### Customizing settings
 
-The Secret Detection scan settings can be changed through [environment variables](#available-variables)
+The Secret Detection scan settings can be changed through [CI/CD variables](#available-variables)
 by using the
 [`variables`](../../../ci/yaml/README.md#variables) parameter in `.gitlab-ci.yml`.
 
@@ -155,8 +155,21 @@ To override a job definition, (for example, change properties like `variables` o
 declare a job with the same name as the SAST job to override. Place this new job after the template
 inclusion and specify any additional keys under it.
 
+WARNING:
+Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
+is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
+
+#### GIT_DEPTH
+
+The [`GIT_DEPTH` CI/CD variable](../../../ci/runners/README.md#shallow-cloning) affects Secret Detection.
+The Secret Detection analyzer relies on generating patches between commits to scan content for
+secrets. If you override the default, ensure the value is greater than 1. If the number of commits
+in an MR is greater than the GIT_DEPTH value, Secret Detection will [fail to detect secrets](#error-couldnt-run-the-gitleaks-command-exit-status-2).
+
+#### Custom settings example
+
 In the following example, we include the Secret Detection template and at the same time we
-override the `secret_detection` job with the `SECRET_DETECTION_HISTORIC_SCAN` variable to `true`:
+override the `secret_detection` job with the `SECRET_DETECTION_HISTORIC_SCAN` CI/CD variable to `true`:
 
 ```yaml
 include:
@@ -170,27 +183,23 @@ secret_detection:
 Because the template is [evaluated before](../../../ci/yaml/README.md#include)
 the pipeline configuration, the last mention of the variable takes precedence.
 
-WARNING:
-Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
-is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
-
 #### Available variables
 
-Secret Detection can be customized by defining available variables:
+Secret Detection can be customized by defining available CI/CD variables:
 
-| Environment variable    | Default value | Description |
-|-------------------------|---------------|-------------|
-| `SECRET_DETECTION_COMMIT_FROM` | -     | The commit a Gitleaks scan starts at. |
-| `SECRET_DETECTION_COMMIT_TO` | -       | The commit a Gitleaks scan ends at. |
-| `SECRET_DETECTION_EXCLUDED_PATHS` | "" | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225273) in GitLab 13.3. |
-| `SECRET_DETECTION_HISTORIC_SCAN` | false | Flag to enable a historic Gitleaks scan. |
+| CI/CD variable                    | Default value | Description |
+|-----------------------------------|---------------|-------------|
+| `SECRET_DETECTION_COMMIT_FROM`    | -             | The commit a Gitleaks scan starts at. |
+| `SECRET_DETECTION_COMMIT_TO`      | -             | The commit a Gitleaks scan ends at. |
+| `SECRET_DETECTION_EXCLUDED_PATHS` | ""            | Exclude vulnerabilities from output based on the paths. This is a comma-separated list of patterns. Patterns can be globs, or file or folder paths (for example, `doc,spec` ). Parent directories also match patterns. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225273) in GitLab 13.3. |
+| `SECRET_DETECTION_HISTORIC_SCAN`  | false         | Flag to enable a historic Gitleaks scan. |
 
 ### Custom rulesets **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211387) in GitLab 13.5.
 
 You can customize the default secret detection rules provided with GitLab.
-Customization allows you to exclude rules and add new rules.
+Customization allows replace the default secret detection rules with rules that you define.
 
 To create a custom ruleset:
 
@@ -230,7 +239,7 @@ To create a custom ruleset:
 
 ### Logging level
 
-To control the verbosity of logs set the `SECURE_LOG_LEVEL` environment variable. Messages of this logging level or higher are output. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1.
+To control the verbosity of logs set the `SECURE_LOG_LEVEL` CI/CD variable. Messages of this logging level or higher are output. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1.
 
 From highest to lowest severity, the logging levels are:
 
@@ -245,10 +254,10 @@ From highest to lowest severity, the logging levels are:
 GitLab 12.11 introduced support for scanning the full history of a repository. This new functionality
 is particularly useful when you are enabling Secret Detection in a repository for the first time and you
 want to perform a full secret scan. Running a secret scan on the full history can take a long time,
-especially for larger repositories with lengthy Git histories. We recommend not setting this variable
+especially for larger repositories with lengthy Git histories. We recommend not setting this CI/CD variable
 as part of your normal job definition.
 
-A new configuration variable ([`SECRET_DETECTION_HISTORIC_SCAN`](../sast/#vulnerability-filters))
+A new configuration variable ([`SECRET_DETECTION_HISTORIC_SCAN`](#available-variables))
 can be set to change the behavior of the GitLab Secret Detection scan to run on the entire Git history of a repository.
 
 We have created a [short video walkthrough](https://youtu.be/wDtc_K00Y0A) showcasing how you can perform a full history secret scan.
@@ -306,7 +315,7 @@ Support for custom certificate authorities was introduced in the following versi
 | -------- | ------- |
 | secrets | [v3.0.0](https://gitlab.com/gitlab-org/security-products/analyzers/secrets/-/releases/v3.0.0) |
 
-### Set Secret Detection CI job variables to use local Secret Detection analyzer
+### Set Secret Detection CI/CD variables to use local Secret Detection analyzer
 
 Add the following configuration to your `.gitlab-ci.yml` file. You must replace
 `SECURE_ANALYZERS_PREFIX` to refer to your local Docker container registry:
@@ -330,11 +339,15 @@ For information on this, see the [general Application Security troubleshooting s
 
 ### Error: `Couldn't run the gitleaks command: exit status 2`
 
-This error is usually caused by the `GIT_DEPTH` value of 50 that is set for all [projects by default](../../../ci/pipelines/settings.md#git-shallow-clone).
+If a pipeline is triggered from a Merge Request containing 60 commits while the `GIT_DEPTH` variable
+is set to 50 (a [project default](../../../ci/pipelines/settings.md#git-shallow-clone)),
+the Secret Detection job fails as the clone is not deep enough to contain all of the
+relevant commits.
 
-For example, if a pipeline is triggered from a Merge Request containing 60 commits while the `GIT_DEPTH` is set to 50, the Secret Detection job fails as the clone is not deep enough to contain all of the relevant commits.
-
-You can confirm this to be the cause of the error by implementing a [logging level](../../application_security/secret_detection/index.md#logging-level) of `debug`. Once implemented, the logs should look similar to the following example, wherein an "object not found" error can be seen:
+To confirm this as the cause of the error, set the
+[logging level](../../application_security/secret_detection/index.md#logging-level) to `debug`, then
+rerun the pipeline. The logs should look similar to the following example. The text "object not
+found" is a symptom of this error.
 
 ```plaintext
 ERRO[2020-11-18T18:05:52Z] object not found
@@ -342,7 +355,9 @@ ERRO[2020-11-18T18:05:52Z] object not found
 [ERRO] [secrets] [2020-11-18T18:05:52Z] ▶ Gitleaks analysis failed: exit status 2
 ```
 
-If this is the case, we can resolve the issue by setting the [`GIT_DEPTH` variable](../../../ci/runners/README.md#shallow-cloning) to a higher value. In order to apply this only to the Secret Detection job, the following can be added to your `.gitlab-ci.yml`:
+To resolve the issue, set the [`GIT_DEPTH` CI/CD variable](../../../ci/runners/README.md#shallow-cloning)
+to a higher value. To apply this only to the Secret Detection job, the following can be added to
+your `.gitlab-ci.yml` file:
 
 ```yaml
 secret_detection:

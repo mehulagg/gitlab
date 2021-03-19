@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
-require 'rubocop/rspec/support'
 require_relative '../../../../rubocop/cop/gitlab/policy_rule_boolean'
 
-RSpec.describe RuboCop::Cop::Gitlab::PolicyRuleBoolean, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::Gitlab::PolicyRuleBoolean do
   subject(:cop) { described_class.new }
 
   it 'registers offense for &&' do

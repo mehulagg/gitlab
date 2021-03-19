@@ -1,11 +1,12 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { npmPackage as packageEntity } from 'jest/packages/mock_data';
+import Vuex from 'vuex';
 import { registryUrl as nugetPath } from 'jest/packages/details/mock_data';
+import { npmPackage as packageEntity } from 'jest/packages/mock_data';
+import InstallationTitle from '~/packages/details/components/installation_title.vue';
 import NpmInstallation from '~/packages/details/components/npm_installation.vue';
-import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
 import { TrackingActions } from '~/packages/details/constants';
 import { npmInstallationCommand, npmSetupCommand } from '~/packages/details/store/getters';
+import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -14,6 +15,7 @@ describe('NpmInstallation', () => {
   let wrapper;
 
   const findCodeInstructions = () => wrapper.findAll(CodeInstructions);
+  const findInstallationTitle = () => wrapper.findComponent(InstallationTitle);
 
   function createComponent() {
     const store = new Vuex.Store({
@@ -38,11 +40,21 @@ describe('NpmInstallation', () => {
   });
 
   afterEach(() => {
-    if (wrapper) wrapper.destroy();
+    wrapper.destroy();
   });
 
   it('renders all the messages', () => {
     expect(wrapper.element).toMatchSnapshot();
+  });
+
+  describe('install command switch', () => {
+    it('has the installation title component', () => {
+      expect(findInstallationTitle().exists()).toBe(true);
+      expect(findInstallationTitle().props()).toMatchObject({
+        packageType: 'npm',
+        options: [{ value: 'npm', label: 'Show NPM commands' }],
+      });
+    });
   });
 
   describe('installation commands', () => {

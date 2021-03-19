@@ -1,5 +1,24 @@
 # frozen_string_literal: true
 
+# Backing store for GitLab session data.
+#
+# The raw session information is stored by the Rails session store
+# (config/initializers/session_store.rb). These entries are accessible by the
+# rack_key_name class method and consistute the base of the session data
+# entries. All other entries in the session store can be traced back to these
+# entries.
+#
+# After a user logs in (config/initializers/warden.rb) a further entry is made
+# in Redis. This entry holds a record of the user's logged in session. These
+# are accessible with the key_name(user_id, session_id) class method. These
+# entries will expire. Lookups to these entries are lazilly cleaned on future
+# user access.
+#
+# There is a reference to all sessions that belong to a specific user. A
+# user may login through multiple browsers/devices and thus record multiple
+# login sessions. These are accessible through the lookup_key_name(user_id)
+# class method.
+#
 class ActiveSession
   include ActiveModel::Model
 
@@ -23,13 +42,6 @@ class ActiveSession
     device_type&.titleize
   end
 
-  # This is not the same as Rack::Session::SessionId#public_id, but we
-  # need to preserve this for backwards compatibility.
-  # TODO: remove in 13.7
-  def public_id
-    Gitlab::CryptoHelper.aes256_gcm_encrypt(session_id)
-  end
-
   def self.set(user, request)
     Gitlab::Redis::SharedState.with do |redis|
       session_private_id = request.session.id.private_id
@@ -44,8 +56,6 @@ class ActiveSession
         device_type: client.device_type,
         created_at: user.current_sign_in_at || timestamp,
         updated_at: timestamp,
-        # TODO: remove in 13.7
-        session_id: request.session.id.public_id,
         session_private_id: session_private_id,
         is_impersonated: request.session[:impersonator_id].present?
       )
@@ -61,18 +71,8 @@ class ActiveSession
           lookup_key_name(user.id),
           session_private_id
         )
-
-        # We remove the ActiveSession stored by using public_id to avoid
-        # duplicate entries
-        remove_deprecated_active_sessions_with_public_id(redis, user.id, request.session.id.public_id)
       end
     end
-  end
-
-  # TODO: remove in 13.7
-  private_class_method def self.remove_deprecated_active_sessions_with_public_id(redis, user_id, rack_session_public_id)
-    redis.srem(lookup_key_name(user_id), rack_session_public_id)
-    redis.del(key_name(user_id, rack_session_public_id))
   end
 
   def self.list(user)
@@ -90,18 +90,6 @@ class ActiveSession
     end
   end
 
-  # TODO: remove in 13.7
-  # After upgrade there might be a duplicate ActiveSessions:
-  # - one with the public_id stored in #session_id
-  # - another with private_id stored in #session_private_id
-  def self.destroy_with_rack_session_id(user, rack_session_id)
-    return unless rack_session_id
-
-    Gitlab::Redis::SharedState.with do |redis|
-      destroy_sessions(redis, user, [rack_session_id.public_id, rack_session_id.private_id])
-    end
-  end
-
   def self.destroy_sessions(redis, user, session_ids)
     key_names = session_ids.map { |session_id| key_name(user.id, session_id) }
 
@@ -113,19 +101,11 @@ class ActiveSession
     end
   end
 
-  # TODO: remove in 13.7
-  # After upgrade, .destroy might be called with the session id encrypted
-  # by .public_id.
-  def self.destroy_with_deprecated_encryption(user, session_id)
+  def self.destroy_session(user, session_id)
     return unless session_id
 
-    decrypted_session_id = decrypt_public_id(session_id)
-    rack_session_private_id = if decrypted_session_id
-                                Rack::Session::SessionId.new(decrypted_session_id).private_id
-                              end
-
     Gitlab::Redis::SharedState.with do |redis|
-      destroy_sessions(redis, user, [session_id, decrypted_session_id, rack_session_private_id].compact)
+      destroy_sessions(redis, user, [session_id].compact)
     end
   end
 
@@ -141,6 +121,10 @@ class ActiveSession
 
   def self.not_impersonated(user)
     list(user).reject(&:is_impersonated)
+  end
+
+  def self.rack_key_name(session_id)
+    "#{Gitlab::Redis::SharedState::SESSION_NAMESPACE}:#{session_id}"
   end
 
   def self.key_name(user_id, session_id = '*')
@@ -197,7 +181,7 @@ class ActiveSession
   end
 
   def self.rack_session_keys(rack_session_ids)
-    rack_session_ids.map { |session_id| "#{Gitlab::Redis::SharedState::SESSION_NAMESPACE}:#{session_id}" }
+    rack_session_ids.map { |session_id| rack_key_name(session_id)}
   end
 
   def self.raw_active_session_entries(redis, session_ids, user_id)
@@ -251,12 +235,5 @@ class ActiveSession
     end
 
     entries.compact
-  end
-
-  # TODO: remove in 13.7
-  private_class_method def self.decrypt_public_id(public_id)
-    Gitlab::CryptoHelper.aes256_gcm_decrypt(public_id)
-  rescue
-    nil
   end
 end

@@ -24,12 +24,6 @@ RSpec.describe Analytics::CycleAnalytics::GroupLevel do
     group.add_owner(user)
   end
 
-  describe '#permissions' do
-    it 'returns true for all stages' do
-      expect(subject.permissions.values.uniq).to eq([true])
-    end
-  end
-
   describe '#summary' do
     before do
       create_cycle(user, project, issue, mr, milestone, pipeline)

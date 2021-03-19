@@ -1,6 +1,6 @@
 import * as actions from 'ee/security_dashboard/store/modules/filters/actions';
-import * as types from 'ee/security_dashboard/store/modules/filters/mutation_types';
 import { DISMISSAL_STATES } from 'ee/security_dashboard/store/modules/filters/constants';
+import * as types from 'ee/security_dashboard/store/modules/filters/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
 import Tracking from '~/tracking';
 

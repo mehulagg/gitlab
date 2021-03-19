@@ -11,6 +11,7 @@ describe('ListEmptyState', () => {
     wrapper = shallowMount(ListEmptyState, {
       propsData: {
         imagePath: 'dir/image.svg',
+        addFrameworkPath: 'group/framework/new',
         ...props,
       },
     });
@@ -27,7 +28,7 @@ describe('ListEmptyState', () => {
       title: 'There are no compliance frameworks set up yet',
       description: 'Once you have created a compliance framework it will appear here.',
       svgPath: 'dir/image.svg',
-      primaryButtonLink: '#',
+      primaryButtonLink: 'group/framework/new',
       primaryButtonText: 'Add framework',
       svgHeight: 110,
       compact: true,

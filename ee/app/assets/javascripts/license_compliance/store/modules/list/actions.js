@@ -1,6 +1,6 @@
-import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 import { FETCH_ERROR_MESSAGE, SORT_BY, SORT_ORDER } from './constants';
@@ -26,10 +26,10 @@ export const fetchLicenses = ({ state, dispatch }, params = {}) => {
         ...params,
       },
     })
-    .then(response => {
+    .then((response) => {
       dispatch('receiveLicensesSuccess', response);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveLicensesError', error);
     });
 };

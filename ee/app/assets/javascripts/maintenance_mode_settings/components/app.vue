@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlForm, GlToggle, GlFormGroup, GlFormTextarea, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
 import { mapComputed } from '~/vuex_shared/bindings';
 
@@ -41,7 +41,11 @@ export default {
     <gl-loading-icon v-if="loading" size="xl" />
     <gl-form v-else @submit.prevent="updateMaintenanceModeSettings">
       <div class="gl-display-flex gl-align-items-center gl-mb-4">
-        <gl-toggle v-model="maintenanceEnabled" />
+        <gl-toggle
+          v-model="maintenanceEnabled"
+          :label="$options.i18n.toggleLabel"
+          label-position="hidden"
+        />
         <div class="gl-ml-3">
           <p class="gl-mb-0">{{ $options.i18n.toggleLabel }}</p>
           <p class="gl-mb-0 gl-text-gray-500">

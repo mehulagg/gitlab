@@ -1,13 +1,13 @@
 /* eslint-disable consistent-return */
 
 import $ from 'jquery';
-import { __ } from './locale';
-import axios from './lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from './flash';
-import FilesCommentButton from './files_comment_button';
-import initImageDiffHelper from './image_diff/helpers/init_image_diff';
-import syntaxHighlight from './syntax_highlight';
 import { spriteIcon } from '~/lib/utils/common_utils';
+import FilesCommentButton from './files_comment_button';
+import { deprecatedCreateFlash as createFlash } from './flash';
+import initImageDiffHelper from './image_diff/helpers/init_image_diff';
+import axios from './lib/utils/axios_utils';
+import { __ } from './locale';
+import syntaxHighlight from './syntax_highlight';
 
 const WRAPPER = '<div class="diff-content"></div>';
 const LOADING_HTML = '<span class="spinner"></span>';
@@ -39,7 +39,7 @@ export default class SingleFileDiff {
       this.$chevronDownIcon.removeClass('gl-display-none');
     }
 
-    $('.js-file-title, .click-to-expand', this.file).on('click', e => {
+    $('.js-file-title, .click-to-expand', this.file).on('click', (e) => {
       this.toggleDiff($(e.target));
     });
   }
@@ -73,7 +73,7 @@ export default class SingleFileDiff {
     this.collapsedContent.hide();
     this.loadingContent.show();
 
-    axios
+    return axios
       .get(this.diffForPath)
       .then(({ data }) => {
         this.loadingContent.hide();

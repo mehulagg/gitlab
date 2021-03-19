@@ -1,7 +1,7 @@
-import { statusIcon, groupedReportText } from '../../utils';
 import messages from '../../messages';
+import { statusIcon, groupedReportText } from '../../utils';
 
-export const groupedApiFuzzingText = state =>
+export const groupedApiFuzzingText = (state) =>
   groupedReportText(
     state,
     messages.API_FUZZING,

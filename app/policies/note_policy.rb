@@ -57,6 +57,10 @@ class NotePolicy < BasePolicy
     enable :resolve_note
   end
 
+  rule { can_read_confidential }.policy do
+    enable :mark_note_as_confidential
+  end
+
   rule { confidential & ~can_read_confidential }.policy do
     prevent :read_note
     prevent :admin_note
@@ -72,7 +76,7 @@ class NotePolicy < BasePolicy
   def parent_namespace
     strong_memoize(:parent_namespace) do
       next if @subject.is_a?(PersonalSnippet)
-      next @subject.noteable.group if @subject.noteable&.is_a?(Epic)
+      next @subject.noteable.group if @subject.noteable.is_a?(Epic)
 
       @subject.project
     end

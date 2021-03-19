@@ -7,8 +7,8 @@ RSpec.describe Resolvers::Boards::EpicListsResolver do
 
   let_it_be(:user) { create(:user) }
   let_it_be_with_refind(:group) { create(:group, :private) }
-  let_it_be(:epic_board) { create(:epic_board, group: group) }
-  let_it_be(:epic_list1) { create(:epic_list, epic_board: epic_board) }
+  let_it_be_with_reload(:epic_board) { create(:epic_board, group: group) }
+  let_it_be(:epic_list1) { create(:epic_list, epic_board: epic_board, list_type: :backlog) }
   let_it_be(:epic_list2) { create(:epic_list, epic_board: epic_board) }
 
   specify do
@@ -17,8 +17,9 @@ RSpec.describe Resolvers::Boards::EpicListsResolver do
 
   describe '#resolve' do
     let(:args) { {} }
+    let(:resolver) { described_class }
 
-    subject(:result) { resolve(described_class, ctx: { current_user: user }, obj: epic_board, args: args) }
+    subject(:result) { resolve(resolver, ctx: { current_user: user }, obj: epic_board, args: args) }
 
     before do
       stub_licensed_features(epics: true)
@@ -34,14 +35,25 @@ RSpec.describe Resolvers::Boards::EpicListsResolver do
       end
 
       it 'returns epic lists for the board' do
-        expect(result.items).to match_array([epic_list1, epic_list2])
+        expect(result).to match_array([epic_list1, epic_list2])
       end
 
-      context 'when list ID param is set' do
+      context 'when resolving a single item' do
         let(:args) { { id: epic_list1.to_global_id } }
+        let(:resolver) { described_class.single }
 
         it 'returns an array with single epic list' do
-          expect(result.items).to match_array([epic_list1])
+          expect(result).to eq(epic_list1)
+        end
+      end
+
+      context 'when the board has hidden lists' do
+        before do
+          epic_board.update_column(:hide_backlog_list, true)
+        end
+
+        it 'returns an array with single epic list' do
+          expect(result).to match_array(epic_list2)
         end
       end
     end

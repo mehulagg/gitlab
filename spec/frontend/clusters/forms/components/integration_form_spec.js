@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlToggle, GlButton } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import IntegrationForm from '~/clusters/forms/components/integration_form.vue';
 import { createStore } from '~/clusters/forms/stores/index';
 
@@ -45,8 +45,12 @@ describe('ClusterIntegrationForm', () => {
     beforeEach(() => createWrapper());
 
     it('enables toggle if editable is true', () => {
-      expect(findGlToggle().props('disabled')).toBe(false);
+      expect(findGlToggle().props()).toMatchObject({
+        disabled: false,
+        label: IntegrationForm.i18n.toggleLabel,
+      });
     });
+
     it('sets the envScope to default', () => {
       expect(wrapper.find('[id="cluster_environment_scope"]').attributes('value')).toBe('*');
     });

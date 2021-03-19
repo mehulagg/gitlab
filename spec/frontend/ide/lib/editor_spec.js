@@ -4,9 +4,10 @@ import {
   Range,
   Selection,
 } from 'monaco-editor';
+import { EDITOR_TYPE_DIFF } from '~/editor/constants';
 import Editor from '~/ide/lib/editor';
-import { createStore } from '~/ide/stores';
 import { defaultEditorOptions } from '~/ide/lib/editor_options';
+import { createStore } from '~/ide/stores';
 import { file } from '../helpers';
 
 describe('Multi-file editor library', () => {
@@ -15,7 +16,7 @@ describe('Multi-file editor library', () => {
   let holder;
   let store;
 
-  const setNodeOffsetWidth = val => {
+  const setNodeOffsetWidth = (val) => {
     Object.defineProperty(instance.instance.getDomNode(), 'offsetWidth', {
       get() {
         return val;
@@ -125,7 +126,7 @@ describe('Multi-file editor library', () => {
     });
 
     it('sets original & modified when diff editor', () => {
-      jest.spyOn(instance.instance, 'getEditorType').mockReturnValue('vs.editor.IDiffEditor');
+      jest.spyOn(instance.instance, 'getEditorType').mockReturnValue(EDITOR_TYPE_DIFF);
       jest.spyOn(instance.instance, 'setModel').mockImplementation(() => {});
 
       instance.attachModel(model);

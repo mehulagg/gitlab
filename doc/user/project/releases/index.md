@@ -66,14 +66,11 @@ To create a new release through the GitLab UI:
 
 1. Navigate to **Project overview > Releases** and click the **New release**
    button.
-1. In the [**Tag name**](#tag-name) box, enter a name.
-
-   Creating a release based on an existing tag using the user
-   interface is not yet supported. However, this is possible using the
-   [Releases API](../../../api/releases/index.md#create-a-release).
-
-1. In the **Create from** list, select a branch, tag, or commit SHA to use when
-   creating the new tag.
+1. Open the [**Tag name**](#tag-name) dropdown. Select an existing tag or type
+   in a new tag name. Selecting an existing tag that is already associated with
+   a release will result in a validation error.
+1. If creating a new tag, open the **Create from** dropdown. Select a
+   branch, tag, or commit SHA to use when creating the new tag.
 1. Optionally, fill out any additional information about the release, such as its
    [title](#title), [milestones](#associate-milestones-with-a-release),
    [release notes](#release-notes-description), or [assets links](#links).
@@ -200,7 +197,7 @@ If the job that's executing is within a freeze period, GitLab CI/CD creates an e
 variable named `$CI_DEPLOY_FREEZE`.
 
 To prevent the deployment job from executing, create a `rules` entry in your
-`gitlab-ci.yaml`, for example:
+`gitlab-ci.yml`, for example:
 
 ```yaml
 deploy_to_production:
@@ -214,17 +211,17 @@ To set a deploy freeze window in the UI, complete these steps:
 
 1. Sign in to GitLab as a user with project Maintainer [permissions](../../permissions.md).
 1. Navigate to **Project overview**.
-1. In the left navigation menu, navigate to **Settings > CI / CD**.
+1. In the left navigation menu, navigate to **Settings > CI/CD**.
 1. Scroll to **Deploy freezes**.
 1. Click **Expand** to see the deploy freeze table.
 1. Click **Add deploy freeze** to open the deploy freeze modal.
 1. Enter the start time, end time, and timezone of the desired deploy freeze period.
 1. Click **Add deploy freeze** in the modal.
-
-![Deploy freeze modal for setting a deploy freeze period](img/deploy_freeze_v13_2.png)
+1. After the deploy freeze is saved, you can edit it by selecting the edit button (**{pencil}**).
+   ![Deploy freeze modal for setting a deploy freeze period](img/deploy_freeze_v13_10.png)
 
 WARNING:
-To edit or delete a deploy freeze, use the [Freeze Periods API](../../../api/freeze_periods.md).
+To delete a deploy freeze, use the [Freeze Periods API](../../../api/freeze_periods.md).
 
 If a project contains multiple freeze periods, all periods apply. If they overlap, the freeze covers the
 complete overlapping period.
@@ -407,7 +404,7 @@ Here is an example of a release evidence object:
 }
 ```
 
-### Collect release evidence **(PREMIUM ONLY)**
+### Collect release evidence **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/199065) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 
@@ -474,6 +471,16 @@ terminal.
 
 Read the [Release CLI documentation](https://gitlab.com/gitlab-org/release-cli/-/blob/master/docs/index.md)
 for details.
+
+## Release Metrics **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259703) in GitLab Premium 13.9.
+
+Group-level release metrics are available by navigating to **Group > Analytics > CI/CD**.
+These metrics include:
+
+- Total number of releases in the group
+- Percentage of projects in the group that have at least one release
 
 <!-- ## Troubleshooting
 

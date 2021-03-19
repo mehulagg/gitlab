@@ -114,7 +114,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       expect(job).to be_present
       expect(job.all_dependencies).to include(dependency)
-      expect(job.scoped_variables_hash).to include(dependency_variable.key => dependency_variable.value)
+      expect(job.scoped_variables.to_hash).to include(dependency_variable.key => dependency_variable.value)
     end
   end
 end

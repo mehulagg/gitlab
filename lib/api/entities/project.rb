@@ -5,6 +5,8 @@ module API
     class Project < BasicProjectDetails
       include ::API::Helpers::RelatedResourcesHelpers
 
+      expose :container_registry_url, as: :container_registry_image_prefix, if: -> (_, _) { Gitlab.config.registry.enabled }
+
       expose :_links do
         expose :self do |project|
           expose_url(api_v4_projects_path(id: project.id))
@@ -100,6 +102,7 @@ module API
       end
       expose :only_allow_merge_if_pipeline_succeeds
       expose :allow_merge_on_skipped_pipeline
+      expose :restrict_user_defined_variables
       expose :request_access_enabled
       expose :only_allow_merge_if_all_discussions_are_resolved
       expose :remove_source_branch_after_merge

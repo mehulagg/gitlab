@@ -57,23 +57,23 @@ module Security
 
     def revoke_token_body
       @revoke_token_body ||= begin
-         response = ::Gitlab::HTTP.get(
-           token_types_url,
-           headers: {
-             'Content-Type' => 'application/json',
-             'Authorization' => revocation_api_token
-           }
-         )
-         raise RevocationFailedError, 'Failed to get revocation token types' unless response.success?
+        response = ::Gitlab::HTTP.get(
+          token_types_url,
+          headers: {
+            'Content-Type' => 'application/json',
+            'Authorization' => revocation_api_token
+          }
+        )
+        raise RevocationFailedError, 'Failed to get revocation token types' unless response.success?
 
-         token_types = ::Gitlab::Json.parse(response.body)['types']
-         return if token_types.blank?
+        token_types = ::Gitlab::Json.parse(response.body)['types']
+        return if token_types.blank?
 
-         @revocable_keys.filter! { |key| token_types.include?(key[:type]) }
-         return if @revocable_keys.blank?
+        @revocable_keys.filter! { |key| token_types.include?(key[:type]) }
+        return if @revocable_keys.blank?
 
-         @revocable_keys.to_json
-       end
+        @revocable_keys.to_json
+      end
     end
 
     def token_types_url

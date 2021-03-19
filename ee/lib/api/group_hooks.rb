@@ -24,6 +24,7 @@ module API
         optional :wiki_page_events, type: Boolean, desc: "Trigger hook on wiki events"
         optional :deployment_events, type: Boolean, desc: "Trigger hook on deployment events"
         optional :releases_events, type: Boolean, desc: "Trigger hook on release events"
+        optional :subgroup_events, type: Boolean, desc: "Trigger hook on subgroup events"
         optional :enable_ssl_verification, type: Boolean, desc: "Do SSL verification when triggering the hook"
         optional :token, type: String, desc: "Secret token to validate received payloads; this will not be returned in the response"
       end

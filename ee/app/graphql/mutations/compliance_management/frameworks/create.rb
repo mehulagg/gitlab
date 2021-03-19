@@ -41,7 +41,7 @@ module Mutations
         end
 
         def namespace(namespace_path)
-          ::Gitlab::Graphql::Loaders::FullPathModelLoader.new(Namespace, namespace_path).find.sync
+          ::Gitlab::Graphql::Loaders::FullPathModelLoader.new(::Namespace, namespace_path).find.sync
         end
       end
     end

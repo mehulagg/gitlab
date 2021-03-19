@@ -64,7 +64,7 @@ module NavHelper
   end
 
   def admin_analytics_nav_links
-    %w(dev_ops_report cohorts)
+    %w(dev_ops_report)
   end
 
   def group_issues_sub_menu_items
@@ -92,10 +92,8 @@ module NavHelper
       links << :admin_impersonation
     end
 
-    if Feature.enabled?(:user_mode_in_session)
-      if current_user_mode.admin_mode?
-        links << :admin_mode
-      end
+    if Gitlab::CurrentSettings.admin_mode && current_user_mode.admin_mode?
+      links << :admin_mode
     end
 
     links

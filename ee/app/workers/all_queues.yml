@@ -3,8 +3,16 @@
 #
 # Do not edit it manually!
 ---
+- :name: auto_merge:merge_trains_refresh
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 3
+  :idempotent: true
+  :tags: []
 - :name: cronjob:active_user_count_threshold
-  :feature_category: :provision
+  :feature_category: :license
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -187,6 +195,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: cronjob:geo_secondary_usage_data_cron
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:geo_sidekiq_cron_config
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -204,7 +220,7 @@
   :idempotent: true
   :tags: []
 - :name: cronjob:historical_data
-  :feature_category: :provision
+  :feature_category: :utilization
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -220,6 +236,14 @@
   :idempotent:
   :tags: []
 - :name: cronjob:incident_management_incident_sla_exceeded_check
+  :feature_category: :incident_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: cronjob:incident_management_oncall_rotations_persist_all_rotations_shifts_job
   :feature_category: :incident_management
   :has_external_dependencies:
   :urgency: :low
@@ -276,7 +300,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:sync_seat_link
-  :feature_category: :provision
+  :feature_category: :license
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -292,7 +316,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:update_max_seats_used_for_gitlab_com_subscriptions
-  :feature_category: :license_compliance
+  :feature_category: :license
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
@@ -321,6 +345,14 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 3
+  :idempotent: true
+  :tags: []
+- :name: dora_metrics:dora_daily_metrics_refresh
+  :feature_category: :continuous_delivery
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
   :idempotent: true
   :tags: []
 - :name: epics:epics_update_epics_dates
@@ -499,6 +531,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: geo:geo_reverification_batch
+  :feature_category: :geo_replication
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: geo:geo_scheduler_primary_scheduler
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -591,11 +631,10 @@
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
   :urgency: :low
-  :resource_boundary: :unknown
+  :resource_boundary: :cpu
   :weight: 2
   :idempotent:
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: security_scans:store_security_scans
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -603,8 +642,7 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: security_scans:sync_security_reports_to_report_approval_rules
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -749,7 +787,47 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: group_wikis_git_garbage_collect
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: groups_schedule_bulk_repository_shard_moves
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: groups_update_repository_storage
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: groups_update_statistics
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: incident_management_apply_incident_sla_exceeded_label
+  :feature_category: :incident_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: incident_management_oncall_rotations_persist_shifts_job
   :feature_category: :incident_management
   :has_external_dependencies:
   :urgency: :low
@@ -836,8 +914,7 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags:
-  - :requires_disk_io
+  :tags: []
 - :name: security_auto_fix
   :feature_category: :vulnerability_management
   :has_external_dependencies:
@@ -863,7 +940,7 @@
   :idempotent: true
   :tags: []
 - :name: sync_seat_link_request
-  :feature_category: :provision
+  :feature_category: :license
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown

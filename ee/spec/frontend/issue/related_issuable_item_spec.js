@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import IssueWeight from 'ee_component/boards/components/issue_card_weight.vue';
-import { TEST_HOST } from 'jest/helpers/test_constants';
+import { TEST_HOST } from 'helpers/test_constants';
 import {
   defaultAssignees,
   defaultMilestone,

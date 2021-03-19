@@ -4,6 +4,8 @@ require 'spec_helper'
 RSpec.describe Packages::Package, type: :model do
   include SortingHelper
 
+  it_behaves_like 'having unique enum values'
+
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:creator) }
@@ -14,7 +16,18 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to have_many(:pipelines).through(:build_infos) }
     it { is_expected.to have_one(:conan_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
+    it { is_expected.to have_one(:debian_publication).inverse_of(:package).class_name('Packages::Debian::Publication') }
+    it { is_expected.to have_one(:debian_distribution).through(:debian_publication).source(:distribution).inverse_of(:packages).class_name('Packages::Debian::ProjectDistribution') }
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
+    it { is_expected.to have_one(:rubygems_metadatum).inverse_of(:package) }
+  end
+
+  describe '.with_debian_codename' do
+    let_it_be(:publication) { create(:debian_publication) }
+
+    subject { described_class.with_debian_codename(publication.distribution.codename).to_a }
+
+    it { is_expected.to contain_exactly(publication.package) }
   end
 
   describe '.with_composer_target' do
@@ -156,6 +169,18 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('My/package').for(:name) }
         it { is_expected.not_to allow_value('../../../my_package').for(:name) }
         it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
+      end
+
+      context 'npm package' do
+        subject { build_stubbed(:npm_package) }
+
+        it { is_expected.to allow_value("@group-1/package").for(:name) }
+        it { is_expected.to allow_value("@any-scope/package").for(:name) }
+        it { is_expected.to allow_value("unscoped-package").for(:name) }
+        it { is_expected.not_to allow_value("@inv@lid-scope/package").for(:name) }
+        it { is_expected.not_to allow_value("@scope/../../package").for(:name) }
+        it { is_expected.not_to allow_value("@scope%2e%2e%fpackage").for(:name) }
+        it { is_expected.not_to allow_value("@scope/sub/package").for(:name) }
       end
     end
 
@@ -337,16 +362,6 @@ RSpec.describe Packages::Package, type: :model do
     end
 
     describe '#package_already_taken' do
-      context 'npm package' do
-        let!(:package) { create(:npm_package) }
-
-        it 'will not allow a package of the same name' do
-          new_package = build(:npm_package, project: create(:project), name: package.name)
-
-          expect(new_package).not_to be_valid
-        end
-      end
-
       context 'maven package' do
         let!(:package) { create(:maven_package) }
 
@@ -374,7 +389,28 @@ RSpec.describe Packages::Package, type: :model do
       end
     end
 
-    Packages::Package.package_types.keys.without('conan').each do |pt|
+    describe "#unique_debian_package_name" do
+      let!(:package) { create(:debian_package) }
+
+      it "will allow a Debian package with same project, name and version, but different distribution" do
+        new_package = build(:debian_package, project: package.project, name: package.name, version: package.version)
+        expect(new_package).to be_valid
+      end
+
+      it "will not allow a Debian package with same project, name, version and distribution" do
+        new_package = build(:debian_package, project: package.project, name: package.name, version: package.version)
+        new_package.debian_publication.distribution = package.debian_publication.distribution
+        expect(new_package).not_to be_valid
+        expect(new_package.errors.to_a).to include('Debian package already exists in Distribution')
+      end
+
+      it "will allow a Debian package with same project, name, version, but no distribution" do
+        new_package = build(:debian_package, project: package.project, name: package.name, version: package.version, published_in: nil)
+        expect(new_package).to be_valid
+      end
+    end
+
+    Packages::Package.package_types.keys.without('conan', 'debian').each do |pt|
       context "project id, name, version and package type uniqueness for package type #{pt}" do
         let(:package) { create("#{pt}_package") }
 
@@ -485,7 +521,7 @@ RSpec.describe Packages::Package, type: :model do
 
   describe '.without_nuget_temporary_name' do
     let!(:package1) { create(:nuget_package) }
-    let!(:package2) { create(:nuget_package, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+    let!(:package2) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
     subject { described_class.without_nuget_temporary_name }
 
@@ -504,7 +540,7 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to match_array([package1, package2, package3]) }
 
     context 'with temporary packages' do
-      let!(:package1) { create(:nuget_package, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+      let!(:package1) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
       it { is_expected.to match_array([package2, package3]) }
     end
@@ -581,6 +617,28 @@ RSpec.describe Packages::Package, type: :model do
 
       it { is_expected.to match_array([pypi_package]) }
     end
+
+    describe '.displayable' do
+      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+      let_it_be(:processing_package) { create(:maven_package, :processing) }
+
+      subject { described_class.displayable }
+
+      it 'does not include hidden packages', :aggregate_failures do
+        is_expected.not_to include(hidden_package)
+        is_expected.not_to include(processing_package)
+      end
+    end
+
+    describe '.with_status' do
+      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+
+      subject { described_class.with_status(:hidden) }
+
+      it 'returns packages with specified status' do
+        is_expected.to match_array([hidden_package])
+      end
+    end
   end
 
   describe '.select_distinct_name' do
@@ -596,6 +654,20 @@ RSpec.describe Packages::Package, type: :model do
 
       expect(packages.size).to eq(2)
       expect(packages.pluck(:name)).to match_array([nuget_package.name, maven_package.name])
+    end
+  end
+
+  describe '.order_by_package_file' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:package1) { create(:maven_package, project: project) }
+    let_it_be(:package2) { create(:maven_package, project: project) }
+
+    it 'orders packages their associated package_file\'s created_at date', :aggregate_failures do
+      expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2])
+
+      create(:package_file, :xml, package: package1)
+
+      expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2, package1])
     end
   end
 
@@ -729,6 +801,75 @@ RSpec.describe Packages::Package, type: :model do
       it 'returns the first build info' do
         expect(package.original_build_info).to eq(first_build_info)
       end
+    end
+  end
+
+  describe '#package_settings' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:package) { create(:maven_package, project: project) }
+
+    it 'returns the namespace package_settings' do
+      expect(package.package_settings).to eq(group.package_settings)
+    end
+  end
+
+  describe '#sync_maven_metadata' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:package) { create(:maven_package) }
+
+    subject { package.sync_maven_metadata(user) }
+
+    shared_examples 'not enqueuing a sync worker job' do
+      it 'does not enqueue a sync worker job' do
+        expect(::Packages::Maven::Metadata::SyncWorker)
+          .not_to receive(:perform_async)
+
+        subject
+      end
+    end
+
+    it 'enqueues a sync worker job' do
+      expect(::Packages::Maven::Metadata::SyncWorker)
+        .to receive(:perform_async).with(user.id, package.project.id, package.name)
+
+      subject
+    end
+
+    context 'with no user' do
+      let(:user) { nil }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a versionless maven package' do
+      let_it_be(:package) { create(:maven_package, version: nil) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a non maven package' do
+      let_it_be(:package) { create(:npm_package) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+  end
+
+  context 'destroying a composer package' do
+    let_it_be(:package_name) { 'composer-package-name' }
+    let_it_be(:json) { { 'name' => package_name } }
+    let_it_be(:project) { create(:project, :custom_repo, files: { 'composer.json' => json.to_json } ) }
+    let!(:package) { create(:composer_package, :with_metadatum, project: project, name: package_name, version: '1.0.0', json: json) }
+
+    before do
+      Gitlab::Composer::Cache.new(project: project, name: package_name).execute
+      package.composer_metadatum.reload
+    end
+
+    it 'schedule the update job' do
+      expect(::Packages::Composer::CacheUpdateWorker).to receive(:perform_async).with(project.id, package_name, package.composer_metadatum.version_cache_sha)
+
+      package.destroy!
     end
   end
 end

@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import { toArray } from 'lodash';
+import Vue from 'vue';
 import PopoversComponent from './components/popovers.vue';
 
 let app;
@@ -32,10 +32,10 @@ const handlePopoverEvent = (rootTarget, e, selector) => {
 };
 
 export const initPopovers = () => {
-  ['mouseenter', 'focus', 'click'].forEach(event => {
+  ['mouseenter', 'focus', 'click'].forEach((event) => {
     document.addEventListener(
       event,
-      e => handlePopoverEvent(document, e, '[data-toggle="popover"]'),
+      (e) => handlePopoverEvent(document, e, '[data-toggle="popover"]'),
       true,
     );
   });
@@ -43,7 +43,7 @@ export const initPopovers = () => {
   return getPopoversApp();
 };
 
-export const dispose = elements => toArray(elements).forEach(getPopoversApp().dispose);
+export const dispose = (elements) => toArray(elements).forEach(getPopoversApp().dispose);
 
 export const destroy = () => {
   getPopoversApp().$destroy();

@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
-import waitForPromises from 'jest/helpers/wait_for_promises';
-import axios from '~/lib/utils/axios_utils';
-import { initEmojiMap, EMOJI_VERSION } from '~/emoji';
+import waitForPromises from 'helpers/wait_for_promises';
 import installGlEmojiElement from '~/behaviors/gl_emoji';
+import { initEmojiMap, EMOJI_VERSION } from '~/emoji';
 
 import * as EmojiUnicodeSupport from '~/emoji/support';
+import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/emoji/support');
 

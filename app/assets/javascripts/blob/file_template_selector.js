@@ -19,6 +19,17 @@ export default class FileTemplateSelector {
     this.$dropdownToggleText = this.$wrapper.find('.dropdown-toggle-text');
 
     this.initDropdown();
+    this.selectInitialTemplate();
+  }
+
+  selectInitialTemplate() {
+    const template = this.$dropdown.data('selected');
+
+    if (!template) {
+      return;
+    }
+
+    this.mediator.selectTemplateFile(this, template);
   }
 
   show() {
@@ -66,6 +77,8 @@ export default class FileTemplateSelector {
   reportSelectionName(options) {
     const opts = options;
     opts.query = options.selectedObj.name;
+    opts.data = options.selectedObj;
+    opts.data.source_template_project_id = options.selectedObj.project_id;
 
     this.reportSelection(opts);
   }

@@ -19,12 +19,12 @@ documentation. This functionality is based on the
 
 GitLab currently supports the following authorization flows:
 
-- **Authorization code with [Proof Key for Code Exchange (PKCE)](https://tools.ietf.org/html/rfc7636):** 
+- **Authorization code with [Proof Key for Code Exchange (PKCE)](https://tools.ietf.org/html/rfc7636):**
   Most secure. Without PKCE, you'd have to include client secrets on mobile clients,
-  and is recommended for both client and server aoos.
-- **Authorization code:** Secure and common flow. Recommended option for secure 
+  and is recommended for both client and server apps.
+- **Authorization code:** Secure and common flow. Recommended option for secure
   server-side apps.
-- **Implicit grant:** Originally designed for user-agent only apps, such as 
+- **Implicit grant:** Originally designed for user-agent only apps, such as
   single page web apps running on GitLab Pages).
   The [IETF](https://tools.ietf.org/html/draft-ietf-oauth-security-topics-09#section-2.1.2)
   recommends against Implicit grant flow.
@@ -89,7 +89,7 @@ Before starting the flow, generate the `STATE`, the `CODE_VERIFIER` and the `COD
    `/oauth/authorize` page with the following query parameters:
 
    ```plaintext
-   https://gitlab.example.com/oauth/authorize?client_id=APP_ID&redirect_uri=REDIRECT_URI&response_type=code&state=YOUR_UNIQUE_STATE_HASH&scope=REQUESTED_SCOPES&code_challenge=CODE_CHALLENGE&code_challenge_method=S256
+   https://gitlab.example.com/oauth/authorize?client_id=APP_ID&redirect_uri=REDIRECT_URI&response_type=code&state=STATE&scope=REQUESTED_SCOPES&code_challenge=CODE_CHALLENGE&code_challenge_method=S256
    ```
 
    This page asks the user to approve the request from the app to access their
@@ -100,7 +100,7 @@ Before starting the flow, generate the `STATE`, the `CODE_VERIFIER` and the `COD
    The redirect includes the authorization `code`, for example:
 
    ```plaintext
-   https://example.com/oauth/redirect?code=1234567890&state=YOUR_UNIQUE_STATE_HASH
+   https://example.com/oauth/redirect?code=1234567890&state=STATE
    ```
 
 1. With the authorization `code` returned from the previous request (denoted as
@@ -139,29 +139,31 @@ detailed flow description.
 The authorization code flow is essentially the same as
 [authorization code flow with PKCE](#authorization-code-with-proof-key-for-code-exchange-pkce),
 
+Before starting the flow, generate the `STATE`. It is a value that can't be predicted
+used by the client to maintain state between the request and callback. It should also
+be used as a CSRF token.
+
 1. Request authorization code. To do that, you should redirect the user to the
-   `/oauth/authorize` endpoint with the following GET parameters:
+   `/oauth/authorize` page with the following query parameters:
 
    ```plaintext
    https://gitlab.example.com/oauth/authorize?client_id=APP_ID&redirect_uri=REDIRECT_URI&response_type=code&state=STATE&scope=REQUESTED_SCOPES
    ```
 
-   This will ask the user to approve the applications access to their account
-   based on the scopes specified in `REQUESTED_SCOPES` and then redirect back to
-   the `REDIRECT_URI` you provided. The [scope parameter](https://github.com/doorkeeper-gem/doorkeeper/wiki/Using-Scopes#requesting-particular-scopes)
-   is a space separated list of scopes you want to have access to (e.g. `scope=read_user+profile`
-   would request `read_user` and `profile` scopes). The redirect will
-   include the GET `code` parameter, for example:
+   This page asks the user to approve the request from the app to access their
+   account based on the scopes specified in `REQUESTED_SCOPES`. The user is then
+   redirected back to the specified `REDIRECT_URI`. The [scope parameter](https://github.com/doorkeeper-gem/doorkeeper/wiki/Using-Scopes#requesting-particular-scopes)
+   is a space separated list of scopes associated with the user.
+   For example,`scope=read_user+profile` requests the `read_user` and `profile` scopes.
+   The redirect includes the authorization `code`, for example:
 
    ```plaintext
    https://example.com/oauth/redirect?code=1234567890&state=STATE
    ```
 
-   You should then use `code` to request an access token.
-
-1. Once you have the authorization code you can request an `access_token` using the
-   code. You can do that by using any HTTP client. In the following example,
-   we are using Ruby's `rest-client`:
+1. With the authorization `code` returned from the previous request (shown as
+   `RETURNED_CODE` in the following example), you can request an `access_token`, with
+   any HTTP client. The following example uses Ruby's `rest-client`:
 
    ```ruby
    parameters = 'client_id=APP_ID&client_secret=APP_SECRET&code=RETURNED_CODE&grant_type=authorization_code&redirect_uri=REDIRECT_URI'
@@ -189,7 +191,7 @@ You can now make requests to the API with the access token returned.
 ### Implicit grant flow
 
 NOTE:
-For a detailed flow diagram, see the [RFC specification](https://tools.ietf.org/html/rfc6749#section-4.2). 
+For a detailed flow diagram, see the [RFC specification](https://tools.ietf.org/html/rfc6749#section-4.2).
 
 WARNING:
 The Implicit grant flow is inherently insecure. The IETF plans to remove it in
@@ -268,10 +270,15 @@ the following parameters:
 }
 ```
 
-Also you must use HTTP Basic authentication using the `client_id` and`client_secret`
-values to authenticate the client that performs a request.
-
 Example cURL request:
+
+```shell
+echo 'grant_type=password&username=<your_username>&password=<your_password>' > auth.txt
+curl --data "@auth.txt" --request POST "https://gitlab.example.com/oauth/token"
+```
+
+You can also use this grant flow with registered OAuth applications, by using
+HTTP Basic Authentication with the application's `client_id` and `client_secret`:
 
 ```shell
 echo 'grant_type=password&username=<your_username>&password=<your_password>' > auth.txt
@@ -352,3 +359,13 @@ These are aliases for `scope` and `expires_in` respectively, and have been inclu
 prevent breaking changes introduced in [doorkeeper 5.0.2](https://github.com/doorkeeper-gem/doorkeeper/wiki/Migration-from-old-versions#from-4x-to-5x).
 
 Don't rely on these fields as they will be removed in a later release.
+
+## OAuth2 tokens and GitLab registries
+
+Standard OAuth2 tokens support different degrees of access to GitLab registries, as they:
+
+- Do not allow users to authenticate to:
+  - The GitLab [Container registry](../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
+  - Packages listed in the GitLab [Package registry](../user/packages/package_registry/index.md).
+- Allow users to get, list, and delete registries through
+  the [Container registry API](container_registry.md).

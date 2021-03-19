@@ -1,0 +1,34 @@
+# Epic events
+#
+# We are using the same slot of issue events 'project_management' for
+# epic events to allow data aggregation.
+# More information in: https://gitlab.com/gitlab-org/gitlab/-/issues/322405
+- name: g_project_management_epic_created
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+- name: g_project_management_users_updating_epic_notes
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+- name: g_project_management_users_destroying_epic_notes
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+- name: g_project_management_users_setting_epic_start_date_as_fixed
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+- name: g_project_management_users_setting_epic_start_date_as_inherited
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity

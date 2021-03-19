@@ -22,8 +22,8 @@ export const flattenGroupProperty = ({ node: epicNode }) => ({
  *
  * @param {Object} edges
  */
-export const extractGroupEpics = edges => edges.map(flattenGroupProperty);
+export const extractGroupEpics = (edges) => edges.map(flattenGroupProperty);
 
-export const addIsChildEpicTrueProperty = obj => ({ ...obj, isChildEpic: true });
+export const addIsChildEpicTrueProperty = (obj) => ({ ...obj, isChildEpic: true });
 
-export const generateKey = epic => `${epic.isChildEpic ? 'child-epic-' : 'epic-'}${epic.id}`;
+export const generateKey = (epic) => `${epic.isChildEpic ? 'child-epic-' : 'epic-'}${epic.id}`;

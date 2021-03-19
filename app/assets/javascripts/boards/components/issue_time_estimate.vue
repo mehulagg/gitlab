@@ -1,7 +1,7 @@
 <script>
 import { GlTooltip, GlIcon } from '@gitlab/ui';
-import { __ } from '~/locale';
 import { parseSeconds, stringifyTime } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
 
 export default {
   i18n: {
@@ -11,13 +11,13 @@ export default {
     GlIcon,
     GlTooltip,
   },
+  inject: ['timeTrackingLimitToHours'],
   props: {
     estimate: {
       type: Number,
       required: true,
     },
   },
-  inject: ['timeTrackingLimitToHours'],
   computed: {
     title() {
       return stringifyTime(
@@ -37,7 +37,7 @@ export default {
 <template>
   <span>
     <span ref="issueTimeEstimate" class="board-card-info card-number">
-      <gl-icon name="hourglass" class="board-card-info-icon" />
+      <gl-icon name="hourglass" class="board-card-info-icon gl-mr-2" />
       <time class="board-card-info-text">{{ timeEstimate }}</time>
     </span>
     <gl-tooltip

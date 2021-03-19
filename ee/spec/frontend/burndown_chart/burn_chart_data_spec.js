@@ -1,6 +1,7 @@
 import dateFormat from 'dateformat';
 import timezoneMock from 'timezone-mock';
 import BurndownChartData from 'ee/burndown_chart/burn_chart_data';
+import { useFakeDate } from 'helpers/fake_date';
 
 describe('BurndownChartData', () => {
   const startDate = '2017-03-01';
@@ -68,16 +69,7 @@ describe('BurndownChartData', () => {
     });
 
     describe('when viewing before due date', () => {
-      const realDateNow = Date.now;
-
-      beforeAll(() => {
-        const today = jest.fn(() => new Date(2017, 2, 2));
-        global.Date.now = today;
-      });
-
-      afterAll(() => {
-        global.Date.now = realDateNow;
-      });
+      useFakeDate(2017, 2, 2);
 
       it('counts until today if milestone due date > date today', () => {
         const chartData = burndownChartData.generateBurndownTimeseries();

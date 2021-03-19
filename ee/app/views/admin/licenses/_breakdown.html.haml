@@ -4,46 +4,44 @@
 - billable_users_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer nofollow">'.html_safe % { url: billable_users_url }
 - link_end = '</a>'.html_safe
 
-.d-flex.gl-mb-5
-  .col-sm-6.d-flex.pl-0
-    .info-well.dark-well.gl-mb-0
-      .well-segment.well-centered
-        %h3.center
-          = _('Users in License:')
-          = licensed_users(@license)
-        %hr
-        - if @license.will_expire?
-          = _('Your license is valid from')
-          %strong<>
-            = _(' %{start} to %{end}') % { start: @license.starts_at, end: @license.expires_at }
-          \.
-        = _('The %{link_start}true-up model%{link_end} allows having more users, and additional users will incur a retroactive charge on renewal.').html_safe % { link_start: true_up_link_start, link_end: link_end }
-        = seats_calculation_message(@license)
-  .col-sm-6.d-flex.pr-0
-    .info-well.dark-well.gl-mb-0
-      .well-segment.well-centered
-        %h3.center
-          = _('Billable Users:')
-          = number_with_delimiter @license.daily_billable_users_count
-        %hr
+.d-flex
+  .row
+    .col-sm-6.d-flex.gl-mb-5
+      .gl-card
+        .gl-card-body
+          %h2.gl-mt-0
+            = licensed_users(@license)
+          .text-uppercase.gl-mb-4= _('Users in License')
+          - if @license.will_expire?
+            = _('Your license is valid from')
+            %strong<>
+              = _(' %{start} to %{end}') % { start: @license.starts_at, end: @license.expires_at }
+            \.
+          = _('The %{link_start}true-up model%{link_end} allows having more users, and additional users will incur a retroactive charge on renewal.').html_safe % { link_start: true_up_link_start, link_end: link_end }
+          = seats_calculation_message(@license)
+    .col-sm-6.d-flex.gl-mb-5
+      .gl-card
+        .gl-card-body
+          %h2.gl-mt-0
+            = number_with_delimiter @license.daily_billable_users_count
+          .text-uppercase.gl-mb-4= _('Billable Users')
           %p
           = _('This is the number of %{billable_users_link_start}billable users%{link_end} on your installation, and this is the minimum number you need to purchase when you renew your license.').html_safe % { billable_users_link_start: billable_users_link_start, link_end: link_end }
-.d-flex.gl-pb-5
-  .col-sm-6.d-flex.pl-0
-    .info-well.dark-well.flex-fill.gl-mb-0
-      .well-segment.well-centered
-        %h3.center
-          = _('Maximum Users:')
-          = number_with_delimiter @license.maximum_user_count
-        %hr
+.d-flex
+  .row
+    .col-sm-6.d-flex.gl-mb-5
+      .gl-card.flex-fill
+        .gl-card-body
+          %h2.gl-mt-0
+            = number_with_delimiter @license.maximum_user_count
+          .text-uppercase.gl-mb-4= _('Maximum Users')
           = _('This is the highest peak of users on your installation since the license started.')
-  .col-sm-6.d-flex.pr-0
-    .info-well.dark-well.gl-mb-0
-      .well-segment.well-centered
-        %h3.center
-          = _('Users over License:')
-          = number_with_delimiter users_over_license
-        %hr
+    .col-sm-6.d-flex.gl-mb-5
+      .gl-card
+        .gl-card-body
+          %h2.gl-mt-0
+            = number_with_delimiter users_over_license
+          .text-uppercase.gl-mb-4= _('Users over License')
           - if users_over_license > 0
             .gl-alert.gl-alert-info.gl-mb-3{ role: 'alert' }
               = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')

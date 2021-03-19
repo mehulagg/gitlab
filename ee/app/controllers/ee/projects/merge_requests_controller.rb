@@ -11,10 +11,12 @@ module EE
         before_action only: [:show] do
           push_frontend_feature_flag(:anonymous_visual_review_feedback)
           push_frontend_feature_flag(:missing_mr_security_scan_types, @project)
-          push_frontend_feature_flag(:coverage_fuzzing_mr_widget, @project, default_enabled: true)
+          push_frontend_feature_flag(:usage_data_i_testing_metrics_report_widget_total, @project, default_enabled: true)
+          push_frontend_feature_flag(:usage_data_i_testing_web_performance_widget_total, @project, default_enabled: true)
+          push_frontend_feature_flag(:usage_data_i_testing_load_performance_widget_total, @project, default_enabled: true)
         end
 
-        before_action :whitelist_query_limiting_ee_merge, only: [:merge]
+        before_action :disable_query_limiting_ee_merge, only: [:merge]
         before_action :authorize_read_pipeline!, only: [:container_scanning_reports, :dependency_scanning_reports,
                                                         :sast_reports, :secret_detection_reports, :dast_reports,
                                                         :metrics_reports, :coverage_fuzzing_reports,
@@ -44,14 +46,6 @@ module EE
         reports_response(merge_request.compare_dependency_scanning_reports(current_user), head_pipeline)
       end
 
-      def sast_reports
-        reports_response(merge_request.compare_sast_reports(current_user), head_pipeline)
-      end
-
-      def secret_detection_reports
-        reports_response(merge_request.compare_secret_detection_reports(current_user), head_pipeline)
-      end
-
       def dast_reports
         reports_response(merge_request.compare_dast_reports(current_user), head_pipeline)
       end
@@ -70,8 +64,8 @@ module EE
 
       private
 
-      def whitelist_query_limiting_ee_merge
-        ::Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/4792')
+      def disable_query_limiting_ee_merge
+        ::Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/4792')
       end
     end
   end

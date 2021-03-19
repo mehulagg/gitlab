@@ -1,12 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormCheckbox, GlSprintf, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import component from '~/registry/explorer/components/details_page/tags_list_row.vue';
 import DeleteButton from '~/registry/explorer/components/delete_button.vue';
-import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
+import component from '~/registry/explorer/components/details_page/tags_list_row.vue';
 import {
   REMOVE_TAG_BUTTON_TITLE,
   REMOVE_TAG_BUTTON_DISABLE_TOOLTIP,
@@ -14,6 +11,9 @@ import {
   NOT_AVAILABLE_TEXT,
   NOT_AVAILABLE_SIZE,
 } from '~/registry/explorer/constants/index';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 import { tagsMock } from '../../mock_data';
 import { ListItem } from '../../stubs';
@@ -172,25 +172,31 @@ describe('tags list row', () => {
     });
 
     it('contains the totalSize and layers', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 1024, layers: 10 } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '1024', layers: 10 } });
 
       expect(findSize().text()).toMatchInterpolatedText('1.00 KiB · 10 layers');
     });
 
+    it('when totalSize is giantic', () => {
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '1099511627776', layers: 2 } });
+
+      expect(findSize().text()).toMatchInterpolatedText('1024.00 GiB · 2 layers');
+    });
+
     it('when totalSize is missing', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 0, layers: 10 } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '0', layers: 10 } });
 
       expect(findSize().text()).toMatchInterpolatedText(`${NOT_AVAILABLE_SIZE} · 10 layers`);
     });
 
     it('when layers are missing', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 1024 } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '1024' } });
 
       expect(findSize().text()).toMatchInterpolatedText('1.00 KiB');
     });
 
     it('when there is 1 layer', () => {
-      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: 0, layers: 1 } });
+      mountComponent({ ...defaultProps, tag: { ...tag, totalSize: '0', layers: 1 } });
 
       expect(findSize().text()).toMatchInterpolatedText(`${NOT_AVAILABLE_SIZE} · 1 layer`);
     });

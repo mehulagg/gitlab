@@ -26,7 +26,7 @@ RSpec.describe 'Group navbar' do
       stub_licensed_features(productivity_analytics: true)
 
       insert_after_sub_nav_item(
-        _('Contribution'),
+        _('DevOps Adoption'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Productivity')
       )
@@ -42,7 +42,7 @@ RSpec.describe 'Group navbar' do
       stub_licensed_features(cycle_analytics_for_groups: true)
 
       insert_after_sub_nav_item(
-        _('Contribution'),
+        _('DevOps Adoption'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Value Stream')
       )
@@ -66,6 +66,7 @@ RSpec.describe 'Group navbar' do
   context 'when epics are available' do
     before do
       stub_licensed_features(epics: true)
+      stub_feature_flags(epic_boards: false)
 
       insert_after_nav_item(
         _('Group overview'),
@@ -73,6 +74,28 @@ RSpec.describe 'Group navbar' do
           nav_item: _('Epics'),
           nav_sub_items: [
             _('List'),
+            _('Roadmap')
+          ]
+        }
+      )
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when epics and epic boards are available' do
+    before do
+      stub_licensed_features(epics: true)
+
+      insert_after_nav_item(
+        _('Group overview'),
+        new_nav_item: {
+          nav_item: _('Epics'),
+          nav_sub_items: [
+            _('List'),
+            _('Boards'),
             _('Roadmap')
           ]
         }
@@ -204,16 +227,5 @@ RSpec.describe 'Group navbar' do
     end
 
     it_behaves_like 'verified navigation bar'
-  end
-
-  context 'when invite team members is available' do
-    it 'includes the div for js-invite-members-trigger' do
-      stub_feature_flags(invite_members_group_modal: true)
-      allow_any_instance_of( InviteMembersHelper ).to receive(:invite_members_allowed?).and_return(true)
-
-      visit group_path(group)
-
-      expect(page).to have_selector('.js-invite-members-trigger')
-    end
   end
 end

@@ -18,6 +18,8 @@ class Dashboard::SnippetsController < Dashboard::ApplicationController
       .execute
       .page(params[:page])
       .inc_author
+      .inc_projects_namespace_route
+      .inc_statistics
 
     return if redirect_out_of_range(@snippets)
 

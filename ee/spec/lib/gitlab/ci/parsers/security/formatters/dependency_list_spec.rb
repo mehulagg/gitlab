@@ -67,28 +67,41 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
       end
     end
 
-    context 'when feature flag for dependency path is off' do
-      let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][0] }
-      let(:location) { data[:location] }
+    context 'with vulnerable dependency' do
+      let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][1] }
+      let(:data) { formatter.format(dependency, package_manager, file_path, vulnerability_data) }
 
-      before do
-        stub_feature_flags(path_to_vulnerable_dependency: false)
+      context 'with feature `standalone vulnerabilities` enabled' do
+        let_it_be(:standalone_vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
+
+        let(:vulnerability_data) do
+          create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: standalone_vulnerability)
+        end
+
+        it 'merge vulnerabilities data' do
+          vulnerability = data[:vulnerabilities].first
+          path = "/security/vulnerabilities/#{standalone_vulnerability.id}"
+
+          expect(vulnerability[:id]).to eq(standalone_vulnerability.id)
+          expect(vulnerability[:url]).to end_with(path)
+          expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+          expect(vulnerability[:severity]).to eq('high')
+        end
       end
 
-      it { expect(location[:top_level]).to be_nil }
-      it { expect(location[:ancestors]).to be_nil }
-      it { expect(location[:path]).to eq('file.path') }
-    end
+      context 'with disabled feature' do
+        let(:vulnerability_data) { parsed_report['vulnerabilities'].first }
 
-    context 'with vulnerable dependency' do
-      let(:data) { formatter.format(dependency, package_manager, file_path, parsed_report['vulnerabilities'].first) }
-      let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][1] }
+        before do
+          stub_feature_flags(standalone_vuln_dependency_list: false)
+        end
 
-      it 'merge vulnerabilities data' do
-        vulnerabilities = data[:vulnerabilities]
+        it 'merge vulnerabilities data' do
+          vulnerability = data[:vulnerabilities].first
 
-        expect(vulnerabilities.first[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-        expect(vulnerabilities.first[:severity]).to eq('high')
+          expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+          expect(vulnerability[:severity]).to eq('high')
+        end
       end
     end
   end

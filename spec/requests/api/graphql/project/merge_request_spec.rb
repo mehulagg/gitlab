@@ -9,7 +9,7 @@ RSpec.describe 'getting merge request information nested in a project' do
   let(:current_user) { create(:user) }
   let(:merge_request_graphql_data) { graphql_data['project']['mergeRequest'] }
   let!(:merge_request) { create(:merge_request, source_project: project) }
-  let(:mr_fields) { all_graphql_fields_for('MergeRequest') }
+  let(:mr_fields) { all_graphql_fields_for('MergeRequest', excluded: ['pipeline']) }
 
   let(:query) do
     graphql_query_for(
@@ -65,14 +65,6 @@ RSpec.describe 'getting merge request information nested in a project' do
 
       expect(graphql_data_at(:project, :merge_request, :reviewers, :nodes)).to match_array(expected)
       expect(graphql_data_at(:project, :merge_request, :participants, :nodes)).to include(*expected)
-    end
-
-    it 'suppresses reviewers if reviewers are not allowed' do
-      stub_feature_flags(merge_request_reviewers: false)
-
-      post_graphql(query, current_user: current_user)
-
-      expect(graphql_data_at(:project, :merge_request, :reviewers)).to be_nil
     end
   end
 
@@ -250,6 +242,43 @@ RSpec.describe 'getting merge request information nested in a project' do
     it 'returns checking' do
       post_graphql(query, current_user: current_user)
       expect(merge_request_graphql_data['mergeStatus']).to eq('checking')
+    end
+  end
+
+  # see: https://gitlab.com/gitlab-org/gitlab/-/issues/297358
+  context 'when the notes have been preloaded (by participants)' do
+    let(:query) do
+      <<~GQL
+      query($path: ID!) {
+        project(fullPath: $path) {
+          mrs: mergeRequests(first: 1) {
+            nodes {
+              participants { nodes { id } }
+              notes(first: 1) {
+                pageInfo { endCursor hasPreviousPage hasNextPage }
+                nodes { id }
+              }
+            }
+          }
+        }
+      }
+      GQL
+    end
+
+    before do
+      create_list(:note_on_merge_request, 3, project: project, noteable: merge_request)
+    end
+
+    it 'does not error' do
+      post_graphql(query,
+                   current_user: current_user,
+                   variables: { path: project.full_path })
+
+      expect(graphql_data_at(:project, :mrs, :nodes, :notes, :pageInfo)).to contain_exactly a_hash_including(
+        'endCursor' => String,
+        'hasNextPage' => true,
+        'hasPreviousPage' => false
+      )
     end
   end
 end

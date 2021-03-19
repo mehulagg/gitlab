@@ -2,7 +2,7 @@
 
 class SubscriptionsController < ApplicationController
   layout 'checkout'
-  skip_before_action :authenticate_user!, only: :new
+  skip_before_action :authenticate_user!, only: [:new, :buy_minutes]
 
   feature_category :purchase
 
@@ -24,10 +24,12 @@ class SubscriptionsController < ApplicationController
   end
 
   def new
-    return if current_user
+    redirect_unauthenticated_user('checkout')
+  end
 
-    store_location_for :user, request.fullpath
-    redirect_to new_user_registration_path(redirect_from: 'checkout')
+  def buy_minutes
+    render_404 unless Feature.enabled?(:new_route_ci_minutes_purchase, default_enabled: :yaml)
+    redirect_unauthenticated_user
   end
 
   def payment_form
@@ -89,5 +91,12 @@ class SubscriptionsController < ApplicationController
 
   def customer_portal_new_subscription_url
     "#{EE::SUBSCRIPTIONS_URL}/subscriptions/new?plan_id=#{params[:plan_id]}&transaction=create_subscription"
+  end
+
+  def redirect_unauthenticated_user(from = action_name)
+    return if current_user
+
+    store_location_for :user, request.fullpath
+    redirect_to new_user_registration_path(redirect_from: from)
   end
 end

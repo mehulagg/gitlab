@@ -1,6 +1,6 @@
-import * as Sentry from '~/sentry/wrapper';
-import axios from '~/lib/utils/axios_utils';
+import * as Sentry from '@sentry/browser';
 import Api from '~/api';
+import axios from '~/lib/utils/axios_utils';
 import * as types from './mutation_types';
 
 export const setPipelineJobsPath = ({ commit }, path) => commit(types.SET_PIPELINE_JOBS_PATH, path);
@@ -29,11 +29,11 @@ export const fetchPipelineJobs = ({ commit, state }) => {
   }
 
   return requestPromise
-    .then(response => {
+    .then((response) => {
       const { data } = response;
       commit(types.RECEIVE_PIPELINE_JOBS_SUCCESS, data);
     })
-    .catch(error => {
+    .catch((error) => {
       Sentry.captureException(error);
       commit(types.RECEIVE_PIPELINE_JOBS_ERROR);
     });

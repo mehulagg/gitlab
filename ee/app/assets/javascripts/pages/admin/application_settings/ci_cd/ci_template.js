@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import { __ } from '~/locale';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import { __ } from '~/locale';
 
 export default class CiTemplate {
   constructor() {
@@ -16,12 +16,12 @@ export default class CiTemplate {
       selectable: true,
       filterable: true,
       allowClear: true,
-      toggleLabel: item => item.name,
+      toggleLabel: (item) => item.name,
       search: {
         fields: ['name'],
       },
-      clicked: clickEvent => this.updateInputValue(clickEvent),
-      text: item => item.name,
+      clicked: (clickEvent) => this.updateInputValue(clickEvent),
+      text: (item) => item.name,
     });
 
     this.setDropdownToggle();

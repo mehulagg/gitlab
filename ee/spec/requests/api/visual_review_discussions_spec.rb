@@ -158,7 +158,7 @@ RSpec.describe API::VisualReviewDiscussions do
         end
 
         it 'returns error messaging specifying that the feature is disabled' do
-          expect(json_response['message']).to eq('403 Forbidden  - Anonymous visual review feedback is disabled')
+          expect(json_response['message']).to eq('403 Forbidden - Anonymous visual review feedback is disabled')
         end
       end
     end

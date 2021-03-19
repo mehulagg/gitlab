@@ -1,6 +1,6 @@
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 
-import { shallowMount } from '@vue/test-utils';
 import LabelsSelect from '~/labels_select';
 import BaseComponent from '~/vue_shared/components/sidebar/labels_select/base.vue';
 
@@ -15,7 +15,7 @@ describe('BaseComponent', () => {
   let wrapper;
   let vm;
 
-  beforeEach(done => {
+  beforeEach((done) => {
     wrapper = createComponent();
 
     ({ vm } = wrapper);

@@ -16,7 +16,7 @@ module NetworkPolicies
 
       ServiceResponse.success(payload: get_policy)
     rescue Kubeclient::HttpError => e
-      kubernetes_error_response(e)
+      kubernetes_error_response(e.message)
     end
 
     private

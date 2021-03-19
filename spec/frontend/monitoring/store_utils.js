@@ -1,6 +1,6 @@
 import * as types from '~/monitoring/stores/mutation_types';
-import { metricsResult, environmentData, dashboardGitResponse } from './mock_data';
 import { metricsDashboardPayload } from './fixture_data';
+import { metricsResult, environmentData, dashboardGitResponse } from './mock_data';
 
 export const setMetricResult = ({ store, result, group = 0, panel = 0, metric = 0 }) => {
   const { dashboard } = store.state.monitoringDashboard;
@@ -15,7 +15,7 @@ export const setMetricResult = ({ store, result, group = 0, panel = 0, metric = 
   });
 };
 
-const setEnvironmentData = store => {
+const setEnvironmentData = (store) => {
   store.commit(`monitoringDashboard/${types.RECEIVE_ENVIRONMENTS_DATA_SUCCESS}`, environmentData);
 };
 
@@ -28,14 +28,14 @@ export const setupAllDashboards = (store, path) => {
   }
 };
 
-export const setupStoreWithDashboard = store => {
+export const setupStoreWithDashboard = (store) => {
   store.commit(
     `monitoringDashboard/${types.RECEIVE_METRICS_DASHBOARD_SUCCESS}`,
     metricsDashboardPayload,
   );
 };
 
-export const setupStoreWithLinks = store => {
+export const setupStoreWithLinks = (store) => {
   store.commit(`monitoringDashboard/${types.RECEIVE_METRICS_DASHBOARD_SUCCESS}`, {
     ...metricsDashboardPayload,
     links: [
@@ -47,7 +47,7 @@ export const setupStoreWithLinks = store => {
   });
 };
 
-export const setupStoreWithData = store => {
+export const setupStoreWithData = (store) => {
   setupAllDashboards(store);
   setupStoreWithDashboard(store);
 

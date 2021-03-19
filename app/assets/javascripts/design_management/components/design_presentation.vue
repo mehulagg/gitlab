@@ -1,7 +1,7 @@
 <script>
 import { throttle } from 'lodash';
-import DesignImage from './image.vue';
 import DesignOverlay from './design_overlay.vue';
+import DesignImage from './image.vue';
 
 const CLICK_DRAG_BUFFER_PX = 2;
 
@@ -58,7 +58,7 @@ export default {
   },
   computed: {
     discussionStartingNotes() {
-      return this.discussions.map(discussion => ({
+      return this.discussions.map((discussion) => ({
         ...discussion.notes[0],
         index: discussion.index,
       }));

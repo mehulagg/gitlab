@@ -1,17 +1,17 @@
-import { mount, createWrapper } from '@vue/test-utils';
 import { getByText as getByTextHelper } from '@testing-library/dom';
+import { mount, createWrapper } from '@vue/test-utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import MemberSource from '~/members/components/table/member_source.vue';
 
 describe('MemberSource', () => {
   let wrapper;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = mount(MemberSource, {
       propsData: {
         memberSource: {
           id: 102,
-          name: 'Foo bar',
+          fullName: 'Foo bar',
           webUrl: 'https://gitlab.com/groups/foo-bar',
         },
         ...propsData,
@@ -25,7 +25,7 @@ describe('MemberSource', () => {
   const getByText = (text, options) =>
     createWrapper(getByTextHelper(wrapper.element, text, options));
 
-  const getTooltipDirective = elementWrapper => getBinding(elementWrapper.element, 'gl-tooltip');
+  const getTooltipDirective = (elementWrapper) => getBinding(elementWrapper.element, 'gl-tooltip');
 
   afterEach(() => {
     wrapper.destroy();

@@ -28,7 +28,8 @@ export default function initTestCaseShow({ mountPointSelector }) {
       ...el.dataset,
       projectsFetchPath: sidebarOptions.projectsAutocompleteEndpoint,
       canEditTestCase: parseBoolean(el.dataset.canEditTestCase),
+      lockVersion: parseInt(el.dataset.lockVersion, 10),
     },
-    render: createElement => createElement(TestCaseShowApp),
+    render: (createElement) => createElement(TestCaseShowApp),
   });
 }

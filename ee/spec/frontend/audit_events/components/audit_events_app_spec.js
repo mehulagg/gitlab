@@ -19,7 +19,7 @@ describe('AuditEventsApp', () => {
   let store;
 
   const events = [{ foo: 'bar' }];
-  const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map(type => ({ type }));
+  const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map((type) => ({ type }));
   const exportUrl = 'http://example.com/audit_log_reports.csv';
 
   const initComponent = (props = {}) => {

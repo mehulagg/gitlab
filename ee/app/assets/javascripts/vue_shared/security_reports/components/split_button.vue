@@ -1,5 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { visitUrl } from '~/lib/utils/url_utility';
 
 export default {
   components: {
@@ -17,9 +18,11 @@ export default {
       default: false,
     },
   },
-  data: () => ({
-    selectedButton: {},
-  }),
+  data() {
+    return {
+      selectedButton: {},
+    };
+  },
   created() {
     this.setButton(this.buttons[0]);
   },
@@ -28,7 +31,11 @@ export default {
       this.selectedButton = button;
     },
     handleClick() {
-      this.$emit(this.selectedButton.action);
+      if (this.selectedButton.href) {
+        visitUrl(this.selectedButton.href, true);
+      } else {
+        this.$emit(this.selectedButton.action);
+      }
     },
   },
 };
@@ -40,6 +47,7 @@ export default {
     :disabled="disabled"
     variant="success"
     :text="selectedButton.name"
+    :href="selectedButton.href"
     split
     @click="handleClick"
   >

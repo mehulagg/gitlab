@@ -31,6 +31,13 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  inject: [
+    'projectName',
+    'featureFlagsHelpPagePath',
+    'unleashApiUrl',
+    'featureFlagsClientExampleHelpPagePath',
+    'featureFlagsClientLibrariesHelpPagePath',
+  ],
 
   props: {
     instanceId: {
@@ -55,13 +62,6 @@ export default {
       required: true,
     },
   },
-  inject: [
-    'projectName',
-    'featureFlagsHelpPagePath',
-    'unleashApiUrl',
-    'featureFlagsClientExampleHelpPagePath',
-    'featureFlagsClientLibrariesHelpPagePath',
-  ],
   translations: {
     cancelActionLabel: __('Close'),
     modalTitle: s__('FeatureFlags|Configure feature flags'),
@@ -84,6 +84,11 @@ export default {
     cancelActionProps() {
       return {
         text: this.$options.translations.cancelActionLabel,
+        attributes: [
+          {
+            category: 'secondary',
+          },
+        ],
       };
     },
     canRegenerateInstanceId() {
@@ -120,11 +125,11 @@ export default {
 <template>
   <gl-modal
     :modal-id="modalId"
-    :action-cancel="cancelActionProps"
-    :action-primary="regenerateInstanceIdActionProps"
-    @canceled="clearState"
+    :action-primary="cancelActionProps"
+    :action-secondary="regenerateInstanceIdActionProps"
+    @secondary.prevent="rotateToken"
     @hide="clearState"
-    @primary.prevent="rotateToken"
+    @primary="clearState"
   >
     <template #modal-title>
       {{ $options.translations.modalTitle }}

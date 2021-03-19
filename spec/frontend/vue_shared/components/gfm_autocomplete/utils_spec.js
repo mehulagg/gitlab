@@ -14,6 +14,10 @@ describe('gfm_autocomplete/utils', () => {
       expect(emojisConfig.lookup(emoji)).toBe(emoji);
     });
 
+    it('limits the number of rendered items to 100', () => {
+      expect(emojisConfig.menuItemLimit).toBe(100);
+    });
+
     it('shows the emoji name and icon in the menu item', () => {
       expect(emojisConfig.menuItemTemplate({ original: emoji })).toMatchSnapshot();
     });
@@ -45,6 +49,10 @@ describe('gfm_autocomplete/utils', () => {
       expect(issuesConfig.lookup(projectContextIssue)).toBe(
         `${projectContextIssue.iid}${projectContextIssue.title}`,
       );
+    });
+
+    it('limits the number of rendered items to 100', () => {
+      expect(issuesConfig.menuItemLimit).toBe(100);
     });
 
     it('shows the reference and title in the menu item within a group context', () => {
@@ -96,6 +104,10 @@ describe('gfm_autocomplete/utils', () => {
 
     it('searches using `title`', () => {
       expect(labelsConfig.lookup).toBe('title');
+    });
+
+    it('limits the number of rendered items to 100', () => {
+      expect(labelsConfig.menuItemLimit).toBe(100);
     });
 
     it('shows the title in the menu item', () => {
@@ -201,6 +213,10 @@ describe('gfm_autocomplete/utils', () => {
       expect(membersConfig.lookup(groupMember)).toBe(last(groupMember.name.split(' / ')));
     });
 
+    it('limits the items in the autocomplete menu to 10', () => {
+      expect(membersConfig.menuItemLimit).toBe(10);
+    });
+
     it('shows the avatar, name and username in the menu item for a user', () => {
       expect(membersConfig.menuItemTemplate({ original: userMember })).toMatchSnapshot();
     });
@@ -287,6 +303,10 @@ describe('gfm_autocomplete/utils', () => {
       );
     });
 
+    it('limits the number of rendered items to 100', () => {
+      expect(mergeRequestsConfig.menuItemLimit).toBe(100);
+    });
+
     it('shows the reference and title in the menu item within a group context', () => {
       expect(
         mergeRequestsConfig.menuItemTemplate({ original: groupContextMergeRequest }),
@@ -328,6 +348,10 @@ describe('gfm_autocomplete/utils', () => {
       expect(milestonesConfig.lookup).toBe('title');
     });
 
+    it('limits the number of rendered items to 100', () => {
+      expect(milestonesConfig.menuItemLimit).toBe(100);
+    });
+
     it('shows the title in the menu item', () => {
       expect(milestonesConfig.menuItemTemplate({ original: milestone })).toMatchSnapshot();
     });
@@ -364,6 +388,10 @@ describe('gfm_autocomplete/utils', () => {
       );
     });
 
+    it('limits the number of rendered items to 100', () => {
+      expect(quickActionsConfig.menuItemLimit).toBe(100);
+    });
+
     it('shows the name, aliases, params and description in the menu item', () => {
       expect(quickActionsConfig.menuItemTemplate({ original: quickAction })).toMatchSnapshot();
     });
@@ -386,6 +414,10 @@ describe('gfm_autocomplete/utils', () => {
 
     it('searches using both the id and title', () => {
       expect(snippetsConfig.lookup(snippet)).toBe(`${snippet.id}${snippet.title}`);
+    });
+
+    it('limits the number of rendered items to 100', () => {
+      expect(snippetsConfig.menuItemLimit).toBe(100);
     });
 
     it('shows the id and title in the menu item', () => {

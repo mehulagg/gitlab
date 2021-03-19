@@ -4,14 +4,12 @@ import SketchLoader from '~/blob/sketch';
 jest.mock('jszip');
 
 describe('Sketch viewer', () => {
-  preloadFixtures('static/sketch_viewer.html');
-
   beforeEach(() => {
     loadFixtures('static/sketch_viewer.html');
   });
 
   describe('with error message', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       jest.spyOn(SketchLoader.prototype, 'getZipFile').mockImplementation(
         () =>
           new Promise((resolve, reject) => {
@@ -37,7 +35,7 @@ describe('Sketch viewer', () => {
   });
 
   describe('success', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       const loadAsyncMock = {
         files: {
           'previews/preview.png': {
@@ -48,7 +46,7 @@ describe('Sketch viewer', () => {
 
       loadAsyncMock.files['previews/preview.png'].async.mockImplementation(
         () =>
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolve('foo');
             done();
           }),

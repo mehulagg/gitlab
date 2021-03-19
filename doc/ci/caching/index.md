@@ -87,7 +87,7 @@ use one or more of the following:
   that are only available to a particular project.
 - [Use a `key`](../yaml/README.md#cachekey) that fits your workflow (for example,
   different caches on each branch). For that, you can take advantage of the
-  [CI/CD predefined variables](../variables/README.md#predefined-environment-variables).
+  [predefined CI/CD variables](../variables/README.md#predefined-cicd-variables).
 
 For runners to work with caches efficiently, you must do one of the following:
 
@@ -580,6 +580,9 @@ via the GitLab UI:
    ![Clear runner caches](img/clear_runners_cache.png)
 
 1. On the next push, your CI/CD job uses a new cache.
+
+NOTE:
+Each time you clear the cache manually, the [internal cache name](#where-the-caches-are-stored) is updated. The name uses the format `cache-<index>`, and the index increments by one each time. The old cache is not deleted. You can manually delete these files from the runner storage.
 
 <!-- ## Troubleshooting
 

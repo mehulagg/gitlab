@@ -1,11 +1,11 @@
 import Sortable from 'sortablejs';
-import { s__ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   getBoardSortableDefaultOptions,
   sortableStart,
 } from '~/boards/mixins/sortable_default_options';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
 
 const updateIssue = (url, issueList, { move_before_id, move_after_id }) =>
   axios
@@ -39,7 +39,7 @@ const initManualOrdering = (draggableSelector = 'li.issue') => {
       onStart: () => {
         sortableStart();
       },
-      onUpdate: event => {
+      onUpdate: (event) => {
         const el = event.item;
 
         const url = el.getAttribute('url') || el.dataset.url;

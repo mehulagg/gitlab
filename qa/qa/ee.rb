@@ -49,6 +49,11 @@ module QA
           autoload :LDAPSync, 'qa/ee/page/group/settings/ldap_sync'
           autoload :General, 'qa/ee/page/group/settings/general'
         end
+
+        module Wiki
+          autoload :Show, 'qa/ee/page/group/wiki/show'
+          autoload :Edit, 'qa/ee/page/group/wiki/edit'
+        end
       end
 
       module File
@@ -81,7 +86,6 @@ module QA
 
         module Settings
           autoload :Templates, 'qa/ee/page/admin/settings/templates'
-          autoload :Elasticsearch, 'qa/ee/page/admin/settings/elasticsearch'
           autoload :Preferences, 'qa/ee/page/admin/settings/preferences'
 
           module Component
@@ -142,6 +146,7 @@ module QA
           autoload :Repository, 'qa/ee/page/project/settings/repository'
           autoload :PushRules, 'qa/ee/page/project/settings/push_rules'
           autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance'
+          autoload :IssueTemplateDefault, 'qa/ee/page/project/settings/issue_template_default.rb'
         end
 
         module Operations

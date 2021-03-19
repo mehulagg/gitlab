@@ -10,7 +10,8 @@ RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access lev
   let(:maryjane) { create(:user, name: 'Mary Jane') }
   let(:owner)    { create(:user) }
   let(:group)    { create(:group_with_ldap_group_link, :public) }
-  let(:project)  { create(:project, namespace: group)  }
+  let(:subgroup) { create(:group, :public, parent: group) }
+  let(:project) { create(:project, namespace: group) }
 
   let!(:owner_member)   { create(:group_member, :owner, group: group, user: owner) }
   let!(:ldap_member)    { create(:group_member, :guest, group: group, user: johndoe, ldap: true) }
@@ -23,8 +24,14 @@ RSpec.describe 'Groups > Members > Maintainer/Owner can override LDAP access lev
     sign_in(owner)
   end
 
-  it 'override not available on project members page', :js do
+  it 'does not allow override on project members page', :js do
     visit namespace_project_project_members_path(group, project)
+
+    expect(page).not_to have_button 'Edit permissions'
+  end
+
+  it 'does not allow override of inherited group members', :js do
+    visit group_group_members_path(subgroup)
 
     expect(page).not_to have_button 'Edit permissions'
   end

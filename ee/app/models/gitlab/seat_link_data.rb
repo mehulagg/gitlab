@@ -40,21 +40,15 @@ module Gitlab
       ::License.current.data
     end
 
-    def license_starts_at
-      ::License.current.starts_at.beginning_of_day
-    end
-
     def default_max_count
-      HistoricalData.max_historical_user_count(
-        from: license_starts_at,
-        to: timestamp
-      )
+      ::License.current.historical_max(to: timestamp)
     end
 
     def historical_data
       strong_memoize(:historical_data) do
         to_timestamp = timestamp || Time.current
-        HistoricalData.during(license_starts_at..to_timestamp).order(:recorded_at).last
+
+        ::License.current.historical_data(to: to_timestamp).order(:recorded_at).last
       end
     end
 

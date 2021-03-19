@@ -1,8 +1,0 @@
----
-name: whats_new_dropdown
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29183
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/215422
-milestone: '12.10'
-type: development
-group: group::retention
-default_enabled: false

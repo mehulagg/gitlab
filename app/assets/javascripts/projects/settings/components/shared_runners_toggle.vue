@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlToggle, GlTooltip } from '@gitlab/ui';
-import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 
 const DEFAULT_ERROR_MESSAGE = __('An error occurred while updating the configuration.');
 
@@ -46,7 +46,7 @@ export default {
           this.isLoading = false;
           this.isSharedRunnerEnabled = !this.isSharedRunnerEnabled;
         })
-        .catch(error => {
+        .catch((error) => {
           this.isLoading = false;
           this.errorMessage = error.response?.data?.error || DEFAULT_ERROR_MESSAGE;
         });

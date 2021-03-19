@@ -8,8 +8,6 @@ describe('GL Style Field Errors', () => {
     testContext = {};
   });
 
-  preloadFixtures('static/gl_field_errors.html');
-
   beforeEach(() => {
     loadFixtures('static/gl_field_errors.html');
     const $form = $('form.gl-show-field-errors');
@@ -33,7 +31,7 @@ describe('GL Style Field Errors', () => {
 
     expect(customErrorElem.length).toBe(1);
 
-    const customErrors = testContext.fieldErrors.state.inputs.filter(input => {
+    const customErrors = testContext.fieldErrors.state.inputs.filter((input) => {
       return input.inputElement.hasClass(customErrorFlag);
     });
 

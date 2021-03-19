@@ -25,7 +25,7 @@ describe('TableHeaderComponent', () => {
 
   describe('data', () => {
     it('returns data with columnIconMeta prop initialized', () => {
-      defaultColumns.forEach(column => {
+      defaultColumns.forEach((column) => {
         expect(vm.columnIconMeta[column.name].sortIcon).toBe('angle-up');
         expect(vm.columnIconMeta[column.name].iconTooltip).toBe('Ascending');
       });

@@ -10,7 +10,7 @@ module Gitlab
           def process
             job_id = nil
 
-            unless skippable?
+            unless registry_exists?
               job_id = destroy_repository
             end
 
@@ -35,7 +35,7 @@ module Gitlab
               project_id: event.project_id,
               repository_storage_name: event.repository_storage_name,
               disk_path: event.deleted_path,
-              skippable: skippable?,
+              skippable: registry_exists?,
               job_id: job_id)
           end
         end

@@ -1,19 +1,17 @@
 <script>
-import { GlButton, GlFormSelect } from '@gitlab/ui';
-import { s__, n__ } from '~/locale';
+import { GlButton, GlAlert } from '@gitlab/ui';
+import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
+import { __, s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
-import createFlash from '~/flash';
-import vulnerabilityDismiss from '../graphql/vulnerability_dismiss.mutation.graphql';
-
-const REASON_NONE = s__('SecurityReports|[No reason]');
-const REASON_WONT_FIX = s__("SecurityReports|Won't fix / Accept risk");
-const REASON_FALSE_POSITIVE = s__('SecurityReports|False positive');
+import eventHub from '../utils/event_hub';
+import StatusDropdown from './status_dropdown.vue';
 
 export default {
   name: 'SelectionSummary',
   components: {
     GlButton,
-    GlFormSelect,
+    GlAlert,
+    StatusDropdown,
   },
   props: {
     selectedVulnerabilities: {
@@ -23,101 +21,106 @@ export default {
   },
   data() {
     return {
-      dismissalReason: null,
+      updateErrorText: null,
+      selectedStatus: null,
+      selectedStatusPayload: undefined,
     };
   },
   computed: {
     selectedVulnerabilitiesCount() {
       return this.selectedVulnerabilities.length;
     },
-    canDismissVulnerability() {
-      return Boolean(this.dismissalReason && this.selectedVulnerabilitiesCount > 0);
-    },
-    message() {
-      return n__(
-        'Dismiss %d selected vulnerability as',
-        'Dismiss %d selected vulnerabilities as',
-        this.selectedVulnerabilitiesCount,
-      );
+    shouldShowActionButtons() {
+      return Boolean(this.selectedStatus);
     },
   },
   methods: {
-    handleDismiss() {
-      if (!this.canDismissVulnerability) return;
-
-      this.dismissSelectedVulnerabilities();
+    handleStatusDropdownChange({ action, payload }) {
+      this.selectedStatus = action;
+      this.selectedStatusPayload = payload;
     },
-    dismissSelectedVulnerabilities() {
-      let fulfilledCount = 0;
-      let rejectedCount = 0;
 
-      const promises = this.selectedVulnerabilities.map(vulnerability =>
-        this.$apollo
+    resetSelected() {
+      this.$emit('cancel-selection');
+    },
+
+    handleSubmit() {
+      this.updateErrorText = null;
+      let fulfilledCount = 0;
+      const rejected = [];
+
+      const promises = this.selectedVulnerabilities.map((vulnerability) => {
+        return this.$apollo
           .mutate({
-            mutation: vulnerabilityDismiss,
-            variables: { id: vulnerability.id, comment: this.dismissalReason },
+            mutation: vulnerabilityStateMutations[this.selectedStatus],
+            variables: { id: vulnerability.id, ...this.selectedStatusPayload },
           })
-          .then(() => {
+          .then(({ data }) => {
+            const [queryName] = Object.keys(data);
+
+            if (data[queryName].errors?.length > 0) {
+              throw data[queryName].errors;
+            }
+
             fulfilledCount += 1;
             this.$emit('vulnerability-updated', vulnerability.id);
           })
           .catch(() => {
-            rejectedCount += 1;
-          }),
-      );
-
-      Promise.all(promises)
-        .then(() => {
-          if (fulfilledCount > 0) {
-            toast(
-              n__('%d vulnerability dismissed', '%d vulnerabilities dismissed', fulfilledCount),
-            );
-          }
-
-          if (rejectedCount > 0) {
-            createFlash({
-              message: n__(
-                'SecurityReports|There was an error dismissing %d vulnerability. Please try again later.',
-                'SecurityReports|There was an error dismissing %d vulnerabilities. Please try again later.',
-                rejectedCount,
-              ),
-            });
-          }
-        })
-        .catch(() => {
-          createFlash({
-            message: s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
+            rejected.push(vulnerability.id.split('/').pop());
           });
-        });
+      });
+
+      return Promise.all(promises).then(() => {
+        if (fulfilledCount > 0) {
+          toast(this.$options.i18n.vulnerabilitiesUpdated(fulfilledCount));
+          eventHub.$emit('vulnerabilities-updated', this);
+        }
+
+        if (rejected.length > 0) {
+          this.updateErrorText = this.$options.i18n.vulnerabilitiesUpdateFailed(
+            rejected.join(', '),
+          );
+        }
+      });
     },
   },
-  dismissalReasons: [
-    { value: null, text: s__('SecurityReports|Select a reason') },
-    REASON_FALSE_POSITIVE,
-    REASON_WONT_FIX,
-    REASON_NONE,
-  ],
+  i18n: {
+    cancel: __('Cancel'),
+    selected: __('Selected'),
+    changeStatus: s__('SecurityReports|Change status'),
+    vulnerabilitiesUpdated: (count) =>
+      n__('%d vulnerability updated', '%d vulnerabilities updated', count),
+    vulnerabilitiesUpdateFailed: (vulnIds) =>
+      s__(`SecurityReports|Failed updating vulnerabilities with the following IDs: ${vulnIds}`),
+  },
 };
 </script>
 
 <template>
-  <div class="card">
-    <form class="card-body d-flex align-items-center" @submit.prevent="handleDismiss">
-      <span data-testid="dismiss-message">{{ message }}</span>
-      <gl-form-select
-        v-model="dismissalReason"
-        class="mx-3 w-auto"
-        :options="$options.dismissalReasons"
-      />
-      <gl-button
-        type="submit"
-        class="js-no-auto-disable"
-        category="secondary"
-        variant="warning"
-        :disabled="!canDismissVulnerability"
+  <div class="card gl-z-index-2!" :class="{ 'with-error': Boolean(updateErrorText) }">
+    <gl-alert v-if="updateErrorText" variant="danger" :dismissible="false">
+      {{ updateErrorText }}
+    </gl-alert>
+
+    <form class="card-body gl-display-flex gl-align-items-center" @submit.prevent="handleSubmit">
+      <div
+        class="gl-line-height-0 gl-border-r-solid gl-border-gray-100 gl-pr-6 gl-border-1 gl-h-7 gl-display-flex gl-align-items-center"
       >
-        {{ s__('SecurityReports|Dismiss Selected') }}
-      </gl-button>
+        <span
+          ><b>{{ selectedVulnerabilitiesCount }}</b> {{ $options.i18n.selected }}</span
+        >
+      </div>
+      <div class="gl-flex-fill-1 gl-ml-6 gl-mr-4">
+        <status-dropdown @change="handleStatusDropdownChange" />
+      </div>
+      <template v-if="shouldShowActionButtons">
+        <gl-button type="button" class="gl-mr-4" @click="resetSelected">
+          {{ $options.i18n.cancel }}
+        </gl-button>
+        <gl-button type="submit" category="primary" variant="confirm">
+          {{ $options.i18n.changeStatus }}
+        </gl-button>
+      </template>
     </form>
   </div>
 </template>

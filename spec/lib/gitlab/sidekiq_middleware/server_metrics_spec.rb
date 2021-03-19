@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+# rubocop: disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
   context "with worker attribution" do
     subject { described_class.new }
@@ -112,6 +113,14 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
             expect { |b| subject.call(worker, job, :test, &b) }.to yield_control.once
           end
 
+          it 'calls BackgroundTransaction' do
+            expect_next_instance_of(Gitlab::Metrics::BackgroundTransaction) do |instance|
+              expect(instance).to receive(:run)
+            end
+
+            subject.call(worker, job, :test) {}
+          end
+
           it 'sets queue specific metrics' do
             expect(running_jobs_metric).to receive(:increment).with(labels, -1)
             expect(running_jobs_metric).to receive(:increment).with(labels, 1)
@@ -198,6 +207,37 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
       it_behaves_like "a metrics middleware"
     end
 
+    context "when a worker is wrapped into ActiveJob" do
+      before do
+        stub_const('TestWrappedWorker', Class.new)
+        TestWrappedWorker.class_eval do
+          include Sidekiq::Worker
+        end
+      end
+
+      let(:job) do
+        {
+          "class" => ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper,
+          "wrapped" => TestWrappedWorker
+        }
+      end
+
+      let(:worker) { TestWrappedWorker.new }
+      let(:worker_class) { TestWrappedWorker }
+      let(:labels) { default_labels.merge(urgency: "") }
+
+      it_behaves_like "a metrics middleware"
+    end
+
+    context 'for ActionMailer::MailDeliveryJob' do
+      let(:job) { { 'class' => ActionMailer::MailDeliveryJob } }
+      let(:worker) { ActionMailer::MailDeliveryJob.new }
+      let(:worker_class) { ActionMailer::MailDeliveryJob }
+      let(:labels) { default_labels.merge(feature_category: 'issue_tracking') }
+
+      it_behaves_like 'a metrics middleware'
+    end
+
     context "when workers are attributed" do
       def create_attributed_worker_class(urgency, external_dependencies, resource_boundary, category)
         Class.new do
@@ -265,3 +305,4 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
     end
   end
 end
+# rubocop: enable RSpec/MultipleMemoizedHelpers

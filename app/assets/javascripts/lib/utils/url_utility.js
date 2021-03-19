@@ -16,6 +16,50 @@ function decodeUrlParameter(val) {
   return decodeURIComponent(val.replace(/\+/g, '%20'));
 }
 
+/**
+ * Safely encodes a string to be used as a path
+ *
+ * Note: This function DOES encode typical URL parts like ?, =, &, #, and +
+ * If you need to use search parameters or URL fragments, they should be
+ *     added AFTER calling this function, not before.
+ *
+ * Usecase: An image filename is stored verbatim, and you need to load it in
+ *     the browser.
+ *
+ * Example: /some_path/file #1.jpg      ==> /some_path/file%20%231.jpg
+ * Example: /some-path/file! Final!.jpg ==> /some-path/file%21%20Final%21.jpg
+ *
+ * Essentially, if a character *could* present a problem in a URL, it's escaped
+ *     to the hexadecimal representation instead. This means it's a bit more
+ *     aggressive than encodeURIComponent: that built-in function doesn't
+ *     encode some characters that *could* be problematic, so this function
+ *     adds them (#, !, ~, *, ', (, and )).
+ *     Additionally, encodeURIComponent *does* encode `/`, but we want safer
+ *     URLs, not non-functional URLs, so this function DEcodes slashes ('%2F').
+ *
+ * @param {String} potentiallyUnsafePath
+ * @returns {String}
+ */
+export function encodeSaferUrl(potentiallyUnsafePath) {
+  const unencode = ['%2F'];
+  const encode = ['#', '!', '~', '\\*', "'", '\\(', '\\)'];
+  let saferPath = encodeURIComponent(potentiallyUnsafePath);
+
+  unencode.forEach((code) => {
+    saferPath = saferPath.replace(new RegExp(code, 'g'), decodeURIComponent(code));
+  });
+  encode.forEach((code) => {
+    const encodedValue = code
+      .codePointAt(code.length - 1)
+      .toString(16)
+      .toUpperCase();
+
+    saferPath = saferPath.replace(new RegExp(code, 'g'), `%${encodedValue}`);
+  });
+
+  return saferPath;
+}
+
 export function cleanLeadingSeparator(path) {
   return path.replace(PATH_SEPARATOR_LEADING_REGEX, '');
 }
@@ -112,13 +156,13 @@ export function mergeUrlParams(params, url, options = {}) {
   const mergedKeys = sort ? Object.keys(merged).sort() : Object.keys(merged);
 
   const newQuery = mergedKeys
-    .filter(key => merged[key] !== null)
-    .map(key => {
+    .filter((key) => merged[key] !== null)
+    .map((key) => {
       let value = merged[key];
       const encodedKey = encodeURIComponent(key);
       if (spreadArrays && Array.isArray(value)) {
         value = merged[key]
-          .map(arrayValue => encodeURIComponent(arrayValue))
+          .map((arrayValue) => encodeURIComponent(arrayValue))
           .join(`&${encodedKey}[]=`);
         return `${encodedKey}[]=${value}`;
       }
@@ -150,11 +194,11 @@ export function removeParams(params, url = window.location.href, skipEncoding = 
     return url;
   }
 
-  const removableParams = skipEncoding ? params : params.map(param => encodeURIComponent(param));
+  const removableParams = skipEncoding ? params : params.map((param) => encodeURIComponent(param));
 
   const updatedQuery = query
     .split('&')
-    .filter(paramPair => {
+    .filter((paramPair) => {
       const [foundParam] = paramPair.split('=');
       return removableParams.indexOf(foundParam) < 0;
     })
@@ -237,7 +281,7 @@ export function redirectTo(url) {
   return window.location.assign(url);
 }
 
-export const escapeFileUrl = fileUrl => encodeURIComponent(fileUrl).replace(/%2F/g, '/');
+export const escapeFileUrl = (fileUrl) => encodeURIComponent(fileUrl).replace(/%2F/g, '/');
 
 export function webIDEUrl(route = undefined) {
   let returnUrl = `${gon.relative_url_root || ''}/-/ide/`;
@@ -307,6 +351,20 @@ export function isBlobUrl(url) {
  */
 export function isAbsoluteOrRootRelative(url) {
   return isAbsolute(url) || isRootRelative(url);
+}
+
+/**
+ * Returns true if url is an external URL
+ *
+ * @param {String} url
+ * @returns {Boolean}
+ */
+export function isExternal(url) {
+  if (isRootRelative(url)) {
+    return false;
+  }
+
+  return !url.includes(gon.gitlab_url);
 }
 
 /**
@@ -396,7 +454,7 @@ export function queryToObject(query, options = {}) {
  */
 export function objectToQuery(obj) {
   return Object.keys(obj)
-    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
     .join('&');
 }
 
@@ -415,12 +473,13 @@ export const setUrlParams = (
   url = window.location.href,
   clearParams = false,
   railsArraySyntax = false,
+  decodeParams = false,
 ) => {
   const urlObj = new URL(url);
   const queryString = urlObj.search;
   const searchParams = clearParams ? new URLSearchParams('') : new URLSearchParams(queryString);
 
-  Object.keys(params).forEach(key => {
+  Object.keys(params).forEach((key) => {
     if (params[key] === null || params[key] === undefined) {
       searchParams.delete(key);
     } else if (Array.isArray(params[key])) {
@@ -437,7 +496,9 @@ export const setUrlParams = (
     }
   });
 
-  urlObj.search = searchParams.toString();
+  urlObj.search = decodeParams
+    ? decodeURIComponent(searchParams.toString())
+    : searchParams.toString();
 
   return urlObj.toString();
 };

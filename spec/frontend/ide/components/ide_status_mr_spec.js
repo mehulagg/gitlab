@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon, GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import IdeStatusMr from '~/ide/components/ide_status_mr.vue';
 
@@ -9,7 +9,7 @@ const TEST_URL = `${TEST_HOST}merge-requests/9001`;
 describe('ide/components/ide_status_mr', () => {
   let wrapper;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(IdeStatusMr, {
       propsData: props,
     });

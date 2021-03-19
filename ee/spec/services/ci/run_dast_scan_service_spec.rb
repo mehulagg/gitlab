@@ -15,16 +15,6 @@ RSpec.describe Ci::RunDastScanService do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
-  describe '.ci_template' do
-    it 'builds a hash' do
-      expect(described_class.ci_template).to be_a(Hash)
-    end
-
-    it 'has only one stage' do
-      expect(described_class.ci_template['stages']).to eq(['dast'])
-    end
-  end
-
   describe '#execute' do
     subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21, use_ajax_spider: use_ajax_spider, show_debug_messages: show_debug_messages, full_scan_enabled: full_scan_enabled) }
 
@@ -140,7 +130,7 @@ RSpec.describe Ci::RunDastScanService do
             'public' => true
           }
         ]
-        expect(build.yaml_variables).to eq(expected_variables)
+        expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 
       it 'enqueues a build' do

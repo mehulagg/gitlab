@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.instance_variables_ui_enabled?
-        ::Feature.enabled?(:ci_instance_variables_ui, default_enabled: true)
-      end
-
       def self.pipeline_latest?
         ::Feature.enabled?(:ci_pipeline_latest, default_enabled: true)
       end
@@ -38,10 +34,6 @@ module Gitlab
         ::Feature.enabled?(:ci_disallow_to_create_merge_request_pipelines_in_target_project, target_project)
       end
 
-      def self.project_transactionless_destroy?(project)
-        Feature.enabled?(:project_transactionless_destroy, project, default_enabled: false)
-      end
-
       def self.trace_overwrite?
         ::Feature.enabled?(:ci_trace_overwrite, type: :ops, default_enabled: false)
       end
@@ -55,24 +47,29 @@ module Gitlab
         ::Feature.enabled?(:ci_trace_log_invalid_chunks, project, type: :ops, default_enabled: false)
       end
 
-      def self.pipeline_open_merge_requests?(project)
-        ::Feature.enabled?(:ci_pipeline_open_merge_requests, project, default_enabled: false)
+      def self.validate_build_dependencies?(project)
+        ::Feature.enabled?(:ci_validate_build_dependencies, project, default_enabled: :yaml) &&
+          ::Feature.disabled?(:ci_validate_build_dependencies_override, project)
       end
 
-      def self.seed_block_run_before_workflow_rules_enabled?(project)
-        ::Feature.enabled?(:ci_seed_block_run_before_workflow_rules, project, default_enabled: true)
+      def self.display_quality_on_mr_diff?(project)
+        ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: false)
       end
 
-      def self.ci_pipeline_editor_page_enabled?(project)
-        ::Feature.enabled?(:ci_pipeline_editor_page, project, default_enabled: false)
+      def self.display_codequality_backend_comparison?(project)
+        ::Feature.enabled?(:codequality_backend_comparison, project, default_enabled: :yaml)
       end
 
-      def self.allow_failure_with_exit_codes_enabled?
-        ::Feature.enabled?(:ci_allow_failure_with_exit_codes)
+      def self.multiple_cache_per_job?
+        ::Feature.enabled?(:multiple_cache_per_job, default_enabled: :yaml)
       end
 
-      def self.rules_variables_enabled?(project)
-        ::Feature.enabled?(:ci_rules_variables, project, default_enabled: false)
+      def self.ci_commit_pipeline_mini_graph_vue_enabled?(project)
+        ::Feature.enabled?(:ci_commit_pipeline_mini_graph_vue, project, default_enabled: :yaml)
+      end
+
+      def self.remove_duplicate_artifact_exposure_paths?(project)
+        ::Feature.enabled?(:remove_duplicate_artifact_exposure_paths, project, default_enabled: :yaml)
       end
     end
   end

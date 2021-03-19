@@ -7,7 +7,7 @@ module Resolvers
 
       argument :link_type, Types::Vulnerability::IssueLinkTypeEnum,
                required: false,
-               description: 'Filter issue links by link type'
+               description: 'Filter issue links by link type.'
 
       delegate :issue_links, :created_issue_links, to: :object, private: true
 

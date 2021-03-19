@@ -1,3 +1,5 @@
+import { truncateSha } from '~/lib/utils/text_utility';
+
 import {
   DIFF_FILE_SYMLINK_MODE,
   DIFF_FILE_DELETED_MODE,
@@ -8,8 +10,8 @@ import { getDerivedMergeRequestInformation } from './merge_request';
 import { uuids } from './uuids';
 
 function fileSymlinkInformation(file, fileList) {
-  const duplicates = fileList.filter(iteratedFile => iteratedFile.file_hash === file.file_hash);
-  const includesSymlink = duplicates.some(iteratedFile => {
+  const duplicates = fileList.filter((iteratedFile) => iteratedFile.file_hash === file.file_hash);
+  const includesSymlink = duplicates.some((iteratedFile) => {
     return [iteratedFile.a_mode, iteratedFile.b_mode].includes(DIFF_FILE_SYMLINK_MODE);
   });
   const brokenSymlinkScenario = duplicates.length > 1 && includesSymlink;
@@ -77,4 +79,8 @@ export function isCollapsed(file) {
   };
 
   return collapsedStates[type];
+}
+
+export function getShortShaFromFile(file) {
+  return file.content_sha ? truncateSha(String(file.content_sha)) : null;
 }

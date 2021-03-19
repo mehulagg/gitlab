@@ -355,6 +355,21 @@ RSpec.describe MarkupHelper do
           expect(doc.css('.gl-label-link')).not_to be_empty
         end
       end
+
+      context 'when content has uploads' do
+        let(:upload_link) { '/uploads/test.png' }
+        let(:content) { "![ImageTest](#{upload_link})" }
+
+        before do
+          allow(wiki).to receive(:wiki_base_path).and_return(project.wiki.wiki_base_path)
+        end
+
+        it 'renders uploads relative to project' do
+          result = helper.render_wiki_content(wiki)
+
+          expect(result).to include("#{project.full_path}#{upload_link}")
+        end
+      end
     end
 
     context 'when file is Asciidoc' do
@@ -364,6 +379,27 @@ RSpec.describe MarkupHelper do
         expect(Gitlab::Asciidoc).to receive(:render)
 
         helper.render_wiki_content(wiki)
+      end
+    end
+
+    context 'when file is Kramdown' do
+      let(:extension) { 'rmd' }
+      let(:content) do
+        <<-EOF
+{::options parse_block_html="true" /}
+
+<div>
+FooBar
+</div>
+        EOF
+      end
+
+      it 'renders using #markdown_unsafe helper method' do
+        expect(helper).to receive(:markdown_unsafe).with(content, context)
+
+        result = helper.render_wiki_content(wiki)
+
+        expect(result).to be_empty
       end
     end
 

@@ -30,6 +30,10 @@ class Packages::PackageFile < ApplicationRecord
   scope :preload_conan_file_metadata, -> { preload(:conan_file_metadatum) }
   scope :preload_debian_file_metadata, -> { preload(:debian_file_metadatum) }
 
+  scope :for_rubygem_with_file_name, ->(project, file_name) do
+    joins(:package).merge(project.packages.rubygems).with_file_name(file_name)
+  end
+
   scope :with_conan_file_type, ->(file_type) do
     joins(:conan_file_metadatum)
       .where(packages_conan_file_metadata: { conan_file_type: ::Packages::Conan::FileMetadatum.conan_file_types[file_type] })
@@ -53,10 +57,6 @@ class Packages::PackageFile < ApplicationRecord
 
   def download_path
     Gitlab::Routing.url_helpers.download_project_package_file_path(project, self)
-  end
-
-  def local?
-    file_store == ::Packages::PackageFileUploader::Store::LOCAL
   end
 
   private

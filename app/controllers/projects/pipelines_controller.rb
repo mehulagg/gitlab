@@ -4,24 +4,22 @@ class Projects::PipelinesController < Projects::ApplicationController
   include ::Gitlab::Utils::StrongMemoize
   include Analytics::UniqueVisitsHelper
 
-  before_action :whitelist_query_limiting, only: [:create, :retry]
+  before_action :disable_query_limiting, only: [:create, :retry]
   before_action :pipeline, except: [:index, :new, :create, :charts, :config_variables]
   before_action :set_pipeline_path, only: [:show]
   before_action :authorize_read_pipeline!
   before_action :authorize_read_build!, only: [:index]
+  before_action :authorize_read_analytics!, only: [:charts]
   before_action :authorize_create_pipeline!, only: [:new, :create, :config_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
-    push_frontend_feature_flag(:dag_pipeline_tab, project, default_enabled: true)
-    push_frontend_feature_flag(:pipelines_security_report_summary, project)
-    push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_pipeline_header, project, type: :development, default_enabled: false)
-    push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: false)
-    push_frontend_feature_flag(:graphql_pipeline_analytics, project, type: :development)
-    push_frontend_feature_flag(:new_pipeline_form_prefilled_vars, project, type: :development, default_enabled: true)
+    push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:graphql_pipeline_details_users, current_user, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:jira_for_vulnerabilities, project, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:new_pipelines_table, project, default_enabled: :yaml)
   end
   before_action :ensure_pipeline, only: [:show]
-  before_action :push_experiment_to_gon, only: :index, if: :html_request?
 
   # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/225596
   before_action :redirect_for_legacy_scope_filter, only: [:index], if: -> { request.format.html? }
@@ -46,11 +44,7 @@ class Projects::PipelinesController < Projects::ApplicationController
     @pipelines_count = limited_pipelines_count(project)
 
     respond_to do |format|
-      format.html do
-        record_empty_pipeline_experiment
-
-        render :index
-      end
+      format.html
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
@@ -98,7 +92,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def show
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/26657')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/26657')
 
     respond_to do |format|
       format.html
@@ -189,23 +183,6 @@ class Projects::PipelinesController < Projects::ApplicationController
     end
   end
 
-  def charts
-    @charts = {}
-    @counts = {}
-
-    return if Feature.enabled?(:graphql_pipeline_analytics)
-
-    @charts[:week] = Gitlab::Ci::Charts::WeekChart.new(project)
-    @charts[:month] = Gitlab::Ci::Charts::MonthChart.new(project)
-    @charts[:year] = Gitlab::Ci::Charts::YearChart.new(project)
-    @charts[:pipeline_times] = Gitlab::Ci::Charts::PipelineTime.new(project)
-
-    @counts[:total] = @project.all_pipelines.count(:all)
-    @counts[:success] = @project.all_pipelines.success.count(:all)
-    @counts[:failed] = @project.all_pipelines.failed.count(:all)
-    @counts[:total_duration] = @project.all_pipelines.total_duration
-  end
-
   def test_report
     respond_to do |format|
       format.html do
@@ -292,9 +269,9 @@ class Projects::PipelinesController < Projects::ApplicationController
             &.present(current_user: current_user)
   end
 
-  def whitelist_query_limiting
+  def disable_query_limiting
     # Also see https://gitlab.com/gitlab-org/gitlab-foss/issues/42343
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42339')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42339')
   end
 
   def authorize_update_pipeline!
@@ -317,20 +294,6 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def index_params
     params.permit(:scope, :username, :ref, :status)
-  end
-
-  def record_empty_pipeline_experiment
-    return unless @pipelines_count.to_i == 0
-    return if helpers.has_gitlab_ci?(@project)
-
-    record_experiment_user(:pipelines_empty_state)
-  end
-
-  def push_experiment_to_gon
-    return unless current_user
-
-    push_frontend_experiment(:pipelines_empty_state, subject: current_user)
-    frontend_experimentation_tracking_data(:pipelines_empty_state, 'view', project.namespace_id, subject: current_user)
   end
 end
 

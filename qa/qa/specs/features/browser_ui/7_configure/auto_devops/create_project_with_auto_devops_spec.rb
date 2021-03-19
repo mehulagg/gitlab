@@ -23,9 +23,7 @@ module QA
           cluster&.remove!
         end
 
-        it 'runs auto devops', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/702' do
-          skip('Test requires tunnel: see https://gitlab.com/gitlab-org/gitlab/-/issues/251090')
-
+        it 'runs auto devops', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1715' do
           Flow::Login.sign_in
 
           # Set an application secret CI variable (prefixed with K8S_SECRET_)
@@ -117,7 +115,7 @@ module QA
         end
       end
 
-      it 'runs an AutoDevOps pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/444' do
+      it 'runs an AutoDevOps pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1277' do
         Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|

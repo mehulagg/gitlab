@@ -1,8 +1,8 @@
 <script>
 /* eslint-disable @gitlab/require-i18n-strings */
 import { GlModal, GlLink, GlSprintf } from '@gitlab/ui';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { __ } from '~/locale';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
 export default {
   i18n: {
@@ -108,9 +108,7 @@ export default {
       {{ $options.i18n.steps.step1.help }}
     </p>
     <div class="gl-display-flex">
-      <pre class="gl-overflow-scroll gl-w-full" data-testid="how-to-merge-instructions">{{
-        mergeInfo1
-      }}</pre>
+      <pre class="gl-w-full" data-testid="how-to-merge-instructions">{{ mergeInfo1 }}</pre>
       <clipboard-button
         :text="mergeInfo1"
         :title="$options.i18n.copyCommands"
@@ -131,9 +129,7 @@ export default {
       {{ $options.i18n.steps.step3.help }}
     </p>
     <div class="gl-display-flex">
-      <pre class="gl-overflow-scroll gl-w-full" data-testid="how-to-merge-instructions">{{
-        mergeInfo2
-      }}</pre>
+      <pre class="gl-w-full" data-testid="how-to-merge-instructions">{{ mergeInfo2 }}</pre>
       <clipboard-button
         :text="mergeInfo2"
         :title="$options.i18n.copyCommands"
@@ -147,9 +143,7 @@ export default {
       {{ $options.i18n.steps.step4.help }}
     </p>
     <div class="gl-display-flex">
-      <pre class="gl-overflow-scroll gl-w-full" data-testid="how-to-merge-instructions">{{
-        mergeInfo3
-      }}</pre>
+      <pre class="gl-w-full" data-testid="how-to-merge-instructions">{{ mergeInfo3 }}</pre>
       <clipboard-button
         :text="mergeInfo3"
         :title="$options.i18n.copyCommands"

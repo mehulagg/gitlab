@@ -1,10 +1,10 @@
+import { deprecatedCreateFlash as flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
-import { deprecatedCreateFlash as flash } from '~/flash';
-import * as types from '../mutation_types';
-import * as messages from '../messages';
 import * as terminalService from '../../../../services/terminals';
 import { STARTING, STOPPING, STOPPED } from '../constants';
+import * as messages from '../messages';
+import * as types from '../mutation_types';
 
 export const requestStartSession = ({ commit }) => {
   commit(types.SET_SESSION_STATUS, STARTING);
@@ -45,7 +45,7 @@ export const startSession = ({ state, dispatch, rootGetters, rootState }) => {
     .then(({ data }) => {
       dispatch('receiveStartSessionSuccess', data);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveStartSessionError', error);
     });
 };
@@ -73,7 +73,7 @@ export const stopSession = ({ state, dispatch }) => {
     .then(() => {
       dispatch('receiveStopSessionSuccess');
     })
-    .catch(err => {
+    .catch((err) => {
       dispatch('receiveStopSessionError', err);
     });
 };
@@ -103,7 +103,7 @@ export const restartSession = ({ state, dispatch, rootState }) => {
     .then(({ data }) => {
       dispatch('receiveStartSessionSuccess', data);
     })
-    .catch(error => {
+    .catch((error) => {
       const responseStatus = error.response && error.response.status;
       // We may have removed the build, in this case we'll just create a new session
       if (

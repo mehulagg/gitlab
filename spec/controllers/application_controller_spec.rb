@@ -56,8 +56,6 @@ RSpec.describe ApplicationController do
     end
   end
 
-  it_behaves_like 'a Trackable Controller'
-
   describe '#add_gon_variables' do
     before do
       Gon.clear
@@ -720,6 +718,49 @@ RSpec.describe ApplicationController do
     end
   end
 
+  describe '#stream_csv_headers' do
+    controller(described_class) do
+      def index
+        respond_to do |format|
+          format.csv do
+            stream_csv_headers('test.csv')
+
+            self.response_body = fixture_file_upload('spec/fixtures/csv_comma.csv')
+          end
+        end
+      end
+    end
+
+    subject { get :index, format: :csv }
+
+    before do
+      sign_in(user)
+    end
+
+    it 'sets no-cache headers', :aggregate_failures do
+      subject
+
+      expect(response.headers['Cache-Control']).to eq 'no-cache, no-store'
+      expect(response.headers['Pragma']).to eq 'no-cache'
+      expect(response.headers['Expires']).to eq 'Fri, 01 Jan 1990 00:00:00 GMT'
+    end
+
+    it 'sets stream headers', :aggregate_failures do
+      subject
+
+      expect(response.headers['Content-Length']).to be nil
+      expect(response.headers['X-Accel-Buffering']).to eq 'no'
+      expect(response.headers['Last-Modified']).to eq '0'
+    end
+
+    it 'sets the csv specific headers', :aggregate_failures do
+      subject
+
+      expect(response.headers['Content-Type']).to eq 'text/csv; charset=utf-8; header=present'
+      expect(response.headers['Content-Disposition']).to eq "attachment; filename=\"test.csv\""
+    end
+  end
+
   context 'Gitlab::Session' do
     controller(described_class) do
       prepend_before_action do
@@ -857,7 +898,7 @@ RSpec.describe ApplicationController do
       feature_category :issue_tracking
 
       def index
-        Labkit::Context.with_context do |context|
+        Gitlab::ApplicationContext.with_raw_context do |context|
           render json: context.to_h
         end
       end

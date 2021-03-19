@@ -10,7 +10,7 @@ module Epics
     def perform(epic_ids)
       return if epic_ids.blank?
 
-      Epics::UpdateDatesService.new(Epic.for_ids(epic_ids)).execute
+      Epics::UpdateDatesService.new(Epic.id_in(epic_ids)).execute
     end
   end
 end

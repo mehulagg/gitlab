@@ -7,6 +7,7 @@ module Projects
 
       NUMBER_OF_RUNNERS_PER_PAGE = 20
 
+      layout 'project_settings'
       before_action :authorize_admin_pipeline!
       before_action :define_variables
       before_action do
@@ -144,8 +145,8 @@ module Projects
       def define_badges_variables
         @ref = params[:ref] || @project.default_branch || 'master'
 
-        @badges = [Gitlab::Badge::Pipeline::Status,
-                   Gitlab::Badge::Coverage::Report]
+        @badges = [Gitlab::Ci::Badge::Pipeline::Status,
+                   Gitlab::Ci::Badge::Coverage::Report]
 
         @badges.map! do |badge|
           badge.new(@project, @ref).metadata

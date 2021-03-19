@@ -1,18 +1,20 @@
 import isPlainObject from 'lodash/isPlainObject';
-import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
+import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
+import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
+import { DEFAULT_SCANNER } from './constants';
 
-const parseOptions = obj =>
+const parseOptions = (obj) =>
   Object.entries(obj).map(([id, name]) => ({ id: id.toUpperCase(), name }));
 
-export const mapProjects = projects =>
-  projects.map(p => ({ id: p.id.split('/').pop(), name: p.name }));
+export const mapProjects = (projects) =>
+  projects.map((p) => ({ id: p.id.split('/').pop(), name: p.name }));
 
 const stateOptions = parseOptions(VULNERABILITY_STATES);
-const defaultStateOptions = stateOptions.filter(x => ['DETECTED', 'CONFIRMED'].includes(x.id));
+const defaultStateOptions = stateOptions.filter((x) => ['DETECTED', 'CONFIRMED'].includes(x.id));
 
 export const stateFilter = {
   name: s__('SecurityReports|Status'),
@@ -30,15 +32,40 @@ export const severityFilter = {
   defaultOptions: [],
 };
 
+export const createScannerOption = (vendor, reportType) => {
+  const type = reportType.toUpperCase();
+
+  return {
+    id: gon.features?.customSecurityScanners ? `${vendor}.${type}` : type,
+    reportType: reportType.toUpperCase(),
+    name: convertReportType(reportType),
+    externalIds: [],
+  };
+};
+
 export const scannerFilter = {
   name: s__('SecurityReports|Scanner'),
   id: 'reportType',
-  options: parseOptions(REPORT_TYPES),
+  options: Object.keys(REPORT_TYPES).map((x) => createScannerOption(DEFAULT_SCANNER, x)),
   allOption: BASE_FILTERS.report_type,
   defaultOptions: [],
 };
 
-export const getProjectFilter = projects => {
+export const activityOptions = {
+  NO_ACTIVITY: { id: 'NO_ACTIVITY', name: s__('SecurityReports|No activity') },
+  WITH_ISSUES: { id: 'WITH_ISSUES', name: s__('SecurityReports|With issues') },
+  NO_LONGER_DETECTED: { id: 'NO_LONGER_DETECTED', name: s__('SecurityReports|No longer detected') },
+};
+
+export const activityFilter = {
+  name: s__('Reports|Activity'),
+  id: 'activity',
+  options: Object.values(activityOptions),
+  allOption: BASE_FILTERS.activity,
+  defaultOptions: [],
+};
+
+export const getProjectFilter = (projects) => {
   return {
     name: s__('SecurityReports|Project'),
     id: 'projectId',
@@ -92,7 +119,7 @@ export const getFormattedSummary = (rawSummary = {}) => {
     return name ? [name, scanSummary] : null;
   });
   // Filter out keys that could not be matched with any translation and are thus considered invalid
-  return formattedEntries.filter(entry => entry !== null);
+  return formattedEntries.filter((entry) => entry !== null);
 };
 
 /**
@@ -103,7 +130,7 @@ export const getFormattedSummary = (rawSummary = {}) => {
  * @param {Object} pageInfo
  * @returns {Object}
  */
-export const preparePageInfo = pageInfo => {
+export const preparePageInfo = (pageInfo) => {
   return { ...pageInfo, hasNextPage: Boolean(pageInfo?.endCursor) };
 };
 

@@ -4,9 +4,9 @@ require 'spec_helper'
 
 RSpec.describe VulnerabilitiesHelper do
   let_it_be(:user) { create(:user) }
-  let(:project) { create(:project, :repository, :public) }
-  let(:pipeline) { create(:ci_pipeline, :success, project: project) }
-  let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
+  let_it_be(:project) { create(:project, :repository, :public) }
+  let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+  let_it_be(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
   let(:vulnerability) { create(:vulnerability, title: "My vulnerability", project: project, findings: [finding]) }
 
   before do
@@ -38,10 +38,12 @@ RSpec.describe VulnerabilitiesHelper do
                     :issue_feedback,
                     :project,
                     :remediations,
-                    :solution)
+                    :solution,
+                    :uuid,
+                    :details)
     end
 
-    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner] }
+    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid details dismissal_feedback] }
 
     before do
       vulnerability_serializer_stub = instance_double("VulnerabilitySerializer")
@@ -63,6 +65,7 @@ RSpec.describe VulnerabilitiesHelper do
         new_issue_url: "/#{project.full_path}/-/issues/new?vulnerability_id=#{vulnerability.id}",
         create_jira_issue_url: nil,
         related_jira_issues_path: "/#{project.full_path}/-/integrations/jira/issues?vulnerability_ids%5B%5D=#{vulnerability.id}",
+        jira_integration_settings_path: "/#{project.full_path}/-/services/jira/edit",
         has_mr: anything,
         create_mr_url: "/#{project.full_path}/-/vulnerability_feedback",
         discussions_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/discussions",
@@ -143,6 +146,22 @@ RSpec.describe VulnerabilitiesHelper do
         expect(subject[:pipeline]).to be_nil
       end
     end
+
+    describe '[:has_mr]' do
+      subject { helper.vulnerability_details(vulnerability, pipeline)[:has_mr] }
+
+      context 'with existing merge request feedback' do
+        before do
+          create(:vulnerability_feedback, :merge_request, project: project, pipeline: pipeline, project_fingerprint: finding.project_fingerprint)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'without feedback' do
+        it { is_expected.to be_falsey }
+      end
+    end
   end
 
   describe '#create_jira_issue_url_for' do
@@ -158,6 +177,7 @@ RSpec.describe VulnerabilitiesHelper do
     context 'with jira vulnerabilities integration enabled' do
       before do
         allow(project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(true)
+        allow(project).to receive(:configured_to_create_issues_from_vulnerabilities?).and_return(true)
       end
 
       let(:expected_jira_issue_description) do
@@ -219,6 +239,7 @@ RSpec.describe VulnerabilitiesHelper do
     context 'with jira vulnerabilities integration disabled' do
       before do
         allow(project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(false)
+        allow(project).to receive(:configured_to_create_issues_from_vulnerabilities?).and_return(false)
       end
 
       it { expect(subject[:create_jira_issue_url]).to be_nil }
@@ -247,7 +268,10 @@ RSpec.describe VulnerabilitiesHelper do
         response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
         evidence_source: anything,
         assets: kind_of(Array),
-        supporting_messages: kind_of(Array)
+        supporting_messages: kind_of(Array),
+        uuid: kind_of(String),
+        details: kind_of(Hash),
+        dismissal_feedback: anything
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))
@@ -262,6 +286,47 @@ RSpec.describe VulnerabilitiesHelper do
       it 'does not have a blob_path if there is no file' do
         expect(subject[:location]).not_to have_key('blob_path')
       end
+    end
+
+    context 'with existing dismissal feedback' do
+      let_it_be(:feedback) { create(:vulnerability_feedback, :comment, :dismissal, project: project, pipeline: pipeline, project_fingerprint: finding.project_fingerprint) }
+
+      it 'returns dismissal feedback information', :aggregate_failures do
+        dismissal_feedback = subject[:dismissal_feedback]
+        expect(dismissal_feedback[:dismissal_reason]).to eq(feedback.dismissal_reason)
+        expect(dismissal_feedback[:dismissal_descriptions]).to eq(Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] })
+        expect(dismissal_feedback[:comment_details][:comment]).to eq(feedback.comment)
+      end
+    end
+  end
+
+  describe '#vulnerability_scan_data?' do
+    subject { helper.vulnerability_scan_data?(vulnerability) }
+
+    context 'scanner present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'scan present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(false)
+        allow(vulnerability).to receive(:scan).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'neither scan nor scanner being present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(false)
+        allow(vulnerability).to receive(:scan).and_return(false)
+      end
+
+      it { is_expected.to be_falsey }
     end
   end
 end

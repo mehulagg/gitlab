@@ -70,7 +70,7 @@ module API
           optional :variables, Array, desc: 'Array of variables available in the pipeline'
         end
         post ':id/pipeline' do
-          Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42124')
+          Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42124')
 
           authorize! :create_pipeline, user_project
 
@@ -121,6 +121,7 @@ module API
         end
         params do
           requires :pipeline_id, type: Integer, desc: 'The pipeline ID'
+          optional :include_retried, type: Boolean, default: false, desc: 'Includes retried jobs'
           use :optional_scope
           use :pagination
         end

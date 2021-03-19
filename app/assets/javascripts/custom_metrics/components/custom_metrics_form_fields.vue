@@ -8,11 +8,11 @@ import {
   GlIcon,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { __, s__ } from '~/locale';
-import csrf from '~/lib/utils/csrf';
 import axios from '~/lib/utils/axios_utils';
-import statusCodes from '~/lib/utils/http_status';
 import { backOff } from '~/lib/utils/common_utils';
+import csrf from '~/lib/utils/csrf';
+import statusCodes from '~/lib/utils/http_status';
+import { __, s__ } from '~/locale';
 import { queryTypes, formDataValidator } from '../constants';
 
 const VALIDATION_REQUEST_TIMEOUT = 10000;
@@ -22,7 +22,7 @@ let cancelTokenSource;
 function backOffRequest(makeRequestCallback) {
   return backOff((next, stop) => {
     makeRequestCallback()
-      .then(resp => {
+      .then((resp) => {
         if (resp.status === statusCodes.OK) {
           stop(resp);
         } else {
@@ -32,7 +32,7 @@ function backOffRequest(makeRequestCallback) {
       // If the request is cancelled by axios
       // then consider it as noop so that its not
       // caught by subsequent catches
-      .catch(thrown => (axios.isCancel(thrown) ? undefined : stop(thrown)));
+      .catch((thrown) => (axios.isCancel(thrown) ? undefined : stop(thrown)));
   }, VALIDATION_REQUEST_TIMEOUT);
 }
 
@@ -144,7 +144,7 @@ export default {
       // as well.
       cancelTokenSource = axiosCancelToken.source();
       this.requestValidation(this.query, cancelTokenSource.token)
-        .then(res => {
+        .then((res) => {
           const response = res.data;
           const { valid, error } = response.query;
           if (response.success) {

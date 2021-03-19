@@ -6,9 +6,7 @@ disqus_identifier: 'https://docs.gitlab.com/ee/ci/pipelines.html'
 type: reference
 ---
 
-# CI/CD pipelines
-
-> Introduced in GitLab 8.8.
+# CI/CD pipelines **(FREE)**
 
 NOTE:
 Watch the
@@ -77,7 +75,7 @@ You can also configure specific aspects of your pipelines through the GitLab UI.
 
 - [Pipeline settings](settings.md) for each project.
 - [Pipeline schedules](schedules.md).
-- [Custom CI/CD variables](../variables/README.md#custom-environment-variables).
+- [Custom CI/CD variables](../variables/README.md#custom-cicd-variables).
 
 ### Ref Specs for Runners
 
@@ -89,14 +87,14 @@ This table lists the refspecs injected for each pipeline type:
 
 | Pipeline type                                                      | Refspecs                                                                                       |
 |---------------                                                     |----------------------------------------                                                        |
-| Pipeline for Branches                                              | `+refs/pipelines/<id>:refs/pipelines/<id>` and `+refs/heads/<name>:refs/remotes/origin/<name>` |
-| pipeline for Tags                                                  | `+refs/pipelines/<id>:refs/pipelines/<id>` and `+refs/tags/<name>:refs/tags/<name>`            |
-| [Pipeline for Merge Requests](../merge_request_pipelines/index.md) | `+refs/pipelines/<id>:refs/pipelines/<id>`                                                     |
+| Pipeline for Branches                                              | `+<sha>:refs/pipelines/<id>` and `+refs/heads/<name>:refs/remotes/origin/<name>` |
+| pipeline for Tags                                                  | `+<sha>:refs/pipelines/<id>` and `+refs/tags/<name>:refs/tags/<name>`            |
+| [Pipeline for Merge Requests](../merge_request_pipelines/index.md) | `+<sha>:refs/pipelines/<id>`                                                     |
 
 The refs `refs/heads/<name>` and `refs/tags/<name>` exist in your
 project repository. GitLab generates the special ref `refs/pipelines/<id>` during a
 running pipeline job. This ref can be created even after the associated branch or tag has been
-deleted. It's therefore useful in some features such as [automatically stopping an environment](../environments/index.md#automatically-stopping-an-environment),
+deleted. It's therefore useful in some features such as [automatically stopping an environment](../environments/index.md#stopping-an-environment),
 and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md)
 that might run pipelines after branch deletion.
 
@@ -132,20 +130,39 @@ Pipelines can be manually executed, with predefined or manually-specified [varia
 You might do this if the results of a pipeline (for example, a code build) are required outside the normal
 operation of the pipeline.
 
-[In GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/30101),
-the variables fields are pre-filled with any global variables defined in the
-`.gitlab-ci.yml` file.
-
 To execute a pipeline manually:
 
 1. Navigate to your project's **CI/CD > Pipelines**.
 1. Select the **Run Pipeline** button.
 1. On the **Run Pipeline** page:
-    1. Select the branch to run the pipeline for in the **Create for** field.
+    1. Select the branch or tag to run the pipeline for in the **Run for branch name or tag** field.
     1. Enter any [environment variables](../variables/README.md) required for the pipeline run.
-    1. Click the **Create pipeline** button.
+       You can set specific variables to have their [values prefilled in the form](#prefill-variables-in-manual-pipelines).
+    1. Click the **Run pipeline** button.
 
 The pipeline now executes the jobs as configured.
+
+#### Prefill variables in manual pipelines
+
+> [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/30101) GitLab 13.7.
+
+You can use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
+keywords to define [variables](../variables/README.md) that are prefilled when running
+a pipeline manually.
+
+In pipelines triggered manually, the **Run pipelines** page displays all variables
+with a `description` and `value` defined in the `.gitlab-ci.yml` file. The values
+can then be modified if needed, which overrides the value for that single pipeline run.
+
+The description is displayed below the variable. It can be used to explain what
+the variable is used for, what the acceptable values are, and so on:
+
+```yaml
+variables:
+  DEPLOY_ENVIRONMENT:
+    value: "staging"  # Deploy to staging by default
+    description: "The deployment target. Change this variable to 'canary' or 'production' if needed."
+```
 
 ### Run a pipeline by using a URL query string
 
@@ -180,8 +197,6 @@ For each `var` or `file_var`, a key and value are required.
 
 ### Add manual interaction to your pipeline
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7931) in GitLab 8.15.
-
 Manual actions, configured using the [`when:manual`](../yaml/README.md#whenmanual) keyword,
 allow you to require manual interaction before moving forward in the pipeline.
 
@@ -189,7 +204,7 @@ You can do this straight from the pipeline graph. Just click the play button
 to execute that particular job.
 
 For example, your pipeline might start automatically, but it requires manual action to
-[deploy to production](../environments/index.md#configuring-manual-deployments). In the example below, the `production`
+[deploy to production](../environments/index.md#configure-manual-deployments). In the example below, the `production`
 stage has a job with a manual action.
 
 ![Pipelines example](img/pipelines.png)
@@ -305,8 +320,6 @@ runners do not use regular runners, they must be tagged accordingly.
 
 ## Visualize pipelines
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5742) in GitLab 8.11.
-
 Pipelines can be complex structures with many sequential and parallel jobs.
 
 To make it easier to understand the flow of a pipeline, GitLab has pipeline graphs for viewing pipelines
@@ -349,18 +362,7 @@ Stages in pipeline mini graphs are collapsible. Hover your mouse over them and c
 
 ### Pipeline success and duration charts
 
-> - Introduced in GitLab 3.1.1 as Commit Stats, and later renamed to Pipeline Charts.
-> - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/issues/38318) to CI / CD Analytics in GitLab 12.8.
-
-GitLab tracks the history of your pipeline successes and failures, as well as how long each pipeline ran. To view this information, go to **Analytics > CI / CD Analytics**.
-
-View successful pipelines:
-
-![Successful pipelines](img/pipelines_success_chart.png)
-
-View pipeline duration history:
-
-![Pipeline duration](img/pipelines_duration_chart.png)
+Pipeline analytics are available on the [**CI/CD Analytics** page](../../user/analytics/ci_cd_analytics.md#pipeline-success-and-duration-charts).
 
 ### Pipeline badges
 

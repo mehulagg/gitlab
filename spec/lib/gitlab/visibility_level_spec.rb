@@ -132,26 +132,27 @@ RSpec.describe Gitlab::VisibilityLevel do
     end
   end
 
-  describe '#visibility_level_decreased?' do
-    let(:project) { create(:project, :internal) }
-
-    context 'when visibility level decreases' do
-      before do
-        project.update!(visibility_level: described_class::PRIVATE)
-      end
-
-      it 'returns true' do
-        expect(project.visibility_level_decreased?).to be(true)
+  describe '.options' do
+    context 'keys' do
+      it 'returns the allowed visibility levels' do
+        expect(described_class.options.keys).to contain_exactly('Private', 'Internal', 'Public')
       end
     end
+  end
 
-    context 'when visibility level does not decrease' do
-      before do
-        project.update!(visibility_level: described_class::PUBLIC)
-      end
+  describe '.level_name' do
+    using RSpec::Parameterized::TableSyntax
 
-      it 'returns false' do
-        expect(project.visibility_level_decreased?).to be(false)
+    where(:level_value, :level_name) do
+      described_class::PRIVATE | 'Private'
+      described_class::INTERNAL | 'Internal'
+      described_class::PUBLIC | 'Public'
+      non_existing_record_access_level | 'Unknown'
+    end
+
+    with_them do
+      it 'returns the name of the visibility level' do
+        expect(described_class.level_name(level_value)).to eq(level_name)
       end
     end
   end

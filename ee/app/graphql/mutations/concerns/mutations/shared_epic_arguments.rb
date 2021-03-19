@@ -7,42 +7,42 @@ module Mutations
     prepended do
       argument :group_path, GraphQL::ID_TYPE,
                required: true,
-               description: "The group the epic to mutate is in"
+               description: "The group the epic to mutate is in."
 
       argument :title,
                 GraphQL::STRING_TYPE,
                 required: false,
-                description: 'The title of the epic'
+                description: 'The title of the epic.'
 
       argument :description,
                 GraphQL::STRING_TYPE,
                 required: false,
-                description: 'The description of the epic'
+                description: 'The description of the epic.'
 
       argument :confidential,
                 GraphQL::BOOLEAN_TYPE,
                 required: false,
-                description: 'Indicates if the epic is confidential'
+                description: 'Indicates if the epic is confidential.'
 
       argument :start_date_fixed,
                 GraphQL::STRING_TYPE,
                 required: false,
-                description: 'The start date of the epic'
+                description: 'The start date of the epic.'
 
       argument :due_date_fixed,
                 GraphQL::STRING_TYPE,
                 required: false,
-                description: 'The end date of the epic'
+                description: 'The end date of the epic.'
 
       argument :start_date_is_fixed,
                 GraphQL::BOOLEAN_TYPE,
                 required: false,
-                description: 'Indicates start date should be sourced from start_date_fixed field not the issue milestones'
+                description: 'Indicates start date should be sourced from start_date_fixed field not the issue milestones.'
 
       argument :due_date_is_fixed,
                 GraphQL::BOOLEAN_TYPE,
                 required: false,
-                description: 'Indicates end date should be sourced from due_date_fixed field not the issue milestones'
+                description: 'Indicates end date should be sourced from due_date_fixed field not the issue milestones.'
       argument :add_label_ids,
                [GraphQL::ID_TYPE],
                required: false,

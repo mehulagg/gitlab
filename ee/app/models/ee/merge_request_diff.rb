@@ -59,10 +59,6 @@ module EE
       super || build_merge_request_diff_detail
     end
 
-    def local?
-      stored_externally? && external_diff_store == ExternalDiffUploader::Store::LOCAL
-    end
-
     def log_geo_deleted_event
       # Keep empty for now. Should be addressed in future
       # by https://gitlab.com/gitlab-org/gitlab/issues/33817

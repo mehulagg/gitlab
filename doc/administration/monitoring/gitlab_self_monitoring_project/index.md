@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab self monitoring project
+# GitLab self monitoring project **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32351) in GitLab 12.7, behind a disabled feature flag (`self_monitoring_project`).
 > - The feature flag was removed and the Self Monitoring Project was [made generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/198511) in GitLab 12.8.
@@ -19,7 +19,7 @@ specifically created for visualizing and configuring the monitoring of your
 GitLab instance.
 
 All administrators at the time of creation of the project and group are
-added as maintainers of the group and project, and as an admin, you can
+added as maintainers of the group and project, and as an administrator, you can
 add new members to the group to give them maintainer access to the project.
 
 This project is used to self monitor your GitLab instance. The metrics dashboard
@@ -32,7 +32,7 @@ metrics exposed by the [GitLab exporter](../prometheus/gitlab_metrics.md#metrics
 
 ## Creating the self monitoring project
 
-1. Navigate to **Admin Area > Settings > Metrics and profiling**, and expand the **Self monitoring** section.
+1. Go to **Admin Area > Settings > Metrics and profiling** and expand the **Self monitoring** section.
 1. Toggle the **Create Project** button on.
 1. Once your GitLab instance creates the project, GitLab displays a link to the project in the text above the **Create Project** toggle. You can also find it under **Projects > Your projects**.
 
@@ -42,7 +42,7 @@ WARNING:
 Deleting the self monitoring project removes any changes made to the project. If
 you create the project again, it's created in its default state.
 
-1. Navigate to **Admin Area > Settings > Metrics and profiling**, and expand the **Self monitoring** section.
+1. Go to **Admin Area > Settings > Metrics and profiling** and expand the **Self monitoring** section.
 1. Toggle the **Create Project** button off.
 1. In the confirmation dialog that opens, click **Delete project**.
    It can take a few seconds for it to be deleted.
@@ -90,26 +90,26 @@ You can add custom metrics in the self monitoring project by:
 
 ## Troubleshooting
 
-### Getting error message in logs: `Could not create instance administrators group. Errors: ["You don’t have permission to create groups."]`
+### Getting error message in logs: `Could not create instance administrators group. Errors: ["You don't have permission to create groups."]`
 
 There is [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/208676) which causes
 project creation to fail with the following error (which appears in the log file)
-when the first admin user is an
+when the first administrator user is an
 [external user](../../../user/permissions.md#external-users):
 
 ```plaintext
-Could not create instance administrators group. Errors: ["You don’t have permission to create groups."]
+Could not create instance administrators group. Errors: ["You don't have permission to create groups."]
 ```
 
-Run the following in a Rails console to check if the first admin user is an external user:
+Run the following in a Rails console to check if the first administrator user is an external user:
 
 ```ruby
 User.admins.active.first.external?
 ```
 
-If this returns true, the first admin user is an external user.
+If this returns true, the first administrator user is an external user.
 
 If you face this issue, you can temporarily
-[make the admin user a non-external user](../../../user/permissions.md#external-users)
+[make the administrator user a non-external user](../../../user/permissions.md#external-users)
 and then try to create the project.
-Once the project is created, the admin user can be changed back to an external user.
+Once the project is created, the administrator user can be changed back to an external user.

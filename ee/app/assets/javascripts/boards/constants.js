@@ -1,4 +1,8 @@
+import { s__ } from '~/locale';
+
 export const DRAGGABLE_TAG = 'div';
+
+export const EPIC_LANE_BASE_HEIGHT = 40;
 
 /* eslint-disable @gitlab/require-i18n-strings */
 export const EpicFilterType = {
@@ -37,6 +41,15 @@ export const WeightIDs = {
 
 export const GroupByParamType = {
   epic: 'epic',
+};
+
+export const ErrorMessages = {
+  fetchIssueError: s__(
+    'Boards|An error occurred while fetching the board issues. Please reload the page.',
+  ),
+  fetchEpicsError: s__(
+    'Boards|An error occurred while fetching the board epics. Please reload the page.',
+  ),
 };
 
 export default {

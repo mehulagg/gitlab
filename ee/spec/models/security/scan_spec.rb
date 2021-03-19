@@ -12,10 +12,36 @@ RSpec.describe Security::Scan do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:build_id) }
     it { is_expected.to validate_presence_of(:scan_type) }
+
+    describe 'info' do
+      let(:scan) { build(:security_scan, info: info) }
+
+      subject { scan.errors.details[:info] }
+
+      before do
+        scan.validate
+      end
+
+      context 'when the value for info field is valid' do
+        let(:info) { { errors: [{ type: 'Foo', message: 'Message' }] } }
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'when the value for info field is invalid' do
+        let(:info) { { errors: [{ type: 'Foo' }] } }
+
+        it { is_expected.not_to be_empty }
+      end
+    end
   end
 
   describe '#project' do
     it { is_expected.to delegate_method(:project).to(:build) }
+  end
+
+  describe '#name' do
+    it { is_expected.to delegate_method(:name).to(:build) }
   end
 
   describe '.by_scan_types' do
@@ -26,6 +52,16 @@ RSpec.describe Security::Scan do
     subject { described_class.by_scan_types(:sast) }
 
     it { is_expected.to match_array(expected_scans) }
+  end
+
+  describe '.latest_successful_by_build' do
+    let!(:first_successful_scan) { create(:security_scan, build: create(:ci_build, :success, :retried)) }
+    let!(:second_successful_scan) { create(:security_scan, build: create(:ci_build, :success)) }
+    let!(:failed_scan) { create(:security_scan, build: create(:ci_build, :failed)) }
+
+    subject { described_class.latest_successful_by_build }
+
+    it { is_expected.to match_array([second_successful_scan]) }
   end
 
   describe '.has_dismissal_feedback' do

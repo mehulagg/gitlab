@@ -31,7 +31,7 @@ class User < ApplicationRecord
 
   INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
-  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'
 
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
   add_authentication_token_field :feed_token
@@ -116,6 +116,13 @@ class User < ApplicationRecord
   has_one :user_synced_attributes_metadata, autosave: true
   has_one :aws_role, class_name: 'Aws::Role'
 
+  # Followers
+  has_many :followed_users, foreign_key: :follower_id, class_name: 'Users::UserFollowUser'
+  has_many :followees, through: :followed_users
+
+  has_many :following_users, foreign_key: :followee_id, class_name: 'Users::UserFollowUser'
+  has_many :followers, through: :following_users
+
   # Groups
   has_many :members
   has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, source: 'GroupMember'
@@ -172,6 +179,7 @@ class User < ApplicationRecord
   has_many :merge_request_reviewers, inverse_of: :reviewer
   has_many :assigned_issues, class_name: "Issue", through: :issue_assignees, source: :issue
   has_many :assigned_merge_requests, class_name: "MergeRequest", through: :merge_request_assignees, source: :merge_request
+  has_many :created_custom_emoji, class_name: 'CustomEmoji', inverse_of: :creator
 
   has_many :bulk_imports
 
@@ -264,7 +272,7 @@ class User < ApplicationRecord
   enum layout: { fixed: 0, fluid: 1 }
 
   # User's Dashboard preference
-  enum dashboard: { projects: 0, stars: 1, project_activity: 2, starred_project_activity: 3, groups: 4, todos: 5, issues: 6, merge_requests: 7, operations: 8 }
+  enum dashboard: { projects: 0, stars: 1, project_activity: 2, starred_project_activity: 3, groups: 4, todos: 5, issues: 6, merge_requests: 7, operations: 8, followed_user_activity: 9 }
 
   # User's Project preference
   enum project_view: { readme: 0, activity: 1, files: 2 }
@@ -286,6 +294,7 @@ class User < ApplicationRecord
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
+            :markdown_surround_selection, :markdown_surround_selection=,
             to: :user_preference
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
@@ -342,6 +351,7 @@ class User < ApplicationRecord
     # For this reason the tradeoff is to disable this cop.
     after_transition any => :blocked do |user|
       Ci::CancelUserPipelinesService.new.execute(user)
+      Ci::DisableUserPipelineSchedulesService.new.execute(user)
     end
     # rubocop: enable CodeReuse/ServiceClass
   end
@@ -352,6 +362,7 @@ class User < ApplicationRecord
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
   scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
   scope :external, -> { where(external: true) }
+  scope :non_external, -> { where(external: false) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :active, -> { with_state(:active).non_internal }
   scope :active_without_ghosts, -> { with_state(:active).without_ghosts }
@@ -930,11 +941,7 @@ class User < ApplicationRecord
   # Returns the groups a user has access to, either through a membership or a project authorization
   def authorized_groups
     Group.unscoped do
-      if Feature.enabled?(:shared_group_membership_auth, self)
-        authorized_groups_with_shared_membership
-      else
-        authorized_groups_without_shared_membership
-      end
+      authorized_groups_with_shared_membership
     end
   end
 
@@ -960,8 +967,8 @@ class User < ApplicationRecord
   end
 
   # rubocop: disable CodeReuse/ServiceClass
-  def refresh_authorized_projects
-    Users::RefreshAuthorizedProjectsService.new(self).execute
+  def refresh_authorized_projects(source: nil)
+    Users::RefreshAuthorizedProjectsService.new(self, source: source).execute
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -1358,6 +1365,7 @@ class User < ApplicationRecord
 
   def hook_attrs
     {
+      id: id,
       name: name,
       username: username,
       avatar_url: avatar_url(only_path: false),
@@ -1377,7 +1385,14 @@ class User < ApplicationRecord
 
   def set_username_errors
     namespace_path_errors = self.errors.delete(:"namespace.path")
-    self.errors[:username].concat(namespace_path_errors) if namespace_path_errors
+
+    return unless namespace_path_errors&.any?
+
+    if namespace_path_errors.include?('has already been taken') && !User.exists?(username: username)
+      self.errors.add(:base, :username_exists_as_a_different_namespace)
+    else
+      self.errors[:username].concat(namespace_path_errors)
+    end
   end
 
   def username_changed_hook
@@ -1431,6 +1446,29 @@ class User < ApplicationRecord
       else
         UsersStarProject.create!(project: project, user: self)
       end
+    end
+  end
+
+  def following?(user)
+    self.followees.exists?(user.id)
+  end
+
+  def follow(user)
+    return false if self.id == user.id
+
+    begin
+      followee = Users::UserFollowUser.create(follower_id: self.id, followee_id: user.id)
+      self.followees.reset if followee.persisted?
+    rescue ActiveRecord::RecordNotUnique
+      false
+    end
+  end
+
+  def unfollow(user)
+    if Users::UserFollowUser.where(follower_id: self.id, followee_id: user.id).delete_all > 0
+      self.followees.reset
+    else
+      false
     end
   end
 
@@ -1564,6 +1602,12 @@ class User < ApplicationRecord
     end
   end
 
+  def review_requested_open_merge_requests_count(force: false)
+    Rails.cache.fetch(['users', id, 'review_requested_open_merge_requests_count'], force: force, expires_in: 20.minutes) do
+      MergeRequestsFinder.new(self, reviewer_id: id, state: 'opened', non_archived: true).execute.count
+    end
+  end
+
   def assigned_open_issues_count(force: false)
     Rails.cache.fetch(['users', id, 'assigned_open_issues_count'], force: force, expires_in: 20.minutes) do
       IssuesFinder.new(self, assignee_id: self.id, state: 'opened', non_archived: true).execute.count
@@ -1607,6 +1651,7 @@ class User < ApplicationRecord
 
   def invalidate_merge_request_cache_counts
     Rails.cache.delete(['users', id, 'assigned_open_merge_requests_count'])
+    Rails.cache.delete(['users', id, 'review_requested_open_merge_requests_count'])
   end
 
   def invalidate_todos_done_count
@@ -1658,6 +1703,10 @@ class User < ApplicationRecord
 
   def can_read_all_resources?
     can?(:read_all_resources)
+  end
+
+  def can_admin_all_resources?
+    can?(:admin_all_resources)
   end
 
   def update_two_factor_requirement
@@ -1808,6 +1857,14 @@ class User < ApplicationRecord
 
   def created_recently?
     created_at > Devise.confirm_within.ago
+  end
+
+  def find_or_initialize_callout(feature_name)
+    callouts.find_or_initialize_by(feature_name: ::UserCallout.feature_names[feature_name])
+  end
+
+  def can_trigger_notifications?
+    confirmed? && !blocked? && !ghost?
   end
 
   protected

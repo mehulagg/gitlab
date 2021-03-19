@@ -1,7 +1,7 @@
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from '~/flash';
-import * as types from '../mutation_types';
+import axios from '~/lib/utils/axios_utils';
 import * as messages from '../messages';
+import * as types from '../mutation_types';
 import { isEndingStatus } from '../utils';
 
 export const pollSessionStatus = ({ state, dispatch, commit }) => {
@@ -58,7 +58,7 @@ export const fetchSessionStatus = ({ dispatch, state }) => {
     .then(({ data }) => {
       dispatch('receiveSessionStatusSuccess', data);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveSessionStatusError', error);
     });
 };

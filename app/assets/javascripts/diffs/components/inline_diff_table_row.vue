@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlTooltipDirective, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { CONTEXT_LINE_CLASS_NAME } from '../constants';
 import DiffGutterAvatars from './diff_gutter_avatars.vue';
 import {
@@ -72,7 +72,12 @@ export default {
       return this.fileLineCoverage(this.filePath, this.line.new_line);
     },
     classNameMapCell() {
-      return classNameMapCell(this.line, this.isHighlighted, this.isLoggedIn, this.isHover);
+      return classNameMapCell({
+        line: this.line,
+        hll: this.isHighlighted,
+        isLoggedIn: this.isLoggedIn,
+        isHover: this.isHover,
+      });
     },
     addCommentTooltip() {
       return addCommentTooltip(this.line);
@@ -134,7 +139,8 @@ export default {
           v-show="shouldShowCommentButton"
           ref="addDiffNoteButton"
           type="button"
-          class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+          class="add-diff-note note-button js-add-diff-note-button"
+          data-qa-selector="diff_comment_button"
           :disabled="line.commentsDisabled"
           @click="handleCommentButton"
         >
@@ -162,10 +168,11 @@ export default {
         "
       />
     </td>
-    <td ref="newTd" class="diff-line-num new_line qa-new-diff-line" :class="classNameMapCell">
+    <td ref="newTd" class="diff-line-num new_line" :class="classNameMapCell">
       <a
         v-if="line.new_line"
         ref="lineNumberRefNew"
+        data-qa-selector="new_diff_line_link"
         :data-linenumber="line.new_line"
         :href="line.lineHref"
         @click="setHighlightedRow(line.lineCode)"

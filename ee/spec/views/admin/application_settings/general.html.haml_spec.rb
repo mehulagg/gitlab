@@ -30,17 +30,9 @@ RSpec.describe 'admin/application_settings/general.html.haml' do
       end
     end
 
-    context 'when maintenance_mode feature is enabled' do
+    context 'when license allows' do
       it 'shows the Maintenance mode section' do
         expect(rendered).to have_css('#js-maintenance-mode-toggle')
-      end
-    end
-
-    context 'when maintenance_mode feature is disabled' do
-      let(:maintenance_mode_flag) { false }
-
-      it 'does not show the Maintenance mode section' do
-        expect(rendered).not_to have_css('#js-maintenance-mode-toggle')
       end
     end
   end

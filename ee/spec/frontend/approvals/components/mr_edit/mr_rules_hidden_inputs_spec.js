@@ -49,7 +49,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
   });
 
   const findHiddenInputs = () =>
-    wrapper.findAll('input[type=hidden]').wrappers.map(x => ({
+    wrapper.findAll('input[type=hidden]').wrappers.map((x) => ({
       name: x.attributes('name'),
       value: x.element.value,
     }));
@@ -137,7 +137,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
         it('renders empty users input', () => {
           factory();
 
-          expect(findHiddenInputs().filter(x => x.name === INPUT_USER_IDS)).toEqual([
+          expect(findHiddenInputs().filter((x) => x.name === INPUT_USER_IDS)).toEqual([
             { name: INPUT_USER_IDS, value: '' },
           ]);
         });
@@ -151,7 +151,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
         it('renders empty groups input', () => {
           factory();
 
-          expect(findHiddenInputs().filter(x => x.name === INPUT_GROUP_IDS)).toEqual([
+          expect(findHiddenInputs().filter((x) => x.name === INPUT_GROUP_IDS)).toEqual([
             { name: INPUT_GROUP_IDS, value: '' },
           ]);
         });
@@ -165,7 +165,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
         it('does render id input', () => {
           factory();
 
-          expect(findHiddenInputs().map(x => x.name)).toContain(INPUT_ID);
+          expect(findHiddenInputs().map((x) => x.name)).toContain(INPUT_ID);
         });
 
         describe('with source', () => {

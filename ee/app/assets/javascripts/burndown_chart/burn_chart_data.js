@@ -35,7 +35,7 @@ export default class BurnChartData {
       const dateString = dateFormat(date, this.dateFormatMask);
 
       const openedIssuesToday = this.filterAndSummarizeBurndownEvents(
-        event =>
+        (event) =>
           event.created_at === dateString &&
           event.event_type === 'milestone' &&
           event.milestone_id === milestoneId &&
@@ -43,7 +43,7 @@ export default class BurnChartData {
       );
 
       const closedIssuesToday = this.filterAndSummarizeBurndownEvents(
-        event =>
+        (event) =>
           event.created_at === dateString &&
           event.event_type === 'milestone' &&
           ((event.action === 'remove' && event.milestone_id === milestoneId) ||
@@ -87,13 +87,13 @@ export default class BurnChartData {
       const dateString = dateFormat(date, this.dateFormatMask);
 
       const openedIssuesToday = this.filterAndSummarizeBurndownEvents(
-        event =>
+        (event) =>
           event.created_at === dateString &&
           (event.action === 'created' || event.action === 'reopened'),
       );
 
       const closedIssuesToday = this.filterAndSummarizeBurndownEvents(
-        event => event.created_at === dateString && event.action === 'closed',
+        (event) => event.created_at === dateString && event.action === 'closed',
       );
 
       openIssuesCount += openedIssuesToday.count - closedIssuesToday.count;
@@ -128,7 +128,7 @@ export default class BurnChartData {
   // 1. Set event creation date to milestone start date if created before milestone start
   // 2. Convert event creation datetime to date in local timezone
   processRawEvents(events) {
-    return events.map(event => ({
+    return events.map((event) => ({
       ...event,
       created_at:
         dateFormat(event.created_at, this.dateFormatMask) < this.startDate

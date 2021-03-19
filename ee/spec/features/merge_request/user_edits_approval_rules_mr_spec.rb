@@ -5,10 +5,23 @@ require 'spec_helper'
 RSpec.describe 'Merge request > User edits MR with approval rules', :js do
   include Select2Helper
 
-  include_context 'project with approval rules'
+  include_context 'with project with approval rules'
 
-  let(:merge_request) { create(:merge_request, source_project: project) }
-  let(:mr_rule_names) { %w[foo lorem ipsum] }
+  let_it_be(:merge_request) { create(:merge_request, source_project: project) }
+  let_it_be(:approver) { create(:user) }
+  let_it_be(:mr_rule_names) { %w[foo lorem ipsum] }
+  let_it_be(:mr_rules) do
+    mr_rule_names.map do |name|
+      create(
+        :approval_merge_request_rule,
+        merge_request: merge_request,
+        approvals_required: 1,
+        name: name,
+        users: [approver]
+      )
+    end
+  end
+
   let(:modal_id) { '#mr-edit-approvals-create-modal' }
   let(:members_selector) { "#{modal_id} input[name=members]" }
   let(:members_search_selector) { "#{modal_id} .select2-input" }
@@ -25,14 +38,8 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
   end
 
   before do
-    project.update_attribute(:disable_overriding_approvers_per_merge_request, false)
+    project.update!(disable_overriding_approvers_per_merge_request: false)
     stub_licensed_features(multiple_approval_rules: true)
-
-    approver = create(:user)
-    mr_rule_names.each do |name|
-      create(:approval_merge_request_rule,
-        merge_request: merge_request, approvals_required: 1, name: name, users: [approver])
-    end
 
     sign_in(author)
     visit(edit_project_merge_request_path(project, merge_request))
@@ -55,7 +62,7 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
 
     click_button "Add approval rule"
 
-    fill_in "Rule name", with: rule_name
+    fill_in "name", with: rule_name
 
     add_approval_rule_member('user', approver.name)
 
@@ -66,7 +73,7 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
   end
 
   context "with public group" do
-    let!(:group) { create(:group, :public) }
+    let_it_be(:group) { create(:group, :public) }
 
     before do
       group.add_developer create(:user)

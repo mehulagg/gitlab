@@ -11,13 +11,13 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
         # Setting the date as 12th March 2020 12:00 UTC for tests and creating new license
         create_current_license(starts_at: '2020-02-12'.to_date)
 
-        HistoricalData.create!(recorded_at: '2020-02-11T00:00:00Z', active_user_count: 100)
-        HistoricalData.create!(recorded_at: '2020-02-12T00:00:00Z', active_user_count: 10)
-        HistoricalData.create!(recorded_at: '2020-02-13T00:00:00Z', active_user_count: 15)
+        create(:historical_data, recorded_at: '2020-02-11T00:00:00Z', active_user_count: 100)
+        create(:historical_data, recorded_at: '2020-02-12T00:00:00Z', active_user_count: 10)
+        create(:historical_data, recorded_at: '2020-02-13T00:00:00Z', active_user_count: 15)
 
-        HistoricalData.create!(recorded_at: '2020-03-11T00:00:00Z', active_user_count: 10)
-        HistoricalData.create!(recorded_at: '2020-03-12T00:00:00Z', active_user_count: 12)
-        HistoricalData.create!(recorded_at: '2020-03-15T00:00:00Z', active_user_count: 25)
+        create(:historical_data, recorded_at: '2020-03-11T00:00:00Z', active_user_count: 10)
+        create(:historical_data, recorded_at: '2020-03-12T00:00:00Z', active_user_count: 12)
+        create(:historical_data, recorded_at: '2020-03-15T00:00:00Z', active_user_count: 25)
         allow(SyncSeatLinkRequestWorker).to receive(:perform_async).and_return(true)
       end
 

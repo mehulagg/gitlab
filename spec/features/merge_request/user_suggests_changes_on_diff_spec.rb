@@ -73,6 +73,23 @@ RSpec.describe 'User comments on a diff', :js do
       end
     end
 
+    it 'allows suggestions in replies' do
+      click_diff_line(find("[id='#{sample_compare.changes[1][:line_code]}']"))
+
+      page.within('.js-discussion-note-form') do
+        fill_in('note_note', with: "```suggestion\n# change to a comment\n```")
+        click_button('Add comment now')
+      end
+
+      wait_for_requests
+
+      find_field('Reply…', match: :first).click
+
+      find('.js-suggestion-btn').click
+
+      expect(find('.js-vue-issue-note-form').value).to include("url = https://github.com/gitlabhq/gitlab-shell.git")
+    end
+
     it 'suggestion is appliable' do
       click_diff_line(find("[id='#{sample_compare.changes[1][:line_code]}']"))
 
@@ -87,6 +104,7 @@ RSpec.describe 'User comments on a diff', :js do
         expect(page).not_to have_content('Applied')
 
         click_button('Apply suggestion')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content('Applied')
@@ -338,6 +356,7 @@ RSpec.describe 'User comments on a diff', :js do
         expect(page).not_to have_content('Applied')
 
         click_button('Apply suggestion')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content('Applied')
@@ -349,6 +368,7 @@ RSpec.describe 'User comments on a diff', :js do
         expect(page).not_to have_content('Unresolve thread')
 
         click_button('Apply suggestion')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content('Unresolve thread')

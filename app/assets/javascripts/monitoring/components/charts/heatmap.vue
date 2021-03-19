@@ -1,8 +1,8 @@
 <script>
 import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlHeatmap } from '@gitlab/ui/dist/charts';
-import { graphDataValidatorForValues } from '../../utils';
 import { formatDate, timezones, formats } from '../../format_date';
+import { graphDataValidatorForValues } from '../../utils';
 
 export default {
   components: {
@@ -42,10 +42,10 @@ export default {
       return this.graphData.y_label || '';
     },
     xAxisLabels() {
-      return this.metrics.result.map(res => Object.values(res.metric)[0]);
+      return this.metrics.result.map((res) => Object.values(res.metric)[0]);
     },
     yAxisLabels() {
-      return this.result.values.map(val => {
+      return this.result.values.map((val) => {
         const [yLabel] = val;
 
         return formatDate(new Date(yLabel), {

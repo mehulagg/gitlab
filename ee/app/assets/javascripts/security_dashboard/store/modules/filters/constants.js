@@ -23,6 +23,10 @@ export const BASE_FILTERS = {
     name: s__('ciReport|All scanners'),
     id: ALL,
   },
+  activity: {
+    name: s__('SecurityReports|All'),
+    id: ALL,
+  },
   project_id: {
     name: s__('ciReport|All projects'),
     id: ALL,

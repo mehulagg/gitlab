@@ -77,15 +77,26 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
     end
 
     it 'allows me to merge, see cherry-pick modal and load branches list', :sidekiq_might_not_need_inline do
+      modal_selector = '[data-testid="modal-commit"]'
+
       wait_for_requests
       click_button 'Merge'
 
       wait_for_requests
-      click_link 'Cherry-pick'
-      page.find('.js-project-refs-dropdown').click
-      wait_for_requests
 
-      expect(page.all('.js-cherry-pick-form .dropdown-content li').size).to be > 1
+      click_button 'Cherry-pick'
+
+      page.within(modal_selector) do
+        click_button 'master'
+      end
+
+      page.within("#{modal_selector} .dropdown-menu") do
+        find('[data-testid="dropdown-search-box"]').set('')
+
+        wait_for_requests
+
+        expect(page.all('[data-testid="dropdown-item"]').size).to be > 1
+      end
     end
   end
 
@@ -319,7 +330,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       wait_for_requests
 
       page.within('.mr-section-container') do
-        expect(page).to have_content('Merge failed: Something went wrong')
+        expect(page).to have_content('Something went wrong.')
       end
     end
   end
@@ -340,7 +351,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       wait_for_requests
 
       page.within('.mr-section-container') do
-        expect(page).to have_content('Merge failed: Something went wrong')
+        expect(page).to have_content('Something went wrong.')
       end
     end
   end
@@ -377,7 +388,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       click_button 'Merge'
 
       page.within('.mr-widget-body') do
-        expect(page).to have_content('Conflicts detected during merge')
+        expect(page).to have_content('An error occurred while merging')
       end
     end
   end
@@ -605,10 +616,13 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('6.66')
-                expect(page).to have_content(sample_java_failed_message.gsub(/\s+/, ' ').strip)
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('6.66')
+              expect(page).to have_content(sample_java_failed_message.gsub(/\s+/, ' ').strip)
             end
           end
         end
@@ -637,7 +651,6 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
             within(".js-report-section-container") do
               expect(page).to have_content('rspec found 1 failed out of 1 total test')
               expect(page).to have_content('junit found no changed test results out of 1 total test')
-              expect(page).not_to have_content('New')
               expect(page).to have_content('Test#sum when a is 1 and b is 3 returns summary')
             end
           end
@@ -650,10 +663,13 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'Test#sum when a is 1 and b is 3 returns summary'
-
-                expect(page).to have_content('2.22')
-                expect(page).to have_content(sample_rspec_failed_message.gsub(/\s+/, ' ').strip)
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('Test#sum when a is 1 and b is 3 returns summary')
+              expect(page).to have_content('2.22')
+              expect(page).to have_content(sample_rspec_failed_message.gsub(/\s+/, ' ').strip)
             end
           end
         end
@@ -694,9 +710,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('5.55')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('5.55')
             end
           end
         end
@@ -738,9 +757,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('8.88')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('8.88')
             end
           end
         end
@@ -769,7 +791,6 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
             within(".js-report-section-container") do
               expect(page).to have_content('rspec found 1 error out of 1 total test')
               expect(page).to have_content('junit found no changed test results out of 1 total test')
-              expect(page).not_to have_content('New')
               expect(page).to have_content('Test#sum when a is 4 and b is 4 returns summary')
             end
           end
@@ -782,9 +803,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'Test#sum when a is 4 and b is 4 returns summary'
-
-                expect(page).to have_content('4.44')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('Test#sum when a is 4 and b is 4 returns summary')
+              expect(page).to have_content('4.44')
             end
           end
         end
@@ -825,9 +849,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('5.55')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('5.55')
             end
           end
         end

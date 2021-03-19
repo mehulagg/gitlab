@@ -1,13 +1,13 @@
 <script>
-import dateFormat from 'dateformat';
 import { GlTooltip, GlIcon } from '@gitlab/ui';
-import { __ } from '~/locale';
+import dateFormat from 'dateformat';
 import {
   getDayDifference,
   getTimeago,
   dateInWords,
   parsePikadayDate,
 } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
 
 export default {
   components: {
@@ -86,7 +86,11 @@ export default {
 <template>
   <span>
     <span ref="issueDueDate" :class="cssClass" class="board-card-info card-number">
-      <gl-icon :class="{ 'text-danger': isPastDue }" class="board-card-info-icon" name="calendar" />
+      <gl-icon
+        :class="{ 'text-danger': isPastDue }"
+        class="board-card-info-icon gl-mr-2"
+        name="calendar"
+      />
       <time :class="{ 'text-danger': isPastDue }" datetime="date" class="board-card-info-text">{{
         body
       }}</time>

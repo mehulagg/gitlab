@@ -85,7 +85,7 @@ describe('Security Dashboard Table', () => {
     });
   });
 
-  describe('with no vulnerabilties', () => {
+  describe('with no vulnerabilities', () => {
     beforeEach(() => {
       store.commit(`vulnerabilities/${RECEIVE_VULNERABILITIES_SUCCESS}`, {
         vulnerabilities: [],

@@ -1,14 +1,14 @@
-import { sprintf, __ } from '~/locale';
 import { deprecatedCreateFlash as flash } from '~/flash';
-import * as rootTypes from '../../mutation_types';
-import { createCommitPayload, createNewMergeRequestUrl } from '../../utils';
-import service from '../../../services';
-import * as types from './mutation_types';
-import consts from './constants';
+import { addNumericSuffix } from '~/ide/utils';
+import { sprintf, __ } from '~/locale';
 import { leftSidebarViews } from '../../../constants';
 import eventHub from '../../../eventhub';
 import { parseCommitError } from '../../../lib/errors';
-import { addNumericSuffix } from '~/ide/utils';
+import service from '../../../services';
+import * as rootTypes from '../../mutation_types';
+import { createCommitPayload, createNewMergeRequestUrl } from '../../utils';
+import { COMMIT_TO_CURRENT_BRANCH } from './constants';
+import * as types from './mutation_types';
 
 export const updateCommitMessage = ({ commit }, message) => {
   commit(types.UPDATE_COMMIT_MESSAGE, message);
@@ -78,8 +78,8 @@ export const updateFilesAfterCommit = ({ commit, dispatch, rootState, rootGetter
     { root: true },
   );
 
-  rootState.stagedFiles.forEach(file => {
-    const changedFile = rootState.changedFiles.find(f => f.path === file.path);
+  rootState.stagedFiles.forEach((file) => {
+    const changedFile = rootState.changedFiles.find((f) => f.path === file.path);
 
     commit(
       rootTypes.UPDATE_FILE_AFTER_COMMIT,
@@ -112,7 +112,7 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
   // Pull commit options out because they could change
   // During some of the pre and post commit processing
   const { shouldCreateMR, shouldHideNewMrOption, isCreatingNewBranch, branchName } = getters;
-  const newBranch = state.commitAction !== consts.COMMIT_TO_CURRENT_BRANCH;
+  const newBranch = state.commitAction !== COMMIT_TO_CURRENT_BRANCH;
   const stageFilesPromise = rootState.stagedFiles.length
     ? Promise.resolve()
     : dispatch('stageAllChanges', null, { root: true });
@@ -133,7 +133,7 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
 
       return service.commit(rootState.currentProjectId, payload);
     })
-    .catch(e => {
+    .catch((e) => {
       commit(types.UPDATE_LOADING, false);
       commit(types.SET_ERROR, parseCommitError(e));
 
@@ -193,37 +193,36 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
               },
               { root: true },
             )
-              .then(changeViewer => {
+              .then((changeViewer) => {
                 if (changeViewer) {
                   dispatch('updateViewer', 'diff', { root: true });
                 }
               })
-              .catch(e => {
+              .catch((e) => {
                 throw e;
               });
           } else {
             dispatch('updateActivityBarView', leftSidebarViews.edit.name, { root: true });
             dispatch('updateViewer', 'editor', { root: true });
-
-            if (rootGetters.activeFile) {
-              dispatch(
-                'router/push',
-                `/project/${rootState.currentProjectId}/blob/${branchName}/-/${rootGetters.activeFile.path}`,
-                { root: true },
-              );
-            }
           }
         })
-        .then(() => dispatch('updateCommitAction', consts.COMMIT_TO_CURRENT_BRANCH))
-        .then(() =>
-          dispatch(
+        .then(() => dispatch('updateCommitAction', COMMIT_TO_CURRENT_BRANCH))
+        .then(() => {
+          if (newBranch) {
+            const path = rootGetters.activeFile ? rootGetters.activeFile.path : '';
+
+            return dispatch(
+              'router/push',
+              `/project/${rootState.currentProjectId}/blob/${branchName}/-/${path}`,
+              { root: true },
+            );
+          }
+
+          return dispatch(
             'refreshLastCommitData',
-            {
-              projectId: rootState.currentProjectId,
-              branchId: rootState.currentBranchId,
-            },
+            { projectId: rootState.currentProjectId, branchId: branchName },
             { root: true },
-          ),
-        );
+          );
+        });
     });
 };

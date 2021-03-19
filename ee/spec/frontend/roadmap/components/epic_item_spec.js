@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils';
 
 import { delay } from 'lodash';
 
+import CurrentDayIndicator from 'ee/roadmap/components/current_day_indicator.vue';
 import EpicItemComponent from 'ee/roadmap/components/epic_item.vue';
 import EpicItemContainer from 'ee/roadmap/components/epic_item_container.vue';
 
@@ -17,7 +18,7 @@ import {
 } from 'ee_jest/roadmap/mock_data';
 
 jest.mock('lodash/delay', () =>
-  jest.fn(func => {
+  jest.fn((func) => {
     // eslint-disable-next-line no-param-reassign
     func.delay = jest.fn();
     return func;
@@ -53,6 +54,12 @@ const createComponent = ({
       childrenEpics,
       childrenFlags,
       hasFiltersApplied,
+    },
+    data() {
+      return {
+        // Arbitrarily set the current date to be in timeframe[1] (2017-12-01)
+        currentDate: timeframe[1],
+      };
     },
   });
 };
@@ -178,6 +185,10 @@ describe('EpicItemComponent', () => {
         },
       });
       expect(wrapper.find('.epic-list-item-container').exists()).toBe(true);
+    });
+
+    it('renders current day indicator element', () => {
+      expect(wrapper.find(CurrentDayIndicator).exists()).toBe(true);
     });
   });
 });

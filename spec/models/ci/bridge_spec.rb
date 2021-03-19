@@ -41,7 +41,7 @@ RSpec.describe Ci::Bridge do
     end
   end
 
-  describe '#scoped_variables_hash' do
+  describe '#scoped_variables' do
     it 'returns a hash representing variables' do
       variables = %w[
         CI_JOB_NAME CI_JOB_STAGE CI_COMMIT_SHA CI_COMMIT_SHORT_SHA
@@ -53,7 +53,7 @@ RSpec.describe Ci::Bridge do
         CI_COMMIT_TIMESTAMP
       ]
 
-      expect(bridge.scoped_variables_hash.keys).to include(*variables)
+      expect(bridge.scoped_variables.map { |v| v[:key] }).to include(*variables)
     end
 
     context 'when bridge has dependency which has dotenv variable' do
@@ -63,7 +63,7 @@ RSpec.describe Ci::Bridge do
       let!(:job_variable) { create(:ci_job_variable, :dotenv_source, job: test) }
 
       it 'includes inherited variable' do
-        expect(bridge.scoped_variables_hash).to include(job_variable.key => job_variable.value)
+        expect(bridge.scoped_variables.to_hash).to include(job_variable.key => job_variable.value)
       end
     end
   end
@@ -78,6 +78,14 @@ RSpec.describe Ci::Bridge do
 
           bridge.enqueue!
         end
+      end
+
+      it "schedules downstream pipeline creation when the status is waiting for resource" do
+        bridge.status = :waiting_for_resource
+
+        expect(bridge).to receive(:schedule_downstream_pipeline!)
+
+        bridge.enqueue_waiting_for_resource!
       end
 
       it 'raises error when the status is failed' do
@@ -356,14 +364,6 @@ RSpec.describe Ci::Bridge do
   describe '#dependency_variables' do
     subject { bridge.dependency_variables }
 
-    shared_context 'when ci_bridge_dependency_variables is disabled' do
-      before do
-        stub_feature_flags(ci_bridge_dependency_variables: false)
-      end
-
-      it { is_expected.to be_empty }
-    end
-
     context 'when downloading from previous stages' do
       let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
       let!(:bridge) { create(:ci_bridge, pipeline: pipeline, stage_idx: 1) }
@@ -374,8 +374,6 @@ RSpec.describe Ci::Bridge do
       it 'inherits only dependent variables' do
         expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value)
       end
-
-      it_behaves_like 'when ci_bridge_dependency_variables is disabled'
     end
 
     context 'when using needs' do
@@ -397,8 +395,6 @@ RSpec.describe Ci::Bridge do
       it 'inherits only needs with artifacts variables' do
         expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value)
       end
-
-      it_behaves_like 'when ci_bridge_dependency_variables is disabled'
     end
   end
 end

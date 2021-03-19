@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# PgBouncer exporter
+# PgBouncer exporter **(FREE SELF)**
 
 > Introduced in [Omnibus GitLab 11.0](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2493).
 

@@ -21,9 +21,23 @@ module EE
           # "Hi, we don't have any more builds now,  but not everything is right anyway, so try again".
           # Runner will retry, but again, against replica, and again will check if replication lag did catch-up.
           if !db_all_caught_up && !result.build
+            metrics.increment_queue_operation(:queue_replication_lag)
+
             return ::Ci::RegisterJobService::Result.new(nil, false) # rubocop:disable Cop/AvoidReturnFromBlocks
           end
         end
+      end
+
+      def retrieve_queue(queue_query_proc)
+        if ::Feature.enabled?(:ci_runner_builds_queue_on_replicas, runner, default_enabled: :yaml)
+          ##
+          # We want to reset a load balancing session to discard the side
+          # effects of writes that could have happened prior to this moment.
+          #
+          ::Gitlab::Database::LoadBalancing::Session.clear_session
+        end
+
+        super
       end
 
       def builds_for_shared_runner

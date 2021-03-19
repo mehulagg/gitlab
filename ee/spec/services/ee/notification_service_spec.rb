@@ -648,9 +648,40 @@ RSpec.describe EE::NotificationService, :mailer do
     end
 
     context 'new epic' do
-      let(:execute) { subject.new_epic(epic) }
+      let(:current_user) { epic.author }
+      let(:execute) { subject.new_epic(epic, current_user) }
 
       include_examples 'epic notifications'
+
+      shared_examples 'is not able to send notifications' do
+        it 'does not send any notification' do
+          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: epic.class.to_s, object_id: epic.id)
+
+          execute
+
+          should_not_email(watcher)
+          should_not_email(participating)
+          should_not_email(other_user)
+        end
+      end
+
+      context 'when author is not confirmed' do
+        let(:current_user) { create(:user, :unconfirmed) }
+
+        include_examples 'is not able to send notifications'
+      end
+
+      context 'when author is blocked' do
+        let(:current_user) { create(:user, :blocked) }
+
+        include_examples 'is not able to send notifications'
+      end
+
+      context 'when author is a ghost' do
+        let(:current_user) { create(:user, :ghost) }
+
+        include_examples 'is not able to send notifications'
+      end
     end
   end
 
@@ -837,6 +868,43 @@ RSpec.describe EE::NotificationService, :mailer do
       issuable.subscriptions.create(user: @unsubscriber, project: project, subscribed: false)
       # Make the watcher a subscriber to detect dupes
       issuable.subscriptions.create(user: @watcher_and_subscriber, project: project, subscribed: true)
+    end
+  end
+
+  context 'Members' do
+    describe '#new_group_member_with_confirmation' do
+      let(:added_user) { create(:user) }
+      let(:group) { create(:group) }
+
+      around do |example|
+        perform_enqueued_jobs do
+          example.run
+        end
+      end
+
+      before do
+        reset_delivered_emails!
+        added_user.user_detail.update!(provisioned_by_group_id: group.id)
+      end
+
+      it 'sends a notification' do
+        group.add_guest(added_user)
+        should_only_email(added_user)
+      end
+    end
+  end
+
+  context 'IncidentManagement::Oncall' do
+    describe '#notify_oncall_users_of_alert' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:alert) { create(:alert_management_alert) }
+      let_it_be(:project) { alert.project }
+
+      it 'sends an email to the specified users' do
+        expect(Notify).to receive(:prometheus_alert_fired_email).with(project, user, alert).and_call_original
+
+        subject.notify_oncall_users_of_alert([user], alert)
+      end
     end
   end
 end

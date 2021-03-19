@@ -17,6 +17,7 @@ import (
 
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/config"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/helper"
+	"gitlab.com/gitlab-org/gitlab-workhorse/internal/rejectmethods"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upload"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upstream/roundtripper"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/urlprefix"
@@ -39,6 +40,10 @@ type upstream struct {
 }
 
 func NewUpstream(cfg config.Config, accessLogger *logrus.Logger) http.Handler {
+	return newUpstream(cfg, accessLogger, configureRoutes)
+}
+
+func newUpstream(cfg config.Config, accessLogger *logrus.Logger, routesCallback func(*upstream)) http.Handler {
 	up := upstream{
 		Config:       cfg,
 		accessLogger: accessLogger,
@@ -55,7 +60,7 @@ func NewUpstream(cfg config.Config, accessLogger *logrus.Logger) http.Handler {
 	up.RoundTripper = roundtripper.NewBackendRoundTripper(up.Backend, up.Socket, up.ProxyHeadersTimeout, cfg.DevelopmentMode)
 	up.CableRoundTripper = roundtripper.NewBackendRoundTripper(up.CableBackend, up.CableSocket, up.ProxyHeadersTimeout, cfg.DevelopmentMode)
 	up.configureURLPrefix()
-	up.configureRoutes()
+	routesCallback(&up)
 
 	var correlationOpts []correlation.InboundHandlerOption
 	if cfg.PropagateCorrelationID {
@@ -63,6 +68,8 @@ func NewUpstream(cfg config.Config, accessLogger *logrus.Logger) http.Handler {
 	}
 
 	handler := correlation.InjectCorrelationID(&up, correlationOpts...)
+	// TODO: move to LabKit https://gitlab.com/gitlab-org/gitlab-workhorse/-/issues/339
+	handler = rejectmethods.NewMiddleware(handler)
 	return handler
 }
 
@@ -92,7 +99,7 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check URL Root
-	URIPath := urlprefix.CleanURIPath(r.URL.Path)
+	URIPath := urlprefix.CleanURIPath(r.URL.EscapedPath())
 	prefix := u.URLPrefix
 	if !prefix.Match(URIPath) {
 		helper.HTTPError(w, r, fmt.Sprintf("Not found %q", URIPath), http.StatusNotFound)

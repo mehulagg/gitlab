@@ -34,6 +34,8 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
+    has_many :fingerprints, class_name: 'Vulnerabilities::FindingFingerprint', inverse_of: :finding
+
     serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha
@@ -61,6 +63,11 @@ module Vulnerabilities
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true
     validates :details, json_schema: { filename: 'vulnerability_finding_details', draft: 7 }
+
+    validates :description, length: { maximum: 15000 }
+    validates :message, length: { maximum: 3000 }
+    validates :solution, length: { maximum: 7000 }
+    validates :cve, length: { maximum: 48400 }
 
     delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
 
@@ -96,18 +103,6 @@ module Vulnerabilities
       end
     end
 
-    def self.with_vulnerabilities_for_state(project:, report_type:, project_fingerprints:)
-      Vulnerabilities::Finding
-        .joins(:vulnerability)
-        .where(
-          project: project,
-          report_type: report_type,
-          project_fingerprint: project_fingerprints
-        )
-        .select('vulnerability_occurrences.report_type, vulnerability_id, project_fingerprint, raw_metadata, '\
-                'vulnerabilities.id, vulnerabilities.state') # fetching only required attributes
-    end
-
     # sha can be sourced from a joined pipeline or set from the report
     def sha
       self[:sha] || @sha
@@ -116,7 +111,7 @@ module Vulnerabilities
     def state
       return 'dismissed' if dismissal_feedback.present?
 
-      if vulnerability.nil?
+      if vulnerability.nil? || vulnerability.detected?
         'detected'
       elsif vulnerability.resolved?
         'resolved'
@@ -217,15 +212,15 @@ module Vulnerabilities
     end
 
     def description
-      metadata.dig('description')
+      super.presence || metadata.dig('description')
     end
 
     def solution
-      metadata.dig('solution') || remediations&.first&.dig('summary')
+      super.presence || metadata.dig('solution') || remediations&.first&.dig('summary')
     end
 
     def location
-      metadata.fetch('location', {})
+      super.presence || metadata.fetch('location', {})
     end
 
     def file
@@ -309,11 +304,11 @@ module Vulnerabilities
     end
 
     def message
-      metadata.dig('message')
+      super.presence || metadata.dig('message')
     end
 
     def cve_value
-      identifiers.find(&:cve?)&.name
+      cve || identifiers.find(&:cve?)&.name
     end
 
     def cwe_value
@@ -359,6 +354,25 @@ module Vulnerabilities
 
     def confidence_value
       self.class.confidences[self.confidence]
+    end
+
+    # We will eventually have only UUIDv5 values for the `uuid`
+    # attribute of the finding records.
+    def uuid_v5
+      if Gitlab::UUID.v5?(uuid)
+        uuid
+      else
+        ::Security::VulnerabilityUUID.generate(
+          report_type: report_type,
+          primary_identifier_fingerprint: primary_identifier.fingerprint,
+          location_fingerprint: location_fingerprint,
+          project_id: project_id
+        )
+      end
+    end
+
+    def pipeline_branch
+      pipelines&.last&.sha || project.default_branch
     end
 
     protected

@@ -388,108 +388,6 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
-  describe '#check_otp_session!' do
-    let_it_be(:user) { create(:user, :two_factor_via_otp)}
-    let_it_be(:key) { create(:key, user: user) }
-    let_it_be(:actor) { key }
-
-    before do
-      project.add_developer(user)
-      stub_feature_flags(two_factor_for_cli: true)
-    end
-
-    context 'with an OTP session', :clean_gitlab_redis_shared_state do
-      before do
-        Gitlab::Redis::SharedState.with do |redis|
-          redis.set("#{Gitlab::Auth::Otp::SessionEnforcer::OTP_SESSIONS_NAMESPACE}:#{key.id}", true)
-        end
-      end
-
-      it 'allows push and pull access' do
-        aggregate_failures do
-          expect { push_access_check }.not_to raise_error
-          expect { pull_access_check }.not_to raise_error
-        end
-      end
-    end
-
-    context 'without OTP session' do
-      it 'does not allow push or pull access' do
-        user = 'jane.doe'
-        host = 'fridge.ssh'
-        port = 42
-
-        stub_config(
-          gitlab_shell: {
-            ssh_user: user,
-            ssh_host: host,
-            ssh_port: port
-          }
-        )
-
-        error_message = "OTP verification is required to access the repository.\n\n"\
-                        "   Use: ssh #{user}@#{host} -p #{port} 2fa_verify"
-
-        aggregate_failures do
-          expect { push_access_check }.to raise_forbidden(error_message)
-          expect { pull_access_check }.to raise_forbidden(error_message)
-        end
-      end
-
-      context 'when protocol is HTTP' do
-        let(:protocol) { 'http' }
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-
-      context 'when actor is not an SSH key' do
-        let(:deploy_key) { create(:deploy_key, user: user) }
-        let(:actor) { deploy_key }
-
-        before do
-          deploy_key.deploy_keys_projects.create(project: project, can_push: true)
-        end
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-
-      context 'when 2FA is not enabled for the user' do
-        let(:user) { create(:user)}
-        let(:actor) { create(:key, user: user) }
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-
-      context 'when feature flag is disabled' do
-        before do
-          stub_feature_flags(two_factor_for_cli: false)
-        end
-
-        it 'allows push and pull access' do
-          aggregate_failures do
-            expect { push_access_check }.not_to raise_error
-            expect { pull_access_check }.not_to raise_error
-          end
-        end
-      end
-    end
-  end
-
   describe '#check_db_accessibility!' do
     context 'when in a read-only GitLab instance' do
       before do
@@ -891,6 +789,10 @@ RSpec.describe Gitlab::GitAccess do
         # Expectations are given a custom failure message proc so that it's
         # easier to identify which check(s) failed.
         it "has the correct permissions for #{role}s" do
+          if role == :admin_without_admin_mode
+            skip("All admins are allowed to perform actions https://gitlab.com/gitlab-org/gitlab/-/issues/296509")
+          end
+
           if [:admin_with_admin_mode, :admin_without_admin_mode].include?(role)
             user.update_attribute(:admin, true)
             enable_admin_mode!(user) if role == :admin_with_admin_mode

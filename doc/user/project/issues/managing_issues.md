@@ -199,7 +199,7 @@ can be closed automatically when the commit reaches the project's default branch
 
 If a commit message or merge request description contains text matching a [defined pattern](#default-closing-pattern),
 all issues referenced in the matched text are closed. This happens when the commit
-is pushed to a project's [**default** branch](../repository/branches/index.md#default-branch),
+is pushed to a project's [**default** branch](../repository/branches/default.md),
 or when a commit or merge request is merged into it.
 
 For example, if `Closes #4, #6, Related to #5` is included in a Merge Request
@@ -270,7 +270,7 @@ closed issues remain as-is. Disabling automatic issue closing only affects merge
 requests *in* the project and does not prevent other projects from closing it
 via cross-project issues.
 
-#### Customizing the issue closing pattern **(CORE ONLY)**
+#### Customizing the issue closing pattern **(FREE SELF)**
 
 In order to change the default issue closing pattern, GitLab administrators must edit the
 [`gitlab.rb` or `gitlab.yml` file](../../../administration/issue_closing_pattern.md)
@@ -287,9 +287,9 @@ editing it and clicking on the delete button.
 
 ## Promote an issue to an epic **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3777) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.6.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/37081) to [GitLab Premium](https://about.gitlab.com/pricing/) in 12.8.
-> - Promoting issues to epics via the UI [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233974) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3777) in GitLab Ultimate 11.6.
+> - Moved to GitLab Premium in 12.8.
+> - Promoting issues to epics via the UI [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233974) in GitLab Premium 13.6.
 
 You can promote an issue to an epic in the immediate parent group.
 
@@ -298,13 +298,14 @@ To promote an issue to an epic:
 1. In an issue, select the vertical ellipsis (**{ellipsis_v}**) button.
 1. Select **Promote to epic**.
 
-Alternatively, you can use the `/promote` [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
+Alternatively, you can use the `/promote` [quick action](../quick_actions.md#issues-merge-requests-and-epics).
 
 Read more about promoting an issue to an epic on the [Manage epics page](../../group/epics/manage_epics.md#promote-an-issue-to-an-epic).
 
-## Add an issue to an iteration **(STARTER)**
+## Add an issue to an iteration **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216158) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.2.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216158) in GitLab 13.2.
+> - Moved to GitLab Premium in 13.9.
 
 To add an issue to an [iteration](../../group/iterations/index.md):
 
@@ -312,5 +313,5 @@ To add an issue to an [iteration](../../group/iterations/index.md):
 1. Click an iteration you'd like to associate this issue with.
 
 You can also use the `/iteration`
-[quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
+[quick action](../quick_actions.md#issues-merge-requests-and-epics)
 in a comment or description field.

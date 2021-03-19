@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlFormCheckbox } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import JiraTriggerFields from '~/integrations/edit/components/jira_trigger_fields.vue';
 
 describe('JiraTriggerFields', () => {
@@ -104,11 +104,11 @@ describe('JiraTriggerFields', () => {
         true,
       );
 
-      wrapper.findAll('[type=checkbox]').wrappers.forEach(checkbox => {
+      wrapper.findAll('[type=checkbox]').wrappers.forEach((checkbox) => {
         expect(checkbox.attributes('disabled')).toBe('disabled');
       });
 
-      wrapper.findAll('[type=radio]').wrappers.forEach(radio => {
+      wrapper.findAll('[type=radio]').wrappers.forEach((radio) => {
         expect(radio.attributes('disabled')).toBe('disabled');
       });
     });

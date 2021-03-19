@@ -19,6 +19,7 @@ cache:
   key: "${TF_ROOT}"
   paths:
     - ${TF_ROOT}/.terraform/
+    - ${TF_ROOT}/.terraform.lock.hcl
 
 .init: &init
   stage: init
@@ -51,7 +52,8 @@ cache:
     - gitlab-terraform apply
   when: manual
   only:
-    - master
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 .destroy: &destroy
   stage: cleanup

@@ -39,8 +39,12 @@ module QA
             element :boards_list
           end
 
-          view 'app/assets/javascripts/boards/toggle_focus.js' do
+          view 'app/assets/javascripts/boards/components/toggle_focus.vue' do
             element :focus_mode_button
+          end
+
+          view 'app/assets/javascripts/boards/components/config_toggle.vue' do
+            element :boards_config_button
           end
 
           # The `focused_board` method does not use `find_element` with an element defined
@@ -80,6 +84,10 @@ module QA
                 find_element(:board_card)
               end
             end
+          end
+
+          def click_boards_config_button
+            click_element(:boards_config_button)
           end
 
           def click_boards_dropdown_button

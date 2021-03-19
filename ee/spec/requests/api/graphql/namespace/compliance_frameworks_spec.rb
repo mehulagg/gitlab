@@ -17,6 +17,11 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
   end
 
   context 'when authenticated as the namespace owner' do
+    before do
+      stub_licensed_features(custom_compliance_frameworks: true)
+      stub_feature_flags(ff_custom_compliance_frameworks: true)
+    end
+
     let(:current_user) { namespace.owner }
 
     it 'returns the groups compliance frameworks' do
@@ -120,7 +125,7 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
       it 'responds with error when querying a compliance framework' do
         post_graphql(query, current_user: current_user)
 
-        expect(graphql_errors).to contain_exactly(include('message' => "Field 'complianceFrameworks' doesn't exist on type 'Namespace'"))
+        expect(graphql_errors).to contain_exactly(include('message' => "The resource that you are attempting to access does not exist or you don't have permission to perform this action"))
       end
     end
   end

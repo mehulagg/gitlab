@@ -4,7 +4,6 @@
   margin-bottom: 0;
   min-height: $header-height;
   border: 0;
-  border-bottom: 1px solid $border-color;
   position: fixed;
   top: 0;
   left: 0;
@@ -172,7 +171,7 @@
       }
 
       li {
-        .badge.badge-pill {
+        .badge.badge-pill:not(.merge-request-badge) {
           box-shadow: none;
           font-weight: $gl-font-weight-bold;
         }
@@ -438,7 +437,7 @@
 
 .title-container,
 .navbar-nav {
-  .badge.badge-pill {
+  .badge.badge-pill:not(.merge-request-badge) {
     position: inherit;
     font-weight: $gl-font-weight-normal;
     margin-left: -6px;
@@ -516,28 +515,8 @@
     left: auto;
     max-height: $dropdown-max-height-lg;
 
-    li.current-user {
-      padding: $dropdown-item-padding-y $dropdown-item-padding-x;
-
-      .user-name {
-        display: block;
-      }
-
-      .user-status {
-        margin-right: 0;
-        max-width: 240px;
-        font-size: $gl-font-size-small;
-
-        gl-emoji {
-          font-size: $gl-font-size-small;
-        }
-
-        .user-status-emoji {
-          gl-emoji {
-            font-size: $gl-font-size;
-          }
-        }
-      }
+    .user-status {
+      max-width: 240px;
     }
 
     svg {

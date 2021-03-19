@@ -145,12 +145,13 @@ RSpec.describe 'group epic roadmap', :js do
   context 'when no epics exist for the group' do
     before do
       visit group_roadmap_path(group)
+      wait_for_requests
     end
 
     describe 'roadmap page' do
-      it 'does not render the filtered search bar' do
-        page.within('.content-wrapper .content') do
-          expect(page).not_to have_css('.epics-filters')
+      it 'shows empty state page' do
+        page.within('.empty-state') do
+          expect(page).to have_content('The roadmap shows the progress of your epics along a timeline')
         end
       end
     end
@@ -160,7 +161,7 @@ RSpec.describe 'group epic roadmap', :js do
     before do
       create_list(:epic, 2, group: group, start_date: 10.days.ago, end_date: 1.day.ago)
       visit group_roadmap_path(group)
-      wait_for_requests
+
       execute_script("gon.roadmap_epics_limit = 1;")
     end
 

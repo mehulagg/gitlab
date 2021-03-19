@@ -40,6 +40,7 @@ RSpec.describe 'issue boards', :js do
     let(:project) { create(:project, :public, namespace: group) }
 
     before do
+      stub_feature_flags(board_new_list: false)
       project.add_maintainer(user)
       group.add_reporter(user)
       login_as(user)
@@ -200,7 +201,7 @@ RSpec.describe 'issue boards', :js do
 
         it 'displays issue and max issue size' do
           page.within(find(".board:nth-child(2)")) do
-            expect(page.find('.js-issue-size')).to have_text(total_development_issues)
+            expect(page.find('[data-testid="board-items-count"]')).to have_text(total_development_issues)
             expect(page.find('.js-max-issue-size')).to have_text(max_issue_count)
           end
         end
@@ -214,7 +215,7 @@ RSpec.describe 'issue boards', :js do
       login_as(user)
     end
 
-    context 'When license is available' do
+    context 'when license is available' do
       let!(:label) { create(:label, project: project, name: 'Brount') }
       let!(:list) { create(:list, board: board, label: label, position: 1) }
 
@@ -345,7 +346,7 @@ RSpec.describe 'issue boards', :js do
       end
     end
 
-    context 'When license is not available' do
+    context 'when license is not available' do
       before do
         stub_licensed_features(wip_limits: false)
         visit project_boards_path(project)

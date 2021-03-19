@@ -1,6 +1,6 @@
 <script>
-import { mapState } from 'vuex';
 import { GlButton, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import { APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
 import { __ } from '~/locale';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
@@ -60,7 +60,9 @@ export default {
         </p>
         <div class="gl-ml-auto">
           <gl-button name="cancel" @click="cancel">{{ __('Cancel') }}</gl-button>
-          <gl-button name="ok" variant="success" @click="ok">{{ title }}</gl-button>
+          <gl-button name="ok" category="primary" variant="confirm" @click="ok">{{
+            title
+          }}</gl-button>
         </div>
       </section>
     </template>

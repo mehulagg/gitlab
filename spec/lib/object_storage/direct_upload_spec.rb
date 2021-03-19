@@ -162,10 +162,6 @@ RSpec.describe ObjectStorage::DirectUpload do
         it 'enables the Workhorse client' do
           expect(subject[:UseWorkhorseClient]).to be true
         end
-
-        it 'omits the multipart upload URLs' do
-          expect(subject).not_to include(:MultipartUpload)
-        end
       end
 
       context 'when only server side encryption is used' do
@@ -227,6 +223,17 @@ RSpec.describe ObjectStorage::DirectUpload do
         expect(subject[:DeleteURL]).to start_with(storage_url)
         expect(subject[:CustomPutHeaders]).to be_truthy
         expect(subject[:PutHeaders]).to eq({})
+      end
+
+      context 'with an object with UTF-8 characters' do
+        let(:object_name) { 'tmp/uploads/テスト' }
+
+        it 'returns an escaped path' do
+          expect(subject[:GetURL]).to start_with(storage_url)
+
+          uri = Addressable::URI.parse(subject[:GetURL])
+          expect(uri.path).to include("tmp/uploads/#{CGI.escape("テスト")}")
+        end
       end
     end
 

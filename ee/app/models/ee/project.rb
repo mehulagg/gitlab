@@ -38,7 +38,7 @@ module EE
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
       has_one :project_registry, class_name: 'Geo::ProjectRegistry', inverse_of: :project
-      has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
+      has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }, inverse_of: :project
       has_one :index_status
 
       has_one :github_service
@@ -46,7 +46,7 @@ module EE
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
-      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
+      has_one :compliance_management_framework, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -62,6 +62,7 @@ module EE
           includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
         end
       end
+      has_many :external_approval_rules, class_name: 'ApprovalRules::ExternalApprovalRule'
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -103,8 +104,12 @@ module EE
       has_many :sourced_pipelines, class_name: 'Ci::Sources::Project', foreign_key: :source_project_id
 
       has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
+      has_many :incident_management_oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :incident_management_oncall_schedules, source: :rotations
+
+      has_one :security_orchestration_policy_configuration, class_name: 'Security::OrchestrationPolicyConfiguration', foreign_key: :project_id, inverse_of: :project
 
       elastic_index_dependant_association :issues, on_change: :visibility_level
+      elastic_index_dependant_association :notes, on_change: :visibility_level
 
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
@@ -123,6 +128,10 @@ module EE
           .where("import_state.next_execution_timestamp <= ?", freeze_at)
           .where("import_state.retry_count <= ?", ::Gitlab::Mirror::MAX_RETRY)
           .limit(limit)
+      end
+
+      scope :with_code_coverage, -> do
+        joins(:daily_build_group_report_results).merge(::Ci::DailyBuildGroupReportResult.with_coverage.with_default_branch).group(:id)
       end
 
       scope :including_project, ->(project) { where(id: project) }
@@ -188,18 +197,17 @@ module EE
 
       delegate :ci_minutes_quota, to: :shared_runners_limit_namespace
 
-      delegate :last_update_succeeded?, :last_update_failed?,
-        :ever_updated_successfully?, :hard_failed?,
-        to: :import_state, prefix: :mirror, allow_nil: true
-
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
       delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
 
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
-      delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
+      delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
+      alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
+
+      delegate :prevent_merge_without_jira_issue, to: :project_setting
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
@@ -229,6 +237,35 @@ module EE
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true
 
       alias_attribute :fallback_approvals_required, :approvals_before_merge
+
+      def jira_issue_association_required_to_merge_enabled?
+        ::Feature.enabled?(:jira_issue_association_on_merge_request, self) &&
+          feature_available?(:jira_issue_association_enforcement)
+      end
+
+      def jira_vulnerabilities_integration_enabled?
+        !!jira_service&.jira_vulnerabilities_integration_enabled?
+      end
+
+      def configured_to_create_issues_from_vulnerabilities?
+        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
+      end
+    end
+
+    def mirror_last_update_succeeded?
+      !!import_state&.last_update_succeeded?
+    end
+
+    def mirror_last_update_failed?
+      !!import_state&.last_update_failed?
+    end
+
+    def mirror_ever_updated_successfully?
+      !!import_state&.ever_updated_successfully?
+    end
+
+    def mirror_hard_failed?
+      !!import_state&.hard_failed?
     end
 
     class_methods do
@@ -278,6 +315,10 @@ module EE
       all_pipelines.newest_first(ref: default_branch).with_reports(reports).take
     end
 
+    def security_reports_up_to_date_for_ref?(ref)
+      latest_pipeline_with_security_reports(only_successful: true) == ci_pipelines.newest_first(ref: ref).take
+    end
+
     def ensure_external_webhook_token
       return if external_webhook_token.present?
 
@@ -297,7 +338,7 @@ module EE
       mirror? && !empty_repo?
     end
 
-    def fetch_mirror(forced: false)
+    def fetch_mirror(forced: false, check_tags_changed: false)
       return unless mirror?
 
       # Only send the password if it's needed
@@ -308,7 +349,7 @@ module EE
           username_only_import_url
         end
 
-      repository.fetch_upstream(url, forced: forced)
+      repository.fetch_upstream(url, forced: forced, check_tags_changed: check_tags_changed)
     end
 
     def can_override_approvers?
@@ -505,7 +546,10 @@ module EE
     def require_password_to_approve
       super && password_authentication_enabled_for_web?
     end
-    alias_method :require_password_to_approve?, :require_password_to_approve
+
+    def require_password_to_approve?
+      !!require_password_to_approve
+    end
 
     def find_path_lock(path, exact_match: false, downstream: false)
       path_lock_finder = strong_memoize(:path_lock_finder) do
@@ -694,7 +738,10 @@ module EE
         ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request? || super
       end
     end
-    alias_method :disable_overriding_approvers_per_merge_request?, :disable_overriding_approvers_per_merge_request
+
+    def disable_overriding_approvers_per_merge_request?
+      !!disable_overriding_approvers_per_merge_request
+    end
 
     def merge_requests_author_approval
       strong_memoize(:merge_requests_author_approval) do
@@ -704,7 +751,10 @@ module EE
         super
       end
     end
-    alias_method :merge_requests_author_approval?, :merge_requests_author_approval
+
+    def merge_requests_author_approval?
+      !!merge_requests_author_approval
+    end
 
     def merge_requests_disable_committers_approval
       strong_memoize(:merge_requests_disable_committers_approval) do
@@ -713,7 +763,10 @@ module EE
         ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval? || super
       end
     end
-    alias_method :merge_requests_disable_committers_approval?, :merge_requests_disable_committers_approval
+
+    def merge_requests_disable_committers_approval?
+      !!merge_requests_disable_committers_approval
+    end
 
     def license_compliance(pipeline = latest_pipeline_with_reports(::Ci::JobArtifact.license_scanning_reports))
       SCA::LicenseCompliance.new(self, pipeline)
@@ -741,6 +794,10 @@ module EE
       end
     end
 
+    def prevent_merge_without_jira_issue?
+      jira_issue_association_required_to_merge_enabled? && prevent_merge_without_jira_issue
+    end
+
     private
 
     def group_hooks
@@ -757,9 +814,6 @@ module EE
     end
 
     def licensed_feature_available?(feature, user = nil)
-      # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, user, type: :licensed, default_enabled: true)
-
       available_features = strong_memoize(:licensed_feature_available) do
         Hash.new do |h, f|
           h[f] = load_licensed_feature_available(f)
@@ -801,5 +855,3 @@ module EE
     end
   end
 end
-
-EE::Project.include_if_ee('::EE::GitlabRoutingHelper')

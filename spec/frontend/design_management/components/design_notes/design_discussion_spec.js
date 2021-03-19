@@ -1,14 +1,14 @@
-import { mount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
-import notes from '../../mock_data/notes';
+import { mount } from '@vue/test-utils';
 import DesignDiscussion from '~/design_management/components/design_notes/design_discussion.vue';
 import DesignNote from '~/design_management/components/design_notes/design_note.vue';
 import DesignReplyForm from '~/design_management/components/design_notes/design_reply_form.vue';
+import ToggleRepliesWidget from '~/design_management/components/design_notes/toggle_replies_widget.vue';
 import createNoteMutation from '~/design_management/graphql/mutations/create_note.mutation.graphql';
 import toggleResolveDiscussionMutation from '~/design_management/graphql/mutations/toggle_resolve_discussion.mutation.graphql';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
-import ToggleRepliesWidget from '~/design_management/components/design_notes/toggle_replies_widget.vue';
 import mockDiscussion from '../../mock_data/discussion';
+import notes from '../../mock_data/notes';
 
 const defaultMockDiscussion = {
   id: '0',
@@ -93,7 +93,7 @@ describe('Design discussions component', () => {
     });
 
     it('does not render a checkbox in reply form', () => {
-      findReplyPlaceholder().vm.$emit('onClick');
+      findReplyPlaceholder().vm.$emit('focus');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(findResolveCheckbox().exists()).toBe(false);
@@ -108,7 +108,7 @@ describe('Design discussions component', () => {
 
     it('renders correct amount of discussion notes', () => {
       expect(findDesignNotes()).toHaveLength(2);
-      expect(findDesignNotes().wrappers.every(w => w.isVisible())).toBe(true);
+      expect(findDesignNotes().wrappers.every((w) => w.isVisible())).toBe(true);
     });
 
     it('renders reply placeholder', () => {
@@ -124,7 +124,7 @@ describe('Design discussions component', () => {
     });
 
     it('renders a checkbox with Resolve thread text in reply form', () => {
-      findReplyPlaceholder().vm.$emit('onClick');
+      findReplyPlaceholder().vm.$emit('focus');
       wrapper.setProps({ discussionWithOpenForm: defaultMockDiscussion.id });
 
       return wrapper.vm.$nextTick().then(() => {
@@ -193,7 +193,7 @@ describe('Design discussions component', () => {
       });
 
       it('renders a checkbox with Unresolve thread text in reply form', () => {
-        findReplyPlaceholder().vm.$emit('onClick');
+        findReplyPlaceholder().vm.$emit('focus');
         wrapper.setProps({ discussionWithOpenForm: defaultMockDiscussion.id });
 
         return wrapper.vm.$nextTick().then(() => {
@@ -205,7 +205,7 @@ describe('Design discussions component', () => {
 
   it('hides reply placeholder and opens form on placeholder click', () => {
     createComponent();
-    findReplyPlaceholder().vm.$emit('onClick');
+    findReplyPlaceholder().vm.$emit('focus');
     wrapper.setProps({ discussionWithOpenForm: defaultMockDiscussion.id });
 
     return wrapper.vm.$nextTick().then(() => {
@@ -251,7 +251,7 @@ describe('Design discussions component', () => {
   describe('when any note from a discussion is active', () => {
     it.each([notes[0], notes[0].discussion.notes.nodes[1]])(
       'applies correct class to all notes in the active discussion',
-      note => {
+      (note) => {
         createComponent(
           { discussion: mockDiscussion },
           {
@@ -265,7 +265,7 @@ describe('Design discussions component', () => {
         expect(
           wrapper
             .findAll(DesignNote)
-            .wrappers.every(designNote => designNote.classes('gl-bg-blue-50')),
+            .wrappers.every((designNote) => designNote.classes('gl-bg-blue-50')),
         ).toBe(true);
       },
     );
@@ -307,7 +307,7 @@ describe('Design discussions component', () => {
 
   it('emits openForm event on opening the form', () => {
     createComponent();
-    findReplyPlaceholder().vm.$emit('onClick');
+    findReplyPlaceholder().vm.$emit('focus');
 
     expect(wrapper.emitted('open-form')).toBeTruthy();
   });

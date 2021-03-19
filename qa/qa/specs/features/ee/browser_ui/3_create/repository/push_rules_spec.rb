@@ -3,8 +3,11 @@
 module QA
   RSpec.describe 'Create' do
     context 'Push Rules' do
-      describe 'using non signed commits' do
+      # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+      describe 'using non signed commits', :requires_admin do
         before(:context) do
+          Runtime::Feature.enable(:invite_members_group_modal)
+
           prepare
 
           @file_name_limitation = 'denied_file'
@@ -110,7 +113,7 @@ module QA
           end
         end
 
-        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/879', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
+        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1677', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
           non_member_user = Resource::User.new.tap do |user|
             user.username = ''
             user.password = ''

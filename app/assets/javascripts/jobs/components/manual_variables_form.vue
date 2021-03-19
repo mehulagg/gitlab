@@ -1,8 +1,8 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import { GlButton } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { mapActions } from 'vuex';
-import { GlButton } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 
 export default {
@@ -94,7 +94,7 @@ export default {
     },
     deleteVariable(id) {
       this.variables.splice(
-        this.variables.findIndex(el => el.id === id),
+        this.variables.findIndex((el) => el.id === id),
         1,
       );
     },

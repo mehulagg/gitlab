@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Geo validation tests **(PREMIUM ONLY)**
+# Geo validation tests **(PREMIUM SELF)**
 
 The Geo team performs manual testing and validation on common deployment configurations to ensure
 that Geo works when upgrading between minor GitLab versions and major PostgreSQL database versions.
@@ -53,7 +53,7 @@ The following are GitLab upgrade validation tests we performed.
 - Outcome: Partial success because we did not run the looping pipeline during the demo to validate
   zero-downtime.
 - Follow up issues:
-  - [Clarify hup Puma/Unicorn should include deploy node](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5460)
+  - [Clarify how Puma/Unicorn should include deploy node](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5460)
   - [Investigate MR creation failure after upgrade to 12.9.10](https://gitlab.com/gitlab-org/gitlab/-/issues/223282) Closed as false positive.
 
 ### February 2020
@@ -128,7 +128,7 @@ The following are PostgreSQL upgrade validation tests we performed.
   PostgreSQL 12 with a database cluster on the primary is not recommended until the issues are resolved.
 - Known issues for PostgreSQL clusters:
   - [Ensure Patroni detects PostgreSQL update](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5423)
-  - [Allow configuring permanent replication slots in patroni](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5628)
+  - [Allow configuring permanent replication slots in Patroni](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5628)
 
 ### August 2020
 
@@ -154,7 +154,7 @@ The following are PostgreSQL upgrade validation tests we performed.
 - Follow up issues:
   - [`replicate-geo-database` incorrectly tries to back up repositories](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5241).
   - [`pg-upgrade` fails to upgrade a standalone Geo tracking database](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5242).
-  - [`revert-pg-upgrade` fails to downgrade the PostgreSQL data of a Geo secondary’s standalone tracking database](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5243).
+  - [`revert-pg-upgrade` fails to downgrade the PostgreSQL data of a Geo secondary's standalone tracking database](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5243).
   - [Timeout error on Geo secondary read-replica near the end of `gitlab-ctl pg-upgrade`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5235).
 
 [Verify Geo installation with PostgreSQL 11](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4971):

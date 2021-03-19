@@ -37,7 +37,7 @@ RSpec.describe 'Import multiple repositories by uploading a manifest file', :js 
     wait_for_requests
 
     page.within(second_row) do
-      expect(page).to have_content 'Done'
+      expect(page).to have_content 'Complete'
       expect(page).to have_content("#{group.full_path}/build/blueprint")
     end
   end
@@ -52,6 +52,6 @@ RSpec.describe 'Import multiple repositories by uploading a manifest file', :js 
   end
 
   def second_row
-    page.all('table.import-table tbody tr')[1]
+    page.all('table tbody tr')[1]
   end
 end

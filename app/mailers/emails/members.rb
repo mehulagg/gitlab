@@ -4,9 +4,11 @@ module Emails
   module Members
     extend ActiveSupport::Concern
     include MembersHelper
+    include Gitlab::Experiment::Dsl
 
     included do
       helper_method :member_source, :member
+      helper_method :experiment
     end
 
     def member_access_requested_email(member_source_type, member_id, recipient_id)
@@ -114,6 +116,23 @@ module Emails
         subject: subject('Invitation declined'))
     end
 
+    def member_expiration_date_updated_email(member_source_type, member_id)
+      @member_source_type = member_source_type
+      @member_id = member_id
+
+      return unless member_exists?
+
+      subject = if member.expires?
+                  _('Group membership expiration date changed')
+                else
+                  _('Group membership expiration date removed')
+                end
+
+      member_email_with_layout(
+        to: member.user.notification_email_for(notification_group),
+        subject: subject(subject))
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def member
       @member ||= Member.find_by(id: @member_id)
@@ -147,3 +166,5 @@ module Emails
     end
   end
 end
+
+Emails::Members.prepend_if_ee('EE::Emails::Members')

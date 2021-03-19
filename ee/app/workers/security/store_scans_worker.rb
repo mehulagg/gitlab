@@ -10,29 +10,19 @@ module Security
       ::Ci::Pipeline.find_by(id: pipeline_id).try do |pipeline|
         break unless pipeline.can_store_security_reports?
 
-        Security::StoreScansService.execute(pipeline)
-        security_build = secret_detection_build(pipeline)
+        record_onboarding_progress(pipeline)
 
-        if revoke_secret_detection_token?(security_build)
-          ::ScanSecurityReportSecretsWorker.perform_async(security_build.id)
-        end
+        Security::StoreScansService.execute(pipeline)
       end
     end
 
     private
 
-    def secret_detection_build(pipeline)
-      pipeline.security_scans.secret_detection.last&.build
-    end
+    def record_onboarding_progress(pipeline)
+      # We only record SAST scans since it's a Free feature and available to all users
+      return unless pipeline.security_scans.sast.any?
 
-    def revoke_secret_detection_token?(build)
-      build.present? &&
-        ::Gitlab::CurrentSettings.secret_detection_token_revocation_enabled? &&
-        secret_detection_vulnerability_found?(build)
-    end
-
-    def secret_detection_vulnerability_found?(build)
-      build.pipeline.vulnerability_findings.secret_detection.any?
+      OnboardingProgressService.new(pipeline.project.namespace).execute(action: :security_scan_enabled)
     end
   end
 end

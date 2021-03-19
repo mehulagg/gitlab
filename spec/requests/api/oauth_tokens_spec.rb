@@ -26,9 +26,6 @@ RSpec.describe 'OAuth tokens' do
     end
 
     context 'when user does not have 2FA enabled' do
-      # NOTE: using ROPS grant flow without client credentials will be deprecated
-      # and removed in the next version of Doorkeeper.
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/219137
       context 'when no client credentials provided' do
         it 'creates an access token' do
           user = create(:user)
@@ -36,7 +33,7 @@ RSpec.describe 'OAuth tokens' do
           request_oauth_token(user)
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['access_token']).not_to be_nil
+          expect(json_response['access_token']).to be_present
         end
       end
 
@@ -54,15 +51,13 @@ RSpec.describe 'OAuth tokens' do
 
         context 'with invalid credentials' do
           it 'does not create an access token' do
-            # NOTE: remove this after update to Doorkeeper 5.5 or newer, see
-            # https://gitlab.com/gitlab-org/gitlab/-/issues/219137
-            pending 'Enable this example after upgrading Doorkeeper to 5.5 or newer'
+            pending 'Enable this example after https://github.com/doorkeeper-gem/doorkeeper/pull/1488 is merged and released'
 
             user = create(:user)
 
             request_oauth_token(user, basic_auth_header(client.uid, 'invalid secret'))
 
-            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(response).to have_gitlab_http_status(:unauthorized)
             expect(json_response['error']).to eq('invalid_client')
           end
         end

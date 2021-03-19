@@ -4,8 +4,8 @@ require 'spec_helper'
 
 RSpec.describe DastScannerProfiles::DestroyService do
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_scanner_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
-  let(:project) { dast_scanner_profile.project }
+  let_it_be(:dast_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
+  let(:project) { dast_profile.project }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -18,7 +18,7 @@ RSpec.describe DastScannerProfiles::DestroyService do
       )
     end
 
-    let(:dast_scanner_profile_id) { dast_scanner_profile.id }
+    let(:dast_scanner_profile_id) { dast_profile.id }
     let(:status) { subject.status }
     let(:message) { subject.message }
     let(:payload) { subject.payload }
@@ -77,6 +77,8 @@ RSpec.describe DastScannerProfiles::DestroyService do
           expect(message).to eq('You are not authorized to update this scanner profile')
         end
       end
+
+      include_examples 'restricts modification if referenced by policy', :delete
     end
   end
 end

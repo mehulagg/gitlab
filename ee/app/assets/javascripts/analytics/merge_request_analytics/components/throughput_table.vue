@@ -1,6 +1,4 @@
 <script>
-import { mapState } from 'vuex';
-import dateFormat from 'dateformat';
 import {
   GlTable,
   GlLink,
@@ -13,11 +11,12 @@ import {
   GlIcon,
   GlPagination,
 } from '@gitlab/ui';
-import { s__, n__ } from '~/locale';
+import dateFormat from 'dateformat';
+import { mapState } from 'vuex';
 import { approximateDuration, differenceInSeconds } from '~/lib/utils/datetime_utility';
+import { s__, n__ } from '~/locale';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
-import throughputTableQuery from '../graphql/queries/throughput_table.query.graphql';
 import {
   THROUGHPUT_TABLE_STRINGS,
   MERGE_REQUEST_ID_PREFIX,
@@ -28,6 +27,7 @@ import {
   THROUGHPUT_TABLE_TEST_IDS,
   PIPELINE_STATUS_ICON_CLASSES,
 } from '../constants';
+import throughputTableQuery from '../graphql/queries/throughput_table.query.graphql';
 
 const TH_TEST_ID = { 'data-testid': THROUGHPUT_TABLE_TEST_IDS.TABLE_HEADERS };
 
@@ -155,12 +155,12 @@ export default {
   },
   computed: {
     ...mapState('filters', {
-      selectedSourceBranch: state => state.branches.source.selected,
-      selectedTargetBranch: state => state.branches.target.selected,
-      selectedMilestone: state => state.milestones.selected,
-      selectedAuthor: state => state.authors.selected,
-      selectedAssignee: state => state.assignees.selected,
-      selectedLabelList: state => state.labels.selectedList,
+      selectedSourceBranch: (state) => state.branches.source.selected,
+      selectedTargetBranch: (state) => state.branches.target.selected,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedAuthor: (state) => state.authors.selected,
+      selectedAssignee: (state) => state.assignees.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
     }),
     options() {
       return filterToQueryObject({

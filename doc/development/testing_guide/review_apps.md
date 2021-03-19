@@ -109,10 +109,10 @@ subgraph "CNG-mirror pipeline"
 ### Auto-stopping of Review Apps
 
 Review Apps are automatically stopped 2 days after the last deployment thanks to
-the [Environment auto-stop](../../ci/environments/index.md#environments-auto-stop) feature.
+the [Environment auto-stop](../../ci/environments/index.md#stop-an-environment-after-a-certain-time-period) feature.
 
 If you need your Review App to stay up for a longer time, you can
-[pin its environment](../../ci/environments/index.md#auto-stop-example) or retry the
+[pin its environment](../../ci/environments/index.md#override-a-deployments-scheduled-stop-time) or retry the
 `review-deploy` job to update the "latest deployed at" time.
 
 The `review-cleanup` job that automatically runs in scheduled
@@ -186,9 +186,9 @@ the GitLab handbook information for the [shared 1Password account](https://about
 ### Find my Review App slug
 
 1. Open the `review-deploy` job.
-1. Look for `Checking for previous deployment of review-*`.
-1. For instance for `Checking for previous deployment of review-qa-raise-e-12chm0`,
-   your Review App slug would be `review-qa-raise-e-12chm0` in this case.
+1. Look for `** Deploying review-*`.
+1. For instance for `** Deploying review-1234-abc-defg... **`,
+   your Review App slug would be `review-1234-abc-defg` in this case.
 
 ### Run a Rails console
 
@@ -357,7 +357,7 @@ using `v232`.
 
 For the record, the debugging steps to find out this issue were:
 
-1. Switch kubectl context to review-apps-ce (we recommend using [kubectx](https://github.com/ahmetb/kubectx/))
+1. Switch kubectl context to `review-apps-ce` (we recommend using [`kubectx`](https://github.com/ahmetb/kubectx/))
 1. `kubectl get pods | grep dns`
 1. `kubectl describe pod <pod name>` & confirm exact error message
 1. Web search for exact error message, following rabbit hole to [a relevant Kubernetes bug report](https://github.com/kubernetes/kubernetes/issues/57345)

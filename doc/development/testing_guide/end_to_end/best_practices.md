@@ -10,7 +10,7 @@ This is a tailored extension of the Best Practices [found in the testing guide](
 
 ## Link a test to its test-case issue
 
-Every test should have a corresponding issue in the [Quality Testcases project](https://gitlab.com/gitlab-org/quality/testcases/).
+Every test should have a corresponding issue in the [Quality Test Cases project](https://gitlab.com/gitlab-org/quality/testcases/).
 It's recommended that you reuse the issue created to plan the test. If one does not already exist you
 can create the issue yourself. Alternatively, you can run the test in a pipeline that has reporting
 enabled and the test-case issue reporter will automatically create a new issue.
@@ -244,7 +244,7 @@ point of failure and so the screenshot would not be captured at the right moment
 
 All tests expect to be able to log in at the start of the test.
 
-For an example see: <https://gitlab.com/gitlab-org/gitlab/-/issues/34736>
+For an example see [issue #34736](https://gitlab.com/gitlab-org/gitlab/-/issues/34736).
 
 Ideally, actions performed in an `after(:context)` (or
 [`before(:context)`](#limit-the-use-of-the-ui-in-beforecontext-and-after-hooks))
@@ -309,10 +309,10 @@ This action can also unintentionally click other elements, altering the test sta
 # Clicking another element to blur an input
 def add_issue_to_epic(issue_url)
   find_element(:issue_actions_split_button).find('button', text: 'Add an issue').click
-  fill_element :add_issue_input, issue_url
+  fill_element(:add_issue_input, issue_url)
   # Clicking the title blurs the input
-  click_element :title
-  click_element :add_issue_button
+  click_element(:title)
+  click_element(:add_issue_button)
 end
 
 # Using native mouse click events in the case of a mask/overlay

@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Status Page
+# Status Page **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2479) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
 
@@ -80,7 +80,7 @@ the necessary CI/CD variables to deploy the Status Page to AWS S3:
    - `AWS_DEFAULT_REGION` - The AWS region.
    - `AWS_ACCESS_KEY_ID` - The AWS access key ID.
    - `AWS_SECRET_ACCESS_KEY` - The AWS secret.
-1. Navigate to **CI / CD > Pipelines > Run Pipeline**, and run the pipeline to
+1. Navigate to **CI/CD > Pipelines > Run Pipeline**, and run the pipeline to
    deploy the Status Page to S3.
 
 WARNING:

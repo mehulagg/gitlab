@@ -14,7 +14,6 @@ RSpec.describe BulkImports::Entity, type: :model do
     it { is_expected.to validate_presence_of(:source_type) }
     it { is_expected.to validate_presence_of(:source_full_path) }
     it { is_expected.to validate_presence_of(:destination_name) }
-    it { is_expected.to validate_presence_of(:destination_namespace) }
 
     it { is_expected.to define_enum_for(:source_type).with_values(%i[group_entity project_entity]) }
 
@@ -38,7 +37,11 @@ RSpec.describe BulkImports::Entity, type: :model do
     context 'when associated with a group and no project' do
       it 'is valid as a group_entity' do
         entity = build(:bulk_import_entity, :group_entity, group: build(:group), project: nil)
+        expect(entity).to be_valid
+      end
 
+      it 'is valid when destination_namespace is empty' do
+        entity = build(:bulk_import_entity, :group_entity, group: build(:group), project: nil, destination_namespace: '')
         expect(entity).to be_valid
       end
 
@@ -55,6 +58,12 @@ RSpec.describe BulkImports::Entity, type: :model do
         entity = build(:bulk_import_entity, :project_entity, group: nil, project: build(:project))
 
         expect(entity).to be_valid
+      end
+
+      it 'is invalid when destination_namespace is nil' do
+        entity = build(:bulk_import_entity, :group_entity, group: build(:group), project: nil, destination_namespace: nil)
+        expect(entity).not_to be_valid
+        expect(entity.errors).to include(:destination_namespace)
       end
 
       it 'is invalid as a project_entity' do
@@ -81,69 +90,39 @@ RSpec.describe BulkImports::Entity, type: :model do
         expect(entity.errors).to include(:parent)
       end
     end
-  end
 
-  describe "#update_tracker_for" do
-    let(:entity) { create(:bulk_import_entity) }
+    context 'validate destination namespace of a group_entity' do
+      it 'is invalid if destination namespace is the source namespace' do
+        group_a = create(:group, path: 'group_a')
 
-    it "inserts new tracker when it does not exist" do
-      expect do
-        entity.update_tracker_for(relation: :relation, has_next_page: false)
-      end.to change(BulkImports::Tracker, :count).by(1)
+        entity = build(
+          :bulk_import_entity,
+          :group_entity,
+          source_full_path: group_a.full_path,
+          destination_namespace: group_a.full_path
+        )
 
-      tracker = entity.trackers.last
+        expect(entity).not_to be_valid
+        expect(entity.errors).to include(:base)
+        expect(entity.errors[:base])
+          .to include('Import failed: Destination cannot be a subgroup of the source group. Change the destination and try again.')
+      end
 
-      expect(tracker.relation).to eq('relation')
-      expect(tracker.has_next_page).to eq(false)
-      expect(tracker.next_page).to eq(nil)
-    end
+      it 'is invalid if destination namespace is a descendant of the source' do
+        group_a = create(:group, path: 'group_a')
+        group_b = create(:group, parent: group_a, path: 'group_b')
 
-    it "updates the tracker if it already exist" do
-      create(
-        :bulk_import_tracker,
-        relation: :relation,
-        has_next_page: false,
-        entity: entity
-      )
+        entity = build(
+          :bulk_import_entity,
+          :group_entity,
+          source_full_path: group_a.full_path,
+          destination_namespace: group_b.full_path
+        )
 
-      expect do
-        entity.update_tracker_for(relation: :relation, has_next_page: true, next_page: 'nextPage')
-      end.not_to change(BulkImports::Tracker, :count)
-
-      tracker = entity.trackers.last
-
-      expect(tracker.relation).to eq('relation')
-      expect(tracker.has_next_page).to eq(true)
-      expect(tracker.next_page).to eq('nextPage')
-    end
-  end
-
-  describe "#has_next_page?" do
-    it "queries for the given relation if it has more pages to be fetched" do
-      entity = create(:bulk_import_entity)
-      create(
-        :bulk_import_tracker,
-        relation: :relation,
-        has_next_page: false,
-        entity: entity
-      )
-
-      expect(entity.has_next_page?(:relation)).to eq(false)
-    end
-  end
-
-  describe "#next_page_for" do
-    it "queries for the next page of the given relation" do
-      entity = create(:bulk_import_entity)
-      create(
-        :bulk_import_tracker,
-        relation: :relation,
-        has_next_page: false,
-        next_page: 'nextPage',
-        entity: entity
-      )
-
-      expect(entity.next_page_for(:relation)).to eq('nextPage')
+        expect(entity).not_to be_valid
+        expect(entity.errors[:base])
+          .to include('Import failed: Destination cannot be a subgroup of the source group. Change the destination and try again.')
+      end
     end
   end
 end

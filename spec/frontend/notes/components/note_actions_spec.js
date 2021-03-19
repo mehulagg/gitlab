@@ -1,11 +1,13 @@
-import Vue from 'vue';
 import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
-import { TEST_HOST } from 'spec/test_constants';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import createStore from '~/notes/stores';
-import noteActions from '~/notes/components/note_actions.vue';
-import { userDataMock } from '../mock_data';
+import Vue from 'vue';
+import { TEST_HOST } from 'spec/test_constants';
 import axios from '~/lib/utils/axios_utils';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import noteActions from '~/notes/components/note_actions.vue';
+import createStore from '~/notes/stores';
+import UserAccessRoleBadge from '~/vue_shared/components/user_access_role_badge.vue';
+import { userDataMock } from '../mock_data';
 
 describe('noteActions', () => {
   let wrapper;
@@ -13,6 +15,9 @@ describe('noteActions', () => {
   let props;
   let actions;
   let axiosMock;
+
+  const findUserAccessRoleBadge = (idx) => wrapper.findAll(UserAccessRoleBadge).at(idx);
+  const findUserAccessRoleBadgeText = (idx) => findUserAccessRoleBadge(idx).text().trim();
 
   const mountNoteActions = (propsData, computed) => {
     const localVue = createLocalVue();
@@ -43,6 +48,7 @@ describe('noteActions', () => {
       projectName: 'project',
       reportAbusePath: `${TEST_HOST}/abuse_reports/new?ref_url=http%3A%2F%2Flocalhost%3A3000%2Fgitlab-org%2Fgitlab-ce%2Fissues%2F7%23note_539&user_id=26`,
       showReply: false,
+      awardPath: `${TEST_HOST}/award_emoji`,
     };
 
     actions = {
@@ -65,11 +71,11 @@ describe('noteActions', () => {
     });
 
     it('should render noteable author badge', () => {
-      expect(wrapper.findAll('.note-role').at(0).text().trim()).toEqual('Author');
+      expect(findUserAccessRoleBadgeText(0)).toBe('Author');
     });
 
     it('should render access level badge', () => {
-      expect(wrapper.findAll('.note-role').at(1).text().trim()).toEqual(props.accessLevel);
+      expect(findUserAccessRoleBadgeText(1)).toBe(props.accessLevel);
     });
 
     it('should render contributor badge', () => {
@@ -79,7 +85,7 @@ describe('noteActions', () => {
       });
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.findAll('.note-role').at(1).text().trim()).toBe('Contributor');
+        expect(findUserAccessRoleBadgeText(1)).toBe('Contributor');
       });
     });
 
@@ -101,7 +107,7 @@ describe('noteActions', () => {
         expect(wrapper.find('.js-btn-copy-note-link').exists()).toBe(true);
       });
 
-      it('should not show copy link action when `noteUrl` prop is empty', done => {
+      it('should not show copy link action when `noteUrl` prop is empty', (done) => {
         wrapper.setProps({
           ...props,
           author: {
@@ -127,7 +133,7 @@ describe('noteActions', () => {
         expect(wrapper.find('.js-note-delete').exists()).toBe(true);
       });
 
-      it('closes tooltip when dropdown opens', done => {
+      it('closes tooltip when dropdown opens', (done) => {
         wrapper.find('.more-actions-toggle').trigger('click');
 
         const rootWrapper = createWrapper(wrapper.vm.$root);
@@ -135,7 +141,7 @@ describe('noteActions', () => {
           .then(() => {
             const emitted = Object.keys(rootWrapper.emitted());
 
-            expect(emitted).toEqual(['bv::hide::tooltip']);
+            expect(emitted).toEqual([BV_HIDE_TOOLTIP]);
             done();
           })
           .catch(done.fail);

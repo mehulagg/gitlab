@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-expressions, consistent-return, no-param-reassign, default-case, no-return-assign */
-
-import $ from 'jquery';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import axios from '~/lib/utils/axios_utils';
 import initSearchAutocomplete from '~/search_autocomplete';
 import '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
 
 describe('Search autocomplete dropdown', () => {
   let widget = null;
@@ -32,7 +31,7 @@ describe('Search autocomplete dropdown', () => {
 
   // Add required attributes to body before starting the test.
   // section would be dashboard|group|project
-  const addBodyAttributes = section => {
+  const addBodyAttributes = (section) => {
     if (section == null) {
       section = 'dashboard';
     }
@@ -106,7 +105,6 @@ describe('Search autocomplete dropdown', () => {
     expect(list.find(mrsIHaveCreatedLink).text()).toBe("Merge requests I've created");
   };
 
-  preloadFixtures('static/search_autocomplete.html');
   beforeEach(() => {
     loadFixtures('static/search_autocomplete.html');
 
@@ -213,10 +211,10 @@ describe('Search autocomplete dropdown', () => {
     });
 
     function triggerAutocomplete() {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         const dropdown = widget.searchInput.data('deprecatedJQueryDropdown');
         const filterCallback = dropdown.filter.options.callback;
-        dropdown.filter.options.callback = jest.fn(data => {
+        dropdown.filter.options.callback = jest.fn((data) => {
           filterCallback(data);
 
           resolve();
@@ -227,7 +225,7 @@ describe('Search autocomplete dropdown', () => {
       });
     }
 
-    it('suggest Projects', done => {
+    it('suggest Projects', (done) => {
       // eslint-disable-next-line promise/catch-or-return
       triggerAutocomplete().finally(() => {
         const list = widget.wrap.find('.dropdown-menu').find('ul');
@@ -242,7 +240,7 @@ describe('Search autocomplete dropdown', () => {
       jest.runOnlyPendingTimers();
     });
 
-    it('suggest Groups', done => {
+    it('suggest Groups', (done) => {
       // eslint-disable-next-line promise/catch-or-return
       triggerAutocomplete().finally(() => {
         const list = widget.wrap.find('.dropdown-menu').find('ul');

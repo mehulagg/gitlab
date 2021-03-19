@@ -118,7 +118,7 @@ describe('RelatedItemsTree', () => {
 
           mutations[types.SET_ITEM_CHILDREN_FLAGS](state, data);
 
-          data.children.forEach(item => {
+          data.children.forEach((item) => {
             expect(state.childrenFlags[item.reference]).toEqual(
               expect.objectContaining({
                 itemExpanded: false,

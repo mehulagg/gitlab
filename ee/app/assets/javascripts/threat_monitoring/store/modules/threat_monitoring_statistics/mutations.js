@@ -1,7 +1,7 @@
 import * as types from './mutation_types';
 import createState from './state';
 
-export default transformFunc => ({
+export default (transformFunc) => ({
   [types.SET_ENDPOINT](state, endpoint) {
     state.statisticsEndpoint = endpoint;
   },

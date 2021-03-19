@@ -1,0 +1,9 @@
+- parent = local_assigns.fetch(:parent)
+- return unless parent&.feature_available?(:iterations)
+
+.block
+  .title
+    = _('Iteration')
+  .filter-item
+    #js-iteration-dropdown{ data: { full_path: parent.full_path } }
+  %input{ id: 'issue_iteration_id', type: 'hidden', name: 'update[iteration_id]' }

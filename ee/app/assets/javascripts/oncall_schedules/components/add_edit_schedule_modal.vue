@@ -1,12 +1,13 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlModal, GlAlert } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import { s__, __ } from '~/locale';
-import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
 import updateOncallScheduleMutation from '../graphql/mutations/update_oncall_schedule.mutation.graphql';
-import AddEditScheduleForm from './add_edit_schedule_form.vue';
+import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreOnScheduleCreate, updateStoreAfterScheduleEdit } from '../utils/cache_updates';
+import { isNameFieldValid } from '../utils/common_utils';
+import AddEditScheduleForm from './add_edit_schedule_form.vue';
 
 export const i18n = {
   cancel: __('Cancel'),
@@ -18,12 +19,12 @@ export const i18n = {
 
 export default {
   i18n,
-  inject: ['projectPath', 'timezones'],
   components: {
     GlModal,
     GlAlert,
     AddEditScheduleForm,
   },
+  inject: ['projectPath', 'timezones'],
   props: {
     modalId: {
       type: String,
@@ -48,7 +49,11 @@ export default {
         description: this.schedule?.description,
         timezone: this.timezones.find(({ identifier }) => this.schedule?.timezone === identifier),
       },
-      error: null,
+      error: '',
+      validationState: {
+        name: true,
+        timezone: true,
+      },
     };
   },
   computed: {
@@ -59,7 +64,7 @@ export default {
           attributes: [
             { variant: 'info' },
             { loading: this.loading },
-            { disabled: this.isFormInvalid },
+            { disabled: !this.isFormValid },
           ],
         },
         cancel: {
@@ -67,14 +72,8 @@ export default {
         },
       };
     },
-    isNameInvalid() {
-      return !this.form.name?.length;
-    },
-    isTimezoneInvalid() {
-      return isEmpty(this.form.timezone);
-    },
-    isFormInvalid() {
-      return this.isNameInvalid || this.isTimezoneInvalid;
+    isFormValid() {
+      return Object.values(this.validationState).every(Boolean);
     },
     editScheduleVariables() {
       return {
@@ -107,8 +106,8 @@ export default {
               timezone: this.form.timezone.identifier,
             },
           },
-          update(store, { data: { oncallScheduleCreate } }) {
-            updateStoreOnScheduleCreate(store, getOncallSchedulesQuery, oncallScheduleCreate, {
+          update(store, { data }) {
+            updateStoreOnScheduleCreate(store, getOncallSchedulesWithRotationsQuery, data, {
               projectPath,
             });
           },
@@ -128,7 +127,7 @@ export default {
             this.$emit('scheduleCreated');
           },
         )
-        .catch(error => {
+        .catch((error) => {
           this.error = error;
         })
         .finally(() => {
@@ -136,7 +135,10 @@ export default {
         });
     },
     editSchedule() {
-      const { projectPath } = this;
+      const {
+        projectPath,
+        form: { timezone },
+      } = this;
       this.loading = true;
 
       this.$apollo
@@ -144,7 +146,9 @@ export default {
           mutation: updateOncallScheduleMutation,
           variables: this.editScheduleVariables,
           update(store, { data }) {
-            updateStoreAfterScheduleEdit(store, getOncallSchedulesQuery, data, { projectPath });
+            updateStoreAfterScheduleEdit(store, getOncallSchedulesWithRotationsQuery, data, {
+              projectPath,
+            });
           },
         })
         .then(
@@ -161,18 +165,29 @@ export default {
             this.$refs.addUpdateScheduleModal.hide();
           },
         )
-        .catch(error => {
+        .catch((error) => {
           this.error = error;
         })
         .finally(() => {
           this.loading = false;
+          if (timezone !== this.schedule.timezone) {
+            window.location.reload();
+          }
         });
     },
     hideErrorAlert() {
-      this.error = null;
+      this.error = '';
     },
     updateScheduleForm({ type, value }) {
       this.form[type] = value;
+      this.validateForm(type);
+    },
+    validateForm(key) {
+      if (key === 'name') {
+        this.validationState.name = isNameFieldValid(this.form.name);
+      } else if (key === 'timezone') {
+        this.validationState.timezone = !isEmpty(this.form.timezone);
+      }
     },
   },
 };
@@ -192,8 +207,7 @@ export default {
       {{ errorMsg }}
     </gl-alert>
     <add-edit-schedule-form
-      :is-name-invalid="isNameInvalid"
-      :is-timezone-invalid="isTimezoneInvalid"
+      :validation-state="validationState"
       :form="form"
       :schedule="schedule"
       @update-schedule-form="updateScheduleForm"

@@ -1,5 +1,4 @@
 <script>
-import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlButton,
@@ -7,7 +6,13 @@ import {
   GlSkeletonLoader,
   GlTable,
   GlTooltipDirective,
+  GlDropdown,
+  GlDropdownItem,
+  GlIcon,
 } from '@gitlab/ui';
+import { uniqueId } from 'lodash';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -16,6 +21,9 @@ export default {
     GlModal,
     GlSkeletonLoader,
     GlTable,
+    GlDropdown,
+    GlDropdownItem,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -42,6 +50,11 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    noProfilesMessage: {
+      type: String,
+      required: false,
+      default: '',
     },
     isLoading: {
       type: Boolean,
@@ -88,15 +101,31 @@ export default {
     },
     tableFields() {
       const defaultClasses = ['gl-word-break-all'];
-      const dataFields = this.fields.map(key => ({ key, class: defaultClasses }));
-      const staticFields = [{ key: 'actions' }];
+      const defaultThClasses = ['gl-bg-transparent!', 'gl-text-black-normal'];
+
+      const dataFields = this.fields.map(({ key, label }) => ({
+        key,
+        label,
+        class: defaultClasses,
+        thClass: defaultThClasses,
+      }));
+
+      const staticFields = [{ key: 'actions', label: '', thClass: defaultThClasses }];
 
       return [...dataFields, ...staticFields];
     },
   },
   methods: {
+    deleteTitle(item) {
+      return this.isPolicyProfile(item)
+        ? s__('DastProfiles|This profile is currently being used in a policy.')
+        : s__('DastProfiles|Delete profile');
+    },
     handleDelete() {
       this.$emit('delete-profile', this.toBeDeletedProfileId);
+    },
+    isPolicyProfile(item) {
+      return Boolean(item?.referencedInSecurityPolicies?.length);
     },
     prepareProfileDeletion(profileId) {
       this.toBeDeletedProfileId = profileId;
@@ -104,6 +133,9 @@ export default {
     },
     handleCancel() {
       this.toBeDeletedProfileId = null;
+    },
+    navigateToProfile({ editPath }) {
+      return visitUrl(editPath);
     },
   },
 };
@@ -117,7 +149,11 @@ export default {
         :fields="tableFields"
         :items="profiles"
         stacked="md"
-        thead-class="gl-display-none"
+        fixed
+        hover
+        thead-class="gl-border-b-solid gl-border-gray-100 gl-border-1 gl-pt-3!"
+        tbody-tr-class="gl-hover-cursor-pointer gl-hover-bg-blue-50!"
+        @row-clicked="navigateToProfile"
       >
         <template v-if="hasError" #top-row>
           <td :colspan="tableFields.length">
@@ -135,7 +171,9 @@ export default {
         </template>
 
         <template #cell(profileName)="{ value }">
-          <strong>{{ value }}</strong>
+          <div class="gl-overflow-hidden gl-white-space-nowrap gl-text-overflow-ellipsis">
+            {{ value }}
+          </div>
         </template>
 
         <template v-for="slotName in Object.keys($scopedSlots)" #[slotName]="slotScope">
@@ -146,24 +184,79 @@ export default {
           <div class="gl-text-right">
             <slot name="actions" :profile="item"></slot>
 
+            <gl-dropdown
+              v-gl-tooltip
+              class="gl-display-none gl-md-display-inline-flex!"
+              toggle-class="gl-border-0! gl-shadow-none!"
+              no-caret
+              right
+              category="tertiary"
+              :title="__('More actions')"
+            >
+              <template #button-content>
+                <gl-icon name="ellipsis_v" />
+                <span class="gl-sr-only">{{ __('Actions') }}</span>
+              </template>
+
+              <gl-dropdown-item
+                v-if="item.editPath"
+                :href="item.editPath"
+                :title="s__('DastProfiles|Edit profile')"
+              >
+                {{ __('Edit') }}
+              </gl-dropdown-item>
+
+              <gl-dropdown-item
+                v-gl-tooltip="{
+                  boundary: 'viewport',
+                  placement: 'bottom',
+                  disabled: !isPolicyProfile(item),
+                }"
+                boundary="viewport"
+                :class="{
+                  'gl-cursor-default': isPolicyProfile(item),
+                }"
+                :disabled="isPolicyProfile(item)"
+                :aria-disabled="isPolicyProfile(item)"
+                variant="danger"
+                :title="deleteTitle(item)"
+                @click="prepareProfileDeletion(item.id)"
+              >
+                <span
+                  :class="{
+                    'gl-text-gray-200!': isPolicyProfile(item),
+                  }"
+                >
+                  {{ __('Delete') }}
+                </span>
+              </gl-dropdown-item>
+            </gl-dropdown>
             <gl-button
               v-if="item.editPath"
               :href="item.editPath"
-              class="gl-ml-3 gl-my-1"
+              category="tertiary"
+              class="gl-ml-3 gl-my-1 gl-md-display-none"
               size="small"
-              >{{ __('Edit') }}</gl-button
             >
-
-            <gl-button
+              {{ __('Edit') }}
+            </gl-button>
+            <span
               v-gl-tooltip.hover.focus
-              icon="remove"
-              variant="danger"
-              category="secondary"
-              size="small"
-              class="gl-mx-3 gl-my-1"
-              :title="s__('DastProfiles|Delete profile')"
-              @click="prepareProfileDeletion(item.id)"
-            />
+              :title="deleteTitle(item)"
+              data-testid="dast-profile-delete-tooltip"
+            >
+              <gl-button
+                category="tertiary"
+                icon="remove"
+                variant="danger"
+                size="small"
+                class="gl-mx-3 gl-my-1 gl-md-display-none"
+                data-testid="dast-profile-delete-button"
+                :disabled="isPolicyProfile(item)"
+                :aria-disabled="isPolicyProfile(item)"
+                @click="prepareProfileDeletion(item.id)"
+              />
+            </span>
           </div>
         </template>
 
@@ -191,7 +284,7 @@ export default {
     </div>
 
     <p v-else class="gl-my-4">
-      {{ s__('DastProfiles|No profiles created yet') }}
+      {{ noProfilesMessage }}
     </p>
 
     <gl-modal

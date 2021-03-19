@@ -1,13 +1,14 @@
 <script>
 import { GlAlert, GlButton, GlLoadingIcon, GlModal, GlModalDirective } from '@gitlab/ui';
+import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import ciHeader from '~/vue_shared/components/header_ci_component.vue';
-import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
-import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
+import { LOAD_FAILURE, POST_FAILURE, DELETE_FAILURE, DEFAULT } from '../constants';
+import cancelPipelineMutation from '../graphql/mutations/cancel_pipeline.mutation.graphql';
 import deletePipelineMutation from '../graphql/mutations/delete_pipeline.mutation.graphql';
 import retryPipelineMutation from '../graphql/mutations/retry_pipeline.mutation.graphql';
-import cancelPipelineMutation from '../graphql/mutations/cancel_pipeline.mutation.graphql';
-import { LOAD_FAILURE, POST_FAILURE, DELETE_FAILURE, DEFAULT } from '../constants';
+import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
+import { getQueryHeaders } from './graph/utils';
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 const POLL_INTERVAL = 10000;
@@ -34,7 +35,9 @@ export default {
     [DEFAULT]: __('An unknown error occurred.'),
   },
   inject: {
-    // Receive `fullProject` and `pipelinesPath`
+    graphqlResourceEtag: {
+      default: '',
+    },
     paths: {
       default: {},
     },
@@ -47,6 +50,9 @@ export default {
   },
   apollo: {
     pipeline: {
+      context() {
+        return getQueryHeaders(this.graphqlResourceEtag);
+      },
       query: getPipelineQuery,
       variables() {
         return {
@@ -54,7 +60,7 @@ export default {
           iid: this.pipelineIid,
         };
       },
-      update: data => data.project.pipeline,
+      update: (data) => data.project.pipeline,
       error() {
         this.reportFailure(LOAD_FAILURE);
       },

@@ -42,10 +42,6 @@ class ApplicationRecord < ActiveRecord::Base
     false
   end
 
-  def self.at_most(count)
-    limit(count)
-  end
-
   def self.safe_find_or_create_by!(*args, &block)
     safe_find_or_create_by(*args, &block).tap do |record|
       raise ActiveRecord::RecordNotFound unless record.present?
@@ -76,5 +72,10 @@ class ApplicationRecord < ActiveRecord::Base
 
   def self.where_exists(query)
     where('EXISTS (?)', query.select(1))
+  end
+
+  def self.declarative_enum(enum_mod)
+    values = enum_mod.definition.transform_values { |v| v[:value] }
+    enum(enum_mod.key => values)
   end
 end

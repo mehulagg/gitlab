@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto, concepts
 ---
@@ -117,7 +117,7 @@ Follow the same process to create any subsequent groups.
 ## Membership
 
 When you add a member to a group, that member is also added to all subgroups.
-Permission level is inherited from the group’s parent. This model allows access to 
+Permission level is inherited from the group's parent. This model allows access to
 subgroups if you have membership in one of its parents.
 
 Jobs for pipelines in subgroups can use [runners](../../../ci/runners/README.md) registered to the parent group(s).
@@ -147,7 +147,7 @@ From the image above, we can deduce the following things:
 - Administrator is the Owner and member of **all** subgroups and for that reason,
   as with User 3, the **Source** column indicates **Direct member**.
 
-Members can be [filtered by inherited or direct membership](../index.md#membership-filter).
+Members can be [filtered by inherited or direct membership](../index.md#filter-a-group).
 
 ### Overriding the ancestor group membership
 

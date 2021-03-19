@@ -95,9 +95,11 @@ describe('DependenciesTable component', () => {
 
     it('renders the table header', () => {
       const expectedLabels = DependenciesTable.fields.map(({ label }) => label);
-      const headerCells = wrapper.findAll('thead th').wrappers;
+      const headerCells = wrapper.findAll('thead th');
 
-      expect(headerCells.map((cell) => cell.text())).toEqual(expectedLabels);
+      expectedLabels.forEach((expectedLabel, i) => {
+        expect(headerCells.at(i).text()).toContain(expectedLabel);
+      });
     });
 
     it('does not render any rows', () => {

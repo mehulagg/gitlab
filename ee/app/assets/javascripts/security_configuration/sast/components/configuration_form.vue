@@ -1,13 +1,13 @@
 <script>
-import { GlAlert, GlButton, GlIcon, GlLink } from '@gitlab/ui';
+import { GlAlert, GlButton, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { cloneDeep } from 'lodash';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
+import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
+import ExpandableSection from 'ee/security_configuration/components/expandable_section.vue';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
+import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
 import AnalyzerConfiguration from './analyzer_configuration.vue';
-import DynamicFields from './dynamic_fields.vue';
-import ExpandableSection from './expandable_section.vue';
-import configureSastMutation from '../graphql/configure_sast.mutation.graphql';
 import {
   toSastCiConfigurationEntityInput,
   toSastCiConfigurationAnalyzerEntityInput,
@@ -22,12 +22,9 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
+    GlSprintf,
   },
   inject: {
-    createSastMergeRequestPath: {
-      from: 'createSastMergeRequestPath',
-      default: '',
-    },
     sastAnalyzersDocumentationPath: {
       from: 'sastAnalyzersDocumentationPath',
       default: '',
@@ -55,12 +52,16 @@ export default {
       analyzersConfiguration: cloneDeep(this.sastCiConfiguration.analyzers.nodes),
       hasSubmissionError: false,
       isSubmitting: false,
+      showAnalyzersTip: false,
     };
   },
   computed: {
     shouldRenderAnalyzersSection() {
       return this.analyzersConfiguration.length > 0;
     },
+  },
+  beforeMount() {
+    this.shouldRenderAnalyzersTip();
   },
   methods: {
     onSubmit() {
@@ -87,7 +88,7 @@ export default {
 
           redirectTo(successPath);
         })
-        .catch(error => {
+        .catch((error) => {
           this.isSubmitting = false;
           this.hasSubmissionError = true;
           Sentry.captureException(error);
@@ -100,13 +101,29 @@ export default {
         analyzers: this.analyzersConfiguration.map(toSastCiConfigurationAnalyzerEntityInput),
       };
     },
+    shouldRenderAnalyzersTip() {
+      this.analyzersConfiguration.some((analyzer) => {
+        if (analyzer.enabled === false && this.showAnalyzersTip === false) {
+          this.showAnalyzersTip = true;
+          return true;
+        }
+        return false;
+      });
+    },
     onAnalyzerChange(name, updatedAnalyzer) {
-      const index = this.analyzersConfiguration.findIndex(analyzer => analyzer.name === name);
+      // show AnalyzersTip when Analyzer was unchecked
+      if (updatedAnalyzer.enabled === false && this.showAnalyzersTip === false) {
+        this.showAnalyzersTip = true;
+      }
+      const index = this.analyzersConfiguration.findIndex((analyzer) => analyzer.name === name);
       if (index === -1) {
         return;
       }
 
       this.analyzersConfiguration.splice(index, 1, updatedAnalyzer);
+    },
+    dismissAnalyzersTip() {
+      this.showAnalyzersTip = false;
     },
   },
   i18n: {
@@ -121,6 +138,10 @@ export default {
       `SecurityConfiguration|By default, all analyzers are applied in order to
       cover all languages across your project, and only run if the language is
       detected in the Merge Request.`,
+    ),
+    analyzersTipHeading: s__('We recommend leaving all SAST analyzers enabled'),
+    analyzersTipBody: s__(
+      'Keeping all SAST analyzers enabled future-proofs the project in case new languages are added later on. Determining which analyzers apply is a process that consumes minimal resources and adds minimal time to the pipeline. Leaving all SAST analyzers enabled ensures maximum coverage.',
     ),
   },
 };
@@ -157,13 +178,27 @@ export default {
         :entity="analyzer"
         @input="onAnalyzerChange(analyzer.name, $event)"
       />
+      <gl-alert
+        v-if="showAnalyzersTip"
+        data-testid="analyzers-section-tip"
+        :title="$options.i18n.analyzersTipHeading"
+        variant="tip"
+        @dismiss="dismissAnalyzersTip"
+      >
+        <gl-sprintf :message="$options.i18n.analyzersTipBody" />
+      </gl-alert>
     </expandable-section>
 
     <hr v-else />
 
-    <gl-alert v-if="hasSubmissionError" class="gl-mb-5" variant="danger" :dismissible="false">{{
-      $options.i18n.submissionError
-    }}</gl-alert>
+    <gl-alert
+      v-if="hasSubmissionError"
+      data-testid="analyzers-error-alert"
+      class="gl-mb-5"
+      variant="danger"
+      :dismissible="false"
+      >{{ $options.i18n.submissionError }}</gl-alert
+    >
 
     <div class="gl-display-flex">
       <gl-button

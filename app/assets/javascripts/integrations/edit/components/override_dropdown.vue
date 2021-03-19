@@ -1,6 +1,6 @@
 <script>
-import { mapState } from 'vuex';
 import { GlDropdown, GlDropdownItem, GlLink } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import { s__ } from '~/locale';
 import { defaultIntegrationLevel, overrideDropdownDescriptions } from '../constants';
 
@@ -40,7 +40,7 @@ export default {
   },
   data() {
     return {
-      selected: dropdownOptions.find(x => x.value === this.override),
+      selected: dropdownOptions.find((x) => x.value === this.override),
     };
   },
   computed: {

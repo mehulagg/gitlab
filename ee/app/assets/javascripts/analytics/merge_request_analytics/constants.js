@@ -1,6 +1,7 @@
 import { __ } from '~/locale';
 
 export const DEFAULT_NUMBER_OF_DAYS = 365;
+export const STAT_LOADER_HEIGHT = 46;
 export const PER_PAGE = 20;
 export const ASSIGNEES_VISIBLE = 2;
 export const AVATAR_SIZE = 24;
@@ -14,6 +15,7 @@ export const THROUGHPUT_CHART_STRINGS = {
   ERROR_FETCHING_DATA: __(
     'There was an error while fetching the chart data. Please refresh the page to try again.',
   ),
+  MTTM: __('Mean time to merge'),
 };
 
 export const THROUGHPUT_TABLE_STRINGS = {
@@ -50,4 +52,8 @@ export const PIPELINE_STATUS_ICON_CLASSES = {
   status_failed: 'gl-text-red-500',
   status_pending: 'gl-text-orange-500',
   default: 'gl-text-grey-500',
+};
+
+export const UNITS = {
+  DAYS: __('days'),
 };

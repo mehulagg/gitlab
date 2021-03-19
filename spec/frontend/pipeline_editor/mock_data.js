@@ -1,13 +1,15 @@
 import { CI_CONFIG_STATUS_VALID } from '~/pipeline_editor/constants';
+import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 
-export const mockNamespace = 'user1';
-export const mockProjectName = 'project1';
-export const mockProjectPath = `${mockNamespace}/${mockProjectName}`;
+export const mockProjectNamespace = 'user1';
+export const mockProjectPath = 'project1';
+export const mockProjectFullPath = `${mockProjectNamespace}/${mockProjectPath}`;
 export const mockDefaultBranch = 'master';
 export const mockNewMergeRequestPath = '/-/merge_requests/new';
 export const mockCommitSha = 'aabbccdd';
 export const mockCommitNextSha = 'eeffgghh';
 export const mockLintHelpPagePath = '/-/lint-help';
+export const mockYmlHelpPagePath = '/-/yml-help';
 export const mockCommitMessage = 'My commit message';
 
 export const mockCiConfigPath = '.gitlab-ci.yml';
@@ -28,15 +30,31 @@ job_test_2:
 
 job_build:
   stage: build
-  script: 
+  script:
     - echo "build"
   needs: ["job_test_2"]
 `;
 
+const mockJobFields = {
+  beforeScript: [],
+  afterScript: [],
+  environment: null,
+  allowFailure: false,
+  tags: [],
+  when: 'on_success',
+  only: { refs: ['branches', 'tags'], __typename: 'CiJobLimitType' },
+  except: null,
+  needs: { nodes: [], __typename: 'CiConfigNeedConnection' },
+  __typename: 'CiConfigJob',
+};
+
+// Mock result of the graphql query at:
+// app/assets/javascripts/pipeline_editor/graphql/queries/ci_config.graphql
 export const mockCiConfigQueryResponse = {
   data: {
     ciConfig: {
       errors: [],
+      mergedYaml: mockCiYml,
       status: CI_CONFIG_STATUS_VALID,
       stages: {
         __typename: 'CiConfigStageConnection',
@@ -47,12 +65,13 @@ export const mockCiConfigQueryResponse = {
               nodes: [
                 {
                   name: 'job_test_1',
+                  size: 1,
                   jobs: {
                     nodes: [
                       {
                         name: 'job_test_1',
-                        needs: { nodes: [], __typename: 'CiConfigNeedConnection' },
-                        __typename: 'CiConfigJob',
+                        script: ['echo "test 1"'],
+                        ...mockJobFields,
                       },
                     ],
                     __typename: 'CiConfigJobConnection',
@@ -61,12 +80,13 @@ export const mockCiConfigQueryResponse = {
                 },
                 {
                   name: 'job_test_2',
+                  size: 1,
                   jobs: {
                     nodes: [
                       {
                         name: 'job_test_2',
-                        needs: { nodes: [], __typename: 'CiConfigNeedConnection' },
-                        __typename: 'CiConfigJob',
+                        script: ['echo "test 2"'],
+                        ...mockJobFields,
                       },
                     ],
                     __typename: 'CiConfigJobConnection',
@@ -84,15 +104,13 @@ export const mockCiConfigQueryResponse = {
               nodes: [
                 {
                   name: 'job_build',
+                  size: 1,
                   jobs: {
                     nodes: [
                       {
                         name: 'job_build',
-                        needs: {
-                          nodes: [{ name: 'job_test_2', __typename: 'CiConfigNeed' }],
-                          __typename: 'CiConfigNeedConnection',
-                        },
-                        __typename: 'CiConfigJob',
+                        script: ['echo "build"'],
+                        ...mockJobFields,
                       },
                     ],
                     __typename: 'CiConfigJobConnection',
@@ -111,8 +129,35 @@ export const mockCiConfigQueryResponse = {
   },
 };
 
+export const mergeUnwrappedCiConfig = (mergedConfig) => {
+  const { ciConfig } = mockCiConfigQueryResponse.data;
+  return {
+    ...ciConfig,
+    stages: unwrapStagesWithNeeds(ciConfig.stages.nodes),
+    ...mergedConfig,
+  };
+};
+
+export const mockProjectPipeline = {
+  pipeline: {
+    commitPath: '/-/commit/aabbccdd',
+    id: 'gid://gitlab/Ci::Pipeline/118',
+    iid: '28',
+    shortSha: mockCommitSha,
+    status: 'SUCCESS',
+    detailedStatus: {
+      detailsPath: '/root/sample-ci-project/-/pipelines/118"',
+      group: 'success',
+      icon: 'status_success',
+      text: 'passed',
+    },
+  },
+};
+
 export const mockLintResponse = {
   valid: true,
+  mergedYaml: mockCiYml,
+  status: CI_CONFIG_STATUS_VALID,
   errors: [],
   warnings: [],
   jobs: [

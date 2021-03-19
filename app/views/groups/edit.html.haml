@@ -26,6 +26,7 @@
   .settings-content
     = render 'groups/settings/permissions'
 
+= render_if_exists 'groups/merge_request_approval_settings', expanded: expanded, group: @group, user: current_user
 = render_if_exists 'groups/insights', expanded: expanded
 
 %section.settings.no-animate#js-badge-settings{ class: ('expanded' if expanded) }
@@ -44,7 +45,7 @@
 = render_if_exists 'groups/custom_project_templates_setting'
 = render_if_exists 'groups/templates_setting', expanded: expanded
 
-%section.settings.gs-advanced.no-animate#js-advanced-settings{ class: ('expanded' if expanded) }
+%section.settings.gs-advanced.no-animate#js-advanced-settings{ class: ('expanded' if expanded), data: { qa_selector: 'advanced_settings_content' } }
   .settings-header
     %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only{ role: 'button' }
       = _('Advanced')

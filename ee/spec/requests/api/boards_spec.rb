@@ -74,7 +74,7 @@ RSpec.describe API::Boards do
 
     context 'without WIP limits license' do
       before do
-        stub_feature_flags(wip_limits: false)
+        stub_licensed_features(wip_limits: false)
 
         get api(url, user)
       end

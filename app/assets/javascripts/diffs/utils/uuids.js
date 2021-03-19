@@ -11,9 +11,9 @@
  * @typedef {String} UUIDv4
  */
 
-import MersenneTwister from 'mersenne-twister';
-import stringHash from 'string-hash';
+import { MersenneTwister } from 'fast-mersenne-twister';
 import { isString } from 'lodash';
+import stringHash from 'string-hash';
 import { v4 } from 'uuid';
 
 function getSeed(seeds) {
@@ -49,7 +49,7 @@ function randomValuesForUuid(prng) {
     const buffer = new ArrayBuffer(4);
     const view = new DataView(buffer);
 
-    view.setUint32(0, prng.random_int());
+    view.setUint32(0, prng.randomNumber());
 
     randomValues.push(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
   }

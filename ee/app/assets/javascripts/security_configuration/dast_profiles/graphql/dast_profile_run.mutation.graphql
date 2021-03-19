@@ -1,0 +1,6 @@
+mutation dastProfileRun($input: DastProfileRunInput!) {
+  dastProfileRun(input: $input) {
+    pipelineUrl
+    errors
+  }
+}

@@ -22,7 +22,7 @@ describe('Security Issue Body', () => {
 
   const findReportLink = () => wrapper.find(ReportLink);
 
-  const createComponent = issue => {
+  const createComponent = (issue) => {
     wrapper = shallowMount(SecurityIssueBody, {
       propsData: {
         issue,

@@ -60,14 +60,14 @@ GET /issues?state=opened
 | `due_date`          | string           | no         | Return issues that have no due date, are overdue, or whose due date is this week, this month, or between two weeks ago and next month. Accepts: `0` (no due date), `overdue`, `week`, `month`, `next_month_and_previous_two_weeks`. _(Introduced in [GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/233420))_ |
 | `iids[]`            | integer array    | no         | Return only the issues having the given `iid`                                                                                                       |
 | `in`                | string           | no         | Modify the scope of the `search` attribute. `title`, `description`, or a string joining them with comma. Default is `title,description`             |
-| `iteration_id` **(STARTER)** | integer | no         | Return issues assigned to the given iteration ID. `None` returns issues that do not belong to an iteration. `Any` returns issues that belong to an iteration. Mutually exclusive with `iteration_title`. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.6)_ |
-| `iteration_title` **(STARTER)** | string | no       | Return issues assigned to the iteration with the given title. Similar to `iteration_id` and mutually exclusive with `iteration_id`. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.6)_ |
+| `iteration_id` **(PREMIUM)** | integer | no         | Return issues assigned to the given iteration ID. `None` returns issues that do not belong to an iteration. `Any` returns issues that belong to an iteration. Mutually exclusive with `iteration_title`. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in GitLab 13.6)_ |
+| `iteration_title` **(PREMIUM)** | string | no       | Return issues assigned to the iteration with the given title. Similar to `iteration_id` and mutually exclusive with `iteration_id`. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in GitLab 13.6)_ |
 | `milestone`         | string           | no         | The milestone title. `None` lists all issues with no milestone. `Any` lists all issues that have an assigned milestone.                             |
 | `labels`            | string           | no         | Comma-separated list of label names, issues must have all labels to be returned. `None` lists all issues with no labels. `Any` lists all issues with at least one label. `No+Label` (Deprecated) lists all issues with no labels. Predefined names are case-insensitive. |
 | `milestone`         | string           | no         | The milestone title. `None` lists all issues with no milestone. `Any` lists all issues that have an assigned milestone.                             |
 | `my_reaction_emoji` | string           | no         | Return issues reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14016) in GitLab 10.0)_ |
 | `non_archived`      | boolean          | no         | Return issues only from non-archived projects. If `false`, the response returns issues from both archived and non-archived projects. Default is `true`. _(Introduced in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/197170))_ |
-| `not`               | Hash             | no         | Return issues that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `my_reaction_emoji` |
+| `not`               | Hash             | no         | Return issues that do not match the parameters supplied. Accepts: `assignee_id`, `assignee_username`, `author_id`, `author_username`, `iids`, `iteration_id`, `iteration_title`, `labels`, `milestone`, and `weight`. |
 | `order_by`          | string           | no         | Return issues ordered by `created_at`, `updated_at`, `priority`, `due_date`, `relative_position`, `label_priority`, `milestone_due`, `popularity`, `weight` fields. Default is `created_at`                                                               |
 | `scope`             | string           | no         | Return issues for the given scope: `created_by_me`, `assigned_to_me` or `all`. Defaults to `created_by_me`<br> For versions before 11.0, use the now deprecated `created-by-me` or `assigned-to-me` scopes instead.<br> _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13004) in GitLab 9.5. [Changed to snake_case](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18935) in GitLab 11.0)_ |
 | `search`            | string           | no         | Search issues against their `title` and `description`                                                                                               |
@@ -169,7 +169,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -183,7 +183,7 @@ the `weight` parameter:
 ]
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -347,7 +347,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -361,7 +361,7 @@ the `weight` parameter:
 ]
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -530,7 +530,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -544,7 +544,7 @@ the `weight` parameter:
 ]
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -684,7 +684,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -696,7 +696,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `epic` property:
 
 ```javascript
@@ -833,7 +833,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -845,7 +845,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Premium](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium](https://about.gitlab.com/pricing/) can also see
 the `epic` property:
 
 ```javascript
@@ -864,7 +864,7 @@ the `epic` property:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see the `health_status`
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see the `health_status`
 property:
 
 ```json
@@ -980,7 +980,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -992,7 +992,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -1133,7 +1133,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -1145,7 +1145,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -1298,7 +1298,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -1310,7 +1310,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -1421,7 +1421,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -2211,3 +2211,26 @@ Example response:
     }
 ]
 ```
+
+## Delete metric image
+
+Available only for Incident issues.
+
+```plaintext
+DELETE /projects/:id/issues/:issue_iid/metric_images/:image_id
+```
+
+| Attribute   | Type    | Required | Description                          |
+|-------------|---------|----------|--------------------------------------|
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user  |
+| `issue_iid` | integer | yes      | The internal ID of a project's issue |
+| `image_id` | integer | yes      | The ID of the image |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/5/issues/93/metric_images/1"
+```
+
+Can return the following status codes:
+
+- `204 No Content`, if the image was deleted successfully.
+- `400 Bad Request`, if the image could not be deleted.

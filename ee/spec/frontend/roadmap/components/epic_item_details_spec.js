@@ -69,7 +69,7 @@ describe('EpicItemDetails', () => {
     title: getGroupName().attributes('title'),
   });
 
-  const createMockEpic = epic => ({
+  const createMockEpic = (epic) => ({
     ...mockFormattedEpic,
     ...epic,
   });

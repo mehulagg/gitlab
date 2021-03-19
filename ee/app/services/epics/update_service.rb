@@ -18,8 +18,14 @@ module Epics
 
       if saved_change_to_epic_dates?(epic)
         Epics::UpdateDatesService.new([epic]).execute
+
+        track_start_date_fixed_events(epic)
+
         epic.reset
       end
+
+      assign_parent_epic_for(epic)
+      assign_child_epic_for(epic)
 
       epic
     end
@@ -47,6 +53,16 @@ module Epics
     end
 
     private
+
+    def track_start_date_fixed_events(epic)
+      return unless epic.saved_changes.key?('start_date_is_fixed')
+
+      if epic.start_date_is_fixed?
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_start_date_set_as_fixed_action(author: current_user)
+      else
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_start_date_set_as_inherited_action(author: current_user)
+      end
+    end
 
     def saved_change_to_epic_dates?(epic)
       (epic.saved_changes.keys.map(&:to_sym) & EPIC_DATE_FIELDS).present?

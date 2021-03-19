@@ -4,6 +4,10 @@ module API
   module Entities
     class GroupMergeRequestApprovalSetting < Grape::Entity
       expose :allow_author_approval
+      expose :allow_committer_approval
+      expose :allow_overrides_to_approver_list_per_merge_request
+      expose :retain_approvals_on_push
+      expose :require_password_to_approve
     end
   end
 end

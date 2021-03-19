@@ -69,7 +69,7 @@ export default {
     },
     fields() {
       if (this.isGroup) {
-        return this.$options.fields.filter(field => field.key !== 'environment_scope');
+        return this.$options.fields.filter((field) => field.key !== 'environment_scope');
       }
       return this.$options.fields;
     },
@@ -84,7 +84,7 @@ export default {
 </script>
 
 <template>
-  <div class="ci-variable-table">
+  <div class="ci-variable-table" data-testid="ci-variable-table">
     <gl-table
       :fields="fields"
       :items="variables"

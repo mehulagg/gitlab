@@ -117,7 +117,7 @@ RSpec.describe API::EpicIssues do
             post api(url, user)
 
             expect(response).to have_gitlab_http_status(:not_found)
-            expect(json_response).to eq('message' => 'No Issue found for given params')
+            expect(json_response).to eq('message' => 'No matching issue found. Make sure that you are adding a valid issue URL.')
           end
         end
       end

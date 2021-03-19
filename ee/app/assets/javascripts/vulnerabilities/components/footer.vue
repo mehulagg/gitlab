@@ -1,19 +1,21 @@
 <script>
-import Visibility from 'visibilityjs';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
-import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
-import Api from 'ee/api';
-import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
 import { GlIcon } from '@gitlab/ui';
+import Visibility from 'visibilityjs';
+import Api from 'ee/api';
+import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
+import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
-import RelatedIssues from './related_issues.vue';
-import HistoryEntry from './history_entry.vue';
-import StatusDescription from './status_description.vue';
 import initUserPopovers from '~/user_popovers';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import HistoryEntry from './history_entry.vue';
+import RelatedIssues from './related_issues.vue';
+import RelatedJiraIssues from './related_jira_issues.vue';
+import StatusDescription from './status_description.vue';
 
 export default {
   name: 'VulnerabilityFooter',
@@ -22,8 +24,15 @@ export default {
     MergeRequestNote,
     HistoryEntry,
     RelatedIssues,
+    RelatedJiraIssues,
     GlIcon,
     StatusDescription,
+  },
+  mixins: [glFeatureFlagMixin()],
+  inject: {
+    createJiraIssueUrl: {
+      default: '',
+    },
   },
   props: {
     vulnerability: {
@@ -31,19 +40,19 @@ export default {
       required: true,
     },
   },
-
-  data: () => ({
-    discussionsDictionary: {},
-    lastFetchedAt: null,
-  }),
-
+  data() {
+    return {
+      discussionsDictionary: {},
+      lastFetchedAt: null,
+    };
+  },
   computed: {
     discussions() {
       return Object.values(this.discussionsDictionary);
     },
     noteDictionary() {
       return this.discussions
-        .flatMap(x => x.notes)
+        .flatMap((x) => x.notes)
         .reduce((acc, note) => {
           acc[note.id] = note;
           return acc;
@@ -83,26 +92,24 @@ export default {
       };
     },
   },
-
   created() {
     this.fetchDiscussions();
   },
-
   updated() {
     this.$nextTick(() => {
       initUserPopovers(this.$el.querySelectorAll('.js-user-link'));
     });
   },
-
   beforeDestroy() {
     if (this.poll) this.poll.stop();
   },
-
   methods: {
     dateToSeconds(date) {
       return Date.parse(date) / 1000;
     },
     fetchDiscussions() {
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .get(this.vulnerability.discussionsUrl)
         .then(({ data, headers: { date } }) => {
@@ -137,6 +144,8 @@ export default {
         });
     },
     createNotesPoll() {
+      // note: this polling call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       this.poll = new Poll({
         resource: {
           fetchNotes: () =>
@@ -156,11 +165,11 @@ export default {
     updateNotes(notes) {
       let isVulnerabilityStateChanged = false;
 
-      notes.forEach(note => {
+      notes.forEach((note) => {
         // If the note exists, update it.
         if (this.noteDictionary[note.id]) {
           const updatedDiscussion = { ...this.discussionsDictionary[note.discussionId] };
-          updatedDiscussion.notes = updatedDiscussion.notes.map(curr =>
+          updatedDiscussion.notes = updatedDiscussion.notes.map((curr) =>
             curr.id === note.id ? note : curr,
           );
           this.discussionsDictionary[note.discussionId] = updatedDiscussion;
@@ -186,7 +195,6 @@ export default {
           }
         }
       });
-
       // Emit an event that tells the header to refresh the vulnerability.
       if (isVulnerabilityStateChanged) {
         this.$emit('vulnerability-state-change');
@@ -198,7 +206,6 @@ export default {
 <template>
   <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
-
     <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
       <merge-request-note
         :feedback="vulnerability.mergeRequestFeedback"
@@ -206,14 +213,17 @@ export default {
         class="card-body"
       />
     </div>
-
+    <related-jira-issues
+      v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl"
+      class="gl-mt-6"
+    />
     <related-issues
+      v-else
       :endpoint="issueLinksEndpoint"
       :can-modify-related-issues="vulnerability.canModifyRelatedIssues"
       :project-path="project.url"
       :help-path="vulnerability.relatedIssuesHelpPath"
     />
-
     <div class="notes" data-testid="detection-note">
       <div class="system-note gl-display-flex gl-align-items-center gl-p-0! gl-mt-6!">
         <div class="timeline-icon gl-m-0!">
@@ -226,9 +236,7 @@ export default {
         />
       </div>
     </div>
-
     <hr />
-
     <ul v-if="discussions.length" ref="historyList" class="notes discussion-body">
       <history-entry
         v-for="discussion in discussions"

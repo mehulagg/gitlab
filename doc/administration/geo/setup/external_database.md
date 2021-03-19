@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Geo with external PostgreSQL instances **(PREMIUM ONLY)**
+# Geo with external PostgreSQL instances **(PREMIUM SELF)**
 
 This document is relevant if you are using a PostgreSQL instance that is *not
 managed by Omnibus*. This includes cloud-managed instances like AWS RDS, or
@@ -49,7 +49,7 @@ developed and tested. We aim to be compatible with most external
 
 To set up an external database, you can either:
 
-- Set up streaming replication yourself (for example, in AWS RDS).
+- Set up [streaming replication](https://www.postgresql.org/docs/11/warm-standby.html#STREAMING-REPLICATION-SLOTS) yourself (for example AWS RDS, bare metal not managed by Omnibus, etc.).
 - Perform the Omnibus configuration manually as follows.
 
 #### Leverage your cloud provider's tools to replicate the primary database

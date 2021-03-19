@@ -3,8 +3,8 @@ import {
   RECEIVE_ITEMS_SUCCESS,
   RECEIVE_ITEMS_ERROR,
 } from '~/create_cluster/store/cluster_dropdown/mutation_types';
-import createState from '~/create_cluster/store/cluster_dropdown/state';
 import mutations from '~/create_cluster/store/cluster_dropdown/mutations';
+import createState from '~/create_cluster/store/cluster_dropdown/state';
 
 describe('Cluster dropdown store mutations', () => {
   let state;
@@ -27,7 +27,7 @@ describe('Cluster dropdown store mutations', () => {
     ${RECEIVE_ITEMS_SUCCESS} | ${'items'}             | ${{ items }}    | ${items}      | ${'items payload'}
     ${RECEIVE_ITEMS_ERROR}   | ${'isLoadingItems'}    | ${{ error }}    | ${false}      | ${false}
     ${RECEIVE_ITEMS_ERROR}   | ${'error'}             | ${{ error }}    | ${error}      | ${'received error object'}
-  `(`$mutation sets $mutatedProperty to $expectedValueDescription`, data => {
+  `(`$mutation sets $mutatedProperty to $expectedValueDescription`, (data) => {
     const { mutation, mutatedProperty, payload, expectedValue } = data;
 
     mutations[mutation](state, payload);

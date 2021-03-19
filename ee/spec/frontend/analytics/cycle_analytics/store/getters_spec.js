@@ -80,7 +80,7 @@ describe('Value Stream Analytics getters', () => {
     });
 
     describe('without a currentGroup set', () => {
-      it.each([[''], [{}], [null]])('given "%s" will return null', value => {
+      it.each([[''], [{}], [null]])('given "%s" will return null', (value) => {
         state = { currentGroup: value };
         expect(getters.currentGroupPath(state)).toEqual(null);
       });

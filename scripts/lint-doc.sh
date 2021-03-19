@@ -18,13 +18,25 @@ then
   ((ERRORCODE++))
 fi
 
-# Test for non-standard spaces (NBSP, NNBSP) in documentation.
+# Documentation pages need front matter for tracking purposes.
+echo '=> Checking documentation for front matter...'
+echo
+no_frontmatter=$(find doc -name "*.md" -exec head -n1 {} \; | grep -v  --count -- ---)
+if [ $no_frontmatter -ne 0 ]
+then
+  echo '✖ ERROR: These documentation pages need front matter. See https://docs.gitlab.com/ee/development/documentation/index.html#stage-and-group-metadata for how to add it.' >&2
+  find doc -name "*.md" -exec sh -c 'if (head -n 1 "{}" | grep -v -- --- >/dev/null); then echo "{}"; fi' \; 2>&1
+  echo
+  ((ERRORCODE++))
+fi
+
+# Test for non-standard spaces (NBSP, NNBSP, ZWSP) in documentation.
 echo '=> Checking for non-standard spaces...'
 echo
-grep --extended-regexp --binary-file=without-match --recursive '[  ]' doc/ >/dev/null 2>&1
+grep --extended-regexp --binary-file=without-match --recursive '[  ​]' doc/ >/dev/null 2>&1
 if [ $? -eq 0 ]
 then
-  echo '✖ ERROR: Non-standard spaces (NBSP, NNBSP) should not be used in documentation.
+  echo '✖ ERROR: Non-standard spaces (NBSP, NNBSP, ZWSP) should not be used in documentation.
          https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#spaces-between-words
          Replace with standard spaces:' >&2
   # Find the spaces, then add color codes with sed to highlight each NBSP or NNBSP in the output.
@@ -57,7 +69,7 @@ fi
 
 # Do not use 'README.md', instead use 'index.md'
 # Number of 'README.md's as of 2020-10-13
-NUMBER_READMES=36
+NUMBER_READMES=28
 FIND_READMES=$(find doc/ -name "README.md" | wc -l)
 echo '=> Checking for new README.md files...'
 echo
@@ -66,7 +78,7 @@ then
   echo
   echo '  ✖ ERROR: The number of README.md file(s) has changed. Use index.md instead of README.md.' >&2
   echo '  ✖        If removing a README.md file, update NUMBER_READMES in lint-doc.sh.' >&2
-  echo '  https://docs.gitlab.com/ee/development/documentation/styleguide.html#work-with-directories-and-files'
+  echo '  https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#work-with-directories-and-files'
   echo
   ((ERRORCODE++))
 fi
@@ -80,12 +92,12 @@ then
   echo "Merge request pipeline (detached) detected. Testing all files."
 else
   MERGE_BASE=$(git merge-base ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA})
-  if git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" | grep -E "\.vale|\.markdownlint|lint-doc\.sh"
+  if git diff --diff-filter=d --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" | grep -E "\.vale|\.markdownlint|lint-doc\.sh"
   then
     MD_DOC_PATH=${MD_DOC_PATH:-doc}
     echo "Vale, Markdownlint, or lint-doc.sh configuration changed. Testing all files."
   else
-    MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
+    MD_DOC_PATH=$(git diff --diff-filter=d --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" -- 'doc/*.md')
     if [ -n "${MD_DOC_PATH}" ]
     then
       echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"

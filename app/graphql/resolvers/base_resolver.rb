@@ -12,8 +12,17 @@ module Resolvers
       @requires_argument = true
     end
 
+    def self.calls_gitaly!
+      @calls_gitaly = true
+    end
+
     def self.field_options
-      super.merge(requires_argument: @requires_argument)
+      extra_options = {
+        requires_argument: @requires_argument,
+        calls_gitaly: @calls_gitaly
+      }.compact
+
+      super.merge(extra_options)
     end
 
     def self.singular_type
@@ -118,7 +127,7 @@ module Resolvers
     end
 
     def offset_pagination(relation)
-      ::Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection.new(relation)
+      ::Gitlab::Graphql::Pagination::OffsetPaginatedRelation.new(relation)
     end
 
     override :object
@@ -126,16 +135,6 @@ module Resolvers
       super.tap do |obj|
         # If the field this resolver is used in is wrapped in a presenter, unwrap its subject
         break obj.subject if obj.is_a?(Gitlab::View::Presenter::Base)
-      end
-    end
-
-    # TODO: remove! This should never be necessary
-    # Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/13984,
-    # since once we use that authorization approach, the object is guaranteed to
-    # be synchronized before any field.
-    def synchronized_object
-      strong_memoize(:synchronized_object) do
-        ::Gitlab::Graphql::Lazy.force(object)
       end
     end
 
@@ -150,6 +149,14 @@ module Resolvers
     # Overridden in sub-classes (see .single, .last)
     def select_result(results)
       results
+    end
+
+    def self.authorization
+      @authorization ||= ::Gitlab::Graphql::Authorize::ObjectAuthorization.new(try(:required_permissions))
+    end
+
+    def self.authorized?(object, context)
+      authorization.ok?(object, context[:current_user])
     end
   end
 end

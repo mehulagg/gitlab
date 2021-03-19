@@ -1,4 +1,6 @@
-- if any_project_nav_tab?([:security, :dependencies, :licenses, :audit_events])
+- on_demand_scans_path = new_project_on_demand_scan_path(@project)
+
+- if any_project_nav_tab?([:security, :security_configuration, :dependencies, :licenses, :audit_events])
   = nav_link(path: sidebar_security_paths) do
     = link_to top_level_link(@project), data: { qa_selector: top_level_qa_selector(@project) } do
       .nav-icon-container
@@ -24,7 +26,7 @@
 
       - if project_nav_tab?(:on_demand_scans)
         = nav_link(path: sidebar_on_demand_scans_paths) do
-          = link_to project_on_demand_scans_path(@project), title: s_('OnDemandScans|On-demand Scans'), data: { qa_selector: 'on_demand_scans_link' } do
+          = link_to on_demand_scans_path, title: s_('OnDemandScans|On-demand Scans'), data: { qa_selector: 'on_demand_scans_link' } do
             %span= s_('OnDemandScans|On-demand Scans')
 
       - if project_nav_tab?(:dependencies)
@@ -41,6 +43,11 @@
         = nav_link(controller: ['projects/threat_monitoring']) do
           = link_to project_threat_monitoring_path(@project), title: _('Threat Monitoring') do
             %span= _('Threat Monitoring')
+
+      - if project_nav_tab?(:security_orchestration_policies) && Feature.enabled?(:security_orchestration_policies_configuration, @project)
+        = nav_link(controller: ['projects/security/policies']) do
+          = link_to project_security_policy_path(@project), title: _('Scan Policies') do
+            %span= _('Scan Policies')
 
       - if project_nav_tab?(:security_configuration)
         = nav_link(path: sidebar_security_configuration_paths) do

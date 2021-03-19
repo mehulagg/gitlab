@@ -293,6 +293,20 @@ RSpec.describe Epics::UpdateService do
         end
       end
 
+      context 'epic start date fixed or inherited' do
+        it 'tracks the user action to set as fixed' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_fixed_action)
+
+          update_epic(start_date_is_fixed: true, start_date_fixed: Date.today)
+        end
+
+        it 'tracks the user action to set as inherited' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_inherited_action)
+
+          update_epic(start_date_is_fixed: false)
+        end
+      end
+
       context 'date fields are not updated' do
         it 'does not call UpdateDatesService' do
           expect(Epics::UpdateDatesService).not_to receive(:new)
@@ -308,12 +322,60 @@ RSpec.describe Epics::UpdateService do
     end
 
     context 'with quick actions in the description' do
-      let(:label) { create(:group_label, group: group) }
+      before do
+        stub_licensed_features(epics: true, subepics: true)
+        group.add_developer(user)
+      end
 
-      it 'adds labels to the epic' do
-        update_epic(description: "/label ~#{label.name}")
+      context 'for /label' do
+        let(:label) { create(:group_label, group: group) }
 
-        expect(epic.label_ids).to contain_exactly(label.id)
+        it 'adds labels to the epic' do
+          update_epic(description: "/label ~#{label.name}")
+
+          expect(epic.label_ids).to contain_exactly(label.id)
+        end
+      end
+
+      context 'for /parent_epic' do
+        it 'assigns parent epic' do
+          parent_epic = create(:epic, group: epic.group)
+
+          update_epic(description: "/parent_epic #{parent_epic.to_reference}")
+
+          expect(epic.parent).to eq(parent_epic)
+        end
+
+        context 'when parent epic cannot be assigned' do
+          it 'does not update parent epic' do
+            other_group = create(:group, :private)
+            parent_epic = create(:epic, group: other_group)
+
+            update_epic(description: "/parent_epic #{parent_epic.to_reference(group)}")
+
+            expect(epic.parent).to eq(nil)
+          end
+        end
+      end
+
+      context 'for /child_epic' do
+        it 'sets a child epic' do
+          child_epic = create(:epic, group: group)
+
+          update_epic(description: "/child_epic #{child_epic.to_reference}")
+
+          expect(epic.reload.children).to include(child_epic)
+        end
+
+        context 'when child epic cannot be assigned' do
+          it 'does not set child epic' do
+            other_group = create(:group, :private)
+            child_epic = create(:epic, group: other_group)
+
+            update_epic(description: "/child_epic #{child_epic.to_reference(group)}")
+            expect(epic.reload.children).to be_empty
+          end
+        end
       end
     end
   end

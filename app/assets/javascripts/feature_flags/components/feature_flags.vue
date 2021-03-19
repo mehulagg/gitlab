@@ -1,20 +1,19 @@
 <script>
-import { mapState, mapActions } from 'vuex';
-import { isEmpty } from 'lodash';
 import { GlAlert, GlButton, GlModalDirective, GlSprintf, GlTabs } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 
-import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
-import FeatureFlagsTab from './feature_flags_tab.vue';
-import FeatureFlagsTable from './feature_flags_table.vue';
-import UserListsTable from './user_lists_table.vue';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import {
   buildUrlWithCurrentLocation,
   getParameterByName,
   historyPushState,
 } from '~/lib/utils/common_utils';
-
+import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
+import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
 import ConfigureFeatureFlagsModal from './configure_feature_flags_modal.vue';
+import FeatureFlagsTab from './feature_flags_tab.vue';
+import FeatureFlagsTable from './feature_flags_table.vue';
+import UserListsTable from './user_lists_table.vue';
 
 const SCOPES = { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE };
 
@@ -133,7 +132,7 @@ export default {
     },
     updateFeatureFlagOptions(parameters) {
       const queryString = Object.keys(parameters)
-        .map(parameter => {
+        .map((parameter) => {
           const value = parameters[parameter];
           return `${parameter}=${encodeURIComponent(value)}`;
         })
@@ -198,7 +197,7 @@ export default {
       @token="rotateInstanceId()"
     />
     <div :class="topAreaBaseClasses">
-      <div class="gl-display-flex gl-flex-direction-column gl-display-md-none!">
+      <div class="gl-display-flex gl-flex-direction-column gl-md-display-none!">
         <gl-button
           v-if="canUserConfigure"
           v-gl-modal="'configure-feature-flags'"
@@ -214,7 +213,7 @@ export default {
         <gl-button
           v-if="newUserListPath"
           :href="newUserListPath"
-          variant="success"
+          variant="confirm"
           category="secondary"
           class="gl-mb-3"
           data-testid="ff-new-list-button"
@@ -225,7 +224,7 @@ export default {
         <gl-button
           v-if="hasNewPath"
           :href="featureFlagsLimitExceeded ? '' : newFeatureFlagPath"
-          variant="success"
+          variant="confirm"
           data-testid="ff-new-button"
           @click="onNewFeatureFlagCLick"
         >
@@ -285,7 +284,7 @@ export default {
         </feature-flags-tab>
         <template #tabs-end>
           <li
-            class="gl-display-none gl-display-md-flex gl-align-items-center gl-flex-fill-1 gl-justify-content-end"
+            class="gl-display-none gl-md-display-flex gl-align-items-center gl-flex-fill-1 gl-justify-content-end"
           >
             <gl-button
               v-if="canUserConfigure"
@@ -302,7 +301,7 @@ export default {
             <gl-button
               v-if="newUserListPath"
               :href="newUserListPath"
-              variant="success"
+              variant="confirm"
               category="secondary"
               class="gl-mb-0 gl-mr-4"
               data-testid="ff-new-list-button"
@@ -313,7 +312,7 @@ export default {
             <gl-button
               v-if="hasNewPath"
               :href="featureFlagsLimitExceeded ? '' : newFeatureFlagPath"
-              variant="success"
+              variant="confirm"
               data-testid="ff-new-button"
               @click="onNewFeatureFlagCLick"
             >

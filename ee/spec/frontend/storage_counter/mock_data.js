@@ -86,5 +86,5 @@ export const withRootStorageStatistics = {
 };
 
 export const mockGetStorageCounterGraphQLResponse = {
-  nodes: projects.map(node => node),
+  nodes: projects.map((node) => node),
 };

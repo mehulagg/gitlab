@@ -1,12 +1,12 @@
 <script>
 import { GlLoadingIcon, GlModal } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
+import { __, s__ } from '~/locale';
 import SmartInterval from '~/smart_interval';
 
-import eventHub from '../event_hub';
-
 import { NODE_ACTIONS } from '../constants';
+import eventHub from '../event_hub';
 
 import GeoNodeItem from './geo_node_item.vue';
 
@@ -89,8 +89,8 @@ export default {
     fetchGeoNodes() {
       return this.service
         .getGeoNodes()
-        .then(res => res.data)
-        .then(nodes => {
+        .then((res) => res.data)
+        .then((nodes) => {
           this.store.setNodes(nodes);
           this.isLoading = false;
         })
@@ -103,8 +103,8 @@ export default {
       const nodeId = node.id;
       return this.service
         .getGeoNodeDetails(node)
-        .then(res => res.data)
-        .then(nodeDetails => {
+        .then((res) => res.data)
+        .then((nodeDetails) => {
           const primaryNodeVersion = this.store.getPrimaryNodeVersion();
           const updatedNodeDetails = Object.assign(nodeDetails, {
             primaryVersion: primaryNodeVersion.version,
@@ -113,7 +113,7 @@ export default {
           this.store.setNodeDetails(nodeId, updatedNodeDetails);
           eventHub.$emit('nodeDetailsLoaded', this.store.getNodeDetails(nodeId));
         })
-        .catch(err => {
+        .catch((err) => {
           this.store.setNodeDetails(nodeId, {
             geo_node_id: nodeId,
             health: err.message,
@@ -142,8 +142,8 @@ export default {
       this.setNodeActionStatus(targetNode, true);
       return this.service
         .toggleNode(targetNode)
-        .then(res => res.data)
-        .then(node => {
+        .then((res) => res.data)
+        .then((node) => {
           Object.assign(targetNode, {
             enabled: node.enabled,
             nodeActionActive: false,
@@ -194,11 +194,11 @@ export default {
       if (actionType === NODE_ACTIONS.TOGGLE && !node.enabled) {
         this.toggleNode(this.targetNode);
       } else {
-        this.$root.$emit('bv::show::modal', this.modalId);
+        this.$root.$emit(BV_SHOW_MODAL, this.modalId);
       }
     },
     hideNodeActionModal() {
-      this.$root.$emit('bv::hide::modal', this.modalId);
+      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
     },
     nodeRemovalAllowed(node) {
       return !node.primary || this.nodes.length <= 1;
@@ -233,9 +233,7 @@ export default {
       @cancel="hideNodeActionModal"
       @ok="handleNodeAction"
     >
-      <template>
-        {{ modalMessage }}
-      </template>
+      {{ modalMessage }}
     </gl-modal>
   </div>
 </template>

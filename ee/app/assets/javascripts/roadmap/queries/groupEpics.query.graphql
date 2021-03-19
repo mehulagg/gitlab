@@ -9,7 +9,9 @@ query groupEpics(
   $labelName: [String!] = []
   $authorUsername: String = ""
   $milestoneTitle: String = ""
+  $confidential: Boolean
   $search: String = ""
+  $first: Int = 1001
 ) {
   group(fullPath: $fullPath) {
     id
@@ -22,7 +24,9 @@ query groupEpics(
       labelName: $labelName
       authorUsername: $authorUsername
       milestoneTitle: $milestoneTitle
+      confidential: $confidential
       search: $search
+      first: $first
     ) {
       edges {
         node {

@@ -3,21 +3,21 @@
 module Mutations
   module Commits
     class Create < BaseMutation
-      include ResolvesProject
+      include FindsProject
 
       graphql_name 'CommitCreate'
 
       argument :project_path, GraphQL::ID_TYPE,
                required: true,
-               description: 'Project full path the branch is associated with'
+               description: 'Project full path the branch is associated with.'
 
       argument :branch, GraphQL::STRING_TYPE,
                required: true,
-               description: 'Name of the branch to commit into, it can be a new branch'
+               description: 'Name of the branch to commit into, it can be a new branch.'
 
       argument :start_branch, GraphQL::STRING_TYPE,
                required: false,
-               description: 'If on a new branch, name of the original branch'
+               description: 'If on a new branch, name of the original branch.'
 
       argument :message,
                GraphQL::STRING_TYPE,
@@ -27,17 +27,17 @@ module Mutations
       argument :actions,
                [Types::CommitActionType],
                required: true,
-               description: 'Array of action hashes to commit as a batch'
+               description: 'Array of action hashes to commit as a batch.'
 
       field :commit,
             Types::CommitType,
             null: true,
-            description: 'The commit after mutation'
+            description: 'The commit after mutation.'
 
       authorize :push_code
 
       def resolve(project_path:, branch:, message:, actions:, **args)
-        project = authorized_find!(full_path: project_path)
+        project = authorized_find!(project_path)
 
         attributes = {
           commit_message: message,
@@ -52,12 +52,6 @@ module Mutations
           commit: (project.repository.commit(result[:result]) if result[:status] == :success),
           errors: Array.wrap(result[:message])
         }
-      end
-
-      private
-
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
       end
     end
   end

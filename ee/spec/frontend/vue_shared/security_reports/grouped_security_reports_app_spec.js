@@ -4,9 +4,9 @@ import Vue from 'vue';
 import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import appStore from 'ee/vue_shared/security_reports/store';
 import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import * as apiFuzzingTypes from 'ee/vue_shared/security_reports/store/modules/api_fuzzing/mutation_types';
 import * as sastTypes from 'ee/vue_shared/security_reports/store/modules/sast/mutation_types';
 import * as secretDetectionTypes from 'ee/vue_shared/security_reports/store/modules/secret_detection/mutation_types';
-import * as apiFuzzingTypes from 'ee/vue_shared/security_reports/store/modules/api_fuzzing/mutation_types';
 import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import { trimText } from 'helpers/text_helper';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
@@ -56,7 +56,9 @@ describe('Grouped security reports app', () => {
     apiFuzzingHelpPath: 'path',
     pipelineId: 123,
     projectId: 321,
+    mrIid: 123,
     projectFullPath: 'path',
+    targetProjectFullPath: 'path',
     apiFuzzingComparisonPath: API_FUZZING_DIFF_ENDPOINT,
     containerScanningComparisonPath: CONTAINER_SCANNING_DIFF_ENDPOINT,
     coverageFuzzingComparisonPath: COVERAGE_FUZZING_DIFF_ENDPOINT,
@@ -77,6 +79,15 @@ describe('Grouped security reports app', () => {
   const createWrapper = (propsData, options, provide) => {
     wrapper = mount(GroupedSecurityReportsApp, {
       propsData,
+      mocks: {
+        $apollo: {
+          queries: {
+            reportArtifacts: {
+              loading: false,
+            },
+          },
+        },
+      },
       data() {
         return {
           dastSummary: defaultDastSummary,
@@ -92,7 +103,6 @@ describe('Grouped security reports app', () => {
       },
       store: appStore(),
       provide: {
-        glFeatures: { coverageFuzzingMrWidget: true },
         ...provide,
       },
     });
@@ -357,11 +367,11 @@ describe('Grouped security reports app', () => {
         wrapper.vm.$el.querySelector('[aria-label="Vulnerability Name"]').click();
 
         return Vue.nextTick().then(() => {
-          expect(wrapper.vm.$el.querySelector('.modal-title').textContent.trim()).toEqual(
+          expect(document.querySelector('.modal-title').textContent.trim()).toEqual(
             mockFindings[0].name,
           );
 
-          expect(wrapper.vm.$el.querySelector('.modal-body').textContent).toContain(
+          expect(document.querySelector('.modal-body').textContent).toContain(
             mockFindings[0].solution,
           );
         });
@@ -401,6 +411,8 @@ describe('Grouped security reports app', () => {
         headBlobPath: 'path',
         pipelinePath,
         projectFullPath: 'path',
+        targetProjectFullPath: 'path',
+        mrIid: 123,
       });
     });
 
@@ -417,27 +429,20 @@ describe('Grouped security reports app', () => {
   });
 
   describe('coverage fuzzing reports', () => {
-    describe.each([true, false])('given featureEnabled is %s', shouldShowFuzzing => {
-      beforeEach(() => {
-        createWrapper(
-          {
-            ...props,
-            enabledReports: {
-              coverageFuzzing: true,
-            },
+    beforeEach(() => {
+      createWrapper(
+        {
+          ...props,
+          enabledReports: {
+            coverageFuzzing: true,
           },
-          {},
-          {
-            glFeatures: { coverageFuzzingMrWidget: shouldShowFuzzing },
-          },
-        );
-      });
+        },
+        {},
+      );
+    });
 
-      it(`${shouldShowFuzzing ? 'renders' : 'does not render'}`, () => {
-        expect(wrapper.find('[data-qa-selector="coverage_fuzzing_report"]').exists()).toBe(
-          shouldShowFuzzing,
-        );
-      });
+    it('renders', () => {
+      expect(wrapper.find('.js-coverage-fuzzing-widget').exists()).toBe(true);
     });
   });
 
@@ -551,7 +556,7 @@ describe('Grouped security reports app', () => {
     });
 
     it('shows the scanned URLs count and opens a modal', async () => {
-      const jobLink = wrapper.find('[data-qa-selector="dast-ci-job-link"]');
+      const jobLink = wrapper.find('[data-testid="dast-ci-job-link"]');
 
       expect(wrapper.text()).toContain('211 URLs scanned');
       expect(jobLink.exists()).toBe(true);
@@ -591,7 +596,7 @@ describe('Grouped security reports app', () => {
 
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         expect(wrapper.text()).not.toContain('0 URLs scanned');
-        expect(wrapper.find('[data-qa-selector="dast-ci-job-link"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="dast-ci-job-link"]').exists()).toBe(false);
       });
     });
   });
@@ -619,7 +624,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should render the component', () => {
-        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(true);
+        expect(wrapper.find('[data-testid="secret-scan-report"]').exists()).toBe(true);
       });
 
       it('should set diffEndpoint', () => {
@@ -641,7 +646,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not render the component', () => {
-        expect(wrapper.find('[data-qa-selector="secret_scan_report"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="secret-scan-report"]').exists()).toBe(false);
       });
     });
   });
@@ -692,7 +697,7 @@ describe('Grouped security reports app', () => {
     };
 
     describe('with active MR', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.open }, done);
       });
 
@@ -704,7 +709,7 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with active MR and diverged commit', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.open, divergedCommitsCount: 1 }, done);
       });
 
@@ -716,7 +721,7 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with closed MR', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.closed }, done);
       });
 
@@ -726,7 +731,7 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with merged MR', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         createComponent({ mrState: mrStates.merged }, done);
       });
 

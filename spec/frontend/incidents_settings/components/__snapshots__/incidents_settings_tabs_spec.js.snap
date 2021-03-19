@@ -10,7 +10,7 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
     class="settings-header"
   >
     <h4
-      class="gl-my-3! gl-py-1"
+      class="settings-title js-settings-toggle js-settings-toggle-trigger-only"
     >
       
       Incidents

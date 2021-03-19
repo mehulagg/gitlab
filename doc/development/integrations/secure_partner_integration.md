@@ -13,13 +13,13 @@ guidelines so you can build an integration that fits with the workflow GitLab
 users are already familiar with.
 
 This page also provides resources for the technical work associated
-with [onboarding as a partner](https://about.gitlab.com/partners/integrate/).
+with [onboarding as a partner](https://about.gitlab.com/partners/technology-partners/integrate/).
 The steps below are a high-level view of what needs to be done to complete an
 integration as well as linking to more detailed resources for how to do so.
 
 ## Integration Tiers
 
-The security offerings in GitLab are designed for GitLab Gold and GitLab Ultimate users, and the
+The security offerings in GitLab are designed for GitLab Ultimate users, and the
 [DevSecOps](https://about.gitlab.com/handbook/use-cases/#4-devsecops-shift-left-security)
 use case. All the features are in those tiers. This includes the APIs and standard reporting
 framework needed to provide a consistent experience for users to easily bring their preferred
@@ -75,7 +75,7 @@ and complete an integration with the Secure stage.
 1. [Create an issue](https://gitlab.com/gitlab-com/alliances/alliances/-/issues/new?issuable_template=new_partner)
    using our new partner issue template to begin the discussion.
 1. Get a test account to begin developing your integration. You can
-   request a [GitLab.com Gold Subscription Sandbox](https://about.gitlab.com/partners/integrate/#gitlabcom-gold-subscription-sandbox-request)
+   request a [GitLab.com Subscription Sandbox](https://about.gitlab.com/partners/integrate/#gitlabcom-subscription-sandbox-request)
    or an [EE Developer License](https://about.gitlab.com/partners/integrate/#requesting-ee-dev-license-for-rd).
 1. Provide a [pipeline job](../../development/pipelines.md)
    template that users could integrate into their own GitLab pipelines.
@@ -101,12 +101,12 @@ and complete an integration with the Secure stage.
    - Users can interact with the findings from your artifact within their workflow. They can dismiss the findings or accept them and create a backlog issue.
    - To automatically create issues without user interaction, use the [issue API](../../api/issues.md).
 1. Optional: Provide auto-remediation steps:
-   - If you specified `remediations` in your artifact, it is proposed through our [automatic remediation](../../user/application_security/index.md#automatic-remediation-for-vulnerabilities)
+   - If you specified `remediations` in your artifact, it is proposed through our [automatic remediation](../../user/application_security/index.md#apply-an-automatic-remediation-for-a-vulnerability)
      interface.
 1. Demo the integration to GitLab:
    - After you have tested and are ready to demo your integration please
      [reach out](https://about.gitlab.com/partners/integrate/) to us. If you
-     skip this step you won’t be able to do supported marketing.
+     skip this step you won't be able to do supported marketing.
 1. Begin doing supported marketing of your GitLab integration.
    - Work with our [partner team](https://about.gitlab.com/partners/integrate/)
      to support your go-to-market as appropriate.
@@ -114,7 +114,7 @@ and complete an integration with the Secure stage.
      doing an [Unfiltered blog post](https://about.gitlab.com/handbook/marketing/blog/unfiltered/),
      doing a co-branded webinar, or producing a co-branded white paper.
 
-We have a [video playlist](https://www.youtube.com/playlist?list=PL05JrBw4t0KpMqYxJiOLz-uBIr5w-yP4A)
+We have a <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [video playlist](https://www.youtube.com/playlist?list=PL05JrBw4t0KpMqYxJiOLz-uBIr5w-yP4A)
 that may be helpful as part of this process. This covers various topics related to integrating your
 tool.
 

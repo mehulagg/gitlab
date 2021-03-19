@@ -1,6 +1,7 @@
 import { isNumber, isString } from 'lodash';
-import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
+import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
 import base from '~/vue_merge_request_widget/mixins/ready_to_merge';
 
 export const MERGE_DISABLED_TEXT_UNAPPROVED = __(
@@ -36,37 +37,44 @@ export default {
       return PIPELINE_MUST_SUCCEED_CONFLICT_TEXT;
     },
     autoMergeText() {
-      if (this.mr.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY) {
-        if (this.mr.mergeTrainsCount === 0) {
+      if (this.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY) {
+        if (this.stateData.mergeTrainsCount === 0) {
           return __('Start merge train when pipeline succeeds');
         }
         return __('Add to merge train when pipeline succeeds');
-      } else if (this.mr.preferredAutoMergeStrategy === MT_MERGE_STRATEGY) {
-        if (this.mr.mergeTrainsCount === 0) {
+      } else if (this.preferredAutoMergeStrategy === MT_MERGE_STRATEGY) {
+        if (this.stateData.mergeTrainsCount === 0) {
           return __('Start merge train');
         }
         return __('Add to merge train');
       }
       return __('Merge when pipeline succeeds');
     },
+    pipelineId() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return getIdFromGraphQLId(this.pipeline.id);
+      }
+
+      return this.pipeline.id;
+    },
     shouldRenderMergeTrainHelperText() {
       return (
-        this.mr.pipeline &&
-        isNumber(this.mr.pipeline.id) &&
-        isString(this.mr.pipeline.path) &&
-        this.mr.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY &&
-        !this.mr.autoMergeEnabled
+        this.pipeline &&
+        isNumber(this.pipelineId) &&
+        isString(this.pipeline.path) &&
+        this.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY &&
+        !this.stateData.autoMergeEnabled
       );
     },
     shouldShowMergeImmediatelyDropdown() {
-      if (this.mr.preferredAutoMergeStrategy === MT_MERGE_STRATEGY) {
+      if (this.preferredAutoMergeStrategy === MT_MERGE_STRATEGY) {
         return true;
       }
 
-      return this.mr.isPipelineActive && !this.mr.onlyAllowMergeIfPipelineSucceeds;
+      return this.isPipelineActive && !this.stateData.onlyAllowMergeIfPipelineSucceeds;
     },
     isMergeImmediatelyDangerous() {
-      return [MT_MERGE_STRATEGY, MTWPS_MERGE_STRATEGY].includes(this.mr.preferredAutoMergeStrategy);
+      return [MT_MERGE_STRATEGY, MTWPS_MERGE_STRATEGY].includes(this.preferredAutoMergeStrategy);
     },
   },
 };

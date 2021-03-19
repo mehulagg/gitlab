@@ -7,9 +7,9 @@ if (process.env.RAILS_ENV !== 'production') {
   process.exit(0);
 }
 
-const path = require('path');
 const fs = require('fs');
 const glob = require('glob');
+const path = require('path');
 const pjs = require('postcss');
 
 const paths = glob.sync('public/assets/page_bundles/_mixins_and_variables_and_functions*.css', {
@@ -27,7 +27,7 @@ const file = fs.readFileSync(paths[0], 'utf-8');
 
 const parsed = pjs.parse(file);
 
-if (parsed.nodes.every(node => ['comment', 'atrule'].includes(node.type))) {
+if (parsed.nodes.every((node) => ['comment', 'atrule'].includes(node.type))) {
   console.log('The file does not introduce any side effects, we are all good.');
   process.exit(0);
 }

@@ -1,21 +1,18 @@
 <script>
-import $ from 'jquery';
-import { mapGetters, mapActions } from 'vuex';
-import { escape } from 'lodash';
 import { GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import $ from 'jquery';
+import { escape, isEmpty } from 'lodash';
+import { mapGetters, mapActions } from 'vuex';
+import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
+import httpStatusCodes from '~/lib/utils/http_status';
 import { truncateSha } from '~/lib/utils/text_utility';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
-import { __, s__, sprintf } from '../../locale';
 import { deprecatedCreateFlash as Flash } from '../../flash';
+import { __, s__, sprintf } from '../../locale';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
-import noteHeader from './note_header.vue';
-import noteActions from './note_actions.vue';
-import NoteBody from './note_body.vue';
 import eventHub from '../event_hub';
 import noteable from '../mixins/noteable';
 import resolvable from '../mixins/resolvable';
-import httpStatusCodes from '~/lib/utils/http_status';
 import {
   getStartLineNumber,
   getEndLineNumber,
@@ -23,7 +20,9 @@ import {
   commentLineOptions,
   formatLineRange,
 } from './multiline_comment_utils';
-import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
+import noteActions from './note_actions.vue';
+import NoteBody from './note_body.vue';
+import noteHeader from './note_header.vue';
 
 export default {
   name: 'NoteableNote',
@@ -38,7 +37,7 @@ export default {
   directives: {
     SafeHtml,
   },
-  mixins: [noteable, resolvable, glFeatureFlagsMixin()],
+  mixins: [noteable, resolvable],
   props: {
     note: {
       type: Object,
@@ -160,7 +159,6 @@ export default {
     },
     showMultiLineComment() {
       if (
-        !this.glFeatures.multilineComments ||
         !this.discussionRoot ||
         this.startLineNumber.length === 0 ||
         this.endLineNumber.length === 0
@@ -284,11 +282,16 @@ export default {
         note: {
           target_type: this.getNoteableData.targetType,
           target_id: this.note.noteable_id,
-          note: { note: noteText, position: JSON.stringify(position) },
+          note: { note: noteText },
         },
       };
+
+      // Stringifying an empty object yields `{}` which breaks graphql queries
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/298827
+      if (!isEmpty(position)) data.note.note.position = JSON.stringify(position);
       this.isRequesting = true;
       this.oldContent = this.note.note_html;
+      // eslint-disable-next-line vue/no-mutating-props
       this.note.note_html = escape(noteText);
 
       this.updateNote(data)
@@ -296,7 +299,7 @@ export default {
           this.updateSuccess();
           callback();
         })
-        .catch(response => {
+        .catch((response) => {
           if (response.status === httpStatusCodes.GONE) {
             this.removeNote(this.note);
             this.updateSuccess();
@@ -321,6 +324,7 @@ export default {
       }
       this.$refs.noteBody.resetAutoSave();
       if (this.oldContent) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.note.note_html = this.oldContent;
         this.oldContent = null;
       }
@@ -330,6 +334,7 @@ export default {
     recoverNoteContent(noteText) {
       // we need to do this to prevent noteForm inconsistent content warning
       // this is something we intentionally do so we need to recover the content
+      // eslint-disable-next-line vue/no-mutating-props
       this.note.note = noteText;
       const { noteBody } = this.$refs;
       if (noteBody) {
@@ -415,6 +420,7 @@ export default {
           :is-draft="note.isDraft"
           :resolve-discussion="note.isDraft && note.resolve_discussion"
           :discussion-id="discussionId"
+          :award-path="note.toggle_award_path"
           @handleEdit="editHandler"
           @handleDelete="deleteHandler"
           @handleResolve="resolveHandler"
@@ -428,6 +434,7 @@ export default {
           ref="noteBody"
           :note="note"
           :line="line"
+          :file="diffFile"
           :can-edit="note.current_user.can_edit"
           :is-editing="isEditing"
           :help-page-path="helpPagePath"

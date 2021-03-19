@@ -116,7 +116,7 @@ module API
       end
 
       def create_note(noteable, opts)
-        whitelist_query_limiting
+        disable_query_limiting
         authorize!(:create_note, noteable)
 
         parent = noteable_parent(noteable)
@@ -138,14 +138,14 @@ module API
           parent = noteable_parent(noteable)
           ::Discussions::ResolveService.new(parent, current_user, one_or_more_discussions: discussion).execute
         else
-          discussion.unresolve!
+          ::Discussions::UnresolveService.new(discussion, current_user).execute
         end
 
         present discussion, with: Entities::Discussion
       end
 
-      def whitelist_query_limiting
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/211538')
+      def disable_query_limiting
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/211538')
       end
     end
   end

@@ -1,63 +1,88 @@
+import { GlAvatar, GlPopover } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
-import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
+import RotationAssignee, {
+  SHIFT_WIDTHS,
+  TIME_DATE_FORMAT,
+} from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { formatDate } from '~/lib/utils/datetime_utility';
+import { truncate } from '~/lib/utils/text_utility';
 import mockRotations from '../../mocks/mock_rotation.json';
+
+jest.mock('lodash/uniqueId', () => (prefix) => `${prefix}fakeUniqueId`);
 
 describe('RotationAssignee', () => {
   let wrapper;
 
-  const assignee = mockRotations[0].participants.nodes[1];
-  const findToken = () => wrapper.find(GlToken);
-  const findAvatar = () => wrapper.find(GlAvatarLabeled);
-  const findPopOver = () => wrapper.find(GlPopover);
+  const shiftWidth = SHIFT_WIDTHS.md;
+  const assignee = mockRotations[0].shifts.nodes[0];
+  const findToken = () => wrapper.findByTestId('rotation-assignee');
+  const findAvatar = () => wrapper.findComponent(GlAvatar);
+  const findPopOver = () => wrapper.findComponent(GlPopover);
   const findStartsAt = () => wrapper.findByTestId('rotation-assignee-starts-at');
   const findEndsAt = () => wrapper.findByTestId('rotation-assignee-ends-at');
+  const findName = () => wrapper.findByTestId('rotation-assignee-name');
 
-  function mountComponent() {
+  const formattedDate = (date) => {
+    return formatDate(date, TIME_DATE_FORMAT);
+  };
+
+  function createComponent({ props = {} } = {}) {
     wrapper = extendedWrapper(
       shallowMount(RotationAssignee, {
         propsData: {
-          assignee,
-          assigneeIndex: 1,
-          rotationLength: mockRotations[0].length,
-          rotationStartsAt: mockRotations[0].startsAt,
+          assignee: { ...assignee.participant },
+          rotationAssigneeStartsAt: assignee.startsAt,
+          rotationAssigneeEndsAt: assignee.endsAt,
+          rotationAssigneeStyle: { left: '0px', width: `${shiftWidth}px` },
+          shiftWidth,
+          ...props,
         },
       }),
     );
   }
 
   beforeEach(() => {
-    mountComponent();
+    createComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('rotation assignee token', () => {
-    it('should render an assignee name', () => {
-      expect(findAvatar().attributes('label')).toBe(assignee.user.username);
+    it('should render an assignee name and avatar', () => {
+      const LARGE_SHIFT_WIDTH = 150;
+      createComponent({ props: { shiftWidth: LARGE_SHIFT_WIDTH } });
+      expect(findAvatar().props('src')).toBe(assignee.participant.user.avatarUrl);
+      expect(findName().text()).toBe(assignee.participant.user.username);
     });
 
-    it('should render an assignee avatar', () => {
-      expect(findAvatar().attributes('src')).toBe(assignee.user.avatarUrl);
+    it('truncate the rotation name on small screens', () => {
+      expect(findName().text()).toBe(truncate(assignee.participant.user.username, 3));
+    });
+
+    it('hides the rotation name on mobile screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.sm } });
+      expect(findName().exists()).toBe(false);
+    });
+
+    it('hides the avatar on the smallest screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.xs } });
+      expect(findAvatar().exists()).toBe(false);
     });
 
     it('should render an assignee color based on the chevron skipping color pallette', () => {
       const token = findToken();
       expect(token.classes()).toContain(
-        `gl-bg-data-viz-${assignee.colorPalette}-${assignee.colorWeight}`,
+        `gl-bg-data-viz-${assignee.participant.colorPalette}-${assignee.participant.colorWeight}`,
       );
     });
 
     it('should render an assignee schedule and rotation information in a popover', () => {
-      expect(findPopOver().attributes('target')).toBe(assignee.user.id);
-      // starts at the beginning of the rotation time
-      expect(findStartsAt().text()).toContain('12/16/2020');
-      // ends at the calculated length of the rotation for this user: rotation length * which user index assignee is at
-      expect(findEndsAt().text()).toContain('12/23/2020');
+      expect(findPopOver().attributes('target')).toBe('rotation-assignee-fakeUniqueId');
+      expect(findStartsAt().text()).toContain(formattedDate(assignee.startsAt));
+      expect(findEndsAt().text()).toContain(formattedDate(assignee.endsAt));
     });
   });
 });

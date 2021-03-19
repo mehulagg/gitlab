@@ -2,12 +2,13 @@ import $ from 'jquery';
 import Pikaday from 'pikaday';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
 import Autosave from './autosave';
+import AutoWidthDropdownSelect from './issuable/auto_width_dropdown_select';
+import { loadCSSFile } from './lib/utils/css_utils';
+import { parsePikadayDate, pikadayToString } from './lib/utils/datetime_utility';
+import { select2AxiosTransport } from './lib/utils/select2_utils';
+import { queryToObject, objectToQuery } from './lib/utils/url_utility';
 import UsersSelect from './users_select';
 import ZenMode from './zen_mode';
-import AutoWidthDropdownSelect from './issuable/auto_width_dropdown_select';
-import { parsePikadayDate, pikadayToString } from './lib/utils/datetime_utility';
-import { queryToObject, objectToQuery } from './lib/utils/url_utility';
-import { loadCSSFile } from './lib/utils/css_utils';
 
 const MR_SOURCE_BRANCH = 'merge_request[source_branch]';
 const MR_TARGET_BRANCH = 'merge_request[target_branch]';
@@ -89,9 +90,9 @@ export default class IssuableForm {
         theme: 'gitlab-theme animate-picker',
         format: 'yyyy-mm-dd',
         container: $issuableDueDate.parent().get(0),
-        parse: dateString => parsePikadayDate(dateString),
-        toString: date => pikadayToString(date),
-        onSelect: dateText => $issuableDueDate.val(calendar.toString(dateText)),
+        parse: (dateString) => parsePikadayDate(dateString),
+        toString: (date) => pikadayToString(date),
+        onSelect: (dateText) => $issuableDueDate.val(calendar.toString(dateText)),
         firstDay: gon.first_day_of_week,
       });
       calendar.setDate(parsePikadayDate($issuableDueDate.val()));
@@ -199,15 +200,16 @@ export default class IssuableForm {
                     search,
                   };
                 },
-                results(data) {
+                results({ results }) {
                   return {
                     // `data` keys are translated so we can't just access them with a string based key
-                    results: data[Object.keys(data)[0]].map(name => ({
+                    results: results[Object.keys(results)[0]].map((name) => ({
                       id: name,
                       text: name,
                     })),
                   };
                 },
+                transport: select2AxiosTransport,
               },
               initSelection(el, callback) {
                 const val = el.val();

@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import { parseDiff } from '~/vue_shared/security_reports/store/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { findIssueIndex } from './utils';
+import { parseDiff } from '~/vue_shared/security_reports/store/utils';
 import * as types from './mutation_types';
+import { findIssueIndex } from './utils';
 
 export default {
   [types.SET_HEAD_BLOB_PATH](state, path) {

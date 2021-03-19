@@ -8,13 +8,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8160) in GitLab 10.5.
 
-Applications API operates on OAuth applications for:
+The Applications API operates on instance-wide OAuth applications for:
 
 - [Using GitLab as an authentication provider](../integration/oauth_provider.md).
 - [Allowing access to GitLab resources on a user's behalf](oauth2.md).
 
+The Applications API cannot be used to manage group applications or applications of individual users.
+
 NOTE:
-Only admin users can use the Applications API.
+Only administrator users can use the Applications API.
 
 ## Create an application
 

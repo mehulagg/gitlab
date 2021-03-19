@@ -26,4 +26,45 @@ export default {
     state.isLoading = false;
     state.hasError = true;
   },
+
+  [types.SET_SEARCH](state, searchString) {
+    state.search = searchString ?? '';
+  },
+
+  [types.RESET_BILLABLE_MEMBERS](state) {
+    state.members = [];
+
+    state.total = null;
+    state.page = null;
+    state.perPage = null;
+
+    state.isLoading = false;
+  },
+
+  [types.SET_BILLABLE_MEMBER_TO_REMOVE](state, memberToRemove) {
+    if (!memberToRemove) {
+      state.billableMemberToRemove = null;
+    } else {
+      state.billableMemberToRemove = state.members.find(
+        (member) => member.id === memberToRemove.id,
+      );
+    }
+  },
+
+  [types.REMOVE_BILLABLE_MEMBER](state) {
+    state.isLoading = true;
+    state.hasError = false;
+  },
+
+  [types.REMOVE_BILLABLE_MEMBER_SUCCESS](state) {
+    state.isLoading = false;
+    state.hasError = false;
+    state.billableMemberToRemove = null;
+  },
+
+  [types.REMOVE_BILLABLE_MEMBER_ERROR](state) {
+    state.isLoading = false;
+    state.hasError = true;
+    state.billableMemberToRemove = null;
+  },
 };

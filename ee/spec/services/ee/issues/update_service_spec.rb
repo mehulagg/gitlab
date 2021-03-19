@@ -62,6 +62,22 @@ RSpec.describe Issues::UpdateService do
             end
           end
 
+          context 'setting to IssuableFinder::Params::NONE' do
+            it 'calls NotificationService#removed_iteration_issue' do
+              expect_next_instance_of(NotificationService::Async) do |ns|
+                expect(ns).to receive(:removed_iteration_issue)
+              end
+
+              update_issue(sprint_id: IssuableFinder::Params::NONE)
+            end
+
+            it 'removes the iteration properly' do
+              update_issue(sprint_id: IssuableFinder::Params::NONE)
+
+              expect(issue.reload.iteration).to be_nil
+            end
+          end
+
           context 'setting to another iteration' do
             it 'calls NotificationService#changed_iteration_issue' do
               expect_next_instance_of(NotificationService::Async) do |ns|

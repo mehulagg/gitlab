@@ -102,7 +102,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQEL17Ufacg8cDhlQMS5NhV8z3GHZdhCrZbl4gz you@example.
 ## Create a project
 
 - Create a project in your user namespace.
-  - Choose to import from 'Any Repo by URL' and use <https://gitlab.com/gitlab-org/training-examples.git>.
+  - Choose to import from **Any Repository by URL** and use <https://gitlab.com/gitlab-org/training-examples.git>.
 - Create a '`development`' or '`workspace`' directory in your home directory.
 - Clone the '`training-examples`' project.
 
@@ -187,7 +187,7 @@ git push origin squash_some_bugs
 ## Merge requests
 
 - When you want feedback create a merge request.
-- Target is the ‘default’ branch (usually master).
+- Target is the 'default' branch (usually master).
 - Assign or mention the person you would like to review.
 - Add `[Draft]` to the title if it's a work in progress.
 - When accepting, always delete the branch.
@@ -214,8 +214,12 @@ Create your first merge request:
 
 ## Feedback and Collaboration resources
 
+<!-- vale gitlab.Spelling = NO -->
+
 Review the Thoughtbot code-review guide for suggestions to follow when reviewing merge requests:
 <https://github.com/thoughtbot/guides/tree/master/code-review>.
+
+<!-- vale gitlab.Spelling = YES -->
 
 See GitLab merge requests for examples: <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests>.
 
@@ -256,7 +260,7 @@ git checkout master
 git tag my_lightweight_tag
 
 # Annotated tag
-git tag -a v1.0 -m ‘Version 1.0’
+git tag -a v1.0 -m 'Version 1.0'
 git tag
 
 git push origin --tags

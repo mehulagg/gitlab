@@ -1,18 +1,18 @@
 import { debounce } from 'lodash';
 import { editor as monacoEditor, KeyCode, KeyMod, Range } from 'monaco-editor';
-import DecorationsController from './decorations/controller';
-import DirtyDiffController from './diff/controller';
-import Disposable from './common/disposable';
-import ModelManager from './common/model_manager';
-import { editorOptions, defaultEditorOptions, defaultDiffEditorOptions } from './editor_options';
-import { themes } from './themes';
-import languages from './languages';
-import keymap from './keymap.json';
 import { clearDomElement } from '~/editor/utils';
 import { registerLanguages } from '../utils';
+import Disposable from './common/disposable';
+import ModelManager from './common/model_manager';
+import DecorationsController from './decorations/controller';
+import DirtyDiffController from './diff/controller';
+import { editorOptions, defaultEditorOptions, defaultDiffEditorOptions } from './editor_options';
+import keymap from './keymap.json';
+import languages from './languages';
+import { themes } from './themes';
 
 function setupThemes() {
-  themes.forEach(theme => {
+  themes.forEach((theme) => {
     monacoEditor.defineTheme(theme.name, theme.data);
   });
 }
@@ -108,7 +108,7 @@ export default class Editor {
 
     this.instance.updateOptions(
       editorOptions.reduce((acc, obj) => {
-        Object.keys(obj).forEach(key => {
+        Object.keys(obj).forEach((key) => {
           Object.assign(acc, {
             [key]: obj[key](model),
           });
@@ -177,7 +177,7 @@ export default class Editor {
   onPositionChange(cb) {
     if (!this.instance.onDidChangeCursorPosition) return;
 
-    this.disposable.add(this.instance.onDidChangeCursorPosition(e => cb(this.instance, e)));
+    this.disposable.add(this.instance.onDidChangeCursorPosition((e) => cb(this.instance, e)));
   }
 
   updateDiffView() {
@@ -213,14 +213,14 @@ export default class Editor {
 
   addCommands() {
     const { store } = this;
-    const getKeyCode = key => {
+    const getKeyCode = (key) => {
       const monacoKeyMod = key.indexOf('KEY_') === 0;
 
       return monacoKeyMod ? KeyCode[key] : KeyMod[key];
     };
 
-    keymap.forEach(command => {
-      const keybindings = command.bindings.map(binding => {
+    keymap.forEach((command) => {
+      const keybindings = command.bindings.map((binding) => {
         const keys = binding.split('+');
 
         // eslint-disable-next-line no-bitwise

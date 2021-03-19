@@ -122,10 +122,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       end
     end
 
-    if render_merge_ref_head_diff?
-      return CompareService.new(@project, @merge_request.merge_ref_head.sha)
-        .execute(@project, @merge_request.target_branch)
-    end
+    return @merge_request.merge_head_diff if render_merge_ref_head_diff?
 
     if @start_sha
       @merge_request_diff.compare_with(@start_sha)
@@ -165,7 +162,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
   end
 
   def render_merge_ref_head_diff?
-    Gitlab::Utils.to_boolean(params[:diff_head]) && @merge_request.diffable_merge_ref?
+    Gitlab::Utils.to_boolean(params[:diff_head]) && @merge_request.diffable_merge_ref? && @start_sha.nil?
   end
 
   def note_positions

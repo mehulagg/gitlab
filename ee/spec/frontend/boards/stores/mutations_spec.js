@@ -1,7 +1,7 @@
 import mutations from 'ee/boards/stores/mutations';
 import { mockIssue, mockIssue2, mockEpics, mockEpic, mockLists } from '../mock_data';
 
-const expectNotImplemented = action => {
+const expectNotImplemented = (action) => {
   it('is not implemented', () => {
     expect(action).toThrow(new Error('Not implemented!'));
   });
@@ -15,8 +15,8 @@ const initialBoardListsState = {
 };
 
 let state = {
-  issuesByListId: {},
-  issues: {},
+  boardItemsByListId: {},
+  boardItems: {},
   boardLists: initialBoardListsState,
   epicsFlags: {
     [epicId]: { isLoading: true },
@@ -92,7 +92,7 @@ describe('REQUEST_ISSUES_FOR_EPIC', () => {
 });
 
 describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
-  it('sets issuesByListId and issues state for epic issues and loading state to false', () => {
+  it('sets boardItemsByListId and issues state for epic issues and loading state to false', () => {
     const listIssues = {
       'gid://gitlab/List/1': [mockIssue.id],
       'gid://gitlab/List/2': [mockIssue2.id],
@@ -104,12 +104,12 @@ describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
 
     mutations.RECEIVE_ISSUES_FOR_EPIC_SUCCESS(state, {
       listData: listIssues,
-      issues,
+      boardItems: issues,
       epicId,
     });
 
-    expect(state.issuesByListId).toEqual(listIssues);
-    expect(state.issues).toEqual(issues);
+    expect(state.boardItemsByListId).toEqual(listIssues);
+    expect(state.boardItems).toEqual(issues);
     expect(state.epicsFlags[epicId].isLoading).toBe(false);
   });
 });
@@ -205,7 +205,7 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
   });
 });
 
-describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
+describe('RECEIVE_EPICS_SUCCESS', () => {
   it('populates epics and canAdminEpic with payload', () => {
     state = {
       ...state,
@@ -213,29 +213,17 @@ describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
       canAdminEpic: false,
     };
 
-    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
+    mutations.RECEIVE_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
 
     expect(state.epics).toEqual(mockEpics);
     expect(state.canAdminEpic).toEqual(true);
   });
-});
 
-describe('RECEIVE_EPICS_SUCCESS', () => {
-  it('populates epics with payload', () => {
-    state = {
-      ...state,
-      epics: {},
-    };
-
-    mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
-
-    expect(state.epics).toEqual(mockEpics);
-  });
-
-  it("doesn't add duplicate epics", () => {
+  it('merges epics while avoiding duplicates', () => {
     state = {
       ...state,
       epics: mockEpics,
+      canAdminEpic: false,
     };
 
     mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
@@ -245,7 +233,7 @@ describe('RECEIVE_EPICS_SUCCESS', () => {
 });
 
 describe('RESET_EPICS', () => {
-  it('should remove issues from issuesByListId state', () => {
+  it('should remove issues from boardItemsByListId state', () => {
     state = {
       ...state,
       epics: mockEpics,
@@ -271,13 +259,13 @@ describe('MOVE_ISSUE', () => {
 
     state = {
       ...state,
-      issuesByListId: listIssues,
-      issues,
+      boardItemsByListId: listIssues,
+      boardItems: issues,
     };
   });
 
-  it('updates issuesByListId, moving issue between lists and updating epic id on issue', () => {
-    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+  it('updates boardItemsByListId, moving issue between lists and updating epic id on issue', () => {
+    expect(state.boardItems['437'].epic.id).toEqual('gid://gitlab/Epic/40');
 
     mutations.MOVE_ISSUE(state, {
       originalIssue: mockIssue2,
@@ -291,12 +279,12 @@ describe('MOVE_ISSUE', () => {
       'gid://gitlab/List/2': [mockIssue2.id],
     };
 
-    expect(state.issuesByListId).toEqual(updatedListIssues);
-    expect(state.issues['437'].epic.id).toEqual(epicId);
+    expect(state.boardItemsByListId).toEqual(updatedListIssues);
+    expect(state.boardItems['437'].epic.id).toEqual(epicId);
   });
 
   it('removes epic id from issue when epicId is null', () => {
-    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+    expect(state.boardItems['437'].epic.id).toEqual('gid://gitlab/Epic/40');
 
     mutations.MOVE_ISSUE(state, {
       originalIssue: mockIssue2,
@@ -310,8 +298,42 @@ describe('MOVE_ISSUE', () => {
       'gid://gitlab/List/2': [mockIssue2.id],
     };
 
-    expect(state.issuesByListId).toEqual(updatedListIssues);
-    expect(state.issues['437'].epic).toEqual(null);
+    expect(state.boardItemsByListId).toEqual(updatedListIssues);
+    expect(state.boardItems['437'].epic).toEqual(null);
+  });
+});
+
+describe('MOVE_EPIC', () => {
+  it('updates boardItemsByListId, moving epic between lists', () => {
+    const listIssues = {
+      'gid://gitlab/List/1': [mockEpic.id, mockEpics[1].id],
+      'gid://gitlab/List/2': [],
+    };
+
+    const epics = {
+      1: mockEpic,
+      2: mockEpics[1],
+    };
+
+    state = {
+      ...state,
+      boardItemsByListId: listIssues,
+      boardLists: initialBoardListsState,
+      boardItems: epics,
+    };
+
+    mutations.MOVE_EPIC(state, {
+      originalEpic: mockEpics[1],
+      fromListId: 'gid://gitlab/List/1',
+      toListId: 'gid://gitlab/List/2',
+    });
+
+    const updatedListEpics = {
+      'gid://gitlab/List/1': [mockEpic.id],
+      'gid://gitlab/List/2': [mockEpics[1].id],
+    };
+
+    expect(state.boardItemsByListId).toEqual(updatedListEpics);
   });
 });
 

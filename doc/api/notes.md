@@ -11,7 +11,7 @@ Notes are comments on:
 - Snippets
 - Issues
 - Merge requests
-- Epics **(ULTIMATE)**
+- Epics **(PREMIUM)**
 
 This includes system notes, which are notes about changes to the object (for example, when an
 assignee changes, GitLab posts a system note).
@@ -35,6 +35,11 @@ By default, `GET` requests return 20 results at a time because the API results
 are paginated.
 
 Read more on [pagination](README.md#pagination).
+
+## Rate limits
+
+To help avoid abuse, you can limit your users to a specific number of `Create` request per minute.
+See [Notes rate limits](../user/admin_area/settings/rate_limit_on_notes_creation.md).
 
 ## Issues
 
@@ -184,6 +189,8 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 ```
 
 ## Snippets
+
+The Snippets Notes API is intended for project-level snippets, and not for personal snippets.
 
 ### List all snippet notes
 

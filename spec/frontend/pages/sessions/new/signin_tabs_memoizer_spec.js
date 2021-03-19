@@ -18,8 +18,6 @@ describe('SigninTabsMemoizer', () => {
     return memo;
   }
 
-  preloadFixtures(fixtureTemplate);
-
   beforeEach(() => {
     loadFixtures(fixtureTemplate);
 
@@ -56,7 +54,7 @@ describe('SigninTabsMemoizer', () => {
     };
     jest
       .spyOn(document, 'querySelector')
-      .mockImplementation(selector =>
+      .mockImplementation((selector) =>
         selector === `${tabSelector} a[href="#bogus"]` ? null : fakeTab,
       );
 

@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: concepts, howto
 ---
 
-# Protected Environments **(PREMIUM)**
+# Protected environments **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6303) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
 
@@ -31,7 +31,7 @@ To protect, update, or unprotect an environment, you need to have at least
 To protect an environment:
 
 1. Navigate to your project's **Settings > CI/CD**.
-1. Expand the **Protected Environments** section.
+1. Expand the **Protected environments** section.
 1. From the **Environment** dropdown menu, select the environment you want to protect.
 1. In the **Allowed to Deploy** dropdown menu, select the role, users, or groups you
    want to give deploy access to. Keep in mind that:
@@ -70,7 +70,7 @@ Alternatively, you can use the API to protect an environment:
      name: ${CI_JOB_NAME}
    ```
 
-1. Use the UI to [create a new group](../../user/group/index.md#create-a-new-group).
+1. Use the UI to [create a new group](../../user/group/index.md#create-a-group).
    For example, this group is called `protected-access-group` and has the group ID `9899826`. Note
    that the rest of the examples in these steps use this group.
 
@@ -79,7 +79,7 @@ Alternatively, you can use the API to protect an environment:
 1. Use the API to add a user to the group as a reporter:
 
    ```shell
-   $ curl --request POST --header "PRIVATE-TOKEN: xxxxxxxxxxxx" --data "user_id=3222377&access_level=20" "https://gitlab.com/api/v4/groups/9899826/members"
+   $ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "user_id=3222377&access_level=20" "https://gitlab.com/api/v4/groups/9899826/members"
 
    {"id":3222377,"name":"Sean Carroll","username":"sfcarroll","state":"active","avatar_url":"https://assets.gitlab-static.net/uploads/-/system/user/avatar/3222377/avatar.png","web_url":"https://gitlab.com/sfcarroll","access_level":20,"created_at":"2020-10-26T17:37:50.309Z","expires_at":null}
    ```
@@ -87,7 +87,7 @@ Alternatively, you can use the API to protect an environment:
 1. Use the API to add the group to the project as a reporter:
 
    ```shell
-   $ curl --request POST --header "PRIVATE-TOKEN: xxxxxxxxxxxx" --request POST "https://gitlab.com/api/v4/projects/22034114/share?group_id=9899826&group_access=20"
+   $ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --request POST "https://gitlab.com/api/v4/projects/22034114/share?group_id=9899826&group_access=20"
 
    {"id":1233335,"project_id":22034114,"group_id":9899826,"group_access":20,"expires_at":null}
    ```
@@ -95,7 +95,7 @@ Alternatively, you can use the API to protect an environment:
 1. Use the API to add the group with protected environment access:
 
    ```shell
-   curl --header 'Content-Type: application/json' --request POST --data '{"name": "production", "deploy_access_levels": [{"group_id": 9899826}]}' --header "PRIVATE-TOKEN: xxxxxxxxxxx" "https://gitlab.com/api/v4/projects/22034114/protected_environments"
+   curl --header 'Content-Type: application/json' --request POST --data '{"name": "production", "deploy_access_levels": [{"group_id": 9899826}]}' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.com/api/v4/projects/22034114/protected_environments"
    ```
 
 The group now has access and can be seen in the UI.
@@ -125,10 +125,18 @@ they have the following privileges:
 ## Deployment-only access to protected environments
 
 Users granted access to a protected environment, but not push or merge access
-to the branch deployed to it, are only granted access to deploy the environment.
+to the branch deployed to it, are only granted access to deploy the environment. An individual in a
+group with the Reporter permission, or in groups added to the project with Reporter permissions,
+appears in the dropdown menu for deployment-only access.
 
-Note that deployment-only access is the only possible access level for users with
-[Reporter permissions](../../user/permissions.md).
+To add deployment-only access:
+
+1. Add a group with Reporter permissions.
+1. Add user(s) to the group.
+1. Invite the group to be a project member.
+1. Follow the steps outlined in [Protecting Environments](#protecting-environments).
+
+Note that deployment-only access is the only possible access level for groups with [Reporter permissions](../../user/permissions.md).
 
 ## Modifying and unprotecting environments
 

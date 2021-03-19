@@ -7,11 +7,11 @@ import {
   GlFormGroup,
   GlFormInput,
 } from '@gitlab/ui';
-import { visitUrl } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import createEpic from '../queries/createEpic.mutation.graphql';
 
 export default {
@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     labelIds() {
-      return this.labels.map(label => label.id);
+      return this.labels.map((label) => label.id);
     },
   },
   i18n: {
@@ -102,7 +102,7 @@ export default {
       const ids = [];
       const allLabels = [...labels, ...this.labels];
 
-      this.labels = allLabels.filter(label => {
+      this.labels = allLabels.filter((label) => {
         const exists = ids.includes(label.id);
         ids.push(label.id);
 
@@ -158,12 +158,15 @@ export default {
           </template>
         </markdown-field>
       </gl-form-group>
-      <gl-form-group :label="__('Confidentiality')" label-for="epic-confidentiality">
+      <gl-form-group
+        :label="__('Confidentiality')"
+        label-for="epic-confidentiality"
+        data-qa-selector="confidential_epic_checkbox"
+      >
         <gl-form-checkbox
           id="epic-confidentiality"
           v-model="confidential"
           data-testid="epic-confidentiality"
-          data-qa-selector="confidential_epic_checkbox"
         >
           {{ $options.i18n.confidentialityLabel }}
         </gl-form-checkbox>

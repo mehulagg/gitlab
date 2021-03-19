@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
@@ -63,7 +63,12 @@ sudo -u git -H git checkout EE_BRANCH
 ```shell
 cd /home/git/gitlab
 
-sudo -u git -H bundle install --deployment --without development test mysql aws kerberos
+# If you haven't done so during installation or a previous upgrade already
+sudo -u git -H bundle config set --local deployment 'true'
+sudo -u git -H bundle config set --local without 'development test mysql aws kerberos'
+
+# Update gems
+sudo -u git -H bundle install
 
 # Optional: clean up old gems
 sudo -u git -H bundle clean
@@ -81,7 +86,7 @@ sudo -u git -H bundle exec rake yarn:install gitlab:assets:clean gitlab:assets:c
 sudo -u git -H bundle exec rake cache:clear RAILS_ENV=production
 ```
 
-### 4. Install `gitlab-elasticsearch-indexer` **(STARTER ONLY)**
+### 4. Install `gitlab-elasticsearch-indexer` **(PREMIUM SELF)**
 
 Please follow the [install instruction](../integration/elasticsearch.md#installing-elasticsearch).
 

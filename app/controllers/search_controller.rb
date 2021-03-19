@@ -5,11 +5,11 @@ class SearchController < ApplicationController
   include SearchHelper
   include RedisTracking
 
-  track_redis_hll_event :show, name: 'i_search_total', feature: :search_track_unique_users, feature_default_enabled: true
+  track_redis_hll_event :show, name: 'i_search_total'
 
   around_action :allow_gitaly_ref_name_caching
 
-  before_action :block_anonymous_global_searches
+  before_action :block_anonymous_global_searches, except: :opensearch
   skip_before_action :authenticate_user!
   requires_cross_project_access if: -> do
     search_term_present = params[:search].present? || params[:term].present?
@@ -49,6 +49,12 @@ class SearchController < ApplicationController
     scope = search_service.scope
     count = search_service.search_results.formatted_count(scope)
 
+    # Users switching tabs will keep fetching the same tab counts so it's a
+    # good idea to cache in their browser just for a short time. They can still
+    # clear cache if they are seeing an incorrect count but inaccurate count is
+    # not such a bad thing.
+    expires_in 1.minute
+
     render json: { count: count }
   end
 
@@ -66,6 +72,9 @@ class SearchController < ApplicationController
     render json: search_autocomplete_opts(term).to_json
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def opensearch
+  end
 
   private
 
@@ -122,7 +131,7 @@ class SearchController < ApplicationController
     payload[:metadata] ||= {}
     payload[:metadata]['meta.search.group_id'] = params[:group_id]
     payload[:metadata]['meta.search.project_id'] = params[:project_id]
-    payload[:metadata]['meta.search.scope'] = params[:scope]
+    payload[:metadata]['meta.search.scope'] = params[:scope] || @scope
     payload[:metadata]['meta.search.filters.confidential'] = params[:confidential]
     payload[:metadata]['meta.search.filters.state'] = params[:state]
     payload[:metadata]['meta.search.force_search_results'] = params[:force_search_results]

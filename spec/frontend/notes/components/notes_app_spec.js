@@ -1,18 +1,18 @@
-import $ from 'jquery';
-import AxiosMockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
 import { mount, shallowMount } from '@vue/test-utils';
+import AxiosMockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
+import Vue from 'vue';
 import { setTestTimeout } from 'helpers/timeout';
 import axios from '~/lib/utils/axios_utils';
-import NotesApp from '~/notes/components/notes_app.vue';
+import * as urlUtility from '~/lib/utils/url_utility';
 import CommentForm from '~/notes/components/comment_form.vue';
-import createStore from '~/notes/stores';
+import NotesApp from '~/notes/components/notes_app.vue';
 import * as constants from '~/notes/constants';
+import createStore from '~/notes/stores';
 import '~/behaviors/markdown/render_gfm';
 // TODO: use generated fixture (https://gitlab.com/gitlab-org/gitlab-foss/issues/62491)
-import * as mockData from '../mock_data';
-import * as urlUtility from '~/lib/utils/url_utility';
 import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
+import * as mockData from '../mock_data';
 
 jest.mock('~/user_popovers', () => jest.fn());
 
@@ -33,19 +33,21 @@ describe('note_app', () => {
   let wrapper;
   let store;
 
+  const findCommentButton = () => wrapper.find('[data-testid="comment-button"]');
+
   const getComponentOrder = () => {
     return wrapper
       .findAll('#notes-list,.js-comment-form')
-      .wrappers.map(node => (node.is(CommentForm) ? TYPE_COMMENT_FORM : TYPE_NOTES_LIST));
+      .wrappers.map((node) => (node.is(CommentForm) ? TYPE_COMMENT_FORM : TYPE_NOTES_LIST));
   };
 
   /**
    * waits for fetchNotes() to complete
    */
   const waitForDiscussionsRequest = () =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       const { vm } = wrapper.find(NotesApp);
-      const unwatch = vm.$watch('isFetching', isFetching => {
+      const unwatch = vm.$watch('isFetching', (isFetching) => {
         if (isFetching) {
           return;
         }
@@ -137,14 +139,14 @@ describe('note_app', () => {
     });
 
     it('should render form', () => {
-      expect(wrapper.find('.js-main-target-form').name()).toEqual('form');
+      expect(wrapper.find('.js-main-target-form').element.tagName).toBe('FORM');
       expect(wrapper.find('.js-main-target-form textarea').attributes('placeholder')).toEqual(
         'Write a comment or drag your files here…',
       );
     });
 
     it('should render form comment button as disabled', () => {
-      expect(wrapper.find('.js-note-new-discussion').attributes('disabled')).toEqual('disabled');
+      expect(findCommentButton().props('disabled')).toEqual(true);
     });
 
     it('updates discussions badge', () => {
@@ -202,7 +204,7 @@ describe('note_app', () => {
     });
 
     it('should render form', () => {
-      expect(wrapper.find('.js-main-target-form').name()).toEqual('form');
+      expect(wrapper.find('.js-main-target-form').element.tagName).toBe('FORM');
       expect(wrapper.find('.js-main-target-form textarea').attributes('placeholder')).toEqual(
         'Write a comment or drag your files here…',
       );

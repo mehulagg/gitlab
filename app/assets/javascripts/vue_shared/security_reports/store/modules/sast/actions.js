@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { fetchDiffData } from '../../utils';
+import * as types from './mutation_types';
 
 export const setDiffEndpoint = ({ commit }, path) => commit(types.SET_DIFF_ENDPOINT, path);
 
@@ -15,7 +15,7 @@ export const fetchDiff = ({ state, rootState, dispatch }) => {
   dispatch('requestDiff');
 
   return fetchDiffData(rootState, state.paths.diffEndpoint, 'sast')
-    .then(data => {
+    .then((data) => {
       dispatch('receiveDiffSuccess', data);
     })
     .catch(() => {

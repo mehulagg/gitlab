@@ -1,5 +1,5 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TerminalSession from '~/ide/components/terminal/session.vue';
 import Terminal from '~/ide/components/terminal/terminal.vue';
@@ -67,7 +67,7 @@ describe('IDE TerminalSession', () => {
     });
   });
 
-  [STARTING, PENDING, RUNNING].forEach(status => {
+  [STARTING, PENDING, RUNNING].forEach((status) => {
     it(`show stop button when status is ${status}`, () => {
       state.session = { status };
       factory();
@@ -82,7 +82,7 @@ describe('IDE TerminalSession', () => {
     });
   });
 
-  [STOPPING, STOPPED].forEach(status => {
+  [STOPPING, STOPPED].forEach((status) => {
     it(`show stop button when status is ${status}`, () => {
       state.session = { status };
       factory();

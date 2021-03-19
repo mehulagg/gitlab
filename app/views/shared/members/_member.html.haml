@@ -107,7 +107,7 @@
         - if member.can_approve?
           = link_to polymorphic_path([:approve_access_request, member]),
                     method: :post,
-                    class: "btn btn-success btn-icon gl-button align-self-center m-0 mb-2 #{'mb-sm-0 ml-sm-2' unless force_mobile_view}",
+                    class: "btn btn-confirm btn-icon gl-button align-self-center m-0 mb-2 #{'mb-sm-0 ml-sm-2' unless force_mobile_view}",
                     title: _('Grant access') do
             %span{ class: ('d-block d-sm-none' unless force_mobile_view) }
               = _('Grant access')
@@ -127,8 +127,5 @@
                 = _("Delete")
               - unless force_mobile_view
                 = sprite_icon('remove', css_class: 'd-none d-sm-block gl-icon')
-        = render_if_exists 'shared/members/ee/override_member_buttons', group: group, member: member, user: user, action: :edit, can_override: member.can_override?
       - else
         %span.member-access-text.user-access-role= member.human_access
-
-= render_if_exists 'shared/members/ee/override_member_buttons', group: group, member: member, user: user, action: :confirm, can_override: member.can_override?

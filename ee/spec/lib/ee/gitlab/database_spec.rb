@@ -37,7 +37,7 @@ RSpec.describe Gitlab::Database do
 
     context 'in maintenance mode' do
       before do
-        stub_application_setting(maintenance_mode: true)
+        stub_maintenance_mode_setting(true)
       end
 
       it 'returns true' do

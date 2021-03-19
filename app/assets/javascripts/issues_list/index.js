@@ -1,12 +1,13 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import IssuesListApp from '~/issues_list/components/issues_list_app.vue';
 import createDefaultClient from '~/lib/graphql';
-import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import JiraIssuesListRoot from './components/jira_issues_list_root.vue';
+import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_utils';
 import IssuablesListApp from './components/issuables_list_app.vue';
+import JiraIssuesImportStatusRoot from './components/jira_issues_import_status_app.vue';
 
 function mountJiraIssuesListApp() {
-  const el = document.querySelector('.js-projects-issues-root');
+  const el = document.querySelector('.js-jira-issues-import-status');
 
   if (!el) {
     return false;
@@ -23,7 +24,7 @@ function mountJiraIssuesListApp() {
     el,
     apolloProvider,
     render(createComponent) {
-      return createComponent(JiraIssuesListRoot, {
+      return createComponent(JiraIssuesImportStatusRoot, {
         props: {
           canEdit: parseBoolean(el.dataset.canEdit),
           isJiraConfigured: parseBoolean(el.dataset.isJiraConfigured),
@@ -36,11 +37,11 @@ function mountJiraIssuesListApp() {
 }
 
 function mountIssuablesListApp() {
-  if (!gon.features?.vueIssuablesList && !gon.features?.jiraIssuesIntegration) {
+  if (!gon.features?.vueIssuablesList) {
     return;
   }
 
-  document.querySelectorAll('.js-issuables-list').forEach(el => {
+  document.querySelectorAll('.js-issuables-list').forEach((el) => {
     const { canBulkEdit, emptyStateMeta = {}, scopedLabelsAvailable, ...data } = el.dataset;
 
     return new Vue({
@@ -61,6 +62,39 @@ function mountIssuablesListApp() {
         });
       },
     });
+  });
+}
+
+export function initIssuesListApp() {
+  const el = document.querySelector('.js-issues-list');
+
+  if (!el) {
+    return false;
+  }
+
+  const {
+    endpoint,
+    fullPath,
+    hasBlockedIssuesFeature,
+    hasIssuableHealthStatusFeature,
+    hasIssueWeightsFeature,
+    issuesPath,
+  } = el.dataset;
+
+  return new Vue({
+    el,
+    // Currently does not use Vue Apollo, but need to provide {} for now until the
+    // issue is fixed upstream in https://github.com/vuejs/vue-apollo/pull/1153
+    apolloProvider: {},
+    provide: {
+      endpoint,
+      fullPath,
+      hasBlockedIssuesFeature: parseBoolean(hasBlockedIssuesFeature),
+      hasIssuableHealthStatusFeature: parseBoolean(hasIssuableHealthStatusFeature),
+      hasIssueWeightsFeature: parseBoolean(hasIssueWeightsFeature),
+      issuesPath,
+    },
+    render: (createComponent) => createComponent(IssuesListApp),
   });
 }
 

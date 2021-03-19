@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { mockAssigneesList } from 'jest/boards/mock_data';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import IssueAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
 const TEST_CSS_CLASSES = 'test-classes';
 const TEST_MAX_VISIBLE = 4;
@@ -11,7 +11,7 @@ describe('IssueAssigneesComponent', () => {
   let wrapper;
   let vm;
 
-  const factory = props => {
+  const factory = (props) => {
     wrapper = shallowMount(IssueAssignees, {
       propsData: {
         assignees: mockAssigneesList,
@@ -99,11 +99,11 @@ describe('IssueAssigneesComponent', () => {
     });
 
     it('renders assignee', () => {
-      const data = findAvatars().wrappers.map(x => ({
+      const data = findAvatars().wrappers.map((x) => ({
         ...x.props(),
       }));
 
-      const expected = mockAssigneesList.slice(0, TEST_MAX_VISIBLE - 1).map(x =>
+      const expected = mockAssigneesList.slice(0, TEST_MAX_VISIBLE - 1).map((x) =>
         expect.objectContaining({
           linkHref: x.web_url,
           imgAlt: `Avatar for ${x.name}`,

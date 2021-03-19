@@ -1,8 +1,8 @@
-import MockAdapter from 'axios-mock-adapter';
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlButton, GlSearchBoxByType } from '@gitlab/ui';
-import { TEST_HOST } from 'spec/test_constants';
+import { shallowMount } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
+import { TEST_HOST } from 'spec/test_constants';
 import EnvironmentsDropdown from '~/feature_flags/components/environments_dropdown.vue';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -11,7 +11,7 @@ describe('Feature flags > Environments dropdown ', () => {
   let wrapper;
   let mock;
   const results = ['production', 'staging'];
-  const factory = props => {
+  const factory = (props) => {
     wrapper = shallowMount(EnvironmentsDropdown, {
       propsData: {
         ...props,
@@ -100,7 +100,7 @@ describe('Feature flags > Environments dropdown ', () => {
         it('emits event when a suggestion is clicked', async () => {
           const button = wrapper
             .findAll(GlButton)
-            .filter(b => b.text() === 'production')
+            .filter((b) => b.text() === 'production')
             .at(0);
           button.vm.$emit('click');
           await wrapper.vm.$nextTick();

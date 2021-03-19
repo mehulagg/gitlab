@@ -10,8 +10,8 @@ RSpec.describe PipelineDetailsEntity do
     described_class.represent(pipeline, request: request)
   end
 
-  it 'inherrits from PipelineEntity' do
-    expect(described_class).to be < PipelineEntity
+  it 'inherits from PipelineEntity' do
+    expect(described_class).to be < Ci::PipelineEntity
   end
 
   before do
@@ -184,25 +184,6 @@ RSpec.describe PipelineDetailsEntity do
       end
     end
 
-    context 'when a pipeline belongs to a public project' do
-      let(:project) { create(:project, :public) }
-      let(:pipeline) { create(:ci_empty_pipeline, status: :success, project: project) }
-
-      context 'that has artifacts' do
-        let!(:build) { create(:ci_build, :success, :artifacts, pipeline: pipeline) }
-
-        it 'contains information about artifacts' do
-          expect(subject[:details][:artifacts].length).to eq(1)
-        end
-      end
-
-      context 'that has non public artifacts' do
-        let!(:build) { create(:ci_build, :success, :artifacts, :non_public_artifacts, pipeline: pipeline) }
-
-        it 'does not contain information about artifacts' do
-          expect(subject[:details][:artifacts].length).to eq(0)
-        end
-      end
-    end
+    it_behaves_like 'public artifacts'
   end
 end

@@ -1,6 +1,6 @@
+import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import { shallowMount } from '@vue/test-utils';
 import timezoneMock from 'timezone-mock';
-import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import ColumnChart from '~/monitoring/components/charts/column.vue';
 
 jest.mock('~/lib/utils/icon_utils', () => ({
@@ -45,7 +45,7 @@ describe('Column component', () => {
     });
   };
   const findChart = () => wrapper.find(GlColumnChart);
-  const chartProps = prop => findChart().props(prop);
+  const chartProps = (prop) => findChart().props(prop);
 
   beforeEach(() => {
     createWrapper();
@@ -58,7 +58,7 @@ describe('Column component', () => {
   describe('xAxisLabel', () => {
     const mockDate = Date.UTC(2020, 4, 26, 20); // 8:00 PM in GMT
 
-    const useXAxisFormatter = date => {
+    const useXAxisFormatter = (date) => {
       const { xAxis } = chartProps('option');
       const { formatter } = xAxis.axisLabel;
       return formatter(date);

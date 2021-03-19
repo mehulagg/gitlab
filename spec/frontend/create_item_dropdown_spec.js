@@ -20,8 +20,6 @@ const DROPDOWN_ITEM_DATA = [
 ];
 
 describe('CreateItemDropdown', () => {
-  preloadFixtures('static/create_item_dropdown.html');
-
   let $wrapperEl;
   let createItemDropdown;
 
@@ -162,7 +160,7 @@ describe('CreateItemDropdown', () => {
         getData: (term, callback) => {
           callback(DROPDOWN_ITEM_DATA);
         },
-        createNewItemFromValue: newValue => ({
+        createNewItemFromValue: (newValue) => ({
           title: `${newValue}-title`,
           id: `${newValue}-id`,
           text: `${newValue}-text`,

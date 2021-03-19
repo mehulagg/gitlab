@@ -26,6 +26,7 @@ module API
       %i[
         assignee_id
         assignee_ids
+        reviewer_ids
         description
         labels
         add_labels
@@ -160,7 +161,8 @@ module API
       helpers do
         params :optional_params do
           optional :assignee_id, type: Integer, desc: 'The ID of a user to assign the merge request'
-          optional :assignee_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The array of user IDs to assign issue'
+          optional :assignee_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Comma-separated list of assignee ids'
+          optional :reviewer_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Comma-separated list of reviewer ids'
           optional :description, type: String, desc: 'The description of the merge request'
           optional :labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
           optional :add_labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
@@ -205,7 +207,7 @@ module API
         use :optional_params
       end
       post ":id/merge_requests" do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42316')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42316')
 
         authorize! :create_merge_request_from, user_project
 
@@ -246,6 +248,8 @@ module API
         success Entities::MergeRequest
       end
       get ':id/merge_requests/:merge_request_iid' do
+        not_found!("Merge Request") unless can?(current_user, :read_merge_request, user_project)
+
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
 
         present merge_request,
@@ -262,7 +266,10 @@ module API
         success Entities::UserBasic
       end
       get ':id/merge_requests/:merge_request_iid/participants' do
+        not_found!("Merge Request") unless can?(current_user, :read_merge_request, user_project)
+
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
+
         participants = ::Kaminari.paginate_array(merge_request.participants)
 
         present paginate(participants), with: Entities::UserBasic
@@ -272,6 +279,8 @@ module API
         success Entities::Commit
       end
       get ':id/merge_requests/:merge_request_iid/commits' do
+        not_found!("Merge Request") unless can?(current_user, :read_merge_request, user_project)
+
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
 
         commits =
@@ -353,13 +362,15 @@ module API
         success Entities::MergeRequestChanges
       end
       get ':id/merge_requests/:merge_request_iid/changes' do
+        not_found!("Merge Request") unless can?(current_user, :read_merge_request, user_project)
+
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
 
         present merge_request,
           with: Entities::MergeRequestChanges,
           current_user: current_user,
           project: user_project,
-          access_raw_diffs: params.fetch(:access_raw_diffs, false)
+          access_raw_diffs: to_boolean(params.fetch(:access_raw_diffs, false))
       end
 
       desc 'Get the merge request pipelines' do
@@ -367,6 +378,8 @@ module API
       end
       get ':id/merge_requests/:merge_request_iid/pipelines' do
         pipelines = merge_request_pipelines_with_access
+
+        not_found!("Merge Request") unless can?(current_user, :read_merge_request, user_project)
 
         present paginate(pipelines), with: Entities::Ci::PipelineBasic
       end
@@ -403,7 +416,7 @@ module API
         at_least_one_of(*::API::MergeRequests.update_params_at_least_one_of)
       end
       put ':id/merge_requests/:merge_request_iid' do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42318')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42318')
 
         merge_request = find_merge_request_with_access(params.delete(:merge_request_iid), :update_merge_request)
 
@@ -432,7 +445,7 @@ module API
         optional :squash, type: Grape::API::Boolean, desc: 'When true, the commits will be squashed into a single commit on merge'
       end
       put ':id/merge_requests/:merge_request_iid/merge' do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42317')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42317')
 
         merge_request = find_project_merge_request(params[:merge_request_iid])
 

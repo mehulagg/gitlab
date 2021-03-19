@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import { parseBoolean } from '~/lib/utils/common_utils';
 import ThreatMonitoringApp from './components/app.vue';
 import createStore from './store';
 
@@ -18,7 +17,6 @@ export default () => {
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
     networkPoliciesEndpoint,
-    chartEmptyStateSvgPath,
     emptyStateSvgPath,
     wafNoDataSvgPath,
     networkPolicyNoDataSvgPath,
@@ -26,9 +24,6 @@ export default () => {
     documentationPath,
     defaultEnvironmentId,
     projectPath,
-    showUserCallout,
-    userCalloutId,
-    userCalloutsPath,
   } = el.dataset;
 
   const store = createStore();
@@ -46,20 +41,16 @@ export default () => {
     el,
     provide: {
       documentationPath,
+      emptyStateSvgPath,
       projectPath,
     },
     store,
     render(createElement) {
       return createElement(ThreatMonitoringApp, {
         props: {
-          chartEmptyStateSvgPath,
-          emptyStateSvgPath,
           wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
           defaultEnvironmentId: parseInt(defaultEnvironmentId, 10),
-          showUserCallout: parseBoolean(showUserCallout),
-          userCalloutId,
-          userCalloutsPath,
           newPolicyPath,
         },
       });

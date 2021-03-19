@@ -2,11 +2,9 @@ import $ from 'jquery';
 import preserveUrlFragment from '~/pages/sessions/new/preserve_url_fragment';
 
 describe('preserve_url_fragment', () => {
-  const findFormAction = selector => {
+  const findFormAction = (selector) => {
     return $(`.omniauth-container ${selector}`).parent('form').attr('action');
   };
-
-  preloadFixtures('sessions/new.html');
 
   beforeEach(() => {
     loadFixtures('sessions/new.html');

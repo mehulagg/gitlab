@@ -21,7 +21,7 @@ RSpec.describe Gitlab::IssuableMetadata do
       create(:issue_link, source: blocking_issue_1, target: blocked_issue_1, link_type: IssueLink::TYPE_BLOCKS)
       create(:issue_link, source: blocking_issue_2, target: blocked_issue_2, link_type: IssueLink::TYPE_BLOCKS)
       create(:issue_link, source: blocking_issue_1, target: closed_blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
-      create(:issue_link, source: blocked_issue_3, target: blocking_issue_1, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+      create(:issue_link, source: blocking_issue_1, target: blocked_issue_3, link_type: IssueLink::TYPE_BLOCKS)
     end
 
     it 'aggregates stats on issues' do

@@ -1,5 +1,5 @@
-import getters from '~/boards/stores/getters';
 import { inactiveId } from '~/boards/constants';
+import getters from '~/boards/stores/getters';
 import {
   mockIssue,
   mockIssue2,
@@ -7,9 +7,47 @@ import {
   mockIssuesByListId,
   issues,
   mockLists,
+  mockGroupProject1,
+  mockArchivedGroupProject,
 } from '../mock_data';
 
 describe('Boards - Getters', () => {
+  describe('isGroupBoard', () => {
+    it('returns true when boardType on state is group', () => {
+      const state = {
+        boardType: 'group',
+      };
+
+      expect(getters.isGroupBoard(state)).toBe(true);
+    });
+
+    it('returns false when boardType on state is not group', () => {
+      const state = {
+        boardType: 'project',
+      };
+
+      expect(getters.isGroupBoard(state)).toBe(false);
+    });
+  });
+
+  describe('isProjectBoard', () => {
+    it('returns true when boardType on state is project', () => {
+      const state = {
+        boardType: 'project',
+      };
+
+      expect(getters.isProjectBoard(state)).toBe(true);
+    });
+
+    it('returns false when boardType on state is not project', () => {
+      const state = {
+        boardType: 'group',
+      };
+
+      expect(getters.isProjectBoard(state)).toBe(false);
+    });
+  });
+
   describe('isSidebarOpen', () => {
     it('returns true when activeId is not equal to 0', () => {
       const state = {
@@ -38,15 +76,15 @@ describe('Boards - Getters', () => {
     });
   });
 
-  describe('getIssueById', () => {
-    const state = { issues: { 1: 'issue' } };
+  describe('getBoardItemById', () => {
+    const state = { boardItems: { 1: 'issue' } };
 
     it.each`
       id     | expected
       ${'1'} | ${'issue'}
       ${''}  | ${{}}
     `('returns $expected when $id is passed to state', ({ id, expected }) => {
-      expect(getters.getIssueById(state)(id)).toEqual(expected);
+      expect(getters.getBoardItemById(state)(id)).toEqual(expected);
     });
   });
 
@@ -56,9 +94,25 @@ describe('Boards - Getters', () => {
       ${'1'} | ${'issue'}
       ${''}  | ${{}}
     `('returns $expected when $id is passed to state', ({ id, expected }) => {
-      const state = { issues: { 1: 'issue' }, activeId: id };
+      const state = { boardItems: { 1: 'issue' }, activeId: id };
 
       expect(getters.activeIssue(state)).toEqual(expected);
+    });
+  });
+
+  describe('groupPathByIssueId', () => {
+    it('returns group path for the active issue', () => {
+      const mockActiveIssue = {
+        referencePath: 'gitlab-org/gitlab-test#1',
+      };
+      expect(getters.groupPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual(
+        'gitlab-org',
+      );
+    });
+
+    it('returns empty string as group path when active issue is an empty object', () => {
+      const mockActiveIssue = {};
+      expect(getters.groupPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual('');
     });
   });
 
@@ -72,23 +126,24 @@ describe('Boards - Getters', () => {
       );
     });
 
-    it('returns empty string as project when active issue is an empty object', () => {
+    it('returns empty string as project path when active issue is an empty object', () => {
       const mockActiveIssue = {};
       expect(getters.projectPathForActiveIssue({}, { activeIssue: mockActiveIssue })).toEqual('');
     });
   });
 
-  describe('getIssuesByList', () => {
+  describe('getBoardItemsByList', () => {
     const boardsState = {
-      issuesByListId: mockIssuesByListId,
-      issues,
+      boardItemsByListId: mockIssuesByListId,
+      boardItems: issues,
     };
     it('returns issues for a given listId', () => {
-      const getIssueById = issueId => [mockIssue, mockIssue2].find(({ id }) => id === issueId);
+      const getBoardItemById = (issueId) =>
+        [mockIssue, mockIssue2].find(({ id }) => id === issueId);
 
-      expect(getters.getIssuesByList(boardsState, { getIssueById })('gid://gitlab/List/2')).toEqual(
-        mockIssues,
-      );
+      expect(
+        getters.getBoardItemsByList(boardsState, { getBoardItemById })('gid://gitlab/List/2'),
+      ).toEqual(mockIssues);
     });
   });
 
@@ -110,6 +165,16 @@ describe('Boards - Getters', () => {
   describe('getListByTitle', () => {
     it('returns list for a given list title', () => {
       expect(getters.getListByTitle(boardsState)('To Do')).toEqual(mockLists[1]);
+    });
+  });
+
+  describe('activeGroupProjects', () => {
+    const state = {
+      groupProjects: [mockGroupProject1, mockArchivedGroupProject],
+    };
+
+    it('returns only returns non-archived group projects', () => {
+      expect(getters.activeGroupProjects(state)).toEqual([mockGroupProject1]);
     });
   });
 });

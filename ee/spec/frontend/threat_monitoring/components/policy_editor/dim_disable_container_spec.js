@@ -26,19 +26,19 @@ describe('DimDisableContainer component', () => {
   });
 
   it('renders title slot component', () => {
-    expect(wrapper.contains('h1')).toBe(true);
+    expect(wrapper.find('h1').exists()).toBe(true);
   });
 
   it('renders default slot component', () => {
-    expect(wrapper.contains('main')).toBe(true);
+    expect(wrapper.find('main').exists()).toBe(true);
   });
 
   it('does not render disabled slot component', () => {
-    expect(wrapper.contains('span')).toBe(false);
+    expect(wrapper.find('span').exists()).toBe(false);
   });
 
   it('does not render dim overlay', () => {
-    expect(wrapper.contains("[data-testid='overlay']")).toBe(false);
+    expect(wrapper.find("[data-testid='overlay']").exists()).toBe(false);
   });
 
   describe('give disabled is true', () => {
@@ -51,19 +51,19 @@ describe('DimDisableContainer component', () => {
     });
 
     it('renders title slot component', () => {
-      expect(wrapper.contains('h1')).toBe(true);
+      expect(wrapper.find('h1').exists()).toBe(true);
     });
 
     it('does not render default slot component', () => {
-      expect(wrapper.contains('main')).toBe(false);
+      expect(wrapper.find('main').exists()).toBe(false);
     });
 
     it('renders disabled slot component', () => {
-      expect(wrapper.contains('span')).toBe(true);
+      expect(wrapper.find('span').exists()).toBe(true);
     });
 
     it('renders dim overlay', () => {
-      expect(wrapper.contains("[data-testid='overlay']")).toBe(true);
+      expect(wrapper.find("[data-testid='overlay']").exists()).toBe(true);
     });
   });
 });

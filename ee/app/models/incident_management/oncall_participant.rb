@@ -18,16 +18,10 @@ module IncidentManagement
     validates :color_palette, presence: true
     validates :color_weight, presence: true
     validates :user, presence: true, uniqueness: { scope: :oncall_rotation_id }
-    validate  :user_can_read_project, if: :user, on: :create
 
     delegate :project, to: :rotation, allow_nil: true
 
-    private
-
-    def user_can_read_project
-      unless user.can?(:read_project, project)
-        errors.add(:user, 'does not have access to the project')
-      end
-    end
+    scope :not_removed, -> { where(is_removed: false) }
+    scope :removed, -> { where(is_removed: true) }
   end
 end
