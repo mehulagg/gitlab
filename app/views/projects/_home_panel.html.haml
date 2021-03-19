@@ -23,7 +23,7 @@
             %span.access-request-links.gl-ml-3
               = render 'shared/members/access_request_links', source: @project
 
-          = cache [@project, :tag_list] do
+          = cache_if Feature.enabled?(:cached_project_topics, type: :ops, default_enabled: :yaml), [@project, :tag_list] do
             - if @project.tag_list.present?
               %span.home-panel-topic-list.mt-2.w-100.d-inline-flex.gl-font-base.gl-font-weight-normal.gl-align-items-center
                 = sprite_icon('tag', css_class: 'icon gl-relative gl-mr-2')
