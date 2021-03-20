@@ -142,7 +142,19 @@ class Packages::Package < ApplicationRecord
   end
 
   def self.only_maven_packages_with_path(path)
-    joins(:maven_metadatum).where(packages_maven_metadata: { path: path })
+    if Feature.enabled?(:maven_metadata_by_path_with_optimization_fence)
+      # This is an optimization fence which assumes that looking up the Metadatum record by path (globally)
+      # and then filter down the packages (by project or by group and subgroups) will be cheaper than
+      # looking up all packages within a project or group and filter them by path.
+
+      inner_query = Packages::Maven::Metadatum.where(path: path).select(:id, :package_id)
+      cte = Gitlab::SQL::CTE.new(:maven_metadata_by_path, inner_query)
+      with(cte.to_arel)
+        .joins('INNER JOIN maven_metadata_by_path ON maven_metadata_by_path.package_id=packages_packages.id')
+
+    else
+      joins(:maven_metadatum).where(packages_maven_metadata: { path: path })
+    end
   end
 
   def self.by_name_and_file_name(name, file_name)
