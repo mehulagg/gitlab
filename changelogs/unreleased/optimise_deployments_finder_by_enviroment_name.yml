@@ -1,0 +1,5 @@
+---
+title: Optimise query for DeploymentsFinder by environment name
+merge_request: 57043
+author:
+type: performance

@@ -68,7 +68,8 @@ class DeploymentsFinder
 
   def by_environment(items)
     if params[:environment].present?
-      items.for_environment_name(params[:environment])
+      environment = params[:project].environments.for_name(params[:environment])
+      items.for_environment(environment)
     else
       items
     end
