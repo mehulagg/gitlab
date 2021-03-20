@@ -424,6 +424,27 @@ echo 'unixsocket /var/run/redis/redis.sock' | sudo tee -a /etc/redis/redis.conf
 # Grant permission to the socket to all members of the redis group
 echo 'unixsocketperm 770' | sudo tee -a /etc/redis/redis.conf
 
+# Add git to the redis group
+sudo usermod -aG redis git
+
+## If you use systemd
+# Configure Redis to not daemonize, but be supervised by systemd instead and disable the pidfile
+sed -e 's/^daemonize yes$/daemonize no/' \
+    -e 's/^supervised no$/supervided systemd/' \
+    -e 's/^pidfile/# pidfile/' /etc/redis/redis.conf | sudo tee /etc/redis/redis.conf
+
+# Make the same changes to the systemd unit file
+mkdir -p /etc/systemd/system/redis-server.service.d
+sudo cat > /etc/systemd/system/redis-server.service.d/10fix_type.conf <<EOF
+[Service]
+Type=notify
+PIDFile=
+EOF
+
+# Activate the changes to redis.conf
+sudo systemctl restart redis-server.service
+
+## If you use SysV init
 # Create the directory which contains the socket
 sudo mkdir -p /var/run/redis
 sudo chown redis:redis /var/run/redis
@@ -436,9 +457,6 @@ fi
 
 # Activate the changes to redis.conf
 sudo service redis-server restart
-
-# Add git to the redis group
-sudo usermod -aG redis git
 ```
 
 ## 8. GitLab
