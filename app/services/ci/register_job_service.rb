@@ -278,7 +278,8 @@ module Ci
       # Workaround for weird Rails bug, that makes `runner.groups.to_sql` to return `runner_id = NULL`
       groups = ::Group.joins(:runner_namespaces).merge(runner.runner_namespaces)
 
-      hierarchy_groups = Gitlab::ObjectHierarchy.new(groups).base_and_descendants
+      hierarchy = Gitlab::ObjectHierarchy.new(groups, options: { use_distinct: Feature.enabled?(:use_distinct_in_object_hierarchy) })
+      hierarchy_groups = hierarchy.base_and_ancestors
       projects = Project.where(namespace_id: hierarchy_groups)
         .with_group_runners_enabled
         .with_builds_enabled
