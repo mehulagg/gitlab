@@ -8,7 +8,7 @@ module API
 
     namespace 'usage_data' do
       before do
-        forbidden!('Invalid CSRF token is provided') unlss verified_request?
+        forbidden!('Invalid CSRF token is provided') unless verified_request?
       end
 
       desc 'Get Non SQL usage ping metrics' do
