@@ -7,9 +7,9 @@ module EE
 
     prepended do
       WEIGHT_RANGE = (0..20).freeze
-      WEIGHT_ALL = 'Everything'.freeze
-      WEIGHT_ANY = 'Any'.freeze
-      WEIGHT_NONE = 'None'.freeze
+      WEIGHT_ALL = 'Everything'
+      WEIGHT_ANY = 'Any'
+      WEIGHT_NONE = 'None'
       ELASTICSEARCH_PERMISSION_TRACKED_FIELDS = %w(assignee_ids author_id confidential).freeze
 
       include Elastic::ApplicationVersionedSearch

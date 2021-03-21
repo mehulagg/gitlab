@@ -14,7 +14,7 @@ class ProductivityAnalytics
   }.freeze
 
   METRIC_TYPES = METRIC_COLUMNS.keys.freeze
-  DEFAULT_TYPE = 'days_to_merge'.freeze
+  DEFAULT_TYPE = 'days_to_merge'
 
   def self.start_date
     ApplicationSetting.current&.productivity_analytics_start_date
