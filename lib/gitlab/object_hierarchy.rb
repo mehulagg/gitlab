@@ -96,7 +96,7 @@ module Gitlab
         base_cte = base_and_descendants_cte(with_depth: true).apply_to(model.all).distinct
 
         if with_depth
-          read_only(model.from(Arel::Nodes::As.new(recursive_query.arel, objects_table)).order(depth: :asc))
+          read_only(model.from(Arel::Nodes::As.new(base_cte.arel, objects_table)).order(depth: :asc))
         else
           read_only(remove_depth_and_maintain_order(base_cte, hierarchy_order: :asc))
         end
@@ -161,7 +161,10 @@ module Gitlab
 
     # Use distinct on the Namespace queries to avoid bad planner behavior in PG11.
     def use_distinct?
-      (model <= Namespace) && options[:use_distinct]
+      return unless model <= Namespace
+      return options[:use_distinct] if options.key?(:use_distinct)
+
+      Feature.enabled?(:use_distinct_in_object_hierarchy)
     end
 
     # Remove the extra `depth` field using an INNER JOIN to avoid breaking UNION queries
