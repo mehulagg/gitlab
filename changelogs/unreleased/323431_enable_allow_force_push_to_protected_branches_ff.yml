@@ -1,0 +1,5 @@
+---
+title: Allow to force push to protected branches by default
+merge_request: 57053
+author:
+type: added

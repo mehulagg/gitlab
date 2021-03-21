@@ -254,7 +254,7 @@ for details about the pipelines security model.
 ## Enable or disable allow force push on protected branches **(FREE SELF)**
 
 Allow force push on protected branches is under development and not ready for
-production use. It is deployed behind a feature flag that is **disabled by default**.
+production use. It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can enable it.
 
