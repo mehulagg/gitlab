@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# To add new service you should build a class inherited from Service
+# To add new integration you should build a class inherited from Integration
 # and implement a set of methods
-class Service < ApplicationRecord
+class Integration < ApplicationRecord
   include Sortable
   include Importable
   include ProjectServicesLoggable
@@ -10,19 +10,22 @@ class Service < ApplicationRecord
   include FromUnion
   include EachBatch
 
-  SERVICE_NAMES = %w[
+  # TODO https://gitlab.com/gitlab-org/gitlab/-/issues/201856
+  self.table_name = 'services'
+
+  INTEGRATION_NAMES = %w[
     asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker datadog discord
     drone_ci emails_on_push ewm external_wiki flowdock hangouts_chat hipchat irker jira
     mattermost mattermost_slash_commands microsoft_teams packagist pipelines_email
     pivotaltracker prometheus pushover redmine slack slack_slash_commands teamcity unify_circuit webex_teams youtrack
   ].freeze
 
-  PROJECT_SPECIFIC_SERVICE_NAMES = %w[
+  PROJECT_SPECIFIC_INTEGRATION_NAMES = %w[
     jenkins
   ].freeze
 
-  # Fake services to help with local development.
-  DEV_SERVICE_NAMES = %w[
+  # Fake integrations to help with local development.
+  DEV_INTEGRATION_NAMES = %w[
     mock_ci mock_monitoring
   ].freeze
 
@@ -47,8 +50,8 @@ class Service < ApplicationRecord
 
   after_commit :reset_updated_properties
 
-  belongs_to :project, inverse_of: :services
-  belongs_to :group, inverse_of: :services
+  belongs_to :project, inverse_of: :integrations
+  belongs_to :group, inverse_of: :integrations
   has_one :service_hook
 
   validates :project_id, presence: true, unless: -> { template? || instance? || group_id }
@@ -164,13 +167,13 @@ class Service < ApplicationRecord
   end
 
   def self.create_nonexistent_templates
-    nonexistent_services = list_nonexistent_services_for(for_template)
-    return if nonexistent_services.empty?
+    nonexistent_integrations = list_nonexistent_services_for(for_template)
+    return if nonexistent_integrations.empty?
 
     # Create within a transaction to perform the lowest possible SQL queries.
     transaction do
-      nonexistent_services.each do |service_type|
-        service_type.constantize.create(template: true)
+      nonexistent_integrations.each do |integration_type|
+        integration_type.constantize.create(template: true)
       end
     end
   end
@@ -186,20 +189,25 @@ class Service < ApplicationRecord
     scope + build_nonexistent_services_for(scope)
   end
 
+  # TODO rename
   def self.build_nonexistent_services_for(scope)
     list_nonexistent_services_for(scope).map do |service_type|
       service_type.constantize.new
     end
   end
+  # TODO rename
   private_class_method :build_nonexistent_services_for
 
+  # TODO rename
   def self.list_nonexistent_services_for(scope)
     # Using #map instead of #pluck to save one query count. This is because
     # ActiveRecord loaded the object here, so we don't need to query again later.
     available_services_types(include_project_specific: false) - scope.map(&:type)
   end
+  # TODO rename
   private_class_method :list_nonexistent_services_for
 
+  # TODO rename
   def self.available_services_names(include_project_specific: true, include_dev: true)
     service_names = services_names
     service_names += project_specific_services_names if include_project_specific
@@ -208,41 +216,45 @@ class Service < ApplicationRecord
     service_names.sort_by(&:downcase)
   end
 
+  # TODO rename
   def self.services_names
-    SERVICE_NAMES
+    INTEGRATION_NAMES
   end
 
+  # TODO rename
   def self.dev_services_names
     return [] unless Rails.env.development?
 
-    DEV_SERVICE_NAMES
+    DEV_INTEGRATION_NAMES
   end
 
+  # TODO rename
   def self.project_specific_services_names
-    PROJECT_SPECIFIC_SERVICE_NAMES
+    PROJECT_SPECIFIC_INTEGRATION_NAMES
   end
 
+  # TODO rename
   def self.available_services_types(include_project_specific: true, include_dev: true)
     available_services_names(include_project_specific: include_project_specific, include_dev: include_dev).map do |service_name|
       "#{service_name}_service".camelize
     end
   end
 
-  def self.build_from_integration(integration, project_id: nil, group_id: nil)
-    service = integration.dup
+  def self.build_from_integration(from_integration, project_id: nil, group_id: nil)
+    integration = from_integration.dup
 
-    if integration.supports_data_fields?
-      data_fields = integration.data_fields.dup
-      data_fields.service = service
+    if from_integration.supports_data_fields?
+      data_fields = from_integration.data_fields.dup
+      data_fields.integration = integration
     end
 
-    service.template = false
-    service.instance = false
-    service.project_id = project_id
-    service.group_id = group_id
-    service.inherit_from_id = integration.id if integration.instance? || integration.group
-    service.active = false if service.invalid?
-    service
+    integration.template = false
+    integration.instance = false
+    integration.project_id = project_id
+    integration.group_id = group_id
+    integration.inherit_from_id = from_integration.id if from_integration.instance? || from_integration.group
+    integration.active = false if integration.invalid?
+    integration
   end
 
   def self.instance_exists_for?(type)
@@ -345,6 +357,7 @@ class Service < ApplicationRecord
     %w[active]
   end
 
+  # TODO rename?
   def to_service_hash
     as_json(methods: :type, except: %w[id template instance project_id group_id])
   end
@@ -407,7 +420,7 @@ class Service < ApplicationRecord
     { success: result.present?, result: result }
   end
 
-  # Disable test for instance-level and group-level services.
+  # Disable test for instance-level and group-level integrations.
   # https://gitlab.com/gitlab-org/gitlab/-/issues/213138
   def can_test?
     !instance? && !group_id
@@ -420,7 +433,7 @@ class Service < ApplicationRecord
   # Returns a hash of the properties that have been assigned a new value since last save,
   # indicating their original values (attr => original value).
   # ActiveRecord does not provide a mechanism to track changes in serialized keys,
-  # so we need a specific implementation for service properties.
+  # so we need a specific implementation for integration properties.
   # This allows to track changes to properties set with the accessor methods,
   # but not direct manipulation of properties hash.
   def updated_properties
@@ -448,10 +461,12 @@ class Service < ApplicationRecord
 
   private
 
+  # TODO change error message?
   def validate_is_instance_or_template
     errors.add(:template, 'The service should be a service template or instance-level integration') if template? && instance?
   end
 
+  # TODO change error message?
   def validate_belongs_to_project_or_group
     errors.add(:project_id, 'The service cannot belong to both a project and a group') if project_id && group_id
   end
@@ -461,4 +476,4 @@ class Service < ApplicationRecord
   end
 end
 
-Service.prepend_if_ee('EE::Service')
+Integration.prepend_if_ee('EE::Integration')

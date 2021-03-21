@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class EmailsOnPushService < Service
+class EmailsOnPushService < Integration
   include NotificationBranchSelection
 
   boolean_accessor :send_from_committer_email

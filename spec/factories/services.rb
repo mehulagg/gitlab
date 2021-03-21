@@ -63,9 +63,9 @@ FactoryBot.define do
       vulnerabilities_issuetype { nil }
     end
 
-    before(:create) do |service, evaluator|
+    before(:create) do |integration, evaluator|
       if evaluator.create_data
-        create(:jira_tracker_data, service: service,
+        create(:jira_tracker_data, integration: integration,
                url: evaluator.url, api_url: evaluator.api_url, jira_issue_transition_id: evaluator.jira_issue_transition_id,
                username: evaluator.username, password: evaluator.password, issues_enabled: evaluator.issues_enabled,
                project_key: evaluator.project_key, vulnerabilities_enabled: evaluator.vulnerabilities_enabled,
@@ -113,9 +113,9 @@ FactoryBot.define do
       new_issue_url { 'http://new-issue.example.com' }
     end
 
-    before(:create) do |service, evaluator|
+    before(:create) do |integration, evaluator|
       if evaluator.create_data
-        create(:issue_tracker_data, service: service,
+        create(:issue_tracker_data, integration: integration,
                project_url: evaluator.project_url, issues_url: evaluator.issues_url, new_issue_url: evaluator.new_issue_url
         )
       end
@@ -141,8 +141,8 @@ FactoryBot.define do
       project_identifier_code { 'PRJ-1' }
     end
 
-    before(:create) do |service, evaluator|
-      create(:open_project_tracker_data, service: service,
+    before(:create) do |integration, evaluator|
+      create(:open_project_tracker_data, integration: integration,
         url: evaluator.url, api_url: evaluator.api_url, token: evaluator.token,
         closed_status_id: evaluator.closed_status_id, project_identifier_code: evaluator.project_identifier_code
       )

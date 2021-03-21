@@ -2,7 +2,7 @@
 
 require 'asana'
 
-class AsanaService < Service
+class AsanaService < Integration
   prop_accessor :api_key, :restrict_to_branch
   validates :api_key, presence: true, if: :activated?
 

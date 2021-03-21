@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class FlowdockService < Service
+class FlowdockService < Integration
   prop_accessor :token
   validates :token, presence: true, if: :activated?
 

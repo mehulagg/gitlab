@@ -1,29 +1,26 @@
 # frozen_string_literal: true
 
 module EE
-  module Service
+  module Integration
     extend ActiveSupport::Concern
 
-    EE_COM_PROJECT_SPECIFIC_SERVICE_NAMES = %w[
+    EE_COM_PROJECT_SPECIFIC_INTEGRATION_NAMES = %w[
       gitlab_slack_application
     ].freeze
 
-    EE_PROJECT_SPECIFIC_SERVICE_NAMES = %w[
+    EE_PROJECT_SPECIFIC_INTEGRATION_NAMES = %w[
       github
     ].freeze
 
     class_methods do
       extend ::Gitlab::Utils::Override
 
+      # TODO rename
       override :project_specific_services_names
       def project_specific_services_names
-        services = super + EE_PROJECT_SPECIFIC_SERVICE_NAMES
-
-        if ::Gitlab.com?
-          services + EE_COM_PROJECT_SPECIFIC_SERVICE_NAMES
-        else
-          services
-        end
+        integrations = super + EE_PROJECT_SPECIFIC_INTEGRATION_NAMES
+        integrations + EE_COM_PROJECT_SPECIFIC_INTEGRATION_NAMES if ::Gitlab.com?
+        integrations
       end
     end
   end

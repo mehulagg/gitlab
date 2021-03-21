@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class HipchatService < Service
+class HipchatService < Integration
   include ActionView::Helpers::SanitizeHelper
 
   MAX_COMMITS = 3

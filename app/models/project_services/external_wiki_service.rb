@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ExternalWikiService < Service
+class ExternalWikiService < Integration
   prop_accessor :external_wiki_url
 
   validates :external_wiki_url, presence: true, public_url: true, if: :activated?

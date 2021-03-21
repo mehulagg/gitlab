@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssueTrackerService < Service
+class IssueTrackerService < Integration
   validate :one_issue_tracker, if: :activated?, on: :manual_change
 
   # TODO: we can probably just delegate as part of
