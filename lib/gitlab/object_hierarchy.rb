@@ -68,12 +68,14 @@ module Gitlab
         expose_depth = hierarchy_order.present?
         hierarchy_order ||= :asc
 
-        recursive_query = base_and_ancestors_cte(upto, hierarchy_order).apply_to(model.all).distinct
-
         # if hierarchy_order is given, the calculated `depth` should be present in SELECT
         if expose_depth
+          recursive_query = base_and_ancestors_cte(upto, hierarchy_order).apply_to(model.all).distinct
           read_only(model.from(Arel::Nodes::As.new(recursive_query.arel, objects_table)).order(depth: hierarchy_order))
         else
+          recursive_query = base_and_ancestors_cte(upto).apply_to(model.all)
+          recursive_query = recursive_query.reselect(*recursive_query.arel.projections, 'ROW_NUMBER() OVER () as depth').distinct
+          recursive_query = model.from(Arel::Nodes::As.new(recursive_query.arel, objects_table))
           read_only(remove_depth_and_maintain_order(recursive_query, hierarchy_order: hierarchy_order))
         end
       else
@@ -93,11 +95,13 @@ module Gitlab
     def base_and_descendants(with_depth: false)
       if use_distinct?
         # Always calculate `depth`, remove it later if with_depth is false
-        base_cte = base_and_descendants_cte(with_depth: true).apply_to(model.all).distinct
-
         if with_depth
+          base_cte = base_and_descendants_cte(with_depth: true).apply_to(model.all).distinct
           read_only(model.from(Arel::Nodes::As.new(base_cte.arel, objects_table)).order(depth: :asc))
         else
+          base_cte = base_and_descendants_cte.apply_to(model.all)
+          base_cte = base_cte.reselect(*base_cte.arel.projections, 'ROW_NUMBER() OVER () as depth').distinct
+          base_cte = model.from(Arel::Nodes::As.new(base_cte.arel, objects_table))
           read_only(remove_depth_and_maintain_order(base_cte, hierarchy_order: :asc))
         end
       else
