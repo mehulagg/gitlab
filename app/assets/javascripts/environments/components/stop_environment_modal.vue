@@ -72,7 +72,7 @@ export default {
       <p>
         <gl-sprintf
           :message="
-            s__(`Environments|Note that this action will stop the environment,
+            s__(`Environments|Note that thi action will stop the environment,
         but it will %{emphasisStart}not%{emphasisEnd} have an effect on any existing deployment
         due to no “stop environment action” being defined
         in the %{ciConfigLinkStart}.gitlab-ci.yml%{ciConfigLinkEnd} file.`)
