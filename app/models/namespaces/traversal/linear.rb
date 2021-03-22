@@ -45,6 +45,7 @@ module Namespaces
         after_update :sync_traversal_ids, if: -> { sync_traversal_ids? && saved_change_to_parent_id? }
 
         scope :traversal_ids_contains, ->(ids) { where("traversal_ids @> (?)", ids) }
+        scope :traversal_ids_contained_by, ->(ids) { where("traversal_ids <@ (?)", ids) }
       end
 
       def sync_traversal_ids?
@@ -56,11 +57,15 @@ module Namespaces
       end
 
       def self_and_descendants
-        if use_traversal_ids?
-          lineage(self)
-        else
-          super
-        end
+        return super unless use_traversal_ids?
+
+        lineage(top: self)
+      end
+
+      def ancestors
+        return super unless use_traversal_ids?
+
+        lineage(bottom: latest_parent_id)
       end
 
       private
@@ -82,11 +87,20 @@ module Namespaces
       end
 
       # Search this namespace's lineage. Bound inclusively by top node.
-      def lineage(top)
-        raise UnboundedSearch.new('Must bound search by a top') unless top
+      def lineage(top: nil, bottom: nil)
+        raise UnboundedSearch.new('Must bound search by a top') unless top || bottom
 
-        without_sti_condition
-          .traversal_ids_contains(latest_traversal_ids(top))
+        skope = without_sti_condition
+
+        if top
+          skope = skope.traversal_ids_contains(latest_traversal_ids(top))
+        end
+
+        if bottom
+          skope = skope.traversal_ids_contained_by(latest_traversal_ids(bottom))
+        end
+
+        skope
       end
 
       # traversal_ids are a cached value.
@@ -102,6 +116,10 @@ module Namespaces
       def latest_traversal_ids(namespace = self)
         without_sti_condition.where('id = (?)', namespace)
                 .select('traversal_ids as latest_traversal_ids')
+      end
+
+      def latest_parent_id(namespace = self)
+        without_sti_condition.where(id: namespace).select(:parent_id)
       end
     end
   end
