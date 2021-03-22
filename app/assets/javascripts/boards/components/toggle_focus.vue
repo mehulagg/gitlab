@@ -42,6 +42,7 @@ export default {
     <gl-button
       ref="toggleFocusModeButton"
       v-gl-tooltip
+      category="tertiary"
       :icon="isFullscreen ? 'minimize' : 'maximize'"
       class="js-focus-mode-btn"
       data-qa-selector="focus_mode_button"
