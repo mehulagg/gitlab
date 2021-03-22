@@ -38,7 +38,6 @@ export default {
   },
 };
 </script>
-
 <template>
   <section>
     <header class="gl-display-flex gl-align-items-center">
