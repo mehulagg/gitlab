@@ -3,9 +3,9 @@ import { GlFormGroup, GlFormSelect, GlFormInput, GlSprintf, GlLink } from '@gitl
 import { isEmpty } from 'lodash';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { NEW_GROUP } from 'ee/subscriptions/new/constants';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import { sprintf, s__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
-import Step from './step.vue';
 
 export default {
   components: {
@@ -137,7 +137,7 @@ export default {
 </script>
 <template>
   <step
-    step="subscriptionDetails"
+    step-id="subscriptionDetails"
     :title="$options.i18n.stepTitle"
     :is-valid="isValid"
     :next-step-button-text="$options.i18n.nextStepButtonText"

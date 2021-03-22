@@ -1,34 +1,61 @@
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
 import Api from 'ee/api';
-import Component from 'ee/subscriptions/new/components/checkout/confirm_order.vue';
+import ConfirmOrder from 'ee/subscriptions/new/components/checkout/confirm_order.vue';
+import { STEPS } from 'ee/subscriptions/new/constants';
 import createStore from 'ee/subscriptions/new/store';
-import * as types from 'ee/subscriptions/new/store/mutation_types';
+import updateStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/update_active_step.mutation.graphql';
+import resolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
+import createMockApollo from 'helpers/mock_apollo_helper';
+
+const stepList = STEPS.map((id) => ({ __typename: 'Step', id }));
+const defaultInitialGraphqlData = {
+  stepList,
+  activeStep: stepList[0],
+};
 
 describe('Confirm Order', () => {
   const localVue = createLocalVue();
   localVue.use(Vuex);
+  localVue.use(VueApollo);
 
   let wrapper;
+  let mockApolloProvider;
 
   jest.mock('ee/api.js');
 
   const store = createStore();
 
-  const createComponent = (opts = {}) => {
-    wrapper = shallowMount(Component, {
+  async function activateStep(stepId) {
+    return mockApolloProvider.clients.defaultClient.mutate({
+      mutation: updateStepMutation,
+      variables: { id: stepId },
+    });
+  }
+
+  function createMockApolloProvider(initialGraphqlData = defaultInitialGraphqlData) {
+    const mockApollo = createMockApollo([], resolvers);
+    mockApollo.clients.defaultClient.cache.writeData({ data: initialGraphqlData });
+
+    return mockApollo;
+  }
+
+  function createComponent(options = {}) {
+    return shallowMount(ConfirmOrder, {
       localVue,
       store,
-      ...opts,
+      ...options,
     });
-  };
+  }
 
   const findConfirmButton = () => wrapper.find(GlButton);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
   beforeEach(() => {
-    createComponent();
+    mockApolloProvider = createMockApolloProvider();
+    wrapper = createComponent({ apolloProvider: mockApolloProvider });
   });
 
   afterEach(() => {
@@ -36,8 +63,8 @@ describe('Confirm Order', () => {
   });
 
   describe('Active', () => {
-    beforeEach(() => {
-      store.commit(types.UPDATE_CURRENT_STEP, 'confirmOrder');
+    beforeEach(async () => {
+      await activateStep(stepList[3].id);
     });
 
     it('button should be visible', () => {
@@ -74,8 +101,8 @@ describe('Confirm Order', () => {
   });
 
   describe('Inactive', () => {
-    beforeEach(() => {
-      store.commit(types.UPDATE_CURRENT_STEP, 'otherStep');
+    beforeEach(async () => {
+      await activateStep(stepList[1].id);
     });
 
     it('button should not be visible', () => {

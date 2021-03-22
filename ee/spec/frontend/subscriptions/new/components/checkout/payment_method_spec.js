@@ -1,24 +1,42 @@
 import { mount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
-import Component from 'ee/subscriptions/new/components/checkout/payment_method.vue';
-import Step from 'ee/subscriptions/new/components/checkout/step.vue';
+import PaymentMethod from 'ee/subscriptions/new/components/checkout/payment_method.vue';
+import { STEPS } from 'ee/subscriptions/new/constants';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
+import resolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
+import createMockApollo from 'helpers/mock_apollo_helper';
+
+const stepList = STEPS.map((id) => ({ __typename: 'Step', id }));
+const defaultInitialGraphqlData = {
+  stepList,
+  activeStep: stepList[0],
+};
 
 describe('Payment Method', () => {
   const localVue = createLocalVue();
   localVue.use(Vuex);
+  localVue.use(VueApollo);
 
   let store;
   let wrapper;
 
-  const createComponent = (opts = {}) => {
-    wrapper = mount(Component, {
+  function createMockApolloProvider(initialGraphqlData = defaultInitialGraphqlData) {
+    const mockApollo = createMockApollo([], resolvers);
+    mockApollo.clients.defaultClient.cache.writeData({ data: initialGraphqlData });
+
+    return mockApollo;
+  }
+
+  function createComponent(options = {}) {
+    return mount(PaymentMethod, {
       localVue,
       store,
-      ...opts,
+      ...options,
     });
-  };
+  }
 
   beforeEach(() => {
     store = createStore();
@@ -31,7 +49,8 @@ describe('Payment Method', () => {
       credit_card_expiration_year: 2009,
     });
 
-    createComponent();
+    const mockApollo = createMockApolloProvider();
+    wrapper = createComponent({ apolloProvider: mockApollo });
   });
 
   afterEach(() => {

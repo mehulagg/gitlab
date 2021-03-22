@@ -1,6 +1,7 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapActions } from 'vuex';
+import activeStepQuery from 'ee/vue_shared/purchase_flow/graphql/queries/active_step.query.graphql';
 import { s__ } from '~/locale';
 
 export default {
@@ -8,11 +9,21 @@ export default {
     GlButton,
     GlLoadingIcon,
   },
+  data() {
+    return {
+      activeStep: null,
+      stepList: [],
+    };
+  },
+  apollo: {
+    activeStep: {
+      query: activeStepQuery,
+    },
+  },
   computed: {
     ...mapState(['isConfirmingOrder']),
-    ...mapGetters(['currentStep']),
     isActive() {
-      return this.currentStep === 'confirmOrder';
+      return this.activeStep.id === 'confirmOrder';
     },
   },
   methods: {

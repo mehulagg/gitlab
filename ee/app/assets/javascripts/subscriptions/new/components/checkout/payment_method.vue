@@ -1,8 +1,8 @@
 <script>
 import { GlSprintf } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import { sprintf, s__ } from '~/locale';
-import Step from './step.vue';
 import Zuora from './zuora.vue';
 
 export default {
@@ -31,7 +31,7 @@ export default {
 };
 </script>
 <template>
-  <step step="paymentMethod" :title="$options.i18n.stepTitle" :is-valid="isValid">
+  <step step-id="paymentMethod" :title="$options.i18n.stepTitle" :is-valid="isValid">
     <template #body="props">
       <zuora :active="props.active" />
     </template>
