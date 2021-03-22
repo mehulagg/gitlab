@@ -6,28 +6,32 @@ module QA
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project'
+          project.initialize_with_readme = true
         end
       end
 
-      let(:merge_request_title) { 'One merge request to rule them all' }
-      let(:merge_request_description) { '... to find them, to bring them all, and in the darkness bind them' }
+      let(:feature_mr) do
+        Resource::MergeRequest.fabricate_via_api! do |merge_request|
+          merge_request.project = project
+          merge_request.target_branch = "development"
+          merge_request.target_new_branch = true
+        end
+      end
 
       before do
         Flow::Login.sign_in
       end
 
       it 'cherry pick a basic merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1616' do
-        merge_request = Resource::MergeRequest.fabricate_via_api! do |merge_request|
-          merge_request.project = project
-          merge_request.title = merge_request_title
-          merge_request.description = merge_request_description
-        end
-
-        merge_request.visit!
+        feature_mr.visit!
 
         Page::MergeRequest::Show.perform do |merge_request|
           merge_request.merge!
           merge_request.cherry_pick!
+        end
+
+        Page::MergeRequest::New.perform do |merge_request|
+          expect(merge_request).to have_content('The merge request has been successfully cherry-picked')
         end
       end
     end
