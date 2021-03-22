@@ -67,6 +67,16 @@ export default {
       required: false,
       default: true,
     },
+    directlyInviteMembers: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    indirectlyInviteMembers: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
