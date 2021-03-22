@@ -195,6 +195,12 @@ module Types
           description: 'Build pipeline of the project.',
           resolver: Resolvers::ProjectPipelineResolver
 
+    field :jobs,
+          null: true,
+          description: 'All jobs run on the project.',
+          extras: [:lookahead],
+          resolver: Resolvers::ProjectJobsResolver
+
     field :ci_cd_settings,
           Types::Ci::CiCdSettingType,
           null: true,
