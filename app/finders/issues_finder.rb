@@ -47,6 +47,11 @@ class IssuesFinder < IssuableFinder
   # rubocop: disable CodeReuse/ActiveRecord
   def with_confidentiality_access_check
     return Issue.all if params.user_can_see_all_confidential_issues?
+
+    # If already filtering by assignee we can skip confidentiality since a user
+    # can always see confidential issues assigned to them.
+    return Issue.all if params.assignee == current_user
+
     return Issue.where('issues.confidential IS NOT TRUE') if params.user_cannot_see_confidential_issues?
 
     Issue.where('
