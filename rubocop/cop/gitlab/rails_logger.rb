@@ -23,6 +23,8 @@ module RuboCop
         MSG = 'Use a structured JSON logger instead of `Rails.logger`. ' \
           'https://docs.gitlab.com/ee/development/logging.html'.freeze
 
+        SOMETHING = 'blah'.freeze
+
         # See supported log methods:
         # https://ruby-doc.org/stdlib-2.6.6/libdoc/logger/rdoc/Logger.html
         LOG_METHODS = %i[debug error fatal info warn].freeze
