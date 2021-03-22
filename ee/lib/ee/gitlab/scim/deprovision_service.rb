@@ -17,8 +17,11 @@ module EE
           return error(_("Did not remove user from group: Cannot remove last group owner.")) if group.last_owner?(user)
 
           ScimIdentity.transaction do
+            response = remove_group_access
+
+            next error(response.errors) if response.errors.any?
+
             identity.update!(active: false)
-            remove_group_access
           end
         end
 
