@@ -6,7 +6,6 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
   describe '#parse!' do
     where(vulnerability_finding_fingerprints_enabled: [true, false])
     with_them do
-
       let_it_be(:pipeline) { create(:ci_pipeline) }
 
       let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
@@ -252,16 +251,15 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
           it 'sets the uuid according to the higest priority fingerprint' do
             finding = report.findings.first
             highest_fingerprint = finding.fingerprints.max_by(&:priority)
-            if vulnerability_finding_fingerprints_enabled
-              expect(finding.uuid).to eq(Gitlab::UUID.v5(
-                "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_fingerprint.fingerprint_hex}-#{report.project_id}"
-              ))
-            else
-              location_fingerprint = "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5"
-              expect(finding.uuid).to eq(Gitlab::UUID.v5(
-                "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{location_fingerprint}-#{report.project_id}"
-              ))
-            end
+
+            identifiers = if vulnerability_finding_fingerprints_enabled
+                            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_fingerprint.fingerprint_hex}-#{report.project_id}"
+                          else
+                            location_fingerprint = "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5"
+                            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{location_fingerprint}-#{report.project_id}"
+                          end
+
+            expect(finding.uuid).to eq(Gitlab::UUID.v5(identifiers))
           end
         end
       end
