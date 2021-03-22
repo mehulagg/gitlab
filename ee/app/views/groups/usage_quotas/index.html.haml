@@ -16,9 +16,14 @@
     %li.nav-item
       %a.nav-link#storage-quota{ data: { toggle: "tab", action: '#storage-quota-tab' }, href: '#storage-quota-tab', 'aria-controls': '#storage-quota-tab', 'aria-selected': false }
         = s_('UsageQuota|Storage')
+    %li.nav-item
+      %a.nav-link#storage-quota{ data: { toggle: "tab", action: '#other-storage-quota-tab' }, href: '#other-storage-quota-tab', 'aria-controls': '#other-storage-quota-tab', 'aria-selected': false }
+        = s_('UsageQuota|Other Storage')
 .tab-content
   .tab-pane#pipelines-quota-tab
     = render "namespaces/pipelines_quota/list",
       locals: { namespace: @group, projects: @projects }
   .tab-pane#storage-quota-tab
     #js-storage-counter-app{ data: { namespace_path: @group.full_path, help_page_path: help_page_path('user/usage_quotas.md', anchor: 'storage-usage-quota'), purchase_storage_url: url_to_purchase_storage, is_temporary_storage_increase_visible: temporary_storage_increase_visible?(@group).to_s } }
+  .tab-pane#other-storage-quota-tab
+    #js-other-storage-counter-app{ data: { namespace_path: @group.full_path, help_page_path: help_page_path('user/usage_quotas.md', anchor: 'storage-usage-quota'), purchase_storage_url: url_to_purchase_storage, is_temporary_storage_increase_visible: temporary_storage_increase_visible?(@group).to_s } }
