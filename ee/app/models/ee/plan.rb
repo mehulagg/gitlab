@@ -18,6 +18,11 @@ module EE
       EE_ALL_PLANS = (EE_DEFAULT_PLANS + PAID_HOSTED_PLANS).freeze
       PLANS_ELIGIBLE_FOR_TRIAL = EE_DEFAULT_PLANS
 
+      CUSTOMERSDOT_NAMES = [
+        { gitlab: PREMIUM, customersdot: "#{PREMIUM}_saas" },
+        { gitlab: ULTIMATE, customersdot: "#{ULTIMATE}_saas" }
+      ].freeze
+
       has_many :hosted_subscriptions, class_name: 'GitlabSubscription', foreign_key: 'hosted_plan_id'
 
       EE::Plan.private_constant :EE_ALL_PLANS, :EE_DEFAULT_PLANS
@@ -61,6 +66,14 @@ module EE
     override :paid?
     def paid?
       PAID_HOSTED_PLANS.include?(name)
+    end
+
+    override :customersdot_name
+    def customersdot_name
+      match = CUSTOMERSDOT_NAMES.find {|h| h[:gitlab] == name}
+      return name unless match
+
+      match[:customersdot]
     end
   end
 end

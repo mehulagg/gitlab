@@ -37,6 +37,10 @@ class Plan < ApplicationRecord
   def paid?
     false
   end
+
+  def customersdot_name
+    name
+  end
 end
 
 Plan.prepend_if_ee('EE::Plan')

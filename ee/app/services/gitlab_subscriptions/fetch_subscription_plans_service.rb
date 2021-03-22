@@ -18,7 +18,7 @@ module GitlabSubscriptions
       response = Gitlab::HTTP.get(
         URL,
         allow_local_requests: true,
-        query: { plan: @plan, namespace_id: @namespace_id },
+        query: { plan: customersdot_plan, namespace_id: @namespace_id },
         headers: { 'Accept' => 'application/json' }
       )
 
@@ -27,6 +27,15 @@ module GitlabSubscriptions
       Gitlab::AppLogger.info "Unable to connect to GitLab Customers App #{e}"
 
       nil
+    end
+
+    def customersdot_plan
+      @customersdot_plan ||= begin
+                               gitlab_plan = Plan.find_by_name(@plan.to_s)
+        return @plan unless gitlab_plan
+
+        gitlab_plan.customersdot_name.to_sym
+      end
     end
 
     def cached
