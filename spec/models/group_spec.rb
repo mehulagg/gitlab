@@ -1769,13 +1769,35 @@ RSpec.describe Group do
         allow(project).to receive(:protected_for?).with('ref').and_return(true)
       end
 
-      it 'returns all variables belong to the group and parent groups' do
-        expected_array1 = [protected_variable, ci_variable]
-        expected_array2 = [variable_child, variable_child_2, variable_child_3]
-        got_array = group_child_3.ci_variables_for('ref', project).to_a
+      context 'traversal queries' do
+        shared_examples 'correct ancestor order' do
+          it 'returns all variables belong to the group and parent groups' do
+            expected_array1 = [protected_variable, ci_variable]
+            expected_array2 = [variable_child, variable_child_2, variable_child_3]
+            got_array = group_child_3.ci_variables_for('ref', project).to_a
 
-        expect(got_array.shift(2)).to contain_exactly(*expected_array1)
-        expect(got_array).to eq(expected_array2)
+            expect(got_array.shift(2)).to contain_exactly(*expected_array1)
+            expect(got_array).to eq(expected_array2)
+          end
+        end
+
+        context 'recursive' do
+          before do
+            stub_feature_flags(use_traversal_ids: false)
+          end
+
+          include_examples 'correct ancestor order'
+        end
+
+        context 'linear' do
+          before do
+            stub_feature_flags(use_traversal_ids: true)
+
+            group_child_3.reload # make sure traversal_ids are reloaded
+          end
+
+          include_examples 'correct ancestor order'
+        end
       end
     end
   end

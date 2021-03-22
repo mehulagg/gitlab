@@ -853,7 +853,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids?' do
-    let_it_be(:namespace) { build(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:namespace) }
 
     subject { namespace.use_traversal_ids? }
 
@@ -874,27 +874,35 @@ RSpec.describe Namespace do
     end
   end
 
-  context 'when use_traversal_ids feature flag is true' do
-    it_behaves_like 'namespace traversal'
+  context 'traversal queries' do
+    let_it_be(:namespace, reload: true) { create(:namespace) }
 
-    describe '#self_and_descendants' do
-      subject { namespace.self_and_descendants }
+    context 'recursive' do
+      before do
+        stub_feature_flags(use_traversal_ids: false)
+      end
 
-      it { expect(subject.to_sql).to include 'traversal_ids @>' }
+      it_behaves_like 'namespace traversal'
+
+      describe '#self_and_descendants' do
+        it { expect(namespace.self_and_descendants.to_sql).not_to include 'traversal_ids @>' }
+      end
+
+      describe '#ancestors' do
+        it { expect(namespace.ancestors.to_sql).not_to include 'traversal_ids <@' }
+      end
     end
-  end
 
-  context 'when use_traversal_ids feature flag is false' do
-    before do
-      stub_feature_flags(use_traversal_ids: false)
-    end
+    context 'linear' do
+      it_behaves_like 'namespace traversal'
 
-    it_behaves_like 'namespace traversal'
+      describe '#self_and_descendants' do
+        it { expect(namespace.self_and_descendants.to_sql).to include 'traversal_ids @>' }
+      end
 
-    describe '#self_and_descendants' do
-      subject { namespace.self_and_descendants }
-
-      it { expect(subject.to_sql).not_to include 'traversal_ids @>' }
+      describe '#ancestors' do
+        it { expect(namespace.ancestors.to_sql).to include 'traversal_ids <@' }
+      end
     end
   end
 
