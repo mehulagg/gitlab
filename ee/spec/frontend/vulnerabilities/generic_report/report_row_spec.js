@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import ReportRow from 'ee/vulnerabilities/components/generic_report/report_row.vue';
 
-describe('EE - GenericReport - ReportSection', () => {
+describe('EE - GenericReport - ReportRow', () => {
   let wrapper;
 
   const createWrapper = () => {
