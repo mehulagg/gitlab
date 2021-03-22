@@ -18,6 +18,19 @@ class BulkImports::Tracker < ApplicationRecord
 
   validates :stage, presence: true
 
+  scope :next_stage_for, -> (entity_id) {
+    entity_scope = where(bulk_import_entity_id: entity_id)
+    next_stage_scope = entity_scope.with_status(:created).select('MIN(stage)')
+
+    entity_scope.where(stage: next_stage_scope)
+  }
+
+  def self.stage_running?(entity_id, stage)
+    where(stage: stage, bulk_import_entity_id: entity_id)
+      .with_status(:created, :started)
+      .exists?
+  end
+
   state_machine :status, initial: :created do
     state :created, value: 0
     state :started, value: 1

@@ -10,24 +10,46 @@ module BulkImports
 
     worker_has_external_dependencies!
 
-    def perform(entity_id)
-      entity = BulkImports::Entity.with_status(:started).find_by_id(entity_id)
+    def perform(entity_id, current_stage = nil)
+      logger.info(
+        worker: self.class.name,
+        entity_id: entity_id,
+        current_stage: current_stage
+      )
 
-      if entity
-        entity.update!(jid: jid)
+      return if stage_running?(entity_id, current_stage)
 
-        BulkImports::Importers::GroupImporter.new(entity).execute
+      next_stage_for(entity_id).each do |pipeline_tracker|
+        BulkImports::PipelineWorker.perform_async(
+          entity_id,
+          pipeline_tracker.id
+        )
       end
-
     rescue => e
-      extra = {
-        bulk_import_id: entity&.bulk_import&.id,
-        entity_id: entity&.id
-      }
+      logger.error(
+        worker: self.class.name,
+        entity_id: entity_id,
+        current_stage: current_stage,
+        error_message: e.message
+      )
 
-      Gitlab::ErrorTracking.track_exception(e, extra)
+      Gitlab::ErrorTracking.track_exception(e, entity_id: entity_id)
+    end
 
-      entity&.fail_op
+    private
+
+    def stage_running?(entity_id, stage)
+      return unless stage
+
+      BulkImports::Tracker.stage_running?(entity_id, stage)
+    end
+
+    def next_stage_for(entity_id)
+      BulkImports::Tracker.next_stage_for(entity_id)
+    end
+
+    def logger
+      @logger ||= Gitlab::Import::Logger
     end
   end
 end
