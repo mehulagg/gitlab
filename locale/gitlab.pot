@@ -22047,27 +22047,6 @@ msgstr ""
 msgid "PackageRegistry|yarn command"
 msgstr ""
 
-msgid "PackageType|Composer"
-msgstr ""
-
-msgid "PackageType|Conan"
-msgstr ""
-
-msgid "PackageType|Generic"
-msgstr ""
-
-msgid "PackageType|Maven"
-msgstr ""
-
-msgid "PackageType|NuGet"
-msgstr ""
-
-msgid "PackageType|PyPI"
-msgstr ""
-
-msgid "PackageType|npm"
-msgstr ""
-
 msgid "Packages"
 msgstr ""
 
