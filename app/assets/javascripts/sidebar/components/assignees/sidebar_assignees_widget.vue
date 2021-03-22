@@ -6,6 +6,7 @@ import {
   GlAvatarLink,
   GlSearchBoxByType,
   GlLoadingIcon,
+  GlLink,
 } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import Vue from 'vue';
@@ -39,6 +40,12 @@ export default {
     GlAvatarLink,
     GlSearchBoxByType,
     GlLoadingIcon,
+    GlLink,
+  },
+  inject: {
+    projectMembersPath: {
+      default: '',
+    },
   },
   props: {
     iid: {
@@ -418,8 +425,23 @@ export default {
                 />
               </gl-avatar-link>
             </gl-dropdown-item>
-            <gl-dropdown-item v-if="noUsersFound && !isSearching" data-testid="empty-results">
+            <gl-dropdown-item
+              v-if="noUsersFound && !isSearching"
+              data-testid="empty-results"
+              class="gl-pl-6!"
+            >
               {{ __('No matching results') }}
+            </gl-dropdown-item>
+            <gl-dropdown-divider />
+            <gl-dropdown-item v-if="directlyInviteMembers || indirectlyInviteMembers">
+              <gl-link
+                class="gl-pl-6!"
+                :to="projectMembersPath"
+                target="_blank"
+                data-track-event="click_invite_members"
+                data-track-label="edit_assignee"
+                >{{ __('Invite Members') }}</gl-link
+              >
             </gl-dropdown-item>
           </template>
         </template>

@@ -91,9 +91,8 @@ function mountAssigneesComponent() {
   const el = document.getElementById('js-vue-sidebar-assignees');
 
   if (!el) return;
-  console.log(el.dataset);
 
-  const { iid, fullPath, editable } = getSidebarOptions();
+  const { iid, fullPath, editable, projectMembersPath } = getSidebarOptions();
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -103,6 +102,7 @@ function mountAssigneesComponent() {
     },
     provide: {
       canUpdate: editable,
+      projectMembersPath,
     },
     render: (createElement) =>
       createElement('sidebar-assignees-widget', {
