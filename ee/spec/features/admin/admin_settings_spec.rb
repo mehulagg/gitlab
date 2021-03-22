@@ -292,12 +292,12 @@ RSpec.describe 'Admin updates EE-only settings' do
         visit general_admin_application_settings_path
 
         page.within('#js-signup-settings') do
-          fill_in 'User cap', with: 5
+          fill_in 'application_setting[new_user_signups_cap]', with: 5
 
           click_button 'Save changes'
 
           message =
-            page.find('#application_setting_new_user_signups_cap').native.attribute('validationMessage')
+            page.find('#test_dummy').native.attribute('validationMessage')
 
           expect(message).to eq('Value must be less than or equal to 1.')
         end
