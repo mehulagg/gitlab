@@ -940,13 +940,17 @@ class Repository
   end
 
   def fetch_as_mirror(url, forced: false, refmap: :all_refs, remote_name: nil, prune: true)
-    unless remote_name
-      remote_name = "tmp-#{SecureRandom.hex}"
-      tmp_remote_name = true
-    end
+    if Feature.enabled?(:gitaly_fetch_remote_params)
+      fetch_url(url, forced: forced, refmap: refmap, prune: prune)
+    else
+      unless remote_name
+        remote_name = "tmp-#{SecureRandom.hex}"
+        tmp_remote_name = true
+      end
 
-    add_remote(remote_name, url, mirror_refmap: refmap)
-    fetch_remote(remote_name, forced: forced, prune: prune)
+      add_remote(remote_name, url, mirror_refmap: refmap)
+      fetch_remote(remote_name, forced: forced, prune: prune)
+    end
   ensure
     async_remove_remote(remote_name) if tmp_remote_name
   end
