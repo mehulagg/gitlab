@@ -6,20 +6,18 @@ import {
   GlAvatarLink,
   GlSearchBoxByType,
   GlLoadingIcon,
-  GlLink,
 } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import Vue from 'vue';
 import createFlash from '~/flash';
 import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
-import InviteMemberModal from '~/invite_member/components/invite_member_modal.vue';
-import InviteMemberTrigger from '~/invite_member/components/invite_member_trigger.vue';
 import { IssuableType } from '~/issue_show/constants';
 import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import { assigneesQueries, ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
+import SidebarInviteMembers from './sidebar_invite_members.vue';
 
 export const assigneesWidget = Vue.observable({
   updateAssignees: null,
@@ -42,13 +40,14 @@ export default {
     GlAvatarLink,
     GlSearchBoxByType,
     GlLoadingIcon,
-    GlLink,
-    InviteMemberTrigger,
-    InviteMemberModal,
+    SidebarInviteMembers,
   },
   inject: {
-    projectMembersPath: {
-      default: '',
+    directlyInviteMembers: {
+      default: false,
+    },
+    indirectlyInviteMembers: {
+      default: false,
     },
   },
   props: {
@@ -77,16 +76,6 @@ export default {
       type: Boolean,
       required: false,
       default: true,
-    },
-    directlyInviteMembers: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    indirectlyInviteMembers: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   data() {
@@ -438,23 +427,7 @@ export default {
             </gl-dropdown-item>
             <gl-dropdown-divider />
             <gl-dropdown-item v-if="directlyInviteMembers || indirectlyInviteMembers">
-              <gl-link
-                v-if="directlyInviteMembers"
-                class="gl-pl-6!"
-                :to="projectMembersPath"
-                target="_blank"
-                data-track-event="click_invite_members"
-                data-track-label="edit_assignee"
-                >{{ __('Invite Members') }}</gl-link
-              >
-              <template v-else>
-                <invite-member-trigger
-                  :display-text="__('Invite Members')"
-                  event="click_invite_members_version_b"
-                  label="edit_assignee"
-                />
-                <invite-member-modal :members-path="projectMembersPath" />
-              </template>
+              <sidebar-invite-members />
             </gl-dropdown-item>
           </template>
         </template>

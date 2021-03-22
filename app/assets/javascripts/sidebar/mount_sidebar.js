@@ -48,6 +48,8 @@ function mountAssigneesComponent() {
     provide: {
       canUpdate: editable,
       projectMembersPath,
+      directlyInviteMembers: el.hasAttribute('data-directly-invite-members'),
+      indirectlyInviteMembers: el.hasAttribute('data-indirectly-invite-members'),
     },
     render: (createElement) =>
       createElement('sidebar-assignees-widget', {
@@ -59,8 +61,6 @@ function mountAssigneesComponent() {
               ? IssuableType.Issue
               : IssuableType.MergeRequest,
           multipleAssignees: !el.dataset.maxAssignees,
-          directlyInviteMembers: el.hasAttribute('data-directly-invite-members'),
-          indirectlyInviteMembers: el.hasAttribute('data-indirectly-invite-members'),
         },
       }),
   });
