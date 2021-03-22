@@ -101,7 +101,7 @@ RSpec.describe 'Marginalia spec' do
         ActiveJob::Base.queue_adapter = :sidekiq
         descendants.each(&:disable_test_adapter)
         example.run
-        descendants.each { |a| a.enable_test_adapter(ActiveJob::QueueAdapters::TestAdapter.new) }
+        descendants.each { |a| a.queue_adapter = :test }
         ActiveJob::Base.queue_adapter = original_queue_adapter
       end
 
