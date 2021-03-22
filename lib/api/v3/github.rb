@@ -143,7 +143,11 @@ module API
         # Keeping for backwards compatibility with old Jira integration instructions
         # so that users that do not change it will not suddenly have a broken integration
         get '/-/jira/pulls' do
-          present find_merge_requests, with: ::API::Github::Entities::PullRequest
+          if Feature.enabled?(:cached_api_jira_pulls, current_user)
+            present_cached find_merge_requests, with: ::API::Github::Entities::PullRequest, cache_context: nil
+          else
+            present find_merge_requests, with: ::API::Github::Entities::PullRequest
+          end
         end
 
         get '/-/jira/events' do
@@ -158,7 +162,11 @@ module API
 
           merge_requests = authorized_merge_requests_for_project(user_project)
 
-          present paginate(merge_requests), with: ::API::Github::Entities::PullRequest
+          if Feature.enabled?(:cached_api_jira_pulls, current_user)
+            present_cached paginate(merge_requests), with: ::API::Github::Entities::PullRequest, cache_context: nil
+          else
+            present paginate(merge_requests), with: ::API::Github::Entities::PullRequest
+          end
         end
 
         params do
@@ -167,7 +175,11 @@ module API
         get ':namespace/:project/pulls/:id' do
           merge_request = find_merge_request_with_access(params[:id])
 
-          present merge_request, with: ::API::Github::Entities::PullRequest
+          if Feature.enabled?(:cached_api_jira_pulls, current_user)
+            present_cached merge_request, with: ::API::Github::Entities::PullRequest, cache_context: nil
+          else
+            present merge_request, with: ::API::Github::Entities::PullRequest
+          end
         end
 
         # In Github, each Merge Request is automatically also an issue.
