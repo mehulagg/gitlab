@@ -111,9 +111,6 @@ module Routable
     # If the route is already preloaded, return directly, preventing an extra load
     return route.name if association(:route).loaded? && route.present?
 
-    # Similarly, we can allow the build if the parent is loaded
-    return build_full_name if parent_loaded?
-
     Gitlab::Cache.fetch_once([routable_cache_key, :full_name]) do
       route&.name || build_full_name
     end
@@ -125,9 +122,6 @@ module Routable
 
     # If the route is already preloaded, return directly, preventing an extra load
     return route.path if association(:route).loaded? && route.present?
-
-    # Similarly, we can allow the build if the parent is loaded
-    return build_full_path if parent_loaded?
 
     Gitlab::Cache.fetch_once([routable_cache_key, :full_path]) do
       route&.path || build_full_path
@@ -144,11 +138,6 @@ module Routable
     else
       path
     end
-  end
-
-  # Overriden in the Project model
-  def parent_loaded?
-    association(:parent).loaded?
   end
 
   # Group would override this to check from association

@@ -173,24 +173,6 @@ RSpec.describe Group, 'Routable' do
     end
   end
 
-  describe '#parent_loaded?' do
-    before do
-      group.parent = create(:namespace)
-
-      group.reload
-    end
-
-    it 'is false when the parent is not loaded' do
-      expect(group.parent_loaded?).to be_falsey
-    end
-
-    it 'is true when the parent is loaded' do
-      group.parent
-
-      expect(group.parent_loaded?).to be_truthy
-    end
-  end
-
   describe '#full_path' do
     it { expect(group.full_path).to eq(group.path) }
     it { expect(nested_group.full_path).to eq("#{group.full_path}/#{nested_group.path}") }
