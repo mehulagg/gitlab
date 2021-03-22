@@ -15,6 +15,7 @@ describe('ClusterAgentTokenTable', () => {
       createdByUser: {
         name: 'user-1',
       },
+      lastUsedAt: '2021-02-13T00:00:00Z',
       name: 'token-1',
     },
     {
@@ -22,6 +23,7 @@ describe('ClusterAgentTokenTable', () => {
       createdAt: '2021-02-10T00:00:00Z',
       description: null,
       createdByUser: null,
+      lastUsedAt: null,
       name: 'token-2',
     },
   ];
@@ -59,6 +61,20 @@ describe('ClusterAgentTokenTable', () => {
 
     expect(token.text()).toBe(name);
   });
+
+  it.each`
+    lastUsedText    | lineNumber
+    ${'2 days ago'} | ${0}
+    ${'Never'}      | ${1}
+  `(
+    'displays last used information "$lastUsedText" for line "$lineNumber"',
+    ({ lastUsedText, lineNumber }) => {
+      const tokens = wrapper.findAll('[data-testid="agent-token-used"]');
+      const token = tokens.at(lineNumber);
+
+      expect(token.text()).toBe(lastUsedText);
+    },
+  );
 
   it.each`
     createdText     | lineNumber
