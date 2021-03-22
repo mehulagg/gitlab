@@ -3,40 +3,65 @@
 require 'spec_helper'
 
 RSpec.describe NotificationRecipient do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, namespace: user.namespace) }
+  let_it_be(:user) { create(:user) }
+  let(:namespace) { create(:namespace, owner: user, emails_disabled: namespace_emails_disabled) }
+  let(:project) { create(:project, namespace: namespace, emails_disabled: project_emails_disabled) }
   let(:target) { create(:issue, project: project) }
+  let(:namespace_emails_disabled) { false }
+  let(:project_emails_disabled) { false }
 
   subject(:recipient) { described_class.new(user, :watch, target: target, project: project) }
 
   describe '#notifiable?' do
-    let(:recipient) { described_class.new(user, :mention, target: target, project: project) }
+    subject { described_class.new(user, type, target: target, project: project).notifiable? }
 
-    context 'when emails are disabled' do
-      it 'returns false if group disabled' do
-        expect(project.namespace).to receive(:emails_disabled?).and_return(true)
-        expect(recipient).to receive(:emails_disabled?).and_call_original
-        expect(recipient.notifiable?).to eq false
+    context 'when type is mention' do
+      let(:type) { :mention }
+
+      context 'when emails are disabled at namespace level' do
+        let(:namespace_emails_disabled) { true }
+
+        it { is_expected.to be_falsey }
       end
 
-      it 'returns false if project disabled' do
-        expect(project).to receive(:emails_disabled?).and_return(true)
-        expect(recipient).to receive(:emails_disabled?).and_call_original
-        expect(recipient.notifiable?).to eq false
+      context 'when emails are disabled at project level' do
+        let(:project_emails_disabled) { true }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when emails are enabled at namespace level' do
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when emails are enabled at project level' do
+        it { is_expected.to be_truthy }
       end
     end
 
-    context 'when emails are enabled' do
-      it 'returns true if group enabled' do
-        expect(project.namespace).to receive(:emails_disabled?).and_return(false)
-        expect(recipient).to receive(:emails_disabled?).and_call_original
-        expect(recipient.notifiable?).to eq true
+    context 'when type is :subscription' do
+      let(:type) { :subscription }
+
+      context 'when user has no subscription to the target' do
+        it { is_expected.to be_falsey }
       end
 
-      it 'returns true if project enabled' do
-        expect(project).to receive(:emails_disabled?).and_return(false)
-        expect(recipient).to receive(:emails_disabled?).and_call_original
-        expect(recipient.notifiable?).to eq true
+      context 'when user has a subscription to the target' do
+        before do
+          create(:subscription, project: project, user: user, subscribable: target, subscribed: subscription_state)
+        end
+
+        context 'when subscription "subscribed" is false' do
+          let(:subscription_state) { false }
+
+          it { is_expected.to be_falsey }
+        end
+
+        context 'when subscription "subscribed" is true' do
+          let(:subscription_state) { true }
+
+          it { is_expected.to be_truthy }
+        end
       end
     end
   end

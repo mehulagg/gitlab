@@ -35,14 +35,14 @@ class NotificationRecipient
     return false if own_activity?
 
     # even users with :disabled notifications receive manual subscriptions
-    return !unsubscribed? if @type == :subscription
+    return subscribed? if @type == :subscription
 
     return false unless suitable_notification_level?
 
     # check this last because it's expensive
     # nobody should receive notifications if they've specifically unsubscribed
     # except if they were mentioned.
-    return false if @type != :mention && unsubscribed?
+    return false if @type != :mention && !subscribed?
 
     true
   end
@@ -70,16 +70,6 @@ class NotificationRecipient
       # fixed_pipeline is a subset of success_pipeline event
       (@custom_action == :fixed_pipeline &&
        notification_setting.event_enabled?(:success_pipeline))
-  end
-
-  def unsubscribed?
-    subscribable_target = @target.is_a?(Note) ? @target.noteable : @target
-
-    return false unless subscribable_target
-    return false unless subscribable_target.respond_to?(:subscriptions)
-
-    subscription = subscribable_target.subscriptions.find { |subscription| subscription.user_id == @user.id }
-    subscription && !subscription.subscribed
   end
 
   def own_activity?
@@ -118,6 +108,16 @@ class NotificationRecipient
   end
 
   private
+
+  def subscribed?
+    subscribable_target = @target.is_a?(Note) ? @target.noteable : @target
+
+    return false unless subscribable_target
+    return false unless subscribable_target.respond_to?(:subscriptions)
+
+    subscription = subscribable_target.subscriptions.find { |subscription| subscription.user_id == @user.id }
+    subscription && subscription.subscribed
+  end
 
   # They are disabled if the project or group has disallowed it.
   # No need to check the group if there is already a project
