@@ -162,11 +162,29 @@ fatal: early EOF
 fatal: index-pack failed
 ```
 
-This can be fixed by increasing the existing `http.postBuffer` value to one greater than the repository size. For example, if `git clone` fails when cloning a 500M repository, you should set `http.postBuffer` to `524288000`. That setting ensures the request only starts buffering after the first 524288000 bytes.
+Usually, this is due to the number of files in the repository, the number of revisions in the history, or the existence of large files (while not using LFS).
 
-NOTE:
-The default value of `http.postBuffer`, 1 MiB, is applied if the setting is not configured.
-
-```shell
-git config http.postBuffer 524288000
-```
+There are a few **potential solutions**:
+1. If this error occurs when cloning a large repository, one option is to [decrease the cloning depth](https://docs.gitlab.com/ee/ci/large_repositories/#shallow-cloning) to a value of `1`. 
+   - _EX:_ 
+     ```shell
+     variables:
+       GIT_DEPTH: 1
+     ```
+1. Another is to increase the local git config's [http.postBuffer](https://git-scm.com/docs/git-config#Documentation/git-config.txt-httppostBuffer) value, whose default is `1 MiB`, to one greater than the repository size. The `http.postBuffer` 
+   - _EX:_ If `git clone` fails when cloning a `500M` repository, you should set `http.postBuffer` to `524288000`. 
+     ```shell
+     git config http.postBuffer 524288000
+     ```
+   - [REF](https://git-scm.com/docs/git-config#Documentation/git-config.txt-httppostBuffer)
+1. In order to increase the `http.postBuffer` on the server side, modify the GitLab instance's [gitlab.rb](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/13.5.1+ee.0/files/gitlab-config-template/gitlab.rb.template#L1435-1455)
+   - _EX:_ Using the same Example number from above.
+     ```shell
+     omnibus_gitconfig['system'] = {
+       "http" => ["postBuffer" => 524288000]
+     }
+     ```
+   - After applying this change, apply the config:
+     ```shell
+     sudo gitlab-ctl reconfigure
+     ```
