@@ -114,9 +114,7 @@ module Ci
 
         @metrics.observe_queue_size(-> { build_ids.size })
 
-        build_ids.each do |build_id|
-          yield Ci::Build.find(build_id)
-        end
+        Ci::Build.find(build_ids).each{ |build| yield build }
       else
         builds_array = retrieve_queue(-> { builds.to_a })
 
