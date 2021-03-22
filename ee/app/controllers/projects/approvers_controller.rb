@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 class Projects::ApproversController < Projects::ApplicationController
-  before_action :authorize_for_subject!
+  before_action do
+    authorize_for_subject!
+    push_frontend_feature_flag(:ff_compliance_approval_gates, project)
+  end
 
   feature_category :source_code_management
 

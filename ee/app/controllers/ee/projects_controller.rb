@@ -14,6 +14,10 @@ module EE
         push_frontend_feature_flag(:cve_id_request_button, project)
       end
 
+      before_action only: :edit do
+        push_frontend_feature_flag(:ff_compliance_approval_gates, project)
+      end
+
       feature_category :projects, [:restore]
     end
 
