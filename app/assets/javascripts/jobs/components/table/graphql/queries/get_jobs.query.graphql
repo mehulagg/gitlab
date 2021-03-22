@@ -1,0 +1,42 @@
+query getJobs($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    pipelines(first: 15) {
+      nodes {
+        jobs {
+          nodes {
+            name
+            artifacts {
+              nodes {
+                downloadPath
+              }
+            }
+            pipeline {
+              commitPath
+              id
+              path
+              user {
+                avatarUrl
+                webUrl
+              }
+            }
+            duration
+            finishedAt
+            detailedStatus {
+              action {
+                buttonTitle
+                icon
+                method
+                path
+                title
+              }
+              tooltip
+              text
+              icon
+              detailsPath
+            }
+          }
+        }
+      }
+    }
+  }
+}

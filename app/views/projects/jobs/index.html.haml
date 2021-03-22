@@ -5,5 +5,9 @@
   - build_path_proc = ->(scope) { project_jobs_path(@project, scope: scope) }
   = render "shared/builds/tabs", build_path_proc: build_path_proc, all_builds: @all_builds, scope: @scope
 
+
 .content-list.builds-content-list
-  = render "table", builds: @builds, project: @project
+  - if Feature.enabled?(:jobs_table_vue, @project)
+    #js-jobs-table{ data: { full_path: @project.full_path } }
+  - else
+    = render "table", builds: @builds, project: @project
