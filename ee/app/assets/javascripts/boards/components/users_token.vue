@@ -3,24 +3,17 @@ import {
   GlToken,
   GlFilteredSearchToken,
   GlFilteredSearchSuggestion,
-  GlDropdownDivider,
   GlLoadingIcon,
   GlAvatar,
 } from '@gitlab/ui';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { __ } from '~/locale';
-
-import GroupUsersQuery from '../graphql/group_members.query.graphql';
 import { stripQuotes } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import GroupUsersQuery from '../graphql/group_members.query.graphql';
 
 export default {
-  avatarSize: 16,
   components: {
     GlToken,
     GlFilteredSearchToken,
     GlFilteredSearchSuggestion,
-    GlDropdownDivider,
     GlLoadingIcon,
     GlAvatar,
   },
@@ -56,7 +49,6 @@ export default {
     };
   },
   // current user on top only on page load
-  // sub group
   // ticket on load populates search with pills
   // should users be able to search label from value not in dropdown?
   computed: {
@@ -84,9 +76,9 @@ export default {
     v-on="$listeners"
     @input="searchForToken"
   >
-    <template #view-token="{ inputValue, cssClasses, listeners }">
-      <gl-token variant="search-value" :class="cssClasses" v-on="listeners">
-        <gl-avatar :size="$options.avatarSize" :src="activeUsers.avatarUrl" />{{
+    <template #view-token="{ listeners }">
+      <gl-token variant="search-value" v-on="listeners">
+        <gl-avatar :size="16" :src="activeUsers.avatarUrl" />{{
           activeUsers.username
         }}</gl-token
       >
@@ -99,7 +91,7 @@ export default {
           :key="author.username"
           :value="author.username"
         >
-          <div class="d-flex">
+          <div class="gl-display-flex">
             <gl-avatar :size="32" :src="author.avatarUrl" />
             <div>
               <div>{{ author.name }}</div>
