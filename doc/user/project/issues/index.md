@@ -45,7 +45,6 @@ To learn how the GitLab Strategic Marketing department uses GitLab issues with [
 - [Sort issue lists](sorting_issue_lists.md) 
 - [Search for issues](../../search/index.md#filtering-issue-and-merge-request-lists)
 - [Epics](../../group/epics/index.md)
-- [Issues List](#issues-list):
 - [Issue Boards](../issue_board.md)
 - [Issues API](../../../api/issues.md)
 - [Configure an external issue tracker](../../../integration/external-issue-tracker.md)

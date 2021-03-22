@@ -16,7 +16,7 @@ Then you can:
 
 - Grant members access to multiple projects at once.
 - Add to-do items for all of the group members at once.
-- View the [issues](../project/issues/index.md#issues-list) and
+- View the [issues](../project/issues/index.md) and
   [merge requests](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-merge-requests-for-all-projects-in-a-group)
   for all projects in the group, together in a single list view.
 - [Bulk edit](../group/bulk_editing/index.md) issues, epics, and merge requests.
