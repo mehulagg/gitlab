@@ -121,10 +121,6 @@ describe('Pipelines', () => {
     it('does not display tabs when the first request has not yet been made', () => {
       expect(findNavigationTabs().exists()).toBe(false);
     });
-
-    it('does not display buttons', () => {
-      expect(findNavigationControls().exists()).toBe(false);
-    });
   });
 
   describe('when there are pipelines in the project', () => {

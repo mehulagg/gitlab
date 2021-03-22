@@ -165,7 +165,9 @@ export default {
 
     shouldRenderButtons() {
       return (
-        (this.newPipelinePath || this.resetCachePath || this.ciLintPath) && this.shouldRenderTabs
+        (this.newPipelinePath || this.resetCachePath || this.ciLintPath) &&
+        this.hasGitlabCi &&
+        this.canCreatePipeline
       );
     },
 
@@ -207,6 +209,10 @@ export default {
     },
     validatedParams() {
       return validateParams(this.params);
+    },
+    navigationControlClasses() {
+      const classes = ['gl-flex-grow-1', 'gl-justify-content-end', 'gl-my-3'];
+      return this.shouldRenderTabs ? '' : classes;
     },
   },
   created() {
@@ -304,6 +310,7 @@ export default {
 
       <navigation-controls
         v-if="shouldRenderButtons"
+        :class="navigationControlClasses"
         :new-pipeline-path="newPipelinePath"
         :reset-cache-path="resetCachePath"
         :ci-lint-path="ciLintPath"
