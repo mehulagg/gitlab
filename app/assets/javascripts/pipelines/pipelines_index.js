@@ -27,16 +27,21 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
     errorStateSvgPath,
     noPipelinesSvgPath,
     newPipelinePath,
+    addCiYmlPath,
     canCreatePipeline,
     hasGitlabCi,
     ciLintPath,
     resetCachePath,
-    projectId,
     params,
+    projectId,
   } = el.dataset;
 
   return new Vue({
     el,
+    provide: {
+      addCiYmlPath,
+      projectId,
+    },
     data() {
       return {
         store: new PipelinesStore(),
