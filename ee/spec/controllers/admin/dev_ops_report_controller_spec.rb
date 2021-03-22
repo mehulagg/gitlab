@@ -30,4 +30,21 @@ RSpec.describe Admin::DevOpsReportController do
       end
     end
   end
+
+  describe '#show' do
+    let(:user) { create(:admin) }
+
+    before do
+      sign_in(user)
+    end
+
+    context 'when devops_adoption tab selected' do
+      it 'tracks devops_adoption usage event' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+          .to receive(:track_event).with('i_analytics_dev_ops_adoption', values: kind_of(String))
+
+        get :show, params: { tab: 'devops-adoption' }, format: :html
+      end
+    end
+  end
 end
