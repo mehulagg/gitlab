@@ -10,8 +10,8 @@ type: howto
 **Secondary** sites can be removed from the Geo cluster using the Geo administration page of the **primary** site. To remove a **secondary** site:
 
 1. Go to **Admin Area > Geo** (`/admin/geo/nodes`).
-1. Click the **Remove** button for the **secondary** site you want to remove.
-1. Confirm by clicking **Remove** when the prompt appears.
+1. Select the **Remove** button for the **secondary** site you want to remove.
+1. Confirm by selecting **Remove** when the prompt appears.
 
 Once removed from the Geo administration page, you must stop and uninstall the **secondary** site:
 
