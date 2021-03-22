@@ -85,6 +85,7 @@ You can then test the connection by clicking on **Test Connection**. If the conn
    1. Set:
       - **Source attribute** to the unique identifier determined above, typically `objectId`.
       - **Target attribute** to `externalId`.
+         - If you do not see `externalId` available, create the mapping and edit it to refresh the **target attribute** dropdown list.
       - **Match objects using this attribute** to `Yes`.
       - **Matching precedence** to `1`.
 
