@@ -6401,7 +6401,7 @@ msgstr ""
 msgid "CloudLicense|Paste your activation code below"
 msgstr ""
 
-msgid "CloudLicense|This instance is currently using the Core plan."
+msgid "CloudLicense|This instance is currently using the %{planName} Plan."
 msgstr ""
 
 msgid "Cluster"
