@@ -25,7 +25,7 @@ To disable Geo, follow these steps:
 ## Remove all secondary Geo sites
 
 To disable Geo, you need to first remove all your secondary Geo sites, which means replication will not happen
-anymore on these sites. You can follow our docs to [remove your secondary Geo sites](remove_geo_node.md).
+anymore on these sites. You can follow our docs to [remove your secondary Geo sites](remove_geo_site.md).
 
 If the current site that you want to keep using is a secondary site, you need to first promote it to primary.
 You can use our steps on [how to promote a secondary site](../disaster_recovery/#step-3-promoting-a-secondary-node)
@@ -59,7 +59,7 @@ Geo node in a PostgreSQL console (`sudo gitlab-psql`):
 
 ## Remove Geo-related configuration
 
-1. SSH into your primary Geo site's node(s) and log in as root:
+1. For each node on your primary Geo site, SSH into the node and log in as root:
 
    ```shell
    sudo -i
