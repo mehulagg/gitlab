@@ -11,5 +11,5 @@ time_frame: none
 data_source: database
 distribution:
 - ee
-tier: [free, premium, ultimate]
+tier: ['free', 'premium', 'ultimate']
 skip_validation: true
