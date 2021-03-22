@@ -330,6 +330,7 @@ export default {
         v-else-if="stateToRender === $options.stateMap.emptyState"
         :empty-state-svg-path="emptyStateSvgPath"
         :can-set-ci="canCreatePipeline"
+        :project-id="projectId"
       />
 
       <gl-empty-state

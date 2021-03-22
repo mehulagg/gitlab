@@ -1,5 +1,7 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
+import Experiment  from '~/experimentation/components/experiment.vue';
+import PipelinesCiTemplates from './pipelines_ci_templates.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 
@@ -15,6 +17,8 @@ export default {
   name: 'PipelinesEmptyState',
   components: {
     GlEmptyState,
+    Experiment,
+    PipelinesCiTemplates
   },
   props: {
     emptyStateSvgPath: {
@@ -25,6 +29,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    projectId: {
+      type: String,
+      required: true,
+    }
   },
   computed: {
     ciHelpPagePath() {
@@ -35,19 +43,26 @@ export default {
 </script>
 <template>
   <div>
-    <gl-empty-state
-      v-if="canSetCi"
-      :title="$options.i18n.title"
-      :svg-path="emptyStateSvgPath"
-      :description="$options.i18n.description"
-      :primary-button-text="$options.i18n.btnText"
-      :primary-button-link="ciHelpPagePath"
-    />
-    <gl-empty-state
-      v-else
-      title=""
-      :svg-path="emptyStateSvgPath"
-      :description="$options.i18n.noCiDescription"
-    />
+    <experiment name="pipeline_empty_state_templates">
+      <template #control>
+        <gl-empty-state
+          v-if="canSetCi"
+          :title="$options.i18n.title"
+          :svg-path="emptyStateSvgPath"
+          :description="$options.i18n.description"
+          :primary-button-text="$options.i18n.btnText"
+          :primary-button-link="ciHelpPagePath"
+        />
+        <gl-empty-state
+          v-else
+          title=""
+          :svg-path="emptyStateSvgPath"
+          :description="$options.i18n.noCiDescription"
+        />
+      </template>
+      <template #candidate>
+        <pipelines-ci-templates :project-id="projectId" />
+      </template>
+    </experiment>
   </div>
 </template>

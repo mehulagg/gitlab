@@ -1,0 +1,8 @@
+---
+name: pipeline_empty_state_templates
+introduced_by_url: 
+rollout_issue_url: https://gitlab.com/gitlab-org/growth/team-tasks/-/issues/310
+milestone: '13.11'
+type: experiment
+group: group::activation
+default_enabled: false
