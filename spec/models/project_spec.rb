@@ -5062,6 +5062,32 @@ RSpec.describe Project, factory_default: :keep do
         end
       end
 
+      context 'when root group default_branch_name is available' do
+        let(:root_group) { create(:group, namespace_settings: root_namespace_settings) }
+        let(:project_group) { create(:group, parent: root_group, namespace_settings: group_namespace_settings) }
+        let(:project) { create(:project, path: 'avatar', namespace: project_group) }
+
+        let(:root_namespace_settings) { create(:namespace_settings, default_branch_name: 'root_branch') }
+        let(:group_namespace_settings) { create(:namespace_settings, default_branch_name: nil) }
+
+        before do
+          expect(Gitlab::CurrentSettings)
+            .not_to receive(:default_branch_name)
+        end
+
+        it 'returns the root group default branch name' do
+          expect(project.default_branch).to eq('root_branch')
+        end
+
+        context 'when both root and project groups define a default branch name' do
+          let(:group_namespace_settings) { create(:namespace_settings, default_branch_name: 'group_branch') }
+
+          it 'returns the project group default branch name' do
+            expect(project.default_branch).to eq('group_branch')
+          end
+        end
+      end
+
       context 'Gitlab::CurrentSettings.default_branch_name is available' do
         before do
           expect(Gitlab::CurrentSettings)
