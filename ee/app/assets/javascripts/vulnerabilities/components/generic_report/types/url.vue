@@ -6,23 +6,13 @@ export default {
     GlLink,
   },
   props: {
-    name: {
-      type: String,
-      required: false,
-      default: '',
-    },
     href: {
       type: String,
       required: true,
     },
   },
-  computed: {
-    linkText() {
-      return this.name || this.href;
-    },
-  },
 };
 </script>
 <template>
-  <gl-link :href="href" target="_blank">{{ linkText }}</gl-link>
+  <gl-link :href="href">{{ href }}</gl-link>
 </template>
