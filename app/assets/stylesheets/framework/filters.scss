@@ -395,6 +395,10 @@
         @include gl-mt-2;
       }
     }
+
+    .board-focus-mode {
+      display: none;
+    }
   }
 
   .boards-add-list > .btn {
