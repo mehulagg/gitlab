@@ -12,6 +12,8 @@ import { cloneDeep } from 'lodash';
 import Vue from 'vue';
 import createFlash from '~/flash';
 import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
+import InviteMemberModal from '~/invite_member/components/invite_member_modal.vue';
+import InviteMemberTrigger from '~/invite_member/components/invite_member_trigger.vue';
 import { IssuableType } from '~/issue_show/constants';
 import { __, n__ } from '~/locale';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
@@ -41,6 +43,8 @@ export default {
     GlSearchBoxByType,
     GlLoadingIcon,
     GlLink,
+    InviteMemberTrigger,
+    InviteMemberModal,
   },
   inject: {
     projectMembersPath: {
@@ -435,6 +439,7 @@ export default {
             <gl-dropdown-divider />
             <gl-dropdown-item v-if="directlyInviteMembers || indirectlyInviteMembers">
               <gl-link
+                v-if="directlyInviteMembers"
                 class="gl-pl-6!"
                 :to="projectMembersPath"
                 target="_blank"
@@ -442,6 +447,14 @@ export default {
                 data-track-label="edit_assignee"
                 >{{ __('Invite Members') }}</gl-link
               >
+              <template v-else>
+                <invite-member-trigger
+                  :display-text="__('Invite Members')"
+                  event="click_invite_members_version_b"
+                  label="edit_assignee"
+                />
+                <invite-member-modal :members-path="projectMembersPath" />
+              </template>
             </gl-dropdown-item>
           </template>
         </template>
