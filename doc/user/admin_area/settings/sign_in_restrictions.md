@@ -25,6 +25,10 @@ You can restrict the password authentication for web interface and Git over HTTP
 
 ## Admin Mode
 
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2158) in GitLab 13.10.
+> - It's [deployed behind the feature flag](../../../user/feature_flags.md) `:user_mode_in_session`, disabled by default.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it.
+
 When this feature is enabled, instance administrators are limited as regular users. During that period,
 they do not have access to all projects, groups, or the **Admin Area** menu.
 
