@@ -289,6 +289,13 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
         described_class.track_event(daily_event, values: entity4, time: 29.days.ago)
       end
 
+      it 'returns 0 if there are no events and does not call HLL count' do
+        allow(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:keys_for_aggregation).and_return([])
+
+        expect(Gitlab::Redis::HLL).not_to receive(:count)
+        expect(described_class.unique_events(event_names: [weekly_event], start_date: 4.weeks.ago, end_date: Date.current)).to eq(0)
+      end
+
       it 'raise error if metrics are not in the same slot' do
         expect do
           described_class.unique_events(event_names: [compliance_slot_event, analytics_slot_event], start_date: 4.weeks.ago, end_date: Date.current)
@@ -507,6 +514,13 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
     it 'validates and raise exception if events has mismatched slot or aggregation', :aggregate_failure do
       expect { described_class.calculate_events_union(**time_range.merge(event_names: %w[event1_slot event4])) }.to raise_error described_class::SlotMismatch
       expect { described_class.calculate_events_union(**time_range.merge(event_names: %w[event5_slot event3_slot])) }.to raise_error described_class::AggregationMismatch
+    end
+
+    it 'returns 0 if there are no events and does not call HLL count' do
+      allow(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:keys_for_aggregation).and_return([])
+
+      expect(Gitlab::Redis::HLL).not_to receive(:count)
+      expect(described_class.calculate_events_union(**time_range.merge(event_names: %w[event1_slot event2_slot event3_slot]))).to eq 0
     end
   end
 

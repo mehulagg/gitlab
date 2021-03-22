@@ -151,6 +151,9 @@ module Gitlab
           aggregation = events.first[:aggregation]
 
           keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date, context: context)
+
+          return 0 unless keys.any?
+
           redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
         end
 
