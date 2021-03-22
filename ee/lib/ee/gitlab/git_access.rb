@@ -112,8 +112,9 @@ module EE
       end
 
       def check_sso_session!
-        return true unless user
-        return unless ::Gitlab::Auth::GroupSaml::SessionEnforcer.new(user, container.group).access_restricted?
+        return true unless user && container
+
+        return unless ::Gitlab::Auth::GroupSaml::SessionEnforcer.new(user, containing_group).access_restricted?
 
         raise ::Gitlab::GitAccess::ForbiddenError, "Cannot find valid SSO session. Please login via your group's SSO at https://gitlab.com/users/sign_in"
       end
@@ -162,6 +163,11 @@ module EE
         strong_memoize(:check_size_limit) do
           size_checker.enabled? && super
         end
+      end
+
+      def containing_group
+        return container if group?
+        return project.group if project?
       end
     end
   end
