@@ -12,13 +12,7 @@ module QA
             end
 
             def subscribe(project_path)
-              puts "**** PROJECT PATH ****"
-              puts project_path
-
               fill_element(:upstream_project_path_field, project_path)
-
-              sleep 5
-
               click_element(:subscribe_button)
             end
           end
