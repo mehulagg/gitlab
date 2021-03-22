@@ -69,10 +69,6 @@ class RootController < Dashboard::ProjectsController
 
     root_urls.exclude?(home_page_url)
   end
-
-  def customize_homepage
-    @customize_homepage = Feature.enabled?(:customize_homepage, default_enabled: :yaml)
-  end
 end
 
 RootController.prepend_if_ee('EE::RootController')
