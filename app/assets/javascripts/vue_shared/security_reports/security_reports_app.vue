@@ -184,6 +184,7 @@ export default {
     :has-issues="false"
     class="mr-widget-border-top mr-report"
     data-testid="security-mr-widget"
+    track-action="expand_security_report"
   >
     <template v-for="slot in $options.summarySlots" #[slot]>
       <span :key="slot">

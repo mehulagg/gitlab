@@ -134,6 +134,7 @@ export default {
     :error-text="groupedSummaryText"
     :has-issues="reports.length > 0"
     :should-emit-toggle-event="true"
+    track-action="expand_test_summary"
     class="mr-widget-section grouped-security-reports mr-report"
     @toggleEvent="handleToggleEvent"
   >

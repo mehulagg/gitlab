@@ -96,6 +96,11 @@ export default {
       required: false,
       default: false,
     },
+    trackAction: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
 
   data() {
@@ -188,6 +193,8 @@ export default {
 
         <button
           v-if="isCollapsible"
+          :data-track-event="trackAction && click_button"
+          :data-track-label="trackAction"
           type="button"
           data-testid="report-section-expand-button"
           class="js-collapse-btn btn float-right btn-sm align-self-center"

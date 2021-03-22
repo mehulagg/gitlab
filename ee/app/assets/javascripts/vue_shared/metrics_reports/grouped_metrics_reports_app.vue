@@ -89,6 +89,7 @@ export default {
     :error-text="groupedSummaryText"
     :has-issues="hasMetrics"
     should-emit-toggle-event
+    track-action="expand_metric_report"
     class="mr-widget-border-top grouped-security-reports mr-report"
     @toggleEvent="handleToggleEvent"
   >
