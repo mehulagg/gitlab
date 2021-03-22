@@ -80,6 +80,7 @@ If necessary, you can disable **Admin Mode** as an administrator by using one of
   ```ruby
   ::Gitlab::CurrentSettings.update_attributes!(admin_mode: false)
   ```
+  
 ## Feature flag **(FREE SELF)**
 
 The admin mode feature is behind these feature flag `user_mode_in_session`. The flag is disabled by default.
