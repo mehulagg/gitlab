@@ -12,9 +12,18 @@ const apolloProvider = new VueApollo({
 export default () => {
   const el = document.getElementById('js-show-cloud-license-page');
 
+  if (!el) {
+    return null;
+  }
+
+  const { currentPlanTitle } = JSON.parse(JSON.stringify(el.dataset));
+
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      planName: currentPlanTitle,
+    },
     render: (h) => h(CloudLicenseShowApp),
   });
 };
