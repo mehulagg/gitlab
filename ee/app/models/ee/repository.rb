@@ -34,9 +34,12 @@ module EE
     end
 
     def fetch_upstream(url, forced: false, check_tags_changed: false)
-      add_remote(MIRROR_REMOTE, url)
-
-      fetch_remote(MIRROR_REMOTE, ssh_auth: project&.import_data, forced: forced, check_tags_changed: check_tags_changed)
+      if Feature.enabled?(:gitaly_fetch_remote_params)
+        fetch_url(url, ssh_auth: project&.import_data, forced: forced, check_tags_changed: check_tags_changed)
+      else
+        add_remote(MIRROR_REMOTE, url)
+        fetch_remote(MIRROR_REMOTE, ssh_auth: project&.import_data, forced: forced, check_tags_changed: check_tags_changed)
+      end
     end
 
     def upstream_branches
