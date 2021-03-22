@@ -7,7 +7,10 @@ export default (apolloProvider) => {
   const queryParams = queryToObject(window.location.search);
   const el = document.getElementById('js-board-filtered-search');
 
-  // get full path and provide here
+  if (!el) {
+    return null;
+  }
+
   return new Vue({
     el,
     provide: {

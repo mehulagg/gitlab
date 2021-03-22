@@ -3,19 +3,16 @@ import {
   GlToken,
   GlFilteredSearchToken,
   GlFilteredSearchSuggestion,
-  GlDropdownDivider,
   GlLoadingIcon,
 } from '@gitlab/ui';
-
-import GroupLabelsQuery from '../graphql/group_labels.query.graphql';
 import { stripQuotes } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import GroupLabelsQuery from '../graphql/group_labels.query.graphql';
 
 export default {
   components: {
     GlToken,
     GlFilteredSearchToken,
     GlFilteredSearchSuggestion,
-    GlDropdownDivider,
     GlLoadingIcon,
   },
   props: {
@@ -39,14 +36,13 @@ export default {
         };
       },
       update(data) {
-        return data.group.labels.edges.map((item) => item.node);
+        return data.group?.labels?.edges.map((item) => item.node) || [];
       },
     },
   },
   data() {
     return {
       labels: [],
-      defaultLabels: [],
       search: '', // on page load if this is there
     };
   },
@@ -89,14 +85,6 @@ export default {
       >
     </template>
     <template #suggestions>
-      <gl-filtered-search-suggestion
-        v-for="label in defaultLabels"
-        :key="label.value"
-        :value="label.value"
-      >
-        {{ label.text }}
-      </gl-filtered-search-suggestion>
-      <gl-dropdown-divider v-if="defaultLabels.length" />
       <gl-loading-icon v-if="$apollo.loading" />
       <template v-else>
         <gl-filtered-search-suggestion v-for="label in labels" :key="label.id" :value="label.title">
