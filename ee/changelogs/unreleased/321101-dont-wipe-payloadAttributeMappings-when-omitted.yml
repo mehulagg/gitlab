@@ -1,5 +1,0 @@
----
-title: Prevents HttpIntegration.payload_attribute_mapping from being reset when it was not a part of a GraphQL mutation input.
-merge_request: 55511
-author:
-type: fixed

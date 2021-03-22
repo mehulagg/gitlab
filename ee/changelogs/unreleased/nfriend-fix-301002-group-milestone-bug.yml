@@ -1,6 +1,0 @@
----
-title: Fix 500 error on group milestones page when milestones are associated to more
-  than 3 releases
-merge_request: 55540
-author:
-type: fixed

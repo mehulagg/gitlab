@@ -55,7 +55,7 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
     it 'returns error message for invalid input' do
       post assign_project_security_policy_url(project), params: { orchestration: { policy_project_id: nil } }
 
-      expect(flash[:alert]).to eq 'Policy project doesn\'t exists'
+      expect(flash[:alert]).to eq 'Policy project doesn\'t exist'
     end
   end
 end

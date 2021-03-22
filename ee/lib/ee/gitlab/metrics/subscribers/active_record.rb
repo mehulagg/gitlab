@@ -54,7 +54,9 @@ module EE
           end
 
           def observe_db_role_duration(db_role, event)
-            observe("gitlab_sql_#{db_role}_duration_seconds".to_sym, event)
+            observe("gitlab_sql_#{db_role}_duration_seconds".to_sym, event) do
+              buckets ::Gitlab::Metrics::Subscribers::ActiveRecord::SQL_DURATION_BUCKET
+            end
 
             duration = event.duration / 1000.0
             duration_key = "db_#{db_role}_duration_s".to_sym

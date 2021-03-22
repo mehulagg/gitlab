@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix syncing direct download remote stored Blob types'
-merge_request: 55775
-author:
-type: fixed

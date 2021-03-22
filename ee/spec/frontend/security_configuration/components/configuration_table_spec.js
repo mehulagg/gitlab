@@ -65,6 +65,7 @@ describe('ConfigurationTable component', () => {
       feature,
       gitlabCiPresent: propsData.gitlabCiPresent,
       gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
+      autoDevopsEnabled: propsData.autoDevopsEnabled,
     });
     expect(manage.find(ManageFeature).props()).toEqual({
       feature,

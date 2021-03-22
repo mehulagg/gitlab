@@ -1,5 +1,0 @@
----
-title: Extend GraphQL Ci::PipelineType to include Security Report Findings
-merge_request: 54104
-author:
-type: added

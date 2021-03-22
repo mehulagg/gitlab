@@ -25,7 +25,7 @@ More links:
 ## What is Usage Ping?
 
 - GitLab sends a weekly payload containing usage data to GitLab Inc. Usage Ping provides high-level data to help our product, support, and sales teams. It does not send any project names, usernames, or any other specific data. The information from the usage ping is not anonymous, it is linked to the hostname of the instance. Sending usage ping is optional, and any instance can disable analytics.
-- The usage data is primarily composed of row counts for different tables in the instance’s database. By comparing these counts month over month (or week over week), we can get a rough sense for how an instance is using the different features in the product. In addition to counts, other facts
+- The usage data is primarily composed of row counts for different tables in the instance's database. By comparing these counts month over month (or week over week), we can get a rough sense for how an instance is using the different features in the product. In addition to counts, other facts
     that help us classify and understand GitLab installations are collected.
 - Usage ping is important to GitLab as we use it to calculate our Stage Monthly Active Users (SMAU) which helps us measure the success of our stages and features.
 - While usage ping is enabled, GitLab gathers data from the other instances and can show usage statistics of your instance to your users.
@@ -33,8 +33,8 @@ More links:
 ### Why should we enable Usage Ping?
 
 - The main purpose of Usage Ping is to build a better GitLab. Data about how GitLab is used is collected to better understand feature/stage adoption and usage, which helps us understand how GitLab is adding value and helps our team better understand the reasons why people use GitLab and with this knowledge we're able to make better product decisions.
-- As a benefit of having the usage ping active, GitLab lets you analyze the users’ activities over time of your GitLab installation.
-- As a benefit of having the usage ping active, GitLab provides you with The DevOps Report,which gives you an overview of your entire instance’s adoption of Concurrent DevOps from planning to monitoring.
+- As a benefit of having the usage ping active, GitLab lets you analyze the users' activities over time of your GitLab installation.
+- As a benefit of having the usage ping active, GitLab provides you with The DevOps Report,which gives you an overview of your entire instance's adoption of Concurrent DevOps from planning to monitoring.
 - You get better, more proactive support. (assuming that our TAMs and support organization used the data to deliver more value)
 - You get insight and advice into how to get the most value out of your investment in GitLab. Wouldn't you want to know that a number of features or values are not being adopted in your organization?
 - You get a report that illustrates how you compare against other similar organizations (anonymized), with specific advice and recommendations on how to improve your DevOps processes.
@@ -502,13 +502,14 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
 Use one of the following methods to track events:
 
-1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, if: nil)`.
+1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, if: nil, &block)`.
 
    Arguments:
 
    - `controller_actions`: controller actions we want to track.
    - `name`: event name.
    - `if`: optional custom conditions, using the same format as with Rails callbacks.
+   - `&block`: optional block that computes and returns the `custom_id` that we want to track. This will override the `visitor_id`.
 
    Example usage:
 
@@ -827,7 +828,7 @@ pry(main)> Gitlab::UsageData.count(User.active)
 Paste the SQL query into `#database-lab` to see how the query performs at scale.
 
 - `#database-lab` is a Slack channel which uses a production-sized environment to test your queries.
-- GitLab.com’s production database has a 15 second timeout.
+- GitLab.com's production database has a 15 second timeout.
 - Any single query must stay below [1 second execution time](../query_performance.md#timing-guidelines-for-queries) with cold caches.
 - Add a specialized index on columns involved to reduce the execution time.
 
@@ -929,7 +930,7 @@ WARNING:
 This feature is intended solely for internal GitLab use.
 
 To add data for aggregated metrics into Usage Ping payload you should add corresponding definition at [`lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/) for metrics available at Community Edition and at [`ee/lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/usage_data_counters/aggregated_metrics/) for Enterprise Edition ones.
- 
+
 Each aggregate definition includes following parts:
 
 - `name`: Unique name under which the aggregate metric is added to the Usage Ping payload.
@@ -957,7 +958,10 @@ Example aggregated metric entries:
 ```yaml
 - name: example_metrics_union
   operator: OR
-  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+  events: 
+    - 'i_search_total'
+    - 'i_search_advanced'
+    - 'i_search_paid'
   source: redis
   time_frame:
     - 7d
@@ -968,7 +972,9 @@ Example aggregated metric entries:
   time_frame:
     - 28d
     - all
-  events: ['dependency_scanning_pipeline_all_time', 'container_scanning_pipeline_all_time']
+  events:
+    - 'dependency_scanning_pipeline_all_time'
+    - 'container_scanning_pipeline_all_time'
   feature_flag: example_aggregated_metric
 ```
 
@@ -993,7 +999,7 @@ Aggregated metrics collected in `7d` and `28d` time frames are added into Usage 
 }
 ```
 
-Aggregated metrics for `all` time frame are present in the `count` top level key, with the `aggregate_` prefix added to their name. 
+Aggregated metrics for `all` time frame are present in the `count` top level key, with the `aggregate_` prefix added to their name.
 
 For example:
 
@@ -1001,7 +1007,7 @@ For example:
 
 Becomes:
 
-`counts.aggregate_example_metrics_intersection` 
+`counts.aggregate_example_metrics_intersection`
 
 ```ruby
 {
@@ -1099,7 +1105,9 @@ Example definition:
 - name: example_metrics_intersection_database_sourced
   operator: AND
   source: database
-  events: ['dependency_scanning_pipeline', 'container_scanning_pipeline']
+  events:
+    - 'dependency_scanning_pipeline'
+    - 'container_scanning_pipeline'
   time_frame:
     - 28d
     - all

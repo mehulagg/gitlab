@@ -19,11 +19,8 @@ export default {
     GlLoadingIcon,
     VulnerabilitiesCountList,
   },
+  inject: ['groupFullPath'],
   props: {
-    groupFullPath: {
-      type: String,
-      required: true,
-    },
     vulnerabilitiesExportEndpoint: {
       type: String,
       required: true,
@@ -88,7 +85,7 @@ export default {
       <template #sticky>
         <filters :projects="projects" @filterChange="handleFilterChange" />
       </template>
-      <group-security-vulnerabilities :group-full-path="groupFullPath" :filters="filters" />
+      <group-security-vulnerabilities :filters="filters" />
     </security-dashboard-layout>
   </div>
 </template>

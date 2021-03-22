@@ -7,13 +7,14 @@ RSpec.describe DastSiteProfiles::CreateService do
   let(:project) { create(:project, :repository, creator: user) }
   let(:name) { FFaker::Company.catch_phrase }
   let(:target_url) { generate(:url) }
+  let(:excluded_urls) { ["#{target_url}/signout"] }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
   describe '#execute' do
-    subject { described_class.new(project, user).execute(name: name, target_url: target_url) }
+    subject { described_class.new(project, user).execute(name: name, target_url: target_url, excluded_urls: excluded_urls) }
 
     let(:status) { subject.status }
     let(:message) { subject.message }
@@ -74,6 +75,22 @@ RSpec.describe DastSiteProfiles::CreateService do
 
         it 'populates errors' do
           expect(errors).to include('Url is blocked: Requests to localhost are not allowed')
+        end
+      end
+
+      context 'when excluded_urls is nil' do
+        let(:excluded_urls) { nil }
+
+        it 'defaults to an empty array' do
+          expect(payload.excluded_urls).to be_empty
+        end
+      end
+
+      context 'when excluded_urls is not supplied' do
+        subject { described_class.new(project, user).execute(name: name, target_url: target_url) }
+
+        it 'defaults to an empty array' do
+          expect(payload.excluded_urls).to be_empty
         end
       end
 

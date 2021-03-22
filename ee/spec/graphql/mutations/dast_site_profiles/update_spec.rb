@@ -3,14 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::DastSiteProfiles::Update do
-  let(:group) { create(:group) }
-  let(:project) { create(:project, group: group) }
-  let(:user) { create(:user) }
-  let(:full_path) { project.full_path }
-  let!(:dast_site_profile) { create(:dast_site_profile, project: project) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
 
+  let(:full_path) { project.full_path }
   let(:new_profile_name) { SecureRandom.hex }
   let(:new_target_url) { generate(:url) }
+  let(:new_excluded_urls) { ["#{new_target_url}/signout"] }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
@@ -26,7 +27,17 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
         full_path: full_path,
         id: dast_site_profile.to_global_id,
         profile_name: new_profile_name,
-        target_url: new_target_url
+        target_url: new_target_url,
+        excluded_urls: new_excluded_urls,
+        request_headers: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0',
+        auth: {
+          enabled: true,
+          url: "#{new_target_url}/login",
+          username_field: 'session[username]',
+          password_field: 'session[password]',
+          username: generate(:email),
+          password: SecureRandom.hex
+        }
       )
     end
 
@@ -44,12 +55,21 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
           project.add_developer(user)
         end
 
-        it 'updates the dast_site_profile' do
+        it 'updates the dast_site_profile', :aggregate_failures do
           dast_site_profile = subject[:id].find
 
-          aggregate_failures do
-            expect(dast_site_profile.name).to eq(new_profile_name)
-            expect(dast_site_profile.dast_site.url).to eq(new_target_url)
+          expect(dast_site_profile.name).to eq(new_profile_name)
+          expect(dast_site_profile.dast_site.url).to eq(new_target_url)
+          expect(dast_site_profile.reload.excluded_urls).to eq(new_excluded_urls)
+        end
+
+        context 'when the feature flag security_dast_site_profiles_additional_fields is disabled' do
+          it 'does not set the branch_name' do
+            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+
+            dast_site_profile = subject[:id].find
+
+            expect(dast_site_profile.reload.excluded_urls).not_to eq(new_excluded_urls)
           end
         end
       end

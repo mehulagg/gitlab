@@ -17,8 +17,8 @@ You're strongly encouraged to read and understand the
 [Feature flags in development of GitLab](../feature_flags/index.md) portion of the
 documentation before considering running experiments. Experiments add additional
 concepts which may seem confusing or advanced without understanding the underpinnings
-of how GitLab uses feature flags in development. One concept: GLEX supports multivariate
-experiments, which are sometimes referred to as A/B/n tests.
+of how GitLab uses feature flags in development. One concept: GLEX supports
+experiments with multiple variants, which are sometimes referred to as A/B/n tests.
 
 The [`gitlab-experiment` project](https://gitlab.com/gitlab-org/gitlab-experiment)
 exists in a separate repository, so it can be shared across any GitLab property that uses

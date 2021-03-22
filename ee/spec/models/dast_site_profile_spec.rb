@@ -3,7 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe DastSiteProfile, type: :model do
-  subject { create(:dast_site_profile, :with_dast_site_validation) }
+  let_it_be(:project) { create(:project) }
+
+  subject { create(:dast_site_profile, :with_dast_site_validation, project: project) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
@@ -12,22 +14,83 @@ RSpec.describe DastSiteProfile, type: :model do
   end
 
   describe 'validations' do
+    let_it_be(:dast_site) { create(:dast_site, project: project) }
+
     it { is_expected.to be_valid }
+    it { is_expected.to validate_length_of(:auth_password_field).is_at_most(255) }
+    it { is_expected.to validate_length_of(:auth_url).is_at_most(1024).allow_nil }
+    it { is_expected.to validate_length_of(:auth_username).is_at_most(255) }
+    it { is_expected.to validate_length_of(:auth_username_field).is_at_most(255) }
     it { is_expected.to validate_length_of(:name).is_at_most(255) }
-    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
-    it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:dast_site_id) }
     it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_presence_of(:project_id) }
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
 
-    context 'when the project_id and dast_site.project_id do not match' do
-      let(:project) { create(:project) }
-      let(:dast_site) { create(:dast_site) }
+    describe '#auth_url' do
+      context 'when the auth_uri is nil' do
+        it 'is valid' do
+          expect(subject).to be_valid
+        end
+      end
 
-      subject { build(:dast_site_profile, project: project, dast_site: dast_site) }
+      context 'when the auth_url is not a valid uri' do
+        subject { build(:dast_site_profile, project: project, dast_site: dast_site, auth_url: 'hello-world') }
 
-      it 'is not valid' do
-        expect(subject.valid?).to be_falsey
-        expect(subject.errors.full_messages).to include('Project does not match dast_site.project')
+        it 'is not valid' do
+          expect(subject).not_to be_valid
+        end
+      end
+
+      context 'when the auth_url is not public' do
+        subject { build(:dast_site_profile, project: project, dast_site: dast_site) }
+
+        it 'is valid' do
+          expect(subject).to be_valid
+        end
+      end
+    end
+
+    describe '#excluded_urls' do
+      let(:excluded_urls) { [] }
+
+      subject { build(:dast_site_profile, project: project, dast_site: dast_site, excluded_urls: excluded_urls) }
+
+      it { is_expected.to allow_value(Array.new(25, generate(:url))).for(:excluded_urls) }
+      it { is_expected.not_to allow_value(Array.new(26, generate(:url))).for(:excluded_urls) }
+
+      context 'when there are some urls that are invalid' do
+        let(:excluded_urls) do
+          [
+            generate(:url),
+            generate(:url) + '/' + SecureRandom.alphanumeric(1024),
+            'hello-world',
+            'hello-world' + '/' + SecureRandom.alphanumeric(1024)
+          ]
+        end
+
+        it 'is not valid', :aggregate_failures do
+          expected_full_messages = [
+            "Excluded urls contains invalid URLs (#{excluded_urls[2]}, #{excluded_urls[3]})",
+            "Excluded urls contains URLs that exceed the 1024 character limit (#{excluded_urls[1]}, #{excluded_urls[3]})"
+          ]
+
+          expect(subject).not_to be_valid
+          expect(subject.errors.full_messages).to eq(expected_full_messages)
+        end
+      end
+    end
+
+    describe '#project' do
+      context 'when the project_id and dast_site.project_id do not match' do
+        let_it_be(:dast_site) { create(:dast_site) }
+
+        subject { build(:dast_site_profile, dast_site: dast_site, project: project) }
+
+        it 'is not valid', :aggregate_failures do
+          expect(subject).not_to be_valid
+          expect(subject.errors.full_messages).to include('Project does not match dast_site.project')
+        end
       end
     end
   end
@@ -38,7 +101,7 @@ RSpec.describe DastSiteProfile, type: :model do
         subject.dast_site_validation.update!(state: :failed)
       end
 
-      it 'eager loads the association' do
+      it 'eager loads the association', :aggregate_failures do
         subject
 
         recorder = ActiveRecord::QueryRecorder.new do
@@ -46,10 +109,8 @@ RSpec.describe DastSiteProfile, type: :model do
           subject.dast_site_validation
         end
 
-        aggregate_failures do
-          expect(subject.status).to eq('failed') # ensures guard passed
-          expect(recorder.count).to be_zero
-        end
+        expect(subject.status).to eq('failed') # ensures guard passed
+        expect(recorder.count).to be_zero
       end
     end
 
@@ -83,13 +144,11 @@ RSpec.describe DastSiteProfile, type: :model do
 
   describe '#status' do
     context 'when dast_site_validation association does not exist' do
-      it 'is none' do
+      it 'is none', :aggregate_failures do
         subject.dast_site.update!(dast_site_validation_id: nil)
 
-        aggregate_failures do
-          expect(subject.dast_site_validation).to be_nil
-          expect(subject.status).to eq('none')
-        end
+        expect(subject.dast_site_validation).to be_nil
+        expect(subject.status).to eq('none')
       end
     end
 

@@ -164,21 +164,21 @@ export default {
     if (getters.isSwimlanesOn) {
       dispatch('resetEpics');
       dispatch('resetIssues');
-      dispatch('fetchEpicsSwimlanes', {});
+      dispatch('fetchEpicsSwimlanes');
+      dispatch('fetchIssueLists');
     } else if (gon.features.graphqlBoardLists || getters.isEpicBoard) {
       dispatch('fetchLists');
       dispatch('resetIssues');
     }
   },
 
-  fetchEpicsSwimlanes({ state, commit, dispatch }, { withLists = true, endCursor = null }) {
+  fetchEpicsSwimlanes({ state, commit, dispatch }, { endCursor = null } = {}) {
     const { fullPath, boardId, boardType, filterParams } = state;
 
     const variables = {
       fullPath,
       boardId: `gid://gitlab/Board/${boardId}`,
       issueFilters: filterParams,
-      withLists,
       isGroup: boardType === BoardType.group,
       isProject: boardType === BoardType.project,
       after: endCursor,
@@ -190,31 +190,21 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const { epics, lists } = data[boardType]?.board;
+        const { epics } = data[boardType]?.board;
         const epicsFormatted = epics.edges.map((e) => ({
           ...e.node,
         }));
 
-        if (!withLists) {
-          commit(types.RECEIVE_EPICS_SUCCESS, epicsFormatted);
+        if (epicsFormatted) {
+          commit(types.RECEIVE_EPICS_SUCCESS, {
+            epics: epicsFormatted,
+            canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
+          });
           commit(types.UPDATE_CACHED_EPICS, epicsFormatted);
-        } else {
-          if (lists) {
-            commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
-          }
-
-          if (epicsFormatted) {
-            commit(types.RECEIVE_FIRST_EPICS_SUCCESS, {
-              epics: epicsFormatted,
-              canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
-            });
-            commit(types.UPDATE_CACHED_EPICS, epicsFormatted);
-          }
         }
 
         if (epics.pageInfo?.hasNextPage) {
           dispatch('fetchEpicsSwimlanes', {
-            withLists: false,
             endCursor: epics.pageInfo.endCursor,
           });
         }
@@ -377,7 +367,8 @@ export default {
           spreadArrays: true,
         }),
       );
-      dispatch('fetchEpicsSwimlanes', {});
+      dispatch('fetchEpicsSwimlanes');
+      dispatch('fetchIssueLists');
     } else if (!gon.features.graphqlBoardLists) {
       historyPushState(removeParams(['group_by']), window.location.href, true);
       boardsStore.create();
@@ -387,10 +378,8 @@ export default {
     }
   },
 
-  setEpicSwimlanes: ({ commit, dispatch }) => {
+  setEpicSwimlanes: ({ commit }) => {
     commit(types.SET_EPICS_SWIMLANES);
-
-    dispatch('fetchEpicsSwimlanes', {});
   },
 
   resetEpics: ({ commit }) => {
@@ -454,7 +443,7 @@ export default {
     const { epic } = data.issueSetEpic.issue;
 
     if (epic !== null) {
-      commit(types.RECEIVE_FIRST_EPICS_SUCCESS, { epics: [epic, ...state.epics] });
+      commit(types.RECEIVE_EPICS_SUCCESS, { epics: [epic, ...state.epics] });
       commit(types.UPDATE_CACHED_EPICS, [epic]);
     }
 

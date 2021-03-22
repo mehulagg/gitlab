@@ -180,7 +180,7 @@ outside world.
    pages_nginx['redirect_http_to_https'] = true
    ```
 
-1. If you haven’t named your certificate and key `example.io.crt` and `example.io.key`
+1. If you haven't named your certificate and key `example.io.crt` and `example.io.key`
 then you'll need to also add the full paths as shown below:
 
    ```ruby
@@ -600,8 +600,9 @@ the below steps to do a no downtime transfer to a new storage location.
 
 ## Configure listener for reverse proxy requests
 
-Follow the steps below to configure the proxy listener of GitLab Pages. [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2533) in
-Omnibus GitLab 11.1.
+> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2533) in Omnibus GitLab 11.1.
+
+Follow the steps below to configure the proxy listener of GitLab Pages.
 
 1. By default the listener is configured to listen for requests on `localhost:8090`.
 
@@ -752,7 +753,7 @@ The default value for Omnibus installations is `nil`.
 If left unchanged, GitLab Pages tries to use any available source (either `gitlab` or `disk`). The
 preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-based-configuration).
 
-On large GitLab instances, using the API-based configuration will significantly improve the pages daemon startup time, as there is no need to load all custom domains configuration into memory. 
+On large GitLab instances, using the API-based configuration will significantly improve the pages daemon startup time, as there is no need to load all custom domains configuration into memory.
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
@@ -815,7 +816,7 @@ or persistent errors, or the Pages Daemon serving old content.
 NOTE:
 Expiry, interval and timeout flags use [Golang's duration formatting](https://golang.org/pkg/time/#ParseDuration).
 A duration string is a possibly signed sequence of decimal numbers,
-each with optional fraction and a unit suffix, such as "300ms", "1.5h" or "2h45m". 
+each with optional fraction and a unit suffix, such as "300ms", "1.5h" or "2h45m".
 Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 
 Examples:

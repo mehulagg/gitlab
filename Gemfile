@@ -150,7 +150,7 @@ gem 'deckar01-task_list', '2.3.1'
 gem 'gitlab-markup', '~> 1.7.1'
 gem 'github-markup', '~> 1.7.0', require: 'github/markup'
 gem 'commonmarker', '~> 0.21'
-gem 'kramdown', '~> 2.3.0'
+gem 'kramdown', '~> 2.3.1'
 gem 'RedCloth', '~> 4.3.2'
 gem 'rdoc', '~> 6.1.2'
 gem 'org-ruby', '~> 0.9.12'
@@ -293,7 +293,7 @@ gem 'autoprefixer-rails', '10.2.0.0'
 gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
-gem 'gemojione', '~> 4.3.3'
+gem 'gemojione', '~> 3.3'
 gem 'gon', '~> 6.2'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
@@ -312,7 +312,7 @@ gem 'pg_query', '~> 1.3.0'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '~> 0.16.1'
+gem 'gitlab-labkit', '~> 0.16.2'
 # Thrift is a dependency of gitlab-labkit, we want a version higher than 0.14.0
 # because of https://gitlab.com/gitlab-org/gitlab/-/issues/321900
 gem 'thrift', '>= 0.14.0'

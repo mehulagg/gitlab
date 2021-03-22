@@ -14,7 +14,6 @@ import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import EnvironmentPicker from './environment_picker.vue';
-import NetworkPolicyEditor from './network_policy_editor.vue';
 import { CiliumNetworkPolicyKind } from './policy_editor/constants';
 import PolicyDrawer from './policy_editor/policy_drawer.vue';
 
@@ -32,7 +31,8 @@ export default {
     GlLink,
     GlToggle,
     EnvironmentPicker,
-    NetworkPolicyEditor,
+    NetworkPolicyEditor: () =>
+      import(/* webpackChunkName: 'network_policy_editor' */ './network_policy_editor.vue'),
     PolicyDrawer,
   },
   props: {
@@ -178,23 +178,22 @@ export default {
 
 <template>
   <div>
-    <div class="mb-2">
-      <gl-alert
-        v-if="hasAutoDevopsPolicy"
-        data-testid="autodevopsAlert"
-        variant="info"
-        :dismissible="false"
-      >
-        <gl-sprintf :message="$options.autodevopsNoticeDescription">
-          <template #monospaced="{ content }">
-            <span class="monospace">{{ content }}</span>
-          </template>
-          <template #link="{ content }">
-            <gl-link :href="documentationFullPath">{{ content }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </gl-alert>
-    </div>
+    <gl-alert
+      v-if="hasAutoDevopsPolicy"
+      data-testid="autodevopsAlert"
+      variant="info"
+      :dismissible="false"
+      class="gl-mb-3"
+    >
+      <gl-sprintf :message="$options.autodevopsNoticeDescription">
+        <template #monospaced="{ content }">
+          <span class="gl-font-monospace">{{ content }}</span>
+        </template>
+        <template #link="{ content }">
+          <gl-link :href="documentationFullPath">{{ content }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
 
     <div class="pt-3 px-3 bg-gray-light">
       <div class="row justify-content-between align-items-center">

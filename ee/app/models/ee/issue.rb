@@ -175,21 +175,6 @@ module EE
         user.can?(:admin_issue, project) && user.can?(:create_epic, group)
     end
 
-    # Issue position on boards list should be relative to all group projects
-    def parent_ids
-      return super unless has_group_boards?
-
-      board_group.all_projects.select(:id)
-    end
-
-    def has_group_boards?
-      board_group && board_group.boards.any?
-    end
-
-    def board_group
-      @group ||= project.group
-    end
-
     def promoted?
       !!promoted_to_epic_id
     end

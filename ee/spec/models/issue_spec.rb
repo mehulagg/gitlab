@@ -529,9 +529,10 @@ RSpec.describe Issue do
 
   describe 'relative positioning with group boards' do
     let_it_be(:group) { create(:group) }
+    let_it_be(:subgroup) { create(:group, parent: group) }
     let_it_be(:board) { create(:board, group: group) }
-    let_it_be(:project) { create(:project, namespace: group) }
-    let_it_be(:project1) { create(:project, namespace: group) }
+    let_it_be(:project) { create(:project, group: subgroup) }
+    let_it_be(:project1) { create(:project, group: group) }
     let_it_be_with_reload(:issue) { create(:issue, project: project) }
     let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }

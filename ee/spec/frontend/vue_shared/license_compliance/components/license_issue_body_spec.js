@@ -1,46 +1,68 @@
-import Vue from 'vue';
-
+import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import LicenseIssueBody from 'ee/vue_shared/license_compliance/components/license_issue_body.vue';
-import createStore from 'ee/vue_shared/license_compliance/store';
-import { trimText } from 'helpers/text_helper';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import LicensePackages from 'ee/vue_shared/license_compliance/components/license_packages.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { licenseReport } from '../mock_data';
 
 describe('LicenseIssueBody', () => {
-  const issue = licenseReport[0];
-  const Component = Vue.extend(LicenseIssueBody);
-  let vm;
-  let store;
+  let wrapper;
+
+  const findLicenseIssueBody = () => wrapper.findComponent(LicenseIssueBody);
+  const findLicensePackages = () => wrapper.findComponent(LicensePackages);
+  const findGlLink = () => wrapper.find(GlLink);
+  const findText = () => wrapper.find('[data-testid="license-copy"]');
+
+  const createComponent = (props = {}) => {
+    wrapper = extendedWrapper(
+      shallowMount(LicenseIssueBody, {
+        propsData: {
+          ...props,
+        },
+      }),
+    );
+  };
 
   beforeEach(() => {
-    store = createStore();
+    createComponent({ issue: licenseReport[0] });
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
   });
 
-  describe('template', () => {
-    beforeEach(() => {
-      vm = mountComponentWithStore(Component, { props: { issue }, store });
-    });
-
-    it('renders component container element with class `license-item`', () => {
-      expect(vm.$el.classList.contains('license-item')).toBe(true);
-    });
-
-    it('renders link to view license', () => {
-      const linkEl = vm.$el.querySelector('.license-item > a');
-
-      expect(linkEl).not.toBeNull();
-      expect(linkEl.innerText.trim()).toBe(issue.name);
+  describe('on load', () => {
+    it('renders license issue body', () => {
+      expect(findLicenseIssueBody().exists()).toBe(true);
     });
 
     it('renders packages list', () => {
-      const packagesEl = vm.$el.querySelector('.license-packages');
+      expect(findLicensePackages().exists()).toBe(true);
+    });
+  });
 
-      expect(packagesEl).not.toBeNull();
-      expect(trimText(packagesEl.innerText)).toBe('Used by pg, puma, foo, and 2 more');
+  describe('when issue url is defined', () => {
+    it('renders link to view license', () => {
+      const link = findGlLink();
+      const text = findText();
+
+      expect(link.text()).toBe(licenseReport[0].name);
+      expect(link.attributes('href')).toBe(licenseReport[0].url);
+      expect(text.exists()).toBe(false);
+    });
+  });
+
+  describe('when issue url is undefined', () => {
+    beforeEach(() => {
+      createComponent({ issue: licenseReport[1] });
+    });
+
+    it('renders text to view license', () => {
+      const link = findGlLink();
+      const text = findText();
+
+      expect(text.text()).toBe(licenseReport[1].name);
+      expect(link.exists()).toBe(false);
     });
   });
 
@@ -49,14 +71,12 @@ describe('LicenseIssueBody', () => {
       const issueWithoutPackages = licenseReport[0];
       issueWithoutPackages.packages = [];
 
-      vm = mountComponentWithStore(Component, { props: { issue: issueWithoutPackages }, store });
+      createComponent({ issue: issueWithoutPackages });
     });
 
     it('does not render packages list', () => {
-      const packagesEl = vm.$el.querySelector('.license-packages');
-
-      expect(packagesEl).toBeNull();
-      vm.$destroy();
+      const packages = findLicensePackages();
+      expect(packages.exists()).toBe(false);
     });
   });
 });

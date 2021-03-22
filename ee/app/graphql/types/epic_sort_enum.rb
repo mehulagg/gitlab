@@ -5,9 +5,9 @@ module Types
     graphql_name 'EpicSort'
     description 'Roadmap sort values'
 
-    value 'start_date_desc', 'Start date at descending order.'
-    value 'start_date_asc', 'Start date at ascending order.'
-    value 'end_date_desc', 'End date at descending order.'
-    value 'end_date_asc', 'End date at ascending order.'
+    value 'start_date_desc', 'Start date at descending order.', value: :start_date_desc
+    value 'start_date_asc', 'Start date at ascending order.', value: :start_date_asc
+    value 'end_date_desc', 'End date at descending order.', value: :end_date_desc
+    value 'end_date_asc', 'End date at ascending order.', value: :end_date_asc
   end
 end

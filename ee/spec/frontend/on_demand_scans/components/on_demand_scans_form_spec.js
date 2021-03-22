@@ -82,6 +82,7 @@ describe('OnDemandScansForm', () => {
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
   const findSaveButton = () => findByTestId('on-demand-scan-save-button');
   const findCancelButton = () => findByTestId('on-demand-scan-cancel-button');
+  const findProfileSummary = () => findByTestId('selected-profile-summary');
 
   const setValidFormData = () => {
     findNameInput().vm.$emit('input', 'My daily scan');
@@ -102,6 +103,12 @@ describe('OnDemandScansForm', () => {
     });
     return setValidFormData();
   };
+  const selectProfile = (component) => async (profile) => {
+    subject.find(component).vm.$emit('input', profile.id);
+    await subject.vm.$nextTick();
+  };
+  const selectScannerProfile = selectProfile(ScannerProfileSelector);
+  const selectSiteProfile = selectProfile(SiteProfileSelector);
 
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
   const saveScan = () => findSaveButton().vm.$emit('click');
@@ -515,13 +522,26 @@ describe('OnDemandScansForm', () => {
     });
   });
 
+  describe('scanner profile summary', () => {
+    beforeEach(() => {
+      mountSubject({
+        provide: {
+          glFeatures: {
+            securityDastSiteProfilesAdditionalFields: true,
+          },
+        },
+      });
+    });
+
+    it('does not render the summary provided an invalid profile ID', async () => {
+      await selectScannerProfile({ id: 'gid://gitlab/DastScannerProfile/123' });
+
+      expect(findProfileSummary().exists()).toBe(false);
+    });
+  });
+
   describe('site profile summary', () => {
     const [authEnabledProfile] = siteProfiles;
-
-    const selectSiteProfile = async (profile) => {
-      subject.find(SiteProfileSelector).vm.$emit('input', profile.id);
-      await subject.vm.$nextTick();
-    };
 
     beforeEach(() => {
       mountSubject({
@@ -547,6 +567,12 @@ describe('OnDemandScansForm', () => {
       expect(summary).toMatch(authEnabledProfile.auth.passwordField);
       expect(summary).toMatch(defaultPassword);
       expect(summary).toMatch(defaultRequestHeaders);
+    });
+
+    it('does not render the summary provided an invalid profile ID', async () => {
+      await selectSiteProfile({ id: 'gid://gitlab/DastSiteProfile/123' });
+
+      expect(findProfileSummary().exists()).toBe(false);
     });
   });
 

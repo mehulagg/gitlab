@@ -74,7 +74,7 @@ RSpec.describe 'Query.project(fullPath).apiFuzzingCiConfiguration' do
         stub_licensed_features(security_dashboard: false)
       end
 
-      it 'returns null' do
+      it 'returns nil' do
         post_graphql(query, current_user: user)
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -90,13 +90,12 @@ RSpec.describe 'Query.project(fullPath).apiFuzzingCiConfiguration' do
       stub_feature_flags(api_fuzzing_configuration_ui: false)
     end
 
-    it 'errors' do
+    it 'returns nil' do
       post_graphql(query, current_user: user)
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(graphql_errors.first['message']).to eq(
-        "Field 'apiFuzzingCiConfiguration' doesn't exist on type 'Project'"
-      )
+      fuzzing_config = graphql_data.dig('project', 'apiFuzzingCiConfiguration')
+      expect(fuzzing_config).to be_nil
     end
   end
 end

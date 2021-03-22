@@ -58,14 +58,11 @@ module Projects
 
       def features
         scans = scan_types.map do |scan_type|
-          if scanner_enabled?(scan_type)
-            scan(scan_type, configured: true, status: auto_devops_source? ? s_('SecurityConfiguration|Enabled with Auto DevOps') : s_('SecurityConfiguration|Enabled'))
-          else
-            scan(scan_type, configured: false, status: s_('SecurityConfiguration|Not enabled'))
-          end
+          scan(scan_type, configured: scanner_enabled?(scan_type))
         end
 
-        dast_profiles_insert(scans)
+        # DAST On-demand scans is a static (non job) entry.  Add it manually.
+        scans << scan(:dast_profiles, configured: true)
       end
 
       def latest_pipeline_path
@@ -74,23 +71,10 @@ module Projects
         project_pipeline_path(self, latest_default_branch_pipeline)
       end
 
-      # DAST On-demand scans is a static (non job) entry.  Add it manually following DAST
-      # TODO: remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/323375
-      def dast_profiles_insert(scans)
-        index = scans.index { |scan| scan[:type] == :dast }
-
-        unless index.nil?
-          scans.insert(index + 1, scan(:dast_profiles, configured: true, status: s_('SecurityConfiguration|Available for on-demand DAST')))
-        end
-
-        scans
-      end
-
-      def scan(type, configured: false, status:)
+      def scan(type, configured: false)
         {
           type: type,
           configured: configured,
-          status: status,
           configuration_path: configuration_path(type)
         }
       end

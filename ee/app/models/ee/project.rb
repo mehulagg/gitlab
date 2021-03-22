@@ -197,10 +197,6 @@ module EE
 
       delegate :ci_minutes_quota, to: :shared_runners_limit_namespace
 
-      delegate :last_update_succeeded?, :last_update_failed?,
-        :ever_updated_successfully?, :hard_failed?,
-        to: :import_state, prefix: :mirror, allow_nil: true
-
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
       delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
 
@@ -254,6 +250,22 @@ module EE
       def configured_to_create_issues_from_vulnerabilities?
         !!jira_service&.configured_to_create_issues_from_vulnerabilities?
       end
+    end
+
+    def mirror_last_update_succeeded?
+      !!import_state&.last_update_succeeded?
+    end
+
+    def mirror_last_update_failed?
+      !!import_state&.last_update_failed?
+    end
+
+    def mirror_ever_updated_successfully?
+      !!import_state&.ever_updated_successfully?
+    end
+
+    def mirror_hard_failed?
+      !!import_state&.hard_failed?
     end
 
     class_methods do

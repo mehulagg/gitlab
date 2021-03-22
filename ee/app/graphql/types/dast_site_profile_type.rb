@@ -22,6 +22,19 @@ module Types
     field :edit_path, GraphQL::STRING_TYPE, null: true,
           description: 'Relative web path to the edit page of a site profile.'
 
+    field :auth, Types::Dast::SiteProfileAuthType, null: true,
+          description: 'Target authentication details. Will always return `null` ' \
+                       'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
+    field :excluded_urls, [GraphQL::STRING_TYPE], null: true,
+          description: 'The URLs to skip during an authenticated scan. Will always return `null` ' \
+                       'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
+    field :request_headers, GraphQL::STRING_TYPE, null: true,
+          description: 'Comma-separated list of request header names and values to be ' \
+                       'added to every request made by DAST. Will always return `null` ' \
+                       'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
     field :validation_status, Types::DastSiteProfileValidationStatusEnum, null: true,
           description: 'The current validation status of the site profile.',
           method: :status
@@ -40,6 +53,22 @@ module Types
 
     def edit_path
       Rails.application.routes.url_helpers.edit_project_security_configuration_dast_profiles_dast_site_profile_path(object.project, object)
+    end
+
+    def auth
+      return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
+
+      object
+    end
+
+    def excluded_urls
+      return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
+
+      object.excluded_urls
+    end
+
+    def request_headers
+      nil
     end
 
     def normalized_target_url

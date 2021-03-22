@@ -11,8 +11,8 @@ export default {
   i18n: {
     search: __('Search'),
   },
-  inject: ['search'],
   components: { FilteredSearch },
+  inject: ['search'],
   computed: {
     ...mapState({
       fullPath: (state) => state.fullPath, // does this support sub groups

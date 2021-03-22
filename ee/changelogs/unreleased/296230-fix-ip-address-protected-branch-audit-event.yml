@@ -1,5 +1,0 @@
----
-title: Fix incorrect IP address when creating ProtectedBranch audit event
-merge_request: 54292
-author:
-type: fixed

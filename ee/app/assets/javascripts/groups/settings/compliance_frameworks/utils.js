@@ -18,6 +18,16 @@ export const initialiseFormData = () => ({
   color: null,
 });
 
+export const getSubmissionParams = (formData, pipelineConfigurationFullPathEnabled) => {
+  const params = { ...formData };
+
+  if (!pipelineConfigurationFullPathEnabled) {
+    delete params.pipelineConfigurationFullPath;
+  }
+
+  return params;
+};
+
 export const getPipelineConfigurationPathParts = (path) => {
   const [, file, group, project] = path.match(PIPELINE_CONFIGURATION_PATH_FORMAT) || [];
 

@@ -20,6 +20,7 @@ FactoryBot.define do
 
     trait :dismissal do
       feedback_type { 'dismissal' }
+      dismissal_reason { 'acceptable_risk' }
     end
 
     trait :comment do

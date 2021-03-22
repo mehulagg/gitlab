@@ -29,9 +29,9 @@ describe('First Class Group Dashboard Component', () => {
       propsData: {
         dashboardDocumentation,
         emptyStateSvgPath,
-        groupFullPath,
         vulnerabilitiesExportEndpoint,
       },
+      provide: { groupFullPath },
       data,
       stubs: {
         SecurityDashboardLayout,
@@ -66,7 +66,6 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should render correctly', () => {
       expect(findGroupVulnerabilities().props()).toEqual({
-        groupFullPath,
         filters: {},
       });
     });

@@ -53,7 +53,7 @@ be merged, and optionally which users should do the approving. Approvals can be 
 
 If no approval rules are defined, any user can approve a merge request. However, the default
 minimum number of required approvers can still be set in the
-[project settings for merge request approvals](#merge-request-approvals-project-settings).
+[settings for merge request approvals](#approval-settings).
 
 You can opt to define one single rule to approve a merge request among the available rules
 or choose more than one with [multiple approval rules](#multiple-approval-rules).
@@ -242,7 +242,7 @@ Alternatively, you can select a very specific protected branch from the **Target
 
 ![Scoped to protected branch](img/scoped_to_protected_branch_v13_10.png)
 
-To enable this configuration, see [Code Owner’s approvals for protected branches](../protected_branches.md#protected-branches-approval-by-code-owners).
+To enable this configuration, see [Code Owner's approvals for protected branches](../protected_branches.md#protected-branches-approval-by-code-owners).
 
 ### Adding or removing an approval
 
@@ -278,9 +278,9 @@ else blocking it. Note that the merge request could still be blocked by other co
 such as merge conflicts, [pending discussions](../../discussions/index.md#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved),
 or a [failed CI/CD pipeline](merge_when_pipeline_succeeds.md).
 
-### Merge request approvals project settings
+### Approval settings
 
-The project settings for Merge request approvals are found by going to
+The settings for Merge request approvals are found by going to
 **Settings > General** and expanding **Merge request approvals**.
 
 #### Prevent overriding default approvals

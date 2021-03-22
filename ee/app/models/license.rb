@@ -98,6 +98,7 @@ class License < ApplicationRecord
     group_repository_analytics
     group_saml
     group_saml_group_sync
+    group_scoped_ci_variables
     group_wikis
     incident_sla
     incident_metric_upload

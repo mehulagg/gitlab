@@ -25,10 +25,12 @@ RSpec.describe Resolvers::Boards::BoardListEpicsResolver do
     expect(described_class).to have_nullable_graphql_type(Types::EpicType.connection_type)
   end
 
-  describe '#resolve' do
-    let(:args) { {} }
+  def resolve_board_list_epics(args: {})
+    resolve(described_class, ctx: { current_user: user }, obj: list1, args: args)
+  end
 
-    subject(:result) { resolve(described_class, ctx: { current_user: user }, obj: list1, args: args) }
+  describe '#resolve' do
+    subject(:result) { resolve_board_list_epics }
 
     before do
       stub_licensed_features(epics: true)
@@ -37,6 +39,46 @@ RSpec.describe Resolvers::Boards::BoardListEpicsResolver do
 
     it 'returns epics on the board list ordered by position on the board' do
       expect(result.to_a).to eq([list1_epic2, list1_epic1])
+    end
+
+    context 'with filters' do
+      let_it_be(:production_label) { create(:group_label, group: group, name: 'production') }
+      let_it_be(:list1_epic3) { create(:labeled_epic, group: group, labels: [development, production_label], title: 'filter_this 1') }
+      let_it_be(:list1_epic4) { create(:labeled_epic, group: group, labels: [development], description: 'filter_this 2') }
+
+      it 'filters epics by label' do
+        args = { filters: { label_name: [production_label.title] } }
+
+        result = resolve_board_list_epics(args: args)
+
+        expect(result).to contain_exactly(list1_epic3)
+      end
+
+      it 'filters epics by author' do
+        args = { filters: { author_username: list1_epic4.author.username } }
+
+        result = resolve_board_list_epics(args: args)
+
+        expect(result).to contain_exactly(list1_epic4)
+      end
+
+      it 'filters epics by reaction emoji' do
+        emoji_name = 'thumbsup'
+        create(:award_emoji, name: emoji_name, awardable: list1_epic1, user: user)
+        args = { filters: { my_reaction_emoji: emoji_name } }
+
+        result = resolve_board_list_epics(args: args)
+
+        expect(result).to contain_exactly(list1_epic1)
+      end
+
+      it 'filters epics by title and description' do
+        args = { filters: { search: 'filter_this' } }
+
+        result = resolve_board_list_epics(args: args)
+
+        expect(result).to contain_exactly(list1_epic3, list1_epic4)
+      end
     end
   end
 end

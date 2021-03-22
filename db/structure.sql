@@ -9473,6 +9473,7 @@ CREATE TABLE application_settings (
     kroki_formats jsonb DEFAULT '{}'::jsonb NOT NULL,
     in_product_marketing_emails_enabled boolean DEFAULT true NOT NULL,
     asset_proxy_whitelist text,
+    admin_mode boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
@@ -11129,6 +11130,42 @@ CREATE SEQUENCE ci_triggers_id_seq
 
 ALTER SEQUENCE ci_triggers_id_seq OWNED BY ci_triggers.id;
 
+CREATE TABLE ci_unit_test_failures (
+    id bigint NOT NULL,
+    failed_at timestamp with time zone NOT NULL,
+    unit_test_id bigint NOT NULL,
+    build_id bigint NOT NULL
+);
+
+CREATE SEQUENCE ci_unit_test_failures_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_unit_test_failures_id_seq OWNED BY ci_unit_test_failures.id;
+
+CREATE TABLE ci_unit_tests (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    key_hash text NOT NULL,
+    name text NOT NULL,
+    suite_name text NOT NULL,
+    CONSTRAINT check_248fae1a3b CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_b288215ffe CHECK ((char_length(key_hash) <= 64)),
+    CONSTRAINT check_c2d57b3c49 CHECK ((char_length(suite_name) <= 255))
+);
+
+CREATE SEQUENCE ci_unit_tests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_unit_tests_id_seq OWNED BY ci_unit_tests.id;
+
 CREATE TABLE ci_variables (
     id integer NOT NULL,
     key character varying NOT NULL,
@@ -11840,7 +11877,17 @@ CREATE TABLE dast_site_profiles (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     name text NOT NULL,
-    CONSTRAINT check_6cfab17b48 CHECK ((char_length(name) <= 255))
+    excluded_urls text[] DEFAULT '{}'::text[] NOT NULL,
+    auth_enabled boolean DEFAULT false NOT NULL,
+    auth_url text,
+    auth_username_field text,
+    auth_password_field text,
+    auth_username text,
+    CONSTRAINT check_5203110fee CHECK ((char_length(auth_username_field) <= 255)),
+    CONSTRAINT check_6cfab17b48 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_c329dffdba CHECK ((char_length(auth_password_field) <= 255)),
+    CONSTRAINT check_d446f7047b CHECK ((char_length(auth_url) <= 1024)),
+    CONSTRAINT check_f22f18002a CHECK ((char_length(auth_username) <= 255))
 );
 
 CREATE SEQUENCE dast_site_profiles_id_seq
@@ -13051,7 +13098,8 @@ CREATE TABLE gitlab_subscription_histories (
     gitlab_subscription_id bigint NOT NULL,
     created_at timestamp with time zone,
     trial_starts_on date,
-    auto_renew boolean
+    auto_renew boolean,
+    trial_extension_type smallint
 );
 
 CREATE SEQUENCE gitlab_subscription_histories_id_seq
@@ -13078,7 +13126,8 @@ CREATE TABLE gitlab_subscriptions (
     trial_starts_on date,
     auto_renew boolean,
     seats_in_use integer DEFAULT 0 NOT NULL,
-    seats_owed integer DEFAULT 0 NOT NULL
+    seats_owed integer DEFAULT 0 NOT NULL,
+    trial_extension_type smallint
 );
 
 CREATE SEQUENCE gitlab_subscriptions_id_seq
@@ -13410,6 +13459,25 @@ CREATE SEQUENCE import_failures_id_seq
     CACHE 1;
 
 ALTER SEQUENCE import_failures_id_seq OWNED BY import_failures.id;
+
+CREATE TABLE in_product_marketing_emails (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    cta_clicked_at timestamp with time zone,
+    track smallint NOT NULL,
+    series smallint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE in_product_marketing_emails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE in_product_marketing_emails_id_seq OWNED BY in_product_marketing_emails.id;
 
 CREATE TABLE incident_management_oncall_participants (
     id bigint NOT NULL,
@@ -19108,6 +19176,10 @@ ALTER TABLE ONLY ci_trigger_requests ALTER COLUMN id SET DEFAULT nextval('ci_tri
 
 ALTER TABLE ONLY ci_triggers ALTER COLUMN id SET DEFAULT nextval('ci_triggers_id_seq'::regclass);
 
+ALTER TABLE ONLY ci_unit_test_failures ALTER COLUMN id SET DEFAULT nextval('ci_unit_test_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_unit_tests ALTER COLUMN id SET DEFAULT nextval('ci_unit_tests_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_variables ALTER COLUMN id SET DEFAULT nextval('ci_variables_id_seq'::regclass);
 
 ALTER TABLE ONLY cluster_agent_tokens ALTER COLUMN id SET DEFAULT nextval('cluster_agent_tokens_id_seq'::regclass);
@@ -19313,6 +19385,8 @@ ALTER TABLE ONLY identities ALTER COLUMN id SET DEFAULT nextval('identities_id_s
 ALTER TABLE ONLY import_export_uploads ALTER COLUMN id SET DEFAULT nextval('import_export_uploads_id_seq'::regclass);
 
 ALTER TABLE ONLY import_failures ALTER COLUMN id SET DEFAULT nextval('import_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY in_product_marketing_emails ALTER COLUMN id SET DEFAULT nextval('in_product_marketing_emails_id_seq'::regclass);
 
 ALTER TABLE ONLY incident_management_oncall_participants ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_participants_id_seq'::regclass);
 
@@ -20278,6 +20352,12 @@ ALTER TABLE ONLY ci_trigger_requests
 ALTER TABLE ONLY ci_triggers
     ADD CONSTRAINT ci_triggers_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY ci_unit_test_failures
+    ADD CONSTRAINT ci_unit_test_failures_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_unit_tests
+    ADD CONSTRAINT ci_unit_tests_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY ci_variables
     ADD CONSTRAINT ci_variables_pkey PRIMARY KEY (id);
 
@@ -20610,6 +20690,9 @@ ALTER TABLE ONLY import_export_uploads
 
 ALTER TABLE ONLY import_failures
     ADD CONSTRAINT import_failures_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY in_product_marketing_emails
+    ADD CONSTRAINT in_product_marketing_emails_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY incident_management_oncall_shifts
     ADD CONSTRAINT inc_mgmnt_no_overlapping_oncall_shifts EXCLUDE USING gist (rotation_id WITH =, tstzrange(starts_at, ends_at, '[)'::text) WITH &&);
@@ -22091,6 +22174,8 @@ CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_config_source ON c
 
 CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_source ON ci_pipelines USING btree (user_id, created_at, source);
 
+CREATE INDEX index_ci_pipelines_on_user_id_and_id_and_cancelable_status ON ci_pipelines USING btree (user_id, id) WHERE ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('waiting_for_resource'::character varying)::text, ('preparing'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text, ('scheduled'::character varying)::text]));
+
 CREATE UNIQUE INDEX index_ci_project_monthly_usages_on_project_id_and_date ON ci_project_monthly_usages USING btree (project_id, date);
 
 CREATE UNIQUE INDEX index_ci_refs_on_project_id_and_ref_path ON ci_refs USING btree (project_id, ref_path);
@@ -22156,6 +22241,10 @@ CREATE INDEX index_ci_trigger_requests_on_trigger_id_and_id ON ci_trigger_reques
 CREATE INDEX index_ci_triggers_on_owner_id ON ci_triggers USING btree (owner_id);
 
 CREATE INDEX index_ci_triggers_on_project_id ON ci_triggers USING btree (project_id);
+
+CREATE INDEX index_ci_unit_test_failures_on_build_id ON ci_unit_test_failures USING btree (build_id);
+
+CREATE UNIQUE INDEX index_ci_unit_tests_on_project_id_and_key_hash ON ci_unit_tests USING btree (project_id, key_hash);
 
 CREATE INDEX index_ci_variables_on_key ON ci_variables USING btree (key);
 
@@ -22674,6 +22763,10 @@ CREATE INDEX index_import_failures_on_project_id_and_correlation_id_value ON imp
 CREATE INDEX index_import_failures_on_project_id_not_null ON import_failures USING btree (project_id) WHERE (project_id IS NOT NULL);
 
 CREATE INDEX index_imported_projects_on_import_type_creator_id_created_at ON projects USING btree (import_type, creator_id, created_at) WHERE (import_type IS NOT NULL);
+
+CREATE INDEX index_in_product_marketing_emails_on_user_id ON in_product_marketing_emails USING btree (user_id);
+
+CREATE UNIQUE INDEX index_in_product_marketing_emails_on_user_track_series ON in_product_marketing_emails USING btree (user_id, track, series);
 
 CREATE INDEX index_inc_mgmnt_oncall_participants_on_oncall_user_id ON incident_management_oncall_participants USING btree (user_id);
 
@@ -23869,6 +23962,10 @@ CREATE INDEX index_u2f_registrations_on_key_handle ON u2f_registrations USING bt
 
 CREATE INDEX index_u2f_registrations_on_user_id ON u2f_registrations USING btree (user_id);
 
+CREATE INDEX index_unit_test_failures_failed_at ON ci_unit_test_failures USING btree (failed_at DESC);
+
+CREATE UNIQUE INDEX index_unit_test_failures_unique_columns ON ci_unit_test_failures USING btree (unit_test_id, failed_at DESC, build_id);
+
 CREATE INDEX index_uploads_on_checksum ON uploads USING btree (checksum);
 
 CREATE INDEX index_uploads_on_model_id_and_model_type ON uploads USING btree (model_id, model_type);
@@ -24502,6 +24599,9 @@ ALTER TABLE ONLY notification_settings
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_0d3f677137 FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_unit_test_failures
+    ADD CONSTRAINT fk_0f09856e1f FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY project_pages_metadata
     ADD CONSTRAINT fk_0fd5b22688 FOREIGN KEY (pages_deployment_id) REFERENCES pages_deployments(id) ON DELETE SET NULL;
 
@@ -24606,6 +24706,9 @@ ALTER TABLE ONLY ci_group_variables
 
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_3448c97865 FOREIGN KEY (push_rule_id) REFERENCES push_rules(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY in_product_marketing_emails
+    ADD CONSTRAINT fk_35c9101b63 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_3654b61b03 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE;
@@ -24747,6 +24850,9 @@ ALTER TABLE ONLY geo_event_log
 
 ALTER TABLE ONLY lists
     ADD CONSTRAINT fk_7a5553d60f FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_unit_tests
+    ADD CONSTRAINT fk_7a8fabf0a8 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY protected_branches
     ADD CONSTRAINT fk_7a9c6d93e7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -25407,6 +25513,9 @@ ALTER TABLE ONLY group_custom_attributes
 
 ALTER TABLE ONLY incident_management_oncall_rotations
     ADD CONSTRAINT fk_rails_256e0bc604 FOREIGN KEY (oncall_schedule_id) REFERENCES incident_management_oncall_schedules(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_unit_test_failures
+    ADD CONSTRAINT fk_rails_259da3e79c FOREIGN KEY (unit_test_id) REFERENCES ci_unit_tests(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY analytics_devops_adoption_snapshots
     ADD CONSTRAINT fk_rails_25da9a92c0 FOREIGN KEY (segment_id) REFERENCES analytics_devops_adoption_segments(id) ON DELETE CASCADE;

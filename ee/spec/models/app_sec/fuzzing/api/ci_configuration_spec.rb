@@ -18,6 +18,17 @@ RSpec.describe AppSec::Fuzzing::Api::CiConfiguration do
         expect(profiles.first.name).to eq('Quick-10')
       end
 
+      it 'caches the response' do
+        profiles_yaml = [{ Name: 'Quick-10' }]
+        allow(Rails.cache).to receive(:fetch).and_return(profiles_yaml)
+
+        profiles = described_class.new(project: double(Project)).scan_profiles
+
+        expect(profiles.first.name).to eq('Quick-10')
+        expect(Rails.cache).to have_received(:fetch)
+          .with(described_class::SCAN_PROFILES_CACHE_KEY, expires_in: 1.hour)
+      end
+
       context 'when the response includes unknown scan profiles' do
         it 'excludes them from the returned profiles' do
           profiles_yaml = YAML.dump(Profiles: [{ Name: 'UNKNOWN!' }])

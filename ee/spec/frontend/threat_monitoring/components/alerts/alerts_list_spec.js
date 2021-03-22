@@ -101,6 +101,7 @@ describe('AlertsList component', () => {
 
     it('shows threat monitoring alert filters', () => {
       expect(findAlertFilters().exists()).toBe(true);
+      expect(findAlertFilters().props('filters')).toBe(DEFAULT_FILTERS);
     });
 
     it('does have the default filters initially', () => {

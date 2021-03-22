@@ -104,9 +104,9 @@ RSpec.configure do |config|
         warn "=== uptime"
         warn `uptime`
         warn "=== Prometheus metrics:"
-        warn `curl -s http://localhost:9236/metrics`
+        warn `curl -s -o log/gitaly-metrics.log http://localhost:9236/metrics`
         warn "=== Taking goroutine dump in log/goroutines.log..."
-        warn `curl -o log/goroutines.log http://localhost:9236/debug/pprof/goroutine?debug=2`
+        warn `curl -s -o log/goroutines.log http://localhost:9236/debug/pprof/goroutine?debug=2`
       end
     end
   end
@@ -297,7 +297,7 @@ RSpec.configure do |config|
     Sidekiq::Worker.clear_all
 
     # Administrators have to re-authenticate in order to access administrative
-    # functionality when feature flag :user_mode_in_session is active. Any spec
+    # functionality when application setting admin_mode is active. Any spec
     # that requires administrative access can use the tag :enable_admin_mode
     # to avoid the second auth step (provided the user is already an admin):
     #
@@ -313,6 +313,9 @@ RSpec.configure do |config|
         current_user_mode.send(:user)&.admin?
       end
     end
+
+    # Make sure specs test by default admin mode setting on, unless forced to the opposite
+    stub_application_setting(admin_mode: true) unless example.metadata[:do_not_mock_admin_mode_setting]
 
     allow(Gitlab::CurrentSettings).to receive(:current_application_settings?).and_return(false)
   end
@@ -333,10 +336,20 @@ RSpec.configure do |config|
     RequestStore.clear!
   end
 
-  config.around do |example|
-    # Wrap each example in it's own context to make sure the contexts don't
-    # leak
-    Labkit::Context.with_context { example.run }
+  if ENV['SKIP_RSPEC_CONTEXT_WRAPPING']
+    config.around(:example, :context_aware) do |example|
+      # Wrap each example in it's own context to make sure the contexts don't
+      # leak
+      Gitlab::ApplicationContext.with_raw_context { example.run }
+    end
+  else
+    config.around do |example|
+      if [:controller, :request, :feature].include?(example.metadata[:type]) || example.metadata[:context_aware]
+        Gitlab::ApplicationContext.with_raw_context { example.run }
+      else
+        example.run
+      end
+    end
   end
 
   config.around do |example|

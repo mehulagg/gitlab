@@ -2,7 +2,7 @@
 # Name of this metric contains g_project_management prefix
 # because we are using the same slot from issue_tracking to
 # allow data aggregation.
-key_path: g_project_management_epic_created_weekly
+key_path: redis_hll_counters.epics_usage.g_project_management_epic_created_weekly
 description: Count of WAU creating epics
 product_section: dev
 product_stage: plan

@@ -4,7 +4,7 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import { SAVE_ERROR } from '../constants';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
-import { initialiseFormData } from '../utils';
+import { getSubmissionParams, initialiseFormData } from '../utils';
 import FormStatus from './form_status.vue';
 import SharedForm from './shared_form.vue';
 
@@ -51,18 +51,16 @@ export default {
       this.errorMessage = '';
 
       try {
-        const { name, description, pipelineConfigurationFullPath, color } = this.formData;
+        const params = getSubmissionParams(
+          this.formData,
+          this.pipelineConfigurationFullPathEnabled,
+        );
         const { data } = await this.$apollo.mutate({
           mutation: createComplianceFrameworkMutation,
           variables: {
             input: {
               namespacePath: this.groupPath,
-              params: {
-                name,
-                description,
-                pipelineConfigurationFullPath,
-                color,
-              },
+              params,
             },
           },
         });

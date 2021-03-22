@@ -34,11 +34,10 @@ module EE
 
           def variables(context)
             iid = context.extra[:epic_iid]
-            tracker = "epic_#{iid}_events"
 
             {
               full_path: context.entity.source_full_path,
-              cursor: context.entity.next_page_for(tracker),
+              cursor: context.tracker.next_page,
               epic_iid: iid
             }
           end

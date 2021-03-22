@@ -40,7 +40,7 @@ describe('EpicFilteredSearch', () => {
       createComponent();
     });
 
-    it('finds FilteredSearch', () => {
+    it('renders FilteredSearch', () => {
       expect(findFilteredSearch().exists()).toBe(true);
     });
 

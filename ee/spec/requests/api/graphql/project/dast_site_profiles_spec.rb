@@ -17,14 +17,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
             pageInfo {
               hasNextPage
             }
-            nodes {
-              id
-              profileName
-              targetUrl
-              editPath
-              validationStatus
-              normalizedTargetUrl
-            }
+            nodes { #{all_graphql_fields_for('DastSiteProfile')} }
           }
         }
       }

@@ -22,7 +22,7 @@ module Projects
         result = ::Security::Orchestration::AssignService.new(project, nil, policy_project_id: policy_project_params[:policy_project_id]).execute
 
         if result.success?
-          flash[:notice] = _('Successfull')
+          flash[:notice] = _('Operation completed')
         else
           flash[:alert] = result.message
         end

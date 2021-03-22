@@ -125,6 +125,46 @@ RSpec.describe Project do
       end
     end
 
+    context 'import_state dependant predicate method' do
+      shared_examples 'returns expected values' do
+        context 'when project lacks a import_state relation' do
+          it 'returns false' do
+            expect(project.send("mirror_#{method}")).to be_falsey
+          end
+        end
+
+        context 'when project has a import_state relation' do
+          before do
+            create(:import_state, project: project)
+          end
+
+          it 'accesses the value from the import_state' do
+            expect(project.import_state).to receive(method)
+
+            project.send("mirror_#{method}")
+          end
+        end
+      end
+
+      describe '#mirror_last_update_succeeded?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "last_update_succeeded?" }
+        end
+      end
+
+      describe '#mirror_last_update_failed?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "last_update_failed?" }
+        end
+      end
+
+      describe '#mirror_ever_updated_successfully?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "ever_updated_successfully?" }
+        end
+      end
+    end
+
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
       let(:project) { rule.project }

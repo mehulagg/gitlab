@@ -57,7 +57,7 @@ module Gitlab
               }
             GQL
 
-            response = execute_graphql_query({ query: query }).dig(:data)
+            response = execute_graphql_query({ query: query })[:data]
 
             if response['errors'].blank?
               eligible = response.dig('data', 'subscription', 'eoaStarterBronzeEligible')
@@ -73,6 +73,31 @@ module Gitlab
             else
               { success: false }
             end
+          end
+
+          def plan_data(plan_tags, fields)
+            query = <<~GQL
+              query($tags: [PlanTag!]) {
+                plans(planTags: $tags) {
+                  deprecated
+                  #{(fields - ['deprecated']).map { |field| "#{field}: #{field.to_s.camelize(:lower)}" }.join(" ")}
+                }
+              }
+            GQL
+
+            response = execute_graphql_query({ query: query, variables: { tags: plan_tags } })[:data]
+
+            if response['errors'].present?
+              exception = SubscriptionPortal::Client::ResponseError.new("Received an error from CustomerDot")
+              Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception, query: query, response: response)
+              return { success: false }
+            end
+
+            {
+              success: true,
+              plans: response.dig('data', 'plans')
+                .reject { |plan| plan['deprecated'] }
+            }
           end
 
           private

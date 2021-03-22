@@ -13,11 +13,8 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
+  inject: ['groupFullPath'],
   props: {
-    groupFullPath: {
-      type: String,
-      required: true,
-    },
     filters: {
       type: Object,
       required: false,

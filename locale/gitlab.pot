@@ -1368,6 +1368,9 @@ msgstr ""
 msgid "A limit of %{ci_project_subscriptions_limit} subscriptions to or from a project applies."
 msgstr ""
 
+msgid "A management, operational, or technical control (that is, safeguard or countermeasure) employed by an organization that provides equivalent or comparable protection for an information system."
+msgstr ""
+
 msgid "A member of the abuse team will review your report as soon as possible."
 msgstr ""
 
@@ -2091,6 +2094,9 @@ msgid "Adjust your filters/search criteria above. If you believe this may be an 
 msgstr ""
 
 msgid "Admin Area"
+msgstr ""
+
+msgid "Admin Mode"
 msgstr ""
 
 msgid "Admin Note"
@@ -3262,6 +3268,9 @@ msgstr ""
 msgid "An error has occurred"
 msgstr ""
 
+msgid "An error in reporting in which a test result incorrectly indicates the presence of a vulnerability in a system when the vulnerability is not present."
+msgstr ""
+
 msgid "An error occurred adding a draft to the thread."
 msgstr ""
 
@@ -3833,6 +3842,9 @@ msgid "Approval rules"
 msgstr ""
 
 msgid "Approval rules reset to project defaults"
+msgstr ""
+
+msgid "Approval settings"
 msgstr ""
 
 msgid "ApprovalRuleRemove|%d member"
@@ -4850,6 +4862,9 @@ msgstr[1] ""
 msgid "Blocked issue"
 msgstr ""
 
+msgid "Blocking"
+msgstr ""
+
 msgid "Blocking issues"
 msgstr ""
 
@@ -4981,6 +4996,9 @@ msgid "Board|Failed to delete board. Please try again."
 msgstr ""
 
 msgid "Board|Load more issues"
+msgstr ""
+
+msgid "Bold text"
 msgstr ""
 
 msgid "Both project and dashboard_path are required"
@@ -6333,6 +6351,9 @@ msgid "Close %{issueType}"
 msgstr ""
 
 msgid "Close %{tabname}"
+msgstr ""
+
+msgid "Close design"
 msgstr ""
 
 msgid "Close epic"
@@ -10245,13 +10266,19 @@ msgstr ""
 msgid "DeployFreeze|Add a freeze period to prevent unintended releases during a period of time for a given environment. You must update the deployment jobs in %{filename} according to the deploy freezes added here. %{freeze_period_link_start}Learn more.%{freeze_period_link_end}"
 msgstr ""
 
+msgid "DeployFreeze|Add deploy freeze"
+msgstr ""
+
+msgid "DeployFreeze|Edit"
+msgstr ""
+
 msgid "DeployFreeze|Freeze end"
 msgstr ""
 
 msgid "DeployFreeze|Freeze start"
 msgstr ""
 
-msgid "DeployFreeze|No deploy freezes exist for this project. To add one, click %{strongStart}Add deploy freeze%{strongEnd}"
+msgid "DeployFreeze|No deploy freezes exist for this project. To add one, select %{strongStart}Add deploy freeze%{strongEnd}"
 msgstr ""
 
 msgid "DeployFreeze|Specify deploy freezes using %{cron_syntax_link_start}cron syntax%{cron_syntax_link_end}."
@@ -11189,6 +11216,9 @@ msgid "Edit application"
 msgstr ""
 
 msgid "Edit comment"
+msgstr ""
+
+msgid "Edit deploy freeze"
 msgstr ""
 
 msgid "Edit description"
@@ -12487,6 +12517,9 @@ msgstr ""
 msgid "Expand milestones"
 msgstr ""
 
+msgid "Expand panel"
+msgstr ""
+
 msgid "Expand sidebar"
 msgstr ""
 
@@ -13392,6 +13425,9 @@ msgstr ""
 msgid "FlowdockService|Flowdock is a collaboration web app for technical teams."
 msgstr ""
 
+msgid "Focus filter bar"
+msgstr ""
+
 msgid "FogBugz Email"
 msgstr ""
 
@@ -13860,6 +13896,9 @@ msgstr ""
 msgid "Geo|In sync"
 msgstr ""
 
+msgid "Geo|Internal URL"
+msgstr ""
+
 msgid "Geo|Last repository check run"
 msgstr ""
 
@@ -13884,9 +13923,6 @@ msgstr ""
 msgid "Geo|Next sync scheduled at"
 msgstr ""
 
-msgid "Geo|Node Details"
-msgstr ""
-
 msgid "Geo|Node name can't be blank"
 msgstr ""
 
@@ -13903,6 +13939,9 @@ msgid "Geo|Pending verification"
 msgstr ""
 
 msgid "Geo|Please refer to Geo Troubleshooting."
+msgstr ""
+
+msgid "Geo|Primary Details"
 msgstr ""
 
 msgid "Geo|Primary node"
@@ -13951,6 +13990,9 @@ msgid "Geo|Reverify all"
 msgstr ""
 
 msgid "Geo|Review replication status, and resynchronize and reverify items with the primary node."
+msgstr ""
+
+msgid "Geo|Secondary Details"
 msgstr ""
 
 msgid "Geo|Secondary node"
@@ -14179,6 +14221,9 @@ msgid "GitLab username"
 msgstr ""
 
 msgid "GitLab uses %{jaeger_link} to monitor distributed systems."
+msgstr ""
+
+msgid "GitLab version"
 msgstr ""
 
 msgid "GitLab will run a background job that will produce pseudonymized CSVs of the GitLab database that will be uploaded to your configured object storage directory."
@@ -16635,9 +16680,6 @@ msgstr ""
 msgid "Invalid Insights config file detected"
 msgstr ""
 
-msgid "Invalid Login or password"
-msgstr ""
-
 msgid "Invalid OS"
 msgstr ""
 
@@ -17058,6 +17100,9 @@ msgstr ""
 msgid "Issue weight"
 msgstr ""
 
+msgid "Issue(s) already assigned"
+msgstr ""
+
 msgid "IssueAnalytics|Age"
 msgstr ""
 
@@ -17206,6 +17251,9 @@ msgid "It seems that there is currently no available data for code coverage"
 msgstr ""
 
 msgid "It's you"
+msgstr ""
+
+msgid "Italic text"
 msgstr ""
 
 msgid "Iteration"
@@ -17607,21 +17655,6 @@ msgstr ""
 msgid "KeyboardKey|Ctrl+"
 msgstr ""
 
-msgid "KeyboardShortcuts|Commit (when editing commit message)"
-msgstr ""
-
-msgid "KeyboardShortcuts|Global Shortcuts"
-msgstr ""
-
-msgid "KeyboardShortcuts|Toggle GitLab Next"
-msgstr ""
-
-msgid "KeyboardShortcuts|Toggle the Performance Bar"
-msgstr ""
-
-msgid "KeyboardShortcuts|Web IDE"
-msgstr ""
-
 msgid "Keys"
 msgstr ""
 
@@ -17710,6 +17743,9 @@ msgid "Label actions dropdown"
 msgstr ""
 
 msgid "Label lists show all issues with the selected label."
+msgstr ""
+
+msgid "Label priority"
 msgstr ""
 
 msgid "Label was created"
@@ -18313,6 +18349,9 @@ msgstr ""
 msgid "Link copied"
 msgstr ""
 
+msgid "Link text"
+msgstr ""
+
 msgid "Link title"
 msgstr ""
 
@@ -18599,6 +18638,9 @@ msgid "Manifest file import"
 msgstr ""
 
 msgid "Manifest import"
+msgstr ""
+
+msgid "Manual"
 msgstr ""
 
 msgid "ManualOrdering|Couldn't save the order of the issues"
@@ -19667,6 +19709,9 @@ msgid_plural "Milestones"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Milestone due date"
+msgstr ""
+
 msgid "Milestone lists not available with your current license"
 msgstr ""
 
@@ -19857,6 +19902,9 @@ msgid "Mirroring was successfully disabled."
 msgstr ""
 
 msgid "Mirroring will only be available if the feature is included in the plan of the selected group or user."
+msgstr ""
+
+msgid "Miscellaneous"
 msgstr ""
 
 msgid "Missing"
@@ -20376,6 +20424,12 @@ msgstr ""
 msgid "NetworkPolicies|ports/protocols"
 msgstr ""
 
+msgid "NetworkPolicy|Policy"
+msgstr ""
+
+msgid "NetworkPolicy|Search by policy name"
+msgstr ""
+
 msgid "Never"
 msgstr ""
 
@@ -20591,6 +20645,9 @@ msgstr ""
 msgid "Next commit"
 msgstr ""
 
+msgid "Next design"
+msgstr ""
+
 msgid "Next file in diff"
 msgstr ""
 
@@ -20702,7 +20759,7 @@ msgstr ""
 msgid "No estimate or time spent"
 msgstr ""
 
-msgid "No file chosen"
+msgid "No file chosen."
 msgstr ""
 
 msgid "No file hooks found."
@@ -20751,6 +20808,9 @@ msgid "No license. All rights reserved"
 msgstr ""
 
 msgid "No matches found"
+msgstr ""
+
+msgid "No matching issue found. Make sure that you are adding a valid issue URL."
 msgstr ""
 
 msgid "No matching labels"
@@ -21013,6 +21073,26 @@ msgstr ""
 
 msgid "Notification settings saved"
 msgstr ""
+
+msgid "NotificationEmail|Assignee"
+msgid_plural "NotificationEmail|Assignees"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "NotificationEmail|Assignee: %{users}"
+msgid_plural "NotificationEmail|Assignees: %{users}"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "NotificationEmail|Reviewer"
+msgid_plural "NotificationEmail|Reviewers"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "NotificationEmail|Reviewer: %{users}"
+msgid_plural "NotificationEmail|Reviewers: %{users}"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "NotificationEvent|Change reviewer merge request"
 msgstr ""
@@ -21542,6 +21622,9 @@ msgid "OpenedNDaysAgo|Opened"
 msgstr ""
 
 msgid "Opens in a new window"
+msgstr ""
+
+msgid "Operation completed"
 msgstr ""
 
 msgid "Operation failed. Check pod logs for %{pod_name} for more details."
@@ -22915,7 +22998,10 @@ msgstr ""
 msgid "Point to any links you like: documentation, built binaries, or other related materials. These can be internal or external links from your GitLab instance. Duplicate URLs are not allowed."
 msgstr ""
 
-msgid "Policy project doesn't exists"
+msgid "Policy project doesn't exist"
+msgstr ""
+
+msgid "Popularity"
 msgstr ""
 
 msgid "Postman collection"
@@ -23083,6 +23169,9 @@ msgstr ""
 msgid "Previous commit"
 msgstr ""
 
+msgid "Previous design"
+msgstr ""
+
 msgid "Previous file in diff"
 msgstr ""
 
@@ -23105,6 +23194,9 @@ msgid "Prioritized Labels"
 msgstr ""
 
 msgid "Prioritized label"
+msgstr ""
+
+msgid "Priority"
 msgstr ""
 
 msgid "Private"
@@ -23365,7 +23457,7 @@ msgstr ""
 msgid "Profiles|Main settings"
 msgstr ""
 
-msgid "Profiles|No file chosen"
+msgid "Profiles|No file chosen."
 msgstr ""
 
 msgid "Profiles|Notification email"
@@ -23990,9 +24082,6 @@ msgid "ProjectSettings|Pages"
 msgstr ""
 
 msgid "ProjectSettings|Pages for project documentation."
-msgstr ""
-
-msgid "ProjectSettings|Pipelines"
 msgstr ""
 
 msgid "ProjectSettings|Pipelines must succeed"
@@ -25855,6 +25944,9 @@ msgstr ""
 msgid "Requests to these domain(s)/address(es) on the local network will be allowed when local requests from hooks and services are not allowed. IP ranges such as 1:0:0:0:0:0:0:0/124 or 127.0.0.0/28 are supported. Domain wildcards are not supported currently. Use comma, semicolon, or newline to separate multiple entries. The allowlist can hold a maximum of 1000 entries. Domains should use IDNA encoding. Ex: example.com, 192.168.1.1, 127.0.0.0/28, xn--itlab-j1a.com."
 msgstr ""
 
+msgid "Require additional authentication for administrative tasks"
+msgstr ""
+
 msgid "Require admin approval for new sign-ups"
 msgstr ""
 
@@ -26434,6 +26526,9 @@ msgid "Save changes before testing"
 msgstr ""
 
 msgid "Save comment"
+msgstr ""
+
+msgid "Save deploy freeze"
 msgstr ""
 
 msgid "Save password"
@@ -27259,9 +27354,6 @@ msgstr ""
 msgid "Select projects"
 msgstr ""
 
-msgid "Select required regulatory standard."
-msgstr ""
-
 msgid "Select reviewer(s)"
 msgstr ""
 
@@ -27688,7 +27780,7 @@ msgstr ""
 msgid "SetPasswordToCloneLink|set a password"
 msgstr ""
 
-msgid "SetStatusModal|\"Busy\" will be shown next to your name"
+msgid "SetStatusModal|A busy indicator is shown next to your name and avatar."
 msgstr ""
 
 msgid "SetStatusModal|Add status emoji"
@@ -27698,6 +27790,9 @@ msgid "SetStatusModal|Busy"
 msgstr ""
 
 msgid "SetStatusModal|Clear status"
+msgstr ""
+
+msgid "SetStatusModal|Clear status after"
 msgstr ""
 
 msgid "SetStatusModal|Edit status"
@@ -27719,6 +27814,9 @@ msgid "SetStatusModal|Status updated"
 msgstr ""
 
 msgid "SetStatusModal|What's your status?"
+msgstr ""
+
+msgid "SetStatusModal|Your status resets on %{date}."
 msgstr ""
 
 msgid "Sets %{epic_ref} as parent epic."
@@ -29174,9 +29272,6 @@ msgstr ""
 msgid "Successful purchase image"
 msgstr ""
 
-msgid "Successfull"
-msgstr ""
-
 msgid "Successfully activated"
 msgstr ""
 
@@ -29980,6 +30075,9 @@ msgstr ""
 msgid "The file name should have a .yml extension"
 msgstr ""
 
+msgid "The finding is not a vulnerability because it is part of a test or is test data."
+msgstr ""
+
 msgid "The following %{user} can also merge into this branch: %{branch}"
 msgstr ""
 
@@ -30280,6 +30378,12 @@ msgid "The value of the provided variable exceeds the %{count} character limit"
 msgstr ""
 
 msgid "The visualization will appear in this tab when the CI/CD configuration file is populated with valid syntax."
+msgstr ""
+
+msgid "The vulnerability is known, and has not been remediated or mitigated, but is considered to be an acceptable business risk."
+msgstr ""
+
+msgid "The vulnerability is known, and has not been remediated or mitigated, but is considered to be in a part of the application that will not be updated."
 msgstr ""
 
 msgid "The vulnerability is no longer detected. Verify the vulnerability has been fixed or removed before changing its status."
@@ -31711,6 +31815,9 @@ msgstr ""
 msgid "Toggle focus mode"
 msgstr ""
 
+msgid "Toggle keyboard shortcuts help dialog"
+msgstr ""
+
 msgid "Toggle navigation"
 msgstr ""
 
@@ -31911,7 +32018,7 @@ msgstr ""
 msgid "Trials|You won't get a free trial right now but you can always resume this process by clicking on your avatar and choosing 'Start a free trial'"
 msgstr ""
 
-msgid "Trials|Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab %{planName}. To continue using GitLab %{planName} after your trial ends, you will need to buy a subscription. You can also choose GitLab Premium if its features are sufficient for your needs."
+msgid "Trials|Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the features of GitLab %{planName}. To keep those features after your trial ends, you’ll need to buy a subscription. (You can also choose GitLab Premium if it meets your needs.)"
 msgstr ""
 
 msgid "Trial|Company name"
@@ -33356,6 +33463,9 @@ msgid "View labels"
 msgstr ""
 
 msgid "View log"
+msgstr ""
+
+msgid "View logs"
 msgstr ""
 
 msgid "View merge request"

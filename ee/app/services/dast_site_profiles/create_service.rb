@@ -2,14 +2,20 @@
 
 module DastSiteProfiles
   class CreateService < BaseService
-    def execute(name:, target_url:)
+    def execute(name:, target_url:, excluded_urls: [])
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
       ActiveRecord::Base.transaction do
         service = DastSites::FindOrCreateService.new(project, current_user)
         dast_site = service.execute!(url: target_url)
 
-        dast_site_profile = DastSiteProfile.create!(project: project, dast_site: dast_site, name: name)
+        dast_site_profile = DastSiteProfile.create!(
+          project: project,
+          dast_site: dast_site,
+          name: name,
+          excluded_urls: excluded_urls || []
+        )
+
         ServiceResponse.success(payload: dast_site_profile)
       end
 
