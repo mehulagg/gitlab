@@ -162,29 +162,48 @@ fatal: early EOF
 fatal: index-pack failed
 ```
 
-Usually, this is due to the number of files in the repository, the number of revisions in the history, or the existence of large files (while not using LFS).
+Usually, this is due to one of these reasons:
 
-There are a few **potential solutions**:
-1. If this error occurs when cloning a large repository, one option is to [decrease the cloning depth](https://docs.gitlab.com/ee/ci/large_repositories/#shallow-cloning) to a value of `1`. 
-   - _EX:_ 
-     ```shell
-     variables:
-       GIT_DEPTH: 1
-     ```
-1. Another is to increase the local git config's [http.postBuffer](https://git-scm.com/docs/git-config#Documentation/git-config.txt-httppostBuffer) value, whose default is `1 MiB`, to one greater than the repository size. The `http.postBuffer` 
-   - _EX:_ If `git clone` fails when cloning a `500M` repository, you should set `http.postBuffer` to `524288000`. 
-     ```shell
-     git config http.postBuffer 524288000
-     ```
-   - [REF](https://git-scm.com/docs/git-config#Documentation/git-config.txt-httppostBuffer)
-1. In order to increase the `http.postBuffer` on the server side, modify the GitLab instance's [gitlab.rb](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/13.5.1+ee.0/files/gitlab-config-template/gitlab.rb.template#L1435-1455)
-   - _EX:_ Using the same Example number from above.
+- The number of files in the repository.
+- The number of revisions in the history.
+- The existence of large files (while not using LFS).
+
+A few potential solutions exist:
+
+- If this error occurs when cloning a large repository, you can
+  [decrease the cloning depth](../../ci/large_repositories/index.md#shallow-cloning)
+  to a value of `1`. For example:
+
+  ```shell
+  variables:
+    GIT_DEPTH: 1
+  ```
+
+- You can increase the
+  [http.postBuffer](https://git-scm.com/docs/git-config#Documentation/git-config.txt-httppostBuffer)
+  value in your local Git configuration from the default 1 MB value to a value greater
+  than the repository size. For example, if `git clone` fails when cloning a 500 MB
+  repository, you should set `http.postBuffer` to `524288000`:
+
+  ```shell
+  # Set the http.postBuffer size, in bytes
+  git config http.postBuffer 524288000
+  ```
+
+- You can increase the `http.postBuffer` on the server side:
+
+  1. Modify the GitLab instance's
+     [`gitlab.rb`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/13.5.1+ee.0/files/gitlab-config-template/gitlab.rb.template#L1435-1455) file:
+
      ```shell
      omnibus_gitconfig['system'] = {
+       # Set the http.postBuffer size, in bytes
        "http" => ["postBuffer" => 524288000]
      }
      ```
-   - After applying this change, apply the config:
+
+  1. After applying this change, apply the configuration change:
+
      ```shell
      sudo gitlab-ctl reconfigure
      ```
