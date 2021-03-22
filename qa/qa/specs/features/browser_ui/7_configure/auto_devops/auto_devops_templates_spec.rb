@@ -18,9 +18,9 @@ module QA
       end
 
       let(:testcase_mapping) do
-        "rails" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/939",
-        "spring" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/940",
-        "express" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/938"
+        { "rails" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/939",
+          "spring" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/940",
+          "express" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/938" }
       end
 
       where(:template) do
