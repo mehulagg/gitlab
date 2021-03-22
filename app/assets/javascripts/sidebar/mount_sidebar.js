@@ -15,7 +15,6 @@ import SidebarConfidentialityWidget from '~/sidebar/components/confidential/side
 import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import { apolloProvider } from '~/sidebar/graphql';
 import Translate from '../vue_shared/translate';
-import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
 import CopyEmailToClipboard from './components/copy_email_to_clipboard.vue';
 import SidebarLabels from './components/labels/sidebar_labels.vue';
 import IssuableLockForm from './components/lock/issuable_lock_form.vue';
@@ -33,30 +32,8 @@ function getSidebarOptions(sidebarOptEl = document.querySelector('.js-sidebar-op
   return JSON.parse(sidebarOptEl.innerHTML);
 }
 
-/**
- * Extracts the list of assignees with availability information from a hidden input
- * field and converts to a key:value pair for use in the sidebar assignees component.
- * The assignee username is used as the key and their busy status is the value
- *
- * e.g { root: 'busy', admin: '' }
- *
- * @returns {Object}
- */
-function getSidebarAssigneeAvailabilityData() {
-  const sidebarAssigneeEl = document.querySelectorAll('.js-sidebar-assignee-data input');
-  return Array.from(sidebarAssigneeEl)
-    .map((el) => el.dataset)
-    .reduce(
-      (acc, { username, availability = '' }) => ({
-        ...acc,
-        [username]: availability,
-      }),
-      {},
-    );
-}
-
 function mountAssigneesComponent() {
-  const el = document.getElementById('js-vue-sidebar-assignees-widget');
+  const el = document.getElementById('js-vue-sidebar-assignees');
 
   if (!el) return;
 
