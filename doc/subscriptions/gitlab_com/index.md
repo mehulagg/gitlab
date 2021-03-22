@@ -225,12 +225,12 @@ To see a list of your billable users on your GitLab group page go to **Settings 
 
 ## Subscription expiry
 
-When your subscription or trial expires, GitLab does not delete your data, but
-it may become inaccessible, depending on the tier at expiry. Some features may not
-behave as expected if you're not prepared for the expiry. For example,
-[environment specific variables not being passed](https://gitlab.com/gitlab-org/gitlab/-/issues/24759).
+When your license expires, GitLab locks down features, like Git pushes
+and issue creation. Then, your instance becomes read-only and
+an expiration message is displayed to all administrators.
 
-If you renew or upgrade, your data is accessible again.
+- To resume functionality, upload a new license.
+- To fall back to Free features, delete the expired license.
 
 ## CI pipeline minutes
 
