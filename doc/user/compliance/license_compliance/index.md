@@ -269,14 +269,13 @@ include:
   - template: Security/License-Scanning.gitlab-ci.yml
 
 license_scanning:
-    SETUP_CMD: ./license.sh
-  script:
-    - echo "asdf install python 3.7.2 && pip install -r requirements.txt" > license.sh
-    - chmod +x license.sh
+    SETUP_CMD: ./setup.sh
+  before_script:
+    - echo "asdf install python 3.7.2 && pip install -r requirements.txt" > setup.sh
+    - chmod +x setup.sh
     - export ASDF_PYTHON_VERSION=3.7.2
     - apt-get -y update
     - apt-get -y install build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
-    - /run.sh analyze .
 ```
 
 ### Custom root certificates for Python
