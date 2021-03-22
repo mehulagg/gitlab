@@ -138,7 +138,9 @@ module Gitlab
           return unless stage
         
           {
-            id: stage.id || stage.name
+            id: stage.id || stage.name,
+            title: stage.title,
+            slug: stage.slug
           }
         end
 
