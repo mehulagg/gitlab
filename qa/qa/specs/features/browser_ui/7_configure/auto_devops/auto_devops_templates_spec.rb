@@ -17,6 +17,12 @@ module QA
         ]
       end
 
+      let(:testcase_mapping) do
+        "rails" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/939",
+        "spring" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/940",
+        "express" => "https://gitlab.com/gitlab-org/quality/testcases/-/issues/938"
+      end
+
       where(:template) do
         %w[rails spring express]
       end
@@ -45,7 +51,7 @@ module QA
           Flow::Login.sign_in
         end
 
-        it 'works with Auto DevOps', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/240946', type: :flaky } do
+        it 'works with Auto DevOps', testcase: testcase_mapping[template], quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/240946', type: :flaky } do
           %w[build code_quality test].each do |job|
             pipeline.visit!
 
