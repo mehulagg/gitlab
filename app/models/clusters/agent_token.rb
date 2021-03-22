@@ -22,7 +22,7 @@ module Clusters
     validates :name, presence: true, length: { maximum: 255 }, on: :create
 
     def track_usage
-      track_values = { last_used_at: Time.current }
+      track_values = { last_used_at: Time.current.utc }
 
       cache_attributes(track_values)
 
