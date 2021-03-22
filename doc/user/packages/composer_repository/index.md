@@ -165,7 +165,7 @@ To install a package:
    - Connect to the Package Registry for your group:
 
    ```shell
-   composer config repositories.<group_id> composer https://gitlab.example.com/api/v4/group/<group_id>/-/packages/composer/
+   composer config repositories.<group_id> composer https://gitlab.example.com/api/v4/groups/<group_id>/-/packages/composer/
    ```
 
    - Set the required package version:
@@ -182,7 +182,7 @@ To install a package:
      "repositories": {
        "<group_id>": {
          "type": "composer",
-         "url": "https://gitlab.example.com/api/v4/group/<group_id>/-/packages/composer/"
+         "url": "https://gitlab.example.com/api/v4/groups/<group_id>/-/packages/composer/"
        },
        ...
      },
@@ -243,7 +243,7 @@ To install a package:
    {
      ...
      "repositories": [
-       { "type": "composer", "url": "https://gitlab.example.com/api/v4/group/<group_id>/-/packages/composer/" }
+       { "type": "composer", "url": "https://gitlab.example.com/api/v4/groups/<group_id>/-/packages/composer/" }
      ],
      "config": {
        ...
