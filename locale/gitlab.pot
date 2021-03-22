@@ -10820,6 +10820,12 @@ msgstr ""
 msgid "DevopsReport|Score"
 msgstr ""
 
+msgid "Did not remove user from group: Cannot remove last group owner."
+msgstr ""
+
+msgid "Did not remove user from group: User is not a group member."
+msgstr ""
+
 msgid "Diff content limits"
 msgstr ""
 

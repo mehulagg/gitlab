@@ -1,0 +1,5 @@
+---
+title: Return errors if SCIM deprovision unsuccessful
+merge_request: 57178
+author:
+type: fixed
