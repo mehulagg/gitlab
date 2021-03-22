@@ -1477,7 +1477,7 @@ The Praefect `reconcile` sub-command allows for the manual reconciliation betwee
 command replicates every repository on a later version on the reference storage to the target storage.
 
 ```shell
-sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml reconcile -virtual <virtual-storage> -reference <up-to-date-storage> -target <outdated-storage> -f
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml reconcile -f -virtual <virtual-storage> -reference <up-to-date-storage> -target <outdated-storage>
 ```
 
 - Replace the placeholder `<virtual-storage>` with the virtual storage containing the Gitaly node storage to be checked.
