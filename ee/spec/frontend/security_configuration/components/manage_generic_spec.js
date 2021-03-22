@@ -17,8 +17,8 @@ describe('ManageGeneric component', () => {
 
   describe.each`
     configured | expectedTestId
-    ${true}    | ${'configureButton'}
-    ${false}   | ${'enableButton'}
+    ${true}    | ${'configure-button'}
+    ${false}   | ${'enable-button'}
   `('given feature.configured is $configured', ({ configured, expectedTestId }) => {
     describe('given a configuration path', () => {
       beforeEach(() => {

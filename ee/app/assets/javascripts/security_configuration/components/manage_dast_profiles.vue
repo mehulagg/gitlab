@@ -15,7 +15,7 @@ export default {
 </script>
 
 <template>
-  <gl-button :href="feature.configuration_path" data-testid="manageButton">{{
+  <gl-button :href="feature.configuration_path" data-testid="manage-button">{{
     s__('SecurityConfiguration|Manage')
   }}</gl-button>
 </template>

@@ -23,16 +23,19 @@ export default {
 </script>
 
 <template>
-  <gl-button v-if="canConfigure" :href="feature.configuration_path" data-testid="configureButton">{{
-    s__('SecurityConfiguration|Configure')
-  }}</gl-button>
+  <gl-button
+    v-if="canConfigure"
+    :href="feature.configuration_path"
+    data-testid="configure-button"
+    >{{ s__('SecurityConfiguration|Configure') }}</gl-button
+  >
 
   <gl-button
     v-else-if="canEnable"
     variant="success"
     category="primary"
     :href="feature.configuration_path"
-    data-testid="enableButton"
+    data-testid="enable-button"
     >{{ s__('SecurityConfiguration|Enable') }}</gl-button
   >
 </template>

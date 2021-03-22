@@ -10,7 +10,7 @@ describe('ManageDastProfiles component', () => {
     wrapper = extendedWrapper(shallowMount(ManageDastProfiles, { propsData }));
   };
 
-  const findButton = () => wrapper.findByTestId('manageButton');
+  const findButton = () => wrapper.findByTestId('manage-button');
 
   afterEach(() => {
     wrapper.destroy();

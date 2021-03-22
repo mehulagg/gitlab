@@ -146,7 +146,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
             <div>
               <a
                 class="btn btn-success btn-md gl-button"
-                data-testid="enableButton"
+                data-testid="enable-button"
                 href="/markrian/qr/-/security/configuration/sast"
               >
                 <!---->
@@ -278,7 +278,7 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
             <div>
               <a
                 class="btn btn-default btn-md gl-button"
-                data-testid="manageButton"
+                data-testid="manage-button"
                 href="/markrian/qr/-/security/configuration/dast_profiles"
               >
                 <!---->
@@ -806,7 +806,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
               <a
                 auto-devops-enabled="true"
                 class="btn btn-success btn-md gl-button"
-                data-testid="enableButton"
+                data-testid="enable-button"
                 href="/markrian-test/test-public-project/-/security/configuration/sast"
               >
                 <!---->
@@ -939,7 +939,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
               <a
                 auto-devops-enabled="true"
                 class="btn btn-default btn-md gl-button"
-                data-testid="manageButton"
+                data-testid="manage-button"
                 href="/markrian-test/test-public-project/-/security/configuration/dast_profiles"
               >
                 <!---->
@@ -1249,7 +1249,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
               <a
                 auto-devops-enabled="true"
                 class="btn btn-success btn-md gl-button"
-                data-testid="enableButton"
+                data-testid="enable-button"
                 href="/markrian-test/test-public-project/-/security/configuration/api_fuzzing"
               >
                 <!---->
@@ -1486,7 +1486,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
             <div>
               <a
                 class="btn btn-default btn-md gl-button"
-                data-testid="configureButton"
+                data-testid="configure-button"
                 href="/gitlab-org/gitlab-ui/-/security/configuration/sast"
               >
                 <!---->
@@ -1618,7 +1618,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
             <div>
               <a
                 class="btn btn-default btn-md gl-button"
-                data-testid="manageButton"
+                data-testid="manage-button"
                 href="/gitlab-org/gitlab-ui/-/security/configuration/dast_profiles"
               >
                 <!---->
@@ -1927,7 +1927,7 @@ exports[`Security Configuration App given some enabled scanners (gitlab-ui) matc
             <div>
               <a
                 class="btn btn-success btn-md gl-button"
-                data-testid="enableButton"
+                data-testid="enable-button"
                 href="/gitlab-org/gitlab-ui/-/security/configuration/api_fuzzing"
               >
                 <!---->
