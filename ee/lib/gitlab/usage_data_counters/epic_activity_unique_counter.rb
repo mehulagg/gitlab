@@ -14,33 +14,33 @@ module Gitlab
       EPIC_START_DATE_SET_AS_INHERITED = 'g_project_management_users_setting_epic_start_date_as_inherited'
 
       class << self
-        def track_epic_created_action(author:, time: Time.zone.now)
-          track_unique_action(EPIC_CREATED, author, time)
+        def track_epic_created_action(author:)
+          track_unique_action(EPIC_CREATED, author)
         end
 
-        def track_epic_note_updated_action(author:, time: Time.zone.now)
-          track_unique_action(EPIC_NOTE_UPDATED, author, time)
+        def track_epic_note_updated_action(author:)
+          track_unique_action(EPIC_NOTE_UPDATED, author)
         end
 
-        def track_epic_note_destroyed_action(author:, time: Time.zone.now)
-          track_unique_action(EPIC_NOTE_DESTROYED, author, time)
+        def track_epic_note_destroyed_action(author:)
+          track_unique_action(EPIC_NOTE_DESTROYED, author)
         end
 
-        def track_epic_start_date_set_as_fixed_action(author:, time: Time.zone.now)
-          track_unique_action(EPIC_START_DATE_SET_AS_FIXED, author, time)
+        def track_epic_start_date_set_as_fixed_action(author:)
+          track_unique_action(EPIC_START_DATE_SET_AS_FIXED, author)
         end
 
-        def track_epic_start_date_set_as_inherited_action(author:, time: Time.zone.now)
-          track_unique_action(EPIC_START_DATE_SET_AS_INHERITED, author, time)
+        def track_epic_start_date_set_as_inherited_action(author:)
+          track_unique_action(EPIC_START_DATE_SET_AS_INHERITED, author)
         end
 
         private
 
-        def track_unique_action(action, author, time)
+        def track_unique_action(action, author)
           return unless Feature.enabled?(:track_epics_activity, default_enabled: true)
           return unless author
 
-          Gitlab::UsageDataCounters::HLLRedisCounter.track_event(action, values: author.id, time: time)
+          Gitlab::UsageDataCounters::HLLRedisCounter.track_event(action, values: author.id)
         end
       end
     end
