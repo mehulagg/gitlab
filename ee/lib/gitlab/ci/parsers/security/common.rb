@@ -7,13 +7,14 @@ module Gitlab
         class Common
           SecurityReportParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
 
-          def self.parse!(json_data, report)
-            new(json_data, report).parse!
+          def self.parse!(json_data, report, vulnerability_finding_fingerprints_enabled = false)
+            new(json_data, report, vulnerability_finding_fingerprints_enabled).parse!
           end
 
-          def initialize(json_data, report)
+          def initialize(json_data, report, vulnerability_finding_fingerprints_enabled = false)
             @json_data = json_data
             @report = report
+            @vulnerability_finding_fingerprints_enabled = vulnerability_finding_fingerprints_enabled
           end
 
           def parse!
@@ -82,8 +83,7 @@ module Gitlab
             remediations = create_remediations(data['remediations'])
             fingerprints = create_signatures(location, tracking_data(data))
 
-            vulnerability_finding_fingerprints_enabled = ::Feature.enabled?(:vulnerability_finding_fingerprints, report&.pipeline&.project)
-            if vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
+            if @vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
               # NOT the fingerprint_sha256 - the compare key is hashed
               # to create the project_fingerprint
               highest_priority_fingerprint = fingerprints.max_by(&:priority)
@@ -111,7 +111,7 @@ module Gitlab
                 details: data['details'] || {},
                 signatures: signatures,
                 project_id: report.project_id,
-                vulnerability_finding_fingerprints_enabled: vulnerability_finding_fingerprints_enabled))
+                vulnerability_finding_fingerprints_enabled: @vulnerability_finding_fingerprints_enabled))
           end
 
           def create_signatures(location, tracking)
