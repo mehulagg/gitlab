@@ -10,7 +10,17 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
-  inject: ['token', 'revokePath', 'buttonClass'],
+  inject: {
+    token: {
+      default: null,
+    },
+    revokePath: {
+      default: '',
+    },
+    buttonClass: {
+      default: '',
+    },
+  },
   computed: {
     modalId() {
       return `revoke-modal-${this.token.id}`;
@@ -32,6 +42,7 @@ export default {
       category="primary"
       variant="danger"
       class="float-right"
+      data-testid="revoke-button"
       >{{ s__('DeployTokens|Revoke') }}</gl-button
     >
     <gl-modal ref="modal" :modal-id="modalId">
@@ -62,6 +73,7 @@ export default {
           :href="revokePath"
           data-method="put"
           class="text-truncate"
+          data-testid="primary-revoke-btn"
         >
           <gl-sprintf :message="s__('DeployTokens|Revoke %{name}')">
             <template #name>{{ token.name }}</template>
