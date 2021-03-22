@@ -1,3 +1,4 @@
+import { nextTick } from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import NavControls from '~/pipelines/components/pipelines_list/nav_controls.vue';
 
@@ -75,7 +76,8 @@ describe('Pipelines Nav Controls', () => {
     it('should emit postAction event when reset runner cache button is clicked', async () => {
       jest.spyOn(wrapper.vm, '$emit').mockImplementation(() => {});
 
-      await wrapper.find('.js-clear-cache').vm.$emit('click');
+      wrapper.find('.js-clear-cache').vm.$emit('click');
+      await nextTick();
 
       expect(wrapper.vm.$emit).toHaveBeenCalledWith('resetRunnersCache', 'foo');
     });
