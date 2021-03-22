@@ -1378,7 +1378,7 @@ class Project < ApplicationRecord
   def find_or_initialize_service(name)
     return if disabled_services.include?(name)
 
-    find_service(services, name) || build_from_instance_or_template(name) || public_send("build_#{name}_service") # rubocop:disable GitlabSecurity/PublicSend
+    find_service(integrations, name) || build_from_instance_or_template(name) || public_send("build_#{name}_service") # rubocop:disable GitlabSecurity/PublicSend
   end
 
   # rubocop: disable CodeReuse/ServiceClass
