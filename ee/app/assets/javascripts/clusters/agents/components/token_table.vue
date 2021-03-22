@@ -18,6 +18,7 @@ export default {
     createToken: s__('ClusterAgents|You will need to create a token to connect to your agent'),
     dateCreated: s__('ClusterAgents|Date created'),
     description: s__('ClusterAgents|Description'),
+    lastUsed: s__('ClusterAgents|Last used'),
     learnMore: s__('ClusterAgents|Learn how to create an agent access token'),
     name: s__('ClusterAgents|Name'),
     noTokens: s__('ClusterAgents|This agent has no tokens'),
@@ -36,6 +37,11 @@ export default {
           key: 'name',
           label: this.$options.i18n.name,
           tdAttr: { 'data-testid': 'agent-token-name' },
+        },
+        {
+          key: 'lastUsed',
+          label: this.$options.i18n.lastUsed,
+          tdAttr: { 'data-testid': 'agent-token-used' },
         },
         {
           key: 'createdAt',
@@ -77,6 +83,10 @@ export default {
     </div>
 
     <gl-table :items="tokens" :fields="fields" fixed stacked="md">
+      <template #cell(lastUsed)="{ item }">
+        <time-ago-tooltip v-if="item.lastUsedAt" :time="item.lastUsedAt" />
+      </template>
+
       <template #cell(createdAt)="{ item }">
         <time-ago-tooltip :time="item.createdAt" />
       </template>

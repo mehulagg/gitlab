@@ -6458,6 +6458,9 @@ msgstr ""
 msgid "ClusterAgents|Integrate with the GitLab Agent"
 msgstr ""
 
+msgid "ClusterAgents|Last used"
+msgstr ""
+
 msgid "ClusterAgents|Learn how to create an agent access token"
 msgstr ""
 
