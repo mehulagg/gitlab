@@ -1,4 +1,4 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { getJSONFixture } from 'helpers/fixtures';
@@ -15,16 +15,23 @@ const oneReleaseQueryResponse = getJSONFixture(
   'graphql/releases/queries/one_release.query.graphql.json',
 );
 
-const localVue = createLocalVue();
 Vue.use(VueApollo);
 
-const EXPECTED_ERROR_MESSAGE = 'Something went wrong while getting the release details';
+const EXPECTED_ERROR_MESSAGE = 'Something went wrong while getting the release details.';
+const MOCK_FULL_PATH = 'project/full/path';
+const MOCK_TAG_NAME = 'test-tag-name';
 
 describe('Release show component', () => {
   let wrapper;
 
   const createComponent = ({ apolloProvider }) => {
-    wrapper = shallowMount(ReleaseShowApp, { localVue, apolloProvider });
+    wrapper = shallowMount(ReleaseShowApp, {
+      provide: {
+        fullPath: MOCK_FULL_PATH,
+        tagName: MOCK_TAG_NAME,
+      },
+      apolloProvider,
+    });
   };
 
   afterEach(() => {
@@ -75,6 +82,24 @@ describe('Release show component', () => {
       expect(findReleaseBlock().exists()).toBe(false);
     });
   };
+
+  describe('GraphQL query variables', () => {
+    const queryHandler = jest.fn().mockResolvedValueOnce(oneReleaseQueryResponse);
+
+    beforeEach(() => {
+      const apolloProvider = createMockApollo([[oneReleaseQuery, queryHandler]]);
+
+      createComponent({ apolloProvider });
+    });
+
+    it('builds a GraphQL with the expected variables', () => {
+      expect(queryHandler).toHaveBeenCalledTimes(1);
+      expect(queryHandler).toHaveBeenCalledWith({
+        fullPath: MOCK_FULL_PATH,
+        tagName: MOCK_TAG_NAME,
+      });
+    });
+  });
 
   describe('when the component is loading data', () => {
     beforeEach(() => {

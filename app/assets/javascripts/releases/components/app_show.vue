@@ -52,7 +52,7 @@ export default {
   methods: {
     showFlash(error) {
       createFlash({
-        message: s__('Release|Something went wrong while getting the release details'),
+        message: s__('Release|Something went wrong while getting the release details.'),
         captureError: true,
         error,
       });
