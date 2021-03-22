@@ -21,7 +21,7 @@ module Gitlab
           if Session.current.performed_write?
             job['database_write_location'] = load_balancer.primary_write_location
           else
-            job['database_replica_location'] = true
+            job['database_replica_location'] = load_balancer.host.database_replica_location
           end
         end
 

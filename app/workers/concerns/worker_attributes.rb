@@ -53,6 +53,14 @@ module WorkerAttributes
       get_feature_category == :not_owned
     end
 
+    def max_replica_retry_count(value)
+      class_attributes[:max_replica_retry_count] = value
+    end
+
+    def get_max_replica_retry_count
+      get_class_attribute(:max_replica_retry_count) || 2
+    end
+
     # This should be set to :high for jobs that need to be run
     # immediately, or, if they are delayed, risk creating
     # inconsistencies in the application that could being perceived by
