@@ -77,6 +77,27 @@ module Gitlab
           check_tags_changed: check_tags_changed
         )
 
+        configure_ssh_auth(request, ssh_auth)
+
+        GitalyClient.call(@storage, :repository_service, :fetch_remote, request, timeout: GitalyClient.long_timeout)
+      end
+
+      def fetch_url(url, refmap: nil, ssh_auth:, forced:, no_tags:, timeout:, prune: true, check_tags_changed: false)
+        request = Gitaly::FetchRemoteRequest.new(
+          remote_params: Gitaly::Remote.new(
+            url: url, mirror_refmaps: refmap,
+          ),
+          repository: @gitaly_repo, force: forced,
+          no_tags: no_tags, timeout: timeout, no_prune: !prune,
+          check_tags_changed: check_tags_changed
+        )
+
+        configure_ssh_auth(request, ssh_auth)
+
+        GitalyClient.call(@storage, :repository_service, :fetch_remote, request, timeout: GitalyClient.long_timeout)
+      end
+
+      def configure_ssh_auth(request, ssh_auth)
         if ssh_auth&.ssh_mirror_url?
           if ssh_auth.ssh_key_auth? && ssh_auth.ssh_private_key.present?
             request.ssh_key = ssh_auth.ssh_private_key
@@ -86,8 +107,6 @@ module Gitlab
             request.known_hosts = ssh_auth.ssh_known_hosts
           end
         end
-
-        GitalyClient.call(@storage, :repository_service, :fetch_remote, request, timeout: GitalyClient.long_timeout)
       end
 
       def create_repository
