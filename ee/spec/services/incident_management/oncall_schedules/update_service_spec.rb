@@ -68,6 +68,28 @@ RSpec.describe IncidentManagement::OncallSchedules::UpdateService do
         expect(oncall_schedule.description).to eq(params[:description])
         expect(oncall_schedule.timezone).to eq(params[:timezone])
       end
+
+      context 'schedule has a rotation' do
+        # Setting fixed timezone for rotation active period updates
+        around do |example|
+          freeze_time do
+            travel_to Time.utc(2021, 03, 22)
+
+            example.run
+          end
+        end
+
+        let_it_be_with_reload(:oncall_rotation) { create(:incident_management_oncall_rotation, :with_active_period, schedule: oncall_schedule) }
+
+        it 'updates the rotation active periods with new timezone' do
+          expect { execute }.to change { time_from_time_column(oncall_rotation.reload.active_period_start) }.from('08:00').to('03:00')
+           .and change { time_from_time_column(oncall_rotation.active_period_end) }.from('17:00').to('12:00')
+        end
+      end
+
+      def time_from_time_column(attribute)
+        attribute.strftime('%H:%M')
+      end
     end
   end
 end
