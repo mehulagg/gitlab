@@ -39,9 +39,9 @@ exports[`Security Configuration App given no enabled scanners matches the snapsh
     <table
       aria-busy="false"
       aria-colcount="3"
-      aria-describedby="__BVID__86__caption_"
+      aria-describedby="__BVID__95__caption_"
       class="table b-table gl-table b-table-stacked-md"
-      id="__BVID__86"
+      id="__BVID__95"
       role="table"
     >
       <!---->
@@ -698,9 +698,9 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
     <table
       aria-busy="false"
       aria-colcount="3"
-      aria-describedby="__BVID__159__caption_"
+      aria-describedby="__BVID__177__caption_"
       class="table b-table gl-table b-table-stacked-md"
-      id="__BVID__159"
+      id="__BVID__177"
       role="table"
     >
       <!---->
@@ -804,6 +804,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <a
+                auto-devops-enabled="true"
                 class="btn btn-success btn-md gl-button"
                 data-testid="enableButton"
                 href="/markrian-test/test-public-project/-/security/configuration/sast"
@@ -936,6 +937,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <a
+                auto-devops-enabled="true"
                 class="btn btn-default btn-md gl-button"
                 data-testid="manageButton"
                 href="/markrian-test/test-public-project/-/security/configuration/dast_profiles"
@@ -1245,6 +1247,7 @@ exports[`Security Configuration App given some enabled by ADO matches the snapsh
           >
             <div>
               <a
+                auto-devops-enabled="true"
                 class="btn btn-success btn-md gl-button"
                 data-testid="enableButton"
                 href="/markrian-test/test-public-project/-/security/configuration/api_fuzzing"

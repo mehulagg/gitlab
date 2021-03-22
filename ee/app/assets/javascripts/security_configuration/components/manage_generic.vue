@@ -1,0 +1,38 @@
+<script>
+import { GlButton } from '@gitlab/ui';
+
+export default {
+  components: {
+    GlButton,
+  },
+  props: {
+    feature: {
+      type: Object,
+      required: true,
+    },
+  },
+  computed: {
+    canConfigure() {
+      return Boolean(this.feature.configuration_path && this.feature.configured);
+    },
+    canEnable() {
+      return Boolean(this.feature.configuration_path && !this.feature.configured);
+    },
+  },
+};
+</script>
+
+<template>
+  <gl-button v-if="canConfigure" :href="feature.configuration_path" data-testid="configureButton">{{
+    s__('SecurityConfiguration|Configure')
+  }}</gl-button>
+
+  <gl-button
+    v-else-if="canEnable"
+    variant="success"
+    category="primary"
+    :href="feature.configuration_path"
+    data-testid="enableButton"
+    >{{ s__('SecurityConfiguration|Enable') }}</gl-button
+  >
+</template>
