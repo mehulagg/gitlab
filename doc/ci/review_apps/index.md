@@ -286,8 +286,8 @@ The visual review tools retrieve the merge request ID from the `data-merge-reque
 data attribute included in the `script` HTML tag used to add the visual review tools
 to your review app.
 
-​After determining the ID for the merge request to link to a visual review app, you
-can supply the ID by either:​​
+After determining the ID for the merge request to link to a visual review app, you
+can supply the ID by either:
 
 - Hard-coding it in the script tag via the data attribute `data-merge-request-id` of the app.
 - Dynamically adding the `data-merge-request-id` value during the build of the app.
@@ -321,7 +321,3 @@ the user must enter a [personal access token](../../user/profile/personal_access
 with `api` scope before submitting feedback.
 
 This same method can be used to require authentication for any public projects.
-
-## Limitations
-
-Review App limitations are the same as [environments limitations](../environments/index.md#limitations).

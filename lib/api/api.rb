@@ -58,7 +58,8 @@ module API
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
-        caller_id: route.origin,
+        runner: -> { @current_runner || @runner },
+        caller_id: api_endpoint.endpoint_id,
         remote_ip: request.ip,
         feature_category: feature_category
       )

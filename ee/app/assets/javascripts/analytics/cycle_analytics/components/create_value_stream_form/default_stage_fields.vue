@@ -86,25 +86,23 @@ export default {
       />
     </div>
     <div
-      class="gl-display-flex gl-align-items-center gl-mt-2"
+      class="gl-display-flex gl-align-items-center gl-mt-3"
       :data-testid="`stage-start-event-${index}`"
     >
       <span class="gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold">{{
         $options.i18n.DEFAULT_FIELD_START_EVENT_LABEL
       }}</span>
-      <gl-form-text class="gl-m-0">{{ eventName(stage.startEventIdentifier) }}</gl-form-text>
-      <gl-form-text v-if="stage.startEventLabel" class="gl-m-0"
-        >&nbsp;-&nbsp;{{ stage.startEventLabel }}</gl-form-text
-      >
+      <gl-form-text class="gl-m-0" tag="span">{{
+        eventName(stage.startEventIdentifier)
+      }}</gl-form-text>
     </div>
     <div class="gl-display-flex gl-align-items-center" :data-testid="`stage-end-event-${index}`">
       <span class="gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold">{{
         $options.i18n.DEFAULT_FIELD_END_EVENT_LABEL
       }}</span>
-      <gl-form-text class="gl-m-0">{{ eventName(stage.endEventIdentifier) }}</gl-form-text>
-      <gl-form-text v-if="stage.endEventLabel" class="gl-m-0"
-        >&nbsp;-&nbsp;{{ stage.endEventLabel }}</gl-form-text
-      >
+      <gl-form-text class="gl-m-0" tag="span">{{
+        eventName(stage.endEventIdentifier)
+      }}</gl-form-text>
     </div>
   </div>
 </template>

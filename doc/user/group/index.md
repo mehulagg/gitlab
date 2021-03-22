@@ -242,7 +242,7 @@ a [beta feature](https://about.gitlab.com/handbook/product/#beta).
 
 For a group, you can view how many merge requests, issues, and members were created in the last 90 days.
 
-These Group Activity Analytics can be enabled with the `group_activity_analytics` [feature flag](../../development/feature_flags/development.md#enabling-a-feature-flag-locally-in-development).
+These Group Activity Analytics can be enabled with the `group_activity_analytics` [feature flag](../../development/feature_flags/index.md#enabling-a-feature-flag-locally-in-development).
 
 ![Recent Group Activity](img/group_activity_analytics_v13_10.png)
 
@@ -336,7 +336,7 @@ You can move group wiki repositories by using the [Group repository storage move
 There are a few limitations compared to project wikis:
 
 - Git LFS is not supported.
-- Group wikis are not included in global search and Geo replication.
+- Group wikis are not included in global search.
 - Changes to group wikis don't show up in the group's activity feed.
 
 For updates, follow [the epic that tracks feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
@@ -387,16 +387,10 @@ because the project cannot be moved.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
 
-By default, when you create a new project in GitLab, the initial branch is called `master`.
-For groups, a group owner can customize the initial branch name to something
-else. This way, every new project created under that group from then on starts from the custom branch name rather than `master`.
-
-To use a custom name for the initial branch:
-
-1. Go to the group's **Settings > Repository** page.
-1. Expand the **Default initial branch name** section.
-1. Change the default initial branch to a custom name of your choice.
-1. Select **Save changes**.
+When you create a new project in GitLab, a default branch is created with the
+first push. The group owner can
+[customize the initial branch](../project/repository/branches/default.md#group-level-custom-initial-branch-name)
+for the group's projects to meet your group's needs.
 
 ## Remove a group
 
@@ -430,30 +424,26 @@ To restore a group that is marked for deletion:
 Prevent projects in a group from [sharing
 a project with another group](../project/members/share_project_with_groups.md) to enable tighter control over project access.
 
-For example, let's say you have two distinct teams (Group A and Group B) working together in a project, and to inherit the group membership, you share the project between the
-two groups A and B. **Share with group lock** prevents any project in
-the group from being shared with another group,
-guaranteeing that only the right group members have access to those projects.
-
-To prevent a project from being shared with groups:
+To prevent a project from being shared with other groups:
 
 1. Go to the group's **Settings > General** page.
-1. Select **Share with group lock**.
-1. Select **Save the group**.
+1. Expand the **Permissions, LFS, 2FA** section.
+1. Select **Prevent sharing a project within <group_name> with other groups**.
+1. Select **Save changes**.
 
 ## Prevent members from being added to a group **(PREMIUM)**
 
-Member lock lets a group owner prevent any new project membership to all of the
+As a group owner, you can prevent any new project membership for all
 projects in a group, allowing tighter control over project membership.
 
 For example, if you want to lock the group for an [Audit Event](../../administration/audit_events.md),
-enable member lock to guarantee that project membership cannot be modified during the audit.
+you can guarantee that project membership cannot be modified during the audit.
 
 To prevent members from being added to a group:
 
 1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
-1. Select **Member lock**.
+1. Under **Member lock**, select **Prevent adding new members to project membership within this group**.
 1. Select **Save changes**.
 
 All users who previously had permissions can no longer add members to a group.
@@ -470,29 +460,24 @@ users cannot perform Git operations through SSH, or access projects in the UI.
 For more information, [see this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/271673).
 
 To ensure only people from your organization can access particular
-resources, you can restrict access to groups and their
-underlying subgroups, projects, issues, and so on, by IP address. This can help ensure that
-particular content doesn't leave the premises, while not blocking off access to
-the entire instance. IP access restrictions can only be configured at the group level.
+resources, you can restrict access to groups by IP address. This setting applies to all subgroups,
+projects, issues, and so on.
 
-Add one or more allowed IP subnets using CIDR notation to the group settings and anyone
-coming from a different IP address won't be able to access the restricted
-content.
+IP access restrictions can be configured at the group level only.
 
-Restriction currently applies to:
+This restriction applies to:
 
-- UI.
-- [From GitLab 12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/12874), API access.
-- [From GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/issues/32113), Git actions via SSH.
+- The GitLab UI.
+- [In GitLab 12.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/12874), the API.
+- [In GitLab 12.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/32113), Git actions via SSH.
 
-To avoid accidental lock-out, admins and group owners are able to access
-the group regardless of the IP restriction.
+Administrators and group owners are able to access the group regardless of the IP restriction.
 
 To restrict group access by IP address:
 
-1. Go to the group’s **Settings > General** page.
+1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
-1. In the **Allow access to the following IP addresses** field, enter IP address ranges.
+1. In the **Allow access to the following IP addresses** field, enter IP address ranges in CIDR notation.
 1. Select **Save changes**.
 
 ![Domain restriction by IP address](img/restrict-by-ip.gif)
@@ -540,20 +525,20 @@ You can configure this feature for both subgroups and immediate parent groups. A
 in a subgroup has access to the templates for that subgroup, as well as
 any immediate parent groups.
 
-To enable group file templates:
-
-1. Go to the group settings page.
-1. Expand the **Templates** section.
-1. Choose a project to act as the template repository.
-1. Select **Save group**.
-
 To learn how to create templates for issues and merge requests, see
 [Description templates](../project/description_templates.md).
 
-### Group-level project templates **(PREMIUM)**
-
 Define project templates at a group level by setting a group as the template source.
-[Learn more about group-level project templates](custom_project_templates.md).
+[Learn more about group-level project templates](custom_project_templates.md). **(PREMIUM)**
+
+### Enable group file template **(PREMIUM)**
+
+To enable group file templates:
+
+1. Go to the group's **Settings > General** page.
+1. Expand the **Templates** section.
+1. Choose a project to act as the template repository.
+1. Select **Save changes**.
 
 ## Disable email notifications
 
@@ -616,7 +601,8 @@ Optionally, on [Premium](https://about.gitlab.com/pricing/) or higher tiers,
 you can prevent the projects in a group from being forked outside of the current top-level group.
 
 Previously this setting was available only for groups enforcing group managed account. This setting will be
-removed from SAML setting page and migrated to group setting, but in the interim period of changes both of those settings will be taken into consideration, if even one is set to `true` then it will be assumed group does not allow forking projects outside.
+removed from SAML setting page and migrated to group settings. In the interim period, both of these settings are taken into consideration.
+If even one is set to `true` then it will be assumed the group does not allow forking projects outside.
 
 To enable prevent project forking:
 
@@ -647,8 +633,7 @@ The group's new subgroups have push rules set for them based on either:
 ## Related topics
 
 - [Maximum artifacts size](../admin_area/settings/continuous_integration.md#maximum-artifacts-size). **(FREE SELF)**
-- [Repositories analytics](repositories_analytics/index.md): View overall activity of all projects with code coverage.
-  [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in GitLab 13.6. **(PREMIUM)**
+- [Repositories analytics](repositories_analytics/index.md): View overall activity of all projects with code coverage. **(PREMIUM)**
 - [Contribution analytics](contribution_analytics/index.md): View the contributions (pushes, merge requests,
   and issues) of group members. **(PREMIUM)**
 - [Issue analytics](issues_analytics/index.md): View a bar chart of your group's number of issues per month. **(PREMIUM)**

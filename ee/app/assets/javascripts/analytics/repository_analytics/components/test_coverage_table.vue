@@ -22,23 +22,29 @@ export default {
     TimeAgoTooltip,
   },
   mixins: [glFeatureFlagsMixin()],
+  inject: {
+    groupFullPath: {
+      default: '',
+    },
+  },
   apollo: {
     projects: {
       query: getProjectsTestCoverage,
       debounce: 500,
       variables() {
         return {
-          projectIds: this.selectedProjectIds,
+          groupFullPath: this.groupFullPath,
+          projectIds: this.projectIdsToFetch,
         };
       },
       result({ data }) {
+        const projects = data.group.projects.nodes;
         // Keep data from all queries so that we don't
         // fetch the same data more than once
         this.allCoverageData = [
           ...this.allCoverageData,
-          // Remove the projects that don't have any code coverage
-          ...data.projects.nodes
-            .filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary))
+          ...projects
+            .filter(({ id }) => !this.allCoverageData.some((project) => project.id === id))
             .map((project) => ({
               ...project,
               codeCoveragePath: joinPaths(
@@ -47,6 +53,9 @@ export default {
               ),
             })),
         ];
+      },
+      update(data) {
+        return data.group.projects.nodes;
       },
       error() {
         this.handleError();
@@ -62,10 +71,11 @@ export default {
   data() {
     return {
       allProjectsSelected: false,
-      allCoverageData: [],
+      allCoverageData: [], // All data we have ever received whether selected or not
       hasError: false,
       isLoading: false,
-      projectIds: {},
+      selectedProjectIds: {},
+      projects: {},
     };
   },
   computed: {
@@ -74,16 +84,28 @@ export default {
     },
     skipQuery() {
       // Skip if we haven't selected any projects yet
-      return !this.selectedProjectIds.length;
+      return !this.allProjectsSelected && !this.projectIdsToFetch.length;
     },
-    selectedProjectIds() {
+    /**
+     * projectIdsToFetch is a subset of selectedProjectIds
+     * The difference is that it only returns the projects
+     * that we have selected but haven't requested yet
+     */
+    projectIdsToFetch() {
+      if (this.allProjectsSelected) {
+        return null;
+      }
       // Get the IDs of the projects that we haven't requested yet
-      return Object.keys(this.projectIds).filter(
+      return Object.keys(this.selectedProjectIds).filter(
         (id) => !this.allCoverageData.some((project) => project.id === id),
       );
     },
     selectedCoverageData() {
-      return this.allCoverageData.filter(({ id }) => this.projectIds[id]);
+      if (this.allProjectsSelected) {
+        return this.allCoverageData;
+      }
+
+      return this.allCoverageData.filter(({ id }) => this.selectedProjectIds[id]);
     },
     sortedCoverageData() {
       // Sort the table by most recently updated coverage report
@@ -106,25 +128,24 @@ export default {
         api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
       }
     },
-    selectAllProjects(allProjects) {
-      this.projectIds = Object.fromEntries(allProjects.map(({ id }) => [id, true]));
+    selectAllProjects() {
       this.allProjectsSelected = true;
     },
     toggleProject({ id }) {
       if (this.allProjectsSelected) {
         // Reset all project selections to false
         this.allProjectsSelected = false;
-        this.projectIds = Object.fromEntries(
-          Object.entries(this.projectIds).map(([key]) => [key, false]),
+        this.selectedProjectIds = Object.fromEntries(
+          Object.entries(this.selectedProjectIds).map(([key]) => [key, false]),
         );
       }
 
-      if (Object.prototype.hasOwnProperty.call(this.projectIds, id)) {
-        Vue.set(this.projectIds, id, !this.projectIds[id]);
+      if (Object.prototype.hasOwnProperty.call(this.selectedProjectIds, id)) {
+        Vue.set(this.selectedProjectIds, id, !this.selectedProjectIds[id]);
         return;
       }
 
-      Vue.set(this.projectIds, id, true);
+      Vue.set(this.selectedProjectIds, id, true);
     },
   },
   tableFields: [

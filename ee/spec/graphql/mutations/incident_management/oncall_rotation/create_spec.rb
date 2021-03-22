@@ -179,7 +179,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
 
         context 'too many users' do
           before do
-            stub_const('Mutations::IncidentManagement::OncallRotation::Create::MAXIMUM_PARTICIPANTS', 0)
+            stub_const('Mutations::IncidentManagement::OncallRotation::Base::MAXIMUM_PARTICIPANTS', 0)
           end
 
           it 'raises an error' do

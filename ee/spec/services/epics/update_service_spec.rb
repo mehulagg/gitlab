@@ -293,6 +293,20 @@ RSpec.describe Epics::UpdateService do
         end
       end
 
+      context 'epic start date fixed or inherited' do
+        it 'tracks the user action to set as fixed' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_fixed_action)
+
+          update_epic(start_date_is_fixed: true, start_date_fixed: Date.today)
+        end
+
+        it 'tracks the user action to set as inherited' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_inherited_action)
+
+          update_epic(start_date_is_fixed: false)
+        end
+      end
+
       context 'date fields are not updated' do
         it 'does not call UpdateDatesService' do
           expect(Epics::UpdateDatesService).not_to receive(:new)

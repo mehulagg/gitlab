@@ -85,6 +85,13 @@ module IncidentManagement
       !hours? && active_period.present?
     end
 
+    def upsert_participants!(new_participants)
+      ::IncidentManagement::OncallParticipant.upsert_all(
+        new_participants,
+        unique_by: :index_inc_mgmnt_oncall_participants_on_user_id_and_rotation_id
+      )
+    end
+
     private
 
     def valid_ends_at

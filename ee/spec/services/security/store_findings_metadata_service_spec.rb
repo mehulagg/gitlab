@@ -43,8 +43,8 @@ RSpec.describe Security::StoreFindingsMetadataService do
                                  .and change { security_scan.findings.first&.confidence }.to(security_finding_1.confidence.to_s)
                                  .and change { security_scan.findings.first&.uuid }.to(security_finding_1.uuid)
                                  .and change { security_scan.findings.first&.project_fingerprint }.to(security_finding_1.project_fingerprint)
-                                 .and change { security_scan.findings.first&.position }.to(0)
-                                 .and change { security_scan.findings.last&.position }.to(1)
+                                 .and change { security_scan.findings.first&.uuid }.to(security_finding_1.uuid)
+                                 .and change { security_scan.findings.last&.uuid }.to(security_finding_2.uuid)
       end
 
       context 'when the scanners already exist in the database' do

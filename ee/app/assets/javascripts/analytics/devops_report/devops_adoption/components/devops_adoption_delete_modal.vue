@@ -3,7 +3,7 @@ import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from '../constants';
 import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
-import { deleteSegmentFromCache } from '../utils/cache_updates';
+import { deleteSegmentsFromCache } from '../utils/cache_updates';
 
 export default {
   name: 'DevopsAdoptionDeleteModal',
@@ -66,7 +66,7 @@ export default {
             id: [id],
           },
           update(store) {
-            deleteSegmentFromCache(store, id);
+            deleteSegmentsFromCache(store, [id]);
           },
         });
 

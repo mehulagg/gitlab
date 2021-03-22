@@ -48,14 +48,6 @@ RSpec.describe IncidentManagement::OncallRotations::DestroyService do
       it_behaves_like 'error response', 'Your license does not support on-call rotations'
     end
 
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(oncall_schedules_mvc: false)
-      end
-
-      it_behaves_like 'error response', 'Your license does not support on-call rotations'
-    end
-
     context 'when an error occurs during removal' do
       before do
         allow(oncall_rotation).to receive(:destroy).and_return(false)

@@ -112,7 +112,7 @@ module API
       end
 
       def delete_group(group)
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/46285')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/46285')
         destroy_conditionally!(group) do |group|
           ::Groups::DestroyService.new(group, current_user).async_execute
         end
@@ -137,6 +137,10 @@ module API
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def authorize_group_creation!
+        authorize! :create_group
+      end
     end
 
     resource :groups do
@@ -169,7 +173,7 @@ module API
         if parent_group
           authorize! :create_subgroup, parent_group
         else
-          authorize! :create_group
+          authorize_group_creation!
         end
 
         group = create_group

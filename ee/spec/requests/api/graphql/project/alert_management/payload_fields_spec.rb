@@ -47,7 +47,6 @@ RSpec.describe 'parse alert payload fields' do
 
   before do
     stub_licensed_features(multiple_alert_http_integrations: license)
-    stub_feature_flags(multiple_http_integrations_custom_mapping: feature_flag)
 
     post_graphql(query, current_user: current_user)
   end
@@ -93,11 +92,5 @@ RSpec.describe 'parse alert payload fields' do
     let(:payload_json) { '1' }
 
     it_behaves_like 'query with error', 'Failed to parse payload'
-  end
-
-  context 'without feature flag' do
-    let(:feature_flag) { false }
-
-    it_behaves_like 'query with error', 'Feature not available'
   end
 end

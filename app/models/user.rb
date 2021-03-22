@@ -199,6 +199,8 @@ class User < ApplicationRecord
 
   has_many :reviews, foreign_key: :author_id, inverse_of: :author
 
+  has_many :in_product_marketing_emails, class_name: '::Users::InProductMarketingEmail'
+
   #
   # Validations
   #
@@ -351,6 +353,7 @@ class User < ApplicationRecord
     # For this reason the tradeoff is to disable this cop.
     after_transition any => :blocked do |user|
       Ci::CancelUserPipelinesService.new.execute(user)
+      Ci::DisableUserPipelineSchedulesService.new.execute(user)
     end
     # rubocop: enable CodeReuse/ServiceClass
   end
@@ -1704,6 +1707,10 @@ class User < ApplicationRecord
     can?(:read_all_resources)
   end
 
+  def can_admin_all_resources?
+    can?(:admin_all_resources)
+  end
+
   def update_two_factor_requirement
     periods = expanded_groups_requiring_two_factor_authentication.pluck(:two_factor_grace_period)
 
@@ -1856,6 +1863,10 @@ class User < ApplicationRecord
 
   def find_or_initialize_callout(feature_name)
     callouts.find_or_initialize_by(feature_name: ::UserCallout.feature_names[feature_name])
+  end
+
+  def can_trigger_notifications?
+    confirmed? && !blocked? && !ghost?
   end
 
   protected

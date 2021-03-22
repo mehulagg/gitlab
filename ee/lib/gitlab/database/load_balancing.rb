@@ -121,10 +121,6 @@ module Gitlab
                              ::License.feature_available?(:db_load_balancing)
       end
 
-      def self.program_name
-        @program_name ||= File.basename($0)
-      end
-
       def self.start_service_discovery
         return unless service_discovery_enabled?
 

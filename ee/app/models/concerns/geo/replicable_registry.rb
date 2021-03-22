@@ -36,7 +36,7 @@ module Geo::ReplicableRegistry
     include ::Delay
 
     scope :failed, -> { with_state(:failed) }
-    scope :needs_sync_again, -> { failed.retry_due }
+    scope :needs_sync_again, -> { failed.retry_due.order(Gitlab::Database.nulls_first_order(:retry_at)) }
     scope :never_attempted_sync, -> { pending.where(last_synced_at: nil) }
     scope :ordered, -> { order(:id) }
     scope :pending, -> { with_state(:pending) }

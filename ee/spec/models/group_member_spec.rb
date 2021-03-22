@@ -254,7 +254,7 @@ RSpec.describe GroupMember do
   end
 
   context 'group member webhooks', :sidekiq_inline do
-    let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
+    let_it_be_with_refind(:group) { create(:group_with_plan, plan: :ultimate_plan) }
     let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
     let_it_be(:user) { create(:user) }
 
@@ -350,8 +350,8 @@ RSpec.describe GroupMember do
         expect(WebMock).not_to have_requested(:post, group_hook.url)
       end
 
-      it 'does not execute webhooks if feature flag is disabled' do
-        stub_feature_flags(group_webhooks: false)
+      it 'does not execute webhooks if license is disabled' do
+        stub_licensed_features(group_webhooks: false)
 
         group.add_guest(user)
 

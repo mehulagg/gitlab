@@ -103,18 +103,6 @@ module Vulnerabilities
       end
     end
 
-    def self.with_vulnerabilities_for_state(project:, report_type:, project_fingerprints:)
-      Vulnerabilities::Finding
-        .joins(:vulnerability)
-        .where(
-          project: project,
-          report_type: report_type,
-          project_fingerprint: project_fingerprints
-        )
-        .select('vulnerability_occurrences.report_type, vulnerability_id, project_fingerprint, raw_metadata, '\
-                'vulnerabilities.id, vulnerabilities.state') # fetching only required attributes
-    end
-
     # sha can be sourced from a joined pipeline or set from the report
     def sha
       self[:sha] || @sha
@@ -123,7 +111,7 @@ module Vulnerabilities
     def state
       return 'dismissed' if dismissal_feedback.present?
 
-      if vulnerability.nil?
+      if vulnerability.nil? || vulnerability.detected?
         'detected'
       elsif vulnerability.resolved?
         'resolved'

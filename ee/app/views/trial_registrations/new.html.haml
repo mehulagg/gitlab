@@ -11,7 +11,7 @@
   = render 'devise/shared/signup_box',
     url: trial_registrations_path,
     button_text: _('Continue'),
-    show_omniauth_providers: social_signin_experiment_enabled?,
+    show_omniauth_providers: social_signin_enabled?,
     omniauth_providers_placement: :top
 
   = render 'devise/shared/sign_in_link'

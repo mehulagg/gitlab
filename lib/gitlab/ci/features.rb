@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.instance_variables_ui_enabled?
-        ::Feature.enabled?(:ci_instance_variables_ui, default_enabled: true)
-      end
-
       def self.pipeline_latest?
         ::Feature.enabled?(:ci_pipeline_latest, default_enabled: true)
       end
@@ -36,10 +32,6 @@ module Gitlab
       # therefore it's not supposed to be enabled by default.
       def self.disallow_to_create_merge_request_pipelines_in_target_project?(target_project)
         ::Feature.enabled?(:ci_disallow_to_create_merge_request_pipelines_in_target_project, target_project)
-      end
-
-      def self.project_transactionless_destroy?(project)
-        Feature.enabled?(:project_transactionless_destroy, project, default_enabled: false)
       end
 
       def self.trace_overwrite?
@@ -70,6 +62,14 @@ module Gitlab
 
       def self.multiple_cache_per_job?
         ::Feature.enabled?(:multiple_cache_per_job, default_enabled: :yaml)
+      end
+
+      def self.ci_commit_pipeline_mini_graph_vue_enabled?(project)
+        ::Feature.enabled?(:ci_commit_pipeline_mini_graph_vue, project, default_enabled: :yaml)
+      end
+
+      def self.remove_duplicate_artifact_exposure_paths?(project)
+        ::Feature.enabled?(:remove_duplicate_artifact_exposure_paths, project, default_enabled: :yaml)
       end
     end
   end

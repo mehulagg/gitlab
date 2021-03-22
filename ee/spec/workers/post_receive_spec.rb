@@ -139,12 +139,60 @@ RSpec.describe PostReceive do
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
 
-      it 'does not call Geo::RepositoryUpdatedService when running on a Geo primary node' do
-        allow(Gitlab::Geo).to receive(:primary?) { true }
+      context 'when on a Geo primary node' do
+        before do
+          allow(Gitlab::Geo).to receive(:primary?) { true }
+        end
 
-        expect_next_instance_of(::Geo::RepositoryUpdatedService).never
+        it 'does not call Geo::RepositoryUpdatedService' do
+          expect_next_instance_of(::Geo::RepositoryUpdatedService).never
 
-        described_class.new.perform(gl_repository, key_id, base64_changes)
+          described_class.new.perform(gl_repository, key_id, base64_changes)
+        end
+
+        context 'when wiki is a project wiki' do
+          let(:wiki) { build(:project_wiki, project: project) }
+
+          it 'does not call replicator to update Geo' do
+            expect_next_instance_of(Geo::GroupWikiRepositoryReplicator).never
+
+            described_class.new.perform(gl_repository, key_id, base64_changes)
+          end
+        end
+
+        context 'when group_wiki_repository does not exist' do
+          it 'does not call replicator to update Geo' do
+            expect(group.group_wiki_repository).to be_nil
+
+            expect_next_instance_of(Geo::GroupWikiRepositoryReplicator).never
+
+            described_class.new.perform(gl_repository, key_id, base64_changes)
+          end
+        end
+
+        context 'when group_wiki_repository exists' do
+          it 'calls replicator to update Geo' do
+            wiki.create_wiki_repository
+
+            expect(group.group_wiki_repository).to be_present
+            expect_next_instance_of(Geo::GroupWikiRepositoryReplicator) do |instance|
+              expect(instance).to receive(:handle_after_update)
+            end
+
+            described_class.new.perform(gl_repository, key_id, base64_changes)
+          end
+        end
+      end
+
+      context 'when not on a Geo primary node' do
+        it 'does not call replicator to update Geo' do
+          wiki.create_wiki_repository
+
+          expect(group.group_wiki_repository).to be_present
+          expect_next_instance_of(Geo::GroupWikiRepositoryReplicator).never
+
+          described_class.new.perform(gl_repository, key_id, base64_changes)
+        end
       end
     end
   end

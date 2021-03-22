@@ -3,10 +3,10 @@ import { GlAlert } from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import Draggable from 'vuedraggable';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
 import { sortableEnd, sortableStart } from '~/boards/mixins/sortable_default_options';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import BoardAddNewColumn from './board_add_new_column.vue';
 import BoardColumn from './board_column.vue';
 import BoardColumnDeprecated from './board_column_deprecated.vue';
 
@@ -17,7 +17,7 @@ export default {
       gon.features?.graphqlBoardLists || gon.features?.epicBoards
         ? BoardColumn
         : BoardColumnDeprecated,
-    BoardContentSidebar: () => import('ee_component/boards/components/board_content_sidebar.vue'),
+    BoardContentSidebar: () => import('~/boards/components/board_content_sidebar.vue'),
     EpicsSwimlanes: () => import('ee_component/boards/components/epics_swimlanes.vue'),
     GlAlert,
   },
@@ -49,7 +49,7 @@ export default {
         : this.lists;
     },
     canDragColumns() {
-      return this.glFeatures.graphqlBoardLists && this.canAdminList;
+      return !this.isEpicBoard && this.glFeatures.graphqlBoardLists && this.canAdminList;
     },
     boardColumnWrapper() {
       return this.canDragColumns ? Draggable : 'div';
@@ -69,7 +69,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['moveList']),
+    ...mapActions(['moveList', 'unsetError']),
     afterFormEnters() {
       const el = this.canDragColumns ? this.$refs.list.$el : this.$refs.list;
       el.scrollTo({ left: el.scrollWidth, behavior: 'smooth' });
@@ -80,6 +80,7 @@ export default {
 
     handleDragOnEnd(params) {
       sortableEnd();
+      if (this.isEpicBoard) return;
 
       const { item, newIndex, oldIndex, to } = params;
 
@@ -99,7 +100,7 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="error" variant="danger" :dismissible="false">
+    <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="unsetError">
       {{ error }}
     </gl-alert>
     <component
@@ -133,6 +134,9 @@ export default {
       :disabled="disabled"
     />
 
-    <board-content-sidebar v-if="isSwimlanesOn || glFeatures.graphqlBoardLists" />
+    <board-content-sidebar
+      v-if="isSwimlanesOn || glFeatures.graphqlBoardLists"
+      class="issue-boards-sidebar"
+    />
   </div>
 </template>

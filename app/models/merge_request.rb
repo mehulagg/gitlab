@@ -191,8 +191,12 @@ class MergeRequest < ApplicationRecord
   end
 
   state_machine :merge_status, initial: :unchecked do
+    event :mark_as_preparing do
+      transition unchecked: :preparing
+    end
+
     event :mark_as_unchecked do
-      transition [:can_be_merged, :checking] => :unchecked
+      transition [:preparing, :can_be_merged, :checking] => :unchecked
       transition [:cannot_be_merged, :cannot_be_merged_rechecking] => :cannot_be_merged_recheck
     end
 
@@ -209,6 +213,7 @@ class MergeRequest < ApplicationRecord
       transition [:unchecked, :cannot_be_merged_recheck, :checking, :cannot_be_merged_rechecking] => :cannot_be_merged
     end
 
+    state :preparing
     state :unchecked
     state :cannot_be_merged_recheck
     state :checking
@@ -237,7 +242,7 @@ class MergeRequest < ApplicationRecord
   # Returns current merge_status except it returns `cannot_be_merged_rechecking` as `checking`
   # to avoid exposing unnecessary internal state
   def public_merge_status
-    cannot_be_merged_rechecking? ? 'checking' : merge_status
+    cannot_be_merged_rechecking? || preparing? ? 'checking' : merge_status
   end
 
   validates :source_project, presence: true, unless: [:allow_broken, :importing?, :closed_or_merged_without_fork?]
@@ -284,10 +289,19 @@ class MergeRequest < ApplicationRecord
     joins(:notes).where(notes: { commit_id: sha })
   end
   scope :join_project, -> { joins(:target_project) }
-  scope :join_metrics, -> do
+  scope :join_metrics, -> (target_project_id = nil) do
+    # Do not join the relation twice
+    return self if self.arel.join_sources.any? { |join| join.left.try(:name).eql?(MergeRequest::Metrics.table_name) }
+
     query = joins(:metrics)
-    query = query.where(MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id]))
-    query
+
+    project_condition = if target_project_id
+                          MergeRequest::Metrics.arel_table[:target_project_id].eq(target_project_id)
+                        else
+                          MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id])
+                        end
+
+    query.where(project_condition)
   end
   scope :references_project, -> { references(:target_project) }
   scope :with_api_entity_associations, -> {
@@ -305,10 +319,28 @@ class MergeRequest < ApplicationRecord
   end
   scope :by_target_branch, ->(branch_name) { where(target_branch: branch_name) }
   scope :order_merged_at, ->(direction) do
-    query = join_metrics.order(Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction))
+    reverse_direction = { 'ASC' => 'DESC', 'DESC' => 'ASC' }
+    reversed_direction = reverse_direction[direction] || raise("Unknown sort direction was given: #{direction}")
 
-    # Add `merge_request_metrics.merged_at` to the `SELECT` in order to make the keyset pagination work.
-    query.select(*query.arel.projections, MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics.merged_at"'))
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'merge_request_metrics_merged_at',
+        column_expression: MergeRequest::Metrics.arel_table[:merged_at],
+        order_expression: Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction),
+        reversed_order_expression: Gitlab::Database.nulls_first_order('merge_request_metrics.merged_at', reversed_direction),
+        order_direction: direction,
+        nullable: :nulls_last,
+        distinct: false,
+        add_to_projections: true
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'merge_request_metrics_id',
+        order_expression: MergeRequest::Metrics.arel_table[:id].desc,
+        add_to_projections: true
+      )
+    ])
+
+    order.apply_cursor_conditions(join_metrics).order(order)
   end
   scope :order_merged_at_asc, -> { order_merged_at('ASC') }
   scope :order_merged_at_desc, -> { order_merged_at('DESC') }
@@ -406,8 +438,8 @@ class MergeRequest < ApplicationRecord
 
   def self.sort_by_attribute(method, excluded_labels: [])
     case method.to_s
-    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_id_desc
-    when 'merged_at_desc' then order_merged_at_desc.with_order_id_desc
+    when 'merged_at', 'merged_at_asc' then order_merged_at_asc
+    when 'merged_at_desc' then order_merged_at_desc
     else
       super
     end
@@ -1876,11 +1908,7 @@ class MergeRequest < ApplicationRecord
   end
 
   def with_rebase_lock
-    if Feature.enabled?(:merge_request_rebase_nowait_lock, default_enabled: true)
-      with_retried_nowait_lock { yield }
-    else
-      with_lock(true) { yield }
-    end
+    with_retried_nowait_lock { yield }
   end
 
   # If the merge request is idle in transaction or has a SELECT FOR

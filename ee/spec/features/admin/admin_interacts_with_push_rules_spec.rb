@@ -47,7 +47,7 @@ RSpec.describe "Admin interacts with push rules" do
 
     it "creates new rule" do
       fill_in("Require expression in commit messages", with: "my_string")
-      click_button("Save Push Rules")
+      click_button("Save push rules")
 
       expect(page).to have_selector("input[value='my_string']")
     end

@@ -148,7 +148,7 @@ export default {
 
         const data = {
           histograms: [
-            { name: PIPELINES_DETAIL_LINK_DURATION, value: duration },
+            { name: PIPELINES_DETAIL_LINK_DURATION, value: duration / 1000 },
             { name: PIPELINES_DETAIL_LINKS_TOTAL, value: this.links.length },
             {
               name: PIPELINES_DETAIL_LINKS_JOB_RATIO,
@@ -170,7 +170,7 @@ export default {
         const parsedData = parseData(arrayOfJobs);
         this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
       } catch (err) {
-        this.$emit('error', DRAW_FAILURE);
+        this.$emit('error', { type: DRAW_FAILURE, reportToSentry: false });
         reportToSentry(this.$options.name, err);
       }
       this.finishPerfMeasureAndSend();

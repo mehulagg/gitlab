@@ -9,6 +9,7 @@ RSpec.describe Projects::IssuesController do
   let_it_be(:project, reload: true) { create(:project) }
   let_it_be(:user, reload: true) { create(:user) }
   let(:issue) { create(:issue, project: project) }
+  let(:spam_action_response_fields) { { 'stub_spam_action_response_fields' => true } }
 
   describe "GET #index" do
     context 'external issue tracker' do
@@ -207,6 +208,32 @@ RSpec.describe Projects::IssuesController do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['issue_email_participants']).to contain_exactly({ "email" => participants[0].email }, { "email" => participants[1].email })
+    end
+
+    context 'with the invite_members_in_comment experiment', :experiment do
+      context 'when user can invite' do
+        before do
+          stub_experiments(invite_members_in_comment: :invite_member_link)
+          project.add_maintainer(user)
+        end
+
+        it 'assigns the candidate experience and tracks the event' do
+          expect(experiment(:invite_member_link)).to track(:view, property: project.root_ancestor.id.to_s)
+                                                       .on_any_instance
+                                                       .for(:invite_member_link)
+                                                       .with_context(namespace: project.root_ancestor)
+
+          get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
+        end
+      end
+
+      context 'when user can not invite' do
+        it 'does not track the event' do
+          expect(experiment(:invite_member_link)).not_to track(:view)
+
+          get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
+        end
+      end
     end
   end
 
@@ -613,12 +640,15 @@ RSpec.describe Projects::IssuesController do
         context 'when allow_possible_spam feature flag is false' do
           before do
             stub_feature_flags(allow_possible_spam: false)
+            expect(controller).to(receive(:spam_action_response_fields).with(issue)) do
+              spam_action_response_fields
+            end
           end
 
-          it 'renders json with recaptcha_html' do
+          it 'renders json with spam_action_response_fields' do
             subject
 
-            expect(json_response).to have_key('recaptcha_html')
+            expect(json_response).to eq(spam_action_response_fields)
           end
         end
 
@@ -948,12 +978,17 @@ RSpec.describe Projects::IssuesController do
               context 'renders properly' do
                 render_views
 
-                it 'renders recaptcha_html json response' do
+                before do
+                  expect(controller).to(receive(:spam_action_response_fields).with(issue)) do
+                    spam_action_response_fields
+                  end
+                end
+
+                it 'renders spam_action_response_fields json response' do
                   update_issue
 
-                  expect(response).to have_gitlab_http_status(:ok)
-                  expect(json_response).to have_key('recaptcha_html')
-                  expect(json_response['recaptcha_html']).not_to be_empty
+                  expect(response).to have_gitlab_http_status(:conflict)
+                  expect(json_response).to eq(spam_action_response_fields)
                 end
               end
             end
@@ -1411,9 +1446,7 @@ RSpec.describe Projects::IssuesController do
         expect_next_instance_of(Spam::AkismetService) do |akismet_service|
           expect(akismet_service).to receive_messages(submit_spam: true)
         end
-        expect_next_instance_of(ApplicationSetting) do |setting|
-          expect(setting).to receive_messages(akismet_enabled: true)
-        end
+        stub_application_setting(akismet_enabled: true)
       end
 
       def post_spam

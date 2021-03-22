@@ -13,7 +13,8 @@ module EE
           super + [
             EE::BulkImports::Groups::Pipelines::EpicsPipeline,
             EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline,
-            EE::BulkImports::Groups::Pipelines::EpicEventsPipeline
+            EE::BulkImports::Groups::Pipelines::EpicEventsPipeline,
+            EE::BulkImports::Groups::Pipelines::IterationsPipeline
           ]
         end
       end

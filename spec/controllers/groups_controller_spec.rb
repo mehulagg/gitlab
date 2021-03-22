@@ -4,16 +4,22 @@ require 'spec_helper'
 
 RSpec.describe GroupsController, factory_default: :keep do
   include ExternalAuthorizationServiceHelpers
+  include AdminModeHelper
 
   let_it_be_with_refind(:group) { create_default(:group, :public) }
   let_it_be_with_refind(:project) { create(:project, namespace: group) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:admin) { create(:admin) }
+  let_it_be(:admin_with_admin_mode) { create(:admin) }
+  let_it_be(:admin_without_admin_mode) { create(:admin) }
   let_it_be(:group_member) { create(:group_member, group: group, user: user) }
   let_it_be(:owner) { group.add_owner(create(:user)).user }
   let_it_be(:maintainer) { group.add_maintainer(create(:user)).user }
   let_it_be(:developer) { group.add_developer(create(:user)).user }
   let_it_be(:guest) { group.add_guest(create(:user)).user }
+
+  before do
+    enable_admin_mode!(admin_with_admin_mode)
+  end
 
   shared_examples 'member with ability to create subgroups' do
     it 'renders the new page' do
@@ -105,10 +111,10 @@ RSpec.describe GroupsController, factory_default: :keep do
       [true, false].each do |can_create_group_status|
         context "and can_create_group is #{can_create_group_status}" do
           before do
-            User.where(id: [admin, owner, maintainer, developer, guest]).update_all(can_create_group: can_create_group_status)
+            User.where(id: [admin_with_admin_mode, admin_without_admin_mode, owner, maintainer, developer, guest]).update_all(can_create_group: can_create_group_status)
           end
 
-          [:admin, :owner, :maintainer].each do |member_type|
+          [:admin_with_admin_mode, :owner, :maintainer].each do |member_type|
             context "and logged in as #{member_type.capitalize}" do
               it_behaves_like 'member with ability to create subgroups' do
                 let(:member) { send(member_type) }
@@ -116,7 +122,7 @@ RSpec.describe GroupsController, factory_default: :keep do
             end
           end
 
-          [:guest, :developer].each do |member_type|
+          [:guest, :developer, :admin_without_admin_mode].each do |member_type|
             context "and logged in as #{member_type.capitalize}" do
               it_behaves_like 'member without ability to create subgroups' do
                 let(:member) { send(member_type) }
@@ -303,6 +309,64 @@ RSpec.describe GroupsController, factory_default: :keep do
 
           expect(response).to have_gitlab_http_status(:found)
           expect(Group.last.default_branch_protection).not_to eq(Gitlab::Access::PROTECTION_NONE)
+        end
+      end
+    end
+
+    context 'when creating a group with captcha protection' do
+      before do
+        sign_in(user)
+
+        stub_application_setting(recaptcha_enabled: true)
+      end
+
+      after do
+        # Avoid test ordering issue and ensure `verify_recaptcha` returns true
+        unless Recaptcha.configuration.skip_verify_env.include?('test')
+          Recaptcha.configuration.skip_verify_env << 'test'
+        end
+      end
+
+      it 'displays an error when the reCAPTCHA is not solved' do
+        allow(controller).to receive(:verify_recaptcha).and_return(false)
+
+        post :create, params: { group: { name: 'new_group', path: "new_group" } }
+
+        expect(response).to render_template(:new)
+        expect(flash[:alert]).to eq(_('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.'))
+      end
+
+      it 'allows creating a group when the reCAPTCHA is solved' do
+        expect do
+          post :create, params: { group: { name: 'new_group', path: "new_group" } }
+        end.to change { Group.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:found)
+      end
+
+      it 'allows creating a sub-group without checking the captcha' do
+        expect(controller).not_to receive(:verify_recaptcha)
+
+        expect do
+          post :create, params: { group: { name: 'new_group', path: "new_group", parent_id: group.id } }
+        end.to change { Group.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:found)
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(recaptcha_on_top_level_group_creation: false)
+        end
+
+        it 'allows creating a group without the reCAPTCHA' do
+          expect(controller).not_to receive(:verify_recaptcha)
+
+          expect do
+            post :create, params: { group: { name: 'new_group', path: "new_group" } }
+          end.to change { Group.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:found)
         end
       end
     end
@@ -856,6 +920,12 @@ RSpec.describe GroupsController, factory_default: :keep do
   end
 
   describe 'POST #export' do
+    let(:admin) { create(:admin) }
+
+    before do
+      enable_admin_mode!(admin)
+    end
+
     context 'when the group export feature flag is not enabled' do
       before do
         sign_in(admin)
@@ -918,6 +988,12 @@ RSpec.describe GroupsController, factory_default: :keep do
   end
 
   describe 'GET #download_export' do
+    let(:admin) { create(:admin) }
+
+    before do
+      enable_admin_mode!(admin)
+    end
+
     context 'when there is a file available to download' do
       let(:export_file) { fixture_file_upload('spec/fixtures/group_export.tar.gz') }
 
@@ -934,8 +1010,6 @@ RSpec.describe GroupsController, factory_default: :keep do
     end
 
     context 'when there is no file available to download' do
-      let(:admin) { create(:admin) }
-
       before do
         sign_in(admin)
       end

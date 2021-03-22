@@ -153,7 +153,7 @@ and therefore it does not have any records yet.
 
 When using a single-transaction migration, a transaction holds a database connection
 for the duration of the migration, so you must make sure the actions in the migration
-do not take too much time: GitLab.com’s production database has a `15s` timeout, so
+do not take too much time: GitLab.com's production database has a `15s` timeout, so
 in general, the cumulative execution time in a migration should aim to fit comfortably
 in that limit. Singular query timings should fit within the [standard limit](query_performance.md#timing-guidelines-for-queries)
 
@@ -1028,10 +1028,10 @@ D, [2020-07-06T00:37:12.653648 #130101] DEBUG -- :   ↳ config/initializers/con
 
 ## High traffic tables
 
-Here's a list of current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml). 
+Here's a list of current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml).
 
 Determining what tables are high-traffic can be difficult. Self-managed instances might use
-different features of GitLab with different usage patterns, thus making assumptions based 
+different features of GitLab with different usage patterns, thus making assumptions based
 on GitLab.com not enough.
 
 To identify a high-traffic table for GitLab.com the following measures are considered.

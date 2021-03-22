@@ -14,12 +14,22 @@ FactoryBot.define do
       active_period_end { '17:00' }
     end
 
-    trait :with_participant do
-      after(:create) do |rotation|
-        user = create(:user)
-        rotation.project.add_reporter(user)
-        create(:incident_management_oncall_participant, rotation: rotation, user: user)
+    trait :with_participants do
+      transient do
+        participants_count { 1 }
       end
+
+      after(:create) do |rotation, evaluator|
+        evaluator.participants_count.times do
+          user = create(:user)
+          rotation.project.add_reporter(user)
+          create(:incident_management_oncall_participant, rotation: rotation, user: user)
+        end
+      end
+    end
+
+    trait :utc do
+      association :schedule, :utc, factory: :incident_management_oncall_schedule
     end
   end
 end

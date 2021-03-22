@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
+import { DAYS_IN_WEEK, HOURS_IN_DAY, PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { useFakeDate } from 'helpers/fake_date';
 import * as dateTimeUtility from '~/lib/utils/datetime_utility';
@@ -86,6 +86,19 @@ describe('Schedule Common Mixins', () => {
       expect(wrapper.vm.getIndicatorStyles()).toEqual(
         expect.objectContaining({
           left: `${left}%`,
+        }),
+      );
+    });
+
+    it('returns object containing `left` offset for a single day grid', () => {
+      const currentDate = new Date(2018, 0, 8);
+      const base = 100 / HOURS_IN_DAY;
+      const hours = base * currentDate.getHours();
+      const minutes = base * (currentDate.getMinutes() / 60) - 2.25;
+
+      expect(wrapper.vm.getIndicatorStyles(PRESET_TYPES.DAYS)).toEqual(
+        expect.objectContaining({
+          left: `${hours + minutes}%`,
         }),
       );
     });

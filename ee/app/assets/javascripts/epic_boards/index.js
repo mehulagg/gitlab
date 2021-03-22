@@ -39,6 +39,14 @@ export default () => {
     }
   });
 
+  if (gon?.features?.boardsFilteredSearch) {
+    import('ee/boards/epic_filtered_search')
+      .then(({ default: initFilteredSearch }) => {
+        initFilteredSearch();
+      })
+      .catch(() => {});
+  }
+
   // eslint-disable-next-line no-new
   new Vue({
     el: $boardApp,

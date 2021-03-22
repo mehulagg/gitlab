@@ -2,12 +2,7 @@
 
 exports[`Security Charts default states sets up group-level 1`] = `
 <div>
-  <div
-    data-testid="security-charts-layout"
-  >
-    <h2>
-      Security Dashboard
-    </h2>
+  <div>
     <div
       class="gl-spinner-container gl-mt-6"
     >
@@ -16,21 +11,13 @@ exports[`Security Charts default states sets up group-level 1`] = `
         class="align-text-bottom gl-spinner gl-spinner-dark gl-spinner-lg"
       />
     </div>
-    <div
-      class="security-charts gl-display-flex gl-flex-wrap"
-    />
   </div>
 </div>
 `;
 
 exports[`Security Charts default states sets up instance-level 1`] = `
 <div>
-  <div
-    data-testid="security-charts-layout"
-  >
-    <h2>
-      Security Dashboard
-    </h2>
+  <div>
     <div
       class="gl-spinner-container gl-mt-6"
     >
@@ -39,9 +26,6 @@ exports[`Security Charts default states sets up instance-level 1`] = `
         class="align-text-bottom gl-spinner gl-spinner-dark gl-spinner-lg"
       />
     </div>
-    <div
-      class="security-charts gl-display-flex gl-flex-wrap"
-    />
   </div>
 </div>
 `;

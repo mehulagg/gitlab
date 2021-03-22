@@ -9,33 +9,50 @@ RSpec.describe Security::Orchestration::AssignService do
   let_it_be(:new_policy_project) { create(:project) }
 
   describe '#execute' do
-    subject(:service) { described_class.new(project, nil, policy_project_id: policy_project.id).execute }
+    subject(:service) do
+      described_class.new(project, nil, policy_project_id: policy_project.id).execute
+    end
+
+    before do
+      service
+    end
 
     it 'assigns policy project to project' do
       expect(service).to be_success
-      expect(project.security_orchestration_policy_configuration.security_policy_management_project_id).to eq(policy_project.id)
+      expect(
+        project.security_orchestration_policy_configuration.security_policy_management_project_id
+      ).to eq(policy_project.id)
     end
 
     it 'updates project with new policy project' do
-      service
-
-      repeated_service = described_class.new(project, nil, policy_project_id: new_policy_project.id).execute
+      repeated_service =
+        described_class.new(project, nil, policy_project_id: new_policy_project.id).execute
 
       expect(repeated_service).to be_success
-      expect(project.security_orchestration_policy_configuration.security_policy_management_project_id).to eq(new_policy_project.id)
+      expect(
+        project.security_orchestration_policy_configuration.security_policy_management_project_id
+      ).to eq(new_policy_project.id)
     end
 
-    it 'returns error when same policy is assigned to different projects' do
-      service
+    it 'assigns same policy to different projects' do
+      repeated_service =
+        described_class.new(another_project, nil, policy_project_id: policy_project.id).execute
+      expect(repeated_service).to be_success
+    end
 
-      repeated_service = described_class.new(another_project, nil, policy_project_id: policy_project.id).execute
-
-      expect(repeated_service).to be_error
+    it 'unassigns project' do
+      expect { described_class.new(project, nil, policy_project_id: nil).execute }.to change {
+        project.reload.security_orchestration_policy_configuration
+      }.to(nil)
     end
 
     it 'returns error when db has problem' do
       dbl_error = double('ActiveRecord')
-      dbl = double('Security::OrchestrationPolicyConfiguration', security_orchestration_policy_configuration: dbl_error)
+      dbl =
+        double(
+          'Security::OrchestrationPolicyConfiguration',
+          security_orchestration_policy_configuration: dbl_error
+        )
 
       allow(dbl_error).to receive(:update!).and_raise(ActiveRecord::RecordInvalid)
 
@@ -44,7 +61,8 @@ RSpec.describe Security::Orchestration::AssignService do
         allow(instance).to receive(:project).and_return(dbl)
       end
 
-      repeated_service = described_class.new(project, nil, policy_project_id: new_policy_project.id).execute
+      repeated_service =
+        described_class.new(project, nil, policy_project_id: new_policy_project.id).execute
 
       expect(repeated_service).to be_error
     end

@@ -1,8 +1,0 @@
----
-name: trial_registration_with_social_signin_experiment_percentage
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45633
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/262853
-milestone: '13.7'
-type: experiment
-group: group::conversion
-default_enabled: false

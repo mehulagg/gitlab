@@ -38,6 +38,10 @@ module Types
             null: true,
             resolver: ::Resolvers::Geo::TerraformStateVersionRegistriesResolver,
             description: 'Find terraform state version registries on this Geo node.'
+      field :group_wiki_repository_registries, ::Types::Geo::GroupWikiRepositoryRegistryType.connection_type,
+            null: true,
+            resolver: ::Resolvers::Geo::GroupWikiRepositoryRegistriesResolver,
+            description: 'Find group wiki repository registries on this Geo node.'
     end
   end
 end

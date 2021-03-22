@@ -1,17 +1,22 @@
 <script>
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import VirtualList from 'vue-virtual-scroll-list';
 import Draggable from 'vuedraggable';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { isListDraggable } from '~/boards/boards_util';
-import BoardAddNewColumn from '~/boards/components/board_add_new_column.vue';
 import { n__ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
-import { DRAGGABLE_TAG } from '../constants';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { calculateSwimlanesBufferSize } from '../boards_util';
+import { DRAGGABLE_TAG, EPIC_LANE_BASE_HEIGHT } from '../constants';
 import EpicLane from './epic_lane.vue';
 import IssuesLaneList from './issues_lane_list.vue';
 
 export default {
+  EpicLane,
+  epicLaneBaseHeight: EPIC_LANE_BASE_HEIGHT,
   components: {
     BoardAddNewColumn,
     BoardListHeader,
@@ -19,10 +24,12 @@ export default {
     IssuesLaneList,
     GlButton,
     GlIcon,
+    VirtualList,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     lists: {
       type: Array,
@@ -38,6 +45,11 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      bufferSize: 0,
+    };
+  },
   computed: {
     ...mapState(['epics', 'pageInfoByListId', 'listsFlags', 'addColumnForm']),
     ...mapGetters(['getUnassignedIssues']),
@@ -48,10 +60,9 @@ export default {
       return (listId) => this.getUnassignedIssues(listId);
     },
     unassignedIssuesCount() {
-      return this.lists.reduce(
-        (total, list) => total + this.listsFlags[list.id]?.unassignedIssuesCount || 0,
-        0,
-      );
+      return this.lists.reduce((total, list) => {
+        return total + (this.listsFlags[list.id]?.unassignedIssuesCount || 0);
+      }, 0);
     },
     unassignedIssuesCountTooltipText() {
       return n__(`%d unassigned issue`, `%d unassigned issues`, this.unassignedIssuesCount);
@@ -78,6 +89,9 @@ export default {
         this.lists.some((list) => this.pageInfoByListId[list.id]?.hasNextPage)
       );
     },
+  },
+  mounted() {
+    this.bufferSize = calculateSwimlanesBufferSize(this.$el.offsetTop);
   },
   methods: {
     ...mapActions(['moveList', 'fetchItemsForList']),
@@ -109,6 +123,17 @@ export default {
         left: container.scrollWidth,
         behavior: 'smooth',
       });
+    },
+    getEpicLaneProps(index) {
+      return {
+        key: this.epics[index].id,
+        props: {
+          epic: this.epics[index],
+          lists: this.lists,
+          disabled: this.disabled,
+          canAdminList: this.canAdminList,
+        },
+      };
     },
   },
 };
@@ -149,14 +174,28 @@ export default {
         </div>
       </component>
       <div class="board-epics-swimlanes gl-display-table">
-        <epic-lane
-          v-for="epic in epics"
-          :key="epic.id"
-          :epic="epic"
-          :lists="lists"
-          :disabled="disabled"
-          :can-admin-list="canAdminList"
-        />
+        <template v-if="glFeatures.swimlanesBufferedRendering">
+          <virtual-list
+            v-if="epics.length"
+            :size="$options.epicLaneBaseHeight"
+            :remain="bufferSize"
+            :bench="bufferSize"
+            :scrollelement="$refs.scrollableContainer"
+            :item="$options.EpicLane"
+            :itemcount="epics.length"
+            :itemprops="getEpicLaneProps"
+          />
+        </template>
+        <template v-else>
+          <epic-lane
+            v-for="epic in epics"
+            :key="epic.id"
+            :epic="epic"
+            :lists="lists"
+            :disabled="disabled"
+            :can-admin-list="canAdminList"
+          />
+        </template>
         <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
           <div class="gl-left-0 gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
             <span

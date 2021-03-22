@@ -113,6 +113,14 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
             expect { |b| subject.call(worker, job, :test, &b) }.to yield_control.once
           end
 
+          it 'calls BackgroundTransaction' do
+            expect_next_instance_of(Gitlab::Metrics::BackgroundTransaction) do |instance|
+              expect(instance).to receive(:run)
+            end
+
+            subject.call(worker, job, :test) {}
+          end
+
           it 'sets queue specific metrics' do
             expect(running_jobs_metric).to receive(:increment).with(labels, -1)
             expect(running_jobs_metric).to receive(:increment).with(labels, 1)
@@ -219,6 +227,15 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
       let(:labels) { default_labels.merge(urgency: "") }
 
       it_behaves_like "a metrics middleware"
+    end
+
+    context 'for ActionMailer::MailDeliveryJob' do
+      let(:job) { { 'class' => ActionMailer::MailDeliveryJob } }
+      let(:worker) { ActionMailer::MailDeliveryJob.new }
+      let(:worker_class) { ActionMailer::MailDeliveryJob }
+      let(:labels) { default_labels.merge(feature_category: 'issue_tracking') }
+
+      it_behaves_like 'a metrics middleware'
     end
 
     context "when workers are attributed" do

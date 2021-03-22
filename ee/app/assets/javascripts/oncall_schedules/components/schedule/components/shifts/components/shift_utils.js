@@ -2,6 +2,7 @@ import {
   PRESET_TYPES,
   DAYS_IN_WEEK,
   ASSIGNEE_SPACER,
+  ASSIGNEE_SPACER_SMALL,
   HOURS_IN_DAY,
 } from 'ee/oncall_schedules/constants';
 import {
@@ -175,7 +176,7 @@ export const daysUntilEndOfTimeFrame = (shiftRangeOverlap, timeframeItem, preset
  * @param {String} shiftTimeUnitWidth - the current grid type i.e. Week, Day, Hour.
  * @param {Date} shiftStartsAt - current shift start Date.
  * @param {Date} timeframeItem - the current timeframe start Date.
- * * @param {String} presetType - the current grid type i.e. Week, Day, Hour.
+ * @param {String} presetType - the current grid type i.e. Week, Day, Hour.
  * @returns {Number}
  *
  * @example
@@ -236,9 +237,9 @@ export const weekDisplayShiftWidth = (
   shiftTimeUnitWidth,
 ) => {
   if (shiftUnitIsHour) {
+    const SPACER = shiftRangeOverlap.hoursOverlap === 1 ? ASSIGNEE_SPACER_SMALL : ASSIGNEE_SPACER;
     return (
-      Math.floor((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) -
-      ASSIGNEE_SPACER
+      Math.floor((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) - SPACER
     );
   }
 

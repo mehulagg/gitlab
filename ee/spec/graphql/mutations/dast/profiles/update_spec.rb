@@ -102,14 +102,6 @@ RSpec.describe Mutations::Dast::Profiles::Update do
             expect(subject[:errors]).to include('Profile failed to update')
           end
         end
-
-        context 'when the feature is not enabled' do
-          before do
-            stub_feature_flags(dast_saved_scans: false)
-          end
-
-          it_behaves_like 'an unrecoverable failure'
-        end
       end
     end
   end

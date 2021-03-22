@@ -84,7 +84,7 @@ See also other [features associated to merge requests](reviewing_and_managing_me
 Choose an assignee to designate someone as the person responsible
 for the first [review of the merge request](reviewing_and_managing_merge_requests.md).
 Open the drop down box to search for the user you wish to assign,
-and the merge request will be added to their
+and the merge request is added to their
 [assigned merge request list](../../search/index.md#issues-and-merge-requests).
 
 #### Multiple assignees **(PREMIUM)**
@@ -110,7 +110,7 @@ dropdown menu.
 It is also possible to manage multiple assignees:
 
 - When creating a merge request.
-- Using [quick actions](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
+- Using [quick actions](../quick_actions.md#issues-merge-requests-and-epics).
 
 ### Reviewer
 
@@ -207,9 +207,9 @@ is set for deletion, the merge request widget displays the
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/320902) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-branch-retargeting-on-merge).
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/320895) on GitLab 13.10.
+> - It's recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [disable it](#enable-or-disable-branch-retargeting-on-merge). **(FREE SELF)**
 
 In specific circumstances, GitLab can retarget the destination branch of
 open merge request, if the destination branch merges while the merge request is
@@ -229,6 +229,12 @@ These merge requests are usually handled in one of these ways:
 GitLab retargets up to four merge requests when their target branch is merged into
 `master`, so you don't need to perform this operation manually. Merge requests from
 forks are not retargeted.
+
+The feature today works only one a merge. Clicking the `Remove source branch` button
+after the merge request was merged will not automatically retarget merge request.
+The feature today works only on merge. Clicking the **Remove source branch** button
+after the merge request was merged will not automatically retarget a merge request.
+This improvement is [tracked as a follow-up](https://gitlab.com/gitlab-org/gitlab/-/issues/321559).
 
 ## Recommendations and best practices for Merge Requests
 

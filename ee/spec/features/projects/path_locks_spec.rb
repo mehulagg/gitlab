@@ -23,7 +23,7 @@ RSpec.describe 'Path Locks', :js do
       click_link "encoding"
     end
 
-    find('.js-path-lock').click
+    accept_confirm(text: 'Are you sure you want to lock this directory?') { find('.js-path-lock').click }
 
     expect(page).to have_link('Unlock')
   end
@@ -36,7 +36,7 @@ RSpec.describe 'Path Locks', :js do
     end
 
     within '.file-actions' do
-      click_link "Lock"
+      accept_confirm(text: 'Are you sure you want to lock VERSION?') { click_link "Lock" }
 
       expect(page).to have_link('Unlock')
     end
@@ -48,13 +48,13 @@ RSpec.describe 'Path Locks', :js do
     end
 
     within '.file-actions' do
-      click_link "Lock"
+      accept_confirm(text: 'Are you sure you want to lock VERSION?') { click_link "Lock" }
 
       expect(page).to have_link('Unlock')
     end
 
     within '.file-actions' do
-      click_link "Unlock"
+      accept_confirm(text: 'Are you sure you want to unlock VERSION?') { click_link "Unlock" }
 
       expect(page).to have_link('Lock')
     end
@@ -68,7 +68,7 @@ RSpec.describe 'Path Locks', :js do
     within '.locks' do
       expect(page).to have_content('encoding')
 
-      accept_confirm { click_link "Unlock" }
+      accept_confirm(text: 'Are you sure you want to unlock encoding?') { click_link "Unlock" }
 
       expect(page).not_to have_content('encoding')
     end

@@ -13,13 +13,20 @@ module QA
           Flow::Login.sign_in
         end
 
-        Resource::PersonalAccessToken.fabricate!.access_token
+        Resource::PersonalAccessToken.fabricate!.token
       end
 
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'maven-with-gradle-project'
           project.initialize_with_readme = true
+        end
+      end
+
+      let(:package) do
+        Resource::Package.new.tap do |package|
+          package.name = package_name
+          package.project = project
         end
       end
 
@@ -39,6 +46,7 @@ module QA
 
       after do
         runner.remove_via_api!
+        package.remove_via_api!
       end
 
       it 'publishes a maven package via gradle', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1074' do

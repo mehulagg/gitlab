@@ -57,6 +57,45 @@ RSpec.describe 'Requirements list', :js do
       end
     end
 
+    it 'shows filtered search input' do
+      page.within('.requirements-list-container .vue-filtered-search-bar-container') do
+        expect(page).to have_selector('.gl-search-box-by-click')
+        expect(page.find('.gl-filtered-search-term-input')[:placeholder]).to eq('Search requirements')
+
+        expect(page).to have_selector('.sort-dropdown-container')
+        page.find('.sort-dropdown-container button.gl-dropdown-toggle').click
+        expect(page.find('.sort-dropdown-container')).to have_selector('li', count: 2)
+      end
+    end
+
+    context 'filtered search input' do
+      it 'shows filter tokens author and status' do
+        page.within('.vue-filtered-search-bar-container .gl-search-box-by-click') do
+          page.find('input').click
+
+          expect(page.find('.gl-filtered-search-suggestion-list')).to have_selector('li', count: 2)
+          page.within('.gl-filtered-search-suggestion-list') do
+            expect(page.find('li:nth-child(1)')).to have_content('Author')
+            expect(page.find('li:nth-child(2)')).to have_content('Status')
+          end
+        end
+      end
+
+      it 'shows options `satisfied`, `failed` and `missing` for status token' do
+        page.within('.vue-filtered-search-bar-container .gl-search-box-by-click') do
+          page.find('input').click
+          page.find('.gl-filtered-search-suggestion-list li:nth-child(2)').click
+
+          expect(page.find('.gl-filtered-search-suggestion-list')).to have_selector('li', count: 3)
+          page.within('.gl-filtered-search-suggestion-list') do
+            expect(page.find('li:nth-child(1)')).to have_content('Satisfied')
+            expect(page.find('li:nth-child(2)')).to have_content('Failed')
+            expect(page.find('li:nth-child(3)')).to have_content('Missing')
+          end
+        end
+      end
+    end
+
     context 'new requirement' do
       it 'shows requirement create form when "New requirement" button is clicked' do
         page.within('.nav-controls') do

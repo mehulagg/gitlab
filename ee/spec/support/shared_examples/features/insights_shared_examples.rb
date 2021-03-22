@@ -64,23 +64,10 @@ RSpec.shared_examples 'Insights page' do
           end
         end
       end
-
-      context 'when the feature flag is disabled globally' do
-        before do
-          stub_feature_flags(insights: false)
-        end
-
-        it 'returns 404' do
-          visit route
-
-          expect(page).to have_gitlab_http_status(:not_found)
-        end
-      end
     end
 
     context 'without correct license' do
       before do
-        stub_feature_flags(insights: false)
         stub_licensed_features(insights: false)
       end
 

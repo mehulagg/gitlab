@@ -61,7 +61,7 @@ module EE
           def variables(context)
             {
               full_path: context.entity.source_full_path,
-              cursor: context.entity.next_page_for(:epics)
+              cursor: context.tracker.next_page
             }
           end
 

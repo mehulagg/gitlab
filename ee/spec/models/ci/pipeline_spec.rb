@@ -288,7 +288,7 @@ RSpec.describe Ci::Pipeline do
       it 'returns a dependency list report with collected data' do
         mini_portile2 = subject.dependencies.find { |x| x[:name] == 'mini_portile2' }
 
-        expect(subject.dependencies.count).to eq(24)
+        expect(subject.dependencies.count).to eq(21)
         expect(mini_portile2[:name]).not_to be_empty
         expect(mini_portile2[:licenses]).not_to be_empty
       end

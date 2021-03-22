@@ -24,13 +24,9 @@ RSpec.describe 'GFM autocomplete', :js do
     end
 
     it 'opens quick action autocomplete in the description field' do
-      find('#epic-description').native.send_keys('/la')
+      fill_in 'Description', with: '/la'
 
-      expect(page).to have_selector('.atwho-container')
-
-      page.within '.atwho-container #at-view-commands' do
-        expect(find('li', match: :first)).to have_content('/label')
-      end
+      expect(find_highlighted_autocomplete_item).to have_text('/label')
     end
   end
 
@@ -42,11 +38,11 @@ RSpec.describe 'GFM autocomplete', :js do
     end
 
     it 'opens quick action autocomplete when updating description' do
-      find('.js-issuable-edit').click
+      click_button 'Edit title and description'
 
-      find('#issue-description').native.send_keys('/')
+      fill_in 'Description', with: '/'
 
-      expect(page).to have_selector('.atwho-container')
+      expect(find_autocomplete_menu).to be_visible
     end
 
     context 'issuables' do
@@ -57,7 +53,7 @@ RSpec.describe 'GFM autocomplete', :js do
           issue_1 = create(:issue, project: project)
           issue_2 = create(:issue, project: project)
 
-          type(find('#note-body'), '#')
+          fill_in 'Comment', with: '#'
 
           expect_resources(shown: [issue_1, issue_2])
         end
@@ -68,7 +64,7 @@ RSpec.describe 'GFM autocomplete', :js do
           mr_1 = create(:merge_request, source_project: project)
           mr_2 = create(:merge_request, source_project: project, source_branch: 'other-branch')
 
-          type(find('#note-body'), '!')
+          fill_in 'Comment', with: '!'
 
           expect_resources(shown: [mr_1, mr_2])
         end
@@ -79,10 +75,8 @@ RSpec.describe 'GFM autocomplete', :js do
       let!(:epic2) { create(:epic, group: group, title: 'make tea') }
 
       it 'shows epics' do
-        note = find('#note-body')
+        fill_in 'Comment', with: '&'
 
-        # It should show all the epics on "&".
-        type(note, '&')
         expect_resources(shown: [epic, epic2])
       end
     end
@@ -93,51 +87,46 @@ RSpec.describe 'GFM autocomplete', :js do
         milestone_1 = create(:milestone, title: 'milestone_1', group: group)
         milestone_2 = create(:milestone, title: 'milestone_2', group: group)
         milestone_3 = create(:milestone, title: 'milestone_3', project: project)
-        note = find('#note-body')
 
-        type(note, '%')
+        fill_in 'Comment', with: '%'
 
         expect_resources(shown: [milestone_1, milestone_2], not_shown: [milestone_3])
       end
     end
 
     context 'labels' do
-      let_it_be(:backend)          { create(:group_label, group: group, title: 'backend') }
-      let_it_be(:bug)              { create(:group_label, group: group, title: 'bug') }
+      let_it_be(:backend) { create(:group_label, group: group, title: 'backend') }
+      let_it_be(:bug) { create(:group_label, group: group, title: 'bug') }
       let_it_be(:feature_proposal) { create(:group_label, group: group, title: 'feature proposal') }
 
       context 'when no labels are assigned' do
         it 'shows all labels for ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '~'
 
-          type(note, '~')
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
         end
 
         it 'shows all labels for /label ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/label ~'
 
-          type(note, '/label ~')
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
         end
 
         it 'shows all labels for /relabel ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/relabel ~'
 
-          type(note, '/relabel ~')
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
         end
 
         it 'shows no labels for /unlabel ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/unlabel ~'
 
-          type(note, '/unlabel ~')
           wait_for_requests
 
           expect_resources(not_shown: [backend, bug, feature_proposal])
@@ -150,36 +139,32 @@ RSpec.describe 'GFM autocomplete', :js do
         end
 
         it 'shows all labels for ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '~'
 
-          type(note, '~')
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
         end
 
         it 'shows only unset labels for /label ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/label ~'
 
-          type(note, '/label ~')
           wait_for_requests
 
           expect_resources(shown: [bug, feature_proposal], not_shown: [backend])
         end
 
         it 'shows all labels for /relabel ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/relabel ~'
 
-          type(note, '/relabel ~')
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
         end
 
         it 'shows only set labels for /unlabel ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/unlabel ~'
 
-          type(note, '/unlabel ~')
           wait_for_requests
 
           expect_resources(shown: [backend], not_shown: [bug, feature_proposal])
@@ -192,36 +177,31 @@ RSpec.describe 'GFM autocomplete', :js do
         end
 
         it 'shows all labels for ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '~'
 
-          type(note, '~')
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
         end
 
         it 'shows no labels for /label ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/label ~'
 
-          type(note, '/label ~')
           wait_for_requests
 
           expect_resources(not_shown: [backend, bug, feature_proposal])
         end
 
         it 'shows all labels for /relabel ~' do
-          note = find('#note-body')
+          fill_in 'Comment', with: '/relabel ~'
 
-          type(note, '/relabel ~')
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
         end
 
         it 'shows all labels for /unlabel ~' do
-          note = find('#note-body')
-
-          type(note, '/unlabel ~')
+          fill_in 'Comment', with: '/unlabel ~'
           wait_for_requests
 
           expect_resources(shown: [backend, bug, feature_proposal])
@@ -231,19 +211,6 @@ RSpec.describe 'GFM autocomplete', :js do
   end
 
   private
-
-  def expect_to_wrap(should_wrap, item, note, value)
-    expect(item).to have_content(value)
-    expect(item).not_to have_content("\"#{value}\"")
-
-    item.click
-
-    if should_wrap
-      expect(note.value).to include("\"#{value}\"")
-    else
-      expect(note.value).not_to include("\"#{value}\"")
-    end
-  end
 
   def expect_resources(shown: nil, not_shown: nil)
     page.within('.atwho-container') do
@@ -259,12 +226,11 @@ RSpec.describe 'GFM autocomplete', :js do
     end
   end
 
-  # `note` is a textarea where the given text should be typed.
-  # We don't want to find it each time this function gets called.
-  def type(note, text)
-    page.within('.timeline-content-form') do
-      note.set('')
-      note.native.send_keys(text)
-    end
+  def find_autocomplete_menu
+    find('.atwho-view ul', visible: true)
+  end
+
+  def find_highlighted_autocomplete_item
+    find('.atwho-view li.cur', visible: true)
   end
 end

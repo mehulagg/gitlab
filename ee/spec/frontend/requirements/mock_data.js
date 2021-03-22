@@ -1,3 +1,6 @@
+import StatusToken from 'ee/requirements/components/tokens/status_token.vue';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+
 export const mockUserPermissions = {
   updateRequirement: true,
   adminRequirement: true,
@@ -26,7 +29,7 @@ export const mockTestReportFailed = {
 
 export const mockTestReportMissing = {
   id: 'gid://gitlab/RequirementsManagement::TestReport/1',
-  state: '',
+  state: 'MISSING',
   createdAt: '2020-06-04T10:55:48Z',
   __typename: 'TestReport',
 };
@@ -141,5 +144,33 @@ export const mockFilters = [
     type: 'author_username',
     value: { data: 'john.doe' },
   },
-  'foo',
+  {
+    type: 'status',
+    value: { data: 'satisfied' },
+  },
+  {
+    type: 'filtered-search-term',
+    value: { data: 'foo' },
+  },
 ];
+
+export const mockAuthorToken = {
+  type: 'author_username',
+  icon: 'user',
+  title: 'Author',
+  unique: false,
+  symbol: '@',
+  token: AuthorToken,
+  operators: [{ value: '=', description: 'is', default: 'true' }],
+  fetchPath: 'gitlab-org/gitlab-shell',
+  fetchAuthors: expect.any(Function),
+};
+
+export const mockStatusToken = {
+  type: 'status',
+  icon: 'status',
+  title: 'Status',
+  unique: true,
+  token: StatusToken,
+  operators: [{ value: '=', description: 'is', default: 'true' }],
+};

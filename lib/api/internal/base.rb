@@ -15,7 +15,7 @@ module API
         Gitlab::ApplicationContext.push(
           user: -> { actor&.user },
           project: -> { project },
-          caller_id: route.origin,
+          caller_id: api_endpoint.endpoint_id,
           remote_ip: request.ip,
           feature_category: feature_category
         )
@@ -52,20 +52,20 @@ module API
           actor.update_last_used_at!
 
           check_result = begin
-                           Gitlab::Auth::CurrentUserMode.bypass_session!(actor.user&.id) do
-                             access_check!(actor, params)
-                           end
-                         rescue Gitlab::GitAccess::ForbiddenError => e
-                           # The return code needs to be 401. If we return 403
-                           # the custom message we return won't be shown to the user
-                           # and, instead, the default message 'GitLab: API is not accessible'
-                           # will be displayed
-                           return response_with_status(code: 401, success: false, message: e.message)
-                         rescue Gitlab::GitAccess::TimeoutError => e
-                           return response_with_status(code: 503, success: false, message: e.message)
-                         rescue Gitlab::GitAccess::NotFoundError => e
-                           return response_with_status(code: 404, success: false, message: e.message)
-                         end
+            with_admin_mode_bypass!(actor.user&.id) do
+              access_check!(actor, params)
+            end
+          rescue Gitlab::GitAccess::ForbiddenError => e
+            # The return code needs to be 401. If we return 403
+            # the custom message we return won't be shown to the user
+            # and, instead, the default message 'GitLab: API is not accessible'
+            # will be displayed
+            return response_with_status(code: 401, success: false, message: e.message)
+          rescue Gitlab::GitAccess::TimeoutError => e
+            return response_with_status(code: 503, success: false, message: e.message)
+          rescue Gitlab::GitAccess::NotFoundError => e
+            return response_with_status(code: 404, success: false, message: e.message)
+          end
 
           log_user_activity(actor.user)
 
@@ -119,6 +119,14 @@ module API
 
         def two_factor_otp_check
           { success: false, message: 'Feature is not available' }
+        end
+
+        def with_admin_mode_bypass!(actor_id)
+          return yield unless Gitlab::CurrentSettings.admin_mode
+
+          Gitlab::Auth::CurrentUserMode.bypass_session!(actor_id) do
+            yield
+          end
         end
       end
 

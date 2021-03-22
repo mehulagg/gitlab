@@ -13,8 +13,6 @@ module EE
 
       state_machine :status do
         after_transition any => :success do |deployment|
-          next unless ::Feature.enabled?(:dora_daily_metrics, deployment.project, default_enabled: :yaml)
-
           deployment.run_after_commit do
             # Schedule to refresh the DORA daily metrics.
             # It has 5 minutes delay due to waiting for the other async processes

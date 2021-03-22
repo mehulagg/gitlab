@@ -4,7 +4,7 @@ import AddEditScheduleForm, {
   i18n,
 } from 'ee/oncall_schedules/components/add_edit_schedule_form.vue';
 import { getOncallSchedulesQueryResponse } from './mocks/apollo_mock';
-import mockTimezones from './mocks/mockTimezones.json';
+import mockTimezones from './mocks/mock_timezones.json';
 
 describe('AddEditScheduleForm', () => {
   let wrapper;

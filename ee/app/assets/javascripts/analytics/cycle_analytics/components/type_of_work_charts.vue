@@ -81,7 +81,7 @@ export default {
         :has-data="hasData"
         :selected-label-ids="selectedLabelIdsFilter"
         :subject-filter="selectedSubjectFilter"
-        @updateFilter="onUpdateFilter"
+        @update-filter="onUpdateFilter"
       />
       <tasks-by-type-chart
         v-if="hasData"

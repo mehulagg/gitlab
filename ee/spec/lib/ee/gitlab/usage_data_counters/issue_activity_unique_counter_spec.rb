@@ -9,7 +9,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
   let(:time) { Time.zone.now }
 
   context 'for Issue health status changed actions' do
-    it_behaves_like 'a tracked issue edit event' do
+    it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_HEALTH_STATUS_CHANGED }
 
       def track_action(params)
@@ -19,7 +19,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
   end
 
   context 'for Issue iteration changed actions' do
-    it_behaves_like 'a tracked issue edit event' do
+    it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_ITERATION_CHANGED }
 
       def track_action(params)
@@ -29,7 +29,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
   end
 
   context 'for Issue weight changed actions' do
-    it_behaves_like 'a tracked issue edit event' do
+    it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_WEIGHT_CHANGED }
 
       def track_action(params)
@@ -39,7 +39,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
   end
 
   context 'for Issue added to epic actions' do
-    it_behaves_like 'a tracked issue edit event' do
+    it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_ADDED_TO_EPIC}
 
       def track_action(params)
@@ -49,7 +49,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
   end
 
   context 'for Issue removed from epic actions' do
-    it_behaves_like 'a tracked issue edit event' do
+    it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_REMOVED_FROM_EPIC}
 
       def track_action(params)
@@ -59,7 +59,7 @@ RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_git
   end
 
   context 'for Issue changed epic actions' do
-    it_behaves_like 'a tracked issue edit event' do
+    it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_CHANGED_EPIC}
 
       def track_action(params)

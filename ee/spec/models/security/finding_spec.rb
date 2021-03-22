@@ -11,20 +11,20 @@ RSpec.describe Security::Finding do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:project_fingerprint) }
-    it { is_expected.to validate_presence_of(:position) }
     it { is_expected.to validate_length_of(:project_fingerprint).is_at_most(40) }
+    it { is_expected.to validate_presence_of(:uuid) }
   end
 
   describe 'delegations' do
     it { is_expected.to delegate_method(:scan_type).to(:scan).allow_nil }
   end
 
-  describe '.by_position' do
-    let!(:finding_1) { create(:security_finding, position: 0) }
-    let!(:finding_2) { create(:security_finding, position: 1) }
+  describe '.by_uuid' do
+    let!(:finding_1) { create(:security_finding) }
+    let!(:finding_2) { create(:security_finding) }
     let(:expected_findings) { [finding_1] }
 
-    subject { described_class.by_position(finding_1.position) }
+    subject { described_class.by_uuid(finding_1.uuid) }
 
     it { is_expected.to match_array(expected_findings) }
   end

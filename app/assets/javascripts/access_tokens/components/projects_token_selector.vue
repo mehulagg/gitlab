@@ -8,12 +8,13 @@ import {
 } from '@gitlab/ui';
 import produce from 'immer';
 
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { convertToGraphQLIds, convertNodeIdsFromGraphQLIds } from '~/graphql_shared/utils';
 
 import getProjectsQuery from '../graphql/queries/get_projects.query.graphql';
 
 const DEBOUNCE_DELAY = 250;
 const PROJECTS_PER_PAGE = 20;
+const GRAPHQL_ENTITY_TYPE = 'Project';
 
 export default {
   name: 'ProjectsTokenSelector',
@@ -32,6 +33,10 @@ export default {
       type: Array,
       required: true,
     },
+    initialProjectIds: {
+      type: Array,
+      required: true,
+    },
   },
   apollo: {
     projects: {
@@ -46,16 +51,28 @@ export default {
       },
       update({ projects }) {
         return {
-          list: projects.nodes.map((project) => ({
-            ...project,
-            id: getIdFromGraphQLId(project.id),
-          })),
+          list: convertNodeIdsFromGraphQLIds(projects.nodes),
           pageInfo: projects.pageInfo,
         };
       },
       result() {
         this.isLoadingMoreProjects = false;
         this.isSearching = false;
+      },
+    },
+    initialProjects: {
+      query: getProjectsQuery,
+      variables() {
+        return {
+          ids: convertToGraphQLIds(GRAPHQL_ENTITY_TYPE, this.initialProjectIds),
+        };
+      },
+      manual: true,
+      skip() {
+        return !this.initialProjectIds.length;
+      },
+      result({ data: { projects } }) {
+        this.$emit('input', convertNodeIdsFromGraphQLIds(projects.nodes));
       },
     },
   },
@@ -87,10 +104,8 @@ export default {
           const { projects: previousProjects } = previousResult;
 
           return produce(previousResult, (draftData) => {
-            /* eslint-disable no-param-reassign */
             draftData.projects.nodes = [...previousProjects.nodes, ...newProjects.nodes];
             draftData.projects.pageInfo = newProjects.pageInfo;
-            /* eslint-enable no-param-reassign */
           });
         },
       });

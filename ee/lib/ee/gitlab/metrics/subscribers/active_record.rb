@@ -43,7 +43,7 @@ module EE
 
             db_role = ::Gitlab::Database::LoadBalancing.db_role_for_connection(payload[:connection])
             increment_db_role_counters(db_role, payload)
-            observe_db_role_duration(db_role, event.duration)
+            observe_db_role_duration(db_role, event)
           end
 
           private
@@ -53,13 +53,12 @@ module EE
             increment("db_#{db_role}_cached_count".to_sym) if cached_query?(payload)
           end
 
-          def observe_db_role_duration(db_role, duration)
-            duration /= 1000.0
-
-            current_transaction&.observe("gitlab_sql_#{db_role}_duration_seconds".to_sym, duration) do
-              buckets [0.05, 0.1, 0.25]
+          def observe_db_role_duration(db_role, event)
+            observe("gitlab_sql_#{db_role}_duration_seconds".to_sym, event) do
+              buckets ::Gitlab::Metrics::Subscribers::ActiveRecord::SQL_DURATION_BUCKET
             end
 
+            duration = event.duration / 1000.0
             duration_key = "db_#{db_role}_duration_s".to_sym
             ::Gitlab::SafeRequestStore[duration_key] = (::Gitlab::SafeRequestStore[duration_key].presence || 0) + duration
           end

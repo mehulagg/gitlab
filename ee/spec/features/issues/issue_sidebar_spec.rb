@@ -191,7 +191,9 @@ RSpec.describe 'Issue Sidebar' do
   end
 
   def find_and_click_edit_iteration
-    page.find('[data-testid="iteration-edit-link"]').click
+    page.find('[data-testid="iteration-edit-link"] [data-testid="edit-button"]').click
+
+    wait_for_all_requests
   end
 
   def select_iteration(iteration_name)

@@ -108,6 +108,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:merge_request_assignees).inverse_of(:assignee) }
     it { is_expected.to have_many(:merge_request_reviewers).inverse_of(:reviewer) }
     it { is_expected.to have_many(:created_custom_emoji).inverse_of(:creator) }
+    it { is_expected.to have_many(:in_product_marketing_emails) }
 
     describe "#user_detail" do
       it 'does not persist `user_detail` by default' do
@@ -1766,7 +1767,7 @@ RSpec.describe User do
   end
 
   describe 'blocking user' do
-    let(:user) { create(:user, name: 'John Smith') }
+    let_it_be_with_refind(:user) { create(:user, name: 'John Smith') }
 
     it 'blocks user' do
       user.block
@@ -1787,6 +1788,14 @@ RSpec.describe User do
         expect(service).to receive(:execute).with(user)
 
         user.block
+      end
+    end
+
+    context 'when user has active CI pipeline schedules' do
+      let_it_be(:schedule) { create(:ci_pipeline_schedule, active: true, owner: user) }
+
+      it 'disables any pipeline schedules' do
+        expect { user.block }.to change { schedule.reload.active? }.to(false)
       end
     end
   end
@@ -3961,6 +3970,37 @@ RSpec.describe User do
     end
   end
 
+  describe '#can_admin_all_resources?', :request_store do
+    it 'returns false for regular user' do
+      user = build_stubbed(:user)
+
+      expect(user.can_admin_all_resources?).to be_falsy
+    end
+
+    context 'for admin user' do
+      include_context 'custom session'
+
+      let(:user) { build_stubbed(:user, :admin) }
+
+      context 'when admin mode is disabled' do
+        it 'returns false' do
+          expect(user.can_admin_all_resources?).to be_falsy
+        end
+      end
+
+      context 'when admin mode is enabled' do
+        before do
+          Gitlab::Auth::CurrentUserMode.new(user).request_admin_mode!
+          Gitlab::Auth::CurrentUserMode.new(user).enable_admin_mode!(password: user.password)
+        end
+
+        it 'returns true' do
+          expect(user.can_admin_all_resources?).to be_truthy
+        end
+      end
+    end
+  end
+
   describe '.ghost' do
     it "creates a ghost user if one isn't already present" do
       ghost = described_class.ghost
@@ -5391,6 +5431,40 @@ RSpec.describe User do
       end
 
       it_behaves_like 'does not require password to be present'
+    end
+  end
+
+  describe 'can_trigger_notifications?' do
+    context 'when user is not confirmed' do
+      let_it_be(:user) { create(:user, :unconfirmed) }
+
+      it 'returns false' do
+        expect(user.can_trigger_notifications?).to be(false)
+      end
+    end
+
+    context 'when user is blocked' do
+      let_it_be(:user) { create(:user, :blocked) }
+
+      it 'returns false' do
+        expect(user.can_trigger_notifications?).to be(false)
+      end
+    end
+
+    context 'when user is a ghost' do
+      let_it_be(:user) { create(:user, :ghost) }
+
+      it 'returns false' do
+        expect(user.can_trigger_notifications?).to be(false)
+      end
+    end
+
+    context 'when user is confirmed and neither blocked or a ghost' do
+      let_it_be(:user) { create(:user) }
+
+      it 'returns true' do
+        expect(user.can_trigger_notifications?).to be(true)
+      end
     end
   end
 

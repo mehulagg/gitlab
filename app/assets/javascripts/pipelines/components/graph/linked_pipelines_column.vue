@@ -94,20 +94,29 @@ export default {
           };
         },
         update(data) {
+          /*
+            This check prevents the pipeline from being overwritten
+            when a poll times out and the data returned is empty.
+            This can be removed once the timeout behavior is updated.
+            See: https://gitlab.com/gitlab-org/gitlab/-/issues/323213.
+          */
+
+          if (!data?.project?.pipeline) {
+            return this.currentPipeline;
+          }
+
           return unwrapPipelineData(projectPath, data);
         },
         result() {
           this.loadingPipelineId = null;
           this.$emit('scrollContainer');
         },
-        error(err, _vm, _key, type) {
-          this.$emit('error', LOAD_FAILURE);
+        error(err) {
+          this.$emit('error', { type: LOAD_FAILURE, skipSentry: true });
 
           reportToSentry(
             'linked_pipelines_column',
-            `error type: ${LOAD_FAILURE}, error: ${serializeLoadErrors(
-              err,
-            )}, apollo error type: ${type}`,
+            `error type: ${LOAD_FAILURE}, error: ${serializeLoadErrors(err)}`,
           );
         },
       });

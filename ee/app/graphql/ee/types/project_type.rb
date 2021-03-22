@@ -56,11 +56,14 @@ module EE
               description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
+        field :iteration_cadences, ::Types::Iterations::CadenceType.connection_type, null: true,
+              description: 'Find iteration cadences.',
+              resolver: ::Resolvers::Iterations::CadencesResolver
+
         field :dast_profiles,
               ::Types::Dast::ProfileType.connection_type,
               null: true,
-              description: 'DAST Profiles associated with the project. Always returns no nodes ' \
-                           'if `dast_saved_scans` is disabled.'
+              description: 'DAST Profiles associated with the project.'
 
         field :dast_site_profile,
               ::Types::DastSiteProfileType,
@@ -128,26 +131,31 @@ module EE
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
         field :api_fuzzing_ci_configuration,
-              ::Types::CiConfiguration::ApiFuzzingType,
+              ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
               null: true,
-              description: 'API fuzzing configuration for the project.',
-              feature_flag: :api_fuzzing_configuration_ui
+              description: 'API fuzzing configuration for the project. '\
+                           'Null unless feature flag `api_fuzzing_configuration_ui` is enabled.'
+
+        field :push_rules,
+              ::Types::PushRulesType,
+              null: true,
+              description: "The project's push rules settings.",
+              method: :push_rule
       end
 
       def api_fuzzing_ci_configuration
-        return unless Ability.allowed?(current_user, :read_vulnerability, object)
+        return unless ::Feature.enabled?(:api_fuzzing_configuration_ui, object, default_enabled: :yaml) && \
+                      Ability.allowed?(current_user, :read_vulnerability, object)
 
-        configuration = ::Security::ApiFuzzing::CiConfiguration.new(project: object)
+        configuration = ::AppSec::Fuzzing::Api::CiConfiguration.new(project: object)
 
         {
-          scan_modes: ::Security::ApiFuzzing::CiConfiguration::SCAN_MODES,
+          scan_modes: ::AppSec::Fuzzing::Api::CiConfiguration::SCAN_MODES,
           scan_profiles: configuration.scan_profiles
         }
       end
 
       def dast_profiles
-        return Dast::Profile.none unless ::Feature.enabled?(:dast_saved_scans, object, default_enabled: :yaml)
-
         Dast::ProfilesFinder.new(project_id: object.id).execute
       end
 

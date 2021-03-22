@@ -1,10 +1,12 @@
 <script>
 import { GlButton, GlForm, GlFormGroup, GlFormInput, GlLink, GlSprintf } from '@gitlab/ui';
+import { debounce } from 'lodash';
 
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { validateHexColor } from '~/lib/utils/color_utils';
 import { __, s__ } from '~/locale';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
+import { DEBOUNCE_DELAY } from '../constants';
 import { fetchPipelineConfigurationFileExists, validatePipelineConfirmationFormat } from '../utils';
 
 export default {
@@ -106,20 +108,23 @@ export default {
   },
   async created() {
     if (this.pipelineConfigurationFullPath) {
-      this.pipelineConfigurationFileExists = await fetchPipelineConfigurationFileExists(
-        this.pipelineConfigurationFullPath,
-      );
+      this.validatePipelineConfigurationPath(this.pipelineConfigurationFullPath);
     }
   },
   methods: {
     onSubmit() {
       this.$emit('submit');
     },
-    async updatePipelineConfiguration(path) {
-      this.pipelineConfigurationFileExists = await fetchPipelineConfigurationFileExists(path);
-
+    onPipelineInput(path) {
       this.$emit('update:pipelineConfigurationFullPath', path);
+      this.validatePipelineInput(path);
     },
+    async validatePipelineConfigurationPath(path) {
+      this.pipelineConfigurationFileExists = await fetchPipelineConfigurationFileExists(path);
+    },
+    validatePipelineInput: debounce(function debounceValidation(path) {
+      this.validatePipelineConfigurationPath(path);
+    }, DEBOUNCE_DELAY),
   },
   i18n: {
     titleInputLabel: __('Title'),
@@ -206,7 +211,7 @@ export default {
         :value="pipelineConfigurationFullPath"
         :state="isValidPipelineConfiguration"
         data-testid="pipeline-configuration-input"
-        @input="updatePipelineConfiguration"
+        @input="onPipelineInput"
       />
     </gl-form-group>
 

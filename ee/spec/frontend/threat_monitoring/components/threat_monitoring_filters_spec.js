@@ -4,7 +4,7 @@ import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_moni
 import createStore from 'ee/threat_monitoring/store';
 import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
 import { timeRanges, defaultTimeRange } from '~/vue_shared/constants';
-import { mockEnvironmentsResponse } from '../mock_data';
+import { mockEnvironmentsResponse } from '../mocks/mock_data';
 
 const mockEnvironments = mockEnvironmentsResponse.environments;
 

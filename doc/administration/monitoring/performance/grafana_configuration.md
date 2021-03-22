@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -62,7 +62,7 @@ repository.
 After setting up Grafana, you can enable a link to access it easily from the
 GitLab sidebar:
 
-1. Navigate to the **Admin Area > Settings > Metrics and profiling**.
+1. Go to the **Admin Area > Settings > Metrics and profiling**.
 1. Expand **Metrics - Grafana**.
 1. Check the **Enable access to Grafana** checkbox.
 1. Configure the **Grafana URL**:

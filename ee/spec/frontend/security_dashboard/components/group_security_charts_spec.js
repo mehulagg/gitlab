@@ -41,7 +41,7 @@ describe('Group Security Charts component', () => {
           },
         },
       },
-      propsData: { groupFullPath },
+      provide: { groupFullPath },
       stubs: {
         SecurityChartsLayout,
       },
@@ -100,11 +100,10 @@ describe('Group Security Charts component', () => {
     expect(dashboardNotConfigured.exists()).toBe(false);
     expect(loadingIcon.exists()).toBe(false);
     expect(vulnerabilityChart.exists()).toBe(true);
-    expect(vulnerabilityChart.props()).toEqual({ query: vulnerabilityHistoryQuery, groupFullPath });
+    expect(vulnerabilityChart.props()).toEqual({ query: vulnerabilityHistoryQuery });
     expect(vulnerabilitySeverities.exists()).toBe(true);
     expect(vulnerabilitySeverities.props()).toEqual({
       query: vulnerabilityGradesQuery,
-      groupFullPath,
       helpPagePath: '',
     });
   });

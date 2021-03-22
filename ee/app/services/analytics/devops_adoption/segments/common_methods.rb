@@ -7,7 +7,7 @@ module Analytics
         include Gitlab::Allowable
 
         def authorize!
-          unless can?(current_user, :manage_devops_adoption_segments, :global)
+          unless can?(current_user, :manage_devops_adoption_segments, namespace)
             raise AuthorizationError.new(self, 'Forbidden')
           end
         end

@@ -91,19 +91,19 @@ RSpec.describe GroupsHelper do
         stub_feature_flags(group_ci_cd_analytics_page: false)
       end
 
-      it 'hides CI / CD Analytics' do
+      it 'hides CI/CD Analytics' do
         expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
       end
     end
 
-    context 'when the user does not have permissions to view the CI / CD Analytics page' do
+    context 'when the user does not have permissions to view the CI/CD Analytics page' do
       let(:current_user) { create(:user) }
 
       before do
         group.add_guest(current_user)
       end
 
-      it 'hides CI / CD Analytics' do
+      it 'hides CI/CD Analytics' do
         expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
       end
     end

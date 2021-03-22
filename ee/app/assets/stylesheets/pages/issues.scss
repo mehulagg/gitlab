@@ -87,3 +87,42 @@
     outline: none;
   }
 }
+
+.cve-id-request {
+  padding-bottom: 0;
+  border-bottom: 0;
+
+  .help-button,
+  .close-help-button {
+    cursor: pointer;
+  }
+
+  .help-state-toggle-enter-active {
+    transition: all 0.8s ease;
+  }
+
+  .help-state-toggle-leave-active {
+    transition: all 0.5s ease;
+  }
+
+  .help-state-toggle-enter,
+  .help-state-toggle-leave-active {
+    opacity: 0;
+  }
+
+  .cve-id-request-content {
+    margin-top: 16px;
+  }
+
+  .cve-id-request-help-state {
+    background: $white;
+    margin: 16px -20px -20px;
+    padding: 16px 20px;
+    border-top: 1px solid $border-gray-light;
+    border-bottom: 1px solid $border-gray-light;
+
+    a:hover {
+      color: $btn-white-active;
+    }
+  }
+}

@@ -91,7 +91,7 @@ export default {
         >
           <gl-icon name="eye-slash" class="icon" />
         </div>
-        {{ __('Opened') }}
+        {{ __('Created') }}
         <timeago-tooltip :time="created" />
         {{ __('by') }}
         <strong class="text-nowrap">

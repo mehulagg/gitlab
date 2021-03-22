@@ -68,14 +68,13 @@ RSpec.describe License do
 
       context 'threshold for users overage' do
         let(:current_active_users_count) { 0 }
-        let(:new_license) do
-          gl_license = build(
+        let(:new_license) { build(:license, data: gitlab_license.export) }
+        let(:gitlab_license) do
+          build(
             :gitlab_license,
             starts_at: Date.current,
             restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
           )
-
-          build(:license, data: gl_license.export)
         end
 
         context 'when current active users count is above the limit set by the license' do
@@ -100,6 +99,21 @@ RSpec.describe License do
 
               it 'does not accept the license' do
                 expect(new_license).not_to be_valid
+              end
+
+              context 'when license is a cloud license' do
+                let(:gitlab_license) do
+                  build(
+                    :gitlab_license,
+                    type: described_class::CLOUD_LICENSE_TYPE,
+                    starts_at: Date.current,
+                    restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
+                  )
+                end
+
+                it 'accepts the license' do
+                  expect(new_license).to be_valid
+                end
               end
             end
           end
@@ -874,26 +888,6 @@ RSpec.describe License do
           end
         end
       end
-
-      context 'when feature is disabled by a feature flag' do
-        it 'returns false' do
-          feature = license.features.first
-          stub_feature_flags(feature => false)
-
-          expect(license.features).not_to receive(:include?)
-
-          expect(license.feature_available?(feature)).to eq(false)
-        end
-      end
-
-      context 'when feature is enabled by a feature flag' do
-        it 'returns true' do
-          feature = license.features.first
-          stub_feature_flags(feature => true)
-
-          expect(license.feature_available?(feature)).to eq(true)
-        end
-      end
     end
 
     def build_license_with_add_ons(add_ons, plan: nil)
@@ -1392,6 +1386,28 @@ RSpec.describe License do
       it do
         is_expected.to eq(result)
       end
+    end
+  end
+
+  describe '#cloud?' do
+    subject { license.cloud? }
+
+    context 'when no license provided' do
+      before do
+        license.data = nil
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the license is not a cloud license' do
+      it { is_expected.to be false }
+    end
+
+    context 'when the license is a cloud license' do
+      let(:gl_license) { build(:gitlab_license, type: described_class::CLOUD_LICENSE_TYPE) }
+
+      it { is_expected.to be true }
     end
   end
 

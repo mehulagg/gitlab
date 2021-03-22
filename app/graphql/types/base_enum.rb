@@ -26,7 +26,7 @@ module Types
 
       def value(*args, **kwargs, &block)
         enum[args[0].downcase] = kwargs[:value] || args[0]
-        kwargs = gitlab_deprecation(kwargs)
+        gitlab_deprecation(kwargs)
 
         super(*args, **kwargs, &block)
       end
@@ -35,6 +35,18 @@ module Types
       # and the value being the Ruby value (either the explicit `value` passed or the same as the value attr).
       def enum
         @enum_values ||= {}.with_indifferent_access
+      end
+
+      def authorization
+        @authorization ||= ::Gitlab::Graphql::Authorize::ObjectAuthorization.new(authorize)
+      end
+
+      def authorize(*abilities)
+        @abilities = abilities
+      end
+
+      def authorized?(object, context)
+        authorization.ok?(object, context[:current_user])
       end
     end
   end

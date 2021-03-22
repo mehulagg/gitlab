@@ -60,6 +60,7 @@ module Gitlab
             .merge(compliance_unique_visits_data)
             .merge(search_unique_visits_data)
             .merge(redis_hll_counters)
+            .deep_merge(aggregated_metrics_data)
         end
       end
 
@@ -224,8 +225,7 @@ module Gitlab
             project_snippets: count(ProjectSnippet.where(last_28_days_time_period)),
             projects_with_alerts_created: distinct_count(::AlertManagement::Alert.where(last_28_days_time_period), :project_id)
           }.merge(
-            snowplow_event_counts(last_28_days_time_period(column: :collector_tstamp)),
-            aggregated_metrics_monthly
+            snowplow_event_counts(last_28_days_time_period(column: :collector_tstamp))
           ).tap do |data|
             data[:snippets] = add(data[:personal_snippets], data[:project_snippets])
           end
@@ -250,10 +250,7 @@ module Gitlab
 
       def system_usage_data_weekly
         {
-          counts_weekly: {
-          }.merge(
-            aggregated_metrics_weekly
-          )
+          counts_weekly: {}
         }
       end
 
@@ -632,6 +629,9 @@ module Gitlab
 
       # rubocop: disable CodeReuse/ActiveRecord
       def usage_activity_by_stage_monitor(time_period)
+        # Calculate histogram only for overall as other time periods aren't available/useful here.
+        integrations_histogram = time_period.empty? ? histogram(::AlertManagement::HttpIntegration.active, :project_id, buckets: 1..100) : nil
+
         {
           clusters: distinct_count(::Clusters::Cluster.where(time_period), :user_id),
           clusters_applications_prometheus: cluster_applications_user_distinct_count(::Clusters::Applications::Prometheus, time_period),
@@ -641,8 +641,9 @@ module Gitlab
           projects_with_tracing_enabled: distinct_count(::Project.with_tracing_enabled.where(time_period), :creator_id),
           projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id),
           projects_with_incidents: distinct_count(::Issue.incident.where(time_period), :project_id),
-          projects_with_alert_incidents: distinct_count(::Issue.incident.with_alert_management_alerts.where(time_period), :project_id)
-        }
+          projects_with_alert_incidents: distinct_count(::Issue.incident.with_alert_management_alerts.where(time_period), :project_id),
+          projects_with_enabled_alert_integrations_histogram: integrations_histogram
+        }.compact
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -713,15 +714,13 @@ module Gitlab
         { redis_hll_counters: ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events_data }
       end
 
-      def aggregated_metrics_monthly
+      def aggregated_metrics_data
         {
-          aggregated_metrics: aggregated_metrics.monthly_data
-        }
-      end
-
-      def aggregated_metrics_weekly
-        {
-          aggregated_metrics: aggregated_metrics.weekly_data
+          counts_weekly: { aggregated_metrics: aggregated_metrics.weekly_data },
+          counts_monthly: { aggregated_metrics: aggregated_metrics.monthly_data },
+          counts: aggregated_metrics
+                    .all_time_data
+                    .to_h { |key, value| ["aggregate_#{key}".to_sym, value.round] }
         }
       end
 

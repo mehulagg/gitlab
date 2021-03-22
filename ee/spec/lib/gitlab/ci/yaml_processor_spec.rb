@@ -74,7 +74,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
             bridge_needs: { pipeline: 'some/project' }
           },
           needs_attributes: [
-            { name: "build", artifacts: true }
+            { name: "build", artifacts: true, optional: false }
           ],
           when: "on_success",
           allow_failure: false,
@@ -147,7 +147,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
             ]
           },
           needs_attributes: [
-            { name: 'build', artifacts: true }
+            { name: 'build', artifacts: true, optional: false }
           ],
           only: { refs: %w[branches tags] },
           when: 'on_success',

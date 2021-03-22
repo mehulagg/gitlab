@@ -3,6 +3,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
 import {
+  EPIC_LANE_BASE_HEIGHT,
   IterationFilterType,
   IterationIDs,
   MilestoneFilterType,
@@ -31,13 +32,16 @@ export function fullEpicBoardId(epicBoardId) {
   return `gid://gitlab/Boards::EpicBoard/${epicBoardId}`;
 }
 
+export function calculateSwimlanesBufferSize(listTopCoordinate) {
+  return Math.ceil((window.innerHeight - listTopCoordinate) / EPIC_LANE_BASE_HEIGHT);
+}
+
 export function formatListEpics(listEpics) {
   const boardItems = {};
   let listItemsCount;
 
   const listData = listEpics.nodes.reduce((map, list) => {
-    // TODO update when list.epics.count is available: https://gitlab.com/gitlab-org/gitlab/-/issues/301017
-    listItemsCount = list.epics.edges.length;
+    listItemsCount = list.epicsCount;
     let sortedEpics = list.epics.edges.map((epicNode) => ({
       ...epicNode.node,
     }));

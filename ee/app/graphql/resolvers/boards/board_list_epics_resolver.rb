@@ -7,8 +7,13 @@ module Resolvers
 
       alias_method :list, :object
 
-      def resolve(**args)
-        filter_params = { board_id: list.epic_board.id, id: list.id }
+      argument :filters, Types::Boards::BoardEpicInputType,
+         required: false,
+         description: 'Filters applied when selecting epics in the board list.'
+
+      def resolve(filters: {}, **args)
+        filter_params = { board_id: list.epic_board.id, id: list.id }.merge(filters)
+
         service = ::Boards::Epics::ListService.new(list.epic_board.group, context[:current_user], filter_params)
 
         offset_pagination(service.execute)

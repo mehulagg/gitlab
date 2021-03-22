@@ -32,11 +32,20 @@ export default {
     defaultRuleName() {
       return this.rule?.defaultRuleName;
     },
+    primaryActionProps() {
+      return {
+        text: this.title,
+        attributes: [{ variant: 'confirm' }],
+      };
+    },
   },
   methods: {
     submit() {
       this.$refs.form.submit();
     },
+  },
+  cancelActionProps: {
+    text: __('Cancel'),
   },
 };
 </script>
@@ -46,9 +55,8 @@ export default {
     modal-module="createModal"
     :modal-id="modalId"
     :title="title"
-    :ok-title="title"
-    ok-variant="success"
-    :cancel-title="__('Cancel')"
+    :action-primary="primaryActionProps"
+    :action-cancel="$options.cancelActionProps"
     size="sm"
     @ok.prevent="submit"
   >

@@ -4,9 +4,9 @@ require 'spec_helper'
 
 RSpec.describe VulnerabilitiesHelper do
   let_it_be(:user) { create(:user) }
-  let(:project) { create(:project, :repository, :public) }
-  let(:pipeline) { create(:ci_pipeline, :success, project: project) }
-  let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
+  let_it_be(:project) { create(:project, :repository, :public) }
+  let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+  let_it_be(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
   let(:vulnerability) { create(:vulnerability, title: "My vulnerability", project: project, findings: [finding]) }
 
   before do
@@ -39,10 +39,11 @@ RSpec.describe VulnerabilitiesHelper do
                     :project,
                     :remediations,
                     :solution,
-                    :uuid)
+                    :uuid,
+                    :details)
     end
 
-    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid] }
+    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid details dismissal_feedback] }
 
     before do
       vulnerability_serializer_stub = instance_double("VulnerabilitySerializer")
@@ -268,7 +269,9 @@ RSpec.describe VulnerabilitiesHelper do
         evidence_source: anything,
         assets: kind_of(Array),
         supporting_messages: kind_of(Array),
-        uuid: kind_of(String)
+        uuid: kind_of(String),
+        details: kind_of(Hash),
+        dismissal_feedback: anything
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))
@@ -283,6 +286,47 @@ RSpec.describe VulnerabilitiesHelper do
       it 'does not have a blob_path if there is no file' do
         expect(subject[:location]).not_to have_key('blob_path')
       end
+    end
+
+    context 'with existing dismissal feedback' do
+      let_it_be(:feedback) { create(:vulnerability_feedback, :comment, :dismissal, project: project, pipeline: pipeline, project_fingerprint: finding.project_fingerprint) }
+
+      it 'returns dismissal feedback information', :aggregate_failures do
+        dismissal_feedback = subject[:dismissal_feedback]
+        expect(dismissal_feedback[:dismissal_reason]).to eq(feedback.dismissal_reason)
+        expect(dismissal_feedback[:dismissal_descriptions]).to eq(Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] })
+        expect(dismissal_feedback[:comment_details][:comment]).to eq(feedback.comment)
+      end
+    end
+  end
+
+  describe '#vulnerability_scan_data?' do
+    subject { helper.vulnerability_scan_data?(vulnerability) }
+
+    context 'scanner present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'scan present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(false)
+        allow(vulnerability).to receive(:scan).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'neither scan nor scanner being present' do
+      before do
+        allow(vulnerability).to receive(:scanner).and_return(false)
+        allow(vulnerability).to receive(:scan).and_return(false)
+      end
+
+      it { is_expected.to be_falsey }
     end
   end
 end

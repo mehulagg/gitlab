@@ -9,6 +9,7 @@ RSpec.describe DastSiteProfiles::UpdateService do
 
   let(:new_profile_name) { SecureRandom.hex }
   let(:new_target_url) { generate(:url) }
+  let(:new_excluded_urls) { ["#{new_target_url}/signout"] }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -18,8 +19,9 @@ RSpec.describe DastSiteProfiles::UpdateService do
     subject do
       described_class.new(project, user).execute(
         id: dast_profile.id,
-        profile_name: new_profile_name,
-        target_url: new_target_url
+        name: new_profile_name,
+        target_url: new_target_url,
+        excluded_urls: new_excluded_urls
       )
     end
 
@@ -50,10 +52,11 @@ RSpec.describe DastSiteProfiles::UpdateService do
       it 'updates the dast_site_profile' do
         updated_dast_site_profile = payload.reload
 
-        aggregate_failures do
-          expect(updated_dast_site_profile.name).to eq(new_profile_name)
-          expect(updated_dast_site_profile.dast_site.url).to eq(new_target_url)
-        end
+        expect(updated_dast_site_profile).to have_attributes(
+          name: new_profile_name,
+          excluded_urls: new_excluded_urls,
+          dast_site: have_attributes(url: new_target_url)
+        )
       end
 
       it 'returns a dast_site_profile payload' do
@@ -69,6 +72,27 @@ RSpec.describe DastSiteProfiles::UpdateService do
 
         it 'populates errors' do
           expect(errors).to include('Url is blocked: Requests to localhost are not allowed')
+        end
+      end
+
+      context 'when the target url is nil' do
+        let(:new_target_url) { nil }
+        let(:new_excluded_urls) { [generate(:url)] }
+
+        it 'returns a success status' do
+          expect(status).to eq(:success)
+        end
+
+        it 'does not attempt to change the associated dast_site' do
+          finder = double(DastSiteProfilesFinder)
+          profile = double(DastSiteProfile, referenced_in_security_policies: [])
+
+          allow(DastSiteProfilesFinder).to receive(:new).and_return(finder)
+          allow(finder).to receive_message_chain(:execute, :first!).and_return(profile)
+
+          expect(profile).to receive(:update!).with(hash_excluding(dast_profile.dast_site))
+
+          subject
         end
       end
 

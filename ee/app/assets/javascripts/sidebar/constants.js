@@ -1,4 +1,8 @@
+import { IssuableType } from '~/issue_show/constants';
 import { s__, __ } from '~/locale';
+import groupIterationsQuery from './queries/group_iterations.query.graphql';
+import projectIssueIterationMutation from './queries/project_issue_iteration.mutation.graphql';
+import projectIssueIterationQuery from './queries/project_issue_iteration.query.graphql';
 
 export const healthStatus = {
   ON_TRACK: 'onTrack',
@@ -44,4 +48,31 @@ export const I18N_DROPDOWN = {
   noStatusText: s__('Sidebar|No status'),
   noneText: s__('Sidebar|None'),
   selectPlaceholderText: s__('Select health status'),
+};
+
+export const CVE_ID_REQUEST_SIDEBAR_I18N = {
+  action: s__('CVE|Request CVE ID'),
+  description: s__('CVE|CVE ID Request'),
+  createRequest: s__('CVE|Create CVE ID Request'),
+  whyRequest: s__('CVE|Why Request a CVE ID?'),
+  whyText1: s__(
+    'CVE|Common Vulnerability Enumeration (CVE) identifiers are used to track distinct vulnerabilities in specific versions of code.',
+  ),
+  whyText2: s__(
+    'CVE|As a maintainer, requesting a CVE for a vulnerability in your project will help your users stay secure and informed.',
+  ),
+  learnMore: __('Learn more'),
+};
+
+export const issuableIterationQueries = {
+  [IssuableType.Issue]: {
+    query: projectIssueIterationQuery,
+    mutation: projectIssueIterationMutation,
+  },
+};
+
+export const iterationsQueries = {
+  [IssuableType.Issue]: {
+    query: groupIterationsQuery,
+  },
 };

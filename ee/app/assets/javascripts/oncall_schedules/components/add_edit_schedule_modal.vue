@@ -135,7 +135,10 @@ export default {
         });
     },
     editSchedule() {
-      const { projectPath } = this;
+      const {
+        projectPath,
+        form: { timezone },
+      } = this;
       this.loading = true;
 
       this.$apollo
@@ -167,6 +170,9 @@ export default {
         })
         .finally(() => {
           this.loading = false;
+          if (timezone !== this.schedule.timezone) {
+            window.location.reload();
+          }
         });
     },
     hideErrorAlert() {

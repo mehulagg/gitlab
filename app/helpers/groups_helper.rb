@@ -22,6 +22,9 @@ module GroupsHelper
       ldap_group_links#index
       hooks#index
       pipeline_quota#index
+      applications#index
+      applications#show
+      applications#edit
       packages_and_registries#index
     ]
   end
@@ -63,7 +66,7 @@ module GroupsHelper
   end
 
   def group_open_issues_count(group)
-    if Feature.enabled?(:cached_sidebar_open_issues_count, group)
+    if Feature.enabled?(:cached_sidebar_open_issues_count, group, default_enabled: :yaml)
       cached_open_group_issues_count(group)
     else
       number_with_delimiter(group_issues_count(state: 'opened'))
@@ -97,6 +100,12 @@ module GroupsHelper
       .new(current_user, group_id: @group.id, state: state, non_archived: true, include_subgroups: true)
       .execute
       .count
+  end
+
+  def group_dependency_proxy_url(group)
+    # The namespace path can include uppercase letters, which
+    # Docker doesn't allow. The proxy expects it to be downcased.
+    "#{group_url(group).downcase}#{DependencyProxy::URL_SUFFIX}"
   end
 
   def group_icon_url(group, options = {})

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module VulnerabilitiesHelper
-  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid].freeze
+  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid details dismissal_feedback].freeze
 
   def vulnerability_details_json(vulnerability, pipeline)
     vulnerability_details(vulnerability, pipeline).to_json
@@ -66,5 +66,9 @@ module VulnerabilitiesHelper
     data = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding, only: FINDING_FIELDS)
     data[:location].merge!('blob_path' => vulnerability.blob_path).compact!
     data
+  end
+
+  def vulnerability_scan_data?(vulnerability)
+    vulnerability.scanner.present? || vulnerability.scan.present?
   end
 end

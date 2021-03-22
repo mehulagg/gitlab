@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::ApplicationContext do
   describe '#to_lazy_hash' do
     let(:user) { build(:user) }
-    let(:project) { build(:project) }
+    let(:project) { create(:project) }
     let(:namespace) { create(:group) }
     let(:subgroup) { create(:group, parent: namespace) }
 
@@ -43,10 +43,12 @@ RSpec.describe Gitlab::ApplicationContext do
     using RSpec::Parameterized::TableSyntax
 
     where(:provided_options, :expected_context_keys) do
-      [:user, :namespace, :project] | [:user, :project, :root_namespace, :subscription_plan]
-      [:user, :project]             | [:user, :project, :root_namespace, :subscription_plan]
-      [:user, :namespace]           | [:user, :root_namespace, :subscription_plan]
-      [:user]                       | [:user]
+      [:user, :namespace, :project] | [:user, :project, :root_namespace, :client_id, :subscription_plan]
+      [:user, :project]             | [:user, :project, :root_namespace, :client_id, :subscription_plan]
+      [:user, :namespace]           | [:user, :root_namespace, :client_id, :subscription_plan]
+      [:user]                       | [:user, :client_id]
+      [:remote_ip]                  | [:remote_ip, :client_id]
+      [:runner]                     | [:project, :root_namespace, :client_id, :subscription_plan]
       [:caller_id]                  | [:caller_id]
       []                            | []
     end

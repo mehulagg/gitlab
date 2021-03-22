@@ -18,10 +18,12 @@ export default {
       default: 'h3',
     },
   },
-  data: () => ({
-    collapseId: uniqueId('expandable-section-'),
-    visible: false,
-  }),
+  data() {
+    return {
+      collapseId: uniqueId('expandable-section-'),
+      visible: false,
+    };
+  },
   computed: {
     toggleText() {
       return this.visible ? __('Collapse') : __('Expand');

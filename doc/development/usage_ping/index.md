@@ -25,7 +25,7 @@ More links:
 ## What is Usage Ping?
 
 - GitLab sends a weekly payload containing usage data to GitLab Inc. Usage Ping provides high-level data to help our product, support, and sales teams. It does not send any project names, usernames, or any other specific data. The information from the usage ping is not anonymous, it is linked to the hostname of the instance. Sending usage ping is optional, and any instance can disable analytics.
-- The usage data is primarily composed of row counts for different tables in the instance’s database. By comparing these counts month over month (or week over week), we can get a rough sense for how an instance is using the different features in the product. In addition to counts, other facts
+- The usage data is primarily composed of row counts for different tables in the instance's database. By comparing these counts month over month (or week over week), we can get a rough sense for how an instance is using the different features in the product. In addition to counts, other facts
     that help us classify and understand GitLab installations are collected.
 - Usage ping is important to GitLab as we use it to calculate our Stage Monthly Active Users (SMAU) which helps us measure the success of our stages and features.
 - While usage ping is enabled, GitLab gathers data from the other instances and can show usage statistics of your instance to your users.
@@ -33,8 +33,8 @@ More links:
 ### Why should we enable Usage Ping?
 
 - The main purpose of Usage Ping is to build a better GitLab. Data about how GitLab is used is collected to better understand feature/stage adoption and usage, which helps us understand how GitLab is adding value and helps our team better understand the reasons why people use GitLab and with this knowledge we're able to make better product decisions.
-- As a benefit of having the usage ping active, GitLab lets you analyze the users’ activities over time of your GitLab installation.
-- As a benefit of having the usage ping active, GitLab provides you with The DevOps Report,which gives you an overview of your entire instance’s adoption of Concurrent DevOps from planning to monitoring.
+- As a benefit of having the usage ping active, GitLab lets you analyze the users' activities over time of your GitLab installation.
+- As a benefit of having the usage ping active, GitLab provides you with The DevOps Report,which gives you an overview of your entire instance's adoption of Concurrent DevOps from planning to monitoring.
 - You get better, more proactive support. (assuming that our TAMs and support organization used the data to deliver more value)
 - You get insight and advice into how to get the most value out of your investment in GitLab. Wouldn't you want to know that a number of features or values are not being adopted in your organization?
 - You get a report that illustrates how you compare against other similar organizations (anonymized), with specific advice and recommendations on how to improve your DevOps processes.
@@ -502,13 +502,14 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
 Use one of the following methods to track events:
 
-1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, if: nil)`.
+1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, if: nil, &block)`.
 
    Arguments:
 
    - `controller_actions`: controller actions we want to track.
    - `name`: event name.
    - `if`: optional custom conditions, using the same format as with Rails callbacks.
+   - `&block`: optional block that computes and returns the `custom_id` that we want to track. This will override the `visitor_id`.
 
    Example usage:
 
@@ -827,7 +828,7 @@ pry(main)> Gitlab::UsageData.count(User.active)
 Paste the SQL query into `#database-lab` to see how the query performs at scale.
 
 - `#database-lab` is a Slack channel which uses a production-sized environment to test your queries.
-- GitLab.com’s production database has a 15 second timeout.
+- GitLab.com's production database has a 15 second timeout.
 - Any single query must stay below [1 second execution time](../query_performance.md#timing-guidelines-for-queries) with cold caches.
 - Add a specialized index on columns involved to reduce the execution time.
 
@@ -928,12 +929,18 @@ appear to be associated to any of the services running, because they all appear 
 WARNING:
 This feature is intended solely for internal GitLab use.
 
-To add data for aggregated metrics into Usage Ping payload you should add corresponding definition in [`aggregated_metrics`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/). Each aggregate definition includes following parts:
+To add data for aggregated metrics into Usage Ping payload you should add corresponding definition at [`lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/) for metrics available at Community Edition and at [`ee/lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/usage_data_counters/aggregated_metrics/) for Enterprise Edition ones.
+
+Each aggregate definition includes following parts:
 
 - `name`: Unique name under which the aggregate metric is added to the Usage Ping payload.
 - `operator`: Operator that defines how the aggregated metric data is counted. Available operators are:
   - `OR`: Removes duplicates and counts all entries that triggered any of listed events.
   - `AND`: Removes duplicates and counts all elements that were observed triggering all of following events.
+- `time_frame`: One or more valid time frames. Use these to limit the data included in aggregated metric to events within a specific date-range. Valid time frames are:
+  - `7d`: Last seven days of data.
+  - `28d`: Last twenty eight days of data.
+  - `all`: All historical data, only available for `database` sourced aggregated metrics.
 - `source`: Data source used to collect all events data included in aggregated metric. Valid data sources are:
   - [`database`](#database-sourced-aggregated-metrics)
   - [`redis`](#redis-sourced-aggregated-metrics)
@@ -941,7 +948,7 @@ To add data for aggregated metrics into Usage Ping payload you should add corres
   relay on the same data source. Additional data source requirements are described in the
   [Database sourced aggregated metrics](#database-sourced-aggregated-metrics) and
   [Redis sourced aggregated metrics](#redis-sourced-aggregated-metrics) sections.
-- `feature_flag`: Name of [development feature flag](../feature_flags/development.md#development-type)
+- `feature_flag`: Name of [development feature flag](../feature_flags/index.md#development-type)
   that is checked before metrics aggregation is performed. Corresponding feature flag
   should have `default_enabled` attribute set to `false`. The `feature_flag` attribute
   is optional and can be omitted. When `feature_flag` is missing, no feature flag is checked.
@@ -949,18 +956,29 @@ To add data for aggregated metrics into Usage Ping payload you should add corres
 Example aggregated metric entries:
 
 ```yaml
-- name: product_analytics_test_metrics_union_redis_sourced
+- name: example_metrics_union
   operator: OR
-  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+  events: 
+    - 'i_search_total'
+    - 'i_search_advanced'
+    - 'i_search_paid'
   source: redis
-- name: product_analytics_test_metrics_intersection_with_feautre_flag_database_sourced
+  time_frame:
+    - 7d
+    - 28d
+- name: example_metrics_intersection
   operator: AND
   source: database
-  events: ['dependency_scanning_pipeline_all_time', 'container_scanning_pipeline_all_time']
+  time_frame:
+    - 28d
+    - all
+  events:
+    - 'dependency_scanning_pipeline_all_time'
+    - 'container_scanning_pipeline_all_time'
   feature_flag: example_aggregated_metric
 ```
 
-Aggregated metrics are added under `aggregated_metrics` key in both `counts_weekly` and `counts_monthly` top level keys in Usage Ping payload.
+Aggregated metrics collected in `7d` and `28d` time frames are added into Usage Ping payload under the `aggregated_metrics` sub-key in the `counts_weekly` and `counts_monthly` top level keys.
 
 ```ruby
 {
@@ -973,10 +991,31 @@ Aggregated metrics are added under `aggregated_metrics` key in both `counts_week
     :project_snippets => 407,
     :promoted_issues => 719,
     :aggregated_metrics => {
-      :product_analytics_test_metrics_union => 7,
-      :product_analytics_test_metrics_intersection_with_feautre_flag => 2
+      :example_metrics_union => 7,
+      :example_metrics_intersection => 2
     },
     :snippets => 2513
+  }
+}
+```
+
+Aggregated metrics for `all` time frame are present in the `count` top level key, with the `aggregate_` prefix added to their name.
+
+For example:
+
+`example_metrics_intersection`
+
+Becomes:
+
+`counts.aggregate_example_metrics_intersection`
+
+```ruby
+{
+  :counts => {
+    :deployments => 11003,
+    :successful_deployments => 178,
+    :failed_deployments => 1275,
+    :aggregate_example_metrics_intersection => 12
   }
 }
 ```
@@ -992,6 +1031,7 @@ you must fulfill the following requirements:
    [`known_events/*.yml`](#known-events-are-added-automatically-in-usage-data-payload) files.
 1. All events listed at `events` attribute must have the same `redis_slot` attribute.
 1. All events listed at `events` attribute must have the same `aggregation` attribute.
+1. `time_frame` does not include `all` value, which is unavailable for Redis sourced aggregated metrics.
 
 ### Database sourced aggregated metrics
 
@@ -1051,17 +1091,26 @@ end
 #### Add new aggregated metric definition
 
 After all metrics are persisted, you can add an aggregated metric definition at
-[`aggregated_metrics/`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/). When adding definitions for metrics names listed in the
-`events:` attribute, use the same names you passed in the `metric_name` argument
-while persisting metrics in previous step.
+[`aggregated_metrics/`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/).
+
+To declare the aggregate of metrics collected with [Estimated Batch Counters](#estimated-batch-counters),
+you must fulfill the following requirements:
+
+- Metrics names listed in the `events:` attribute, have to use the same names you passed in the `metric_name` argument while persisting metrics in previous step.
+- Every metric listed in the `events:` attribute, has to be persisted for **every** selected `time_frame:` value.
 
 Example definition:
 
 ```yaml
-- name: product_analytics_test_metrics_intersection_database_sourced
+- name: example_metrics_intersection_database_sourced
   operator: AND
   source: database
-  events: ['dependency_scanning_pipeline', 'container_scanning_pipeline']
+  events:
+    - 'dependency_scanning_pipeline'
+    - 'container_scanning_pipeline'
+  time_frame:
+    - 28d
+    - all
 ```
 
 ## Example Usage Ping payload

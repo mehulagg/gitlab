@@ -44,12 +44,12 @@ module API
               forbidden!
             end
 
-          runner = ::Ci::Runner.create(attributes)
+          @runner = ::Ci::Runner.create(attributes)
 
-          if runner.persisted?
-            present runner, with: Entities::RunnerRegistrationDetails
+          if @runner.persisted?
+            present @runner, with: Entities::RunnerRegistrationDetails
           else
-            render_validation_error!(runner)
+            render_validation_error!(@runner)
           end
         end
 
@@ -62,9 +62,7 @@ module API
         delete '/' do
           authenticate_runner!
 
-          runner = ::Ci::Runner.find_by_token(params[:token])
-
-          destroy_conditionally!(runner)
+          destroy_conditionally!(current_runner)
         end
 
         desc 'Validates authentication credentials' do
@@ -247,7 +245,7 @@ module API
 
           job = authenticate_job!
 
-          result = ::Ci::CreateJobArtifactsService.new(job).authorize(artifact_type: params[:artifact_type], filesize: params[:filesize])
+          result = ::Ci::JobArtifacts::CreateService.new(job).authorize(artifact_type: params[:artifact_type], filesize: params[:filesize])
 
           if result[:status] == :success
             content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
@@ -286,7 +284,7 @@ module API
           artifacts = params[:file]
           metadata = params[:metadata]
 
-          result = ::Ci::CreateJobArtifactsService.new(job).execute(artifacts, params, metadata_file: metadata)
+          result = ::Ci::JobArtifacts::CreateService.new(job).execute(artifacts, params, metadata_file: metadata)
 
           if result[:status] == :success
             status :created

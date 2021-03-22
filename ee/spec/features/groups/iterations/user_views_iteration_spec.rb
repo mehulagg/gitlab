@@ -81,7 +81,7 @@ RSpec.describe 'User views iteration' do
       end
     end
 
-    context 'when grouping by label' do
+    context 'when grouping by label', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/323731' do
       before do
         sign_in(user)
 

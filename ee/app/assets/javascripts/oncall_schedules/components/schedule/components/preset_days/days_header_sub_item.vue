@@ -45,7 +45,7 @@ export default {
       ref="dailyHourCell"
       class="sublabel-value"
       data-testid="sublabel-value"
-      >{{ hour }}</span
+      >{{ hour - 1 }}</span
     >
     <span
       v-if="isToday"

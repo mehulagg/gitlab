@@ -1,6 +1,6 @@
 import * as types from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/mutation_types';
 import mutationsFactory from 'ee/threat_monitoring/store/modules/threat_monitoring_statistics/mutations';
-import { mockWafStatisticsResponse } from '../../../mock_data';
+import { mockWafStatisticsResponse } from '../../../mocks/mock_data';
 
 describe('threatMonitoringStatistics mutations', () => {
   let state;

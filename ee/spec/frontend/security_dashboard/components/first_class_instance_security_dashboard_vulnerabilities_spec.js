@@ -142,6 +142,14 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
     it('should render the observer component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
     });
+
+    describe('when the filter is changed', () => {
+      it('it should not render the observer component', async () => {
+        await wrapper.setProps({ filters: {} });
+
+        expect(findIntersectionObserver().exists()).toBe(false);
+      });
+    });
   });
 
   describe('when the query is loading and there is another page', () => {
@@ -171,8 +179,8 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
       wrapper = createWrapper({ loading: true });
     });
 
-    it('should show the initial loading state when the filter is changed', () => {
-      wrapper.setProps({ filter: {} });
+    it('should show the initial loading state when the filter is changed', async () => {
+      await wrapper.setProps({ filter: {} });
 
       expectLoadingState({ initial: true });
     });

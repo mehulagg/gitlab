@@ -213,11 +213,21 @@ module Security
     end
 
     def create_vulnerability(vulnerability_finding, pipeline)
-      if vulnerability_finding.vulnerability_id
-        Vulnerabilities::UpdateService.new(vulnerability_finding.project, pipeline.user, finding: vulnerability_finding, resolved_on_default_branch: false).execute
-      else
-        Vulnerabilities::CreateService.new(vulnerability_finding.project, pipeline.user, finding_id: vulnerability_finding.id).execute
-      end
+      vulnerability = if vulnerability_finding.vulnerability_id
+                        Vulnerabilities::UpdateService.new(vulnerability_finding.project, pipeline.user, finding: vulnerability_finding, resolved_on_default_branch: false).execute
+                      else
+                        Vulnerabilities::CreateService.new(vulnerability_finding.project, pipeline.user, finding_id: vulnerability_finding.id).execute
+                      end
+
+      create_vulnerability_issue_link(vulnerability)
+      vulnerability
+    end
+
+    def create_vulnerability_issue_link(vulnerability)
+      vulnerability_issue_feedback = vulnerability.finding.feedback(feedback_type: 'issue')
+      return unless vulnerability_issue_feedback
+
+      vulnerability.issue_links.create!(issue_id: vulnerability_issue_feedback.issue_id)
     end
 
     def scanners_objects

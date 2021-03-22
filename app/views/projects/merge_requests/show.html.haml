@@ -13,6 +13,8 @@
 - add_page_specific_style 'page_bundles/reports'
 - add_page_specific_style 'page_bundles/ci_status'
 
+- add_page_startup_api_call @endpoint_metadata_url
+
 .merge-request{ data: { mr_action: mr_action, url: merge_request_path(@merge_request, format: :json), project_path: project_path(@merge_request.project), lock_version: @merge_request.lock_version } }
   = render "projects/merge_requests/mr_title"
 
@@ -35,7 +37,7 @@
               = tab_link_for @merge_request, :pipelines do
                 = _("Pipelines")
                 %span.badge.badge-pill.js-pipelines-mr-count= number_of_pipelines
-          = render "projects/merge_requests/tabs/tab", name: "diffs", class: "diffs-tab qa-diffs-tab", id: "diffs-tab" do
+          = render "projects/merge_requests/tabs/tab", name: "diffs", class: "diffs-tab", id: "diffs-tab", qa_selector: "diffs_tab" do
             = tab_link_for @merge_request, :diffs do
               = _("Changes")
               %span.badge.badge-pill= @merge_request.diff_size
@@ -63,6 +65,7 @@
                 - add_page_startup_api_call widget_project_json_merge_request_path(@project, @merge_request, format: :json)
                 - add_page_startup_api_call cached_widget_project_json_merge_request_path(@project, @merge_request, format: :json)
               #js-vue-mr-discussions{ data: { notes_data: notes_data(@merge_request, Feature.enabled?(:paginated_notes, @project)).to_json,
+                endpoint_metadata: @endpoint_metadata_url,
                 noteable_data: serialize_issuable(@merge_request, serializer: 'noteable'),
                 noteable_type: 'MergeRequest',
                 target_type: 'merge_request',
@@ -75,8 +78,6 @@
       = render "projects/merge_requests/tabs/pane", name: "pipelines", id: "pipelines", class: "pipelines" do
         - if number_of_pipelines.nonzero?
           = render 'projects/commit/pipelines_list', disable_initialization: true, endpoint: pipelines_project_merge_request_path(@project, @merge_request)
-      - if mr_action === "diffs"
-        - add_page_startup_api_call @endpoint_metadata_url
       - params = request.query_parameters
       - if Feature.enabled?(:default_merge_ref_for_diffs, @project, default_enabled: :yaml)
         - params = params.merge(diff_head: true)
@@ -108,3 +109,6 @@
   = render "projects/commit/change", type: 'cherry-pick', commit: @merge_request.merge_commit
 
 #js-review-bar
+
+= render 'shared/issuable/invite_members_trigger', project: @project
+

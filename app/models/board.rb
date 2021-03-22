@@ -7,6 +7,7 @@ class Board < ApplicationRecord
   has_many :lists, -> { ordered }, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_many :destroyable_lists, -> { destroyable.ordered }, class_name: "List"
 
+  validates :name, presence: true
   validates :project, presence: true, if: :project_needed?
   validates :group, presence: true, unless: :project
 
@@ -31,14 +32,6 @@ class Board < ApplicationRecord
 
   def project_board?
     project_id.present?
-  end
-
-  def backlog_list
-    lists.merge(List.backlog).take
-  end
-
-  def closed_list
-    lists.merge(List.closed).take
   end
 
   def scoped?

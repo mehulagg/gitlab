@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Health
+group: Monitor
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -32,7 +32,7 @@ metrics exposed by the [GitLab exporter](../prometheus/gitlab_metrics.md#metrics
 
 ## Creating the self monitoring project
 
-1. Navigate to **Admin Area > Settings > Metrics and profiling**, and expand the **Self monitoring** section.
+1. Go to **Admin Area > Settings > Metrics and profiling** and expand the **Self monitoring** section.
 1. Toggle the **Create Project** button on.
 1. Once your GitLab instance creates the project, GitLab displays a link to the project in the text above the **Create Project** toggle. You can also find it under **Projects > Your projects**.
 
@@ -42,7 +42,7 @@ WARNING:
 Deleting the self monitoring project removes any changes made to the project. If
 you create the project again, it's created in its default state.
 
-1. Navigate to **Admin Area > Settings > Metrics and profiling**, and expand the **Self monitoring** section.
+1. Go to **Admin Area > Settings > Metrics and profiling** and expand the **Self monitoring** section.
 1. Toggle the **Create Project** button off.
 1. In the confirmation dialog that opens, click **Delete project**.
    It can take a few seconds for it to be deleted.
@@ -90,7 +90,7 @@ You can add custom metrics in the self monitoring project by:
 
 ## Troubleshooting
 
-### Getting error message in logs: `Could not create instance administrators group. Errors: ["You don’t have permission to create groups."]`
+### Getting error message in logs: `Could not create instance administrators group. Errors: ["You don't have permission to create groups."]`
 
 There is [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/208676) which causes
 project creation to fail with the following error (which appears in the log file)
@@ -98,7 +98,7 @@ when the first administrator user is an
 [external user](../../../user/permissions.md#external-users):
 
 ```plaintext
-Could not create instance administrators group. Errors: ["You don’t have permission to create groups."]
+Could not create instance administrators group. Errors: ["You don't have permission to create groups."]
 ```
 
 Run the following in a Rails console to check if the first administrator user is an external user:

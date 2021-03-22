@@ -13,7 +13,6 @@ class TrialsController < ApplicationController
 
   def new
     record_experiment_user(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
-    record_experiment_user(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
   end
 
   def select
@@ -40,10 +39,8 @@ class TrialsController < ApplicationController
 
     if @result&.dig(:success)
       record_experiment_user(:remove_known_trial_form_fields, namespace_id: @namespace.id)
-      record_experiment_user(:trial_registration_with_social_signin, namespace_id: @namespace.id)
       record_experiment_user(:trial_onboarding_issues, namespace_id: @namespace.id)
       record_experiment_conversion_event(:remove_known_trial_form_fields)
-      record_experiment_conversion_event(:trial_registration_with_social_signin)
       record_experiment_conversion_event(:trial_onboarding_issues)
 
       redirect_to group_url(@namespace, { trial: true })
@@ -125,15 +122,6 @@ class TrialsController < ApplicationController
       first_name_present: current_user.first_name.present?,
       last_name_present: current_user.last_name.present?,
       company_name_present: current_user.organization.present?
-    }
-  end
-
-  def trial_registration_with_social_signin_context
-    identities = current_user.identities.map(&:provider)
-
-    {
-      google_signon: identities.include?('google_oauth2'),
-      github_signon: identities.include?('github')
     }
   end
 end

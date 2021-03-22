@@ -38,6 +38,13 @@ describe('TrialStatusWidget component', () => {
     it('renders without an id', () => {
       expect(getGlLink().attributes('id')).toBe(undefined);
     });
+
+    it('renders with the correct tracking data attributes', () => {
+      const attrs = getGlLink().attributes();
+      expect(attrs['data-track-event']).toBe('click_link');
+      expect(attrs['data-track-label']).toBe('trial_status_widget');
+      expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
+    });
   });
 
   describe('with the optional containerId prop', () => {

@@ -1,11 +1,13 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { IssuableType } from '~/issue_show/constants';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { store } from '~/notes/stores';
 import { apolloProvider } from '~/sidebar/graphql';
 import * as CEMountSidebar from '~/sidebar/mount_sidebar';
-import IterationSelect from './components/iteration_select.vue';
+import CveIdRequest from './components/cve_id_request/cve_id_request_sidebar.vue';
 import SidebarItemEpicsSelect from './components/sidebar_item_epics_select.vue';
+import SidebarIterationWidget from './components/sidebar_iteration_widget.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
 import SidebarWeight from './components/weight/sidebar_weight.vue';
 import SidebarStore from './stores/sidebar_store';
@@ -53,6 +55,26 @@ const mountStatusComponent = (mediator) => {
   });
 };
 
+function mountCveIdRequestComponent() {
+  const el = document.getElementById('js-sidebar-cve-id-request-entry-point');
+
+  if (!el) {
+    return false;
+  }
+
+  const { iid, fullPath } = CEMountSidebar.getSidebarOptions();
+
+  return new Vue({
+    store,
+    el,
+    provide: {
+      iid: String(iid),
+      fullPath,
+    },
+    render: (createElement) => createElement(CveIdRequest),
+  });
+}
+
 const mountEpicsSelect = () => {
   const el = document.querySelector('#js-vue-sidebar-item-epics-select');
 
@@ -85,21 +107,26 @@ function mountIterationSelect() {
   if (!el) {
     return false;
   }
+
   const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider,
     components: {
-      IterationSelect,
+      SidebarIterationWidget,
+    },
+    provide: {
+      canUpdate: parseBoolean(canEdit),
+      isClassicSidebar: true,
     },
     render: (createElement) =>
-      createElement('iteration-select', {
+      createElement('sidebar-iteration-widget', {
         props: {
-          groupPath,
-          canEdit: parseBoolean(canEdit),
-          projectPath,
-          issueIid,
+          iterationsWorkspacePath: groupPath,
+          workspacePath: projectPath,
+          iid: issueIid,
+          issuableType: IssuableType.Issue,
         },
       }),
   });
@@ -111,4 +138,8 @@ export default function mountSidebar(mediator) {
   mountStatusComponent(mediator);
   mountEpicsSelect();
   mountIterationSelect();
+
+  if (gon.features.cveIdRequestButton) {
+    mountCveIdRequestComponent();
+  }
 }

@@ -55,6 +55,11 @@ NOTE:
 A limit of 100 `<source>` nodes for Cobertura format XML files applies. If your Cobertura report exceeds
 100 nodes, there can be mismatches or no matches in the Merge Request diff view.
 
+### Artifact expiration
+
+By default, the [pipeline artifact](../../../ci/pipelines/pipeline_artifacts.md#storage) used
+to draw the visualization on the Merge Request expires **one week** after creation.
+
 ### Automatic class path correction
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217664) in GitLab 13.8.
@@ -146,7 +151,7 @@ coverage-jdk11:
   # The `visualize` stage does not exist by default.
   # Please define it first, or chose an existing stage like `deploy`.
   stage: visualize
-  image: haynes/jacoco2cobertura:1.0.4
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
   script:
     # convert report from jacoco to cobertura
     - 'python /opt/cover2cover.py target/site/jacoco/jacoco.xml src/main/java > target/site/cobertura.xml'
@@ -186,7 +191,7 @@ coverage-jdk11:
   # The `visualize` stage does not exist by default.
   # Please define it first, or chose an existing stage like `deploy`.
   stage: visualize
-  image: haynes/jacoco2cobertura:1.0.4
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
   script:
     # convert report from jacoco to cobertura
     - 'python /opt/cover2cover.py build/jacoco/jacoco.xml src/main/java > build/cobertura.xml'

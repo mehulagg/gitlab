@@ -21,7 +21,7 @@ RSpec.describe SurveyResponsesController do
       end
 
       it 'tracks a survey_response event' do
-        expect(controller).to receive(:track_self_describing_event).with(
+        expect(Gitlab::Tracking).to receive(:self_describing_event).with(
           SurveyResponsesController::SURVEY_RESPONSE_SCHEMA_URL,
           data: { survey_id: 1, response: 'bar' }
         )
@@ -32,7 +32,7 @@ RSpec.describe SurveyResponsesController do
 
     context 'not on GitLab.com' do
       it 'does not track a survey_response event' do
-        expect(controller).not_to receive(:track_self_describing_event)
+        expect(Gitlab::Tracking).not_to receive(:self_describing_event)
 
         subject
       end

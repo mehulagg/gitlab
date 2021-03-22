@@ -72,7 +72,7 @@ export default {
     },
     epicTimeAgoString() {
       return this.isOpen
-        ? sprintf(__(`Opened %{epicTimeagoDate}`), {
+        ? sprintf(__(`Created %{epicTimeagoDate}`), {
             epicTimeagoDate: this.timeFormatted(this.epic.createdAt),
           })
         : sprintf(__(`Closed %{epicTimeagoDate}`), {

@@ -67,19 +67,17 @@ export default {
 
 <template>
   <security-dashboard-layout>
+    <dashboard-not-configured v-if="shouldShowEmptyState" />
+
     <template #header>
-      <div>
-        <header class="gl-my-6 gl-display-flex gl-align-items-center">
+      <div v-if="shouldShowDashboard">
+        <header class="gl-my-6 gl-display-flex gl-align-items-center" data-testid="header">
           <h2 class="gl-flex-grow-1 gl-my-0">
             {{ s__('SecurityReports|Vulnerability Report') }}
           </h2>
-          <csv-export-button
-            v-if="shouldShowDashboard"
-            :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint"
-          />
+          <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
         </header>
         <vulnerabilities-count-list
-          v-if="shouldShowDashboard"
           :scope="$options.vulnerabilitiesSeverityCountScopes.instance"
           :filters="filters"
         />
@@ -93,6 +91,5 @@ export default {
       :projects="projects"
       :filters="filters"
     />
-    <dashboard-not-configured v-else-if="shouldShowEmptyState" />
   </security-dashboard-layout>
 </template>

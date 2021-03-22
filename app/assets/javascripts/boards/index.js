@@ -53,7 +53,6 @@ let issueBoardsApp;
 
 export default () => {
   const $boardApp = document.getElementById('board-app');
-
   // check for browser back and trigger a hard reload to circumvent browser caching.
   window.addEventListener('pageshow', (event) => {
     const isNavTypeBackForward =
@@ -97,6 +96,10 @@ export default () => {
         ? parseInt($boardApp.dataset.boardWeight, 10)
         : null,
       scopedLabelsAvailable: parseBoolean($boardApp.dataset.scopedLabels),
+      milestoneListsAvailable: parseBoolean($boardApp.dataset.milestoneListsAvailable),
+      assigneeListsAvailable: parseBoolean($boardApp.dataset.assigneeListsAvailable),
+      iterationListsAvailable: parseBoolean($boardApp.dataset.iterationListsAvailable),
+      issuableType: issuableTypes.issue,
     },
     store,
     apolloProvider,
@@ -164,8 +167,15 @@ export default () => {
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
-      this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
-      this.filterManager.setup();
+      if (!gon.features?.boardsFilteredSearch) {
+        this.filterManager = new FilteredSearchBoards(
+          boardsStore.filter,
+          true,
+          boardsStore.cantEdit,
+        );
+
+        this.filterManager.setup();
+      }
 
       this.performSearch();
 
@@ -323,7 +333,7 @@ export default () => {
       },
       computed: {
         disabled() {
-          if (!this.store) {
+          if (!this.store || !this.store.lists) {
             return true;
           }
           return !this.store.lists.filter((list) => !list.preset).length;
@@ -351,7 +361,7 @@ export default () => {
   toggleFocusMode(ModalStore, boardsStore);
   toggleLabels();
 
-  if (gon.features?.swimlanes) {
+  if (gon.licensed_features?.swimlanes) {
     toggleEpicsSwimlanes();
   }
 

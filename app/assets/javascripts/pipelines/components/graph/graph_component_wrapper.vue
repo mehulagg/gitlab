@@ -59,10 +59,34 @@ export default {
         };
       },
       update(data) {
+        /*
+          This check prevents the pipeline from being overwritten
+          when a poll times out and the data returned is empty.
+          This can be removed once the timeout behavior is updated.
+          See: https://gitlab.com/gitlab-org/gitlab/-/issues/323213.
+        */
+
+        if (!data?.project?.pipeline) {
+          return this.pipeline;
+        }
+
         return unwrapPipelineData(this.pipelineProjectPath, data);
       },
       error(err) {
-        this.reportFailure(LOAD_FAILURE, serializeLoadErrors(err));
+        this.reportFailure({ type: LOAD_FAILURE, skipSentry: true });
+        reportToSentry(
+          this.$options.name,
+          `type: ${LOAD_FAILURE}, info: ${serializeLoadErrors(err)}`,
+        );
+      },
+      result({ error }) {
+        /*
+          If there is a successful load after a failure, clear
+          the failure notification to avoid confusion.
+        */
+        if (!error && this.alertType === LOAD_FAILURE) {
+          this.hideAlert();
+        }
       },
     },
   },
@@ -109,15 +133,20 @@ export default {
   methods: {
     hideAlert() {
       this.showAlert = false;
+      this.alertType = null;
     },
     refreshPipelineGraph() {
       this.$apollo.queries.pipeline.refetch();
     },
-    reportFailure(type, err = '') {
+    /* eslint-disable @gitlab/require-i18n-strings */
+    reportFailure({ type, err = 'No error string passed.', skipSentry = false }) {
       this.showAlert = true;
       this.alertType = type;
-      reportToSentry(this.$options.name, `type: ${this.alertType}, info: ${err}`);
+      if (!skipSentry) {
+        reportToSentry(this.$options.name, `type: ${type}, info: ${err}`);
+      }
     },
+    /* eslint-enable @gitlab/require-i18n-strings */
   },
 };
 </script>

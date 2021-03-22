@@ -12,7 +12,9 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
         <span
-          class="gl-text-truncated"
+          aria-label="Rotation 242"
+          class="gl-text-truncate"
+          data-testid="rotation-name-gid://gitlab/IncidentManagement::OncallRotation/2"
         >
           Rotation 242
         </span>
@@ -23,7 +25,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         >
           <button
             aria-label="Edit rotation"
-            class="btn gl-display-none btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
             title="Edit rotation"
             type="button"
           >
@@ -88,11 +90,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
               <div
                 class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <img
-                  alt="avatar"
-                  class="gl-avatar gl-avatar-circle gl-avatar-s16"
-                  src="/url"
-                />
+                <!---->
                  
                 <!---->
               </div>
@@ -105,14 +103,18 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 class="gl-m-0"
                 data-testid="rotation-assignee-starts-at"
               >
-                Starts: January 12, 2021, 10:04am GMT+0000
+                
+      Starts: January 12, 2021, 10:04 (UTC: +0000)
+    
               </p>
                
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-ends-at"
               >
-                Ends: January 15, 2021, 10:04am GMT+0000
+                
+      Ends: January 15, 2021, 10:04 (UTC: +0000)
+    
               </p>
             </div>
           </div>
@@ -128,11 +130,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
               <div
                 class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <img
-                  alt="avatar"
-                  class="gl-avatar gl-avatar-circle gl-avatar-s16"
-                  src="/url"
-                />
+                <!---->
                  
                 <!---->
               </div>
@@ -145,14 +143,18 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 class="gl-m-0"
                 data-testid="rotation-assignee-starts-at"
               >
-                Starts: January 16, 2021, 10:04am GMT+0000
+                
+      Starts: January 16, 2021, 10:04 (UTC: +0000)
+    
               </p>
                
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-ends-at"
               >
-                Ends: January 18, 2021, 10:04am GMT+0000
+                
+      Ends: January 18, 2021, 10:04 (UTC: +0000)
+    
               </p>
             </div>
           </div>

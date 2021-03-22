@@ -4,6 +4,7 @@ import VueApollo from 'vue-apollo';
 import SelectionSummary from 'ee/security_dashboard/components/selection_summary.vue';
 import StatusDropdown from 'ee/security_dashboard/components/status_dropdown.vue';
 import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
+import eventHub from 'ee/security_dashboard/utils/event_hub';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import toast from '~/vue_shared/plugins/global_toast';
@@ -183,6 +184,14 @@ describe('Selection Summary component', () => {
       it(`calls the toaster - ${action}`, async () => {
         await submitForm();
         expect(toast).toHaveBeenLastCalledWith('3 vulnerabilities updated');
+      });
+
+      it(`emits an event for the event hub - ${action}`, async () => {
+        const spy = jest.fn();
+        eventHub.$on('vulnerabilities-updated', spy);
+
+        await submitForm();
+        expect(spy).toHaveBeenCalled();
       });
     });
   });

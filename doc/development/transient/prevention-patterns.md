@@ -10,7 +10,7 @@ This page will cover architectural patterns and tips for developers to follow to
 
 ## Common root causes
 
-We've noticed a few root causes that come up frequently when addressing transient bugs. 
+We've noticed a few root causes that come up frequently when addressing transient bugs.
 
 - Needs better state management in the backend or frontend.
 - Frontend code needs improvements.
@@ -55,12 +55,12 @@ Including when that expanded content is:
 ### Using assertions to detect transient bugs caused by unmet conditions
 
 Transient bugs happen in the context of code that executes under the assumption
-that the application’s state meets one or more conditions. We may write a feature
+that the application's state meets one or more conditions. We may write a feature
 that assumes a server-side API response always include a group of attributes or that
 an operation only executes when the application has successfully transitioned to a new
 state.
 
-Transient bugs are difficult to debug because there isn’t any mechanism that alerts
+Transient bugs are difficult to debug because there isn't any mechanism that alerts
 the user or the developer about unsatisfied conditions. These conditions are usually
 not expressed explicitly in the code. A useful debugging technique for such situations
 is placing assertions to make any assumption explicit. They can help detect the cause

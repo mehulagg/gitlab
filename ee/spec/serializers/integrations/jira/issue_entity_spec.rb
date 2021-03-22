@@ -12,7 +12,7 @@ RSpec.describe Integrations::Jira::IssueEntity do
     {
       'displayName' => 'reporter',
       'avatarUrls' => { '48x48' => 'http://reporter.avatar' },
-      'name' => double
+      'name' => 'reporter@reporter.com'
     }
   end
 
@@ -20,7 +20,7 @@ RSpec.describe Integrations::Jira::IssueEntity do
     {
       'displayName' => 'assignee',
       'avatarUrls' => { '48x48' => 'http://assignee.avatar' },
-      'name' => double
+      'name' => 'assignee@assignee.com'
     }
   end
 
@@ -77,11 +77,6 @@ RSpec.describe Integrations::Jira::IssueEntity do
   end
 
   context 'with Jira Server configuration' do
-    before do
-      reporter['name'] = 'reporter@reporter.com'
-      assignee['name'] = 'assignee@assignee.com'
-    end
-
     it 'returns the Jira Server profile URL' do
       expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
       expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee@assignee.com')
@@ -130,7 +125,7 @@ RSpec.describe Integrations::Jira::IssueEntity do
     end
   end
 
-  context 'feature flag "jira_issues_show_integration" is disabled' do
+  context 'when feature flag "jira_issues_show_integration" is disabled' do
     before do
       stub_feature_flags(jira_issues_show_integration: false)
     end

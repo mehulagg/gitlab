@@ -12,7 +12,7 @@ FactoryBot.define do
     author
     issue { nil }
     merge_request { nil }
-    pipeline { create(:ci_pipeline, project: project) }
+    pipeline { association(:ci_pipeline, project: project) }
     feedback_type { 'dismissal' }
     category { 'sast' }
     project_fingerprint { generate(:project_fingerprint) }
@@ -20,6 +20,7 @@ FactoryBot.define do
 
     trait :dismissal do
       feedback_type { 'dismissal' }
+      dismissal_reason { 'acceptable_risk' }
     end
 
     trait :comment do
@@ -30,12 +31,12 @@ FactoryBot.define do
 
     trait :issue do
       feedback_type { 'issue' }
-      issue { create(:issue, project: project) }
+      issue { association(:issue, project: project) }
     end
 
     trait :merge_request do
       feedback_type { 'merge_request' }
-      merge_request { create(:merge_request, source_project: project) }
+      merge_request { association(:merge_request, source_project: project) }
     end
 
     trait :sast do

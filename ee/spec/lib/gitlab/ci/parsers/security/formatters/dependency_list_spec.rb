@@ -68,14 +68,40 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
     end
 
     context 'with vulnerable dependency' do
-      let(:data) { formatter.format(dependency, package_manager, file_path, parsed_report['vulnerabilities'].first) }
       let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][1] }
+      let(:data) { formatter.format(dependency, package_manager, file_path, vulnerability_data) }
 
-      it 'merge vulnerabilities data' do
-        vulnerabilities = data[:vulnerabilities]
+      context 'with feature `standalone vulnerabilities` enabled' do
+        let_it_be(:standalone_vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
 
-        expect(vulnerabilities.first[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-        expect(vulnerabilities.first[:severity]).to eq('high')
+        let(:vulnerability_data) do
+          create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: standalone_vulnerability)
+        end
+
+        it 'merge vulnerabilities data' do
+          vulnerability = data[:vulnerabilities].first
+          path = "/security/vulnerabilities/#{standalone_vulnerability.id}"
+
+          expect(vulnerability[:id]).to eq(standalone_vulnerability.id)
+          expect(vulnerability[:url]).to end_with(path)
+          expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+          expect(vulnerability[:severity]).to eq('high')
+        end
+      end
+
+      context 'with disabled feature' do
+        let(:vulnerability_data) { parsed_report['vulnerabilities'].first }
+
+        before do
+          stub_feature_flags(standalone_vuln_dependency_list: false)
+        end
+
+        it 'merge vulnerabilities data' do
+          vulnerability = data[:vulnerabilities].first
+
+          expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+          expect(vulnerability[:severity]).to eq('high')
+        end
       end
     end
   end

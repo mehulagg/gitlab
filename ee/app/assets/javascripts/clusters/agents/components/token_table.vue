@@ -19,6 +19,7 @@ export default {
     dateCreated: s__('ClusterAgents|Date created'),
     description: s__('ClusterAgents|Description'),
     learnMore: s__('ClusterAgents|Learn how to create an agent access token'),
+    name: s__('ClusterAgents|Name'),
     noTokens: s__('ClusterAgents|This agent has no tokens'),
     unknownUser: s__('ClusterAgents|Unknown user'),
   },
@@ -31,6 +32,11 @@ export default {
   computed: {
     fields() {
       return [
+        {
+          key: 'name',
+          label: this.$options.i18n.name,
+          tdAttr: { 'data-testid': 'agent-token-name' },
+        },
         {
           key: 'createdAt',
           label: this.$options.i18n.dateCreated,

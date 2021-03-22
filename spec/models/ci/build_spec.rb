@@ -821,45 +821,6 @@ RSpec.describe Ci::Build do
       { cache: [{ key: "key", paths: ["public"], policy: "pull-push" }] }
     end
 
-    context 'with multiple_cache_per_job FF disabled' do
-      before do
-        stub_feature_flags(multiple_cache_per_job: false)
-      end
-      let(:options) { { cache: { key: "key", paths: ["public"], policy: "pull-push" } } }
-
-      subject { build.cache }
-
-      context 'when build has cache' do
-        before do
-          allow(build).to receive(:options).and_return(options)
-        end
-
-        context 'when project has jobs_cache_index' do
-          before do
-            allow_any_instance_of(Project).to receive(:jobs_cache_index).and_return(1)
-          end
-
-          it { is_expected.to be_an(Array).and all(include(key: "key-1")) }
-        end
-
-        context 'when project does not have jobs_cache_index' do
-          before do
-            allow_any_instance_of(Project).to receive(:jobs_cache_index).and_return(nil)
-          end
-
-          it { is_expected.to eq([options[:cache]]) }
-        end
-      end
-
-      context 'when build does not have cache' do
-        before do
-          allow(build).to receive(:options).and_return({})
-        end
-
-        it { is_expected.to eq([]) }
-      end
-    end
-
     subject { build.cache }
 
     context 'when build has cache' do
@@ -1258,6 +1219,21 @@ RSpec.describe Ci::Build do
       it 'returns nil' do
         is_expected.to be_nil
       end
+    end
+  end
+
+  describe '#environment_deployment_tier' do
+    subject { build.environment_deployment_tier }
+
+    let(:build) { described_class.new(options: options) }
+    let(:options) { { environment: { deployment_tier: 'production' } } }
+
+    it { is_expected.to eq('production') }
+
+    context 'when options does not include deployment_tier' do
+      let(:options) { { environment: { name: 'production' } } }
+
+      it { is_expected.to be_nil }
     end
   end
 
@@ -2423,6 +2399,7 @@ RSpec.describe Ci::Build do
           { key: 'CI_JOB_ID', value: build.id.to_s, public: true, masked: false },
           { key: 'CI_JOB_URL', value: project.web_url + "/-/jobs/#{build.id}", public: true, masked: false },
           { key: 'CI_JOB_TOKEN', value: 'my-token', public: false, masked: true },
+          { key: 'CI_JOB_STARTED_AT', value: build.started_at&.iso8601, public: true, masked: false },
           { key: 'CI_BUILD_ID', value: build.id.to_s, public: true, masked: false },
           { key: 'CI_BUILD_TOKEN', value: 'my-token', public: false, masked: true },
           { key: 'CI_REGISTRY_USER', value: 'gitlab-ci-token', public: true, masked: false },
@@ -2464,14 +2441,15 @@ RSpec.describe Ci::Build do
           { key: 'CI_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },
-          { key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}", public: true, masked: false },
+          { key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port, public: true, masked: false },
           { key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
-            value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{project.namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}",
+            value: "#{Gitlab.host_with_port}/#{project.namespace.root_ancestor.path.downcase}#{DependencyProxy::URL_SUFFIX}",
             public: true,
             masked: false },
           { key: 'CI_API_V4_URL', value: 'http://localhost/api/v4', public: true, masked: false },
           { key: 'CI_PIPELINE_IID', value: pipeline.iid.to_s, public: true, masked: false },
           { key: 'CI_PIPELINE_SOURCE', value: pipeline.source, public: true, masked: false },
+          { key: 'CI_PIPELINE_CREATED_AT', value: pipeline.created_at.iso8601, public: true, masked: false },
           { key: 'CI_COMMIT_SHA', value: build.sha, public: true, masked: false },
           { key: 'CI_COMMIT_SHORT_SHA', value: build.short_sha, public: true, masked: false },
           { key: 'CI_COMMIT_BEFORE_SHA', value: build.before_sha, public: true, masked: false },

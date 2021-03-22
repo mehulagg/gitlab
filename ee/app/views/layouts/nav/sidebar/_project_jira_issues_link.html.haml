@@ -1,7 +1,8 @@
 = nav_link(path: sidebar_external_tracker_paths) do
   = link_to project_integrations_jira_issues_path(@project) do
     .nav-icon-container
-      = image_tag('logos/jira-gray.svg', class: "gl-w-5 gl-h-5")
+      -# Hardcode sizes so image doesn't flash before CSS loads https://gitlab.com/gitlab-org/gitlab/-/issues/321022
+      = image_tag('logos/jira-gray.svg', size: 16)
     %span.nav-item-name.qa-settings-item#js-onboarding-settings-link
       = s_('JiraService|Jira Issues')
 

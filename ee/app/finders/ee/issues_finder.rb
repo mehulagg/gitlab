@@ -16,7 +16,7 @@ module EE
 
       override :negatable_params
       def negatable_params
-        @negatable_params ||= super + [:iteration_title]
+        @negatable_params ||= super + [:iteration_title, :weight]
       end
     end
 

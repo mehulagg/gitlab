@@ -36,7 +36,7 @@ Note the following about server hooks:
   - [Webhooks](../user/project/integrations/webhooks.md).
   - [GitLab CI/CD](../ci/README.md).
   - [Push Rules](../push_rules/push_rules.md), for a user-configurable Git hook
-    interface. **(STARTER)**
+    interface.
 - Server hooks aren't replicated to [Geo](geo/index.md) secondary nodes.
 
 ## Create a server hook for a repository
@@ -51,7 +51,7 @@ repository directory might not exactly match the instructions below. In that cas
 
 Follow the steps below to set up a server-side hook for a repository:
 
-1. Navigate to **Admin area > Projects** and click on the project you want to add a server hook to.
+1. Go to **Admin area > Projects** and select the project you want to add a server hook to.
 1. Locate the **Gitaly relative path** on the page that appears. This is where the server hook
    must be implemented. For information on interpreting the relative path, see
    [Translate hashed storage paths](repository_storage_types.md#translate-hashed-storage-paths).
@@ -104,8 +104,6 @@ Now test the hook to check whether it is functioning properly.
 
 ## Chained hooks
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-shell/-/merge_requests/93) in GitLab Shell 4.1.0 and GitLab 8.15.
-
 Server hooks set [per project](#create-a-server-hook-for-a-repository) or
 [globally](#create-a-global-server-hook-for-all-repositories) can be executed in a chain.
 
@@ -157,8 +155,6 @@ While other environment variables can be passed to server hooks, your applicatio
 them as they can change.
 
 ## Custom error messages
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5073) in GitLab 8.10.
 
 To have custom error messages appear in the GitLab UI when a commit is declined or an error occurs
 during the Git hook, your script should:

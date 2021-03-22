@@ -29,9 +29,9 @@ describe('First Class Group Dashboard Component', () => {
       propsData: {
         dashboardDocumentation,
         emptyStateSvgPath,
-        groupFullPath,
         vulnerabilitiesExportEndpoint,
       },
+      provide: { groupFullPath },
       data,
       stubs: {
         SecurityDashboardLayout,
@@ -52,10 +52,6 @@ describe('First Class Group Dashboard Component', () => {
       expect(findLoadingIcon().exists()).toBe(true);
     });
 
-    it('dashboard should have display none because it needs to fetch the projects', () => {
-      expect(findDashboardLayout().attributes('class')).toEqual('gl-display-none');
-    });
-
     it('should not display the dashboard not configured component', () => {
       expect(findEmptyState().exists()).toBe(false);
     });
@@ -70,7 +66,6 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should render correctly', () => {
       expect(findGroupVulnerabilities().props()).toEqual({
-        groupFullPath,
         filters: {},
       });
     });
@@ -101,10 +96,6 @@ describe('First Class Group Dashboard Component', () => {
 
     it('loading button should not be rendered', () => {
       expect(findLoadingIcon().exists()).toBe(false);
-    });
-
-    it('dashboard should no more have display none', () => {
-      expect(findDashboardLayout().attributes('class')).toEqual('');
     });
 
     it('should not display the dashboard not configured component', () => {

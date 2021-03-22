@@ -13,13 +13,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
     %(
       query project($fullPath: ID!, $id: DastSiteProfileID!) {
         project(fullPath: $fullPath) {
-          dastSiteProfile(id: $id) {
-            id
-            profileName
-            targetUrl
-            validationStatus
-            normalizedTargetUrl
-          }
+          dastSiteProfile(id: $id) { #{all_graphql_fields_for('DastSiteProfile')} }
         }
       }
     )

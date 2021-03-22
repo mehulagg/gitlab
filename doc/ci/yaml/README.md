@@ -7,7 +7,7 @@ type: reference
 
 <!-- markdownlint-disable MD044 -->
 <!-- vale gitlab.Spelling = NO -->
-# Keyword reference for the .gitlab-ci.yml file
+# Keyword reference for the .gitlab-ci.yml file **(FREE)**
 <!-- vale gitlab.Spelling = YES -->
 <!-- markdownlint-enable MD044 -->
 
@@ -312,9 +312,7 @@ does not block triggered pipelines.
 
 ### `include`
 
-> - Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.5.
-> - Available for Starter, Premium, and Ultimate in GitLab 10.6 and later.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Free in 11.4.
+> [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Free in 11.4.
 
 Use `include` to include external YAML files in your CI/CD configuration.
 You can break down one long `gitlab-ci.yml` file into multiple files to increase readability,
@@ -1071,8 +1069,8 @@ job:
     - when: on_success
 ```
 
-- If the pipeline is for a merge request, the job is **not** be added to the pipeline.
-- If the pipeline is a scheduled pipeline, the job is **not** be added to the pipeline.
+- If the pipeline is for a merge request, the job is **not** added to the pipeline.
+- If the pipeline is a scheduled pipeline, the job is **not** added to the pipeline.
 - In **all other cases**, the job is added to the pipeline, with `when: on_success`.
 
 WARNING:
@@ -1952,9 +1950,8 @@ production:
 
 #### Requirements and limitations
 
-- If `needs:` is set to point to a job that is not instantiated
-  because of `only/except` rules or otherwise does not exist, the
-  pipeline is not created and a YAML error is shown.
+- In GitLab 13.9 and older, if `needs:` refers to a job that might not be added to
+  a pipeline because of `only`, `except`, or `rules`, the pipeline might fail to create.
 - The maximum number of jobs that a single job can need in the `needs:` array is limited:
   - For GitLab.com, the limit is 50. For more information, see our
     [infrastructure issue](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7541).
@@ -2145,6 +2142,68 @@ in the same parent-child pipeline hierarchy of the given pipeline.
 The `pipeline` attribute does not accept the current pipeline ID (`$CI_PIPELINE_ID`).
 To download artifacts from a job in the current pipeline, use the basic form of [`needs`](#artifact-downloads-with-needs).
 
+#### Optional `needs`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30680) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-needs). **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+To need a job that sometimes does not exist in the pipeline, add `optional: true`
+to the `needs` configuration. If not defined, `optional: false` is the default.
+
+Jobs that use [`rules`](#rules), [`only`, or `except`](#onlyexcept-basic), might
+not always exist in a pipeline. When the pipeline starts, it checks the `needs`
+relationships before running. Without `optional: true`, needs relationships that
+point to a job that does not exist stops the pipeline from starting and causes a pipeline
+error similar to:
+
+- `'job1' job needs 'job2' job, but it was not added to the pipeline`
+
+In this example:
+
+- When the branch is `master`, the `build` job exists in the pipeline, and the `rspec`
+  job waits for it to complete before starting.
+- When the branch is not `master`, the `build` job does not exist in the pipeline.
+  The `rspec` job runs immediately (similar to `needs: []`) because its `needs`
+  relationship to the `build` job is optional.
+
+```yaml
+build:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"
+
+rspec:
+  stage: test
+  needs:
+    - job: build
+      optional: true
+```
+
+#### Enable or disable optional needs **(FREE SELF)**
+
+Optional needs is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_needs_optional)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_needs_optional)
+```
+
 ### `tags`
 
 Use `tags` to select a specific runner from the list of all runners that are
@@ -2266,8 +2325,8 @@ The valid values of `when` are:
 1. `delayed` - [Delay the execution of a job](#whendelayed) for a specified duration.
     Added in GitLab 11.14.
 1. `never`:
-   - With [`rules`](#rules), don't execute job.
-   - With [`workflow`](#workflow), don't run pipeline.
+   - With job [`rules`](#rules), don't execute job.
+   - With [`workflow:rules`](#workflow), don't run pipeline.
 
 In the following example, the script:
 
@@ -2555,7 +2614,7 @@ the GitLab UI to run.
 
 Also in the example, `GIT_STRATEGY` is set to `none`. If the
 `stop_review_app` job is [automatically triggered](../environments/index.md#stopping-an-environment),
-the runner won’t try to check out the code after the branch is deleted.
+the runner won't try to check out the code after the branch is deleted.
 
 The example also overwrites global variables. If your `stop` `environment` job depends
 on global variables, use [anchor variables](#yaml-anchors-for-variables) when you set the `GIT_STRATEGY`
@@ -2633,6 +2692,23 @@ Kubernetes configuration is not supported for Kubernetes clusters
 that are [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the
 [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/38054).
+
+#### `environment:deployment_tier`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27630) in GitLab 13.10.
+
+Use the `deployment_tier` keyword to specify the tier of the deployment environment:
+
+```yaml
+deploy:
+  script: echo
+  environment:
+    name: customer-portal
+    deployment_tier: production
+```
+
+For more information,
+see [Deployment tier of environments](../environments/index.md#deployment-tier-of-environments).
 
 #### Dynamic environments
 
@@ -3134,7 +3210,8 @@ test:
 ```
 
 With this configuration, GitLab adds a link **artifact 1** to the relevant merge request
-that points to `file1.txt`.
+that points to `file1.txt`. To access the link, select **View exposed artifact**
+below the pipeline graph in the merge request overview.
 
 An example that matches an entire directory:
 
@@ -3664,6 +3741,40 @@ deploystacks:
       - PROVIDER: [aws, ovh, gcp, vultr]
 ```
 
+##### Parallel `matrix` trigger jobs
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/270957) in GitLab 13.10.
+
+Use `matrix:` to run a [trigger](#trigger) job multiple times in parallel in a single pipeline,
+but with different variable values for each instance of the job.
+
+```yaml
+deploystacks:
+  stage: deploy
+  trigger:
+    include: path/to/child-pipeline.yml
+  parallel:
+    matrix:
+      - PROVIDER: aws
+        STACK: [monitoring, app1]
+      - PROVIDER: ovh
+        STACK: [monitoring, backup]
+      - PROVIDER: [gcp, vultr]
+        STACK: [data]
+```
+
+This example generates 6 parallel `deploystacks` trigger jobs, each with different values
+for `PROVIDER` and `STACK`, and they create 6 different child pipelines with those variables.
+
+```plaintext
+deploystacks: [aws, monitoring]
+deploystacks: [aws, app1]
+deploystacks: [ovh, monitoring]
+deploystacks: [ovh, backup]
+deploystacks: [gcp, data]
+deploystacks: [vultr, data]
+```
+
 ### `trigger`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8997) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.8.
@@ -4087,7 +4198,7 @@ job:
 
 #### `release:ref`
 
-If the `release: tag_name` doesn’t exist yet, the release is created from `ref`.
+If the `release: tag_name` doesn't exist yet, the release is created from `ref`.
 `ref` can be a commit SHA, another tag name, or a branch name.
 
 #### `release:milestones`

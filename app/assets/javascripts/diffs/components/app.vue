@@ -3,6 +3,13 @@ import { GlLoadingIcon, GlPagination, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Mousetrap from 'mousetrap';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import {
+  keysFor,
+  MR_PREVIOUS_FILE_IN_DIFF,
+  MR_NEXT_FILE_IN_DIFF,
+  MR_COMMITS_NEXT_COMMIT,
+  MR_COMMITS_PREVIOUS_COMMIT,
+} from '~/behaviors/shortcuts/keybindings';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { isSingleViewStyle } from '~/helpers/diffs_helper';
 import { getParameterByName, parseBoolean } from '~/lib/utils/common_utils';
@@ -125,7 +132,7 @@ export default {
       required: false,
       default: '',
     },
-    mrReviews: {
+    rehydratedMrReviews: {
       type: Object,
       required: false,
       default: () => ({}),
@@ -164,6 +171,7 @@ export default {
       'canMerge',
       'hasConflicts',
       'viewDiffsFileByFile',
+      'mrReviews',
     ]),
     ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
@@ -268,7 +276,7 @@ export default {
       showSuggestPopover: this.showSuggestPopover,
       viewDiffsFileByFile: fileByFile(this.fileByFileUserPreference),
       defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
-      mrReviews: this.mrReviews || {},
+      mrReviews: this.rehydratedMrReviews,
     });
 
     if (this.shouldShow) {
@@ -405,30 +413,23 @@ export default {
       }
     },
     setEventListeners() {
-      Mousetrap.bind(['[', 'k', ']', 'j'], (e, combo) => {
-        switch (combo) {
-          case '[':
-          case 'k':
-            this.jumpToFile(-1);
-            break;
-          case ']':
-          case 'j':
-            this.jumpToFile(+1);
-            break;
-          default:
-            break;
-        }
-      });
+      Mousetrap.bind(keysFor(MR_PREVIOUS_FILE_IN_DIFF), () => this.jumpToFile(-1));
+      Mousetrap.bind(keysFor(MR_NEXT_FILE_IN_DIFF), () => this.jumpToFile(+1));
 
       if (this.commit) {
-        Mousetrap.bind('c', () => this.moveToNeighboringCommit({ direction: 'next' }));
-        Mousetrap.bind('x', () => this.moveToNeighboringCommit({ direction: 'previous' }));
+        Mousetrap.bind(keysFor(MR_COMMITS_NEXT_COMMIT), () =>
+          this.moveToNeighboringCommit({ direction: 'next' }),
+        );
+        Mousetrap.bind(keysFor(MR_COMMITS_PREVIOUS_COMMIT), () =>
+          this.moveToNeighboringCommit({ direction: 'previous' }),
+        );
       }
     },
     removeEventListeners() {
-      Mousetrap.unbind(['[', 'k', ']', 'j']);
-      Mousetrap.unbind('c');
-      Mousetrap.unbind('x');
+      Mousetrap.unbind(keysFor(MR_PREVIOUS_FILE_IN_DIFF));
+      Mousetrap.unbind(keysFor(MR_NEXT_FILE_IN_DIFF));
+      Mousetrap.unbind(keysFor(MR_COMMITS_NEXT_COMMIT));
+      Mousetrap.unbind(keysFor(MR_COMMITS_PREVIOUS_COMMIT));
     },
     jumpToFile(step) {
       const targetIndex = this.currentDiffIndex + step;
@@ -513,7 +514,7 @@ export default {
               v-for="(file, index) in diffs"
               :key="file.newPath"
               :file="file"
-              :reviewed="fileReviews[index]"
+              :reviewed="fileReviews[file.id]"
               :is-first-file="index === 0"
               :is-last-file="index === diffFilesLength - 1"
               :help-page-path="helpPagePath"

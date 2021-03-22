@@ -205,7 +205,7 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
   });
 });
 
-describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
+describe('RECEIVE_EPICS_SUCCESS', () => {
   it('populates epics and canAdminEpic with payload', () => {
     state = {
       ...state,
@@ -213,7 +213,7 @@ describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
       canAdminEpic: false,
     };
 
-    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
+    mutations.RECEIVE_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
 
     expect(state.epics).toEqual(mockEpics);
     expect(state.canAdminEpic).toEqual(true);
@@ -224,30 +224,6 @@ describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
       ...state,
       epics: mockEpics,
       canAdminEpic: false,
-    };
-
-    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, mockEpics);
-
-    expect(state.epics).toEqual(mockEpics);
-  });
-});
-
-describe('RECEIVE_EPICS_SUCCESS', () => {
-  it('populates epics with payload', () => {
-    state = {
-      ...state,
-      epics: {},
-    };
-
-    mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
-
-    expect(state.epics).toEqual(mockEpics);
-  });
-
-  it("doesn't add duplicate epics", () => {
-    state = {
-      ...state,
-      epics: mockEpics,
     };
 
     mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
@@ -324,6 +300,40 @@ describe('MOVE_ISSUE', () => {
 
     expect(state.boardItemsByListId).toEqual(updatedListIssues);
     expect(state.boardItems['437'].epic).toEqual(null);
+  });
+});
+
+describe('MOVE_EPIC', () => {
+  it('updates boardItemsByListId, moving epic between lists', () => {
+    const listIssues = {
+      'gid://gitlab/List/1': [mockEpic.id, mockEpics[1].id],
+      'gid://gitlab/List/2': [],
+    };
+
+    const epics = {
+      1: mockEpic,
+      2: mockEpics[1],
+    };
+
+    state = {
+      ...state,
+      boardItemsByListId: listIssues,
+      boardLists: initialBoardListsState,
+      boardItems: epics,
+    };
+
+    mutations.MOVE_EPIC(state, {
+      originalEpic: mockEpics[1],
+      fromListId: 'gid://gitlab/List/1',
+      toListId: 'gid://gitlab/List/2',
+    });
+
+    const updatedListEpics = {
+      'gid://gitlab/List/1': [mockEpic.id],
+      'gid://gitlab/List/2': [mockEpics[1].id],
+    };
+
+    expect(state.boardItemsByListId).toEqual(updatedListEpics);
   });
 });
 

@@ -138,14 +138,16 @@ pending_job_classes = scheduled_queue.select { |job| job["class"] == "Background
 pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
 ```
 
-## Checking for pending Elasticsearch migrations
+## Checking for pending Advanced Search migrations
 
 This section is only applicable if you have enabled the [Elasticsearch
 integration](../integration/elasticsearch.md).
 
-Certain major releases might require [Elasticsearch
-migrations](../integration/elasticsearch.md#background-migrations) to be
-finished. You can find pending migrations by running the following command:
+Major releases require all [Advanced Search
+migrations](../integration/elasticsearch.md#advanced-search-migrations) to
+be finished from the most recent minor release in your current version
+before the major version upgrade. You can find pending migrations by
+running the following command:
 
 **For Omnibus installations**
 
@@ -160,14 +162,15 @@ cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:elastic:list_pending_migrations
 ```
 
-### What do I do if my Elasticsearch migrations are stuck?
+### What do I do if my Advanced Search migrations are stuck?
 
 See [how to retry a halted
 migration](../integration/elasticsearch.md#retry-a-halted-migration).
 
 ## Upgrade paths
 
-Although you can generally upgrade through multiple GitLab versions in one go,
+You can generally upgrade through multiple GitLab versions in one go,
+although this is discouraged for [zero downtime upgrades](#upgrading-without-downtime) and
 sometimes this can cause issues.
 
 Find where your version sits in the upgrade path below, and upgrade GitLab
@@ -208,6 +211,13 @@ It's also important to ensure that any background migrations have been fully com
 before upgrading to a new major version. To see the current size of the `background_migration` queue,
 [Check for background migrations before upgrading](#checking-for-background-migrations-before-upgrading).
 
+If you have enabled the [Elasticsearch
+integration](../integration/elasticsearch.md), then you will also need to ensure
+all Advanced Search migrations are completed in the last minor version within
+your current version. Be sure to [check for pending Advanced Search
+migrations](#checking-for-pending-advanced-search-migrations) before proceeding
+with the major version upgrade.
+
 If your GitLab instance has any runners associated with it, it is very
 important to upgrade GitLab Runner to match the GitLab minor version that was
 upgraded to. This is to ensure [compatibility with GitLab versions](https://docs.gitlab.com/runner/#compatibility-with-gitlab-versions).
@@ -219,7 +229,8 @@ patch version of GitLab without having to take your GitLab instance offline.
 However, for this to work there are the following requirements:
 
 - You can only upgrade 1 minor release at a time. So from 9.1 to 9.2, not to
-   9.3.
+   9.3. If you skip releases, database modifications may be run in the wrong
+   sequence [and leave the database schema in a broken state](https://gitlab.com/gitlab-org/gitlab/-/issues/321542).
 - You have to use [post-deployment
    migrations](../development/post_deployment_migrations.md) (included in
    [zero downtime update steps below](#steps)).

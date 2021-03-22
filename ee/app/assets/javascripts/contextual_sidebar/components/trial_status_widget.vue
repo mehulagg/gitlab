@@ -3,6 +3,11 @@ import { GlLink, GlProgressBar } from '@gitlab/ui';
 import { n__, sprintf } from '~/locale';
 
 export default {
+  tracking: {
+    event: 'click_link',
+    label: 'trial_status_widget',
+    property: 'experiment:show_trial_status_in_sidebar',
+  },
   components: {
     GlLink,
     GlProgressBar,
@@ -53,7 +58,14 @@ export default {
 </script>
 
 <template>
-  <gl-link :id="containerId" :title="widgetTitle" :href="plansHref">
+  <gl-link
+    :id="containerId"
+    :title="widgetTitle"
+    :href="plansHref"
+    :data-track-event="$options.tracking.event"
+    :data-track-label="$options.tracking.label"
+    :data-track-property="$options.tracking.property"
+  >
     <div class="gl-display-flex gl-flex-direction-column gl-align-items-stretch gl-w-full">
       <span class="gl-display-flex gl-align-items-center">
         <span class="nav-icon-container svg-container">

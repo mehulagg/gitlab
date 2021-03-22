@@ -106,8 +106,8 @@ export default {
         height: this.$refs[this.containerId].scrollHeight,
       };
     },
-    onError(errorType) {
-      this.$emit('error', errorType);
+    onError(payload) {
+      this.$emit('error', payload);
     },
     setJob(jobName) {
       this.hoveredJobName = jobName;
@@ -158,6 +158,7 @@ export default {
               :container-measurements="measurements"
               :highlighted-job="hoveredJobName"
               :metrics-config="metricsConfig"
+              :never-show-links="true"
               default-link-color="gl-stroke-transparent"
               @error="onError"
               @highlightedJobsChange="updateHighlightedJobs"

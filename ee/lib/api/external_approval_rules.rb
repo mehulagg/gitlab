@@ -23,7 +23,6 @@ module API
           requires :name, type: String, desc: 'The name of the rule'
           requires :external_url, type: String, desc: 'The URL to notify when MR receives new commits'
           optional :protected_branch_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The protected branch ids for this rule'
-          use :pagination
         end
         desc 'Create a new external approval rule' do
           success ::API::Entities::ExternalApprovalRule
@@ -43,6 +42,9 @@ module API
 
         desc 'List project\'s external approval rules' do
           detail 'This feature is gated by the :ff_compliance_approval_gates feature flag.'
+        end
+        params do
+          use :pagination
         end
         get do
           unauthorized! unless current_user.can?(:admin_project, @project)

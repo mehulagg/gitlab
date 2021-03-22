@@ -15,7 +15,7 @@ class GitlabSubscription < ApplicationRecord
   belongs_to :hosted_plan, class_name: 'Plan'
 
   validates :seats, :start_date, presence: true
-  validates :namespace_id, uniqueness: true, allow_blank: true
+  validates :namespace_id, uniqueness: true, presence: true
 
   delegate :name, :title, to: :hosted_plan, prefix: :plan, allow_nil: true
 
@@ -74,7 +74,6 @@ class GitlabSubscription < ApplicationRecord
 
   def has_a_paid_hosted_plan?(include_trials: false)
     (include_trials || !trial?) &&
-      hosted? &&
       seats > 0 &&
       Plan::PAID_HOSTED_PLANS.include?(plan_name)
   end
@@ -103,7 +102,7 @@ class GitlabSubscription < ApplicationRecord
   # in order to make it easy for customers to get this information.
   def seats_in_use
     return super unless Feature.enabled?(:seats_in_use_for_free_or_trial)
-    return super if has_a_paid_hosted_plan? || !hosted?
+    return super if has_a_paid_hosted_plan?
 
     seats_in_use_now
   end
@@ -151,10 +150,6 @@ class GitlabSubscription < ApplicationRecord
     omitted_attrs = %w(id created_at updated_at seats_in_use seats_owed)
 
     GitlabSubscriptionHistory.create(attrs.except(*omitted_attrs))
-  end
-
-  def hosted?
-    namespace_id.present?
   end
 
   def automatically_index_in_elasticsearch?

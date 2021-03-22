@@ -2202,6 +2202,44 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#set_container_registry_access_level' do
+    let_it_be_with_reload(:project) { create(:project) }
+
+    it 'updates project_feature', :aggregate_failures do
+      # Simulate an existing project that has container_registry enabled
+      project.update_column(:container_registry_enabled, true)
+      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
+
+      expect(project.container_registry_enabled).to eq(true)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+
+      project.update!(container_registry_enabled: false)
+
+      expect(project.container_registry_enabled).to eq(false)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+
+      project.update!(container_registry_enabled: true)
+
+      expect(project.container_registry_enabled).to eq(true)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::ENABLED)
+    end
+
+    it 'rollsback both projects and project_features row in case of error', :aggregate_failures do
+      project.update_column(:container_registry_enabled, true)
+      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
+
+      expect(project.container_registry_enabled).to eq(true)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+
+      allow(project).to receive(:valid?).and_return(false)
+
+      expect { project.update!(container_registry_enabled: false) }.to raise_error(ActiveRecord::RecordInvalid)
+
+      expect(project.reload.container_registry_enabled).to eq(true)
+      expect(project.project_feature.reload.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+    end
+  end
+
   describe '#has_container_registry_tags?' do
     let(:project) { build(:project) }
 
@@ -4488,6 +4526,34 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#dependency_proxy_variables' do
+    let_it_be(:namespace) { create(:namespace, path: 'NameWithUPPERcaseLetters') }
+    let_it_be(:project) { create(:project, :repository, namespace: namespace) }
+
+    subject { project.dependency_proxy_variables.to_runner_variables }
+
+    context 'when dependency_proxy is enabled' do
+      before do
+        stub_config(dependency_proxy: { enabled: true })
+      end
+
+      it 'contains the downcased name' do
+        expect(subject).to include({ key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
+                                     value: "#{Gitlab.host_with_port}/namewithuppercaseletters#{DependencyProxy::URL_SUFFIX}",
+                                     public: true,
+                                     masked: false })
+      end
+    end
+
+    context 'when dependency_proxy is disabled' do
+      before do
+        stub_config(dependency_proxy: { enabled: false })
+      end
+
+      it { expect(subject).to be_empty }
+    end
+  end
+
   describe '#auto_devops_enabled?' do
     before do
       Feature.enable_percentage_of_actors(:force_autodevops_on_by_default, 0)
@@ -5950,12 +6016,15 @@ RSpec.describe Project, factory_default: :keep do
       project.set_first_pages_deployment!(deployment)
 
       expect(project.pages_metadatum.reload.pages_deployment).to eq(deployment)
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
     end
 
     it "updates the existing metadara record with deployment" do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
+
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
     end
 
     it 'only updates metadata for this project' do
@@ -5964,6 +6033,8 @@ RSpec.describe Project, factory_default: :keep do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.not_to change { other_project.pages_metadatum.reload.pages_deployment }.from(nil)
+
+      expect(other_project.pages_metadatum.reload.deployed).to eq(false)
     end
 
     it 'does nothing if metadata already references some deployment' do
@@ -5973,6 +6044,14 @@ RSpec.describe Project, factory_default: :keep do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.not_to change { project.pages_metadatum.reload.pages_deployment }.from(existing_deployment)
+    end
+
+    it 'marks project as not deployed if deployment is nil' do
+      project.mark_pages_as_deployed
+
+      expect do
+        project.set_first_pages_deployment!(nil)
+      end.to change { project.pages_metadatum.reload.deployed }.from(true).to(false)
     end
   end
 

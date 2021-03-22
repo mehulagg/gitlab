@@ -50,7 +50,6 @@ export default {
     <div class="gl-display-flex">
       <gl-button
         v-gl-tooltip="$options.i18n.editFramework"
-        :loading="loading"
         :disabled="loading"
         :aria-label="$options.i18n.editFramework"
         :href="framework.editPath"

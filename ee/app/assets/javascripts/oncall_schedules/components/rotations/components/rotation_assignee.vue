@@ -6,12 +6,13 @@ import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
 
 export const SHIFT_WIDTHS = {
-  md: 140,
-  sm: 90,
-  xs: 40,
+  md: 100,
+  sm: 50,
+  xs: 25,
 };
 
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
+export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM ("UTC:" o)';
 
 export default {
   ROTATION_CENTER_CLASS,
@@ -43,7 +44,7 @@ export default {
   },
   computed: {
     assigneeName() {
-      if (this.shiftWidth <= SHIFT_WIDTHS.sm) {
+      if (this.shiftWidth <= SHIFT_WIDTHS.md) {
         return truncate(this.assignee.user.username, 3);
       }
 
@@ -54,18 +55,21 @@ export default {
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)}`,
       });
     },
     rotationAssigneeUniqueID() {
       return uniqueId('rotation-assignee-');
     },
-    rotationMobileView() {
+    hasRotationMobileViewAvatar() {
       return this.shiftWidth <= SHIFT_WIDTHS.xs;
+    },
+    hasRotationMobileViewText() {
+      return this.shiftWidth <= SHIFT_WIDTHS.sm;
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)}`,
       });
     },
   },
@@ -81,10 +85,13 @@ export default {
       data-testid="rotation-assignee"
     >
       <div class="gl-text-white" :class="$options.ROTATION_CENTER_CLASS">
-        <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
-        <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
-          assigneeName
-        }}</span>
+        <gl-avatar v-if="!hasRotationMobileViewAvatar" :src="assignee.user.avatarUrl" :size="16" />
+        <span
+          v-if="!hasRotationMobileViewText"
+          class="gl-ml-2"
+          data-testid="rotation-assignee-name"
+          >{{ assigneeName }}</span
+        >
       </div>
     </div>
     <gl-popover
@@ -93,8 +100,12 @@ export default {
       triggers="hover"
       placement="top"
     >
-      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>
-      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">{{ endsAt }}</p>
+      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">
+        {{ startsAt }}
+      </p>
+      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">
+        {{ endsAt }}
+      </p>
     </gl-popover>
   </div>
 </template>

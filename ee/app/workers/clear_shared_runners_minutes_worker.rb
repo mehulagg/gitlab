@@ -10,7 +10,7 @@ class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWo
   feature_category :continuous_integration
 
   LEASE_TIMEOUT = 3600
-  TIME_SPREAD = 3.hours.seconds.freeze
+  TIME_SPREAD = 8.hours.seconds.freeze
   BATCH_SIZE = 100_000
 
   def perform

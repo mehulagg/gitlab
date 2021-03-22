@@ -48,7 +48,7 @@ module Groups
     def milestones
       group_ids = group.self_and_ancestors.public_or_visible_to_user(current_user).pluck(:id)
 
-      MilestonesFinder.new(group_ids: group_ids).execute.select(:iid, :title)
+      MilestonesFinder.new(group_ids: group_ids).execute.select(:iid, :title, :due_date)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

@@ -15,12 +15,14 @@ describe('ClusterAgentTokenTable', () => {
       createdByUser: {
         name: 'user-1',
       },
+      name: 'token-1',
     },
     {
       id: '2',
       createdAt: '2021-02-10T00:00:00Z',
       description: null,
       createdByUser: null,
+      name: 'token-2',
     },
   ];
 
@@ -45,6 +47,17 @@ describe('ClusterAgentTokenTable', () => {
 
     expect(learnMoreLink.exists()).toBe(true);
     expect(learnMoreLink.text()).toBe(TokenTable.i18n.learnMore);
+  });
+
+  it.each`
+    name         | lineNumber
+    ${'token-1'} | ${0}
+    ${'token-2'} | ${1}
+  `('displays token name "$name" for line "$lineNumber"', ({ name, lineNumber }) => {
+    const tokens = wrapper.findAll('[data-testid="agent-token-name"]');
+    const token = tokens.at(lineNumber);
+
+    expect(token.text()).toBe(name);
   });
 
   it.each`

@@ -56,6 +56,8 @@ describe('BoardForm', () => {
     return new Vuex.Store({
       getters: {
         isEpicBoard: () => true,
+        isGroupBoard: () => true,
+        isProjectBoard: () => false,
       },
     });
   };

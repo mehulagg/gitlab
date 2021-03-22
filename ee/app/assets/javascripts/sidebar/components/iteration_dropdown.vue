@@ -9,7 +9,7 @@ import {
 } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { iterationSelectTextMap, iterationDisplayState } from '../constants';
-import groupIterationsQuery from '../queries/group_iterations.query.graphql';
+import groupIterationsQuery from '../queries/iterations.query.graphql';
 
 export default {
   directives: {

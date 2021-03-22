@@ -28,7 +28,7 @@
                 .gl-alert-body
                   %h4.gl-alert-title= _('There is a halted Elasticsearch migration')
                   = html_escape_once(_('Check the elasticsearch.log file to debug why the migration was halted and make any changes before retrying the migration. When you fix the cause of the failure, click "Retry migration", and the migration will be scheduled to be retried in the background.')).html_safe
-                  = link_to _('Learn more.'), help_page_path('integration/elasticsearch', anchor: 'background-migrations')
+                  = link_to _('Learn more.'), help_page_path('integration/elasticsearch', anchor: 'advanced-search-migrations')
                 .gl-alert-actions
                   - migration = Elastic::DataMigrationService.halted_migration
                   = link_to _('Retry migration'), admin_elasticsearch_retry_migration_path(version: migration.version), class: 'btn gl-alert-action btn-warning gl-button', disabled: @elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to retry this migration?') }, method: :post

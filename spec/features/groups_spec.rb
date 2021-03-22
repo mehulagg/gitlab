@@ -141,9 +141,33 @@ RSpec.describe 'Group' do
         end
       end
     end
+
+    describe 'showing recaptcha on group creation when it is enabled' do
+      before do
+        stub_application_setting(recaptcha_enabled: true)
+        allow(Gitlab::Recaptcha).to receive(:load_configurations!)
+        visit new_group_path
+      end
+
+      it 'renders recaptcha' do
+        expect(page).to have_css('.recaptcha')
+      end
+    end
+
+    describe 'not showing recaptcha on group creation when it is disabled' do
+      before do
+        stub_feature_flags(recaptcha_on_top_level_group_creation: false)
+        stub_application_setting(recaptcha_enabled: true)
+        visit new_group_path
+      end
+
+      it 'does not render recaptcha' do
+        expect(page).not_to have_css('.recaptcha')
+      end
+    end
   end
 
-  describe 'create a nested group', :js do
+  describe 'create a nested group' do
     let_it_be(:group) { create(:group, path: 'foo') }
 
     context 'as admin' do
@@ -153,13 +177,21 @@ RSpec.describe 'Group' do
         visit new_group_path(group, parent_id: group.id)
       end
 
-      it 'creates a nested group' do
-        fill_in 'Group name', with: 'bar'
-        fill_in 'Group URL', with: 'bar'
-        click_button 'Create group'
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'creates a nested group' do
+          fill_in 'Group name', with: 'bar'
+          fill_in 'Group URL', with: 'bar'
+          click_button 'Create group'
 
-        expect(current_path).to eq(group_path('foo/bar'))
-        expect(page).to have_content("Group 'bar' was successfully created.")
+          expect(current_path).to eq(group_path('foo/bar'))
+          expect(page).to have_content("Group 'bar' was successfully created.")
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'is not allowed' do
+          expect(page).to have_gitlab_http_status(:not_found)
+        end
       end
     end
 
@@ -179,6 +211,23 @@ RSpec.describe 'Group' do
 
         expect(current_path).to eq(group_path('foo/bar'))
         expect(page).to have_content("Group 'bar' was successfully created.")
+      end
+    end
+
+    context 'when recaptcha is enabled' do
+      before do
+        stub_application_setting(recaptcha_enabled: true)
+        allow(Gitlab::Recaptcha).to receive(:load_configurations!)
+      end
+
+      context 'when creating subgroup' do
+        let(:path) { new_group_path(group, parent_id: group.id) }
+
+        it 'does not render recaptcha' do
+          visit path
+
+          expect(page).not_to have_css('.recaptcha')
+        end
       end
     end
   end

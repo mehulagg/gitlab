@@ -45,14 +45,14 @@ module QA
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
 
       context 'Add group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/733' do
-        let(:group_name) { 'new group' }
-
         before do
           @event_count = 0
           sign_in
-          Resource::Group.fabricate_via_browser_ui! do |group|
-            group.name = group_name
-          end.visit!
+          group = Resource::Group.fabricate_via_browser_ui! do |group|
+            group.path = "group-to-test-audit-event-log-#{SecureRandom.hex(8)}"
+          end
+
+          expect(page).to have_text("Group '#{group.path}' was successfully created")
         end
 
         it_behaves_like 'audit event', ['Added group']
@@ -103,7 +103,6 @@ module QA
 
       context 'Add and remove project access', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/735' do
         before do
-          Runtime::Feature.enable('vue_project_members_list', project: project)
           Runtime::Feature.enable(:invite_members_group_modal)
           sign_in
           project.visit!
@@ -119,10 +118,6 @@ module QA
           end
 
           group.visit!
-        end
-
-        after do
-          Runtime::Feature.disable('vue_project_members_list', project: project)
         end
 
         it_behaves_like 'audit event', ['Added project access', 'Removed project access']

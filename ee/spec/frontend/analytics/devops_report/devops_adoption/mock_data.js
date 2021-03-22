@@ -21,11 +21,11 @@ export const groupNodes = [
 ];
 
 export const groupNodeLabelValues = [
-  { text: 'Foo', value: '1' },
-  { text: 'Bar', value: '2' },
+  { label: 'Foo', value: '1' },
+  { label: 'Bar', value: '2' },
 ];
 
-export const groupIds = ['1', '2'];
+export const groupIds = [1, 2];
 
 export const groupGids = ['gid://gitlab/Group/1', 'gid://gitlab/Group/2'];
 
@@ -128,7 +128,7 @@ export const devopsAdoptionTableHeaders = [
 
 export const segmentName = 'Foooo';
 
-export const genericErrorMessage = 'An error occurred while saving the group. Please try again.';
+export const genericErrorMessage = 'An error occurred while saving changes. Please try again.';
 
 export const dataErrorMessage = 'Name already taken.';
 

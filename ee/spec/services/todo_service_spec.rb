@@ -114,7 +114,7 @@ RSpec.describe TodoService do
 
           context 'for mentioned users' do
             let(:todo_params) { { action: Todo::MENTIONED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'
@@ -126,7 +126,7 @@ RSpec.describe TodoService do
             end
 
             let(:todo_params) { { action: Todo::DIRECTLY_ADDRESSED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'

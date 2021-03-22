@@ -8,7 +8,9 @@ exports[`Status Page settings form default state should match the default snapsh
   <div
     class="settings-header"
   >
-    <h4>
+    <h4
+      class="settings-title js-settings-toggle js-settings-toggle-trigger-only"
+    >
       
       Status page
     

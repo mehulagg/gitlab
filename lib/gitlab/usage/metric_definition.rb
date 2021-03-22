@@ -29,7 +29,15 @@ module Gitlab
       def validate!
         unless skip_validation?
           self.class.schemer.validate(attributes.stringify_keys).each do |error|
-            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Metric::InvalidMetricError.new("#{error["details"] || error['data_pointer']} for `#{path}`"))
+            error_message = <<~ERROR_MSG
+              Error type: #{error['type']}
+              Data: #{error['data']}
+              Path: #{error['data_pointer']}
+              Details: #{error['details']}
+              Metric file: #{path}
+            ERROR_MSG
+
+            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Gitlab::Usage::Metric::InvalidMetricError.new(error_message))
           end
         end
       end
@@ -64,7 +72,7 @@ module Gitlab
 
           self.new(path, definition).tap(&:validate!)
         rescue => e
-          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Metric::InvalidMetricError.new(e.message))
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Gitlab::Usage::Metric::InvalidMetricError.new(e.message))
         end
 
         def load_all_from_path!(definitions, glob_path)
@@ -72,7 +80,7 @@ module Gitlab
             definition = load_from_file(path)
 
             if previous = definitions[definition.key]
-              Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Metric::InvalidMetricError.new("Metric '#{definition.key}' is already defined in '#{previous.path}'"))
+              Gitlab::ErrorTracking.track_and_raise_for_dev_exception(Gitlab::Usage::Metric::InvalidMetricError.new("Metric '#{definition.key}' is already defined in '#{previous.path}'"))
             end
 
             definitions[definition.key] = definition

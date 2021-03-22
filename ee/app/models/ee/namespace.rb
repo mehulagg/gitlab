@@ -69,6 +69,11 @@ module EE
         where("EXISTS (?)", matcher)
       end
 
+      scope :without_last_ci_minutes_notification, -> do
+        where.not(last_ci_minutes_notification_at: nil)
+          .or(where.not(last_ci_minutes_usage_notification_level: nil))
+      end
+
       delegate :shared_runners_seconds, :shared_runners_seconds_last_reset, to: :namespace_statistics, allow_nil: true
 
       delegate :additional_purchased_storage_size, :additional_purchased_storage_size=,
@@ -138,9 +143,6 @@ module EE
     # being licensed.
     override :feature_available?
     def feature_available?(feature)
-      # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
-
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
           h[f] = load_feature_available(f)

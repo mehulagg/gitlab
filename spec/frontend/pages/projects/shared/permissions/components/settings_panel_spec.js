@@ -29,6 +29,7 @@ const defaultProps = {
     showDefaultAwardEmojis: true,
     allowEditingCommitMessages: false,
   },
+  isGitlabCom: true,
   canDisableEmails: true,
   canChangeVisibilityLevel: true,
   allowedVisibilityOptions: [0, 10, 20],
@@ -227,7 +228,7 @@ describe('Settings Panel', () => {
     });
   });
 
-  describe('Pipelines', () => {
+  describe('CI/CD', () => {
     it('should enable the builds access level input when the repository is enabled', () => {
       wrapper = mountComponent({
         currentSettings: { repositoryAccessLevel: featureAccessLevel.EVERYONE },

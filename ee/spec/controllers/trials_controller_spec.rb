@@ -12,13 +12,6 @@ RSpec.describe TrialsController do
     }
   end
 
-  let_it_be(:trial_registration_with_social_signin_context) do
-    {
-      google_signon: user.identities.select { |id| id.provider == 'google_auth2'}.present?,
-      github_signon: user.identities.select { |id| id.provider == 'github' }.present?
-    }
-  end
-
   let(:dev_env_or_com) { true }
   let(:logged_in) { true }
 
@@ -63,7 +56,6 @@ RSpec.describe TrialsController do
 
     it 'calls record_experiment_user for the experiments' do
       expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
-      expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
 
       subject
     end
@@ -198,10 +190,8 @@ RSpec.describe TrialsController do
       it { is_expected.to redirect_to("/#{namespace.path}?trial=true") }
       it 'calls the record conversion method for the experiments' do
         expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, namespace_id: namespace.id)
-        expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, namespace_id: namespace.id)
         expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues, namespace_id: namespace.id)
         expect(controller).to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
-        expect(controller).to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)
         expect(controller).to receive(:record_experiment_conversion_event).with(:trial_onboarding_issues)
 
         subject
@@ -222,7 +212,6 @@ RSpec.describe TrialsController do
       it { is_expected.to render_template(:select) }
       it 'does not call the record conversion method for the experiments' do
         expect(controller).not_to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
-        expect(controller).not_to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)
 
         subject
       end

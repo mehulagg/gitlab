@@ -15,7 +15,7 @@ module QA
           Flow::Login.sign_in
         end
 
-        Resource::PersonalAccessToken.fabricate!.access_token
+        Resource::PersonalAccessToken.fabricate!.token
       end
 
       let(:project) do
@@ -28,6 +28,13 @@ module QA
         Resource::Project.fabricate_via_api! do |another_project|
           another_project.name = 'another-maven-package-project'
           another_project.group = project.group
+        end
+      end
+
+      let(:package) do
+        Resource::Package.new.tap do |package|
+          package.name = package_name
+          package.project = project
         end
       end
 
@@ -223,9 +230,7 @@ module QA
           project.group.visit!
 
           Page::Group::Menu.perform(&:go_to_package_settings)
-          Page::Group::Settings::PackageRegistries.perform do |settings|
-            expect(settings).to have_allow_duplicates_enabled
-          end
+          Page::Group::Settings::PackageRegistries.perform(&:set_allow_duplicates_enabled)
         end
 
         it 'allows users to publish duplicate Maven packages at the group level', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1722' do

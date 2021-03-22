@@ -55,18 +55,6 @@ RSpec.describe Projects::IncidentManagement::OncallSchedulesController do
       end
     end
 
-    context 'with feature flag off' do
-      before do
-        stub_feature_flags(oncall_schedules_mvc: false)
-      end
-
-      it 'responds with 404' do
-        request
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
     context 'with unavailable feature' do
       before do
         stub_licensed_features(oncall_schedules: false)

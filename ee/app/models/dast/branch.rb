@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 module Dast
-  Branch = Struct.new(:project) do
+  Branch = Struct.new(:profile) do
+    delegate :project, to: :profile
+
     def name
-      project.default_branch
+      profile.branch_name || project.default_branch
     end
 
     def exists
-      project.repository.branch_exists?(project.default_branch)
+      project.repository.branch_exists?(name)
     end
   end
 end

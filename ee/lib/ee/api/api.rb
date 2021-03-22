@@ -14,6 +14,7 @@ module EE
         mount ::API::ProjectApprovalRules
         mount ::API::ExternalApprovalRules
         mount ::API::ProjectApprovalSettings
+        mount ::API::Dora::Metrics
         mount ::API::EpicIssues
         mount ::API::EpicLinks
         mount ::API::Epics

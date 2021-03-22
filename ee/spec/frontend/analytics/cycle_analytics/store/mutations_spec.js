@@ -35,7 +35,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_STAGE_DATA}                  | ${'isLoadingStage'}          | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isEmptyStage'}            | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isLoadingStage'}          | ${false}
-    ${types.REQUEST_CYCLE_ANALYTICS_DATA}        | ${'isLoading'}               | ${true}
+    ${types.REQUEST_VALUE_STREAM_DATA}           | ${'isLoading'}               | ${true}
     ${types.RECEIVE_GROUP_STAGES_ERROR}          | ${'stages'}                  | ${[]}
     ${types.REQUEST_GROUP_STAGES}                | ${'stages'}                  | ${[]}
     ${types.REQUEST_UPDATE_STAGE}                | ${'isLoading'}               | ${true}
@@ -58,7 +58,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'selectedValueStream'}     | ${null}
-    ${types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS}  | ${'isLoading'}               | ${false}
+    ${types.INITIALIZE_VALUE_STREAM_SUCCESS}     | ${'isLoading'}               | ${false}
   `('$mutation will set $stateKey=$value', ({ mutation, stateKey, value }) => {
     mutations[mutation](state);
 
@@ -186,7 +186,7 @@ describe('Value Stream Analytics mutations', () => {
     });
   });
 
-  describe(`${types.INITIALIZE_CYCLE_ANALYTICS}`, () => {
+  describe(`${types.INITIALIZE_VSA}`, () => {
     const initialData = {
       group: { fullPath: 'cool-group' },
       selectedProjects,
@@ -202,7 +202,7 @@ describe('Value Stream Analytics mutations', () => {
       ${'endDate'}          | ${initialData.createdBefore}
     `('$stateKey will be set to $expectedState', ({ stateKey, expectedState }) => {
       state = {};
-      mutations[types.INITIALIZE_CYCLE_ANALYTICS](state, initialData);
+      mutations[types.INITIALIZE_VSA](state, initialData);
 
       expect(state[stateKey]).toEqual(expectedState);
     });

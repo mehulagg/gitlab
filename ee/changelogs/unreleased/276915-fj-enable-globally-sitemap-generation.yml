@@ -1,0 +1,5 @@
+---
+title: Add sitemap generation for Gitlab.com and gitlab-org namespace
+merge_request: 56947
+author:
+type: added

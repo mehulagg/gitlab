@@ -31,7 +31,7 @@ export default {
     state.search = searchString ?? '';
   },
 
-  [types.RESET_MEMBERS](state) {
+  [types.RESET_BILLABLE_MEMBERS](state) {
     state.members = [];
 
     state.total = null;
@@ -41,28 +41,30 @@ export default {
     state.isLoading = false;
   },
 
-  [types.SET_MEMBER_TO_REMOVE](state, memberToRemove) {
+  [types.SET_BILLABLE_MEMBER_TO_REMOVE](state, memberToRemove) {
     if (!memberToRemove) {
-      state.memberToRemove = null;
+      state.billableMemberToRemove = null;
     } else {
-      state.memberToRemove = state.members.find((member) => member.id === memberToRemove.id);
+      state.billableMemberToRemove = state.members.find(
+        (member) => member.id === memberToRemove.id,
+      );
     }
   },
 
-  [types.REMOVE_MEMBER](state) {
+  [types.REMOVE_BILLABLE_MEMBER](state) {
     state.isLoading = true;
     state.hasError = false;
   },
 
-  [types.REMOVE_MEMBER_SUCCESS](state) {
+  [types.REMOVE_BILLABLE_MEMBER_SUCCESS](state) {
     state.isLoading = false;
     state.hasError = false;
-    state.memberToRemove = null;
+    state.billableMemberToRemove = null;
   },
 
-  [types.REMOVE_MEMBER_ERROR](state) {
+  [types.REMOVE_BILLABLE_MEMBER_ERROR](state) {
     state.isLoading = false;
     state.hasError = true;
-    state.memberToRemove = null;
+    state.billableMemberToRemove = null;
   },
 };

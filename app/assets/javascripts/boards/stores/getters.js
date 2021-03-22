@@ -1,7 +1,9 @@
 import { find } from 'lodash';
-import { inactiveId } from '../constants';
+import { BoardType, inactiveId } from '../constants';
 
 export default {
+  isGroupBoard: (state) => state.boardType === BoardType.group,
+  isProjectBoard: (state) => state.boardType === BoardType.project,
   isSidebarOpen: (state) => state.activeId !== inactiveId,
   isSwimlanesOn: () => false,
   getBoardItemById: (state) => (id) => {
@@ -25,6 +27,10 @@ export default {
   projectPathForActiveIssue: (_, getters) => {
     const { referencePath = '' } = getters.activeIssue;
     return referencePath.slice(0, referencePath.indexOf('#'));
+  },
+
+  activeGroupProjects: (state) => {
+    return state.groupProjects.filter((p) => !p.archived);
   },
 
   getListByLabelId: (state) => (labelId) => {

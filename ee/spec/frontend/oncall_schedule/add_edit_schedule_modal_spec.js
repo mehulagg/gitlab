@@ -15,7 +15,7 @@ import {
   updateScheduleResponse,
   updateScheduleResponseWithErrors,
 } from './mocks/apollo_mock';
-import mockTimezones from './mocks/mockTimezones.json';
+import mockTimezones from './mocks/mock_timezones.json';
 
 describe('AddScheduleModal', () => {
   let wrapper;
@@ -28,11 +28,12 @@ describe('AddScheduleModal', () => {
     getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
   let updateScheduleHandler;
 
-  const createComponent = ({ schedule, isEditMode, modalId } = {}) => {
+  const createComponent = ({ schedule, isEditMode, modalId, data } = {}) => {
     wrapper = shallowMount(AddEditScheduleModal, {
       data() {
         return {
           form: mockSchedule,
+          ...data,
         };
       },
       propsData: {
@@ -234,6 +235,53 @@ describe('AddScheduleModal', () => {
         const alert = findAlert();
         expect(alert.exists()).toBe(true);
         expect(alert.text()).toContain('Houston, we have a problem');
+      });
+    });
+
+    describe('when the schedule timezone is updated', () => {
+      const { location } = window;
+
+      beforeEach(() => {
+        delete window.location;
+        window.location = {
+          reload: jest.fn(),
+          hash: location.hash,
+        };
+      });
+
+      afterEach(() => {
+        window.location = location;
+      });
+
+      it('it should not reload the page if the timezone has not changed', async () => {
+        mutate.mockResolvedValueOnce({});
+        findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+        await waitForPromises();
+        expect(window.location.reload).not.toHaveBeenCalled();
+      });
+
+      it('it should reload the page if the timezone has changed', async () => {
+        createComponent({
+          data: { form: { ...mockSchedule, timezone: mockTimezones[1] } },
+          schedule: mockSchedule,
+          isEditMode: true,
+          modalId: editScheduleModalId,
+        });
+        mutate.mockResolvedValueOnce({});
+        findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+        expect(mutate).toHaveBeenCalledWith({
+          mutation: updateOncallScheduleMutation,
+          update: expect.anything(),
+          variables: {
+            iid: mockSchedule.iid,
+            projectPath,
+            name: mockSchedule.name,
+            description: mockSchedule.description,
+            timezone: mockTimezones[1].identifier,
+          },
+        });
+        await waitForPromises();
+        expect(window.location.reload).toHaveBeenCalled();
       });
     });
   });

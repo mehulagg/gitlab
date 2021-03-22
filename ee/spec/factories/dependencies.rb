@@ -22,12 +22,16 @@ FactoryBot.define do
     trait :with_vulnerabilities do
       vulnerabilities do
         [{
-           name:     'DDoS',
-           severity: 'high'
+           name: 'DDoS',
+           severity: 'high',
+           id: 42,
+           url: 'http://gitlab.org/some-group/some-project/-/security/vulnerabilities/42'
          },
          {
            name:     'XSS vulnerability',
-           severity: 'low'
+           severity: 'low',
+           id: 1729,
+           url: 'http://gitlab.org/some-group/some-project/-/security/vulnerabilities/1729'
          }]
       end
     end

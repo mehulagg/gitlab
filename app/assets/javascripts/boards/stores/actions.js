@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import { pick } from 'lodash';
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
@@ -134,7 +135,7 @@ export default {
 
   createIssueList: (
     { state, commit, dispatch, getters },
-    { backlog, labelId, milestoneId, assigneeId },
+    { backlog, labelId, milestoneId, assigneeId, iterationId },
   ) => {
     const { boardId } = state;
 
@@ -154,6 +155,7 @@ export default {
           labelId,
           milestoneId,
           assigneeId,
+          iterationId,
         },
       })
       .then(({ data }) => {
@@ -325,17 +327,21 @@ export default {
     commit(types.RESET_ISSUES);
   },
 
+  moveItem: ({ dispatch }) => {
+    dispatch('moveIssue');
+  },
+
   moveIssue: (
     { state, commit },
-    { issueId, issueIid, issuePath, fromListId, toListId, moveBeforeId, moveAfterId },
+    { itemId, itemIid, itemPath, fromListId, toListId, moveBeforeId, moveAfterId },
   ) => {
-    const originalIssue = state.boardItems[issueId];
+    const originalIssue = state.boardItems[itemId];
     const fromList = state.boardItemsByListId[fromListId];
-    const originalIndex = fromList.indexOf(Number(issueId));
+    const originalIndex = fromList.indexOf(Number(itemId));
     commit(types.MOVE_ISSUE, { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId });
 
     const { boardId } = state;
-    const [fullProjectPath] = issuePath.split(/[#]/);
+    const [fullProjectPath] = itemPath.split(/[#]/);
 
     gqlClient
       .mutate({
@@ -343,7 +349,7 @@ export default {
         variables: {
           projectPath: fullProjectPath,
           boardId: fullBoardId(boardId),
-          iid: issueIid,
+          iid: itemIid,
           fromListId: getIdFromGraphQLId(fromListId),
           toListId: getIdFromGraphQLId(toListId),
           moveBeforeId,
@@ -352,7 +358,7 @@ export default {
       })
       .then(({ data }) => {
         if (data?.issueMoveList?.errors.length) {
-          commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex });
+          throw new Error();
         } else {
           const issue = data.issueMoveList?.issue;
           commit(types.MOVE_ISSUE_SUCCESS, { issue });
@@ -601,6 +607,18 @@ export default {
     } else {
       dispatch('setActiveId', { id: boardItem.id, sidebarType });
     }
+  },
+
+  setError: ({ commit }, { message, error, captureError = false }) => {
+    commit(types.SET_ERROR, message);
+
+    if (captureError) {
+      Sentry.captureException(error);
+    }
+  },
+
+  unsetError: ({ commit }) => {
+    commit(types.SET_ERROR, undefined);
   },
 
   fetchBacklog: () => {

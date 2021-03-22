@@ -257,16 +257,6 @@ RSpec.describe GitlabSubscription do
 
       it_behaves_like 'a disabled feature'
     end
-
-    context 'with a self hosted plan' do
-      before do
-        gitlab_subscription.update!(namespace: nil)
-      end
-
-      it 'returns the previously calculated seats in use' do
-        expect(subject).to eq(5)
-      end
-    end
   end
 
   describe '#expired?' do
@@ -298,17 +288,15 @@ RSpec.describe GitlabSubscription do
 
     let(:subscription) { build(:gitlab_subscription) }
 
-    where(:plan_name, :seats, :hosted, :result) do
-      'bronze'        | 0 | true  | false
-      'bronze'        | 1 | true  | true
-      'bronze'        | 1 | false | false
-      'premium'       | 1 | true  | true
+    where(:plan_name, :seats, :result) do
+      'bronze'        | 0 | false
+      'bronze'        | 1 | true
+      'premium'       | 1 | true
     end
 
     with_them do
       before do
         plan = build(:plan, name: plan_name)
-        allow(subscription).to receive(:hosted?).and_return(hosted)
         subscription.assign_attributes(hosted_plan: plan, seats: seats)
       end
 
@@ -394,18 +382,6 @@ RSpec.describe GitlabSubscription do
         end
       end
 
-      context 'when it is not a hosted plan' do
-        before do
-          gitlab_subscription.namespace_id = nil
-        end
-
-        it 'does not index anything' do
-          expect(ElasticsearchIndexedNamespace).not_to receive(:safe_find_or_create_by!)
-
-          gitlab_subscription.save!
-        end
-      end
-
       context 'when it is a free plan' do
         let(:plan) { :free }
 
@@ -429,12 +405,13 @@ RSpec.describe GitlabSubscription do
 
     context 'before_update' do
       it 'logs previous state to gitlab subscription history' do
-        subject.update! max_seats_used: 42, seats: 13
-        subject.update! max_seats_used: 32
+        gitlab_subscription = create(:gitlab_subscription, max_seats_used: 42, seats: 13, namespace: create(:namespace))
+
+        gitlab_subscription.update! max_seats_used: 32
 
         expect(GitlabSubscriptionHistory.count).to eq(1)
         expect(GitlabSubscriptionHistory.last.attributes).to include(
-          'gitlab_subscription_id' => subject.id,
+          'gitlab_subscription_id' => gitlab_subscription.id,
           'change_type' => 'gitlab_subscription_updated',
           'max_seats_used' => 42,
           'seats' => 13
