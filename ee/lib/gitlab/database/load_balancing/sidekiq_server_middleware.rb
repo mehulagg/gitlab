@@ -4,8 +4,8 @@ module Gitlab
   module Database
     module LoadBalancing
       class SidekiqServerMiddleware
-        def call(worker, job, queue)
-          if requires_primary?(worker.class, job, queue)
+        def call(worker, job, _queue)
+          if requires_primary?(worker.class, job)
             Session.current.use_primary!
           end
 
@@ -21,7 +21,7 @@ module Gitlab
           Session.clear_session
         end
 
-        def requires_primary?(worker_class, job, queue)
+        def requires_primary?(worker_class, job)
           job[:worker_data_consistency] = worker_class.get_data_consistency
 
           return true if worker_class.get_data_consistency == :always
@@ -31,13 +31,13 @@ module Gitlab
           if replica_caught_up?(location)
             false
           elsif worker_class.get_data_consistency == :delayed
-            attempt_retry(worker_class, job, queue)
+            attempt_retry(worker_class, job)
           else
             true
           end
         end
 
-        def attempt_retry(worker_class, job, queue)
+        def attempt_retry(worker_class, job)
           max_retry_attempts = worker_class.get_max_replica_retry_count
 
           if job["delayed_retry"].nil?
