@@ -509,7 +509,7 @@ default variants `control` and `candidate` could be implemented like this:
 
 ```ruby
 def show
-  experiment(:button_color) do |e|
+  experiment(:button_name) do |e|
     e.use { } # control
     e.try { } # candidate
   end.run
@@ -538,8 +538,8 @@ export default {
 </template>
 ```
 
-When you use a multivariate experiment, you can use the variant names. For example,
-the Vue component for the `pill_color` experiment would look like this:
+When you use an experiment with multiple variants, you can use the variant names.
+For example, the Vue component for the `pill_color` experiment would look like this:
 
 ```vue
 <template>
