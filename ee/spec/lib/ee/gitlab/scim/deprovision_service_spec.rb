@@ -10,30 +10,56 @@ RSpec.describe ::EE::Gitlab::Scim::DeprovisionService do
 
     let(:service) { described_class.new(identity) }
 
-    it 'deactivates scim identity' do
-      service.execute
+    context 'when user is successfully removed' do
+      before do
+        create(:group_member, group: group, user: user, access_level: GroupMember::REPORTER)
+      end
 
-      expect(identity.active).to be false
+      it 'deactivates scim identity' do
+        service.execute
+
+        expect(identity.active).to be false
+      end
+
+      it 'removes group access' do
+        service.execute
+
+        expect(group.members.pluck(:user_id)).not_to include(user.id)
+      end
     end
 
-    it 'removes group access' do
-      create(:group_member, group: group, user: user, access_level: GroupMember::REPORTER)
+    context 'when user is not successfully removed' do
+      context 'when user is the last owner' do
+        before do
+          create(:group_member, group: group, user: user, access_level: GroupMember::OWNER)
+        end
 
-      service.execute
+        it 'does not remove the last owner' do
+          service.execute
 
-      expect(group.members.pluck(:user_id)).not_to include(user.id)
-    end
+          expect(identity.group.members.pluck(:user_id)).to include(user.id)
+        end
 
-    it 'does not remove the last owner' do
-      create(:group_member, group: group, user: user, access_level: GroupMember::OWNER)
+        it 'returns the last group owner error' do
+          response = service.execute
 
-      service.execute
+          expect(response.error?).to be true
+          expect(response.errors).to include("Did not remove user from group: Cannot remove last group owner.")
+        end
+      end
 
-      expect(identity.group.members.pluck(:user_id)).to include(user.id)
-    end
+      context 'when user is not a group member' do
+        it 'does not change group membership when the user is not a member' do
+          expect { service.execute }.not_to change { group.members.count }
+        end
 
-    it 'does not change group membership when the user is not a member' do
-      expect { service.execute }.not_to change { group.members.count }
+        it 'returns the group membership error' do
+          response = service.execute
+
+          expect(response.error?).to be true
+          expect(response.errors).to include("Did not remove user from group: User is not a group member.")
+        end
+      end
     end
   end
 end
