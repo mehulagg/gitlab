@@ -47,17 +47,19 @@ export default {
       </h3>
     </header>
     <gl-collapse class="container" :visible="showSection">
-      <template v-for="([label, item], i) in detailsEntries">
-        <report-row
-          v-if="$options.isSupportedReportType(item.type)"
-          :key="label"
-          :label="item.name"
-          :is-last-row="isLastRow(i)"
-          :debug="i"
-        >
-          <report-item :item="item" />
-        </report-row>
-      </template>
+      <div data-testid="reports">
+        <template v-for="([label, item], i) in detailsEntries">
+          <report-row
+            v-if="$options.isSupportedReportType(item.type)"
+            :key="label"
+            :label="item.name"
+            :is-last-row="isLastRow(i)"
+            data-testid="reportRow"
+          >
+            <report-item :item="item" />
+          </report-row>
+        </template>
+      </div>
     </gl-collapse>
   </section>
 </template>
