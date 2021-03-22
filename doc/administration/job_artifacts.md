@@ -526,6 +526,9 @@ If you need to manually remove job artifacts associated with multiple jobs while
    - `3.months.ago`
    - `1.year.ago`
 
+   Note that `erase_erasable_artifacts!` is a synchronous method, so upon exececution of the above, artifacts should be removed immediately,
+   removal is not scheduled via some background queue.
+
 #### Delete job artifacts and logs from jobs completed before a specific date
 
 WARNING:
