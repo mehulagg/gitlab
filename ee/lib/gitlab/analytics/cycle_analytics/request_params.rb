@@ -138,7 +138,8 @@ module Gitlab
           return unless stage
         
           {
-            id: stage.id,          }
+            id: stage.id || stage.name
+          }
         end
 
         def validate_created_before
