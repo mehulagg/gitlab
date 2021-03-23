@@ -67,6 +67,11 @@ export default {
       required: false,
       default: true,
     },
+    line: {
+      type: Object,
+      required: false,
+      default: null,
+    },
     lines: {
       type: Array,
       required: false,
@@ -110,7 +115,7 @@ export default {
       return this.referencedUsers.length >= referencedUsersThreshold;
     },
     lineContent() {
-      if (this.lines) {
+      if (this.lines.length) {
         return this.lines
           .map((line) => {
             const { rich_text: richText, text } = line;
