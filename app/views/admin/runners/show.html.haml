@@ -11,9 +11,9 @@
         %span.runner-state.runner-state-specific
           Specific
 
-- page_title @runner.short_sha
-- add_to_breadcrumbs _("Runners"), admin_runners_path
 - breadcrumb_title "##{@runner.id}"
+- add_to_breadcrumbs _("Runners"), admin_runners_path
+- page_title "##{@runner.id} (#{@runner.short_sha})"
 
 - if @runner.instance_type?
   .bs-callout.bs-callout-success
