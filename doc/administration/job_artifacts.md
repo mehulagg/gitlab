@@ -587,7 +587,7 @@ If a job depends on the artifacts of a previous job,
 and `gitlab.rb` combines the following configurations
 it is possible to encounter the above error due to a race-condition.
 
-````ruby
+```ruby
 gitlab_rails['artifacts_object_store_background_upload'] = false
 gitlab_rails['artifacts_object_store_direct_upload'] = true
 ```
