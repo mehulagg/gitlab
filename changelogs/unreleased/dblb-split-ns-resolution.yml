@@ -1,5 +1,5 @@
 ---
 title: Catch NoResponseError from Net::DNS in LoadBalancing::Resolver
-merge_request:
+merge_request: 57187
 author:
 type: fixed
