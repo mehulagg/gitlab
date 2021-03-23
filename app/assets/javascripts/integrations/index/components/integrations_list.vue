@@ -14,8 +14,10 @@ export default {
   },
   computed: {
     activeIntegrations() {
-      // TODO filter
-      return this.integrations;
+      return this.integrations.filter((integration) => integration.active);
+    },
+    inactiveIntegrations() {
+      return this.integrations.filter((integration) => !integration.active);
     },
   },
 };
@@ -24,6 +26,7 @@ export default {
 <template>
   <div>
     <integrations-table :integrations="activeIntegrations" />
-    <div>{{ integrations }}</div>
+    <h5>{{ s__('Integrations|Add an integration') }}</h5>
+    <integrations-table :integrations="inactiveIntegrations" />
   </div>
 </template>

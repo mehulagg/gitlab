@@ -1,5 +1,6 @@
 <script>
 import { GlIcon, GlLink, GlTable } from '@gitlab/ui';
+import { __ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
@@ -22,15 +23,15 @@ export default {
     },
     {
       key: 'name',
-      label: 'Integration',
+      label: __('Integration'),
     },
     {
       key: 'description',
-      label: 'Description',
+      label: __('Description'),
     },
     {
       key: 'updated_at',
-      label: 'Last edit',
+      label: __('Last updated'),
     },
   ],
 };
