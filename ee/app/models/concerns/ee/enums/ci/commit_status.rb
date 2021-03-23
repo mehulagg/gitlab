@@ -13,7 +13,8 @@ module EE
           def failure_reasons
             super.merge(protected_environment_failure: 1_000,
                         upstream_bridge_project_not_found: 1_004,
-                        insufficient_upstream_permissions: 1_005)
+                        insufficient_upstream_permissions: 1_005,
+                        ci_quota_exceeded: 1_010)
           end
         end
       end

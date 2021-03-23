@@ -178,6 +178,11 @@ module EE
 
         ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)
       end
+
+      def ci_quota_available?
+        # TODO add checks here
+        true
+      end
     end
   end
 end
