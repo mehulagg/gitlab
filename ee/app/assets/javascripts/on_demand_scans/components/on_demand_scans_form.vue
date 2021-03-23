@@ -221,11 +221,12 @@ export default {
       return isFormInvalid || (loading && loading !== saveScanBtnId);
     },
     formFieldValues() {
-      const { selectedScannerProfileId, selectedSiteProfileId } = this;
+      const { selectedScannerProfileId, selectedSiteProfileId, selectedBranch } = this;
       return {
         ...serializeFormObject(this.form.fields),
         selectedScannerProfileId,
         selectedSiteProfileId,
+        selectedBranch,
       };
     },
     hasExcludedUrls() {
@@ -310,11 +311,17 @@ export default {
       this.showAlert = false;
     },
     updateFromStorage(val) {
-      const { selectedSiteProfileId, selectedScannerProfileId, name, description } = val;
+      const {
+        selectedSiteProfileId,
+        selectedScannerProfileId,
+        name,
+        description,
+        selectedBranch,
+      } = val;
 
       this.form.fields.name.value = name ?? this.form.fields.name.value;
       this.form.fields.description.value = description ?? this.form.fields.description.value;
-
+      this.selectedBranch = selectedBranch;
       // precedence is given to profile IDs passed from the query params
       this.selectedSiteProfileId = this.selectedSiteProfileId ?? selectedSiteProfileId;
       this.selectedScannerProfileId = this.selectedScannerProfileId ?? selectedScannerProfileId;

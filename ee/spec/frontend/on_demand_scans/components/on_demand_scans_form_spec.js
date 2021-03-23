@@ -268,6 +268,7 @@ describe('OnDemandScansForm', () => {
             name: 'My daily scan',
             selectedScannerProfileId: 'gid://gitlab/DastScannerProfile/1',
             selectedSiteProfileId: 'gid://gitlab/DastSiteProfile/1',
+            selectedBranch: 'some-other-branch',
           }),
         ],
       ]);
