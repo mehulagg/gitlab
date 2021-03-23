@@ -55,7 +55,12 @@ export default {
     </template>
 
     <template #cell(name)="{ item }">
-      <gl-link :href="item.edit_path" class="gl-font-weight-bold">{{ item.name }}</gl-link>
+      <gl-link
+        :href="item.edit_path"
+        class="gl-font-weight-bold"
+        :data-qa-selector="`${item.type}_link`"
+        >{{ item.name }}</gl-link
+      >
     </template>
 
     <template #cell(updated_at)="{ item }">

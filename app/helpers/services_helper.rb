@@ -161,7 +161,8 @@ module ServicesHelper
       name: integration.title,
       description: integration.description,
       updated_at: integration.updated_at,
-      edit_path: scoped_edit_integration_path(integration)
+      edit_path: scoped_edit_integration_path(integration),
+      type: integration.to_param
     }
   end
 end
