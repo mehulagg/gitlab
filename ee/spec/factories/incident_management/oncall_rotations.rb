@@ -4,7 +4,7 @@ FactoryBot.define do
   factory :incident_management_oncall_rotation, class: 'IncidentManagement::OncallRotation' do
     association :schedule, factory: :incident_management_oncall_schedule
     sequence(:name) { |n| "On-call Rotation ##{n}" }
-    starts_at { Time.current.change(usec: 0) }
+    starts_at { Time.new(Time.current.year+1, 3, 1, 10, 00).in_time_zone }
     ends_at { nil }
     length { 5 }
     length_unit { :days }
