@@ -49,7 +49,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mr-3 gl-display-inline-block gl-vertical-align-bottom full-width-mobile">
+  <div data-testid="sort-discussion-filter" class="gl-mr-3 gl-display-inline-block gl-vertical-align-bottom full-width-mobile">
     <local-storage-sync
       :value="sortDirection"
       :storage-key="storageKey"
@@ -58,7 +58,6 @@ export default {
     />
     <gl-dropdown
       :text="dropdownText"
-      data-testid="sort-discussion-filter"
       class="js-dropdown-text full-width-mobile"
     >
       <gl-dropdown-item
