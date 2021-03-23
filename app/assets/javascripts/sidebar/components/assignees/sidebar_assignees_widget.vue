@@ -11,6 +11,7 @@ import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import { assigneesQueries, ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SidebarInviteMembers from './sidebar_invite_members.vue';
 import SidebarParticipant from './sidebar_participant.vue';
 
@@ -37,6 +38,7 @@ export default {
     SidebarParticipant,
     SidebarAssigneesRealtime,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: {
     directlyInviteMembers: {
       default: false,
@@ -139,6 +141,10 @@ export default {
     },
   },
   computed: {
+    shouldEnableRealtime() {
+      // Note: Realtime is only available on issues right now, future support for MR wil be built later.
+      return this.glFeatures.realTimeIssueSidebar && this.issuableType === 'issue';
+    },
     queryVariables() {
       return {
         iid: this.iid,
