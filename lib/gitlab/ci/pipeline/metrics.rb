@@ -54,6 +54,24 @@ module Gitlab
             Gitlab::Metrics.counter(name, comment)
           end
         end
+
+        def pipeline_failure_reason_counter
+          strong_memoize(:pipeline_failure_reason_counter) do
+            name = :gitlab_ci_pipeline_failure_reasons
+            comment = 'Counter of pipeline failure reasons'
+
+            Gitlab::Metrics.counter(name, comment)
+          end
+        end
+
+        def job_failure_reason_counter
+          strong_memoize(:job_failure_reason_counter) do
+            name = :gitlab_ci_job_failure_reasons
+            comment = 'Counter of job failure reasons'
+
+            Gitlab::Metrics.counter(name, comment)
+          end
+        end
       end
     end
   end
