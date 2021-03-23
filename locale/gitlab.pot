@@ -31650,6 +31650,9 @@ msgstr ""
 msgid "To GitLab"
 msgstr ""
 
+msgid "To accept this invitation, create an account or sign in."
+msgstr ""
+
 msgid "To access this domain create a new DNS record"
 msgstr ""
 
