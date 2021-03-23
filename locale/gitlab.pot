@@ -10709,6 +10709,9 @@ msgstr ""
 msgid "DevopsAdoption|Add / remove groups"
 msgstr ""
 
+msgid "DevopsAdoption|Add / remove sub-groups"
+msgstr ""
+
 msgid "DevopsAdoption|Add Group"
 msgstr ""
 

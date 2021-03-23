@@ -17,6 +17,8 @@ export const DEVOPS_ADOPTION_ERROR_KEYS = {
   segments: 'segmentsError',
 };
 
+export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add / remove sub-groups');
+
 export const DEVOPS_ADOPTION_STRINGS = {
   app: {
     [DEVOPS_ADOPTION_ERROR_KEYS.groups]: s__(

@@ -9,6 +9,7 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import dateformat from 'dateformat';
+import { convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
@@ -17,6 +18,7 @@ import {
   DATE_TIME_FORMAT,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEFAULT_POLLING_INTERVAL,
+  DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
 } from '../constants';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
@@ -40,7 +42,16 @@ export default {
     GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
+  inject: {
+    isGroup: {
+      default: false,
+    },
+    group: {
+      default: {},
+    },
+  },
   i18n: {
+    groupLevelLabel: DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
     ...DEVOPS_ADOPTION_STRINGS.app,
   },
   maxSegments: MAX_SEGMENTS,
@@ -56,7 +67,7 @@ export default {
         [DEVOPS_ADOPTION_ERROR_KEYS.segments]: false,
       },
       groups: {
-        nodes: [],
+        nodes: this.isGroup ? [this.group] : [],
         pageInfo: null,
       },
       pollingTableData: null,
@@ -65,6 +76,18 @@ export default {
   apollo: {
     devopsAdoptionSegments: {
       query: devopsAdoptionSegmentsQuery,
+      variables() {
+        let variables = {};
+
+        if (this.isGroup) {
+          variables = {
+            parentNamespaceId: convertToGraphQLId(TYPE_GROUP, this.group.id),
+            directDescendantsOnly: false,
+          };
+        }
+
+        return variables;
+      },
       error(error) {
         this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.segments, error);
       },
@@ -196,7 +219,9 @@ export default {
             v-gl-modal="$options.devopsSegmentModalId"
             :disabled="segmentLimitReached"
             @click="clearSelectedSegment"
-            >{{ $options.i18n.tableHeader.button }}</gl-button
+            >{{
+              isGroup ? $options.i18n.groupLevelLabel : $options.i18n.tableHeader.button
+            }}</gl-button
           ></span
         >
       </div>
