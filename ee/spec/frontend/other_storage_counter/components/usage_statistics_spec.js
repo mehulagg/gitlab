@@ -58,8 +58,8 @@ describe('Usage Statistics component', () => {
       expect(url.attributes('href')).toBe('/help/user/usage_quotas#excess-storage-usage');
     });
 
-    it('renders button in purchased usage card footer', () => {
-      expect(getStatisticsCard('purchased-usage').find(GlButton).exists()).toBe(true);
+    it('does not render button in purchased usage card footer', () => {
+      expect(getStatisticsCard('purchased-usage').find(GlButton).exists()).toBe(false);
     });
   });
 
