@@ -9,11 +9,17 @@ query issueParticipants($fullPath: ID!, $iid: String!) {
       participants {
         nodes {
           ...User
+          status {
+            availability
+          }
         }
       }
       assignees {
         nodes {
           ...User
+          status {
+            availability
+          }
         }
       }
     }

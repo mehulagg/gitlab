@@ -9,11 +9,17 @@ mutation mergeRequestSetAssignees($iid: String!, $assigneeUsernames: [String!]!,
       assignees {
         nodes {
           ...User
+          status {
+            availability
+          }
         }
       }
       participants {
         nodes {
           ...User
+          status {
+            availability
+          }
         }
       }
     }

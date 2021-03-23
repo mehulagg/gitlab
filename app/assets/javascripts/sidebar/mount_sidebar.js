@@ -15,6 +15,7 @@ import SidebarConfidentialityWidget from '~/sidebar/components/confidential/side
 import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import { apolloProvider } from '~/sidebar/graphql';
 import Translate from '../vue_shared/translate';
+import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
 import CopyEmailToClipboard from './components/copy_email_to_clipboard.vue';
 import SidebarLabels from './components/labels/sidebar_labels.vue';
 import IssuableLockForm from './components/lock/issuable_lock_form.vue';
@@ -32,8 +33,53 @@ function getSidebarOptions(sidebarOptEl = document.querySelector('.js-sidebar-op
   return JSON.parse(sidebarOptEl.innerHTML);
 }
 
-function mountAssigneesComponent() {
+function getSidebarAssigneeAvailabilityData() {
+  const sidebarAssigneeEl = document.querySelectorAll('.js-sidebar-assignee-data input');
+  return Array.from(sidebarAssigneeEl)
+    .map((el) => el.dataset)
+    .reduce(
+      (acc, { username, availability = '' }) => ({
+        ...acc,
+        [username]: availability,
+      }),
+      {},
+    );
+}
+
+function mountAssigneesComponentDeprecated(mediator) {
   const el = document.getElementById('js-vue-sidebar-assignees');
+
+  if (!el) return;
+
+  const { iid, fullPath } = getSidebarOptions();
+  const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
+  // eslint-disable-next-line no-new
+  new Vue({
+    el,
+    apolloProvider,
+    components: {
+      SidebarAssignees,
+    },
+    render: (createElement) =>
+      createElement('sidebar-assignees', {
+        props: {
+          mediator,
+          issuableIid: String(iid),
+          projectPath: fullPath,
+          field: el.dataset.field,
+          signedIn: el.hasAttribute('data-signed-in'),
+          issuableType:
+            isInIssuePage() || isInIncidentPage() || isInDesignPage()
+              ? IssuableType.Issue
+              : IssuableType.MergeRequest,
+          assigneeAvailabilityStatus,
+        },
+      }),
+  });
+}
+
+function mountAssigneesComponent() {
+  const el = document.getElementById('js-vue-sidebar-assignees-widget');
 
   if (!el) return;
 
@@ -323,6 +369,7 @@ function mountCopyEmailComponent() {
 
 export function mountSidebar(mediator) {
   mountAssigneesComponent();
+  mountAssigneesComponentDeprecated(mediator);
   mountReviewersComponent(mediator);
   mountConfidentialComponent(mediator);
   mountReferenceComponent(mediator);

@@ -9,11 +9,17 @@ mutation issueSetAssignees($iid: String!, $assigneeUsernames: [String!]!, $fullP
       assignees {
         nodes {
           ...User
+          status {
+            availability
+          }
         }
       }
       participants {
         nodes {
           ...User
+          status {
+            availability
+          }
         }
       }
     }

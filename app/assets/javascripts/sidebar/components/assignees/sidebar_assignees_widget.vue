@@ -154,6 +154,9 @@ export default {
       const currentAssignees = this.$apollo.queries.issuable.loading
         ? this.initialAssignees
         : this.issuable?.assignees?.nodes;
+      currentAssignees.forEach((assignee) => {
+        console.log(1);
+      });
       return currentAssignees || [];
     },
     participants() {
