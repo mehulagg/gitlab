@@ -1,9 +1,11 @@
 <script>
 import { GlButton } from '@gitlab/ui';
+import EnableFeatureViaMr from './enable_feature_via_mr.vue';
 
 export default {
   components: {
     GlButton,
+    EnableFeatureViaMr
   },
   props: {
     feature: {
@@ -22,7 +24,7 @@ export default {
     canManageProfiles() {
       return this.feature.type === 'dast_profiles';
     },
-  },
+  }
 };
 </script>
 
@@ -40,6 +42,8 @@ export default {
     data-testid="configureButton"
     >{{ s__('SecurityConfiguration|Configure') }}</gl-button
   >
+  
+  <enable-feature-via-mr v-else-if="feature.type === 'dependency_scanning'" :feature="feature.type"></enable-feature-via-mr>
 
   <gl-button
     v-else-if="canConfigureFeature"
@@ -49,4 +53,6 @@ export default {
     data-testid="enableButton"
     >{{ s__('SecurityConfiguration|Enable') }}</gl-button
   >
+  
+
 </template>
