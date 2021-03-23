@@ -89,7 +89,7 @@ _The artifacts are stored by default in
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1762) in
 >   [GitLab Premium](https://about.gitlab.com/pricing/) 9.4.
-> - Since version 9.5, artifacts are [browsable](../ci/pipelines/job_artifacts.md#browsing-artifacts),
+> - Since version 9.5, artifacts are [browsable](../ci/pipelines/job_artifacts.md#download-job-artifacts),
 >   when object storage is enabled. 9.4 lacks this feature.
 > - Since version 10.6, available in [GitLab Free](https://about.gitlab.com/pricing/).
 > - Since version 11.0, we support `direct_upload` to S3.
@@ -509,7 +509,7 @@ If you need to manually remove job artifacts associated with multiple jobs while
 
    NOTE:
    This step also erases artifacts that users have chosen to
-   ["keep"](../ci/pipelines/job_artifacts.md#browsing-artifacts).
+   ["keep"](../ci/pipelines/job_artifacts.md#download-job-artifacts).
 
    ```ruby
    builds_to_clear = builds_with_artifacts.where("finished_at < ?", 1.week.ago)

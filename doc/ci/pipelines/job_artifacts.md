@@ -60,7 +60,7 @@ is used.
 
 For more examples, view the [keyword reference for the `.gitlab-ci.yml` file](../yaml/README.md#artifacts).
 
-## Download artifacts
+## Download job artifacts
 
 > - From GitLab 9.2, PDFs, images, videos, and other formats can be previewed directly in the job artifacts browser without the need to download them.
 > - Introduced in [GitLab 10.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14399), HTML files in a public project can be previewed directly in a new tab without the need to download them when [GitLab Pages](../../administration/pages/index.md) is enabled. The same applies for textual formats (currently supported extensions: `.txt`, `.json`, and `.log`).
@@ -149,13 +149,13 @@ information in the UI.
 
 ![Latest artifacts button](img/job_latest_artifacts_browser.png)
 
-## Erase artifacts
+## Erase job artifacts
 
 WARNING:
 This is a destructive action that leads to data loss. Use with caution.
 
-You can erase a single job via the UI, which also removes the job's
-artifacts and trace, if you are:
+You can erase a single job, which also removes the job's
+artifacts and trace. You must be:
 
 - The owner of the job.
 - A [Maintainer](../../user/permissions.md#gitlab-cicd-permissions) of the project.
