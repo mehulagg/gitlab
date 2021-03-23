@@ -76,9 +76,9 @@
   - if issuable.new_record?
     = link_to _('Cancel'), polymorphic_path([@project, issuable.class]), class: 'btn gl-button btn-default'
   - else
-    - if can?(current_user, :"destroy_#{issuable.to_ability_name}", @project)
-      = link_to 'Delete', polymorphic_path([@project, issuable], params: { destroy_confirm: true }), data: { confirm: "#{issuable.human_class_name} will be removed! Are you sure?" }, method: :delete, class: 'btn gl-button btn-danger btn-danger-secondary gl-mr-2'
     = link_to _('Cancel'), polymorphic_path([@project, issuable]), class: 'gl-button btn btn-default'
+    - if can?(current_user, :"destroy_#{issuable.to_ability_name}", @project)
+      = link_to 'Delete', polymorphic_path([@project, issuable], params: { destroy_confirm: true }), data: { confirm: "#{issuable.human_class_name} will be removed! Are you sure?" }, method: :delete, class: 'btn gl-button btn-danger btn-danger-secondary gl-float-right'
 
 = render_if_exists 'shared/issuable/remove_approver'
 
