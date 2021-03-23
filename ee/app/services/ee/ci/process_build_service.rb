@@ -18,9 +18,9 @@ module EE
       def allowed_to_deploy?(build)
         # We need to check if Protected Environments feature is available,
         # as evaluating `build.expanded_environment_name` is expensive.
-        return true unless project.protected_environments_feature_available?
+        return true unless project.protected_environments_feature_available? # TODO:
 
-        project.protected_environment_accessible_to?(build.expanded_environment_name, build.user)
+        build.user.has_access_to_protected_environment?(build.persisted_environment)
       end
     end
   end

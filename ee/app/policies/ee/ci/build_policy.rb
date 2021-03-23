@@ -14,7 +14,7 @@ module EE
           if environment && project.protected_environments_feature_available?
             protected_environment = project.protected_environment_by_name(environment)
 
-            !!protected_environment&.accessible_to?(user)
+            user.has_access_to_protected_environment?(environment)
           else
             false
           end
@@ -37,9 +37,9 @@ module EE
         def deployable_by_user?
           # We need to check if Protected Environments feature is available,
           # as evaluating `build.expanded_environment_name` is expensive.
-          return true unless build.project.protected_environments_feature_available?
+          return true unless build.project.protected_environments_feature_available? # TODO:
 
-          build.project.protected_environment_accessible_to?(build.persisted_environment&.name, user)
+          user.has_access_to_protected_environment?(build.persisted_environment)
         end
       end
     end

@@ -1204,6 +1204,10 @@ class User < ApplicationRecord
     ])
   end
 
+  def has_access_to_protected_environment?(environment)
+    environment.project.protected_environment_accessible_to?(environment.name, self)
+  end
+
   def created_by
     User.find_by(id: created_by_id) if created_by_id
   end
