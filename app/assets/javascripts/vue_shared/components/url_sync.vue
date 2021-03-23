@@ -6,7 +6,8 @@ export default {
   props: {
     query: {
       type: Object,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   watch: {
@@ -14,11 +15,19 @@ export default {
       immediate: true,
       deep: true,
       handler(newQuery) {
-        historyPushState(mergeUrlParams(newQuery, window.location.href, { spreadArrays: true }));
+        this.updateQuery(newQuery);
       },
     },
   },
+  methods: {
+    updateQuery(newQuery) {
+      historyPushState(mergeUrlParams(newQuery, window.location.href, { spreadArrays: true }));
+    },
+  },
   render() {
+    if (this.$scopedSlots.default) {
+      return this.$scopedSlots.default({ updateQuery: this.updateQuery });
+    }
     return this.$slots.default;
   },
 };
