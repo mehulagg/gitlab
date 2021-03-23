@@ -56,7 +56,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
 }));
 
-const LOCAL_STORAGE_KEY = 'on-demand-scans-new-form';
+const LOCAL_STORAGE_KEY = 'group/project/on-demand-scans-new-form';
 
 describe('OnDemandScansForm', () => {
   let localVue;

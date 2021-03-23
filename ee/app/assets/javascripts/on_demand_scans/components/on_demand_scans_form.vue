@@ -231,6 +231,9 @@ export default {
     hasExcludedUrls() {
       return this.selectedSiteProfile.excludedUrls?.length > 0;
     },
+    storageKey() {
+      return `${this.projectPath}/${ON_DEMAND_SCANS_STORAGE_KEY}`;
+    },
   },
   created() {
     const params = queryToObject(window.location.search);
@@ -317,7 +320,6 @@ export default {
       this.selectedScannerProfileId = this.selectedScannerProfileId ?? selectedScannerProfileId;
     },
   },
-  ON_DEMAND_SCANS_STORAGE_KEY,
   EXCLUDED_URLS_SEPARATOR,
 };
 </script>
@@ -327,7 +329,7 @@ export default {
     <local-storage-sync
       v-if="!isEdit"
       as-json
-      :storage-key="$options.ON_DEMAND_SCANS_STORAGE_KEY"
+      :storage-key="storageKey"
       :clear="clearStorage"
       :value="formFieldValues"
       @input="updateFromStorage"
