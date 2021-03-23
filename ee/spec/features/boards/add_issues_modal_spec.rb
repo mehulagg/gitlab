@@ -12,6 +12,7 @@ RSpec.describe 'Issue Boards add issue modal', :js do
   let!(:issue) { create(:issue, project: project, title: 'abc', description: 'def') }
 
   before do
+    stub_feature_flags(graphql_board_lists: false)
     stub_feature_flags(add_issues_button: true)
     project.add_maintainer(user)
 

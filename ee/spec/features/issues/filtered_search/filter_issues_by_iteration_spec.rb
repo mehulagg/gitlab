@@ -81,7 +81,7 @@ RSpec.describe 'Filter issues by iteration', :js do
         before do
           # iterationWildCardId is not yet supported by graphQL https://gitlab.com/gitlab-org/gitlab/-/issues/300115
           stub_feature_flags(graphql_board_lists: false)
-          
+
           visit page_path
 
           page.within('.filtered-search-wrapper') do
