@@ -147,6 +147,7 @@ RSpec.describe MigrateNotesToSeparateIndex do
             migration.set_migration_state(slice: 0, max_slices: 2, task_id: 'task_id')
 
             expect { migration.migrate }.to raise_error(/total is not equal/)
+            expect(migration.migration_state[:task_id]).to be_nil
           end
         end
 
@@ -159,6 +160,7 @@ RSpec.describe MigrateNotesToSeparateIndex do
             migration.set_migration_state(slice: 0, max_slices: 2, task_id: 'task_id')
 
             expect { migration.migrate }.to raise_error(/failed with/)
+            expect(migration.migration_state[:task_id]).to be_nil
           end
         end
       end

@@ -74,7 +74,7 @@ class MigrateNotesToSeparateIndex < Elastic::Migration
 
     set_migration_state(
       slice: slice,
-      task_id: task_id,
+      task_id: nil,
       retry_attempt: retry_attempt + 1,
       max_slices: max_slices
     )
