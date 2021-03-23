@@ -43,6 +43,7 @@ module Gitlab
           return if answer.empty?
 
           answer.first.address
+        rescue Net::DNS::Resolver::NoResponseError
         end
       end
     end
