@@ -53,7 +53,7 @@ You can specify that they are created:
 - Only when the job fails.
 
 The `expire_in` keyword determines how long GitLab keeps the job artifacts.
-You can also [use the UI to keep job artifacts from expiring](#browse-artifacts).
+You can also [use the UI to keep job artifacts from expiring](#download-job-artifacts).
 If `expire_in` is not defined, the
 [instance-wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
 is used.
