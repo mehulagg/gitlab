@@ -45,17 +45,17 @@ export default {
     },
     tabIndex: {
       get() {
-        const activeTabIndex = Object.keys(this.profileSettings).indexOf(
-          camelCase(getLocationHash()),
+        const activeTabIndex = Object.values(this.profileSettings).find(
+          ({ anchorName }) => anchorName === camelCase(getLocationHash()),
         );
 
         return Math.max(0, activeTabIndex);
       },
       set(newTabIndex) {
-        const profileTypeName = Object.keys(this.profileSettings)[newTabIndex];
+        const { anchorName } = Object.values(this.profileSettings)[newTabIndex];
 
-        if (profileTypeName) {
-          window.location.hash = kebabCase(profileTypeName);
+        if (anchorName) {
+          window.location.hash = kebabCase(anchorName);
         }
       },
     },

@@ -13,6 +13,7 @@ import { s__ } from '~/locale';
 export const getProfileSettings = ({ createNewProfilePaths }) => ({
   dastProfiles: {
     profileType: 'dastProfiles',
+    anchorName: 'dastScans',
     createNewProfilePath: createNewProfilePaths.savedScan,
     graphQL: {
       query: dastProfilesQuery,
@@ -56,6 +57,7 @@ export const getProfileSettings = ({ createNewProfilePaths }) => ({
   },
   siteProfiles: {
     profileType: 'siteProfiles',
+    anchorName: 'siteProfiles',
     createNewProfilePath: createNewProfilePaths.siteProfile,
     graphQL: {
       query: dastSiteProfilesQuery,
@@ -90,6 +92,7 @@ export const getProfileSettings = ({ createNewProfilePaths }) => ({
   },
   scannerProfiles: {
     profileType: 'scannerProfiles',
+    anchorName: 'scannerProfiles',
     createNewProfilePath: createNewProfilePaths.scannerProfile,
     graphQL: {
       query: dastScannerProfilesQuery,
