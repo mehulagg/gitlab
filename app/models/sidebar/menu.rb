@@ -26,7 +26,7 @@ module Sidebar
     end
 
     def active_paths
-      [active_path] + @items.map(&:active_path)
+      ([active_path] + renderable_items.map(&:active_path)).flatten
     end
 
     def link_to_attributes
@@ -38,7 +38,7 @@ module Sidebar
     end
 
     def has_renderable_items?
-      renderable_items.present?
+      renderable_items.any?
     end
 
     def add_item(item)

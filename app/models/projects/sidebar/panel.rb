@@ -8,6 +8,7 @@ module Projects
 
         set_context_menu(Projects::Sidebar::Menus::ContextMenu.new(current_user, project))
         add_menu(Projects::Sidebar::Menus::ProjectOverviewMenu.new(current_user, project))
+        add_menu(Projects::Sidebar::Menus::LearnGitlabMenu.new(current_user, project))
       end
 
       def aria_label

@@ -22,5 +22,13 @@ module Sidebar
     def aria_label
       raise NotImplementedError
     end
+
+    def has_renderable_menus?
+      renderable_menus.any?
+    end
+
+    def renderable_menus
+      @renderable_menus ||= @menus.select(&:render?)
+    end
   end
 end

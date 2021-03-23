@@ -25,7 +25,7 @@ module Projects
 
           override :active_path
           def active_path
-            'releases#index'
+            ['releases#index', 'releases#new']
           end
 
           override :item_name
