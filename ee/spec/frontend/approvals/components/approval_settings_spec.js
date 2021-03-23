@@ -1,4 +1,4 @@
-import { GlButton, GlForm } from '@gitlab/ui';
+import { GlButton, GlForm, GlLink, GlIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 
@@ -21,11 +21,15 @@ describe('ApprovalSettings', () => {
       localVue,
       store: new Vuex.Store(store),
       propsData: { approvalSettingsPath },
+      stubs: {
+        GlLink,
+      },
     });
   };
 
   const findForm = () => wrapper.findComponent(GlForm);
   const findPreventAuthorApproval = () => wrapper.find('[data-testid="prevent-author-approval"]');
+  const findRequireUserPassword = () => wrapper.find('[data-testid="require-user-password"]');
   const findSaveButton = () => wrapper.findComponent(GlButton);
 
   beforeEach(() => {
@@ -47,14 +51,42 @@ describe('ApprovalSettings', () => {
     expect(actions.fetchSettings).toHaveBeenCalledWith(expect.any(Object), approvalSettingsPath);
   });
 
+  describe('checkboxes', () => {
+    beforeEach(() => {
+      createWrapper();
+    });
+
+    it('shows all the checkboxes', () => {
+      expect(
+        [findPreventAuthorApproval().exists(), findRequireUserPassword().exists()].every((x) => x),
+      ).toBe(true);
+    });
+
+    it('shows the checkbox label', () => {
+      expect(findPreventAuthorApproval().text()).toBe('Prevent MR approvals by the author.');
+    });
+
+    it('shows the help link', () => {
+      const link = findRequireUserPassword().find(GlLink);
+
+      expect(link.attributes('href')).toBe(
+        '/help/user/project/merge_requests/merge_request_approvals#require-authentication-when-approving-a-merge-request',
+      );
+      expect(link.find(GlIcon).props('name')).toBe('question-o');
+    });
+  });
+
   describe('interact with checkboxes', () => {
-    it('renders checkbox with correct value', async () => {
+    it.each`
+      find                         | setting
+      ${findPreventAuthorApproval} | ${'preventAuthorApproval'}
+      ${findRequireUserPassword}   | ${'requireUserPassword'}
+    `('renders the $setting checkbox with correct value', async ({ find, setting }) => {
       createWrapper();
 
-      const input = findPreventAuthorApproval();
-      await input.vm.$emit('input', false);
+      await find().vm.$emit('input', true);
 
-      expect(store.modules.approvals.state.settings.preventAuthorApproval).toBe(false);
+      expect(store.modules.approvals.state.settings[setting]).toBe(true);
     });
   });
 
