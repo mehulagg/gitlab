@@ -23094,6 +23094,8 @@ CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_nulls_last ON merge
 
 CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_time_to_merge ON merge_request_metrics USING btree (target_project_id, merged_at, created_at) WHERE (merged_at > created_at);
 
+CREATE INDEX index_mrs_on_target_id_and_created_at_and_state_id ON merge_requests USING btree (target_project_id, created_at, state_id, id);
+
 CREATE UNIQUE INDEX index_namespace_aggregation_schedules_on_namespace_id ON namespace_aggregation_schedules USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_namespace_root_storage_statistics_on_namespace_id ON namespace_root_storage_statistics USING btree (namespace_id);
