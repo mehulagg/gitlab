@@ -25,7 +25,7 @@ RSpec.describe ContainerExpirationPolicyWorker do
           stub_exclusive_lease_taken(worker.lease_key, timeout: 5.hours)
         end
 
-        it 'does not execute any policy' do
+        it 'does not do anything' do
           expect(ContainerExpirationPolicies::CleanupContainerRepositoryWorker).not_to receive(:perform_with_capacity)
           expect(worker).not_to receive(:runnable_policies)
 
