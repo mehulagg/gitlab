@@ -3,7 +3,7 @@
 - aside_title = @group.subgroup? ? _('Subgroup navigation') : _('Group navigation')
 - overview_title = @group.subgroup? ? _('Subgroup overview') : _('Group overview')
 
-%aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('groups_side_navigation', 'render', 'groups_side_navigation'), 'aria-label': aside_title }
+%aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **group_tracking_attrs, 'aria-label': aside_title }
   .nav-sidebar-inner-scroll
     .context-header
       = link_to group_path(@group), title: @group.name do
