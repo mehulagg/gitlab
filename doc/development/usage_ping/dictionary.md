@@ -13856,23 +13856,11 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
-### `topology.duration_s`
+### `topology`
 
-Time it took to collect topology data
+Topology data
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180922_duration_s.yml)
-
-Group: `group::memory`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
-### `topology.failures`
-
-Contains information about failed queries
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180924_failures.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210323120839_topology.yml)
 
 Group: `group::memory`
 
