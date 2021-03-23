@@ -124,7 +124,9 @@ export default class Project {
 
             if (loc.includes('/-/')) {
               const refs = this.fullData.Branches.concat(this.fullData.Tags);
-              const currentRef = refs.find((ref) => loc.indexOf(ref) > -1);
+              const locSplitByDash = loc.split('/');
+              const currentRef = refs.find((ref) => locSplitByDash.includes(ref));
+
               if (currentRef) {
                 const targetPath = loc.split(currentRef)[1].slice(1).split('#')[0];
                 selectedUrl.searchParams.set('path', targetPath);
