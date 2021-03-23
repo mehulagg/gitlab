@@ -1,0 +1,5 @@
+---
+title: Add controller path to helper to display active state
+merge_request: 57214
+author:
+type: fixed
