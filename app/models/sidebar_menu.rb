@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SidebarMenu
+class SidebarMenu # rubocop:disable Gitlab/NamespacedClass
   include ::Gitlab::Routing
 
   attr_reader :container

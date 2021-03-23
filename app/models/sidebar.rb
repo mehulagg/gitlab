@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Sidebar
+class Sidebar # rubocop:disable Gitlab/NamespacedClass
   attr_reader :container, :menus, :context_menu
 
   def initialize(container)
