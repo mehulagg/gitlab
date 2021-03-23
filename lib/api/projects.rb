@@ -52,6 +52,18 @@ module API
 
         accepted!
       end
+
+      def exempt_from_global_attachment_size?(user_project)
+        list = ::Gitlab::RackAttack::UserAllowlist.new(ENV['GITLAB_UPLOAD_API_ALLOWLIST'])
+        list.include?(user_project.id)
+      end
+
+      def project_attachment_size(user_project)
+        return 1.gigabyte if exempt_from_global_attachment_size?(user_project)
+        return user_project.max_attachment_size if Feature.enabled?(:enforce_max_attachment_size_upload_api)
+
+        1.gigabyte
+      end
     end
 
     helpers do
@@ -553,7 +565,7 @@ module API
 
         status 200
         content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
-        FileUploader.workhorse_authorize(has_length: false, maximum_size: user_project.max_attachment_size)
+        FileUploader.workhorse_authorize(has_length: false, maximum_size: project_attachment_size(user_project))
       end
 
       desc 'Upload a file'
@@ -561,7 +573,9 @@ module API
         requires :file, types: [Rack::Multipart::UploadedFile, ::API::Validations::Types::WorkhorseFile], desc: 'The attachment file to be uploaded'
       end
       post ":id/uploads", feature_category: :not_owned do
-        upload = UploadService.new(user_project, params[:file]).execute
+        service = UploadService.new(user_project, params[:file])
+        service.set_max_attachment_size(project_attachment_size(user_project))
+        upload = service.execute
 
         present upload, with: Entities::ProjectUpload
       end

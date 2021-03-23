@@ -1471,7 +1471,6 @@ RSpec.describe API::Projects do
         post api("/projects/#{project.id}/uploads/authorize", user), headers: headers
 
         expect(response).to have_gitlab_http_status(:ok)
-
         expect(json_response['MaximumSize']).to eq(project.max_attachment_size)
       end
     end
@@ -1481,6 +1480,32 @@ RSpec.describe API::Projects do
         post api("/projects/#{project.id}/uploads/authorize", user2), headers: headers
 
         expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'with exempted project' do
+      before do
+        stub_env('GITLAB_UPLOAD_API_ALLOWLIST', project.id)
+      end
+
+      it "returns 200" do
+        post api("/projects/#{project.id}/uploads/authorize", user), headers: headers
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['MaximumSize']).to eq(1.gigabyte)
+      end
+    end
+
+    context 'with upload size enforcement disabled' do
+      before do
+        stub_feature_flags(enforce_max_attachment_size_upload_api: false)
+      end
+
+      it "returns 200" do
+        post api("/projects/#{project.id}/uploads/authorize", user), headers: headers
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['MaximumSize']).to eq(1.gigabyte)
       end
     end
 
@@ -1499,6 +1524,10 @@ RSpec.describe API::Projects do
     end
 
     it "uploads the file and returns its info" do
+      expect_next_instance_of(UploadService) do |instance|
+        expect(instance).to receive(:set_max_attachment_size).with(project.max_attachment_size).and_call_original
+      end
+
       post api("/projects/#{project.id}/uploads", user), params: { file: fixture_file_upload("spec/fixtures/dk.png", "image/png") }
 
       expect(response).to have_gitlab_http_status(:created)
@@ -1507,6 +1536,38 @@ RSpec.describe API::Projects do
       expect(json_response['url']).to end_with("/dk.png")
 
       expect(json_response['full_path']).to start_with("/#{project.namespace.path}/#{project.path}/uploads")
+    end
+
+    context 'with exempted project' do
+      before do
+        stub_env('GITLAB_UPLOAD_API_ALLOWLIST', project.id)
+      end
+
+      it "limits the upload to 1 GB" do
+        expect_next_instance_of(UploadService) do |instance|
+          expect(instance).to receive(:set_max_attachment_size).with(1.gigabyte).and_call_original
+        end
+
+        post api("/projects/#{project.id}/uploads", user), params: { file: fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+
+        expect(response).to have_gitlab_http_status(:created)
+      end
+    end
+
+    context 'with upload size enforcement disabled' do
+      before do
+        stub_feature_flags(enforce_max_attachment_size_upload_api: false)
+      end
+
+      it "limits the upload to 1 GB" do
+        expect_next_instance_of(UploadService) do |instance|
+          expect(instance).to receive(:set_max_attachment_size).with(1.gigabyte).and_call_original
+        end
+
+        post api("/projects/#{project.id}/uploads", user), params: { file: fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+
+        expect(response).to have_gitlab_http_status(:created)
+      end
     end
   end
 
