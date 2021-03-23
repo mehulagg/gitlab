@@ -17,7 +17,7 @@
           %td.new_line.diff-line-num
           %td.line_content.match= line.text
         - else
-          %td.old_line.diff-line-num{ class: [line.type, "js-avatar-container"], data: { linenumber: line.old_pos, line_data: (diff_view_line_data(line_code, diff_file.position(line), line.type) unless @diff_notes_disabled) } }
+          %td.old_line.diff-line-num{ class: "#{line.type} js-avatar-container", data: { linenumber: line.old_pos, line_data: (diff_view_line_data(line_code, diff_file.position(line), line.type) unless @diff_notes_disabled) } }
             %a{ href: "##{line_code}", data: { linenumber: diff_link_number(line.type, "new", line.old_pos) } }
 
           %td.new_line.diff-line-num{ class: line.type, data: { linenumber: line.new_pos } }
@@ -26,7 +26,8 @@
           %td.line_content{ class: line.type }<
             = diff_line_content(line.rich_text)
 
-      - if line.discussable? && (line_discussions = @grouped_diff_discussions[line_code])
+      - if line.discussable? && @grouped_diff_discussions[line_code]
+        - line_discussions = @grouped_diff_discussions[line_code]
         = render "discussions/diff_discussion", discussions: line_discussions, expanded: line_discussions.any?(&:expanded?)
 
   - else
