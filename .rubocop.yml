@@ -641,7 +641,6 @@ Cop/UserAdmin:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
 
-# WIP https://gitlab.com/gitlab-org/gitlab/-/issues/325744
 Performance/OpenStruct:
   Exclude:
     - 'ee/spec/**/*.rb'
