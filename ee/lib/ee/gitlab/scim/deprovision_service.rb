@@ -13,21 +13,18 @@ module EE
         end
 
         def execute
-          return error(_('Did not remove user from group: User is not a group member.')) unless group_membership
-          return error(_('Did not remove user from group: Cannot remove last group owner.')) if group.last_owner?(user)
-
           ScimIdentity.transaction do
-            response = remove_group_access
-
-            next error(response.errors) if response.errors.any?
-
             identity.update!(active: false)
+            remove_group_access
           end
         end
 
         private
 
         def remove_group_access
+          return error(_('Did not remove user from group: User is not a group member.')) unless group_membership
+          return error(_('Did not remove user from group: Cannot remove last group owner.')) if group.last_owner?(user)
+
           ::Members::DestroyService.new(user).execute(group_membership)
         end
 
