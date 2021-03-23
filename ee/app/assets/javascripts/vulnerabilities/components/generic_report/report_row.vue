@@ -14,7 +14,7 @@ export default {
 </script>
 <template>
   <div
-    class="row gl-py-5 gl-px-4 gl-border-b-1 gl-border-b-solid gl-border-gray-100"
+    class="row gl-py-5 gl-border-b-1 gl-border-b-solid gl-border-gray-100"
     :class="{ 'gl-border-none!': isLastRow }"
   >
     <strong class="col-sm-3">{{ label }}</strong>

@@ -240,7 +240,7 @@ export default {
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
     <generic-report-section
       v-if="vulnerability.details"
-      class="md"
+      class="md gl-my-6"
       :details="vulnerability.details"
     />
     <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
