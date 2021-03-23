@@ -51,7 +51,7 @@ OmniAuth providers and LDAP auth. The Admin Mode status is stored in the active 
 session and remains active until it is explicitly disabled (it will be disabled
 automatically after a timeout otherwise).
 
-### Limitations
+### Limitations of Admin Mode
 
 The following access methods are **not** protected by Admin Mode:
 
@@ -65,7 +65,7 @@ authentication steps.
 We may address these limitations in the future. For more information see the following epic:
 [Admin mode for GitLab Administrators](https://gitlab.com/groups/gitlab-org/-/epics/2158).
 
-### Troubleshooting
+### Troubleshooting Admin Mode
 
 If necessary, you can disable **Admin Mode** as an administrator by using one of these two methods:
 
@@ -81,7 +81,7 @@ If necessary, you can disable **Admin Mode** as an administrator by using one of
   ::Gitlab::CurrentSettings.update_attributes!(admin_mode: false)
   ```
   
-## Feature flag **(FREE SELF)**
+## Enable or disable Admin Mode
 
 The admin mode feature is behind these feature flag `user_mode_in_session`. The flag is disabled by default.
 To activate the feature, ask a GitLab administrator with Rails console access to run:
