@@ -144,7 +144,7 @@ Follow these examples to form your new issue URL with prefilled fields.
 - For a new issue in the GitLab Community Edition project with a pre-filled title,
   a pre-filled description, and the confidential flag set, the URL would be `https://gitlab.com/gitlab-org/gitlab-foss/-/issues/new?issue[title]=Validate%20new%20concept&issue[description]=Research%20idea&issue[confidential]=true`
 
-## Moving Issues
+## Moving issues
 
 Moving an issue copies it to the target project, and closes it in the originating project.
 The original issue is not deleted. A system note, which indicates
@@ -154,7 +154,7 @@ The "Move issue" button is at the bottom of the right-sidebar when viewing the i
 
 ![move issue - button](img/sidebar_move_issue.png)
 
-### Moving Issues in Bulk
+### Moving issues in bulk **FREE SELF**
 
 If you have advanced technical skills you can also bulk move all the issues from
 one project to another in the rails console. The below script moves all issues
@@ -316,14 +316,14 @@ You can also use the `/iteration`
 [quick action](../quick_actions.md#issues-merge-requests-and-epics)
 in a comment or description field.
 
-## Real-time sidebar
+## Real-time sidebar **FREE SELF**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17589) in GitLab 13.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17589) in GitLab 13.3.
 
 Assignees in the sidebar are updated in real time. This feature is **disabled by default**.
 To enable it, you need to enable [ActionCable in-app mode](https://docs.gitlab.com/omnibus/settings/actioncable.html).
 
-## Cached issue count
+## Cached issue count **FREE SELF**
 
 > - [Introduced]([link-to-issue](https://gitlab.com/gitlab-org/gitlab/-/issues/243753)) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
@@ -337,7 +337,7 @@ This feature might not be available to you. Check the **version history** note a
 In a group, the sidebar displays the total count of open issues and this value is cached if higher
 than 1000. The cached value is rounded to thousands (or millions) and updated every 24 hours.
 
-### Enable or disable cached issue count
+### Enable or disable cached issue count **(FREE SELF)**
 
 Cached issue count in the left sidebar is under development and not ready for production use. It is
 deployed behind a feature flag that is **enabled by default**.
@@ -382,10 +382,12 @@ This marks issues as progressing as planned or needs attention to keep on schedu
 
 - **On track** (green)
 - **Needs attention** (amber)
-- **At risk** (red)
+- On track (green)
+- Needs attention (amber)
+- At risk (red)
 
-After an issue is closed, its health status can't be edited and the "Edit" button becomes disabled
+After an issue is closed, its health status can't be edited and the **Edit** button becomes disabled
 until the issue is reopened.
 
 You can then see issue statuses in the issues list and the
-[Epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree).
+[epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree).
