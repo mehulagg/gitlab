@@ -108,10 +108,6 @@ module QA
           element :cherry_pick_button
         end
 
-        view 'app/assets/javascripts/projects/commit/components/form_modal.vue' do
-          element :submit_commit_button
-        end
-
         def start_review
           click_element(:start_review_button)
 
