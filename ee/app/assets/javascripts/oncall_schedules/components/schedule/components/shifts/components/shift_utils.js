@@ -13,6 +13,22 @@ import {
 import { __ } from '~/locale';
 
 /**
+ * @param {IncidentManagementOncallShift} shift
+ * @return {Number} start date in milliseconds
+ */
+export const getAbsoluteStartDate = ({ startsAt }) => {
+  return new Date(startsAt).getTime();
+};
+
+/**
+ * @param {IncidentManagementOncallShift} shift
+ * @return {Number} end date in milliseconds
+ */
+export const getAbsoluteEndDate = ({ endsAt }) => {
+  return new Date(endsAt).getTime();
+};
+
+/**
  * This method returns a Date that is
  * n days after the start Date provided. This
  * is used to calculate the end Date of a time
