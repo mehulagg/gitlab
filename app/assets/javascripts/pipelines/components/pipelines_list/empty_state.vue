@@ -1,9 +1,9 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
-import Experiment  from '~/experimentation/components/experiment.vue';
-import PipelinesCiTemplates from './pipelines_ci_templates.vue';
+import Experiment from '~/experimentation/components/experiment.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
+import PipelinesCiTemplates from './pipelines_ci_templates.vue';
 
 export default {
   i18n: {
@@ -18,7 +18,7 @@ export default {
   components: {
     GlEmptyState,
     Experiment,
-    PipelinesCiTemplates
+    PipelinesCiTemplates,
   },
   props: {
     emptyStateSvgPath: {
@@ -32,7 +32,12 @@ export default {
     projectId: {
       type: String,
       required: true,
-    }
+    },
+    addCiYmlPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   computed: {
     ciHelpPagePath() {
@@ -61,7 +66,7 @@ export default {
         />
       </template>
       <template #candidate>
-        <pipelines-ci-templates :project-id="projectId" />
+        <pipelines-ci-templates :project-id="projectId" :add-ci-yml-path="addCiYmlPath" />
       </template>
     </experiment>
   </div>

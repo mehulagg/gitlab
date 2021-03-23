@@ -86,6 +86,11 @@ export default {
       required: false,
       default: null,
     },
+    addCiYmlPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
     projectId: {
       type: String,
       required: true,
@@ -331,6 +336,7 @@ export default {
         :empty-state-svg-path="emptyStateSvgPath"
         :can-set-ci="canCreatePipeline"
         :project-id="projectId"
+        :add-ci-yml-path="addCiYmlPath"
       />
 
       <gl-empty-state

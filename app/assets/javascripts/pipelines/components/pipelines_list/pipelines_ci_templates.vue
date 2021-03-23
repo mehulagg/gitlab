@@ -1,7 +1,7 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import Api from '~/api';
-import { __ } from '~/locale';
+import { __, sprintf } from '~/locale';
 
 const TEMPLATE_TYPE = 'gitlab_ci_ymls';
 const TEMPLATES = {
@@ -51,11 +51,17 @@ export default {
       'Use a sample file to implement GitLab CI/CD based on your project’s language/framework.',
     ),
     cta: __('Use template'),
+    description: __('Continuous deployment template to test and deploy your %{name} project.'),
   },
   props: {
     projectId: {
       type: String,
       required: true,
+    },
+    addCiYmlPath: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   data() {
@@ -79,14 +85,15 @@ export default {
                 ...template,
                 ...TEMPLATES[template.key],
                 logoPath: `/assets/illustrations/logos/${TEMPLATES[template.key].logo}.svg`,
-                link: `/-/new/&template=${template.key}`
+                link: `${this.addCiYmlPath}&template=${template.key}`,
+                description: sprintf(this.$options.i18n.description, { name: template.name }),
               });
-            } else {
-              return templates;
             }
+
+            return templates;
           }, []);
         })
-        .catch(() => console.log('ere'))
+        .catch(() => {})
         .finally(() => {
           this.isLoading = false;
         });
@@ -99,17 +106,26 @@ export default {
     <h2>{{ $options.i18n.title }}</h2>
     <p>{{ $options.i18n.subtitle }}</p>
 
-    <div v-if="this.isLoading">
+    <div v-if="isLoading">
       <gl-loading-icon />
     </div>
 
-    <ul v-for="template in this.templates" :key="template.key" class="gl-list-style-none gl-pl-0">
-      <li>
-        <img width="48" height="48" :src="template.logoPath" />
-        <h4>{{template.name}}</h4>
-        <p>Continuous deployment template to test and deploy your {{template.name}} project.</p>
-        <gl-button variant="primary" :href="template.link">{{$options.i18n.cta}}</gl-button>
-        <hr />
+    <ul class="gl-list-style-none gl-pl-0">
+      <li v-for="template in templates" :key="template.key">
+        <div
+          class="gl-display-flex gl-align-items-center gl-justify-content-space-between gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-pb-5 gl-pt-5"
+        >
+          <div class="gl-display-flex gl-flex-direction-row gl-align-items-center">
+            <img width="48" height="48" :src="template.logoPath" class="gl-mr-6" />
+            <div class="gl-flex-direction-row">
+              <strong class="gl-text-gray-800">{{ template.name }}</strong>
+              <p class="gl-mb-0">{{ template.description }}</p>
+            </div>
+          </div>
+          <gl-button category="primary" variant="confirm" :href="template.link">{{
+            $options.i18n.cta
+          }}</gl-button>
+        </div>
       </li>
     </ul>
   </div>
