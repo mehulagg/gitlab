@@ -58,11 +58,23 @@ RSpec.describe ApplicationExperiment, :experiment do
   end
 
   describe "publishing results" do
+    it "logs the performance details" do
+      subject.use { raise }
+      subject.try { }
+
+      expect(Gitlab::Metrics).to receive(:add_event).with(:gitlab_namespaced_stub_experiment_run, hash_including({
+        duration: an_instance_of(Float),
+        variant: 'candidate'
+      })).and_call_original
+
+      subject.run
+    end
+
     it "doesn't track or push data to the client if we shouldn't track", :snowplow do
       allow(subject).to receive(:should_track?).and_return(false)
       expect(Gon).not_to receive(:push)
 
-      subject.publish(:action)
+      subject.publish
 
       expect_no_snowplow_event
     end

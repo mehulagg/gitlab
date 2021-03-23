@@ -9,9 +9,10 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     Feature.get(feature_flag_name).state != :off # rubocop:disable Gitlab/AvoidFeatureGet
   end
 
-  def publish(_result = nil)
+  def publish(result = nil)
     return unless should_track? # don't track events for excluded contexts
 
+    log_performance(result) if result.present? # log performance details
     track(:assignment) # track that we've assigned a variant for this context
 
     begin
@@ -44,5 +45,12 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
 
   def experiment_group?
     Feature.enabled?(feature_flag_name, self, type: :experiment, default_enabled: :yaml)
+  end
+
+  def log_performance(result)
+    Gitlab::Metrics.add_event("gitlab_#{feature_flag_name}_experiment_run".to_sym, {
+      duration: result.observations.first.duration,
+      variant: variant.name
+    })
   end
 end
