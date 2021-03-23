@@ -11,6 +11,7 @@ import {
 import { get } from 'lodash';
 import getContainerRepositoriesQuery from 'shared_queries/container_registry/get_container_repositories.query.graphql';
 import createFlash from '~/flash';
+import { searchArrayToFilterTokens } from '~/packages_and_registries/shared/utils';
 import Tracking from '~/tracking';
 import RegistrySearch from '~/vue_shared/components/registry/registry_search.vue';
 import DeleteImage from '../components/delete_image.vue';
@@ -81,6 +82,9 @@ export default {
   searchConfig: SORT_FIELDS,
   apollo: {
     baseImages: {
+      skip() {
+        return !this.fetchBaseQuery;
+      },
       query: getContainerRepositoriesQuery,
       variables() {
         return this.queryVariables;
@@ -124,12 +128,13 @@ export default {
       sorting: { orderBy: 'UPDATED', sort: 'desc' },
       name: null,
       mutationLoading: false,
+      fetchBaseQuery: false,
       fetchAdditionalDetails: false,
     };
   },
   computed: {
     images() {
-      return this.baseImages.map((image, index) => ({
+      return [...(this.baseImages || [])].map((image, index) => ({
         ...image,
         ...get(this.additionalDetails, index, {}),
       }));
@@ -171,8 +176,25 @@ export default {
     },
   },
   mounted() {
+    const { orderBy, sort, search } = this.$route.query;
+    if (search) {
+      const freeTextSearch = searchArrayToFilterTokens(search);
+      this.filter = [...freeTextSearch];
+      this.name = freeTextSearch[0].value.data;
+    }
+
+    const sortUpdate = { ...this.sorting };
+    if (orderBy) {
+      sortUpdate.orderBy = orderBy;
+    }
+    if (sort) {
+      sortUpdate.sort = sort;
+    }
+    this.sorting = sortUpdate;
+
     // If the two graphql calls - which are not batched - resolve togheter we will have a race
     //  condition when apollo sets the cache, with this we give the 'base' call an headstart
+    this.fetchBaseQuery = true;
     setTimeout(() => {
       this.fetchAdditionalDetails = true;
     }, 200);
@@ -244,6 +266,9 @@ export default {
       const search = this.filter.find((i) => i.type === 'filtered-search-term');
       this.name = search?.value?.data;
     },
+    updateUrlQueryString(query) {
+      this.$router.push({ query });
+    },
   },
 };
 </script>
@@ -303,6 +328,7 @@ export default {
         @sorting:changed="updateSorting"
         @filter:changed="filter = $event"
         @filter:submit="doFilter"
+        @query:changed="updateUrlQueryString"
       />
 
       <div v-if="isLoading" class="gl-mt-5">

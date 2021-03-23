@@ -69,6 +69,7 @@ describe('List Page', () => {
     detailsResolver = jest.fn().mockResolvedValue(graphQLProjectImageRepositoriesDetailsMock),
     mutationResolver = jest.fn().mockResolvedValue(graphQLImageDeleteMock),
     config = { isGroupPage: false },
+    query = {},
   } = {}) => {
     localVue.use(VueApollo);
 
@@ -95,6 +96,7 @@ describe('List Page', () => {
         $toast,
         $route: {
           name: 'foo',
+          query,
         },
         ...mocks,
       },
@@ -158,8 +160,10 @@ describe('List Page', () => {
   });
 
   describe('isLoading is true', () => {
-    it('shows the skeleton loader', () => {
+    it('shows the skeleton loader', async () => {
       mountComponent();
+
+      await wrapper.vm.$nextTick();
 
       expect(findSkeletonLoader().exists()).toBe(true);
     });
@@ -176,8 +180,10 @@ describe('List Page', () => {
       expect(findCliCommands().exists()).toBe(false);
     });
 
-    it('title has the metadataLoading props set to true', () => {
+    it('title has the metadataLoading props set to true', async () => {
       mountComponent();
+
+      await wrapper.vm.$nextTick();
 
       expect(findRegistryHeader().props('metadataLoading')).toBe(true);
     });
@@ -496,5 +502,60 @@ describe('List Page', () => {
       findDeleteImage().vm.$emit('start');
       testTrackingCall('confirm_delete');
     });
+  });
+
+  describe('url query string handling', () => {
+    const defaultQueryParams = {
+      search: [1, 2],
+      sort: 'asc',
+      orderBy: 'CREATED',
+    };
+
+    it('query:updated event pushes the new query to the router', async () => {
+      const push = jest.fn();
+      mountComponent({ mocks: { $router: { push } } });
+
+      await wrapper.vm.$nextTick();
+
+      findRegistrySearch().vm.$emit('query:changed', 'foo');
+
+      expect(push).toHaveBeenCalledWith({ query: 'foo' });
+    });
+
+    it('graphql API call has the variables set from the URL', async () => {
+      const resolver = jest.fn().mockResolvedValue(graphQLImageListMock);
+      mountComponent({ query: defaultQueryParams, resolver });
+
+      await wrapper.vm.$nextTick();
+
+      expect(resolver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 1,
+          sort: 'CREATED_ASC',
+        }),
+      );
+    });
+
+    it.each`
+      sort         | orderBy      | search            | payload
+      ${'ASC'}     | ${undefined} | ${undefined}      | ${{ sort: 'UPDATED_ASC' }}
+      ${undefined} | ${'bar'}     | ${undefined}      | ${{ sort: 'BAR_DESC' }}
+      ${'ASC'}     | ${'bar'}     | ${undefined}      | ${{ sort: 'BAR_ASC' }}
+      ${undefined} | ${undefined} | ${undefined}      | ${{}}
+      ${undefined} | ${undefined} | ${['one']}        | ${{ name: 'one' }}
+      ${undefined} | ${undefined} | ${['one', 'two']} | ${{ name: 'one' }}
+      ${undefined} | ${'UPDATED'} | ${['one', 'two']} | ${{ name: 'one', sort: 'UPDATED_DESC' }}
+      ${'ASC'}     | ${'UPDATED'} | ${['one', 'two']} | ${{ name: 'one', sort: 'UPDATED_ASC' }}
+    `(
+      'with sort equal to $sort, orderBy equal to $orderBy, search set to $search API call has the variables set as $payload',
+      async ({ sort, orderBy, search, payload }) => {
+        const resolver = jest.fn().mockResolvedValue({ sort, orderBy });
+        mountComponent({ query: { sort, orderBy, search }, resolver });
+
+        await wrapper.vm.$nextTick();
+
+        expect(resolver).toHaveBeenCalledWith(expect.objectContaining(payload));
+      },
+    );
   });
 });
