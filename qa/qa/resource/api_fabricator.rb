@@ -73,6 +73,8 @@ module QA
       private
 
       def resource_web_url(resource)
+        resource = resource.has_key?(:owner) ? resource.fetch(:owner) : resource
+
         resource.fetch(:web_url) do
           raise ResourceURLMissingError, "API resource for #{self.class.name} does not expose a `web_url` property: `#{resource}`."
         end
