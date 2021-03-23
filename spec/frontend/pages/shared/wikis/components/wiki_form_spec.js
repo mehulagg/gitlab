@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import WikiForm from '~/pages/shared/wikis/components/wiki_form.vue';
 
 describe('WikiForm', () => {
@@ -11,10 +12,10 @@ describe('WikiForm', () => {
   const findFormat = () => wrapper.find('#wiki_format');
   const findContent = () => wrapper.find('#wiki_content');
   const findMessage = () => wrapper.find('#wiki_message');
-  const findSubmitButton = () => wrapper.find('[data-testid="wiki-submit-button"]');
-  const findCancelButton = () => wrapper.find('[data-testid="wiki-cancel-button"]');
-  const findTitleHelpLink = () => wrapper.find('[data-testid="wiki-title-help-link"]');
-  const findMarkdownHelpLink = () => wrapper.find('[data-testid="wiki-markdown-help-link"]');
+  const findSubmitButton = () => wrapper.findByTestId('wiki-submit-button');
+  const findCancelButton = () => wrapper.findByTestId('wiki-cancel-button');
+  const findTitleHelpLink = () => wrapper.findByTestId('wiki-title-help-link');
+  const findMarkdownHelpLink = () => wrapper.findByTestId('wiki-markdown-help-link');
 
   const pageInfoNew = {
     persisted: false,
@@ -37,23 +38,25 @@ describe('WikiForm', () => {
   };
 
   function createWrapper(persisted = false, pageInfo = {}) {
-    wrapper = mount(
-      WikiForm,
-      {
-        propsData: {
-          formatOptions: {
-            Markdown: 'markdown',
-            RDoc: 'rdoc',
-            AsciiDoc: 'asciidoc',
-            Org: 'org',
-          },
-          pageInfo: {
-            ...(persisted ? pageInfoPersisted : pageInfoNew),
-            ...pageInfo,
+    wrapper = extendedWrapper(
+      mount(
+        WikiForm,
+        {
+          propsData: {
+            formatOptions: {
+              Markdown: 'markdown',
+              RDoc: 'rdoc',
+              AsciiDoc: 'asciidoc',
+              Org: 'org',
+            },
+            pageInfo: {
+              ...(persisted ? pageInfoPersisted : pageInfoNew),
+              ...pageInfo,
+            },
           },
         },
-      },
-      { attachToDocument: true },
+        { attachToDocument: true },
+      ),
     );
   }
 
