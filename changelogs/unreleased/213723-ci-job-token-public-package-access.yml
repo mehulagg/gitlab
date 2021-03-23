@@ -1,0 +1,6 @@
+---
+title: Give CI_JOB_TOKEN read access to public projects so public packages can be
+  consumed
+merge_request: 57265
+author:
+type: fixed

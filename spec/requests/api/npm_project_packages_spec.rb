@@ -80,6 +80,20 @@ RSpec.describe API::NpmProjectPackages do
       end
 
       it_behaves_like 'a package tracking event', 'API::NpmPackages', 'pull_package'
+
+      context 'with a job token for a different user' do
+        let_it_be(:other_user) { create(:user) }
+        let_it_be(:other_job, reload: true) { create(:ci_build, user: other_user, status: :running) }
+
+        let(:headers) { build_token_auth_header(other_job.token) }
+
+        it 'returns the file' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type).to eq('application/octet-stream')
+        end
+      end
     end
 
     context 'private project' do
