@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Create' do
-    describe 'Cherry pick a merge request' do
+    describe 'Cherry picking from a merge request' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project'
@@ -13,7 +13,7 @@ module QA
       let(:feature_mr) do
         Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.project = project
-          merge_request.target_branch = "development"
+          merge_request.target_branch = 'development'
           merge_request.target_new_branch = true
         end
       end
@@ -22,7 +22,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'cherry pick a basic merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1616' do
+      it 'cherry picks a basic merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1616' do
         feature_mr.visit!
 
         Page::MergeRequest::Show.perform do |merge_request|
