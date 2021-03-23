@@ -18,7 +18,8 @@ RSpec.shared_examples 'valid dashboard service response for schema' do
     expect(result.keys).to contain_exactly(:dashboard, :status)
     expect(result[:status]).to eq(:success)
 
-    expect(JSON::Validator.fully_validate(dashboard_schema, result[:dashboard])).to be_empty
+    validator = JSONSchemer.schema(dashboard_schema)
+    expect(validator.valid?(result[:dashboard])).to be true
   end
 end
 

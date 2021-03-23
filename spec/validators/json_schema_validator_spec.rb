@@ -44,7 +44,7 @@ RSpec.describe JsonSchemaValidator do
         let(:validator) { described_class.new(attributes: [:data], filename: "build_report_result_data", draft: 4) }
 
         it 'uses JSON::Validator to perform validations' do
-          expect(JSON::Validator).to receive(:validate).with(Rails.root.join('app', 'validators', 'json_schemas', 'build_report_result_data.json').to_s, build_report_result.data)
+          expect(JSONSchemer).to receive(:schema).with(Pathname.new(Rails.root.join('app', 'validators', 'json_schemas', 'build_report_result_data.json').to_s)).and_call_original
 
           subject
         end
@@ -54,7 +54,7 @@ RSpec.describe JsonSchemaValidator do
         let(:validator) { described_class.new(attributes: [:data], filename: "build_report_result_data") }
 
         it 'uses JSON::Validator to perform validations' do
-          expect(JSON::Validator).to receive(:validate).with(Rails.root.join('app', 'validators', 'json_schemas', 'build_report_result_data.json').to_s, build_report_result.data)
+          expect(JSONSchemer).to receive(:schema).with(Pathname.new(Rails.root.join('app', 'validators', 'json_schemas', 'build_report_result_data.json').to_s)).and_call_original
 
           subject
         end

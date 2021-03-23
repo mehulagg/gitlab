@@ -32,10 +32,13 @@ module Gitlab
         private
 
         def valid_degradation?(degradation)
-          JSON::Validator.validate!(CODECLIMATE_SCHEMA_PATH, degradation)
-        rescue JSON::Schema::ValidationError => e
-          set_error_message("Invalid degradation format: #{e.message}")
-          false
+          schema_validator.valid?(degradation).tap do |valid|
+            set_error_message("Invalid degradation format") unless valid
+          end
+        end
+
+        def schema_validator
+          JSONSchemer.schema(Pathname.new(CODECLIMATE_SCHEMA_PATH))
         end
       end
     end
