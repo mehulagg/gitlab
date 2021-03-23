@@ -61,7 +61,7 @@ module EE
       end
 
       condition(:custom_compliance_framework_available) do
-        ::Feature.enabled?(:ff_custom_compliance_frameworks)
+        ::Feature.enabled?(:ff_custom_compliance_frameworks, default_enabled: :yaml)
       end
 
       with_scope :subject

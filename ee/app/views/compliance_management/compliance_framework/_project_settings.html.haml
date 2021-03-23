@@ -1,7 +1,7 @@
 - user_has_edit_permissions = current_user.can?(:admin_compliance_framework, @project)
 .row
   .form-group.col-md-9.gl-mb-6
-    - if Feature.enabled?(:ff_custom_compliance_frameworks, @project.namespace)
+    - if Feature.enabled?(:ff_custom_compliance_frameworks, @project.namespace, default_enabled: :yaml)
       - frameworks = @project.namespace.root_ancestor.compliance_management_frameworks
       - if user_has_edit_permissions
         = f.fields_for :compliance_framework_setting, ComplianceManagement::ComplianceFramework::ProjectSettings.new do |cf|

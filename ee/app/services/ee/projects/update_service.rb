@@ -81,7 +81,7 @@ module EE
           framework_identifier = settings.delete(:framework)
           if framework_identifier.blank?
             settings.merge!(_destroy: true)
-          elsif ::Feature.enabled?(:ff_custom_compliance_frameworks, project.namespace)
+          elsif ::Feature.enabled?(:ff_custom_compliance_frameworks, project.namespace, default_enabled: :yaml)
             settings[:compliance_management_framework] = project.namespace.root_ancestor.compliance_management_frameworks.find(framework_identifier)
           else
             settings[:compliance_management_framework] = ComplianceManagement::Framework.find_or_create_legacy_default_framework(project, framework_identifier)
