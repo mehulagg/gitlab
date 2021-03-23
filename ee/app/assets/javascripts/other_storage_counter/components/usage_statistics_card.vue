@@ -65,7 +65,7 @@ export default {
       data-testid="statistics-card-footer"
     >
       <slot v-bind="{ link }" name="footer">
-        <gl-link target="_blank" :href="link.url">
+        <gl-link v-if="link.url" target="_blank" :href="link.url">
           <span class="text-truncate">{{ link.text }}</span>
           <gl-icon name="external-link" class="gl-ml-2 gl-flex-shrink-0 gl-text-black-normal" />
         </gl-link>
