@@ -1,5 +1,5 @@
 <script>
-import { GlEmptyState } from '@gitlab/ui';
+import { GlEmptyState, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import DateRange from '../../shared/components/daterange.vue';
@@ -33,6 +33,9 @@ export default {
     ValueStreamSelect,
     UrlSync,
     Metrics,
+  },
+  directives: {
+    SafeHtml,
   },
   props: {
     emptyStateSvgPath: {
@@ -233,6 +236,16 @@ export default {
             @change="setDateRange"
           />
         </div>
+      </div>
+    </div>
+    <div v-if="selectedStage" class="gl-my-4 text-secondary">
+      <div v-if="selectedStage.startEventHtmlDescription" class="gl-display-flex">
+        <span>{{ __('Start event') }}:&nbsp;</span>
+        <span v-safe-html="selectedStage.startEventHtmlDescription"></span>
+      </div>
+      <div v-if="selectedStage.endEventHtmlDescription" class="gl-display-flex">
+        <span>{{ __('Stop event') }}:&nbsp;</span>
+        <span v-safe-html="selectedStage.endEventHtmlDescription"></span>
       </div>
     </div>
     <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
