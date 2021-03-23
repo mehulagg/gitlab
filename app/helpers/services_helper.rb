@@ -160,7 +160,8 @@ module ServicesHelper
       active: integration.activated?,
       name: integration.title,
       description: integration.description,
-      updated_at: integration.updated_at
+      updated_at: integration.updated_at,
+      edit_path: scoped_edit_integration_path(integration)
     }
   end
 end
