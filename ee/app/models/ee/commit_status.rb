@@ -9,7 +9,6 @@ module EE
 
     prepended do
       state_machine :status do
-
         event :enqueue do
           transition [:created, :waiting_for_resource, :preparing, :manual, :scheduled] => :failed, unless: :ci_quota_available?
         end
