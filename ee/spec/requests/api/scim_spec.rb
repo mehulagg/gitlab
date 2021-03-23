@@ -12,7 +12,7 @@ RSpec.describe API::Scim do
 
   before do
     stub_licensed_features(group_allowed_email_domains: true, group_saml: true)
-    group.add_owner(user)
+    group.add_developer(user)
     create(:saml_provider, group: group, default_membership_role: Gitlab::Access::DEVELOPER)
   end
 
