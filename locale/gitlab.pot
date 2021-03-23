@@ -28849,6 +28849,9 @@ msgstr ""
 msgid "Start date"
 msgstr ""
 
+msgid "Start event"
+msgstr ""
+
 msgid "Start merge train"
 msgstr ""
 
@@ -29051,6 +29054,9 @@ msgid "Still, we recommend keeping a backup saved somewhere. Otherwise, if you e
 msgstr ""
 
 msgid "Stop Terminal"
+msgstr ""
+
+msgid "Stop event"
 msgstr ""
 
 msgid "Stop impersonation"
