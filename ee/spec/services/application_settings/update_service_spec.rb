@@ -55,8 +55,11 @@ RSpec.describe ApplicationSettings::UpdateService do
 
         context 'when index does not exist' do
           it 'creates a new index' do
-            expect(helper).to(receive(:index_exists?)).and_return(false)
-            expect(helper).to(receive(:create_empty_index))
+            expect(helper).to receive(:index_exists?).and_return(false)
+            expect(helper).to receive(:create_empty_index)
+            expect(helper).to receive(:create_standalone_indices)
+            expect(helper).to receive(:migrations_index_exists?).and_return(false)
+            expect(helper).to receive(:create_migrations_index)
 
             service.execute
           end

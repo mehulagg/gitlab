@@ -67,6 +67,8 @@ module EE
         return if elasticsearch_helper.index_exists?
 
         elasticsearch_helper.create_empty_index
+        elasticsearch_helper.create_standalone_indices
+        elasticsearch_helper.create_migrations_index unless elasticsearch_helper.migrations_index_exists?
       rescue Faraday::Error => e
         log_error(e)
       end
