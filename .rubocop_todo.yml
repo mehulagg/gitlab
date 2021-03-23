@@ -323,10 +323,6 @@ Performance/Detect:
 Performance/MethodObjectAsBlock:
   Enabled: false
 
-# Offense count: 42
-Performance/OpenStruct:
-  Enabled: false
-
 # Offense count: 18
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect.
