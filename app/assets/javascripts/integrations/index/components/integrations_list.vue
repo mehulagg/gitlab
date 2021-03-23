@@ -25,8 +25,8 @@ export default {
 
 <template>
   <div>
-    <integrations-table :integrations="activeIntegrations" />
+    <integrations-table :active="true" :integrations="activeIntegrations" />
     <h5>{{ s__('Integrations|Add an integration') }}</h5>
-    <integrations-table :integrations="inactiveIntegrations" />
+    <integrations-table :active="false" :integrations="inactiveIntegrations" />
   </div>
 </template>
