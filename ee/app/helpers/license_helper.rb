@@ -48,5 +48,11 @@ module LicenseHelper
     end
   end
 
+  def cloud_license_view_data
+    {
+      current_plan_title: current_license_title
+    }
+  end
+
   extend self
 end
