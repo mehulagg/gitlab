@@ -1,12 +1,5 @@
 <script>
-import {
-  GlDropdownItem,
-  GlDropdownDivider,
-  GlAvatarLabeled,
-  GlAvatarLink,
-  GlSearchBoxByType,
-  GlLoadingIcon,
-} from '@gitlab/ui';
+import { GlDropdownItem, GlDropdownDivider, GlSearchBoxByType, GlLoadingIcon } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import Vue from 'vue';
 import createFlash from '~/flash';
@@ -18,6 +11,7 @@ import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue'
 import { assigneesQueries, ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 import SidebarInviteMembers from './sidebar_invite_members.vue';
+import SidebarParticipant from './sidebar_participant.vue';
 
 export const assigneesWidget = Vue.observable({
   updateAssignees: null,
@@ -36,11 +30,10 @@ export default {
     MultiSelectDropdown,
     GlDropdownItem,
     GlDropdownDivider,
-    GlAvatarLabeled,
-    GlAvatarLink,
     GlSearchBoxByType,
     GlLoadingIcon,
     SidebarInviteMembers,
+    SidebarParticipant,
   },
   inject: {
     directlyInviteMembers: {
@@ -154,9 +147,6 @@ export default {
       const currentAssignees = this.$apollo.queries.issuable.loading
         ? this.initialAssignees
         : this.issuable?.assignees?.nodes;
-      currentAssignees.forEach((assignee) => {
-        console.log(1);
-      });
       return currentAssignees || [];
     },
     participants() {
@@ -377,15 +367,7 @@ export default {
               data-testid="selected-participant"
               @click.stop="unselect(item.username)"
             >
-              <gl-avatar-link>
-                <gl-avatar-labeled
-                  :size="32"
-                  :label="item.name"
-                  :sub-label="item.username"
-                  :src="item.avatarUrl || item.avatar || item.avatar_url"
-                  class="gl-align-items-center"
-                />
-              </gl-avatar-link>
+              <sidebar-participant :user="item" />
             </gl-dropdown-item>
             <template v-if="showCurrentUser">
               <gl-dropdown-divider />
@@ -393,15 +375,7 @@ export default {
                 data-testid="current-user"
                 @click.stop="selectAssignee(currentUser)"
               >
-                <gl-avatar-link>
-                  <gl-avatar-labeled
-                    :size="32"
-                    :label="currentUser.name"
-                    :sub-label="currentUser.username"
-                    :src="currentUser.avatarUrl"
-                    class="gl-align-items-center gl-pl-6!"
-                  />
-                </gl-avatar-link>
+                <sidebar-participant :user="currentUser" class="gl-pl-6!" />
               </gl-dropdown-item>
             </template>
             <gl-dropdown-divider v-if="showDivider(unselectedFiltered)" />
@@ -411,15 +385,7 @@ export default {
               data-testid="unselected-participant"
               @click="selectAssignee(unselectedUser)"
             >
-              <gl-avatar-link class="gl-pl-6!">
-                <gl-avatar-labeled
-                  :size="32"
-                  :label="unselectedUser.name"
-                  :sub-label="unselectedUser.username"
-                  :src="unselectedUser.avatarUrl || unselectedUser.avatar"
-                  class="gl-align-items-center"
-                />
-              </gl-avatar-link>
+              <sidebar-participant :user="unselectedUser" class="gl-pl-6!" />
             </gl-dropdown-item>
             <gl-dropdown-item
               v-if="noUsersFound && !isSearching"
