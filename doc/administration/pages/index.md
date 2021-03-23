@@ -171,7 +171,7 @@ URL scheme: `https://<namespace>.example.io/<project_slug>`
 NGINX proxies all requests to the daemon. Pages daemon doesn't listen to the
 outside world.
 
-1. Place the `example.io` certificate and key inside `/etc/gitlab/ssl`
+1. Place the `example.io` certificate and key inside `/etc/gitlab/ssl`.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
@@ -189,9 +189,9 @@ then you'll need to also add the full paths as shown below:
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. If you're using [Pages Access Control](#access-control), update Redirect URI in the `GitLab Pages`
+1. If you're using [Pages Access Control](#access-control), update the redirect URI in the GitLab Pages
 [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
-to use HTTPS protocol.
+to use the HTTPS protocol.
 
 WARNING:
 Multiple wildcards for one instance is not supported. Only one wildcard per instance can be assigned.
@@ -337,7 +337,7 @@ In that case, the Pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
 world. Custom domains and TLS are supported.
 
-1. Place the `example.io` certificate and key inside `/etc/gitlab/ssl`
+1. Place the `example.io` certificate and key inside `/etc/gitlab/ssl`.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
@@ -354,7 +354,7 @@ world. Custom domains and TLS are supported.
    `192.0.2.2` and `2001:db8::2` are the secondary IPs where the GitLab Pages daemon
    listens on. If you don't have IPv6, you can omit the IPv6 address.
 
-1. If you haven't named your certificate and key `example.io.crt` and `example.io.key`
+1. If you haven't named your certificate and key `example.io.crt` and `example.io.key` respectively,
 then you'll need to also add the full paths as shown below:
 
    ```ruby
@@ -363,9 +363,9 @@ then you'll need to also add the full paths as shown below:
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. If you're using [Pages Access Control](#access-control), update Redirect URI in the `GitLab Pages`
+1. If you're using [Pages Access Control](#access-control), update the redirect URI in the GitLab Pages
 [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
-to use HTTPS protocol.
+to use the HTTPS protocol.
 
 ### Custom domain verification
 
@@ -1130,7 +1130,7 @@ gitlab_pages['env'] = {'TMPDIR' => '<new_tmp_path>'}
 Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
 `sudo gitlab-ctl restart`.
 
-### `The redirect URI included is not valid.` when using Pages Access Controls
+### `The redirect URI included is not valid.` when using Pages Access Control
 
-Verify that the **Callback URL**/Redirect URI in the `GitLab Pages` [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
+Verify that the **Callback URL**/Redirect URI in the GitLab Pages [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
 is using the protocol (HTTP or HTTPS) that `pages_external_url` is configured to use.
