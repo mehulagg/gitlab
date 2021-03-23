@@ -31,10 +31,34 @@ describe('EE - GenericReport - ReportItem', () => {
 
   const findReportComponent = () => wrapper.findByTestId('reportComponent');
 
-  it.each(REPORT_TYPES)('renders the support type "%S"', (reportType) => {
-    wrapper = createWrapper({ props: { item: { type: reportType, ...TEST_DATA[reportType] } } });
+  describe.each(REPORT_TYPES)('with report type "%s"', (reportType) => {
+    beforeEach(() => {
+      wrapper = createWrapper({ props: { item: { type: reportType, ...TEST_DATA[reportType] } } });
+    });
 
-    expect(findReportComponent().exists()).toBe(true);
+    it('renders the corresponding component', () => {
+      expect(findReportComponent().exists()).toBe(true);
+    });
+
+    it('passes the report data as props', () => {
+      expect(findReportComponent().props()).toMatchObject({
+        ...TEST_DATA[reportType],
+      });
+    });
+  });
+
+  describe('with report type "list"', () => {
+    const nestingLevel = 3;
+
+    beforeEach(() => {
+      wrapper = createWrapper({
+        props: { nestingLevel, item: { type: REPORT_TYPE_LIST, ...TEST_DATA[REPORT_TYPE_LIST] } },
+      });
+    });
+
+    it('passes the nesting level as a prop', () => {
+      expect(findReportComponent().props('nestingLevel')).toBe(nestingLevel);
+    });
   });
 
   it('does not render a type that is not supported', () => {
