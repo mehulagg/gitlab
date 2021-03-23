@@ -15,7 +15,7 @@ export default {
       return this.isEpicBoard || this.multipleIssueBoardsAvailable;
     },
     showDelete() {
-      return this.boards.length > 1 && !this.isEpicBoard;
+      return this.boards.length > 1;
     },
   },
   methods: {
