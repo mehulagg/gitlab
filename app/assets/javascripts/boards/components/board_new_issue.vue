@@ -2,6 +2,7 @@
 import { GlButton } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getMilestone } from 'ee_else_ce/boards/boards_util';
+import BoardNewIssueMixin from 'ee_else_ce/boards/mixins/board_new_issue';
 import { __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../eventhub';
@@ -17,8 +18,8 @@ export default {
     ProjectSelect,
     GlButton,
   },
-  mixins: [glFeatureFlagMixin()],
-  inject: ['groupId', 'weightFeatureAvailable', 'boardWeight'],
+  mixins: [glFeatureFlagMixin(), BoardNewIssueMixin],
+  inject: ['groupId'],
   props: {
     list: {
       type: Object,
@@ -53,13 +54,10 @@ export default {
     submit(e) {
       e.preventDefault();
 
+      const { title } = this;
       const labels = this.list.label ? [this.list.label] : [];
       const assignees = this.list.assignee ? [this.list.assignee] : [];
       const milestone = getMilestone(this.list);
-
-      const weight = this.weightFeatureAvailable ? this.boardWeight : undefined;
-
-      const { title } = this;
 
       eventHub.$emit(`scroll-board-list-${this.list.id}`);
 
@@ -70,7 +68,7 @@ export default {
           assigneeIds: assignees?.map((a) => a?.id),
           milestoneId: milestone?.id,
           projectPath: this.selectedProject.fullPath,
-          weight: weight >= 0 ? weight : null,
+          ...this.extraIssueInput(),
         },
         list: this.list,
       }).then(() => {
