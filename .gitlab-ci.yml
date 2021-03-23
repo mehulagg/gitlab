@@ -97,10 +97,10 @@ include:
   - local: .gitlab/ci/global.gitlab-ci.yml
   - local: .gitlab/ci/memory.gitlab-ci.yml
   - local: .gitlab/ci/pages.gitlab-ci.yml
-  - local: .gitlab/ci/qa.gitlab-ci.yml
-  - local: .gitlab/ci/reports.gitlab-ci.yml
+#  - local: .gitlab/ci/qa.gitlab-ci.yml
+#  - local: .gitlab/ci/reports.gitlab-ci.yml
   - local: .gitlab/ci/rails.gitlab-ci.yml
-  - local: .gitlab/ci/review.gitlab-ci.yml
+#  - local: .gitlab/ci/review.gitlab-ci.yml
   - local: .gitlab/ci/rules.gitlab-ci.yml
   - local: .gitlab/ci/setup.gitlab-ci.yml
   - local: .gitlab/ci/dev-fixtures.gitlab-ci.yml
@@ -108,7 +108,7 @@ include:
   - local: .gitlab/ci/yaml.gitlab-ci.yml
   - local: .gitlab/ci/releases.gitlab-ci.yml
   - local: .gitlab/ci/notify.gitlab-ci.yml
-  - local: .gitlab/ci/dast.gitlab-ci.yml
+#  - local: .gitlab/ci/dast.gitlab-ci.yml
   - local: .gitlab/ci/workhorse.gitlab-ci.yml
   - local: .gitlab/ci/graphql.gitlab-ci.yml
   - remote: 'https://gitlab.com/gitlab-org/frontend/untamper-my-lockfile/-/raw/main/.gitlab-ci-template.yml'
