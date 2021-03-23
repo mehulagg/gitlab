@@ -29,6 +29,11 @@ export default {
 </script>
 <template>
   <div v-if="isSupportedReportType">
-    <component :is="item.type" v-bind="item" :nesting-level="nestingLevel" />
+    <component
+      :is="item.type"
+      v-bind="item"
+      :nesting-level="nestingLevel"
+      data-testid="reportComponent"
+    />
   </div>
 </template>

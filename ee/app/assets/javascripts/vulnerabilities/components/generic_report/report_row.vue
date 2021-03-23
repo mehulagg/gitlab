@@ -18,7 +18,7 @@ export default {
     :class="{ 'gl-border-none!': isLastRow }"
   >
     <strong class="col-sm-3">{{ label }}</strong>
-    <div class="col-sm-9">
+    <div data-testid="reportContent" class="col-sm-9">
       <slot></slot>
     </div>
   </div>
