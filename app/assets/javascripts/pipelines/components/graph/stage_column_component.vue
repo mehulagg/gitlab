@@ -70,7 +70,7 @@ export default {
     },
     filteredGroups() {
       return this.groups.map((group) => {
-        return group.jobs.filter(Boolean);
+        return { ...group, jobs: group.jobs.filter(Boolean)};
       });
     },
     formattedTitle() {
