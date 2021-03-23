@@ -36,12 +36,11 @@ describe('EE - GenericReport - ReportSection', () => {
       name: /evidence/i,
     });
   const findReportsSection = () => wrapper.findByTestId('reports');
-  const findReportRows = () => wrapper.findAllComponents(ReportRow);
-  const findReportRow = (label) => wrapper.findByTestId(`report-row-${label}`);
+  const findAllReportRows = () => wrapper.findAllComponents(ReportRow);
+  const findReportRowByLabel = (label) => wrapper.findByTestId(`report-row-${label}`);
 
-  const detailsCount = () => Object.keys(TEST_DETAILS).length;
-  const isLastRow = (rowLabel) =>
-    Object.keys(TEST_DETAILS).indexOf(rowLabel) === detailsCount() - 1;
+  const detailsLabels = Object.keys(TEST_DETAILS);
+  const isLastRow = (label) => detailsLabels.indexOf(label) === detailsLabels.length - 1;
 
   beforeEach(() => {
     wrapper = createWrapper();
@@ -67,13 +66,13 @@ describe('EE - GenericReport - ReportSection', () => {
 
   describe('report rows', () => {
     it('shows a row for each report item', () => {
-      expect(findReportRows()).toHaveLength(detailsCount());
+      expect(findAllReportRows()).toHaveLength(detailsLabels.length);
     });
 
-    it.each(Object.keys(TEST_DETAILS))('passes the correct props to report row: %s', (rowLabel) => {
-      expect(findReportRow(rowLabel).props()).toMatchObject({
-        label: TEST_DETAILS[rowLabel].name,
-        isLastRow: isLastRow(rowLabel),
+    it.each(detailsLabels)('passes the correct props to report row: %s', (label) => {
+      expect(findReportRowByLabel(label).props()).toMatchObject({
+        label: TEST_DETAILS[label].name,
+        isLastRow: isLastRow(label),
       });
     });
   });
