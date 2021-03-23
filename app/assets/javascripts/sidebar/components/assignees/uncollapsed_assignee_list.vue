@@ -58,7 +58,7 @@ export default {
       this.showLess = !this.showLess;
     },
     userAvailability(u) {
-      return u?.availability || '';
+      return u?.availability || u?.status?.availability || '';
     },
   },
 };
