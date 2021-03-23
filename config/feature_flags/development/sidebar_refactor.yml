@@ -1,0 +1,8 @@
+---
+name: sidebar_refactor
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.11'
+type: development
+group: group::editor
+default_enabled: false
