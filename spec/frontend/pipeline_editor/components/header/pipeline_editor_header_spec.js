@@ -23,6 +23,7 @@ describe('Pipeline editor header', () => {
         ciConfigData: mockLintResponse,
         ciFileContent: mockCiYml,
         isCiConfigDataLoading: false,
+        isNewCiConfigFile: false,
       },
     });
   };
@@ -36,15 +37,21 @@ describe('Pipeline editor header', () => {
   });
 
   describe('template', () => {
-    beforeEach(() => {
-      createComponent();
+    it('hides the pipeline status for new projects without a CI file', () => {
+      createComponent({ isNewCiConfigFile: true });
+
+      expect(findPipelineStatus({}).exists()).toBe(true);
     });
 
-    it('renders the pipeline status', () => {
+    it('renders the pipeline status when CI file exists', () => {
+      createComponent({ isNewCiConfigFile: false });
+
       expect(findPipelineStatus().exists()).toBe(true);
     });
 
     it('renders the validation segment', () => {
+      createComponent();
+
       expect(findValidationSegment().exists()).toBe(true);
     });
   });
