@@ -6,6 +6,7 @@ import createFlash from '~/flash';
 import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
 import { IssuableType } from '~/issue_show/constants';
 import { __, n__ } from '~/locale';
+import SidebarAssigneesRealtime from '~/sidebar/components/assignees/assignees_realtime.vue';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import { assigneesQueries, ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
@@ -34,6 +35,7 @@ export default {
     GlLoadingIcon,
     SidebarInviteMembers,
     SidebarParticipant,
+    SidebarAssigneesRealtime,
   },
   inject: {
     directlyInviteMembers: {
@@ -310,97 +312,99 @@ export default {
     {{ __('Assignee') }}
     <gl-loading-icon size="sm" class="gl-ml-2" />
   </div>
-  <sidebar-editable-item
-    v-else
-    ref="toggle"
-    :loading="isSettingAssignees"
-    :title="assigneeText"
-    @open="focusSearch"
-    @close="saveAssignees"
-  >
-    <template #collapsed>
-      <issuable-assignees
-        :users="assignees"
-        :issuable-type="issuableType"
-        class="gl-mt-2"
-        @assign-self="assignSelf"
-      />
-    </template>
+  <div v-else>
+    <sidebar-assignees-realtime :project-path="fullPath" :issuable-iid="iid" />
+    <sidebar-editable-item
+      ref="toggle"
+      :loading="isSettingAssignees"
+      :title="assigneeText"
+      @open="focusSearch"
+      @close="saveAssignees"
+    >
+      <template #collapsed>
+        <issuable-assignees
+          :users="assignees"
+          :issuable-type="issuableType"
+          class="gl-mt-2"
+          @assign-self="assignSelf"
+        />
+      </template>
 
-    <template #default>
-      <multi-select-dropdown
-        class="gl-w-full dropdown-menu-user"
-        :text="$options.i18n.assignees"
-        :header-text="$options.i18n.assignTo"
-        @toggle="collapseWidget"
-      >
-        <template #search>
-          <gl-search-box-by-type ref="search" v-model.trim="search" />
-        </template>
-        <template #items>
-          <gl-loading-icon
-            v-if="$apollo.queries.searchUsers.loading || $apollo.queries.issuable.loading"
-            data-testid="loading-participants"
-            size="lg"
-          />
-          <template v-else>
-            <template v-if="isSearchEmpty || isSearching">
+      <template #default>
+        <multi-select-dropdown
+          class="gl-w-full dropdown-menu-user"
+          :text="$options.i18n.assignees"
+          :header-text="$options.i18n.assignTo"
+          @toggle="collapseWidget"
+        >
+          <template #search>
+            <gl-search-box-by-type ref="search" v-model.trim="search" />
+          </template>
+          <template #items>
+            <gl-loading-icon
+              v-if="$apollo.queries.searchUsers.loading || $apollo.queries.issuable.loading"
+              data-testid="loading-participants"
+              size="lg"
+            />
+            <template v-else>
+              <template v-if="isSearchEmpty || isSearching">
+                <gl-dropdown-item
+                  :is-checked="selectedIsEmpty"
+                  :is-check-centered="true"
+                  data-testid="unassign"
+                  @click="selectAssignee()"
+                >
+                  <span
+                    :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'"
+                    class="gl-font-weight-bold"
+                    >{{ $options.i18n.unassigned }}</span
+                  ></gl-dropdown-item
+                >
+              </template>
+              <gl-dropdown-divider v-if="showDivider(selectedFiltered)" />
               <gl-dropdown-item
-                :is-checked="selectedIsEmpty"
+                v-for="item in selectedFiltered"
+                :key="item.id"
+                :is-checked="isChecked(item.username)"
                 :is-check-centered="true"
-                data-testid="unassign"
-                @click="selectAssignee()"
+                data-testid="selected-participant"
+                @click.stop="unselect(item.username)"
               >
-                <span
-                  :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'"
-                  class="gl-font-weight-bold"
-                  >{{ $options.i18n.unassigned }}</span
-                ></gl-dropdown-item
-              >
-            </template>
-            <gl-dropdown-divider v-if="showDivider(selectedFiltered)" />
-            <gl-dropdown-item
-              v-for="item in selectedFiltered"
-              :key="item.id"
-              :is-checked="isChecked(item.username)"
-              :is-check-centered="true"
-              data-testid="selected-participant"
-              @click.stop="unselect(item.username)"
-            >
-              <sidebar-participant :user="item" />
-            </gl-dropdown-item>
-            <template v-if="showCurrentUser">
-              <gl-dropdown-divider />
+                <sidebar-participant :user="item" />
+              </gl-dropdown-item>
+              <template v-if="showCurrentUser">
+                <gl-dropdown-divider />
+                <gl-dropdown-item
+                  data-testid="current-user"
+                  @click.stop="selectAssignee(currentUser)"
+                >
+                  <sidebar-participant :user="currentUser" class="gl-pl-6!" />
+                </gl-dropdown-item>
+              </template>
+              <gl-dropdown-divider v-if="showDivider(unselectedFiltered)" />
               <gl-dropdown-item
-                data-testid="current-user"
-                @click.stop="selectAssignee(currentUser)"
+                v-for="unselectedUser in unselectedFiltered"
+                :key="unselectedUser.id"
+                data-testid="unselected-participant"
+                @click="selectAssignee(unselectedUser)"
               >
-                <sidebar-participant :user="currentUser" class="gl-pl-6!" />
+                <sidebar-participant :user="unselectedUser" class="gl-pl-6!" />
+              </gl-dropdown-item>
+              <gl-dropdown-item
+                v-if="noUsersFound && !isSearching"
+                data-testid="empty-results"
+                class="gl-pl-6!"
+              >
+                {{ __('No matching results') }}
+              </gl-dropdown-item>
+              <gl-dropdown-divider />
+              <gl-dropdown-item v-if="directlyInviteMembers || indirectlyInviteMembers">
+                <sidebar-invite-members />
               </gl-dropdown-item>
             </template>
-            <gl-dropdown-divider v-if="showDivider(unselectedFiltered)" />
-            <gl-dropdown-item
-              v-for="unselectedUser in unselectedFiltered"
-              :key="unselectedUser.id"
-              data-testid="unselected-participant"
-              @click="selectAssignee(unselectedUser)"
-            >
-              <sidebar-participant :user="unselectedUser" class="gl-pl-6!" />
-            </gl-dropdown-item>
-            <gl-dropdown-item
-              v-if="noUsersFound && !isSearching"
-              data-testid="empty-results"
-              class="gl-pl-6!"
-            >
-              {{ __('No matching results') }}
-            </gl-dropdown-item>
-            <gl-dropdown-divider />
-            <gl-dropdown-item v-if="directlyInviteMembers || indirectlyInviteMembers">
-              <sidebar-invite-members />
-            </gl-dropdown-item>
           </template>
-        </template>
-      </multi-select-dropdown>
-    </template>
-  </sidebar-editable-item>
+        </multi-select-dropdown>
+      </template>
+    </sidebar-editable-item>
+  </div>
 </template>

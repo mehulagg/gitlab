@@ -9,7 +9,8 @@ export default {
   props: {
     mediator: {
       type: Object,
-      required: true,
+      required: false,
+      default: null,
     },
     issuableIid: {
       type: String,
@@ -65,11 +66,13 @@ export default {
         id: getIdFromGraphQLId(n.id),
       }));
 
-      this.mediator.store.setAssigneesFromRealtime(assignees);
+      if (this.mediator) {
+        this.mediator.store.setAssigneesFromRealtime(assignees);
+      }
     },
   },
   render() {
-    return this.$slots.default;
+    return null;
   },
 };
 </script>
