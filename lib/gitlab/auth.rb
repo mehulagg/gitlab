@@ -82,7 +82,7 @@ module Gitlab
         return unless authenticate_using_internal_or_ldap_password?
 
         Gitlab::Auth::UniqueIpsLimiter.limit_user! do
-          user = User.by_login(login)
+          user = user_limited_select.by_login(login)
 
           break if user && !user.can?(:log_in)
 
@@ -181,7 +181,7 @@ module Gitlab
           token = Doorkeeper::AccessToken.by_token(password)
 
           if valid_oauth_token?(token)
-            user = User.id_in(token.resource_owner_id).first
+            user = user_limited_select.id_in(token.resource_owner_id).first
             return unless user&.can?(:log_in)
 
             Gitlab::Auth::Result.new(user, nil, :oauth, full_authentication_abilities)
@@ -255,7 +255,7 @@ module Gitlab
           if deploy_key_matches
             DeployKey.find(deploy_key_matches[1])
           else
-            User.by_login(login)
+            user_limited_select.by_login(login)
           end
 
         return unless actor
@@ -365,6 +365,12 @@ module Gitlab
       end
 
       private
+
+      # Only limited attributes are needed by this class and callers.
+      # Since the table is very wide, this reduces return of unnecessary data.
+      def user_limited_select
+        User.select(:id, :confirmed_at, :locked_at, :state, :user_type)
+      end
 
       def non_admin_available_scopes
         API_SCOPES + REPOSITORY_SCOPES + registry_scopes
