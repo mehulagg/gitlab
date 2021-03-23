@@ -11,11 +11,9 @@ query getState($projectPath: ID!, $iid: String!) {
       mergeError
       mergeStatus
       mergeableDiscussionsState
-      pipelines(first: 1) {
-        nodes {
-          status
-          warnings
-        }
+      headPipeline {
+        status
+        warnings
       }
       shouldBeRebased
       sourceBranchExists
