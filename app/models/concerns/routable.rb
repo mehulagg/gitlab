@@ -95,15 +95,6 @@ module Routable
     end
   end
 
-  # This is used specifically for routing purposes as we don't
-  # usually need to include all the namespace keys in, for example,
-  # the project cache key.
-  def routable_cache_key
-    return unless persisted?
-
-    "#{parent&.routable_cache_key}:#{cache_key}"
-  end
-
   def full_name
     # We have to test for persistence as the cache key uses #updated_at
     return (route&.name || build_full_name) unless persisted? && Feature.enabled?(:cached_route_lookups, type: :ops, default_enabled: :yaml)
@@ -111,7 +102,7 @@ module Routable
     # If the route is already preloaded, return directly, preventing an extra load
     return route.name if association(:route).loaded? && route.present?
 
-    Gitlab::Cache.fetch_once([routable_cache_key, :full_name]) do
+    Gitlab::Cache.fetch_once([cache_key, :full_name]) do
       route&.name || build_full_name
     end
   end
@@ -123,7 +114,7 @@ module Routable
     # If the route is already preloaded, return directly, preventing an extra load
     return route.path if association(:route).loaded? && route.present?
 
-    Gitlab::Cache.fetch_once([routable_cache_key, :full_path]) do
+    Gitlab::Cache.fetch_once([cache_key, :full_path]) do
       route&.path || build_full_path
     end
   end

@@ -84,6 +84,7 @@ class Namespace < ApplicationRecord
   after_destroy :rm_dir
 
   before_save :ensure_delayed_project_removal_assigned_to_namespace_settings, if: :delayed_project_removal_changed?
+  after_commit :expire_child_caches
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
@@ -411,6 +412,11 @@ class Namespace < ApplicationRecord
   end
 
   private
+
+  def expire_child_caches
+    children.find_each(&:touch)
+    projects.find_each(&:touch)
+  end
 
   def ensure_delayed_project_removal_assigned_to_namespace_settings
     return if Feature.disabled?(:migrate_delayed_project_removal, default_enabled: true)
