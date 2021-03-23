@@ -48,3 +48,4 @@ To learn how the GitLab Strategic Marketing department uses GitLab issues with [
 - [Issue Boards](../issue_board.md)
 - [Issues API](../../../api/issues.md)
 - [Configure an external issue tracker](../../../integration/external-issue-tracker.md)
+- [Parts of an issue](issue_data_and_actions.md)
