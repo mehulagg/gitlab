@@ -117,6 +117,7 @@ that of Issues and Merge Requests) based on following parameters:
 - Title or description
 - Author name / username
 - Labels
+- Reaction emoji
 
 ![epics search](img/epics_search.png)
 
