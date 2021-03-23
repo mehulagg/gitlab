@@ -1,17 +1,18 @@
 import { within, fireEvent } from '@testing-library/dom';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
+import ReportItem from 'ee/vulnerabilities/components/generic_report/report_item.vue';
 import ReportRow from 'ee/vulnerabilities/components/generic_report/report_row.vue';
 import ReportSection from 'ee/vulnerabilities/components/generic_report/report_section.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DETAILS = {
-  first: {
+  one: {
     name: 'one',
     type: 'url',
     href: 'http://foo.com',
   },
-  last: {
+  two: {
     name: 'two',
     type: 'url',
     href: 'http://bar.com',
@@ -38,7 +39,7 @@ describe('EE - GenericReport - ReportSection', () => {
   const findReportsSection = () => wrapper.findByTestId('reports');
   const findAllReportRows = () => wrapper.findAllComponents(ReportRow);
   const findReportRowByLabel = (label) => wrapper.findByTestId(`report-row-${label}`);
-
+  const findItemWithinRow = (row) => row.findComponent(ReportItem);
   const detailsLabels = Object.keys(TEST_DETAILS);
   const isLastRow = (label) => detailsLabels.indexOf(label) === detailsLabels.length - 1;
 
@@ -73,6 +74,16 @@ describe('EE - GenericReport - ReportSection', () => {
       expect(findReportRowByLabel(label).props()).toMatchObject({
         label: TEST_DETAILS[label].name,
         isLastRow: isLastRow(label),
+      });
+    });
+  });
+
+  describe('report items', () => {
+    it.each(detailsLabels)('passes the correct props to item for row: %s', (label) => {
+      const row = findReportRowByLabel(label);
+
+      expect(findItemWithinRow(row).props()).toMatchObject({
+        item: TEST_DETAILS[label],
       });
     });
   });
