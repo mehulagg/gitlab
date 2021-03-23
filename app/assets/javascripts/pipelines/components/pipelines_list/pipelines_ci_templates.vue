@@ -17,7 +17,7 @@ const TEMPLATES = {
   Elixir: { logo: 'elixir' },
   'iOS-Fastlane': { logo: 'fastlane' },
   Flutter: { logo: 'flutter' },
-  Go: { logo: 'go' },
+  Go: { logo: 'go_logo' },
   Gradle: { logo: 'gradle' },
   Grails: { logo: 'grails' },
   Dotnet: { logo: 'dotnet' },
@@ -50,6 +50,7 @@ export default {
     subtitle: __(
       'Use a sample file to implement GitLab CI/CD based on your project’s language/framework.',
     ),
+    cta: __('Use template'),
   },
   props: {
     projectId: {
@@ -78,6 +79,7 @@ export default {
                 ...template,
                 ...TEMPLATES[template.key],
                 logoPath: `/assets/illustrations/logos/${TEMPLATES[template.key].logo}.svg`,
+                link: `/-/new/&template=${template.key}`
               });
             } else {
               return templates;
@@ -101,8 +103,14 @@ export default {
       <gl-loading-icon />
     </div>
 
-    <ul v-for="template in this.templates" :key="template.key">
-      <li><img :src="template.logoPath" />{{ template.name }}</li>
+    <ul v-for="template in this.templates" :key="template.key" class="gl-list-style-none gl-pl-0">
+      <li>
+        <img width="48" height="48" :src="template.logoPath" />
+        <h4>{{template.name}}</h4>
+        <p>Continuous deployment template to test and deploy your {{template.name}} project.</p>
+        <gl-button variant="primary" :href="template.link">{{$options.i18n.cta}}</gl-button>
+        <hr />
+      </li>
     </ul>
   </div>
 </template>
