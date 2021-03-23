@@ -877,7 +877,7 @@ RSpec.describe CommitStatus do
     let!(:status3) { create_status(name: 'test') }
     let!(:status4) { create_status(name: 'build', pipeline: create(:ci_pipeline, project: project, sha: project.commit.id)) }
 
-    it "updates 'retried' and 'status' columns of the status with the same name in the same pipeline" do
+    it "updates 'retried' and 'status' columns of the latest status with the same name in the same pipeline" do
       status1.update_older_statuses_retried!
 
       expect(status1.reload).to have_attributes(retried: false, processed: false)
