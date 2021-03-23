@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::GithubImport::Importer::PullRequestsImporter do
-  let(:project) { create(:project, import_source: 'foo/bar') }
+  let(:url) { 'https://github.com/foo/bar.git' }
+  let(:project) { create(:project, import_source: 'foo/bar', import_url: url) }
   let(:client) { double(:client) }
 
   let(:pull_request) do
@@ -153,7 +154,7 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequestsImporter do
 
       expect(project.repository)
         .to receive(:fetch_remote)
-        .with('github', forced: false)
+        .with('github', forced: false, url: url, refmap: Gitlab::GithubImport.refmap)
 
       expect_next_instance_of(Gitlab::Import::Logger) do |logger|
         expect(logger)
