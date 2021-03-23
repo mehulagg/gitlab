@@ -643,7 +643,6 @@ Cop/UserAdmin:
 
 # WIP https://gitlab.com/gitlab-org/gitlab/-/issues/325744
 Performance/OpenStruct:
-  Enabled: true
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
