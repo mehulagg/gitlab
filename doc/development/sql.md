@@ -367,3 +367,10 @@ retries if it were to fail because of an
 
 To be able to use this method, make sure the model you want to use
 this on inherits from `ApplicationRecord`.
+
+## Monitoring SQL queries in production
+
+GitLab team members can monitor slow or canceled queries on GitLab.com
+via the PostgreSQL logs, which are indexed in Elasticsearch and
+searchable via Kibana. See [the runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/master/docs/patroni/pg_collect_query_data.md#searching-postgresql-logs-with-kibanaelasticsearch)
+for more details.
