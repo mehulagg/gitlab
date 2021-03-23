@@ -12,16 +12,16 @@ RSpec.describe "Admin views Cloud License", :js do
     allow(License).to receive(:current).and_return(license)
   end
 
-  context "when there is a license" do
-    let_it_be(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+  License::EE_ALL_PLANS.each do |plan|
+    context "#{plan} license" do
+      let_it_be(:license) { build(:license, plan: plan) }
 
-    before do
-      visit(admin_cloud_license_path)
-    end
+      it 'displays the correct license name' do
+        visit(admin_cloud_license_path)
 
-    it "shows the main title" do
-      page.within(find('#content-body', match: :first)) do
-        expect(page).to have_content("This instance is currently using the Ultimate Plan.")
+        page.within(find('#content-body', match: :first)) do
+          expect(page).to have_content("This instance is currently using the #{plan.titleize} Plan.")
+        end
       end
     end
   end
@@ -33,7 +33,7 @@ RSpec.describe "Admin views Cloud License", :js do
       visit(admin_cloud_license_path)
     end
 
-    it "shows the main title" do
+    it "displays the fallback license name" do
       page.within(find('#content-body', match: :first)) do
         expect(page).to have_content("This instance is currently using the Core Plan.")
       end
