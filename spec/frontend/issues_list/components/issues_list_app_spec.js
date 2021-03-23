@@ -13,6 +13,7 @@ import {
   sortOptions,
   sortParams,
 } from '~/issues_list/constants';
+import eventHub from '~/issues_list/eventhub';
 import axios from '~/lib/utils/axios_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 
@@ -99,6 +100,23 @@ describe('IssuesListApp component', () => {
         urlParams: sortParams[sortKey],
       });
     });
+  });
+
+  describe('bulk edit', () => {
+    describe.each([true, false])(
+      'when "issuables:toggleBulkEdit" event is received with payload %s',
+      (isBulkEdit) => {
+        beforeEach(() => {
+          wrapper = mountComponent();
+
+          eventHub.$emit('issuables:toggleBulkEdit', isBulkEdit);
+        });
+
+        it(`${isBulkEdit ? 'enables' : 'disables'} bulk edit`, async () => {
+          expect(findIssuableList().props('showBulkEditSidebar')).toBe(isBulkEdit);
+        });
+      },
+    );
   });
 
   describe('when "page-change" event is emitted by IssuableList', () => {
@@ -209,5 +227,20 @@ describe('IssuesListApp component', () => {
         });
       },
     );
+  });
+
+  describe('when "update-legacy-bulk-edit" event is emitted by IssuableList', () => {
+    beforeEach(() => {
+      wrapper = mountComponent();
+      jest.spyOn(eventHub, '$emit');
+    });
+
+    it('emits an "issuables:updateBulkEdit" event to the legacy bulk edit class', async () => {
+      findIssuableList().vm.$emit('update-legacy-bulk-edit');
+
+      await waitForPromises();
+
+      expect(eventHub.$emit).toHaveBeenCalledWith('issuables:updateBulkEdit');
+    });
   });
 });
