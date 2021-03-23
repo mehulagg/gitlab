@@ -1,0 +1,5 @@
+---
+title: Remove Jira proxy settings columns
+merge_request: 57260
+author:
+type: removed
