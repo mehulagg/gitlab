@@ -1,0 +1,14 @@
+query SubscriptionList {
+  subscriptions @client {
+    edges {
+      node {
+        name
+        email
+        company
+        lastSync
+        startDate
+        endDate
+      }
+    }
+  }
+}
