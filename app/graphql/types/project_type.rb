@@ -198,7 +198,6 @@ module Types
     field :jobs,
           null: true,
           description: 'All jobs run on the project.',
-          extras: [:lookahead],
           resolver: Resolvers::ProjectJobsResolver
 
     field :ci_cd_settings,
