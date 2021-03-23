@@ -54,7 +54,7 @@ export default {
             :key="label"
             :label="item.name"
             :is-last-row="isLastRow(i)"
-            data-testid="reportRow"
+            :data-testid="`report-row-${label}`"
           >
             <report-item :item="item" />
           </report-row>
