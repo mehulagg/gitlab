@@ -898,10 +898,23 @@ Style/RedundantFetchBlock:
 Style/RedundantFileExtensionInRequire:
   Enabled: false
 
-# Offense count: 248
+# Offense count: 20
 # Cop supports --auto-correct.
 Style/RedundantFreeze:
-  Enabled: false
+  Exclude:
+    - 'db/migrate/20200928233632_remove_terraform_state_verification_indexes.rb'
+    - 'db/migrate/20201214032220_add_has_external_wiki_trigger.rb'
+    - 'db/migrate/20210102164121_drop_temporary_index_on_ci_builds.rb'
+    - 'db/post_migrate/20190214112022_schedule_sync_issuables_state_id.rb'
+    - 'db/post_migrate/20200325162730_schedule_backfill_push_rules_id_in_projects.rb'
+    - 'db/post_migrate/20200416111111_migrate_vulnerability_dismissals.rb'
+    - 'db/post_migrate/20200930144340_set_job_waiter_ttl.rb'
+    - 'db/post_migrate/20201014142521_schedule_sync_blocking_issues_count.rb'
+    - 'db/post_migrate/20201208175117_schedule_backfilling_artifact_expiry_migration.rb'
+    - 'db/post_migrate/20210105030125_cleanup_projects_with_bad_has_external_wiki_data.rb'
+    - 'db/post_migrate/20210115220610_schedule_artifact_expiry_backfill.rb'
+    - 'db/post_migrate/20210210221006_cleanup_projects_with_bad_has_external_issue_tracker_data.rb'
+    - 'db/post_migrate/20210224150506_reschedule_artifact_expiry_backfill.rb'
 
 # Offense count: 206
 # Cop supports --auto-correct.
