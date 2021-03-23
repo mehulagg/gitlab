@@ -17,11 +17,7 @@
           %td.new_line.diff-line-num
           %td.line_content.match= line.text
         - else
-          %td.old_line.diff-line-num{ class: [line.type, "js-avatar-container"], data: { linenumber: line.old_pos } }
-            - unless @diff_notes_disabled
-              %span.add-diff-note.tooltip-wrapper
-                %button.note-button.add-diff-note.js-add-diff-note-button{ type: "submit", name: "button", data: diff_view_line_data(line_code, diff_file.position(line), line.type), title: _('Add a comment to this line') { sprite_icon('comment', size: 12) } }
-
+          %td.old_line.diff-line-num{ class: [line.type, "js-avatar-container"], data: { linenumber: line.old_pos, line_data: (diff_view_line_data(line_code, diff_file.position(line), line.type) unless @diff_notes_disabled) } }
             %a{ href: "##{line_code}", data: { linenumber: diff_link_number(line.type, "new", line.old_pos) } }
 
           %td.new_line.diff-line-num{ class: line.type, data: { linenumber: line.new_pos } }
