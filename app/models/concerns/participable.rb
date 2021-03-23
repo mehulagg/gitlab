@@ -60,15 +60,23 @@ module Participable
     all_participants[current_user]
   end
 
+  def participant?(current_user)
+    raw_participants.include?(current_user)
+  end
+
   private
 
   def all_participants
     @all_participants ||= Hash.new do |hash, user|
-      hash[user] = raw_participants(user)
+      hash[user] = filtered_participants(user)
     end
   end
 
-  def raw_participants(current_user = nil)
+  def filtered_participants(user)
+    filter_by_ability(raw_participants(user))
+  end
+
+  def raw_participants(current_user = nil, skip_access_check: false)
     current_user ||= author
     ext = Gitlab::ReferenceExtractor.new(project, current_user)
     participants = Set.new
@@ -98,8 +106,6 @@ module Participable
     end
 
     participants.merge(ext.users)
-
-    filter_by_ability(participants)
   end
 
   def filter_by_ability(participants)

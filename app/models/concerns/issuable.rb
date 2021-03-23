@@ -437,7 +437,11 @@ module Issuable
   end
 
   def subscribed_without_subscriptions?(user, project)
-    participants(user).include?(user)
+    if Feature.enabled?(:skip_subscription_access_check, project)
+      participant?(user)
+    else
+      participants(user).include?(user)
+    end
   end
 
   def can_assign_epic?(user)
