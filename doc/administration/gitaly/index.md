@@ -77,7 +77,6 @@ Gitaly has an optional cache that can reduce server load due to
 paralel Git clones from CI. See [pack-objects
 cache](pack-objects-cache.md).
 
-
 ## Do not bypass Gitaly
 
 GitLab doesn't advise directly accessing Gitaly repositories stored on disk with a Git client,
