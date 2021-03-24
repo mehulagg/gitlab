@@ -4160,7 +4160,7 @@ msgstr ""
 msgid "AsanaService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches."
 msgstr ""
 
-msgid "AsanaService|User Personal Access Token. User must have access to the task. All comments will be attributed to this user."
+msgid "AsanaService|User Personal Access Token. User must have access to the task. All comments are attributed to this user."
 msgstr ""
 
 msgid "Ascending"
