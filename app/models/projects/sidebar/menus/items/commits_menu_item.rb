@@ -5,15 +5,9 @@ module Projects
     module Menus
       module Items
         class CommitsMenuItem < ::Sidebar::MenuItem
-          def initialize(current_user, project, current_ref)
-            super(current_user, project)
-
-            @current_ref = current_ref
-          end
-
           override :link_to_href
           def link_to_href
-            project_commits_path(container, @current_ref)
+            project_commits_path(container, current_ref)
           end
 
           override :link_to_attributes

@@ -4,16 +4,16 @@ module Projects
   module Sidebar
     module Menus
       class RepositoryMenu < ::Sidebar::Menu
-        def initialize(current_user, project, current_ref)
-          super(current_user, project)
+        def initialize(context)
+          super
 
-          add_item(Items::FilesMenuItem.new(current_user, project, current_ref))
-          add_item(Items::CommitsMenuItem.new(current_user, project, current_ref))
-          add_item(Items::BranchesMenuItem.new(current_user, project))
-          add_item(Items::TagsMenuItem.new(current_user, project))
-          add_item(Items::ContributorsMenuItem.new(current_user, project, current_ref))
-          add_item(Items::GraphsMenuItem.new(current_user, project, current_ref))
-          add_item(Items::CompareMenuItem.new(current_user, project, current_ref))
+          add_item(Items::FilesMenuItem.new(context))
+          add_item(Items::CommitsMenuItem.new(context))
+          add_item(Items::BranchesMenuItem.new(context))
+          add_item(Items::TagsMenuItem.new(context))
+          add_item(Items::ContributorsMenuItem.new(context))
+          add_item(Items::GraphsMenuItem.new(context))
+          add_item(Items::CompareMenuItem.new(context))
         end
 
         override :link_to_href

@@ -2,13 +2,14 @@
 
 module Sidebar
   class Panel
-    attr_reader :container, :menus, :context_menu, :current_user
+    attr_reader :current_user, :container, :context_menu
 
-    def initialize(current_user, container)
-      @current_user = current_user
+    def initialize(context)
+      @context = context
+      @current_user = context.current_user
+      @container = context.container
       @context_menu = nil
       @menus = []
-      @container = container
     end
 
     def add_menu(menu)

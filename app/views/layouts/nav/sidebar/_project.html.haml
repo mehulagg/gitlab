@@ -1,5 +1,7 @@
 - if Feature.enabled?(:sidebar_refactor, @current_user)
-  = render partial: 'shared/nav/sidebar', object: Projects::Sidebar::Panel.new(@current_user, @project, current_ref)
+  - context = Sidebar::Context.new(current_user: @current_user, container: @project, current_ref: current_ref)
+
+  = render partial: 'shared/nav/sidebar', object: Projects::Sidebar::Panel.new(context)
 - else
   %aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **project_tracking_attrs, 'aria-label': _('Project navigation') }
     .nav-sidebar-inner-scroll

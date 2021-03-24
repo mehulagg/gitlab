@@ -3,13 +3,13 @@
 module Projects
   module Sidebar
     class Panel < ::Sidebar::Panel
-      def initialize(current_user, project, current_ref)
-        super(current_user, project)
+      def initialize(context)
+        super
 
-        set_context_menu(Projects::Sidebar::Menus::ContextMenu.new(current_user, project))
-        add_menu(Projects::Sidebar::Menus::ProjectOverviewMenu.new(current_user, project))
-        add_menu(Projects::Sidebar::Menus::LearnGitlabMenu.new(current_user, project))
-        add_menu(Projects::Sidebar::Menus::RepositoryMenu.new(current_user, project, current_ref))
+        set_context_menu(Projects::Sidebar::Menus::ContextMenu.new(context))
+        add_menu(Projects::Sidebar::Menus::ProjectOverviewMenu.new(context))
+        add_menu(Projects::Sidebar::Menus::LearnGitlabMenu.new(context))
+        add_menu(Projects::Sidebar::Menus::RepositoryMenu.new(context))
       end
 
       def aria_label

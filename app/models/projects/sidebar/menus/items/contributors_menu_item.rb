@@ -5,15 +5,9 @@ module Projects
     module Menus
       module Items
         class ContributorsMenuItem < ::Sidebar::MenuItem
-          def initialize(current_user, project, current_ref)
-            super(current_user, project)
-
-            @current_ref = current_ref
-          end
-
           override :link_to_href
           def link_to_href
-            project_graph_path(container, @current_ref)
+            project_graph_path(container, current_ref)
           end
 
           override :nav_link_params

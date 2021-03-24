@@ -7,11 +7,8 @@ module Sidebar
     include GitlabRoutingHelper
     include Gitlab::Allowable
 
-    attr_reader :current_user, :container, :items
-
-    def initialize(current_user, container)
-      @current_user = current_user
-      @container = container
+    def initialize(context)
+      @context = context
       @items = []
     end
 
@@ -61,11 +58,17 @@ module Sidebar
     end
 
     def renderable_items
-      @renderable_items ||= items.select(&:render?)
+      @renderable_items ||= @items.select(&:render?)
     end
 
     def sprite_icon
       raise NotImplementedError
+    end
+
+    private
+
+    def method_missing(method, *args, &block)
+      @context.public_send(method) # rubocop:disable GitlabSecurity/PublicSend
     end
   end
 end
