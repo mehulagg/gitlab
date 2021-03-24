@@ -41,13 +41,13 @@ module Projects
       current_user.invalidate_personal_projects_count
 
       true
-    rescue => error
+    rescue DestroyError => error
       attempt_rollback(project, error.message)
       false
     rescue Exception => error # rubocop:disable Lint/RescueException
       # Project.transaction can raise Exception
       attempt_rollback(project, error.message)
-      raise
+      Gitlab::ErrorTracking.track_and_raise_exception(error)
     end
 
     private
