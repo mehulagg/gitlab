@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Resolver do
 
             allow(Net::DNS::Resolver).to receive(:start)
               .with('localhost', Net::DNS::A)
-              .and_return(double(:packet, answer: []))
+              .and_raise(Net::DNS::Resolver::NoResponseError)
 
             expect { subject }.to raise_exception(
               described_class::UnresolvableNameserverError,
