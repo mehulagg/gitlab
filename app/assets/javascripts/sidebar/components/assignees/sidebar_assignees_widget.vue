@@ -46,6 +46,9 @@ export default {
     indirectlyInviteMembers: {
       default: false,
     },
+    signedIn: {
+      default: false,
+    },
   },
   props: {
     iid: {
@@ -209,7 +212,11 @@ export default {
       return !this.isSearchEmpty && this.searchUsers.length === 0;
     },
     showCurrentUser() {
-      return !this.isCurrentUserInParticipants && (this.isSearchEmpty || this.isSearching);
+      return (
+        this.signedIn &&
+        !this.isCurrentUserInParticipants &&
+        (this.isSearchEmpty || this.isSearching)
+      );
     },
   },
   watch: {
