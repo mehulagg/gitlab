@@ -17,6 +17,11 @@ namespace :gitlab do
       puts Gitlab::Json.pretty_generate(Gitlab::UsageData.uncached_data)
     end
 
+    desc 'GitLab | UsageDataMetrics | Generate usage ping from metrics definition YAML files in JSON'
+    task generate_from_yaml: :environment do
+      puts Gitlab::Json.pretty_generate(Gitlab::UsageDataMetrics.uncached_data)
+    end
+
     desc 'GitLab | UsageData | Generate usage ping and send it to Versions Application'
     task generate_and_send: :environment do
       result = SubmitUsagePingService.new.execute

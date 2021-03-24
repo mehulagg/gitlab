@@ -53,6 +53,14 @@ module Gitlab
           @definitions ||= load_all!
         end
 
+        def find_by(args)
+          definitions.find do |_key_path, definition|
+            args.reduce(true) do |found, arg|
+              found && definition.attributes[arg.first] == arg.second
+            end
+          end
+        end
+
         def schemer
           @schemer ||= ::JSONSchemer.schema(Pathname.new(METRIC_SCHEMA_PATH))
         end
