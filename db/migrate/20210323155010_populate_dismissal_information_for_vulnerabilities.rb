@@ -1,33 +1,40 @@
 # frozen_string_literal: true
 
-# See https://docs.gitlab.com/ee/development/migration_style_guide.html
-# for more information on how to write migrations for GitLab.
-
 class PopulateDismissalInformationForVulnerabilities < ActiveRecord::Migration[6.0]
   # Uncomment the following include if you require helper functions:
   # include Gitlab::Database::MigrationHelpers
 
-  # Set this constant to true if this migration requires downtime.
   DOWNTIME = false
+  BATCH_SIZE = 100
+  UPDATE_QUERY = <<~SQL
+    UPDATE
+      vulnerabilities
+    SET
+      vulnerabilities.dismissed_at = vulnerabilities.updated_at,
+      vulnerabilities.dismissed_by_id = COALESCE(vulnerabilities.updated_by_id, vulnerabilities.last_edited_by_id, vulnerabilities.author_id)
+    WHERE
+      vulnerabilities.id IN (%{ids})
+  SQL
 
-  # When a migration requires downtime you **must** uncomment the following
-  # constant and define a short and easy to understand explanation as to why the
-  # migration requires downtime.
-  # DOWNTIME_REASON = ''
+  class Vulnerability < ActiveRecord::Base
+    include EachBatch
 
-  # When using the methods "add_concurrent_index", "remove_concurrent_index" or
-  # "add_column_with_default" you must disable the use of transactions
-  # as these methods can not run in an existing transaction.
-  # When using "add_concurrent_index" or "remove_concurrent_index" methods make sure
-  # that either of them is the _only_ method called in the migration,
-  # any other changes should go in a separate migration.
-  # This ensures that upon failure _only_ the index creation or removing fails
-  # and can be retried or reverted easily.
-  #
-  # To disable transactions uncomment the following line and remove these
-  # comments:
-  # disable_ddl_transaction!
+    self.table_name = 'vulnerabilities'
 
-  def change
+    enum state: { detected: 1, confirmed: 4, resolved: 3, dismissed: 2 }
+
+    scope :broken, -> { dismissed.where('dismissed_at IS NULL OR dismissed_by_id IS NULL') }
+  end
+
+  def up
+    Vulnerability.broken.each_batch(of: BATCH_SIZE) do |batch|
+      query = format(UPDATE_QUERY, ids: batch.pluck(:id).join(', '))
+
+      connection.execute(query)
+    end
+  end
+
+  def down
+    # no-op
   end
 end
