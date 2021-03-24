@@ -258,7 +258,7 @@ For a walkthrough of the integration with GitLab for Jira, watch [Configure GitL
 
    ![Start GitLab App configuration on Jira](img/jira_dev_panel_setup_com_2.png)
 1. If not already signed in to GitLab.com, you must sign in as a user with
-   [Maintainer](../user/permissions.md) permissions to add namespaces.
+   [Maintainer](../../user/permissions.md) permissions to add namespaces.
 
    ![Sign in to GitLab.com in GitLab Jira App](img/jira_dev_panel_setup_com_3_v13_9.png)
 1. Select **Add namespace** to open the list of available namespaces.
