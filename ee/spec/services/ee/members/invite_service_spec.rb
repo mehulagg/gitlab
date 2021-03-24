@@ -81,5 +81,11 @@ RSpec.describe Members::InviteService, :aggregate_failures do
         expect(result[:status]).to eq(:success)
       end
     end
+
+    context 'with Audit Event logging' do
+      specify do
+        expect { result }.to change { AuditEvent.count }.by(2)
+      end
+    end
   end
 end
