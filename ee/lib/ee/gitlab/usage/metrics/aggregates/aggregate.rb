@@ -9,7 +9,7 @@ module EE
             extend ActiveSupport::Concern
             extend ::Gitlab::Utils::Override
 
-            EE_AGGREGATED_METRICS_PATH = Rails.root.join('ee/lib/gitlab/usage_data_counters/aggregated_metrics/*.yml')
+            EE_AGGREGATED_METRICS_PATH = Rails.root.join('ee/config/metrics/aggregates/*.yml')
 
             override :initialize
             def initialize(recorded_at)
