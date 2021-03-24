@@ -120,15 +120,14 @@ module Security
     def update_vulnerability_scanners!(findings)
       records = findings.map do |finding|
         scanner = scanners_objects[finding.scanner.key]
-        if scanner.present?
-          scanner = scanner.attributes.with_indifferent_access
-                                      .merge(finding.scanner.to_hash)
-                                      .merge({created_at: Time.current, updated_at: Time.current})
-          scanner.delete(:id)
-          scanner.compact
-        else
-          nil
-        end
+
+        next nil if scanner.nil?
+
+        scanner_attr = scanner.attributes.with_indifferent_access
+          .merge(finding.scanner.to_hash)
+          .merge({created_at: Time.current, updated_at: Time.current})
+        scanner_attr.delete(:id)
+        scanner_attr.compact
       end.compact
 
       if records.present?
