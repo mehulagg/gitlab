@@ -34,12 +34,15 @@ module Security
 
     def create_all_vulnerabilities!
       # Look for existing Findings using UUID
-      finding_uuids = @report.findings.map(&:uuid)
+      findings = @report.findings
+      finding_uuids = findings.map(&:uuid)
       vulnerability_findings_by_uuid = project.vulnerability_findings
         .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
         .to_h { |vf| [vf.uuid, vf] }
 
-      @report.findings.map do |finding|
+      update_vulnerability_scanners!(findings)
+
+      findings.map do |finding|
         create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
       end.compact.uniq
     end
@@ -62,8 +65,6 @@ module Security
       # Vulnerabilities::Finding (`vulnerability_occurrences`)
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
         create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
-
-      update_vulnerability_scanner(finding)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
@@ -116,9 +117,25 @@ module Security
       end
     end
 
-    def update_vulnerability_scanner(finding)
-      scanner = scanners_objects[finding.scanner.key]
-      scanner.update!(finding.scanner.to_hash)
+    def update_vulnerability_scanners!(findings)
+      records = findings.map do |finding|
+        scanner = scanners_objects[finding.scanner.key]
+        if scanner.present?
+          scanner = scanner.attributes.with_indifferent_access
+                                      .merge(finding.scanner.to_hash)
+                                      .merge({created_at: Time.current, updated_at: Time.current})
+          scanner.delete(:id)
+          scanner.compact
+        else
+          nil
+        end
+      end.compact
+
+      if records.present?
+        Vulnerabilities::Scanner.insert_all(records)
+        clear_memoization(:scanners_objects)
+        clear_memoization(:existing_scanner_objects)
+      end
     end
 
     def update_vulnerability_finding(vulnerability_finding, update_params)
