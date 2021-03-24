@@ -798,7 +798,7 @@ for how to use its API to query for data.
 ```ruby
 SubmitUsagePingService.new.execute
 ```
-- Use `versions` Rails console, to check that a usage ping was successfully received, parsed, and stored in the Versions database.
+- Use `versions` Rails console, to check that a Usage Ping was successfully received, parsed, and stored in the Versions database.
 ```ruby
 UsageData.last
 ```
