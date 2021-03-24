@@ -794,7 +794,7 @@ for how to use its API to query for data.
 
 ### 2. Tesing local setup
 
-- Use `gitlab` Rails console, manually trigger a usage ping
+- Use `gitlab` Rails console, manually trigger a Usage Ping
 ```ruby
 SubmitUsagePingService.new.execute
 ```
