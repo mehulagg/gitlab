@@ -104,13 +104,14 @@ module API
         end
 
         def deprovision(identity)
-          ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
+          service = ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
 
-          true
-        rescue => e
-          logger.error(identity: identity, error: e.class.name, message: e.message, source: "#{__FILE__}:#{__LINE__}")
-
-          false
+          if service.success?
+            no_content!
+          else
+            logger.error(identity: identity, error: service.class.name, message: service.message, source: "#{__FILE__}:#{__LINE__}")
+            scim_error!(message: service.message)
+          end
         end
 
         def reprovision(identity)
@@ -212,11 +213,7 @@ module API
 
           scim_not_found!(message: "Resource #{params[:id]} not found") unless identity
 
-          destroyed = deprovision(identity)
-
-          scim_not_found!(message: "Resource #{params[:id]} not found") unless destroyed
-
-          no_content!
+          deprovision(identity)
         end
       end
     end

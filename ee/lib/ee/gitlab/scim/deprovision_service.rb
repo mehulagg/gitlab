@@ -19,6 +19,7 @@ module EE
           ScimIdentity.transaction do
             identity.update!(active: false)
             remove_group_access
+            ServiceResponse.success(message: "User #{user.name} has been deprovisioned.")
           end
         end
 
