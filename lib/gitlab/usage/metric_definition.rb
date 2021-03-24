@@ -49,6 +49,18 @@ module Gitlab
           @paths ||= [Rails.root.join('config', 'metrics', '**', '*.yml')]
         end
 
+        def all
+          @all ||= definitions.map { |_key_path, definition| definition }
+        end
+
+        def find_by(args)
+          all.find do |definition|
+            args.reduce(true) do |found, arg|
+              found && definition.attributes[arg.first] == arg.second
+            end
+          end
+        end
+
         def definitions
           @definitions ||= load_all!
         end
