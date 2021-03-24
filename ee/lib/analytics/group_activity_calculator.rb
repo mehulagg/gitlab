@@ -22,7 +22,7 @@ module Analytics
       ::Gitlab::Database::LoadBalancing::Session.clear_session
 
       @merge_requests_count ||=
-        MergeRequestsFinder.new(@current_user, params).execute.count
+        Groups::RecentMergeRequestsCountService.new(@group, @current_user, params).count
     end
 
     def new_members_count
