@@ -48,7 +48,6 @@ module Projects
   end
 end
 
-
 # - if project_nav_tab? :files
 #   = nav_link(controller: sidebar_repository_paths, unless: -> { current_path?('projects/graphs#charts') }) do
 #     = link_to project_tree_path(@project), class: 'shortcuts-tree', data: { qa_selector: "repository_link" } do
