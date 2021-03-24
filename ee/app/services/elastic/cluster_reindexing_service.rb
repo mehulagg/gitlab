@@ -13,7 +13,6 @@ module Elastic
     DELETE_ORIGINAL_INDEX_AFTER = 14.days
 
     REINDEX_MAX_RETRY_LIMIT = 10
-    REINDEX_SLICE_MULTIPLIER = 2
 
     def execute
       case current_task.state.to_sym
@@ -82,7 +81,7 @@ module Elastic
         # Record documents count
         documents_count = elastic_helper.documents_count(index_name: old_index_name)
         # Trigger reindex
-        max_slice = REINDEX_SLICE_MULTIPLIER * elastic_helper.get_settings.dig('number_of_shards').to_i
+        max_slice = elastic_helper.get_settings(index_name: old_index_name).dig('number_of_shards').to_i
         task_id = elastic_helper.reindex(from: old_index_name, to: new_index_name, max_slice: max_slice, slice: 0)
         logger.info(message: "Reindex task #{task_id} from #{old_index_name} to #{new_index_name} started for slice 0.")
 

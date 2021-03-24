@@ -53,6 +53,8 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
       allow(helper).to receive(:create_standalone_indices).and_return('new_issues_name' => 'new_issues')
       allow(helper).to receive(:reindex).with(from: anything, to: 'new_index_name', slice: anything, max_slice: anything).and_return('task_id_1')
       allow(helper).to receive(:reindex).with(from: anything, to: 'new_issues_name', slice: anything, max_slice: anything).and_return('task_id_2')
+      allow(helper).to receive(:get_settings).with(index_name: 'new_index').and_return({ 'number_of_shards' => '10' })
+      allow(helper).to receive(:get_settings).with(index_name: 'new_issues').and_return({ 'number_of_shards' => '3' })
 
       expect { subject.execute }.to change { task.reload.state }.from('indexing_paused').to('reindexing')
 
@@ -64,7 +66,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
       expect(subtasks.first.elastic_task).to eq('task_id_1')
       expect(subtasks.first.elastic_slice).to eq(0)
       expect(subtasks.last.index_name_to).to eq('new_issues_name')
-      expect(subtasks.last.elastic_max_slice).to eq(10)
+      expect(subtasks.last.elastic_max_slice).to eq(3)
       expect(subtasks.last.elastic_task).to eq('task_id_2')
       expect(subtasks.last.elastic_slice).to eq(0)
     end
@@ -85,7 +87,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
     before do
       allow(helper).to receive(:task_status).and_return({ 'completed' => true, 'response' => { 'total' => 20, 'created' => 20, 'updated' => 0, 'deleted' => 0 } })
       allow(helper).to receive(:refresh_index).and_return(true)
-      allow(helper).to receive(:reindex).and_return('task_id_1')
+      allow(helper).to receive(:reindex).and_return(FFaker::Lorem.characters(15))
     end
 
     context 'errors are raised' do
@@ -119,7 +121,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
 
         context 'before retry limit reached' do
           it 'increases retry_attempt and reindexes the subtask slice again' do
-            expect { subject.execute }.to change { subtask.reload.retry_attempt }.by(1)
+            expect { subject.execute }.to change { subtask.reload.retry_attempt }.by(1).and change { subtask.reload.elastic_task }
             expect(task.reload.state).to eq('reindexing')
             expect(helper).to have_received(:reindex).with(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: 2, slice: 0)
           end
@@ -144,7 +146,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
 
         context 'before retry limit reached' do
           it 'increases retry_attempt and reindexes the slice again' do
-            expect { subject.execute }.to change { subtask.reload.retry_attempt }.by(1)
+            expect { subject.execute }.to change { subtask.reload.retry_attempt }.by(1).and change { subtask.reload.elastic_task }
             expect(task.reload.state).to eq('reindexing')
             expect(helper).to have_received(:reindex).with(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: 2, slice: 0)
           end
