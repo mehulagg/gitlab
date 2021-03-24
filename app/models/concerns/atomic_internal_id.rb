@@ -194,7 +194,9 @@ module AtomicInternalId
   end
 
   def self.scope_attrs(scope_value)
-    { scope_value.class.table_name.singularize.to_sym => scope_value } if scope_value
+    return unless scope_value
+
+    { "#{scope_value.class.table_name.singularize}_id".to_sym => scope_value.id }
   end
 
   def internal_id_scope_attrs(scope)
