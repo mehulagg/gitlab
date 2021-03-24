@@ -89,18 +89,6 @@ module EE
               requires :approver_group_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce,
                 desc: 'Array of Group IDs to set as approvers.'
             end
-            put 'approvers' do
-              ::Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/8883')
-
-              merge_request = find_merge_request_with_access(params[:merge_request_iid], :update_approvers)
-
-              merge_request = ::MergeRequests::UpdateService.new(user_project, current_user, declared(params, include_parent_namespaces: false).merge(remove_old_approvers: true)).execute(merge_request)
-
-              # Merge request shouldn't be in an invalid state after the changes, but handling errors to be safe
-              handle_merge_request_errors!(merge_request)
-
-              present_approval(merge_request)
-            end
           end
         end
       end
