@@ -13,6 +13,8 @@ RSpec.describe 'Project navbar' do
 
   before do
     insert_package_nav(_('Operations'))
+    insert_terraform_registry_nav(_('Operations'))
+    stub_config(registry: { enabled: false })
 
     project.add_maintainer(user)
     sign_in(user)

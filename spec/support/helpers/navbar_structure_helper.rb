@@ -44,4 +44,12 @@ module NavbarStructureHelper
       new_sub_nav_item_name: _('Dependency Proxy')
     )
   end
+
+  def insert_terraform_registry_nav(within)
+    insert_after_sub_nav_item(
+      _('Package Registry'),
+      within: _('Packages & Registries'),
+      new_sub_nav_item_name: _('Infrastructure Registry')
+    )
+  end
 end
