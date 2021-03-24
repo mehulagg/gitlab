@@ -47,7 +47,7 @@ export default {
     },
     deleteIssuableButtonText() {
       return sprintf(__('Delete %{issuableType}'), {
-        issuableType: issuableTypes[this.issuableType],
+        issuableType: issuableTypes[this.issuableType].toLowerCase(),
       });
     },
   },
