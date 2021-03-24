@@ -12,6 +12,6 @@ RSpec.describe 'Issue Boards focus mode', :js do
   end
 
   it 'shows focus mode button to guest users' do
-    expect(page).to have_selector('.board-extra-actions .js-focus-mode-btn')
+    expect(page).to have_selector('.js-focus-mode-btn')
   end
 end

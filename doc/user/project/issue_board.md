@@ -657,24 +657,6 @@ To disable it:
 Feature.disable(:graphql_board_lists)
 ```
 
-## Enable or disable adding issues to the list **(FREE SELF)**
-
-Adding issues to the list is deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:add_issues_button)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:add_issues_button)
-```
-
 ### Enable or disable new add list form **(FREE SELF)**
 
 The new form for adding lists is under development and not ready for production use. It is
