@@ -38,13 +38,13 @@ Learn about your Personal Access Tokens here: <https://developers.asana.com/docs
         name: 'api_key',
         help: s_('AsanaService|User Personal Access Token. User must have access to the task. All comments will be attributed to this user.'),
         # Example Personal Access Token from Asana docs
-        placeholder: ('0/68a9e79b868c6789e79a124c30b0'),
+        placeholder: '0/68a9e79b868c6789e79a124c30b0',
         required: true
       },
       {
         type: 'text',
         name: 'restrict_to_branch',
-        help: s_('AsanaService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches.'),
+        help: s_('AsanaService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches.')
       }
     ]
   end
