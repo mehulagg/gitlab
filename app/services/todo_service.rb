@@ -220,9 +220,14 @@ class TodoService
   private
 
   def create_todos(users, attributes)
-    Array(users).map do |user|
-      next if pending_todos(user, attributes).exists? && Feature.disabled?(:multiple_todos, user)
+    users = Array(users)
 
+    return unless users.any?
+
+    users_with_pending_todos = pending_todos(users, attributes).pluck(:user_id)
+    users.reject! { |user| users_with_pending_todos.include?(user.id) && Feature.disabled?(:multiple_todos, user) }
+
+    users.map do |user|
       issue_type = attributes.delete(:issue_type)
       track_todo_creation(user, issue_type)
 

@@ -1044,12 +1044,33 @@ RSpec.describe TodoService do
       should_not_create_todo(user: skipped, target: noteable, action: Todo::DIRECTLY_ADDRESSED)
     end
 
-    it 'does not create a todo if user was already mentioned and todo is pending' do
-      stub_feature_flags(multiple_todos: false)
+    context 'users already have pending todos and the multiple_todos feature is off' do
+      before do
+        stub_feature_flags(multiple_todos: false)
+      end
 
-      create(:todo, :mentioned, user: member, project: project, target: noteable, author: author)
+      let!(:pending_todo_for_member) { create(:todo, :mentioned, user: member, project: project, target: noteable, author: author) }
+      let!(:pending_todo_for_guest) { create(:todo, :mentioned, user: guest, project: project, target: noteable, author: author) }
 
-      expect { service.update_note(note, author, skip_users) }.not_to change(member.todos, :count)
+      let(:mentions) { 'FYI: ' + [member, guest].map(&:to_reference).join(' ') }
+
+      it 'does not create a todo if user was already mentioned and todo is pending' do    
+        expect { service.update_note(note, author, skip_users) }.not_to change(member.todos, :count)
+      end
+
+      it 'does not create N+1 queries when all users have pending todos' do
+        allow_any_instance_of(User).to receive(:can?).and_return(true)
+
+        mentions = 'FYI: ' + [member].map(&:to_reference).join(' ')
+        note = create(:note, project: project, note: mentions, noteable: noteable)
+        control_count = ActiveRecord::QueryRecorder.new { service.update_note(note, author, skip_users) }.count
+
+        mentions = 'FYI: ' + [member, guest, admin].map(&:to_reference).join(' ')
+        note = create(:note, project: project, note: mentions, noteable: noteable)
+        create(:todo, :mentioned, user: admin, project: project, target: noteable, author: author)
+
+        expect { service.update_note(note, author, skip_users) }.not_to exceed_query_limit(control_count)
+      end
     end
 
     it 'does not create a todo if user was already mentioned and todo is done' do
