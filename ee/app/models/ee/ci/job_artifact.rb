@@ -23,9 +23,6 @@ module EE
       API_FUZZING_REPORT_TYPES = %w[api_fuzzing].freeze
       BROWSER_PERFORMANCE_REPORT_FILE_TYPES = %w[browser_performance performance].freeze
 
-      scope :project_id_in, ->(ids) { where(project_id: ids) }
-      scope :with_files_stored_remotely, -> { where(file_store: ::JobArtifactUploader::Store::REMOTE) }
-
       scope :security_reports, -> (file_types: SECURITY_REPORT_FILE_TYPES) do
         requested_file_types = *file_types
 

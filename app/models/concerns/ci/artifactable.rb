@@ -20,6 +20,9 @@ module Ci
 
       scope :expired_before, -> (timestamp) { where(arel_table[:expire_at].lt(timestamp)) }
       scope :expired, -> (limit) { expired_before(Time.current).limit(limit) }
+      scope :with_files_stored_locally, -> { where(file_store: ::ObjectStorage::Store::LOCAL) }
+      scope :with_files_stored_remotely, -> { where(file_store: ::ObjectStorage::Store::REMOTE) }
+      scope :project_id_in, ->(ids) { where(project_id: ids) }
     end
 
     def each_blob(&blk)

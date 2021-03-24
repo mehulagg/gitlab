@@ -72,5 +72,41 @@ RSpec.describe Ci::Artifactable do
         expect(Ci::JobArtifact.expired(1).order_id_asc).to eq([recently_expired_artifact])
       end
     end
+
+    describe '.with_files_stored_locally' do
+      it 'returns artifacts stored locally' do
+        expect(Ci::JobArtifact.with_files_stored_locally).to contain_exactly(recently_expired_artifact, later_expired_artifact, not_expired_artifact)
+      end
+    end
+
+    describe '.with_files_stored_remotely' do
+      let(:remote_artifact) { create(:ci_job_artifact, :remote_store) }
+
+      before do
+        stub_artifacts_object_storage
+      end
+
+      it 'returns artifacts stored remotely' do
+        expect(Ci::JobArtifact.with_files_stored_remotely).to contain_exactly(remote_artifact)
+      end
+    end
+
+    describe '.project_id_in' do
+      context 'when artifacts belongs to projects' do
+        let(:project_ids) { [recently_expired_artifact.project.id] }
+
+        it 'returns artifacts belonging to projects' do
+          expect(Ci::JobArtifact.project_id_in(project_ids)).to contain_exactly(recently_expired_artifact)
+        end
+      end
+
+      context 'when artifacts does not belong to projects' do
+        let(:project_ids) { [non_existing_record_id] }
+
+        it 'returns an empty array' do
+          expect(Ci::JobArtifact.project_id_in(project_ids)).to be_empty
+        end
+      end
+    end
   end
 end
