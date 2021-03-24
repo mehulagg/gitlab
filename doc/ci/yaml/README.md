@@ -1985,7 +1985,7 @@ To disable directed acyclic graphs (DAG), set the limit to `0`.
 
 When a job uses `needs`, it no longer downloads all artifacts from previous stages
 by default, because jobs with `needs` can start before earlier stages complete. With
-`needs` you can only download artifacts from the jobs listed in the `needs:` section.
+`needs` you can only download artifacts from the jobs listed in the `needs:` configuration.
 
 Use `artifacts: true` (default) or `artifacts: false` to control when artifacts are
 downloaded in jobs that use `needs`.
@@ -3076,13 +3076,15 @@ The artifacts are sent to GitLab after the job finishes. They are
 available for download in the GitLab UI if the size is not
 larger than the [maximum artifact size](../../user/gitlab_com/index.md#gitlab-cicd).
 
+By default, jobs in later stages automatically download all the artifacts created
+by jobs in earlier stages. You can control artifact download behavior in jobs with
+[`dependencies`](#dependencies).
+
+When using the [`needs`](#artifact-downloads-with-needs) keyword, jobs can only download
+artifacts from the jobs defined in the `needs` configuration.
+
 Job artifacts are only collected for successful jobs by default, and
 artifacts are restored after [caches](#cache).
-
-By default, all artifacts are made available for jobs in later stages. But some keywords 
-can affect or/and change this behavior. For example, you can control artifacts download behavior 
-with [`dependencies`](#dependencies). And when you use [`needs`](#artifact-downloads-with-needs), 
-you can only download artifacts from the jobs listed in the `needs` configuration.
 
 [Read more about artifacts](../pipelines/job_artifacts.md).
 
