@@ -47,7 +47,7 @@ self-managed GitLab) set up the integration to simplify administration.
 | If you use Jira on: | GitLab.com customers need: | GitLab self-managed customers need: |
 |-|-|-|
 | [Atlassian cloud](https://www.atlassian.com/cloud) | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview) application installed from the [Atlassian Marketplace](https://marketplace.atlassian.com). This offers real-time sync between GitLab and Jira. | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview), using a workaround process. See a [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/268278) for more information. |
-| Your own server | The Jira DVCS (distributed version control system) connector. This syncs data hourly. | The Jira DVCS connector. |
+| Your own server | The Jira DVCS (distributed version control system) connector. This syncs data hourly. | The [Jira DVCS Connector](dvcs.md). |
 
 ### GitLab for Jira app **(FREE SAAS)**
 
@@ -56,7 +56,7 @@ You can integrate GitLab.com and Jira Cloud using the
 app in the Atlassian Marketplace. The user configuring GitLab for Jira must have
 [Maintainer](../../user/permissions.md) permissions in the GitLab namespace.
 
-This method is recommended when using GitLab.com and Jira Cloud because data is synchronized in real-time. The DVCS connector updates data only once per hour. If you are not using both of these environments, use the [Jira DVCS Connector](#jira-dvcs-configuration) method.
+This method is recommended when using GitLab.com and Jira Cloud because data is synchronized in real-time. The DVCS connector updates data only once per hour. If you are not using both of these environments, use the [Jira DVCS Connector](dvcs.md) method.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For a walkthrough of the integration with GitLab for Jira, watch [Configure GitLab Jira Integration using Marketplace App](https://youtu.be/SwR-g1s1zTo) on YouTube.
