@@ -204,6 +204,7 @@ export default {
                 :draggable="glFeatures.dragCommentSelection"
                 type="button"
                 class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+                data-qa-selector="diff_comment_button"
                 :class="{ 'gl-cursor-grab': dragging }"
                 :disabled="line.left.commentsDisabled"
                 @click="handleCommentButton(line.left)"
