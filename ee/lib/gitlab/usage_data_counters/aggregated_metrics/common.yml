@@ -14,10 +14,11 @@
 #  feature_flag: name of development feature flag that will be checked before metrics aggregation is performed.
 #                Corresponding feature flag should have `default_enabled` attribute set to `false`.
 #                This attribute is OPTIONAL and can be omitted, when `feature_flag` is missing no feature flag will be checked.
-- name: product_analytics_test_metrics_intersection_database_sourced
-  source: database
-  time_frame: [28d]
-  events:
-    - 'dependency_scanning_pipeline'
-    - 'container_scanning_pipeline'
-  operator: AND
+# Example:
+#- name: product_analytics_test_metrics_intersection_database_sourced
+#  source: database
+#  time_frame: [28d]
+#  events:
+#    - 'dependency_scanning_pipeline'
+#    - 'container_scanning_pipeline'
+#  operator: AND
