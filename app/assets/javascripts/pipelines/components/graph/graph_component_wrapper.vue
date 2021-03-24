@@ -68,7 +68,7 @@ export default {
         };
       },
       skip() {
-        return !Boolean(this.pipelineProjectPath && this.pipelineIid);
+        return !(this.pipelineProjectPath && this.pipelineIid);
       },
       update(data) {
         /*
