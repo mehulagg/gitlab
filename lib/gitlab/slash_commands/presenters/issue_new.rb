@@ -21,7 +21,25 @@ module Gitlab
         end
 
         def pretext
-          "I created an issue on #{author_profile_link}'s behalf: *#{issue.to_reference}* in #{project_link}"
+          "I created an issue on #{author_profile_link}'s behalf: *#{issue_link}* in #{project_link}"
+        end
+
+        def issue_link
+          "[#{issue.to_reference}](#{project_issue_url(issue.project, issue)})"
+        end
+
+        def response_message(custom_pretext: pretext)
+          {
+            attachments: [
+            {
+              fallback:     fallback_message,
+              pretext:      custom_pretext,
+              text:         text,
+              fields:       [],
+              mrkdwn_in:    fields_with_markdown
+            }
+          ]
+          }
         end
       end
     end
