@@ -84,6 +84,6 @@ class Projects::CommitsController < Projects::ApplicationController
   end
 
   def disable_query_limiting
-    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42330')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20780')
   end
 end
