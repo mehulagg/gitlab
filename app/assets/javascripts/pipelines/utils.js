@@ -65,3 +65,10 @@ export const generateJobNeedsDict = (jobs = {}) => {
     return { ...acc, [value]: uniqueValues };
   }, {});
 };
+
+export const reportToSentry = (component, failureType) => {
+  Sentry.withScope((scope) => {
+    scope.setTag('component', component);
+    Sentry.captureException(failureType);
+  });
+};
