@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Users::ActivityService, '#execute', :request_store, :redis, :clean_gitlab_redis_shared_state do
+  include_context 'clear DB Load Balancing configuration'
+
   let(:user) { create(:user, last_activity_on: last_activity_on) }
 
   context 'when last activity is in the past' do
@@ -32,10 +34,6 @@ RSpec.describe Users::ActivityService, '#execute', :request_store, :redis, :clea
         expect(user.last_activity_on).to eq(Date.today)
         expect(::Gitlab::Database::LoadBalancing::Session.current).to be_performed_write
         expect(::Gitlab::Database::LoadBalancing::Session.current).not_to be_using_primary
-      end
-
-      after do
-        ::Gitlab::Database::LoadBalancing.clear_configuration
       end
     end
 
