@@ -64,12 +64,12 @@ module Dora
           select("DATE_TRUNC('month', date)::date AS month, #{data_query}")
             .group("DATE_TRUNC('month', date)")
             .order('month ASC')
-            .map { |row| { row.month.to_s => row.data } }
+            .map { |row| { 'date' => row.month.to_s, 'value' => row.data } }
         when INTERVAL_DAILY
           select("date, #{data_query}")
             .group('date')
             .order('date ASC')
-            .map { |row| { row.date.to_s => row.data } }
+            .map { |row| { 'date' => row.date.to_s, 'value' => row.data } }
         else
           raise ArgumentError, 'Unknown interval'
         end
