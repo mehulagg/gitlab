@@ -1,0 +1,8 @@
+fragment CorpusState on Package {
+  restPackages @client
+  mockedPackages @client
+
+  id
+  name
+  createdAt
+}

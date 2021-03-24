@@ -1,0 +1,23 @@
+#import "../fragments/corpus_state.fragment.graphql"
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query getCorpuses($projectPath: ID!, $first: Int, $last: Int, $before: String, $after: String) {
+  project(fullPath: $projectPath) {
+    packages(first: $first, last: $last, before: $before, after: $after) {
+      nodes {
+        ...CorpusState
+      }
+
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+  restPackages(projectPath: $projectPath) @client {
+    data
+  }
+  mockedPackages(projectPath: $projectPath) @client {
+    data
+    totalSize
+  }
+}
