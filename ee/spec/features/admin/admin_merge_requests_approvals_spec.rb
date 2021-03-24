@@ -37,8 +37,7 @@ RSpec.describe 'Admin interacts with merge requests approvals settings' do
     page.within('#js-merge-request-approval-settings') do
       expect(find('#project_merge_requests_author_approval')).to be_disabled.and be_checked
       expect(find('#project_merge_requests_disable_committers_approval')).to be_disabled.and be_checked
-      expect(find('#project_disable_overriding_approvers_per_merge_request')).to be_disabled
-      expect(find('#project_disable_overriding_approvers_per_merge_request')).not_to be_checked
+      expect(find('#project_disable_overriding_approvers_per_merge_request')).to be_disabled.and be_checked
     end
   end
 end
