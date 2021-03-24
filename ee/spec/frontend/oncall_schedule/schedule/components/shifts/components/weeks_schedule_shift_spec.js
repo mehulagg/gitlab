@@ -30,7 +30,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
         timeframeItem,
         timeframe,
         presetType: PRESET_TYPES.WEEKS,
-        shiftTimeUnitWidth: CELL_WIDTH,
+        timelineWidth: CELL_WIDTH,
         rotationLength: { lengthUnit: 'DAYS' },
         ...props,
       },
@@ -57,7 +57,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
        * Where left should be 0px i.e. beginning of time-frame cell
        * and width should be overlapping days * CELL_WIDTH - ASSIGNEE_SPACER((3 * 50) - 2)
        */
-      createComponent({ data: { shiftTimeUnitWidth: CELL_WIDTH } });
+      createComponent({ data: { timelineWidth: CELL_WIDTH } });
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '0px',
         width: '98px',
@@ -77,7 +77,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
             endsAt: '2021-01-18T10:04:56.333Z',
           },
         },
-        data: { shiftTimeUnitWidth: CELL_WIDTH },
+        data: { timelineWidth: CELL_WIDTH },
       });
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '50px',
@@ -90,7 +90,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
     beforeEach(() => {
       createComponent({
         props: { shift: { ...shift, startsAt: '2021-01-14T10:04:56.333Z' } },
-        data: { shiftTimeUnitWidth: CELL_WIDTH },
+        data: { timelineWidth: CELL_WIDTH },
       });
     });
 
@@ -121,7 +121,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
           },
           rotationLength: { lengthUnit: 'HOURS' },
         },
-        data: { shiftTimeUnitWidth: CELL_WIDTH },
+        data: { timelineWidth: CELL_WIDTH },
       });
     });
 

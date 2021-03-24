@@ -29,16 +29,12 @@ export default {
       type: String,
       required: true,
     },
-    shiftTimeUnitWidth: {
+    timelineWidth: {
       type: Number,
       required: true,
     },
     rotationLength: {
       type: Object,
-      required: true,
-    },
-    timelineWidth: {
-      type: Number,
       required: true,
     },
   },

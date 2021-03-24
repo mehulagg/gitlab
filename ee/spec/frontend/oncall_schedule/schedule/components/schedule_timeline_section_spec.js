@@ -4,6 +4,9 @@ import WeeksHeaderItem from 'ee/oncall_schedules/components/schedule/components/
 import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import updateTimelineWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_timeline_width.mutation.graphql';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
 
 describe('TimelineSectionComponent', () => {
@@ -16,12 +19,22 @@ describe('TimelineSectionComponent', () => {
   function createComponent({
     props = { presetType: PRESET_TYPES.WEEKS, timeframe: mockTimeframeWeeks },
   } = {}) {
-    wrapper = shallowMount(ScheduleTimelineSection, {
-      propsData: {
-        schedule,
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(ScheduleTimelineSection, {
+        propsData: {
+          schedule,
+          ...props,
+        },
+        directives: {
+          GlResizeObserver: createMockDirective(),
+        },
+        mocks: {
+          $apollo: {
+            mutate: jest.fn(),
+          },
+        },
+      }),
+    );
   }
 
   beforeEach(() => {
@@ -31,6 +44,8 @@ describe('TimelineSectionComponent', () => {
   afterEach(() => {
     wrapper.destroy();
   });
+
+  const findTimelineWrapper = () => wrapper.findByTestId('timeline-header-wrapper');
 
   it('renders component container element with class `timeline-section`', () => {
     expect(wrapper.html()).toContain('timeline-section');
@@ -47,5 +62,26 @@ describe('TimelineSectionComponent', () => {
   it('renders days header items based on timeframe data', () => {
     createComponent({ props: { presetType: PRESET_TYPES.DAYS, timeframe: mockTimeframeWeeks } });
     expect(wrapper.findAllComponents(DaysHeaderItem)).toHaveLength(1);
+  });
+
+  describe('updateShiftStyles', () => {
+    it('should store the rendered cell width in Apollo cache via `updateTimelineWidthMutation` when mounted', async () => {
+      wrapper.vm.$apollo.mutate.mockResolvedValueOnce({});
+      await wrapper.vm.$nextTick();
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: updateTimelineWidthMutation,
+        variables: {
+          timelineWidth: wrapper.vm.$refs.timelineHeaderWrapper.offsetWidth,
+        },
+      });
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-calculate cell width inside Apollo cache on page resize', () => {
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
+      const { value } = getBinding(findTimelineWrapper().element, 'gl-resize-observer');
+      value();
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(2);
+    });
   });
 });

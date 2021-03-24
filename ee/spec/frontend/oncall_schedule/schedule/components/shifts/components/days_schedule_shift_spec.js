@@ -30,7 +30,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/d
         timeframeItem,
         timeframe,
         presetType: PRESET_TYPES.WEEKS,
-        shiftTimeUnitWidth: CELL_WIDTH,
+        timelineWidth: CELL_WIDTH,
         ...props,
       },
     });
@@ -56,7 +56,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/d
        * Where left should be 0px i.e. beginning of time-frame cell
        * and width should be overlapping hours * CELL_WIDTH(5 * 50)
        */
-      createComponent({ data: { shiftTimeUnitWidth: CELL_WIDTH } });
+      createComponent({ data: { timelineWidth: CELL_WIDTH } });
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '0px',
         width: '248px',
@@ -76,7 +76,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/d
             endsAt: '2021-01-15T22:04:56.333Z',
           },
         },
-        data: { shiftTimeUnitWidth: CELL_WIDTH },
+        data: { timelineWidth: CELL_WIDTH },
       });
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '500px',
@@ -101,7 +101,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/d
           timeframeItem: DLSTimeframeItem,
           timeframe: DSLTimeframe,
         },
-        data: { shiftTimeUnitWidth: CELL_WIDTH },
+        data: { timelineWidth: CELL_WIDTH },
       });
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '250px',

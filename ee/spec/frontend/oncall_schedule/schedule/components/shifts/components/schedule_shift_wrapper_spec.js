@@ -23,14 +23,14 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
       },
       data() {
         return {
-          shiftTimeUnitWidth: 0,
+          timelineWidth: 0,
           ...data,
         };
       },
       mocks: {
         $apollo: {
           queries: {
-            shiftTimeUnitWidth: 0,
+            timelineWidth: 0,
           },
         },
       },

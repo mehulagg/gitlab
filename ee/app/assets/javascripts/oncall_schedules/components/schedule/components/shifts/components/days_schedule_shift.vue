@@ -29,7 +29,7 @@ export default {
       type: String,
       required: true,
     },
-    shiftTimeUnitWidth: {
+    timelineWidth: {
       type: Number,
       required: true,
     },
@@ -56,7 +56,7 @@ export default {
 
       return shouldStartAtBeginningOfCell
         ? 0
-        : (HOURS_IN_DAY - this.hoursUntilEndOfTimeFrame) * this.shiftTimeUnitWidth;
+        : (HOURS_IN_DAY - this.hoursUntilEndOfTimeFrame) * this.timelineWidth;
     },
     shiftRangeOverlap() {
       try {
@@ -79,7 +79,7 @@ export default {
         this.shiftEndsAt.getTime() >= this.currentTimeframeEndsAt.getTime()
           ? HOURS_IN_DAY
           : this.shiftRangeOverlap.hoursOverlap + this.shiftOffset;
-      return this.shiftTimeUnitWidth * baseWidth - ASSIGNEE_SPACER;
+      return this.timelineWidth * baseWidth - ASSIGNEE_SPACER;
     },
     shiftOffset() {
       return (this.shiftStartsAt.getTimezoneOffset() - this.shiftEndsAt.getTimezoneOffset()) / 60;
