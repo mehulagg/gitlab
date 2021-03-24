@@ -71,6 +71,13 @@ GitLab installations for more than 2000 users should use Gitaly Cluster.
 Gitaly can run in a clustered configuration to scale Gitaly and increase fault tolerance. For more
 information, see [Gitaly Cluster](praefect.md).
 
+## Pack-objects cache
+
+Gitaly has an optional cache that can reduce server load due to
+paralel Git clones from CI. See [pack-objects
+cache](pack-objects-cache.md).
+
+
 ## Do not bypass Gitaly
 
 GitLab doesn't advise directly accessing Gitaly repositories stored on disk with a Git client,
