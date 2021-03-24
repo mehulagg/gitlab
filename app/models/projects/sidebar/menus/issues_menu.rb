@@ -56,7 +56,6 @@ end
 
 # Projects::Sidebar::Menus::IssuesMenu.prepend_if_ee('EE::Projects::Sidebar::Menus::IssuesMenu')
 
-
 # - if project_nav_tab? :issues
 #   = nav_link(controller: @project.issues_enabled? ? ['projects/issues', :labels, :milestones, :boards, :iterations] : 'projects/issues') do
 #     = link_to project_issues_path(@project), class: 'shortcuts-issues qa-issues-item' do
@@ -77,12 +76,6 @@ end
 #             %span.badge.badge-pill.count.issue_counter.fly-out-badge
 #               = number_with_delimiter(@project.open_issues_count(current_user))
 #       %li.divider.fly-out-top-item
-
-
-
-
-
-
 
 #       = nav_link(controller: :labels) do
 #         = link_to project_labels_path(@project), title: _('Labels'), class: 'qa-labels-link' do
