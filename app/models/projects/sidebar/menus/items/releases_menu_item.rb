@@ -23,9 +23,9 @@ module Projects
             !container.empty_repo? && can?(current_user, :read_release, container)
           end
 
-          override :active_path
-          def active_path
-            ['releases#index', 'releases#new']
+          override :nav_link_params
+          def nav_link_params
+            { controller: :releases }
           end
 
           override :item_name

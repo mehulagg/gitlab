@@ -11,9 +11,9 @@ module Projects
           project_learn_gitlab_path(container)
         end
 
-        override :active_path
-        def active_path
-          'learn_gitlab#index'
+        override :nav_link_params
+        def nav_link_params
+          { controller: :learn_gitlab }
         end
 
         override :menu_name

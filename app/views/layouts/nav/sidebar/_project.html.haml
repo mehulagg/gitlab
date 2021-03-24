@@ -1,5 +1,5 @@
 - if Feature.enabled?(:sidebar_refactor, @current_user)
-  = render partial: 'shared/nav/sidebar', object: Projects::Sidebar::Panel.new(@current_user, @project)
+  = render partial: 'shared/nav/sidebar', object: Projects::Sidebar::Panel.new(@current_user, @project, current_ref)
 - else
   %aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **project_tracking_attrs, 'aria-label': _('Project navigation') }
     .nav-sidebar-inner-scroll
@@ -10,7 +10,7 @@
           .sidebar-context-title
             = @project.name
       %ul.sidebar-top-level-items.qa-project-sidebar
-        = nav_link(path: sidebar_projects_paths, html_options: { class: 'home' }) do
+        = nav_link(path: sidebar_projects_paths, controller: :releases, html_options: { class: 'home' }) do
           = link_to project_path(@project), class: 'shortcuts-project rspec-project-link', data: { qa_selector: 'project_link' } do
             .nav-icon-container
               = sprite_icon('home')
@@ -32,7 +32,7 @@
                 %span= _('Activity')
 
             - if project_nav_tab?(:releases)
-              = nav_link(controller: :releases) do
+              = nav_link(page: project_releases_path(@project)) do
                 = link_to project_releases_path(@project), title: _('Releases'), class: 'shortcuts-project-releases' do
                   %span= _('Releases')
 

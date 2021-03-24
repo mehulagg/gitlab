@@ -4,6 +4,8 @@ module Sidebar
   class Menu
     extend ::Gitlab::Utils::Override
     include ::Gitlab::Routing
+    include GitlabRoutingHelper
+    include Gitlab::Allowable
 
     attr_reader :current_user, :container, :items
 
@@ -21,15 +23,28 @@ module Sidebar
       raise NotImplementedError
     end
 
-    def active_path
-      raise NotImplementedError
-    end
+    # This method normalizes the information retrieved from the submenus and this menu
+    # Value from menus is something like: [{ path: 'foo', path: 'bar', controller: :foo }]
+    # This method filters the information and returns: { path: ['foo', 'bar'], controller: :foo }
+    def all_nav_link_params
+      @all_nav_link_params ||= begin
+        ([nav_link_params] + renderable_items.map(&:nav_link_params)).flatten.each_with_object({}) do |pairs, hash|
+          pairs.each do |k, v|
+            hash[k] ||= []
+            hash[k] += Array(v)
+            hash[k].uniq!
+          end
 
-    def active_paths
-      ([active_path] + renderable_items.map(&:active_path)).flatten
+          hash
+        end
+      end
     end
 
     def link_to_attributes
+      {}
+    end
+
+    def nav_link_params
       {}
     end
 

@@ -1,4 +1,4 @@
-= nav_link(path: sidebar_menu.active_paths, html_options: { class: 'home' }) do
+= nav_link(**sidebar_menu.all_nav_link_params, html_options: { class: 'home' }) do
   = link_to sidebar_menu.link_to_href, **sidebar_menu.link_to_attributes do
     .nav-icon-container
       = sprite_icon(sidebar_menu.sprite_icon)
@@ -7,7 +7,7 @@
 
   - if sidebar_menu.has_renderable_items?
     %ul.sidebar-sub-level-items
-      = nav_link(path: sidebar_menu.active_path, html_options: { class: 'fly-out-top-item' } ) do
+      = nav_link(**sidebar_menu.all_nav_link_params, html_options: { class: 'fly-out-top-item' } ) do
         = link_to sidebar_menu.link_to_href do
           %strong.fly-out-top-item-name
             = sidebar_menu.menu_name

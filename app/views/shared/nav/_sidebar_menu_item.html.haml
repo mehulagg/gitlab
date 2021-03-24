@@ -1,3 +1,3 @@
-= nav_link(path: sidebar_menu_item.active_path) do
+= nav_link(**sidebar_menu_item.nav_link_params) do
   = link_to sidebar_menu_item.link_to_href, **sidebar_menu_item.link_to_attributes do
     %span= sidebar_menu_item.item_name

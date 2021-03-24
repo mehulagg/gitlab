@@ -4,6 +4,7 @@ module Sidebar
   class MenuItem
     extend ::Gitlab::Utils::Override
     include ::Gitlab::Routing
+    include GitlabRoutingHelper
     include Gitlab::Allowable
 
     attr_reader :current_user, :container
@@ -25,7 +26,11 @@ module Sidebar
       {}
     end
 
-    def active_path
+    # This method returns the possible values for the
+    # nav_link helper method. It can be either `path`,
+    # `page`, `controller`.
+    # Param 'action' is not supported.
+    def nav_link_params
       raise NotImplementedError
     end
 

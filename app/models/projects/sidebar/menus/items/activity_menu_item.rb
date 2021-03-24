@@ -19,9 +19,9 @@ module Projects
             }
           end
 
-          override :active_path
-          def active_path
-            'projects#activity'
+          override :nav_link_params
+          def nav_link_params
+            { path: 'projects#activity' }
           end
 
           override :item_name

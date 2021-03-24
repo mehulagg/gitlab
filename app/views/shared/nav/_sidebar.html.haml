@@ -1,6 +1,6 @@
 %aside.nav-sidebar{ class: ('sidebar-collapsed-desktop' if collapsed_sidebar?), **tracking_attributes_by_object(sidebar.container), 'aria-label': sidebar.aria_label }
   .nav-sidebar-inner-scroll
     = render partial: 'shared/nav/context_menu', object: sidebar.context_menu
-    %ul.sidebar-top-level-items.qa-project-sideba
+    %ul.sidebar-top-level-items.qa-project-sidebar
       = render partial: 'shared/nav/sidebar_menu', collection: sidebar.renderable_menus
     = render 'shared/sidebar_toggle_button'

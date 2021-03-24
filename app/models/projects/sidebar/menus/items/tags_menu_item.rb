@@ -4,28 +4,27 @@ module Projects
   module Sidebar
     module Menus
       module Items
-        class DetailsMenuItem < ::Sidebar::MenuItem
+        class TagsMenuItem < ::Sidebar::MenuItem
           override :link_to_href
           def link_to_href
-            project_path(container)
+            project_tags_path(container)
           end
 
           override :link_to_attributes
           def link_to_attributes
             {
-              title: _('Project details'),
-              class: 'shortcuts-project'
+              data: { qa_selector: 'tags_link' }
             }
           end
 
           override :nav_link_params
           def nav_link_params
-            { path: 'projects#show' }
+            { controller: :tags }
           end
 
           override :item_name
           def item_name
-            _('Details')
+            _('Tags')
           end
         end
       end

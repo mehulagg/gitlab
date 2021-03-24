@@ -25,10 +25,10 @@ module Projects
           }
         end
 
-        override :active_path
-        def active_path
-          'projects#show'
-        end
+        # override :nav_link_params
+        # def nav_link_params
+        #   { path: 'projects#show' }
+        # end
 
         override :menu_name
         def menu_name

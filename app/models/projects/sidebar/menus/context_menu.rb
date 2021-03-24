@@ -18,7 +18,7 @@ module Projects
 
         override :menu_name
         def menu_name
-          container.path
+          container.name
         end
       end
     end
