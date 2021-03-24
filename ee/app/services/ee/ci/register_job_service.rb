@@ -75,7 +75,7 @@ module EE
       # rubocop: disable CodeReuse/ActiveRecord
       def all_namespaces
         namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')
-        ::Gitlab::ObjectHierarchy.new(namespaces).roots
+        ::Gitlab::ObjectHierarchy.new(namespaces, options: { skip_ordering: true }).roots
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
