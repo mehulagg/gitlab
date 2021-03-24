@@ -1,0 +1,5 @@
+---
+title: Delete all associated todos without N+1
+merge_request: 57355
+author:
+type: performance
