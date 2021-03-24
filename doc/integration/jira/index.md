@@ -12,9 +12,9 @@ The Jira Development panel integration allows you to reference Jira issues in Gi
 activity in the [Development panel](https://support.atlassian.com/jira-software-cloud/docs/view-development-information-for-an-issue/)
 in the issue.
 
-It complements the [GitLab Jira integration](../user/project/integrations/jira.md). You may choose
+It complements the [GitLab Jira integration](../../user/project/integrations/jira.md). You may choose
 to configure both integrations to take advantage of both sets of features. See a
-[feature comparison](../user/project/integrations/jira_integrations.md).
+[feature comparison](../../user/project/integrations/jira_integrations.md).
 
 ## Features
 
@@ -34,7 +34,7 @@ This integration connects all GitLab projects to projects in the Jira instance i
   down, are connected.
 - A personal namespace, which then connects the projects in that personal namespace to Jira.
 
-This differs from the [Jira integration](../user/project/integrations/jira.md), where the mapping is between one GitLab project and the entire Jira instance.
+This differs from the [Jira integration](../../user/project/integrations/jira.md), where the mapping is between one GitLab project and the entire Jira instance.
 
 ## Configuration
 
@@ -155,7 +155,7 @@ GitLab. No other error messages appear in any logs.
 
 If there was an issue with SSL/TLS, this error message is generated.
 
-- The [GitLab Jira integration](../user/project/integrations/jira.md) requires GitLab to connect to Jira. Any
+- The [GitLab Jira integration](../../user/project/integrations/jira.md) requires GitLab to connect to Jira. Any
   TLS issues that arise from a private certificate authority or self-signed
   certificate [are resolved on the GitLab server](https://docs.gitlab.com/omnibus/settings/ssl.html#other-certificate-authorities),
   as GitLab is the TLS client.
@@ -241,7 +241,7 @@ resynchronize the information. To do so:
 You can integrate GitLab.com and Jira Cloud using the
 [GitLab for Jira](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud)
 app in the Atlassian Marketplace. The user configuring GitLab for Jira must have
-[Maintainer](../user/permissions.md) permissions in the GitLab namespace.
+[Maintainer](../../user/permissions.md) permissions in the GitLab namespace.
 
 This method is recommended when using GitLab.com and Jira Cloud because data is synchronized in real-time. The DVCS connector updates data only once per hour. If you are not using both of these environments, use the [Jira DVCS Connector](#jira-dvcs-configuration) method.
 
