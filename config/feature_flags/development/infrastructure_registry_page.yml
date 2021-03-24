@@ -1,0 +1,8 @@
+---
+name: infrastructure_registry_page
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.11'
+type: development
+group: group::package
+default_enabled: false
