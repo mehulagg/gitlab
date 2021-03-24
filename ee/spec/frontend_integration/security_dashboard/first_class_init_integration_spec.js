@@ -1,4 +1,4 @@
-import initVulnerabilityReport from 'ee/security_dashboard/first_class_init';
+import initVulnerabilityReport from 'ee/security_dashboard/vulnerability_report_init';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { TEST_HOST } from 'helpers/test_constants';
 
