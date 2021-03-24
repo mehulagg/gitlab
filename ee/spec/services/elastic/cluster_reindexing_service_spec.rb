@@ -75,6 +75,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
   context 'state: reindexing' do
     let_it_be(:task) { create(:elastic_reindexing_task, state: :reindexing) }
     let_it_be(:subtask) { create(:elastic_reindexing_subtask, elastic_reindexing_task: task, documents_count: 10, elastic_max_slice: 2, elastic_slice: 0) }
+
     let(:refresh_interval) { nil }
     let(:expected_default_settings) do
       {
