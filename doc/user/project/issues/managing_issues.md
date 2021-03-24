@@ -337,25 +337,6 @@ This feature might not be available to you. Check the **version history** note a
 In a group, the sidebar displays the total count of open issues and this value is cached if higher
 than 1000. The cached value is rounded to thousands (or millions) and updated every 24 hours.
 
-### Enable or disable cached issue count **(FREE SELF)**
-
-Cached issue count in the left sidebar is under development and not ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable it.
-
-To disable it:
-
-```ruby
-Feature.disable(:cached_sidebar_open_issues_count)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:cached_sidebar_open_issues_count)
-```
-
 ## Similar issues
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22866) in GitLab 11.6.
@@ -391,3 +372,23 @@ until the issue is reopened.
 
 You can then see issue statuses in the issues list and the
 [epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree).
+
+
+## Enable or disable cached issue count **(FREE SELF)**
+
+Cached issue count in the left sidebar is under development and not ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can disable it.
+
+To disable it:
+
+```ruby
+Feature.disable(:cached_sidebar_open_issues_count)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:cached_sidebar_open_issues_count)
+```
