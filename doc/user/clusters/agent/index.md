@@ -260,6 +260,7 @@ Set `--agent-version` to the latest released patch version matching your
 GitLab installation's major and minor versions. For example, if you have
 GitLab v13.9.0, set `--agent-version=v13.9.1`.
 
+WARNING:
 Version `stable` can be used to refer to the latest stable release at the time when the command runs. It's fine for
 testing purposes but for production please make sure to specify a matching version explicitly.
 
