@@ -40,7 +40,7 @@ const initialAssignees = [
   },
 ];
 
-describe('BoardCardAssigneeDropdown', () => {
+describe('Sidebar assignees widget', () => {
   let wrapper;
   let fakeApollo;
 
