@@ -139,6 +139,7 @@ module Gitlab
 
       # Clear configuration
       def self.clear_configuration
+        @proxy.load_balancer.release_host if @proxy
         @proxy = nil
         remove_instance_variable(:@feature_available) if defined?(@feature_available)
       end
