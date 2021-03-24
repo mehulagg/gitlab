@@ -14,7 +14,6 @@ RSpec.describe 'GFM autocomplete', :js do
 
   let_it_be(:issue) { create(:issue, project: project, assignees: [user]) }
   let_it_be(:label) { create(:label, project: project, title: 'special+') }
-  let_it_be(:discussion) { create(:discussion_note_on_issue, noteable: issue, project: issue.project) }
   let_it_be(:snippet) { create(:project_snippet, project: project, title: 'code snippet') }
 
   before_all do
@@ -340,6 +339,8 @@ RSpec.describe 'GFM autocomplete', :js do
       end
 
       context 'when other notes are destroyed' do
+        let!(:discussion) { create(:discussion_note_on_issue, noteable: issue, project: issue.project) }
+
         # This is meant to protect against this issue https://gitlab.com/gitlab-org/gitlab/-/issues/228729
         it 'keeps autocomplete key listeners' do
           note = find_field('Comment')
@@ -703,6 +704,8 @@ RSpec.describe 'GFM autocomplete', :js do
       end
 
       context 'when other notes are destroyed' do
+        let!(:discussion) { create(:discussion_note_on_issue, noteable: issue, project: issue.project) }
+
         # This is meant to protect against this issue https://gitlab.com/gitlab-org/gitlab/-/issues/228729
         it 'keeps autocomplete key listeners' do
           note = find_field('Comment')
