@@ -61,7 +61,7 @@ module API
         get path do
           authorize_can_read!
 
-          present epic.issues_readable_by(current_user),
+          present epic.issues_readable_by(current_user).with_api_entity_associations,
             with: EE::API::Entities::EpicIssue,
             current_user: current_user
         end
