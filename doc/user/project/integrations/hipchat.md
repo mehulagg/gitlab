@@ -10,6 +10,11 @@ GitLab provides a way to send HipChat notifications upon a number of events,
 such as when a user pushes code, creates a branch or tag, adds a comment, and
 creates a merge request.
 
+As of [GitLab
+13.11](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57434), the
+HipChat integration will not send any notifications to HipChat. This
+integration is also deprecated.
+
 ## Setup
 
 GitLab requires the use of a HipChat v2 API token to work. v1 tokens are
