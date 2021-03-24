@@ -57,6 +57,18 @@ module EE
               present_merge_request_approval_state(presenter: ::EE::API::Entities::MergeRequestApprovalState)
             end
 
+            desc 'Approve a merge request from an external provider'
+            params do
+              optional :external_approval_rule_id, type: Integer, desc: 'External approval rule ID if being approved by an external service'
+            end
+            post 'approve_externally' do
+              merge_request = find_merge_request_with_access(params[:merge_request_iid], :update_merge_request)
+              approval_rule = merge_request.project.external_approval_rules.find(:external_approval_rule_id)
+
+              puts approval_rule.inspect
+
+            end
+
             # Deprecated in favor of approval rules API
             desc 'Change approval-related configuration' do
               detail 'This feature was introduced in 10.6'

@@ -12596,6 +12596,21 @@ CREATE SEQUENCE external_approval_rules_protected_branches_id_seq
 
 ALTER SEQUENCE external_approval_rules_protected_branches_id_seq OWNED BY external_approval_rules_protected_branches.id;
 
+CREATE TABLE external_approvals (
+    id bigint NOT NULL,
+    merge_request_id bigint NOT NULL,
+    external_approval_rule_id bigint NOT NULL
+);
+
+CREATE SEQUENCE external_approvals_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE external_approvals_id_seq OWNED BY external_approvals.id;
+
 CREATE TABLE external_pull_requests (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -19342,6 +19357,8 @@ ALTER TABLE ONLY external_approval_rules ALTER COLUMN id SET DEFAULT nextval('ex
 
 ALTER TABLE ONLY external_approval_rules_protected_branches ALTER COLUMN id SET DEFAULT nextval('external_approval_rules_protected_branches_id_seq'::regclass);
 
+ALTER TABLE ONLY external_approvals ALTER COLUMN id SET DEFAULT nextval('external_approvals_id_seq'::regclass);
+
 ALTER TABLE ONLY external_pull_requests ALTER COLUMN id SET DEFAULT nextval('external_pull_requests_id_seq'::regclass);
 
 ALTER TABLE ONLY feature_gates ALTER COLUMN id SET DEFAULT nextval('feature_gates_id_seq'::regclass);
@@ -20598,6 +20615,9 @@ ALTER TABLE ONLY external_approval_rules
 
 ALTER TABLE ONLY external_approval_rules_protected_branches
     ADD CONSTRAINT external_approval_rules_protected_branches_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY external_approvals
+    ADD CONSTRAINT external_approvals_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY external_pull_requests
     ADD CONSTRAINT external_pull_requests_pkey PRIMARY KEY (id);
@@ -22642,6 +22662,10 @@ CREATE INDEX index_experiment_users_on_user_id ON experiment_users USING btree (
 CREATE UNIQUE INDEX index_experiments_on_name ON experiments USING btree (name);
 
 CREATE INDEX index_expired_and_not_notified_personal_access_tokens ON personal_access_tokens USING btree (id, expires_at) WHERE ((impersonation = false) AND (revoked = false) AND (expire_notification_delivered = false));
+
+CREATE INDEX index_external_approvals_on_external_approval_rule_id ON external_approvals USING btree (external_approval_rule_id);
+
+CREATE INDEX index_external_approvals_on_merge_request_id ON external_approvals USING btree (merge_request_id);
 
 CREATE UNIQUE INDEX index_external_pull_requests_on_project_and_branches ON external_pull_requests USING btree (project_id, source_branch, target_branch);
 
@@ -24817,6 +24841,9 @@ ALTER TABLE ONLY issues
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_3c1fd1cccc FOREIGN KEY (due_date_sourcing_milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY external_approvals
+    ADD CONSTRAINT fk_3c93e422b8 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY ci_pipelines
     ADD CONSTRAINT fk_3d34ab2e06 FOREIGN KEY (pipeline_schedule_id) REFERENCES ci_pipeline_schedules(id) ON DELETE SET NULL;
 
@@ -24951,6 +24978,9 @@ ALTER TABLE ONLY vulnerabilities
 
 ALTER TABLE ONLY vulnerabilities
     ADD CONSTRAINT fk_7c5bb22a22 FOREIGN KEY (due_date_sourcing_milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY external_approvals
+    ADD CONSTRAINT fk_7dc55a62b2 FOREIGN KEY (external_approval_rule_id) REFERENCES external_approval_rules(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY labels
     ADD CONSTRAINT fk_7de4989a69 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

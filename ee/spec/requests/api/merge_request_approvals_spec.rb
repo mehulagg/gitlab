@@ -333,6 +333,29 @@ RSpec.describe API::MergeRequestApprovals do
     end
   end
 
+  describe 'POST :id/merge_requests/:merge_request_iid/approve_externally' do
+    let!(:external_approval_rule) { create(:external_approval_rule, project: merge_request.project) }
+    let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}/approve_externally" }
+
+    context 'when approval rule does not exist' do
+      it 'returns 404' do
+        post api(url, user), params: { external_approval_rule_id: non_existing_record_id }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when approval rule does exist' do
+      it 'creates new approval' do
+        puts merge_request.project.external_approval_rules.inspect
+        puts external_approval_rule.inspect
+        post api(url, user), params: { external_approval_rule_id: external_approval_rule.id }
+
+        expect(response).to have_gitlab_http_status(:created)
+      end
+    end
+  end
+
   describe 'POST :id/merge_requests/:merge_request_iid/approve' do
     let!(:rule) { create(:approval_merge_request_rule, merge_request: merge_request, approvals_required: 2) }
 
