@@ -32,7 +32,7 @@ export default {
 
 <template>
   <div>
-    <div class="gl-display-block gl-text-right gl-my-4 learn-more">
+    <div class="gl-display-block gl-text-right gl-my-3">
       <gl-link
         href="https://docs.gitlab.com/ee/user/clusters/agent/#get-started-with-gitops-and-the-gitlab-agent"
         target="_blank"
