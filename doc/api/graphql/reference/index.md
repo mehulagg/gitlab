@@ -1202,6 +1202,7 @@ An edge in a connection.
 | `needs` | [`CiBuildNeedConnection`](#cibuildneedconnection) | References to builds that must complete before the jobs run. |
 | `pipeline` | [`Pipeline`](#pipeline) | Pipeline the job belongs to. |
 | `scheduledAt` | [`Time`](#time) | Schedule for the build. |
+| `schedulingType` | [`String`](#string) | Type of scheduling dependent on if a job has needs or not. If it has needs, the value will be `dag`, otherwise it will be `stage`. |
 
 ### `CiJobArtifact`
 
@@ -4569,6 +4570,7 @@ Information about pagination in a connection.
 | `upstream` | [`Pipeline`](#pipeline) | Pipeline that triggered the pipeline. |
 | `user` | [`User`](#user) | Pipeline user. |
 | `userPermissions` | [`PipelinePermissions!`](#pipelinepermissions) | Permissions for the current user on the resource |
+| `usesNeeds` | [`Boolean`](#boolean) | Indicates if the pipeline has jobs that use needs. |
 | `warnings` | [`Boolean!`](#boolean) | Indicates if a pipeline has warnings. |
 
 ### `PipelineAnalytics`

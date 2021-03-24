@@ -13,6 +13,7 @@ RSpec.describe Types::Ci::JobType do
       needs
       detailedStatus
       scheduledAt
+      schedulingType
       artifacts
       finished_at
       duration

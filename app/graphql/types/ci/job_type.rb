@@ -22,6 +22,8 @@ module Types
             description: 'When a job has finished running.'
       field :duration, GraphQL::INT_TYPE, null: true,
             description: 'Duration of the job in seconds.'
+      field :scheduling_type, GraphQL::STRING_TYPE, null: true,
+            description: 'Type of scheduling dependent on if a job has needs or not. If it has needs, the value will be `dag`, otherwise it will be `stage`.'
 
       def pipeline
         Gitlab::Graphql::Loaders::BatchModelLoader.new(::Ci::Pipeline, object.pipeline_id).find
