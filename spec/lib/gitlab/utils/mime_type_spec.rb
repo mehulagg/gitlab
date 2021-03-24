@@ -19,16 +19,13 @@ RSpec.describe Gitlab::Utils::MimeType do
       using RSpec::Parameterized::TableSyntax
 
       where(:fixture, :mime_type) do
-        "csv_comma.csv"         | "text/plain"
-        "csv_empty.csv"         | nil
-        "group.json"            | "text/plain"
-        "audio_sample.wav"      | "audio/x-wav"
-        "banana_sample.gif"     | "image/gif"
-        "invalid_manifest.xml"  | "text/plain"
-        "rails_sample.jpg"      | "image/jpeg"
-        "pages.zip"             | "application/zip"
-        "git-cheat-sheet.pdf"   | "text/plain"
-        "fuzzy.po"              | "text/x-po"
+        "banana_sample.gif"          | "image/gif"
+        "rails_sample.jpg"           | "image/jpeg"
+        "rails_sample.png"           | "image/png"
+        "rails_sample.bmp"           | "image/bmp"
+        "rails_sample.tif"           | "image/tiff"
+        "blockquote_fence_before.md" | nil
+        "csv_empty.csv"              | nil
       end
 
       with_them do
@@ -53,7 +50,7 @@ RSpec.describe Gitlab::Utils::MimeType do
     context "input is a string" do
       let(:str) { "plain text" }
 
-      it { is_expected.to eq("text/plain") }
+      it { is_expected.to eq(nil) }
     end
   end
 end

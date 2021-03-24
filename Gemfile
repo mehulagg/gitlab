@@ -276,6 +276,9 @@ gem 'licensee', '~> 9.14.1'
 # Detect and convert string character encoding
 gem 'charlock_holmes', '~> 0.7.7'
 
+# Detect mime content type from content
+gem 'mimemagic', '~> 0.3.2'
+
 # Faster blank
 gem 'fast_blank'
 
