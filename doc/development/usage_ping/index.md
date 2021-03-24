@@ -788,10 +788,9 @@ for how to use its API to query for data.
 ## Usage Ping Local Setup
 
 ### 1. Setup local repositories
-- Clone and start https://gitlab.com/gitlab-org/gitlab, 
-- Clone and start https://gitlab.com/gitlab-services/version-gitlab-com, make sure to run `docker-compose up` to start a postgresql and redis instance.
-- Point gitlab to the versions endpoint instead of the default endpoint: Open [submit_usage_ping_service.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L4) in your local and modified `PRODUCTION_URL`, and set it to the local versions url `http://localhost:3000/usage_data`
-
+- Clone and start [GitLab](https://gitlab.com/gitlab-org/gitlab-development-kit)
+- Clone and start (Versions Application)[https://gitlab.com/gitlab-services/version-gitlab-com], make sure to run `docker-compose up` to start a PostgreSQL and Redis instance.
+- Point GitLab to the Versions Application endpoint instead of the default endpoint: Open [submit_usage_ping_service.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L4) in your local and modified `PRODUCTION_URL`, and set it to the local Versions Application url `http://localhost:3000/usage_data`
 ### 2. Testing local setup
 
 - Use `gitlab` Rails console, manually trigger a Usage Ping
