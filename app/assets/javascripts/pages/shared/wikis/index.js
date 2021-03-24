@@ -74,7 +74,7 @@ const createWikiFormApp = () => {
       el,
       render(createElement) {
         return createElement(wikiForm, {
-          props: {
+          provide: {
             formatOptions: JSON.parse(formatOptions),
             pageInfo: convertObjectPropsToCamelCase(JSON.parse(pageInfo)),
           },

@@ -40,7 +40,7 @@ describe('WikiForm', () => {
       mount(
         WikiForm,
         {
-          propsData: {
+          provide: {
             formatOptions: {
               Markdown: 'markdown',
               RDoc: 'rdoc',

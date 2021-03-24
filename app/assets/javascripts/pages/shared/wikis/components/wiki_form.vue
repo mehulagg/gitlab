@@ -21,22 +21,12 @@ export default {
     GlButton,
     MarkdownField,
   },
-  props: {
-    formatOptions: {
-      type: Object,
-      required: true,
-    },
-    pageInfo: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
-  },
+  inject: ['formatOptions', 'pageInfo'],
   data() {
     return {
-      title: this.pageInfo.title || '',
+      title: this.pageInfo.title?.trim() || '',
       format: this.pageInfo.format || 'markdown',
-      content: this.pageInfo.content || '',
+      content: this.pageInfo.content?.trim() || '',
       commitMessage: '',
     };
   },
