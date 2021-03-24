@@ -3,7 +3,7 @@
 # See https://docs.gitlab.com/ee/development/migration_style_guide.html
 # for more information on how to write migrations for GitLab.
 
-class AddIndexMirrorDataOnRetryCountAndNextExecutionWhereStatusIsNonScheduledOrStarted < ActiveRecord::Migration[6.0]
+class AddIndexMirrorDataOnRetryNextExecutionWhereStatus < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
 
   DOWNTIME = false
