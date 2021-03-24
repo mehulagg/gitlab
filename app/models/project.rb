@@ -1715,8 +1715,11 @@ class Project < ApplicationRecord
     end
   end
 
-  def any_active_runners?(&block)
-    active_runners_with_tags.any?(&block)
+  def any_active_runners?(online: false, &block)
+    runners = active_runners_with_tags
+    runners = runners.online if online
+
+    runners.any?(&block)
   end
 
   def valid_runners_token?(token)

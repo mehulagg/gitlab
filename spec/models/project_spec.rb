@@ -1701,6 +1701,23 @@ RSpec.describe Project, factory_default: :keep do
         end
       end
     end
+
+    context 'online runners' do
+      subject { project.any_active_runners?(online: true) }
+
+      let(:project) { create(:project) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      context 'when runner is not online' do
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when runner is online' do
+        let!(:runner) { create(:ci_runner, :project, :online, projects: [project]) }
+
+        it { is_expected.to be_truthy }
+      end
+    end
   end
 
   describe '#shared_runners' do

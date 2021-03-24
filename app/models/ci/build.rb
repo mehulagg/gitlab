@@ -700,7 +700,7 @@ module Ci
 
     def any_runners_online?
       Rails.cache.fetch(['has-active-runners', id], expires_in: RUNNERS_STATUS_CACHE_EXPIRATION) do
-        project.any_active_runners? { |runner| runner.match_build_if_online?(self) }
+        project.any_active_runners?(online: true) { |runner| runner.match_build_if_online?(self) }
       end
     end
 
