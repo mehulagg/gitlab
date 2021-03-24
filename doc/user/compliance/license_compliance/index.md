@@ -270,10 +270,10 @@ include:
 
 license_scanning:
     SETUP_CMD: ./setup.sh
+    ASDF_PYTHON_VERSION: "3.7.2"
   before_script:
     - echo "asdf install python 3.7.2 && pip install -r requirements.txt" > setup.sh
     - chmod +x setup.sh
-    - export ASDF_PYTHON_VERSION=3.7.2
     - apt-get -y update
     - apt-get -y install build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
 ```
