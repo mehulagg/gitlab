@@ -585,6 +585,38 @@ RSpec.describe Ci::Build do
         is_expected.to be_falsey
       end
     end
+
+    describe 'Cache', :use_clean_rails_memory_store_caching do
+      it 'caches the result in Redis' do
+        build.any_runners_online?
+
+        expect { build.any_runners_online? }.not_to exceed_query_limit(0)
+        expect(Rails.cache.exist?("has-active-runners/#{build.id}")).to be_truthy
+      end
+    end
+  end
+
+  describe '#any_runners_available?' do
+    subject { build.any_runners_available? }
+
+    context 'when no runners' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when there are runners' do
+      let!(:runner) { create(:ci_runner, :project, projects: [build.project]) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    describe 'Cache', :use_clean_rails_memory_store_caching do
+      it 'caches the result in Redis' do
+        build.any_runners_available?
+
+        expect { build.any_runners_available? }.not_to exceed_query_limit(0)
+        expect(Rails.cache.exist?("has-available-runners/#{build.project.id}")).to be_truthy
+      end
+    end
   end
 
   describe '#artifacts?' do

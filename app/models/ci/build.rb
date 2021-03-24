@@ -35,6 +35,7 @@ module Ci
     }.freeze
 
     DEGRADATION_THRESHOLD_VARIABLE_NAME = 'DEGRADATION_THRESHOLD'
+    RUNNERS_STATUS_CACHE_EXPIRATION = 1.minute
 
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
@@ -698,7 +699,15 @@ module Ci
     end
 
     def any_runners_online?
-      project.any_active_runners? { |runner| runner.match_build_if_online?(self) }
+      Rails.cache.fetch(['has-active-runners', id], expires_in: RUNNERS_STATUS_CACHE_EXPIRATION) do
+        project.any_active_runners? { |runner| runner.match_build_if_online?(self) }
+      end
+    end
+
+    def any_runners_available?
+      Rails.cache.fetch(['has-available-runners', project.id], expires_in: RUNNERS_STATUS_CACHE_EXPIRATION) do
+        project.any_active_runners?
+      end
     end
 
     def stuck?
