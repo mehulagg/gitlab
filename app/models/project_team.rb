@@ -71,6 +71,19 @@ class ProjectTeam
   end
   alias_method :users, :members
 
+  def scoped_members
+    @scoped_members ||= Hash.new
+    @scoped_members[_members_scope] ||= fetch_members(use_scope: true)
+  end
+
+  def with_member_scope(users)
+    @_members_scope = users
+
+    yield
+  ensure
+    @_members_scope = nil
+  end
+
   # `members` method uses project_authorizations table which
   # is updated asynchronously, on project move it still contains
   # old members who may not have access to the new location,
@@ -80,19 +93,19 @@ class ProjectTeam
   end
 
   def guests
-    @guests ||= fetch_members(Gitlab::Access::GUEST)
+    @guests ||= fetch_members(level: Gitlab::Access::GUEST)
   end
 
   def reporters
-    @reporters ||= fetch_members(Gitlab::Access::REPORTER)
+    @reporters ||= fetch_members(level: Gitlab::Access::REPORTER)
   end
 
   def developers
-    @developers ||= fetch_members(Gitlab::Access::DEVELOPER)
+    @developers ||= fetch_members(level: Gitlab::Access::DEVELOPER)
   end
 
   def maintainers
-    @maintainers ||= fetch_members(Gitlab::Access::MAINTAINER)
+    @maintainers ||= fetch_members(level: Gitlab::Access::MAINTAINER)
   end
 
   def owners
@@ -214,8 +227,11 @@ class ProjectTeam
 
   private
 
-  def fetch_members(level = nil)
+  attr_accessor :_members_scope
+
+  def fetch_members(level: nil, use_scope: false)
     members = project.authorized_users
+    members = members.where(id: _members_scope) if use_scope
     members = members.where(project_authorizations: { access_level: level }) if level
 
     members

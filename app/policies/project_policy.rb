@@ -671,7 +671,7 @@ class ProjectPolicy < BasePolicy
       # project.team.members will perform a separate query for each user, unless
       # project.team.members was loaded before somewhere else. Calling #to_a
       # ensures it's always loaded before checking for membership.
-      project.team.members.to_a.include?(user)
+      project.team.scoped_members.to_a.include?(user)
     else
       # otherwise we just make a specific query for
       # this particular user.

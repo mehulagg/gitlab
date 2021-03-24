@@ -99,7 +99,9 @@ module Participable
 
     participants.merge(ext.users)
 
-    filter_by_ability(participants)
+    project.team.with_member_scope(participants) do
+      filter_by_ability(participants)
+    end
   end
 
   def filter_by_ability(participants)
