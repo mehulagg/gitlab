@@ -220,7 +220,7 @@ module API
         use :with_custom_attributes
         optional :with_projects, type: Boolean, default: true, desc: 'Omit project details'
       end
-      get ":id" do
+      get ':id' do
         group = find_group!(params[:id])
         group.preload_shared_group_links
 

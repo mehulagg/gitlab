@@ -181,6 +181,28 @@ RSpec.describe API::Groups do
         end
       end
     end
+
+    context 'billable_members_count attribute' do
+      context 'when authenticated as an owner' do
+        it 'is returned' do
+          get api("/groups/#{group.id}", user)
+
+          expect(json_response).to have_key('billable_members_count')
+        end
+      end
+
+      context 'when authenticated as a non-owner' do
+        before do
+          group.add_developer(another_user)
+        end
+
+        it 'is not returned' do
+          get api("/groups/#{group.id}", another_user)
+
+          expect(json_response).not_to have_key('billable_members_count')
+        end
+      end
+    end
   end
 
   describe 'PUT /groups/:id' do
