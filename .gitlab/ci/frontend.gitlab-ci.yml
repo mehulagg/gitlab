@@ -317,3 +317,20 @@ bundle-size-review:
     expire_in: 31d
     paths:
       - bundle-size-review
+
+compile-storybook:
+  extends:
+    - .compile-assets-base
+  script:
+    - source scripts/utils.sh
+    - cd storybook/
+    - run_timed_command "retry yarn install --frozen-lockfile"
+    - yarn build
+    - mkdir public
+    - mv storybook-static/* public
+  artifacts:
+    name: storybook
+    expire_in: 31d
+    when: always
+    paths:
+      - public

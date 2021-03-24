@@ -1,13 +1,13 @@
 pages:
   extends:
     - .default-retry
-    - .pages:rules
   stage: pages
   needs:
     - rspec:coverage
     - coverage-frontend
     - karma
     - compile-production-assets
+    - compile-storybook
   script:
     - mv public/ .public/
     - mkdir public/
@@ -16,7 +16,10 @@ pages:
     - mv coverage-javascript/ public/coverage-javascript/ || true
     - cp .public/assets/application-*.css public/application.css || true
     - cp .public/assets/application-*.css.gz public/application.css.gz || true
+    - cp .public/storybook public/storybook || true
   artifacts:
     paths:
       - public
     expire_in: 31d
+  rules:
+    - when: manual
