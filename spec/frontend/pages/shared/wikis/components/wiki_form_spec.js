@@ -5,8 +5,6 @@ import WikiForm from '~/pages/shared/wikis/components/wiki_form.vue';
 describe('WikiForm', () => {
   let wrapper;
 
-  const getBeforeUnloadWarning = () => window.onbeforeunload?.();
-
   const findForm = () => wrapper.find('form');
   const findTitle = () => wrapper.find('#wiki_title');
   const findFormat = () => wrapper.find('#wiki_format');
@@ -58,6 +56,8 @@ describe('WikiForm', () => {
         { attachToDocument: true },
       ),
     );
+
+    jest.spyOn(wrapper.vm, 'onBeforeUnload');
   }
 
   afterEach(() => {
@@ -113,7 +113,9 @@ describe('WikiForm', () => {
 
     await wrapper.vm.$nextTick();
 
-    expect(getBeforeUnloadWarning()).toBeUndefined();
+    window.dispatchEvent(new Event('beforeunload'));
+
+    expect(wrapper.vm.onBeforeUnload).not.toHaveBeenCalled();
   });
 
   it.each`
@@ -154,7 +156,9 @@ describe('WikiForm', () => {
     });
 
     it('sets before unload warning', () => {
-      expect(getBeforeUnloadWarning()).toBe('');
+      window.dispatchEvent(new Event('beforeunload'));
+
+      expect(wrapper.vm.onBeforeUnload).toHaveBeenCalled();
     });
 
     it('when form submitted, unsets before unload warning', async () => {
@@ -162,7 +166,9 @@ describe('WikiForm', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(getBeforeUnloadWarning()).toBeUndefined();
+      window.dispatchEvent(new Event('beforeunload'));
+
+      expect(wrapper.vm.onBeforeUnload).not.toHaveBeenCalled();
     });
   });
 

@@ -1,6 +1,4 @@
 <script>
-/* eslint-disable vue/no-template-shadow */
-
 import { GlForm, GlIcon, GlLink, GlButton, GlSprintf } from '@gitlab/ui';
 import csrf from '~/lib/utils/csrf';
 import { setUrlFragment } from '~/lib/utils/url_utility';
@@ -71,12 +69,6 @@ export default {
       if (this.pageInfo.persisted) return this.pageInfo.path;
       return this.pageInfo.wikiPath;
     },
-    hasTitle() {
-      return this.title.trim();
-    },
-    hasContent() {
-      return this.content.trim();
-    },
     wikiSpecificMarkdownHelpPath() {
       return setUrlFragment(this.pageInfo.markdownHelpPath, 'wiki-specific-markdown');
     },
@@ -86,15 +78,19 @@ export default {
   },
   methods: {
     handleFormSubmit() {
-      window.onbeforeunload = null;
+      window.removeEventListener('beforeunload', this.onBeforeUnload);
     },
 
     handleContentChange() {
-      window.onbeforeunload = () => '';
+      window.addEventListener('beforeunload', this.onBeforeUnload);
+    },
+
+    onBeforeUnload() {
+      return '';
     },
 
     updateCommitMessage() {
-      if (!this.hasTitle) return;
+      if (!this.title) return;
 
       // Replace hyphens with spaces
       const newTitle = this.title.replace(/-+/g, ' ');
@@ -128,7 +124,7 @@ export default {
       <div class="col-sm-10">
         <input
           id="wiki_title"
-          v-model="title"
+          v-model.trim="title"
           name="wiki[title]"
           type="text"
           class="form-control"
@@ -189,7 +185,7 @@ export default {
             <textarea
               id="wiki_content"
               ref="textarea"
-              v-model="content"
+              v-model.trim="content"
               name="wiki[content]"
               class="note-textarea js-gfm-input js-autosize markdown-area"
               dir="auto"
@@ -217,7 +213,9 @@ export default {
             <template #linkExample
               ><code>{{ linkExample }}</code></template
             >
-            <template #link="{ content }"
+            <template
+              #link="// eslint-disable-next-line vue/no-template-shadow
+                { content }"
               ><gl-link
                 :href="wikiSpecificMarkdownHelpPath"
                 target="_blank"
@@ -238,11 +236,11 @@ export default {
       <div class="col-sm-10">
         <input
           id="wiki_message"
+          v-model.trim="commitMessage"
           name="wiki[message]"
           type="text"
           class="form-control"
           data-qa-selector="wiki_message_textbox"
-          :value="commitMessage"
           :placeholder="s__('WikiPage|Commit message')"
         />
       </div>
@@ -254,7 +252,7 @@ export default {
         type="submit"
         data-qa-selector="wiki_submit_button"
         data-testid="wiki-submit-button"
-        :disabled="!hasContent || !hasTitle"
+        :disabled="!content || !title"
         >{{ submitButtonText }}</gl-button
       >
       <gl-button :href="cancelFormPath" class="float-right" data-testid="wiki-cancel-button">{{
