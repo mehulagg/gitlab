@@ -1,0 +1,8 @@
+---
+name: api_v3_merge_request_optimization
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57315
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/325789
+milestone: '13.11'
+type: development
+group: group::ecosystem
+default_enabled: false
