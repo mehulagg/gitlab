@@ -2,7 +2,7 @@
 
 module API
   class UsageData < ::API::Base
-    before { authenticate! }
+    before { authenticate_non_get! }
 
     feature_category :usage_ping
 
@@ -38,6 +38,16 @@ module API
         increment_unique_values(event_name, current_user.id)
 
         status :ok
+      end
+
+      desc 'Get a list of all metric definitions' do
+        detail 'This feature was introduced in GitLab 13.11.'
+      end
+      get 'metrics' do
+        content_type 'application/yaml'
+        env['api.format'] = :binary
+
+        Gitlab::Usage::MetricDefinition.dump_metrics_yaml
       end
     end
   end
