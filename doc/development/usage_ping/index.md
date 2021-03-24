@@ -785,23 +785,6 @@ end
 Please refer to [the `PrometheusClient` definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/prometheus_client.rb)
 for how to use its API to query for data.
 
-## Usage Ping Local Setup
-
-### 1. Setup local repositories
-- Clone and start [GitLab](https://gitlab.com/gitlab-org/gitlab-development-kit)
-- Clone and start (Versions Application)[https://gitlab.com/gitlab-services/version-gitlab-com], make sure to run `docker-compose up` to start a PostgreSQL and Redis instance.
-- Point GitLab to the Versions Application endpoint instead of the default endpoint: Open [submit_usage_ping_service.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L4) in your local and modified `PRODUCTION_URL`, and set it to the local Versions Application url `http://localhost:3000/usage_data`
-### 2. Testing local setup
-
-- Use `gitlab` Rails console, manually trigger a Usage Ping
-```ruby
-SubmitUsagePingService.new.execute
-```
-- Use `versions` Rails console, to check that a Usage Ping was successfully received, parsed, and stored in the Versions database.
-```ruby
-UsageData.last
-```
-
 ## Developing and testing Usage Ping
 
 ### 1. Naming and placing the metrics
@@ -892,6 +875,25 @@ On GitLab.com, we have DangerBot setup to monitor Product Intelligence related f
 ### 10. Verify your metric
 
 On GitLab.com, the Product Intelligence team regularly monitors Usage Ping. They may alert you that your metrics need further optimization to run quicker and with greater success. You may also use the [Usage Ping QA dashboard](https://app.periscopedata.com/app/gitlab/632033/Usage-Ping-QA) to check how well your metric performs. The dashboard allows filtering by GitLab version, by "Self-managed" & "SaaS" and shows you how many failures have occurred for each metric. Whenever you notice a high failure rate, you may re-optimize your metric.
+
+### Usage Ping Local Setup
+
+#### 1. Setup local repositories
+
+- Clone and start [GitLab](https://gitlab.com/gitlab-org/gitlab-development-kit)
+- Clone and start (Versions Application)[https://gitlab.com/gitlab-services/version-gitlab-com], make sure to run `docker-compose up` to start a PostgreSQL and Redis instance.
+- Point GitLab to the Versions Application endpoint instead of the default endpoint: Open [submit_usage_ping_service.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L4) in your local and modified `PRODUCTION_URL`, and set it to the local Versions Application url `http://localhost:3000/usage_data`
+
+#### 2. Testing local setup
+
+- Use `gitlab` Rails console, manually trigger a Usage Ping
+```ruby
+SubmitUsagePingService.new.execute
+```
+- Use `versions` Rails console, to check that a Usage Ping was successfully received, parsed, and stored in the Versions database.
+```ruby
+UsageData.last
+```
 
 ### Optional: Test Prometheus based Usage Ping
 
