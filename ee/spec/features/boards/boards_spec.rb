@@ -345,7 +345,7 @@ RSpec.describe 'Project issue boards', :js do
   end
 
   def list_weight_badge(list)
-    find(".board[data-id='gid://gitlab/List/#{list.id}'] .issue-count-badge")
+    find(".board[data-id='gid://gitlab/List/#{list.id}'] [data-testid='issue-count-badge']")
   end
 
   def card_weight_badge(list)

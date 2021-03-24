@@ -4,7 +4,6 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { getMilestone } from 'ee_else_ce/boards/boards_util';
 import BoardNewIssueMixin from 'ee_else_ce/boards/mixins/board_new_issue';
 import { __ } from '~/locale';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../eventhub';
 import ProjectSelect from './project_select.vue';
 
@@ -18,7 +17,7 @@ export default {
     ProjectSelect,
     GlButton,
   },
-  mixins: [glFeatureFlagMixin(), BoardNewIssueMixin],
+  mixins: [BoardNewIssueMixin],
   inject: ['groupId'],
   props: {
     list: {
