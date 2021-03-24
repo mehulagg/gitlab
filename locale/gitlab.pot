@@ -8602,7 +8602,13 @@ msgstr ""
 msgid "Copy value"
 msgstr ""
 
+msgid "Corpus Management|Are you sure you want to delete the corpus?"
+msgstr ""
+
 msgid "CorpusManagement|Fuzz testing corpus management"
+msgstr ""
+
+msgid "CorpusManagement|Not Set"
 msgstr ""
 
 msgid "Could not add admins as members"
@@ -17910,6 +17916,9 @@ msgid "LastPushEvent|You pushed to"
 msgstr ""
 
 msgid "LastPushEvent|at"
+msgstr ""
+
+msgid "Latest Job:"
 msgstr ""
 
 msgid "Latest changes"
