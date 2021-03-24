@@ -7,7 +7,7 @@ module Projects
         class DetailsMenuItem < ::Sidebar::MenuItem
           override :link_to_href
           def link_to_href
-            project_path(container)
+            project_path(context.project)
           end
 
           override :link_to_attributes

@@ -7,6 +7,8 @@ module Sidebar
     include GitlabRoutingHelper
     include Gitlab::Allowable
 
+    attr_reader :context
+
     def initialize(context)
       @context = context
     end
@@ -33,13 +35,6 @@ module Sidebar
 
     def item_name
       raise NotImplementedError
-    end
-
-    private
-
-    def method_missing(method, *args, &block)
-      # binding.pry if method != :container
-      @context.public_send(method) # rubocop:disable GitlabSecurity/PublicSend
     end
   end
 end

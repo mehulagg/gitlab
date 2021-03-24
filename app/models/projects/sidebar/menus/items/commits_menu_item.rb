@@ -7,7 +7,7 @@ module Projects
         class CommitsMenuItem < ::Sidebar::MenuItem
           override :link_to_href
           def link_to_href
-            project_commits_path(container, current_ref)
+            project_commits_path(context.project, context.current_ref)
           end
 
           override :link_to_attributes

@@ -4,29 +4,32 @@ module Projects
   module Sidebar
     module Menus
       module Items
-        class ActivityMenuItem < ::Sidebar::MenuItem
+        class FileLocksMenuItem < ::Sidebar::MenuItem
           override :link_to_href
           def link_to_href
-            activity_project_path(context.project)
+            project_path_locks_path(context.project)
           end
 
           override :link_to_attributes
           def link_to_attributes
             {
-              title: _('Activity'),
-              class: 'shortcuts-project-activity',
-              data: { qa_selector: 'activity_link' }
+              data: { qa_selector: 'path_locks_link' }
             }
           end
 
           override :nav_link_params
           def nav_link_params
-            { path: 'projects#activity' }
+            { controller: :path_locks }
           end
 
           override :item_name
           def item_name
-            _('Activity')
+            _('Locked Files')
+          end
+
+          override :render?
+          def render?
+            context.project.feature_available?(:file_locks)
           end
         end
       end

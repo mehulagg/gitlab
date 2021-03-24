@@ -18,7 +18,7 @@ module Projects
 
         override :link_to_href
         def link_to_href
-          project_tree_path(container)
+          project_tree_path(context.project)
         end
 
         override :link_to_attributes
@@ -34,6 +34,13 @@ module Projects
           _('Repository')
         end
 
+        override :menu_name_html_options
+        def menu_name_html_options
+          {
+            id: 'js-onboarding-repo-link'
+          }
+        end
+
         override :sprite_icon
         def sprite_icon
           'doc-text'
@@ -41,53 +48,11 @@ module Projects
 
         override :render?
         def render?
-          !container.empty_repo? && can?(current_user, :download_code, container)
+          !context.project.empty_repo? && can?(context.current_user, :download_code, context.project)
         end
       end
     end
   end
 end
 
-# - if project_nav_tab? :files
-#   = nav_link(controller: sidebar_repository_paths, unless: -> { current_path?('projects/graphs#charts') }) do
-#     = link_to project_tree_path(@project), class: 'shortcuts-tree', data: { qa_selector: "repository_link" } do
-#       .nav-icon-container
-#         = sprite_icon('doc-text')
-#       %span.nav-item-name#js-onboarding-repo-link <---- ******
-#         = _('Repository')
-
-#     %ul.sidebar-sub-level-items
-#       = nav_link(controller: sidebar_repository_paths, html_options: { class: "fly-out-top-item" } ) do
-#         = link_to project_tree_path(@project) do
-#           %strong.fly-out-top-item-name
-#             = _('Repository')
-#       %li.divider.fly-out-top-item
-#       = nav_link(controller: %w(tree blob blame edit_tree new_tree find_file)) do
-#         = link_to project_tree_path(@project) do
-#           = _('Files')
-
-#       = nav_link(controller: [:commit, :commits]) do
-#         = link_to project_commits_path(@project, current_ref), id: 'js-onboarding-commits-link' do
-#           = _('Commits')
-
-#       = nav_link(html_options: {class: branches_tab_class}) do
-#         = link_to project_branches_path(@project), data: { qa_selector: "branches_link" }, id: 'js-onboarding-branches-link' do
-#           = _('Branches')
-
-#       = nav_link(controller: [:tags]) do
-#         = link_to project_tags_path(@project), data: { qa_selector: "tags_link" } do
-#           = _('Tags')
-
-#       = nav_link(path: 'graphs#show') do
-#         = link_to project_graph_path(@project, current_ref) do
-#           = _('Contributors')
-
-#       = nav_link(controller: %w(network)) do
-#         = link_to project_network_path(@project, current_ref) do
-#           = _('Graph')
-
-#       = nav_link(controller: :compare) do
-#         = link_to project_compare_index_path(@project, from: @repository.root_ref, to: current_ref) do
-#           = _('Compare')
-
-#       = render_if_exists 'projects/sidebar/repository_locked_files' <---- ******
+Projects::Sidebar::Menus::RepositoryMenu.prepend_if_ee('EE::Projects::Sidebar::Menus::RepositoryMenu')

@@ -7,7 +7,7 @@ module Projects
         class CompareMenuItem < ::Sidebar::MenuItem
           override :link_to_href
           def link_to_href
-            project_compare_index_path(container, from: container.repository.root_ref, to: current_ref)
+            project_compare_index_path(context.project, from: context.project.repository.root_ref, to: context.current_ref)
           end
 
           override :nav_link_params

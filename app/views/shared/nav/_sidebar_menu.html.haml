@@ -2,7 +2,7 @@
   = link_to sidebar_menu.link_to_href, **sidebar_menu.link_to_attributes do
     .nav-icon-container
       = sprite_icon(sidebar_menu.sprite_icon)
-    %span.nav-item-name
+    %span.nav-item-name{ **sidebar_menu.menu_name_html_options }
       = sidebar_menu.menu_name
 
   - if sidebar_menu.has_renderable_items?

@@ -1,5 +1,5 @@
 - if Feature.enabled?(:sidebar_refactor, @current_user)
-  - context = Sidebar::Context.new(current_user: @current_user, container: @project, current_ref: current_ref)
+  - context = Sidebar::Context.new(current_user: @current_user, container: @project, project: @project, current_ref: current_ref)
 
   = render partial: 'shared/nav/sidebar', object: Projects::Sidebar::Panel.new(context)
 - else

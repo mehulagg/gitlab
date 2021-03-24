@@ -7,7 +7,7 @@ module Projects
         class ContributorsMenuItem < ::Sidebar::MenuItem
           override :link_to_href
           def link_to_href
-            project_graph_path(container, current_ref)
+            project_graph_path(context.project, context.current_ref)
           end
 
           override :nav_link_params

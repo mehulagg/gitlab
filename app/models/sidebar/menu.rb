@@ -7,6 +7,9 @@ module Sidebar
     include GitlabRoutingHelper
     include Gitlab::Allowable
 
+    attr_reader :context
+    delegate :current_user, :container, to: :@context
+
     def initialize(context)
       @context = context
       @items = []
@@ -45,6 +48,10 @@ module Sidebar
       {}
     end
 
+    def menu_name_html_options
+      {}
+    end
+
     def menu_name
       raise NotImplementedError
     end
@@ -63,12 +70,6 @@ module Sidebar
 
     def sprite_icon
       raise NotImplementedError
-    end
-
-    private
-
-    def method_missing(method, *args, &block)
-      @context.public_send(method) # rubocop:disable GitlabSecurity/PublicSend
     end
   end
 end

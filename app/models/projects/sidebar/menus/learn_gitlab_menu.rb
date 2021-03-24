@@ -8,7 +8,7 @@ module Projects
 
         override :link_to_href
         def link_to_href
-          project_learn_gitlab_path(container)
+          project_learn_gitlab_path(context.project)
         end
 
         override :nav_link_params
@@ -28,7 +28,7 @@ module Projects
 
         override :render?
         def render?
-          learn_gitlab_experiment_enabled?(container)
+          learn_gitlab_experiment_enabled?(context.project)
         end
       end
     end

@@ -6,7 +6,7 @@ module Projects
       class ContextMenu < ::Sidebar::Menu
         override :link_to_href
         def link_to_href
-          project_path(container)
+          project_path(context.project)
         end
 
         override :link_to_attributes
@@ -18,7 +18,7 @@ module Projects
 
         override :menu_name
         def menu_name
-          container.name
+          context.project.name
         end
       end
     end

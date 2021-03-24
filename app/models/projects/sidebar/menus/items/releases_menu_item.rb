@@ -7,7 +7,7 @@ module Projects
         class ReleasesMenuItem < ::Sidebar::MenuItem
           override :link_to_href
           def link_to_href
-            project_releases_path(container)
+            project_releases_path(context.project)
           end
 
           override :link_to_attributes
@@ -20,7 +20,7 @@ module Projects
 
           override :render?
           def render?
-            !container.empty_repo? && can?(current_user, :read_release, container)
+            !context.project.empty_repo? && can?(context.current_user, :read_release, context.project)
           end
 
           override :nav_link_params
