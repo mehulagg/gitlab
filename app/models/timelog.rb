@@ -2,6 +2,7 @@
 
 class Timelog < ApplicationRecord
   include Importable
+  include FromUnion
 
   before_save :set_project
 
@@ -14,12 +15,12 @@ class Timelog < ApplicationRecord
   belongs_to :user
   belongs_to :note
 
-  scope :for_issues_in_group, -> (group) do
-    joins(:issue).where(
-      'EXISTS (?)',
-      Project.select(1).where(namespace: group.self_and_descendants)
-        .where('issues.project_id = projects.id')
-    )
+  scope :in_group, -> (group) do
+    all_groups = group.self_and_descendants.select(:id)
+    issue_timelogs = joins(issue: :project).where(projects: { namespace_id: all_groups })
+    merge_request_timelogs = joins(merge_request: [:target_project]).where(projects: { namespace_id: all_groups })
+
+    from_union([issue_timelogs, merge_request_timelogs])
   end
 
   scope :between_times, -> (start_time, end_time) do
