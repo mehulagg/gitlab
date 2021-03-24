@@ -154,7 +154,7 @@ The "Move issue" button is at the bottom of the right-sidebar when viewing the i
 
 ![move issue - button](img/sidebar_move_issue.png)
 
-### Moving issues in bulk **FREE SELF**
+### Moving issues in bulk **(FREE SELF)**
 
 If you have advanced technical skills you can also bulk move all the issues from
 one project to another in the rails console. The below script moves all issues
@@ -316,14 +316,14 @@ You can also use the `/iteration`
 [quick action](../quick_actions.md#issues-merge-requests-and-epics)
 in a comment or description field.
 
-## Real-time sidebar **FREE SELF**
+## Real-time sidebar **(FREE SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17589) in GitLab 13.3.
 
 Assignees in the sidebar are updated in real time. This feature is **disabled by default**.
 To enable it, you need to enable [ActionCable in-app mode](https://docs.gitlab.com/omnibus/settings/actioncable.html).
 
-## Cached issue count **FREE SELF**
+## Cached issue count **(FREE SELF)**
 
 > - [Introduced]([link-to-issue](https://gitlab.com/gitlab-org/gitlab/-/issues/243753)) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
