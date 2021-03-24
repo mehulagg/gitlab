@@ -183,6 +183,20 @@ module Types
          description: 'Packages of the project.',
          resolver: Resolvers::ProjectPackagesResolver
 
+    field :jobs,
+         Types::Ci::JobType.connection_type,
+         null: true,
+         authorize: :read_build,
+         description: 'Jobs of the project.' do
+            argument :statuses, [::Types::Ci::JobStatusEnum],
+            required: false,
+            description: 'Filter jobs by status.'
+         end
+
+    def jobs(statuses: nil)
+      statuses.present? ? project.builds.with_status(statuses) : project.builds
+    end
+
     field :pipelines,
           null: true,
           description: 'Build pipelines of the project.',
