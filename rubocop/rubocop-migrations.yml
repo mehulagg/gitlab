@@ -36,9 +36,10 @@ Migration/UpdateLargeTable:
     - :system_note_metadata
     - :taggings
     - :todos
-    - :users
-    - :user_preferences
+    - :user_callouts
     - :user_details
+    - :user_preferences
+    - :users
     - :vulnerability_occurrences
     - :web_hook_logs
   DeniedMethods:
