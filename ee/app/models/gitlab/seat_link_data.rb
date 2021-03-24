@@ -24,6 +24,25 @@ module Gitlab
       historical_data.present?
     end
 
+    def sync
+      return unless should_sync_seats?
+
+      SyncSeatLinkWorker.perform_sync
+    end
+
+    # Only sync paid licenses from start date until 14 days after expiration
+    # when seat link feature is enabled.
+    def should_sync_seats?
+      license = License.current
+
+      Gitlab::CurrentSettings.seat_link_enabled? &&
+        license &&
+        !license.trial? &&
+        license.expires_at && # Skip sync if license has no expiration
+        historical_data_exists? && # Skip sync if there is no historical data
+        timestamp.between?(license.starts_at.beginning_of_day, license.expires_at.end_of_day + 14.days)
+    end
+
     private
 
     def data
