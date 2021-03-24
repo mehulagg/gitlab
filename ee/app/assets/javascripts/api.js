@@ -46,6 +46,7 @@ export default {
   descendantGroupsPath: '/api/:version/groups/:group_id/descendant_groups',
   projectDeploymentFrequencyAnalyticsPath:
     '/api/:version/projects/:id/analytics/deployment_frequency',
+  projectPackagesPath: '/api/:version/projects/:id/packages',
   issueMetricImagesPath: '/api/:version/projects/:id/issues/:issue_iid/metric_images',
   issueMetricSingleImagePath:
     '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
@@ -301,6 +302,15 @@ export default {
   fetchStates(country) {
     const url = Api.buildUrl(this.countryStatesPath);
     return axios.get(url, { params: { country } });
+  },
+
+  fetchPackages(projectId, params = {}) {
+    const url = Api.buildUrl(this.projectPackagesPath).replace(
+      ':id',
+      encodeURIComponent(projectId),
+    );
+
+    return axios.get(url, { params });  
   },
 
   fetchPaymentFormParams(id) {

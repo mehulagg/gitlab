@@ -1,7 +1,11 @@
+import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import CorpusManagement from 'ee/security_configuration/corpus_management/components/corpus_management.vue';
+import CorpusTable from 'ee/security_configuration/corpus_management/components/corpus_table.vue';
+import CorpusUpload from 'ee/security_configuration/corpus_management/components/corpus_upload.vue';
 
 const TEST_PROJECT_FULL_PATH = '/namespace/project';
+const TEST_CORPUS_HELP_PATH = '/docs/corpus-management';
 
 describe('EE - CorpusManagement', () => {
   let wrapper;
@@ -9,9 +13,18 @@ describe('EE - CorpusManagement', () => {
   const createComponentFactory = (mountFn = shallowMount) => (options = {}) => {
     const defaultProps = {
       projectFullPath: TEST_PROJECT_FULL_PATH,
+      corpusHelpPath: TEST_CORPUS_HELP_PATH,
     };
+
+    const defaultMocks = {
+      $apollo: {
+        loading: false,
+      },
+    };
+
     wrapper = mountFn(CorpusManagement, {
       propsData: defaultProps,
+      mocks: defaultMocks,
       ...options,
     });
   };
@@ -23,9 +36,40 @@ describe('EE - CorpusManagement', () => {
   });
 
   describe('corpus management', () => {
-    it('bootstraps and renders the component', () => {
-      createComponent();
-      expect(wrapper.find(CorpusManagement).exists()).toBe(true);
+    describe('when loaded', () => {
+      beforeEach(() => {
+        const data = () => {
+          return { states: { mockedPackages: { totalSize: 12 } } };
+        };
+
+        createComponent({ data });
+      });
+
+      it('bootstraps and renders the component', () => {
+        expect(wrapper.findComponent(CorpusManagement).exists()).toBe(true);
+        expect(wrapper.findComponent(CorpusTable).exists()).toBe(true);
+        expect(wrapper.findComponent(CorpusUpload).exists()).toBe(true);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
+      });
+
+      it('renders the correct header', () => {
+        const header = wrapper.findComponent(CorpusManagement).find('header');
+        expect(header.element).toMatchSnapshot();
+      });
+    });
+
+    describe('when loading', () => {
+      it('shows loading state when loading', () => {
+        const mocks = {
+          $apollo: {
+            loading: jest.fn().mockResolvedValue(true),
+          },
+        };
+        createComponent({ mocks });
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(true);
+        expect(wrapper.findComponent(CorpusTable).exists()).toBe(false);
+        expect(wrapper.findComponent(CorpusUpload).exists()).toBe(false);
+      });
     });
   });
 });
