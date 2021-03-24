@@ -5,12 +5,15 @@ module Projects
     include Gitlab::Utils::StrongMemoize
 
     MAX_TRIES = 3
+    INVALID_URL_ERROR = _('The remote mirror URL is invalid')
 
     def execute(remote_mirror, tries)
       return success unless remote_mirror.enabled?
 
+      # Blocked URLs are a hard failure, no need to attempt to retry
       if Gitlab::UrlBlocker.blocked_url?(normalized_url(remote_mirror.url))
-        return error("The remote mirror URL is invalid.")
+        remote_mirror.mark_as_failed!(INVALID_URL_ERROR)
+        return error(INVALID_URL_ERROR)
       end
 
       update_mirror(remote_mirror)
