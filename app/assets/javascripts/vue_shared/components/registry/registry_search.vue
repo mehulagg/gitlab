@@ -1,5 +1,6 @@
 <script>
 import { GlSorting, GlSortingItem, GlFilteredSearch } from '@gitlab/ui';
+import { FILTERED_SEARCH_TERM } from '~/packages_and_registries/shared/constants';
 
 const ASCENDING_ORDER = 'asc';
 const DESCENDING_ORDER = 'desc';
@@ -45,20 +46,20 @@ export default {
     isSortAscending() {
       return this.sorting.sort === ASCENDING_ORDER;
     },
+    baselineQueryStringFilters() {
+      return this.tokens.reduce((acc, curr) => {
+        acc[curr.type] = '';
+        return acc;
+      }, {});
+    },
   },
   methods: {
-    generateQueryString({ sorting = {}, filter = [] } = {}) {
+    generateQueryData({ sorting = {}, filter = [] } = {}) {
       // Ensure that we clean up the query when we remove a token from the search
-      const result = this.tokens.reduce(
-        (acc, curr) => {
-          acc[curr.type] = '';
-          return acc;
-        },
-        { ...sorting, search: [] },
-      );
+      const result = { ...this.baselineQueryStringFilters, ...sorting, search: [] };
 
       filter.forEach((f) => {
-        if (f.type === 'filtered-search-term') {
+        if (f.type === FILTERED_SEARCH_TERM) {
           result.search.push(f.value.data);
         } else {
           result[f.type] = f.value.data;
@@ -68,7 +69,7 @@ export default {
     },
     onDirectionChange() {
       const sort = this.isSortAscending ? DESCENDING_ORDER : ASCENDING_ORDER;
-      const newQueryString = this.generateQueryString({
+      const newQueryString = this.generateQueryData({
         sorting: { ...this.sorting, sort },
         filter: this.filter,
       });
@@ -76,7 +77,7 @@ export default {
       this.$emit('query:changed', newQueryString);
     },
     onSortItemClick(item) {
-      const newQueryString = this.generateQueryString({
+      const newQueryString = this.generateQueryData({
         sorting: { ...this.sorting, orderBy: item },
         filter: this.filter,
       });
@@ -84,7 +85,7 @@ export default {
       this.$emit('query:changed', newQueryString);
     },
     submitSearch() {
-      const newQueryString = this.generateQueryString({
+      const newQueryString = this.generateQueryData({
         sorting: this.sorting,
         filter: this.filter,
       });
@@ -92,7 +93,7 @@ export default {
       this.$emit('query:changed', newQueryString);
     },
     clearSearch() {
-      const newQueryString = this.generateQueryString({
+      const newQueryString = this.generateQueryData({
         sorting: this.sorting,
       });
 
