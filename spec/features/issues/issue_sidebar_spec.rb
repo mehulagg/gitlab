@@ -39,9 +39,10 @@ RSpec.describe 'Issue Sidebar' do
           project.add_developer(user)
           visit_issue(project, issue2)
 
-          find('.block.assignee .edit-link').click
-
-          wait_for_requests
+          page.within('.assignee') do
+            click_button('Edit')
+            wait_for_requests
+          end
         end
 
         it 'shows author in assignee dropdown' do
@@ -67,7 +68,10 @@ RSpec.describe 'Issue Sidebar' do
 
           wait_for_requests
 
-          find('.block.assignee .edit-link').click
+          page.within('.assignee') do
+            click_button('Edit')
+            wait_for_requests
+          end
 
           page.within '.dropdown-menu-user' do
             expect(page.find('.dropdown-header')).to be_visible
@@ -86,7 +90,10 @@ RSpec.describe 'Issue Sidebar' do
           end
 
           find('.js-right-sidebar').click
-          find('.block.assignee .edit-link').click
+          page.within('.assignee') do
+            click_button('Edit')
+            wait_for_requests
+          end
 
           expect(page.all('.dropdown-menu-user li').length).to eq(1)
           expect(find('.dropdown-input-field').value).to eq(user2.name)
@@ -97,8 +104,10 @@ RSpec.describe 'Issue Sidebar' do
         project.add_developer(user)
         visit_issue(project, issue2)
 
-        find('.block.assignee .edit-link').click
-        wait_for_requests
+        page.within('.assignee') do
+          click_button('Edit')
+          wait_for_requests
+        end
 
         click_on 'Unassigned'
 
