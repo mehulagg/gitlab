@@ -18,6 +18,11 @@ export default {
       required: false,
       default: 'issue',
     },
+    signedIn: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     assigneesText() {
@@ -37,16 +42,19 @@ export default {
       class="gl-display-flex gl-align-items-center gl-text-gray-500"
       data-testid="none"
     >
-      <span> {{ __('None') }} -</span>
-      <gl-button
-        data-testid="assign-yourself"
-        category="tertiary"
-        variant="link"
-        class="gl-ml-2"
-        @click="$emit('assign-self')"
-      >
-        <span class="gl-text-gray-500 gl-hover-text-blue-800">{{ __('assign yourself') }}</span>
-      </gl-button>
+      <span> {{ __('None') }}</span>
+      <template v-if="signedIn">
+        <span>-</span>
+        <gl-button
+          data-testid="assign-yourself"
+          category="tertiary"
+          variant="link"
+          class="gl-ml-2"
+          @click="$emit('assign-self')"
+        >
+          <span class="gl-text-gray-500 gl-hover-text-blue-800">{{ __('assign yourself') }}</span>
+        </gl-button>
+      </template>
     </div>
     <uncollapsed-assignee-list v-else :users="users" :issuable-type="issuableType" />
   </div>

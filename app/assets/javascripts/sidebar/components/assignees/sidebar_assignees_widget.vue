@@ -338,6 +338,7 @@ export default {
         <issuable-assignees
           :users="assignees"
           :issuable-type="issuableType"
+          :signed-in="signedIn"
           class="gl-mt-2"
           @assign-self="assignSelf"
         />
