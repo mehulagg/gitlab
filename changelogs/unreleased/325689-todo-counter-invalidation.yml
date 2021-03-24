@@ -1,0 +1,5 @@
+---
+title: Invalidate todo counter cache to avoid N+1 SQL queries
+merge_request: 57360
+author:
+type: performance

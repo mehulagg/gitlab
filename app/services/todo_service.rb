@@ -47,7 +47,12 @@ class TodoService
 
     yield target
 
-    todo_users.each(&:update_todos_count_cache)
+    # Invalidate the cache so we can show updating counts when user views
+    # the list of todos or the todo counter.
+    #
+    # We are invalidating instead instead of force updating it to avoid N+1 count
+    # queries when a target is deleted.
+    todo_users.each(&:invalidate_todos_count)
   end
 
   # When we reassign an assignable object (issuable, alert) we should:

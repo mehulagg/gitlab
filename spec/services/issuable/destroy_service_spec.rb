@@ -10,13 +10,15 @@ RSpec.describe Issuable::DestroyService do
 
   describe '#execute' do
     shared_examples_for 'service deleting todos' do
+      let(:another_user) { create(:user) }
+
       it 'destroys associated todos' do
-        create(:todo, target: issuable, user: user, author: user, project: project)
+        create(:todo, :pending, target: issuable, user: user, author: user, project: project)
 
         control_count = ActiveRecord::QueryRecorder.new { service.execute(issuable) }.count
 
-        create(:todo, target: other_issuable, user: user, author: user, project: project)
-        create(:todo, target: other_issuable, user: user, author: user, project: project)
+        create(:todo, :pending, target: other_issuable, user: user, author: user, project: project)
+        create(:todo, :pending, target: other_issuable, user: another_user, author: user, project: project)
 
         expect { service.execute(other_issuable) }.not_to exceed_query_limit(control_count)
         expect(other_issuable.todos.count).to eq(0)

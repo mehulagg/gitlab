@@ -1655,9 +1655,13 @@ class User < ApplicationRecord
   def invalidate_cache_counts
     invalidate_issue_cache_counts
     invalidate_merge_request_cache_counts
+    invalidate_todos_count
+    invalidate_personal_projects_count
+  end
+
+  def invalidate_todos_count
     invalidate_todos_done_count
     invalidate_todos_pending_count
-    invalidate_personal_projects_count
   end
 
   def invalidate_issue_cache_counts
