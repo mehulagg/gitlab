@@ -112,6 +112,7 @@
       color: $gray-500;
     }
   }
+}
 
 .cluster-warning {
   @include alert-variant(theme-color-level('warning', $alert-bg-level), theme-color-level('warning', $alert-border-level), theme-color-level('warning', $alert-color-level));
