@@ -15,11 +15,9 @@ module API
       desc 'Track usage data events' do
         detail 'This feature was introduced in GitLab 13.4.'
       end
-
       params do
         requires :event, type: String, desc: 'The event name that should be tracked'
       end
-
       post 'increment_counter' do
         event_name = params[:event]
 
@@ -31,7 +29,6 @@ module API
       params do
         requires :event, type: String, desc: 'The event name that should be tracked'
       end
-
       post 'increment_unique_users' do
         event_name = params[:event]
 
