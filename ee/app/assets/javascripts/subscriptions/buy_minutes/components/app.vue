@@ -1,5 +1,5 @@
 <script>
-import StepOrderApp from 'ee/vue_shared/components/step_order_app.vue';
+import StepOrderApp from 'ee/vue_shared/purchase_flow/components/step_order_app.vue';
 
 export default {
   components: {

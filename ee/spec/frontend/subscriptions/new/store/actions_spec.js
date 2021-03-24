@@ -1,7 +1,9 @@
 import MockAdapter from 'axios-mock-adapter';
 import Api from 'ee/api';
 import * as constants from 'ee/subscriptions/new/constants';
+import defaultClient from 'ee/subscriptions/new/graphql';
 import * as actions from 'ee/subscriptions/new/store/actions';
+import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
 import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
 import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
@@ -16,53 +18,18 @@ const {
 } = Api;
 
 jest.mock('~/flash');
-jest.mock('ee/subscriptions/new/constants', () => ({
-  STEPS: ['firstStep', 'secondStep'],
-}));
 
 describe('Subscriptions Actions', () => {
   let mock;
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
+    defaultClient.mutate = jest.fn();
   });
 
   afterEach(() => {
     mock.restore();
-  });
-
-  describe('activateStep', () => {
-    it('set the currentStep to the provided value', (done) => {
-      testAction(
-        actions.activateStep,
-        'secondStep',
-        {},
-        [{ type: 'UPDATE_CURRENT_STEP', payload: 'secondStep' }],
-        [],
-        done,
-      );
-    });
-
-    it('does not change the currentStep if provided value is not available', (done) => {
-      testAction(actions.activateStep, 'thirdStep', {}, [], [], done);
-    });
-  });
-
-  describe('activateNextStep', () => {
-    it('set the currentStep to the next step in the available steps', (done) => {
-      testAction(
-        actions.activateNextStep,
-        {},
-        { currentStepIndex: 0 },
-        [{ type: 'UPDATE_CURRENT_STEP', payload: 'secondStep' }],
-        [],
-        done,
-      );
-    });
-
-    it('does not change the currentStep if the current step is the last step', (done) => {
-      testAction(actions.activateNextStep, {}, { currentStepIndex: 1 }, [], [], done);
-    });
+    defaultClient.mutate.mockClear();
   });
 
   describe('updateSelectedPlan', () => {
@@ -553,7 +520,7 @@ describe('Subscriptions Actions', () => {
   });
 
   describe('fetchPaymentMethodDetailsSuccess', () => {
-    it('updates creditCardDetails to the provided data and calls activateNextStep', (done) => {
+    it('updates creditCardDetails to the provided data and calls defaultClient with activateNextStepMutation', (done) => {
       testAction(
         actions.fetchPaymentMethodDetailsSuccess,
         {
@@ -574,8 +541,13 @@ describe('Subscriptions Actions', () => {
             },
           },
         ],
-        [{ type: 'activateNextStep' }],
-        done,
+        [],
+        () => {
+          expect(defaultClient.mutate).toHaveBeenCalledWith({
+            mutation: activateNextStepMutation,
+          });
+          done();
+        },
       );
     });
   });

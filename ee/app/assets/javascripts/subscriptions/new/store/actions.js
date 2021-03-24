@@ -1,25 +1,11 @@
 import Api from 'ee/api';
+import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
 import createFlash from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { sprintf, s__ } from '~/locale';
-import { STEPS, PAYMENT_FORM_ID } from '../constants';
+import { PAYMENT_FORM_ID } from '../constants';
+import defaultClient from '../graphql';
 import * as types from './mutation_types';
-
-export const activateStep = ({ commit }, currentStep) => {
-  if (STEPS.includes(currentStep)) {
-    commit(types.UPDATE_CURRENT_STEP, currentStep);
-  }
-};
-
-export const activateNextStep = ({ commit, getters }) => {
-  const { currentStepIndex } = getters;
-
-  if (currentStepIndex < STEPS.length - 1) {
-    const nextStep = STEPS[currentStepIndex + 1];
-
-    commit(types.UPDATE_CURRENT_STEP, nextStep);
-  }
-};
 
 export const updateSelectedPlan = ({ commit }, selectedPlan) => {
   commit(types.UPDATE_SELECTED_PLAN, selectedPlan);
@@ -180,10 +166,12 @@ export const fetchPaymentMethodDetails = ({ state, dispatch, commit }) =>
     .catch(() => dispatch('fetchPaymentMethodDetailsError'))
     .finally(() => commit(types.UPDATE_IS_LOADING_PAYMENT_METHOD, false));
 
-export const fetchPaymentMethodDetailsSuccess = ({ commit, dispatch }, creditCardDetails) => {
+export const fetchPaymentMethodDetailsSuccess = ({ commit }, creditCardDetails) => {
   commit(types.UPDATE_CREDIT_CARD_DETAILS, creditCardDetails);
 
-  dispatch('activateNextStep');
+  defaultClient.mutate({
+    mutation: activateNextStepMutation,
+  });
 };
 
 export const fetchPaymentMethodDetailsError = () => {
