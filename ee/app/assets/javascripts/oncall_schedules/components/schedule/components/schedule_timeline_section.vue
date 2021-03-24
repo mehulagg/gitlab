@@ -30,7 +30,7 @@ export default {
 <template>
   <div class="timeline-section clearfix">
     <span class="timeline-header-blank"></span>
-    <div>
+    <div class="timeline-header-wrapper">
       <days-header-item v-if="presetIsDay" :timeframe-item="timeframe[0]" />
       <weeks-header-item
         v-for="(timeframeItem, index) in timeframe"

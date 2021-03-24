@@ -29,6 +29,55 @@ export const getAbsoluteEndDate = ({ endsAt }) => {
 };
 
 /**
+ *
+ * @param {Enum} presetType
+ */
+export const getTotalTime = (presetType) => {
+  // TODO: There might already be a constant for this in our utils.
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  return presetType === PRESET_TYPES.DAYS ? MS_PER_DAY : MS_PER_DAY * 14; // Either 1 day or two weeks
+};
+
+/**
+ *
+ * @param {ISODateString} timeframeStartDate
+ * @param {IncidentManagementOncallShift} shift
+ */
+export const getTimeOffset = (timeframeStartDate, shift) => {
+  return getAbsoluteStartDate(shift) - timeframeStartDate.getTime();
+};
+
+/**
+ *
+ * @param {IncidentManagementOncallShift} shift
+ */
+export const getDuration = (shift) => {
+  return getAbsoluteEndDate(shift) - getAbsoluteStartDate(shift);
+};
+
+/**
+ *
+ * @param {Object} input data
+ */
+export const getPixelOffset = ({ timeframe, shift, timelineWidth, presetType }) => {
+  const totalTime = getTotalTime(presetType);
+  const timeOffset = getTimeOffset(timeframe[0], shift);
+  // offset (px) = total width (px) * shift time (ms) / total time (ms)
+  return (timelineWidth * timeOffset) / totalTime;
+};
+
+/**
+ *
+ * @param {Object} input data
+ */
+export const getPixelWidth = ({ shift, timelineWidth, presetType }) => {
+  const totalTime = getTotalTime(presetType);
+  const durationMillis = getDuration(shift);
+  // shift width (px) = shift time (ms) * total width (px) / total time (ms)
+  return (durationMillis * timelineWidth) / totalTime;
+};
+
+/**
  * This method returns a Date that is
  * n days after the start Date provided. This
  * is used to calculate the end Date of a time

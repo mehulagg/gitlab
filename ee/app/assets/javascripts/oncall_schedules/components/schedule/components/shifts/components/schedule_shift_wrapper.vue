@@ -35,6 +35,7 @@ export default {
         [PRESET_TYPES.DAYS]: DaysScheduleShift,
         [PRESET_TYPES.WEEKS]: WeeksScheduleShift,
       },
+      timelineWidth: 0,
     };
   },
   apollo: {
@@ -62,6 +63,11 @@ export default {
       return this.timeframe.indexOf(this.timeframeItem);
     },
   },
+  mounted() {
+    // Massive hack, please fix
+    const timelineWidth = document.getElementsByClassName('timeline-header-wrapper')[0].offsetWidth;
+    this.timelineWidth = timelineWidth;
+  },
 };
 </script>
 
@@ -78,6 +84,7 @@ export default {
       :timeframe="timeframe"
       :shift-time-unit-width="shiftTimeUnitWidth"
       :rotation-length="rotationLength"
+      :timeline-width="timelineWidth"
     />
   </div>
 </template>
