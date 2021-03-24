@@ -232,6 +232,7 @@ describe('BoardCardAssigneeDropdown', () => {
               name: 'Administrator',
               username: 'root',
               webUrl: '/root',
+              status: null,
             },
           ],
         ],
@@ -393,6 +394,7 @@ describe('BoardCardAssigneeDropdown', () => {
           name: 'Roodie',
           username: 'roodie',
           webUrl: '/roodie',
+          status: null,
         });
 
         const issuableQueryHandler = jest.fn().mockResolvedValue(responseCopy);

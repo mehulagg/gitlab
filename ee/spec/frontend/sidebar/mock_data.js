@@ -94,6 +94,7 @@ export const issuableQueryResponse = {
               name: 'Administrator',
               username: 'root',
               webUrl: '/root',
+              status: null,
             },
             {
               id: 'gid://gitlab/User/2',
@@ -102,6 +103,9 @@ export const issuableQueryResponse = {
               name: 'Jacki Kub',
               username: 'francina.skiles',
               webUrl: '/franc',
+              status: {
+                availability: 'BUSY',
+              },
             },
             {
               id: 'gid://gitlab/User/3',
@@ -109,6 +113,7 @@ export const issuableQueryResponse = {
               name: 'John Doe',
               username: 'johndoe',
               webUrl: '/john',
+              status: null,
             },
           ],
         },
@@ -121,6 +126,7 @@ export const issuableQueryResponse = {
               name: 'Jacki Kub',
               username: 'francina.skiles',
               webUrl: '/franc',
+              status: null,
             },
           ],
         },
@@ -142,6 +148,7 @@ export const searchQueryResponse = {
               name: 'root',
               username: 'root',
               webUrl: 'root',
+              status: null,
             },
           },
           {
@@ -151,6 +158,7 @@ export const searchQueryResponse = {
               name: 'rookie',
               username: 'rookie',
               webUrl: 'rookie',
+              status: null,
             },
           },
         ],
@@ -175,6 +183,7 @@ export const updateIssueAssigneesMutationResponse = {
               name: 'Administrator',
               username: 'root',
               webUrl: '/root',
+              status: null,
             },
           ],
           __typename: 'UserConnection',
@@ -189,6 +198,7 @@ export const updateIssueAssigneesMutationResponse = {
               name: 'Administrator',
               username: 'root',
               webUrl: '/root',
+              status: null,
             },
             {
               __typename: 'User',
@@ -198,6 +208,7 @@ export const updateIssueAssigneesMutationResponse = {
               name: 'Jacki Kub',
               username: 'francina.skiles',
               webUrl: '/franc',
+              status: null,
             },
           ],
           __typename: 'UserConnection',
