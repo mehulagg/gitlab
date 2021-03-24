@@ -30,7 +30,9 @@ class InternalId < ApplicationRecord
   # The operation locks the record and gathers a `ROW SHARE` lock (in PostgreSQL).
   # As such, the increment is atomic and safe to be called concurrently.
   def increment_and_save!
-    update_and_save { self.last_value = (last_value || 0) + 1 }
+    update_and_save { self.last_value = (last_value || 0) + 1 }.tap do
+      update_and_save_counter
+    end
   end
 
   # Increments #last_value with new_value if it is greater than the current,
@@ -39,7 +41,9 @@ class InternalId < ApplicationRecord
   # The operation locks the record and gathers a `ROW SHARE` lock (in PostgreSQL).
   # As such, the increment is atomic and safe to be called concurrently.
   def track_greatest_and_save!(new_value)
-    update_and_save { self.last_value = [last_value || 0, new_value].max }
+    update_and_save { self.last_value = [last_value || 0, new_value].max }.tap do
+      update_and_save_counter
+    end
   end
 
   private
@@ -47,14 +51,17 @@ class InternalId < ApplicationRecord
   def update_and_save(&block)
     lock!
     yield
-    update_and_save_counter.increment(usage: usage, changed: last_value_changed?)
     save!
     last_value
   end
 
-  # Instrumentation to track for-update locks
   def update_and_save_counter
-    strong_memoize(:update_and_save_counter) do
+    metric_counter.increment(usage: usage, changed: last_value_changed?)
+  end
+
+  # Instrumentation to track for-update locks
+  def metric_counter
+    strong_memoize(:metric_counter) do
       Gitlab::Metrics.counter(:gitlab_internal_id_for_update_lock, 'Number of ROW SHARE (FOR UPDATE) locks on individual records from internal_ids')
     end
   end
