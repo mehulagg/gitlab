@@ -881,10 +881,10 @@ RSpec.describe CommitStatus do
     end
 
     it "updates 'retried' and 'status' columns of the latest status with the same name in the same pipeline" do
-      build_old.update_older_statuses_retried!
+      build_new.update_older_statuses_retried!
 
-      expect(build_old.reload).to have_attributes(retried: false, processed: false)
-      expect(build_new.reload).to have_attributes(retried: true, processed: true)
+      expect(build_new.reload).to have_attributes(retried: false, processed: false)
+      expect(build_old.reload).to have_attributes(retried: true, processed: true)
       expect(test.reload).to have_attributes(retried: false, processed: false)
       expect(build_from_other_pipeline.reload).to have_attributes(retried: false, processed: false)
     end
