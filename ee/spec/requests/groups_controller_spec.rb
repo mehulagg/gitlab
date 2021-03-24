@@ -32,8 +32,8 @@ RSpec.describe GroupsController, type: :request do
             shared_examples 'creates ip restrictions' do
               it 'creates ip restrictions' do
                 expect { subject }
-                  .to(change { group.reload.ip_restrictions.map(&:range) }
-                    .from([]).to(range.split(',')))
+                  .to(change { group.reload.ip_restrictions.map(&:range).sort }
+                  .from([]).to(range.split(',').sort))
                 expect(response).to have_gitlab_http_status(:found)
               end
             end
@@ -72,8 +72,8 @@ RSpec.describe GroupsController, type: :request do
               shared_examples 'updates ip restrictions' do
                 it 'updates ip restrictions' do
                   expect { subject }
-                    .to(change { group.reload.ip_restrictions.map(&:range) }
-                      .from(['10.0.0.0/8']).to(range.split(',')))
+                    .to(change { group.reload.ip_restrictions.map(&:range).sort }
+                    .from(['10.0.0.0/8']).to(range.split(',').sort))
                   expect(response).to have_gitlab_http_status(:found)
                 end
               end
