@@ -872,18 +872,21 @@ RSpec.describe CommitStatus do
   end
 
   describe '#update_older_statuses_retried!' do
-    let!(:status1) { create_status(name: 'build') }
-    let!(:status2) { create_status(name: 'build') }
-    let!(:status3) { create_status(name: 'test') }
-    let!(:status4) { create_status(name: 'build', pipeline: create(:ci_pipeline, project: project, sha: project.commit.id)) }
+    let!(:build_old) { create_status(name: 'build') }
+    let!(:build_new) { create_status(name: 'build') }
+    let!(:test) { create_status(name: 'test') }
+    let!(:build_from_other_pipeline) do
+      new_pipeline = create(:ci_pipeline, project: project, sha: project.commit.id)
+      create_status(name: 'build', pipeline: new_pipeline)
+    end
 
     it "updates 'retried' and 'status' columns of the latest status with the same name in the same pipeline" do
-      status1.update_older_statuses_retried!
+      build_old.update_older_statuses_retried!
 
-      expect(status1.reload).to have_attributes(retried: false, processed: false)
-      expect(status2.reload).to have_attributes(retried: true, processed: true)
-      expect(status3.reload).to have_attributes(retried: false, processed: false)
-      expect(status4.reload).to have_attributes(retried: false, processed: false)
+      expect(build_old.reload).to have_attributes(retried: false, processed: false)
+      expect(build_new.reload).to have_attributes(retried: true, processed: true)
+      expect(test.reload).to have_attributes(retried: false, processed: false)
+      expect(build_from_other_pipeline.reload).to have_attributes(retried: false, processed: false)
     end
   end
 end
