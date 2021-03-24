@@ -20,9 +20,13 @@
               %li.js-filter-issuable-type
                 = link_to new_project_issue_path(@project), class: ("is-active" if issuable.issue?) do
                   = _("Issue")
+                  .text-secondary
+                    = _('Used for general work')
               %li.js-filter-issuable-type{ data: { track: { event: "select_issue_type_incident", label: "select_issue_type_incident_dropdown_option" } } }
                 = link_to new_project_issue_path(@project, { issuable_template: 'incident', issue: { issue_type: 'incident' } }), class: ("is-active" if issuable.incident?) do
                   = _("Incident")
+                  .text-secondary
+                    = _('For investigating IT service disruptions or outages')
     - if issuable.incident?
       %p.form-text.text-muted
         - incident_docs_url = help_page_path('operations/incident_management/incidents.md')

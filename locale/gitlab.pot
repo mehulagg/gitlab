@@ -13483,6 +13483,9 @@ msgstr ""
 msgid "For individual use, create a separate account under your personal email address, not tied to the Enterprise email domain or group."
 msgstr ""
 
+msgid "For investigating IT service disruptions or outages"
+msgstr ""
+
 msgid "For more info, read the documentation."
 msgstr ""
 
@@ -32979,6 +32982,9 @@ msgid "Use your smart card to authenticate with the LDAP server."
 msgstr ""
 
 msgid "Used by members to sign in to your group in GitLab"
+msgstr ""
+
+msgid "Used for general work"
 msgstr ""
 
 msgid "Used programming language"
