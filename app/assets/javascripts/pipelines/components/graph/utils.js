@@ -24,13 +24,6 @@ const getQueryHeaders = (etagResource) => {
   };
 };
 
-const reportToSentry = (component, failureType) => {
-  Sentry.withScope((scope) => {
-    scope.setTag('component', component);
-    Sentry.captureException(failureType);
-  });
-};
-
 const serializeGqlErr = (gqlError) => {
   const { locations = [], message = '', path = [] } = gqlError;
 
@@ -113,7 +106,6 @@ const validateConfigPaths = (value) => value.graphqlResourceEtag?.length > 0;
 
 export {
   getQueryHeaders,
-  reportToSentry,
   serializeGqlErr,
   serializeLoadErrors,
   toggleQueryPollingByVisibility,
