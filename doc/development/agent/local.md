@@ -98,3 +98,57 @@ bazel test //internal/module/gitops/server:server_test
 - Bazel documentation about [specifying targets to build](https://docs.bazel.build/versions/master/guide.html#specifying-targets-to-build).
 - [The Bazel query](https://docs.bazel.build/versions/master/query.html)
 - [Bazel query how to](https://docs.bazel.build/versions/master/query-how-to.html)
+
+## QA Tests
+
+# Tested successfully against staging ✅
+
+## How to test against `staging` directly from your GDK instance:
+
+**STEP 0** - (CAVEAT) Go to your local `qa/qa/service/cluster_provider/k3s.rb` and comment out [this line](https://gitlab.com/gitlab-org/gitlab/-/blob/5b15540ea78298a106150c3a1d6ed26416109b9d/qa/qa/service/cluster_provider/k3s.rb#L8) and [this line](https://gitlab.com/gitlab-org/gitlab/-/blob/5b15540ea78298a106150c3a1d6ed26416109b9d/qa/qa/service/cluster_provider/k3s.rb#L36)
+
+Resons for this:
+- We don't want to allow local connections on `staging`
+- We wouldn't be able to do it anyway since we're going to test it with a non-admin user
+- I think this was only used for GDK and Omnibus tests. But I'm proposing that we completely stop doing this as this won't be necessary once the QA tunnel is back and is not necessary locally for GDK with the use of a hostname instead of `localhost` in your `/etc/hosts`.
+---
+
+1. Go to GitLab's root folder and `cd qa`
+1. Login with your own user in staging and create a group to be used as sandbox, for me I did: `jcunha-qa-sandbox`
+1. Create an access token for your user with the `api` permission.
+1. Run the following command, replacing the curly braces comments and cross your fingers:
+
+```shell
+GITLAB_SANDBOX_NAME="{THE GROUP ID YOU CREATED ON STEP 2}" \
+GITLAB_QA_ACCESS_TOKEN="{THE ACCESS TOKEN YOU CREATED ON STEP 3}" \
+GITLAB_USERNAME="{YOUR STAGING USERNAME}" \
+GITLAB_PASSWORD="{YOUR STAGING PASSWORD}" \
+bundle exec bin/qa Test::Instance::All https://staging.gitlab.com -- --tag quarantine qa/specs/features/ee/api/7_configure/kubernetes/kubernetes_agent_spec.rb
+```
+
+## How to test against your GDK instance:
+
+**STEP 0** - (CAVEAT) Go to your `qa/qa/fixtures/kubernetes_agent/agentk-manifest.yaml.erb` and comment out [this line](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49053/diffs#81111e16630bc859ec482eae4c8520af4e36d018_0_27) and UNcomment [this line](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49053/diffs#81111e16630bc859ec482eae4c8520af4e36d018_0_28)
+
+Reasons for this:
+- In GDK `gitlab-kas` is listening on `grpc` not `wss`.
+- We will automate this identification once we have https://gitlab.com/gitlab-org/gitlab/-/issues/292935
+---
+
+1. [Enable the `gitlab-k8s-agent` on your GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/kubernetes_agent.md).
+1. Go to GitLab's root folder and `cd qa`
+1. In GDK we can run as admin, which will be the default choice of the test. So we can use the default sandbox group So simply run:
+
+```shell
+bundle exec bin/qa Test::Instance::All http://gdk.test:3000 -- --tag quarantine qa/specs/features/ee/api/7_configure/kubernetes/kubernetes_agent_spec.rb
+````
+
+---
+
+## Troubleshooting
+
+- If you had `k3d` instance running before this, you might see a message saying something like `failed to remove k3s cluster`. If that's the case, stop you K3d manually and re-run the test.
+- If your test is failing on the login screen, make sure you're passing the correct credentials.
+- If your test test agains GDK is failing to provision a license, so breaking on `qa/qa/ee/resource/license.rb`, you probably changed your GDK admin user/password. You can set it by using this environment vars: `GITLAB_ADMIN_USERNAME` and `GITLAB_ADMIN_PASSWORD`.
+- When testing against staging, you shouldn't have a `EE_LICENSE` env var set, since this would force a login admin login.
+- Make sure FF is enabled: 
