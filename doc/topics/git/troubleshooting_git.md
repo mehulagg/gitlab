@@ -153,8 +153,7 @@ and provide GitLab with more information on how to improve the service.
 
 ## `git clone` over HTTP fails with `transfer closed with outstanding read data remaining` error
 
-If the buffer size is lower than what is allowed in the request, the action fails with an error similar to the one below:
-
+Sometimes, when cloning old or large repositories, the following error is thrown:
 ```plaintext
 error: RPC failed; curl 18 transfer closed with outstanding read data remaining
 fatal: The remote end hung up unexpectedly
@@ -162,13 +161,16 @@ fatal: early EOF
 fatal: index-pack failed
 ```
 
-Usually, this is due to one of these reasons:
+This is a common problem with Git itself, due to its inability to handle large files or large quantities of files. 
+[Git LFS](https://about.gitlab.com/blog/2017/01/30/getting-started-with-git-lfs-tutorial/) was created to work around this problem; however, even it has limitations.
+
+In other words, this is usually due to one of these reasons:
 
 - The number of files in the repository.
 - The number of revisions in the history.
-- The existence of large files (while not using LFS).
+- The existence of large files in the repository.
 
-A few potential solutions exist:
+Due to the variable root causes, multiple potential solutions exist:
 
 - If this error occurs when cloning a large repository, you can
   [decrease the cloning depth](../../ci/large_repositories/index.md#shallow-cloning)
@@ -207,3 +209,9 @@ A few potential solutions exist:
      ```shell
      sudo gitlab-ctl reconfigure
      ```
+
+Please note: These options are NOT mutually exclusive. 
+For example: If a repository has a very long history and no large files, the depth should do the trick. 
+However, if a repository has very large files, even a depth of 1 may be too large, thus requiring the `postBuffer` change.
+Meanwhile, if you increase your local `postBuffer` but the NGINX on the back end is still too small, the error will persist.
+That said, modifying the server is not always an option and introduces more potential risk. Therefore, local changes should be attempted first.
