@@ -51,7 +51,7 @@ class GithubService < Service
         placeholder: 'https://github.com/owner/repository' },
       { type: 'checkbox',
         name: "static_context",
-        title: s_('GithubIntegration|Static status check names'),
+        title: s_('GithubIntegration|Static status check names (optional)'),
         help: s_('GithubIntegration|Select this if you want GitHub to mark status checks as "Required". When enabled, appends your
         GitLab instance host name to the status check name. When disabled, it uses the branch name.') }
     ]

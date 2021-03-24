@@ -14379,7 +14379,7 @@ msgid ""
 "          GitLab instance host name to the status check name. When disabled, it uses the branch name."
 msgstr ""
 
-msgid "GithubIntegration|Static status check names"
+msgid "GithubIntegration|Static status check names (optional)"
 msgstr ""
 
 msgid "GithubIntegration|This requires mirroring your GitHub repository to this project. %{docs_link}"
