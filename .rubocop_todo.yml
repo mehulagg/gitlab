@@ -380,11 +380,6 @@ RSpec/EmptyExampleGroup:
     - 'ee/spec/services/personal_access_tokens/revoke_invalid_tokens_spec.rb'
     - 'spec/services/projects/prometheus/alerts/notify_service_spec.rb'
 
-# Offense count: 1162
-# Cop supports --auto-correct.
-RSpec/EmptyLineAfterFinalLetItBe:
-  Enabled: false
-
 # Offense count: 1428
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
