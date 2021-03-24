@@ -21296,6 +21296,9 @@ msgstr ""
 msgid "On-call Schedules"
 msgstr ""
 
+msgid "On-call schedule %{schedule} in Project %{project}"
+msgstr ""
+
 msgid "On-call schedules"
 msgstr ""
 
@@ -32994,6 +32997,9 @@ msgid "User %{current_user_username} has started impersonating %{username}"
 msgstr ""
 
 msgid "User %{username} was successfully removed."
+msgstr ""
+
+msgid "User %{user} is currently part of:"
 msgstr ""
 
 msgid "User ID"

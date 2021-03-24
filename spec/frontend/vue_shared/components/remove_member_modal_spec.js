@@ -2,6 +2,30 @@ import { GlModal } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
 
+const schedules = [
+  {
+    id: 1,
+    name: 'Schedule 1',
+    link: 'gitlab.com',
+    projectName: 'Some of the projects',
+    projectPath: '#',
+  },
+  {
+    id: 2,
+    name: 'Schedule 2',
+    link: 'gitlab.com',
+    projectName: 'Some of the projects',
+    projectPath: '#',
+  },
+  {
+    id: 3,
+    name: 'Schedule 3',
+    link: 'gitlab.com',
+    projectName: 'Some of thep rojects',
+    projectPath: '#',
+  },
+];
+
 describe('RemoveMemberModal', () => {
   const memberPath = '/gitlab-org/gitlab-test/-/project_members/90';
   let wrapper;
@@ -16,9 +40,9 @@ describe('RemoveMemberModal', () => {
 
   describe.each`
     state                          | memberType         | isAccessRequest | actionText               | removeSubMembershipsCheckboxExpected | unassignIssuablesCheckboxExpected | message
-    ${'removing a group member'}   | ${'GroupMember'}   | ${'false'}      | ${'Remove member'}       | ${true}                              | ${true}                           | ${'Are you sure you want to remove Jane Doe from the Gitlab Org / Gitlab Test project?'}
-    ${'removing a project member'} | ${'ProjectMember'} | ${'false'}      | ${'Remove member'}       | ${false}                             | ${true}                           | ${'Are you sure you want to remove Jane Doe from the Gitlab Org / Gitlab Test project?'}
-    ${'denying an access request'} | ${'ProjectMember'} | ${'true'}       | ${'Deny access request'} | ${false}                             | ${false}                          | ${"Are you sure you want to deny Jane Doe's request to join the Gitlab Org / Gitlab Test project?"}
+    ${'removing a group member'}   | ${'GroupMember'}   | ${false}        | ${'Remove member'}       | ${true}                              | ${true}                           | ${'Are you sure you want to remove Jane Doe from the Gitlab Org / Gitlab Test project?'}
+    ${'removing a project member'} | ${'ProjectMember'} | ${false}        | ${'Remove member'}       | ${false}                             | ${true}                           | ${'Are you sure you want to remove Jane Doe from the Gitlab Org / Gitlab Test project?'}
+    ${'denying an access request'} | ${'ProjectMember'} | ${true}         | ${'Deny access request'} | ${false}                             | ${false}                          | ${"Are you sure you want to deny Jane Doe's request to join the Gitlab Org / Gitlab Test project?"}
   `(
     'when $state',
     ({
@@ -38,6 +62,7 @@ describe('RemoveMemberModal', () => {
                 message,
                 memberPath,
                 memberType,
+                schedules,
               },
             };
           },
@@ -70,6 +95,10 @@ describe('RemoveMemberModal', () => {
         expect(wrapper.find('[name=unassign_issuables]').exists()).toBe(
           unassignIssuablesCheckboxExpected,
         );
+      });
+
+      it(`shows ${isAccessRequest ? 'no' : 'all'} related on-call schedules`, () => {
+        expect(wrapper.find('[data-testid=modal-schedules]').exists()).toBe(!isAccessRequest);
       });
 
       it('submits the form when the modal is submitted', () => {
