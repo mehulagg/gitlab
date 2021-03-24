@@ -122,6 +122,10 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
 
   shared_examples 'group value stream analytics' do
     context 'stage panel' do
+      before do
+        select_stage("Issue")
+      end
+
       it 'displays the stage table headers' do
         expect(page).to have_selector('.event-header', visible: true)
         expect(page).to have_selector('.total-time-header', visible: true)
@@ -155,10 +159,6 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   end
 
   shared_examples 'has default filters' do
-    it 'hides the empty state' do
-      expect(page).to have_selector('.row.empty-state', visible: false)
-    end
-
     it 'shows the projects filter' do
       expect(page).to have_selector('.dropdown-projects', visible: true)
     end
@@ -222,6 +222,8 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     context 'with fake parameters' do
       before do
         visit "#{group_analytics_cycle_analytics_path(group)}?beans=not-cool"
+
+        select_stage("Issue")
       end
 
       it_behaves_like 'empty state'
@@ -354,9 +356,14 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       end
     end
 
-    it 'will have data available' do
-      expect(page.find('[data-testid="vsa-stage-table"]')).not_to have_text(_("We don't have enough data to show this stage."))
+    it 'will not display the stage table on the overview stage' do
+      expect(page).not_to have_selector('[data-testid="vsa-stage-table"]')
 
+      select_stage("Issue")
+      expect(page).to have_selector('[data-testid="vsa-stage-table"]')
+    end
+
+    it 'will have data available' do
       duration_chart_content = page.find('[data-testid="vsa-duration-chart"]')
       expect(duration_chart_content).not_to have_text(_("There is no data available. Please change your selection."))
       expect(duration_chart_content).to have_text(_('Total days to completion'))
@@ -373,8 +380,6 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       end
 
       it 'will filter the data' do
-        expect(page.find('[data-testid="vsa-stage-table"]')).to have_text(_("We don't have enough data to show this stage."))
-
         duration_chart_content = page.find('[data-testid="vsa-duration-chart"]')
         expect(duration_chart_content).not_to have_text(_('Total days to completion'))
         expect(duration_chart_content).to have_text(_("There is no data available. Please change your selection."))

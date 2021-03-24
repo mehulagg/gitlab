@@ -91,11 +91,17 @@ export default {
     },
     shouldDisplayDurationChart() {
       return (
-        this.featureFlags.hasDurationChart && this.isOverviewStageSelected && !this.hasNoAccessError
+        !this.featureFlags.hasPathNavigation ||
+        (this.featureFlags.hasDurationChart &&
+          this.isOverviewStageSelected &&
+          !this.hasNoAccessError)
       );
     },
     shouldDisplayTypeOfWorkCharts() {
-      return this.isOverviewStageSelected && !this.hasNoAccessError;
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.isOverviewStageSelected && !this.hasNoAccessError)
+      );
     },
     selectedStageReady() {
       return !this.hasNoAccessError && this.selectedStage;
