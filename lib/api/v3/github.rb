@@ -67,19 +67,29 @@ module API
         # rubocop: enable CodeReuse/ActiveRecord
 
         # rubocop: disable CodeReuse/ActiveRecord
-        def find_merge_request_with_access(id, access_level = :read_merge_request)
-          merge_request = authorized_merge_requests.find_by(id: id)
-          not_found! unless can?(current_user, access_level, merge_request)
+        def find_merge_request_with_access(id, preload_associations: true)
+          merge_request = authorized_merge_requests(preload_associations: preload_associations).find_by(id: id)
+          not_found! unless can?(current_user, :read_merge_request, merge_request)
           merge_request
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
-        def authorized_merge_requests
-          MergeRequestsFinder.new(current_user, authorized_only: !current_user.admin?).execute
+        def authorized_merge_requests(preload_associations: true)
+          merge_requests = MergeRequestsFinder.new(current_user, authorized_only: !current_user.admin?).execute
+          merge_requests = preload_merge_request_associations(merge_requests) if preload_associations
+          merge_requests
         end
 
         def authorized_merge_requests_for_project(project)
-          MergeRequestsFinder.new(current_user, authorized_only: !current_user.admin?, project_id: project.id).execute
+          merge_requests = MergeRequestsFinder.new(current_user, authorized_only: !current_user.admin?, project_id: project.id).execute
+          merge_requests = preload_merge_request_associations(merge_requests)
+          merge_requests
+        end
+
+        def preload_merge_request_associations(relation)
+          return relation unless Feature.enabled?(:api_v3_merge_request_optimization, default_enabled: :yaml)
+
+          relation.with_api_v3_entity_associations
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
@@ -175,7 +185,7 @@ module API
         # It'll present _just_ the comments counting with a link to GitLab on
         # Jira dev panel, not the actual note content.
         get ':namespace/:project/issues/:id/comments' do
-          merge_request = find_merge_request_with_access(params[:id])
+          merge_request = find_merge_request_with_access(params[:id], preload_associations: false)
 
           present find_notes(merge_request), with: ::API::Github::Entities::NoteableComment
         end
@@ -194,16 +204,13 @@ module API
 
         # Self-hosted Jira (tested on 7.11.1) requests this endpoint right
         # after fetching branches.
-        # rubocop: disable CodeReuse/ActiveRecord
         get ':namespace/:project/events' do
           user_project = find_project_with_access(params)
 
           merge_requests = authorized_merge_requests_for_project(user_project)
-          merge_requests = merge_requests.preload(:author, :assignees, :metrics, source_project: :namespace, target_project: :namespace)
 
           present paginate(merge_requests), with: ::API::Github::Entities::PullRequestEvent
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
         params do
           use :project_full_path

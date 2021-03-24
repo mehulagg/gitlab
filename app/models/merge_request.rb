@@ -311,7 +311,7 @@ class MergeRequest < ApplicationRecord
                target_project: :project_feature,
                metrics: [:latest_closed_by, :merged_by])
   }
-
+  scope :with_api_v3_entity_associations, -> { preload_routables.preload(:author, :assignees, :metrics) }
   scope :with_csv_entity_associations, -> { preload(:assignees, :approved_by_users, :author, :milestone, metrics: [:merged_by]) }
 
   scope :by_target_branch_wildcard, ->(wildcard_branch_name) do

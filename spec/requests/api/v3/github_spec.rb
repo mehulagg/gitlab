@@ -226,13 +226,54 @@ RSpec.describe API::V3::Github do
     end
 
     describe 'GET /-/jira/pulls' do
-      it 'returns an array of merge requests with github format' do
+      def call_api
         jira_get v3_api('/repos/-/jira/pulls', user)
+      end
+
+      # As the regular `json_response` is defined as a `let` (in the 'JSON response' shared context),
+      # its value is memoized between calls.
+      # This method is called to compare the JSON response of two requests within the same test.
+      def unmemoized_json_response
+        Gitlab::Json.parse(response.body)
+      end
+
+      it 'returns an array of merge requests with github format' do
+        call_api
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to be_an(Array)
         expect(json_response.size).to eq(2)
         expect(response).to match_response_schema('entities/github/pull_requests')
+      end
+
+      it 'avoids N+1 queries' do
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { call_api }
+        project3 = create(:project, :repository, creator: user)
+        project3.add_maintainer(user)
+        assignee3 = create(:user)
+        create(:merge_request, source_project: project3, target_project: project3, author: user, assignees: [assignee3])
+
+        expect do
+          expect { call_api }.not_to exceed_all_query_limit(control)
+        end.to change { unmemoized_json_response.size }.by(1)
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'with `api_v3_merge_request_optimization` feature flag disabled' do
+        before do
+          stub_feature_flags(api_v3_merge_request_optimization: false)
+        end
+
+        it 'falls back to less optimal query performance' do
+          control = ActiveRecord::QueryRecorder.new(skip_cached: false) { call_api }
+          project3 = create(:project, :repository, creator: user)
+          project3.add_maintainer(user)
+          assignee3 = create(:user)
+          create(:merge_request, source_project: project3, target_project: project3, author: user, assignees: [assignee3])
+
+          expect { call_api }.to exceed_all_query_limit(control)
+        end
       end
     end
 
@@ -340,14 +381,12 @@ RSpec.describe API::V3::Github do
       end
 
       it 'avoids N+1 queries' do
-        jira_get v3_api("/users/#{group.parent.path}/repos", user)
-
-        control = ActiveRecord::QueryRecorder.new { jira_get v3_api("/users/#{group.parent.path}/repos", user) }
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { jira_get v3_api("/users/#{group.parent.path}/repos", user) }
 
         new_group = create(:group, parent: group.parent)
         create(:project, :repository, group: new_group, creator: user)
 
-        expect { jira_get v3_api("/users/#{group.parent.path}/repos", user) }.not_to exceed_query_limit(control)
+        expect { jira_get v3_api("/users/#{group.parent.path}/repos", user) }.not_to exceed_all_query_limit(control)
         expect(response).to have_gitlab_http_status(:ok)
       end
     end
