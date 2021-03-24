@@ -1,5 +1,6 @@
 import { GlSorting, GlSortingItem, GlFilteredSearch } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { FILTERED_SEARCH_TERM } from '~/packages_and_registries/shared/constants';
 import component from '~/vue_shared/components/registry/registry_search.vue';
 
 describe('Registry Search', () => {
@@ -123,8 +124,8 @@ describe('Registry Search', () => {
 
   describe('query string calculation', () => {
     const filter = [
-      { type: 'filtered-search-term', value: { data: 'one' } },
-      { type: 'filtered-search-term', value: { data: 'two' } },
+      { type: FILTERED_SEARCH_TERM, value: { data: 'one' } },
+      { type: FILTERED_SEARCH_TERM, value: { data: 'two' } },
       { type: 'typeOne', value: { data: 'value_one' } },
       { type: 'typeTwo', value: { data: 'value_two' } },
     ];
