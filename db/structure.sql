@@ -16813,10 +16813,12 @@ ALTER SEQUENCE protected_environment_deploy_access_levels_id_seq OWNED BY protec
 
 CREATE TABLE protected_environments (
     id integer NOT NULL,
-    project_id integer NOT NULL,
+    project_id integer,
+    group_id integer,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    name character varying NOT NULL
+    name character varying
+    tier smallint
 );
 
 CREATE SEQUENCE protected_environments_id_seq
@@ -23616,9 +23618,9 @@ CREATE INDEX index_protected_environment_deploy_access_levels_on_group_id ON pro
 
 CREATE INDEX index_protected_environment_deploy_access_levels_on_user_id ON protected_environment_deploy_access_levels USING btree (user_id);
 
-CREATE INDEX index_protected_environments_on_project_id ON protected_environments USING btree (project_id);
+CREATE INDEX index_protected_environments_on_project_id ON protected_environments USING btree (project_id) WHERE project_id IS NOT NULL;
 
-CREATE UNIQUE INDEX index_protected_environments_on_project_id_and_name ON protected_environments USING btree (project_id, name);
+CREATE UNIQUE INDEX index_protected_environments_on_project_id_and_name ON protected_environments USING btree (project_id, name) WHERE project_id IS NOT NULL AND name IS NOT NULL;
 
 CREATE INDEX index_protected_tag_create_access ON protected_tag_create_access_levels USING btree (protected_tag_id);
 
@@ -26240,6 +26242,9 @@ ALTER TABLE ONLY jira_tracker_data
 
 ALTER TABLE ONLY protected_environments
     ADD CONSTRAINT fk_rails_a354313d11 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY protected_environments
+    ADD CONSTRAINT fk_rails_a354313d11 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY jira_connect_subscriptions
     ADD CONSTRAINT fk_rails_a3c10bcf7d FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;

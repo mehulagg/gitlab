@@ -88,7 +88,7 @@ module EE
       has_many :dast_site_tokens
       has_many :dast_sites
 
-      has_many :protected_environments
+      has_many :protected_environments, foreign_key: :project_id
       has_many :software_license_policies, inverse_of: :project, class_name: 'SoftwareLicensePolicy'
       has_many :software_licenses, through: :software_license_policies
       accepts_nested_attributes_for :software_license_policies, allow_destroy: true
