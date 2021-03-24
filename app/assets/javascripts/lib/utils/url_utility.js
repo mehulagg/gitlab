@@ -41,7 +41,7 @@ function decodeUrlParameter(val) {
  * @returns {String}
  */
 export function encodeSaferUrl(potentiallyUnsafePath) {
-  const unencode = ['%2F'];
+  const unencode = ['%2F', '%3A'];
   const encode = ['#', '!', '~', '\\*', "'", '\\(', '\\)'];
   let saferPath = encodeURIComponent(potentiallyUnsafePath);
 

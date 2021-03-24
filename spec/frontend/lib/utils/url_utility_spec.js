@@ -917,6 +917,7 @@ describe('URL utility', () => {
       ${'\\d'}  | ${'/url/hello123.png'}
       ${'-'}    | ${'/url/hello-123.png'}
       ${'_'}    | ${'/url/hello_123.png'}
+      ${':'}    | ${'blob:https://url/hello_123.png'}
     `('makes no changes to unproblematic characters ($character)', ({ input }) => {
       expect(urlUtils.encodeSaferUrl(input)).toBe(input);
     });
