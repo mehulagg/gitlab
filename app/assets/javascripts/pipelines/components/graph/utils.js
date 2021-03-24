@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser';
 import Visibility from 'visibilityjs';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { unwrapStagesWithNeeds } from '../unwrapping_utils';

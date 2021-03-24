@@ -43,11 +43,6 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [delayedJobMixin],
-  inject: {
-    dataMethod: {
-      default: REST,
-    },
-  },
   props: {
     job: {
       type: Object,
@@ -84,13 +79,10 @@ export default {
       return this.dropdownLength === 1 ? 'viewport' : 'scrollParent';
     },
     detailsPath() {
-      return accessValue(this.dataMethod, 'detailsPath', this.status);
+      return this.status.details_path
     },
     hasDetails() {
-      return accessValue(this.dataMethod, 'hasDetails', this.status);
-    },
-    computedJobId() {
-      return this.pipelineId > -1 ? `${this.job.name}-${this.pipelineId}` : '';
+      return this.status.has_details
     },
     status() {
       return this.job && this.job.status ? this.job.status : {};
@@ -153,7 +145,6 @@ export default {
 </script>
 <template>
   <div
-    :id="computedJobId"
     class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between"
     data-qa-selector="job_item_container"
   >
