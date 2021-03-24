@@ -17,6 +17,7 @@ module Members
       validate_emails!
 
       emails.each(&method(:process_email))
+      enqueue_onboarding_progress_action
       result
     rescue BlankEmailsError, TooManyEmailsError => e
       error(e.message)
@@ -24,7 +25,7 @@ module Members
 
     private
 
-    attr_reader :source, :errors, :emails
+    attr_reader :source, :errors, :emails, :successfully_created_namespace_id
 
     def validate_emails!
       raise BlankEmailsError, s_('AddMember|Email cannot be blank') if emails.blank?
@@ -84,7 +85,11 @@ module Members
     def add_member(email)
       new_member = source.add_user(email, params[:access_level], current_user: current_user, expires_at: params[:expires_at])
 
-      errors[email] = new_member.errors.full_messages.to_sentence if new_member.invalid?
+      if new_member.invalid?
+        errors[email] = new_member.errors.full_messages.to_sentence
+      else
+        @successfully_created_namespace_id ||= new_member.namespace.id
+      end
     end
 
     def result
@@ -93,6 +98,12 @@ module Members
       else
         success
       end
+    end
+
+    def enqueue_onboarding_progress_action
+      return unless successfully_created_namespace_id
+
+      Namespaces::OnboardingUserAddedWorker.perform_async(successfully_created_namespace_id)
     end
   end
 end

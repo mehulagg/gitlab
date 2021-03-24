@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe GroupMember do
+  describe 'associations' do
+    it { is_expected.to belong_to(:group).with_foreign_key(:source_id) }
+  end
+
   context 'scopes' do
     let_it_be(:user_1) { create(:user) }
     let_it_be(:user_2) { create(:user) }

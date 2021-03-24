@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Members::InviteService, :aggregate_failures do
+RSpec.describe Members::InviteService, :aggregate_failures, :clean_gitlab_redis_shared_state, :sidekiq_inline do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { project.owner }
   let_it_be(:project_user) { create(:user) }
@@ -11,11 +11,15 @@ RSpec.describe Members::InviteService, :aggregate_failures do
 
   subject(:result) { described_class.new(user, base_params.merge(params)).execute(project) }
 
+  before_all do
+    OnboardingProgress.onboard(project.namespace)
+  end
+
   context 'when email is previously unused by current members' do
     let(:params) { { email: 'email@example.org' } }
 
     it 'successfully creates a member' do
-      expect { result }.to change(ProjectMember, :count).by(1)
+      expect_to_create_members(count: 1)
       expect(result[:status]).to eq(:success)
     end
   end
@@ -24,7 +28,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: %w[email@example.org email2@example.org] } }
 
     it 'successfully creates members' do
-      expect { result }.to change(ProjectMember, :count).by(2)
+      expect_to_create_members(count: 2)
       expect(result[:status]).to eq(:success)
     end
   end
@@ -33,14 +37,14 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: '' } }
 
     it 'returns an error' do
-      expect(result[:status]).to eq(:error)
+      expect_not_to_create_members
       expect(result[:message]).to eq('Email cannot be blank')
     end
   end
 
   context 'when email param is not included' do
     it 'returns an error' do
-      expect(result[:status]).to eq(:error)
+      expect_not_to_create_members
       expect(result[:message]).to eq('Email cannot be blank')
     end
   end
@@ -49,8 +53,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: '_bogus_' } }
 
     it 'returns an error' do
-      expect { result }.not_to change(ProjectMember, :count)
-      expect(result[:status]).to eq(:error)
+      expect_not_to_create_members
       expect(result[:message]['_bogus_']).to eq("Invite email is invalid")
     end
   end
@@ -59,7 +62,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: 'email@example.org,email@example.org' } }
 
     it 'only creates one member per unique address' do
-      expect { result }.to change(ProjectMember, :count).by(1)
+      expect_to_create_members(count: 1)
       expect(result[:status]).to eq(:success)
     end
   end
@@ -71,8 +74,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
       let(:params) { { email: emails } }
 
       it 'limits the number of emails to 100' do
-        expect { result }.not_to change(ProjectMember, :count)
-        expect(result[:status]).to eq(:error)
+        expect_not_to_create_members
         expect(result[:message]).to eq('Too many users specified (limit is 100)')
       end
     end
@@ -81,8 +83,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
       let(:params) { { email: 'email@example.org,email2@example.org', limit: 1 } }
 
       it 'limits the number of emails to the limit supplied' do
-        expect { result }.not_to change(ProjectMember, :count)
-        expect(result[:status]).to eq(:error)
+        expect_not_to_create_members
         expect(result[:message]).to eq('Too many users specified (limit is 1)')
       end
     end
@@ -91,7 +92,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
       let(:params) { { email: emails, limit: -1 } }
 
       it 'does not limit number of emails' do
-        expect { result }.to change(ProjectMember, :count).by(101)
+        expect_to_create_members(count: 101)
         expect(result[:status]).to eq(:success)
       end
     end
@@ -101,7 +102,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: project_user.email } }
 
     it 'adds an existing user to members' do
-      expect { result }.to change(ProjectMember, :count).by(1)
+      expect_to_create_members(count: 1)
       expect(result[:status]).to eq(:success)
       expect(project.users).to include project_user
     end
@@ -111,8 +112,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: project_user.email, access_level: -1 } }
 
     it 'returns an error' do
-      expect { result }.not_to change(ProjectMember, :count)
-      expect(result[:status]).to eq(:error)
+      expect_not_to_create_members
       expect(result[:message][project_user.email]).to eq("Access level is not included in the list")
     end
   end
@@ -122,7 +122,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: "#{invited_member.invite_email},#{project_user.email}" } }
 
     it 'adds new email and returns an error for the already invited email' do
-      expect { result }.to change(ProjectMember, :count).by(1)
+      expect_to_create_members(count: 1)
       expect(result[:status]).to eq(:error)
       expect(result[:message][invited_member.invite_email]).to eq("Member already invited to #{project.name}")
       expect(project.users).to include project_user
@@ -134,7 +134,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: "#{requested_member.user.email},#{project_user.email}" } }
 
     it 'adds new email and returns an error for the already invited email' do
-      expect { result }.to change(ProjectMember, :count).by(1)
+      expect_to_create_members(count: 1)
       expect(result[:status]).to eq(:error)
       expect(result[:message][requested_member.user.email])
         .to eq("Member cannot be invited because they already requested to join #{project.name}")
@@ -147,10 +147,21 @@ RSpec.describe Members::InviteService, :aggregate_failures do
     let(:params) { { email: "#{existing_member.user.email},#{project_user.email}" } }
 
     it 'adds new email and returns an error for the already invited email' do
-      expect { result }.to change(ProjectMember, :count).by(1)
+      expect_to_create_members(count: 1)
       expect(result[:status]).to eq(:error)
       expect(result[:message][existing_member.user.email]).to eq("Already a member of #{project.name}")
       expect(project.users).to include project_user
     end
+  end
+
+  def expect_to_create_members(count:)
+    expect { result }.to change(ProjectMember, :count).by(count)
+    expect(OnboardingProgress).to be_completed(project.namespace, :user_added)
+  end
+
+  def expect_not_to_create_members
+    expect { result }.not_to change(ProjectMember, :count)
+    expect(result[:status]).to eq(:error)
+    expect(OnboardingProgress).not_to be_completed(project.namespace, :user_added)
   end
 end

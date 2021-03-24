@@ -5,6 +5,8 @@ class ProjectMember < Member
 
   belongs_to :project, foreign_key: 'source_id'
 
+  delegate :namespace, to: :project
+
   # Make sure project member points only to project as it source
   default_value_for :source_type, SOURCE_TYPE
   validates :source_type, format: { with: /\AProject\z/ }
@@ -84,10 +86,6 @@ class ProjectMember < Member
     def can_update_member?(current_user, member)
       super || (member.owner? && member.new_record?)
     end
-  end
-
-  def project
-    source
   end
 
   def owner?

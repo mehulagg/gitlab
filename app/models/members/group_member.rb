@@ -7,7 +7,7 @@ class GroupMember < Member
   SOURCE_TYPE = 'Namespace'
 
   belongs_to :group, foreign_key: 'source_id'
-
+  alias_method :namespace, :group
   delegate :update_two_factor_requirement, to: :user
 
   # Make sure group member points only to group as it source
@@ -32,10 +32,6 @@ class GroupMember < Member
 
   def self.access_levels
     Gitlab::Access.sym_options_with_owner
-  end
-
-  def group
-    source
   end
 
   # Because source_type is `Namespace`...
