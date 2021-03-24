@@ -4154,13 +4154,13 @@ msgstr ""
 msgid "AsanaService|%{user} pushed to branch %{branch} of %{project_name} ( %{commit_url} ):"
 msgstr ""
 
-msgid "AsanaService|Asana - Teamwork without email"
+msgid "AsanaService|Add commit messages as comments to Asana tasks."
 msgstr ""
 
-msgid "AsanaService|Comma-separated list of branches which will be automatically inspected. Leave blank to include all branches."
+msgid "AsanaService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches."
 msgstr ""
 
-msgid "AsanaService|User Personal Access Token. User must have access to task, all comments will be attributed to this user."
+msgid "AsanaService|User Personal Access Token. User must have access to the task. All comments will be attributed to this user."
 msgstr ""
 
 msgid "Ascending"
