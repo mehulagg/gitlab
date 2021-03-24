@@ -792,7 +792,7 @@ for how to use its API to query for data.
 - Clone and start https://gitlab.com/gitlab-services/version-gitlab-com, make sure to run `docker-compose up` to start a postgresql and redis instance.
 - Point gitlab to the versions endpoint instead of the default endpoint: Open [submit_usage_ping_service.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L4) in your local and modified `PRODUCTION_URL`, and set it to the local versions url `http://localhost:3000/usage_data`
 
-### 2. Tesing local setup
+### 2. Testing local setup
 
 - Use `gitlab` Rails console, manually trigger a Usage Ping
 ```ruby
