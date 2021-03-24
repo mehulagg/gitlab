@@ -94,6 +94,8 @@ class Discussion
   def initialize(notes, context_noteable = nil)
     @notes = notes
     @context_noteable = context_noteable
+
+    notes.each { |note| note.preset_discussion_instance(self) }
   end
 
   def on_image?

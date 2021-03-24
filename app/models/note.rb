@@ -445,9 +445,13 @@ class Note < ApplicationRecord
   # and all its notes and if we don't care about the discussion's resolvability status.
   def discussion
     strong_memoize(:discussion) do
-      full_discussion = self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
+      full_discussion = @discussion_instance || self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
       full_discussion || to_discussion
     end
+  end
+
+  def preset_discussion_instance(discussion)
+    @discussion_instance = discussion
   end
 
   def start_of_discussion?
