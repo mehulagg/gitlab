@@ -19,6 +19,9 @@ module Gitlab
         private
 
         def cost_factor
+          return 0 unless @build.runner
+          return 0 unless @build.runner.instance_type?
+
           @build.runner.minutes_cost_factor(project_visibility_level)
         end
 

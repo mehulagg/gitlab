@@ -2507,10 +2507,12 @@ class Project < ApplicationRecord
   end
 
   def root_namespace
-    if namespace.has_parent?
-      namespace.root_ancestor
-    else
-      namespace
+    strong_memoize(:root_namespace) do
+      if namespace.has_parent?
+        namespace.root_ancestor
+      else
+        namespace
+      end
     end
   end
 

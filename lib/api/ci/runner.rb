@@ -180,6 +180,11 @@ module API
 
           Gitlab::Metrics.add_event(:update_build)
 
+          # TODO: add specs
+          if job.runner&.instance_type?
+            ::Ci::Minutes::EnforceQuotaService.new(project, nil).conditionally_execute_async
+          end
+
           service = ::Ci::UpdateBuildStateService
             .new(job, declared_params(include_missing: false))
 

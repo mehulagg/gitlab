@@ -11,6 +11,7 @@ module Ci
     include Importable
     include Ci::HasRef
     include IgnorableColumns
+    include EachBatch
 
     BuildArchivedError = Class.new(StandardError)
 
@@ -194,6 +195,8 @@ module Ci
     scope :with_coverage, -> { where.not(coverage: nil) }
 
     scope :for_project, -> (project_id) { where(project_id: project_id) }
+
+    scope :from_shared_runners, -> { joins(:runner).merge(Ci::Runner.instance_type) }
 
     acts_as_taggable
 

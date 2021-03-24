@@ -64,6 +64,10 @@ module Ci
         namespace.root? && namespace.any_project_with_shared_runners_enabled?
       end
 
+      def total_minutes_remaining
+        [total_minutes.to_i - total_minutes_used, 0].max
+      end
+
       private
 
       def minutes_limit
@@ -80,10 +84,6 @@ module Ci
         return :disabled unless enabled?
 
         monthly_minutes_used_up? ? :over_quota : :under_quota
-      end
-
-      def total_minutes_remaining
-        [total_minutes.to_i - total_minutes_used, 0].max
       end
 
       def monthly_minutes_used_up?

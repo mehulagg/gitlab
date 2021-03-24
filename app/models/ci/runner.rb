@@ -331,6 +331,12 @@ module Ci
       end
     end
 
+    def matches_build?(build)
+      return false if self.ref_protected? && !build.protected?
+
+      accepting_tags?(build)
+    end
+
     def uncached_contacted_at
       read_attribute(:contacted_at)
     end
@@ -391,12 +397,6 @@ module Ci
       unless groups.one?
         errors.add(:runner, 'needs to be assigned to exactly one group')
       end
-    end
-
-    def matches_build?(build)
-      return false if self.ref_protected? && !build.protected?
-
-      accepting_tags?(build)
     end
 
     def accepting_tags?(build)
