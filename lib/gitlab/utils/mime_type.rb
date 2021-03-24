@@ -35,6 +35,12 @@ module Gitlab
         rescue Errno::ENOENT
           raise Error, "file command-line tool is not installed"
         end
+
+        def from_string(string)
+          return unless string.is_a?(String)
+
+          from_io(StringIO.new(string))
+        end
       end
     end
   end
