@@ -362,7 +362,7 @@ module QA
         end
 
         def cherry_pick!
-          click_element(:cherry_pick_button)
+          click_element(:cherry_pick_button, Page::Component::CommitModal)
           click_element(:submit_commit_button)
         end
       end
