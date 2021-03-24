@@ -10,9 +10,11 @@ module Gitlab
         def from_io(io)
           require "open3"
 
-          return nil if io.eof? # file command returns "application/x-empty" for empty files
+          raise Error, "input isn't an IO object" unless io.is_a?(IO) || io.is_a?(StringIO)
 
-          Open3.popen3(*%W[file --mime-type --brief -]) do |stdin, stdout, stderr, thread|
+          return if io.eof? # file command returns "application/x-empty" for empty files
+
+          Open3.popen3(*%w[file --mime-type --brief -]) do |stdin, stdout, stderr, thread|
             begin
               IO.copy_stream(io, stdin.binmode)
             rescue Errno::EPIPE
@@ -37,7 +39,7 @@ module Gitlab
         end
 
         def from_string(string)
-          return unless string.is_a?(String)
+          raise Error, "input isn't a string" unless string.is_a?(String)
 
           from_io(StringIO.new(string))
         end

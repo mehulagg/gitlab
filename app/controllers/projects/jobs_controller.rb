@@ -226,6 +226,8 @@ class Projects::JobsController < Projects::ApplicationController
   end
 
   def raw_trace_content_disposition(raw_data)
+    return 'inline' if raw_data.nil?
+
     mime_type = Gitlab::Utils::MimeType.from_string(raw_data)
 
     # if mime_type is nil can also represent 'text/plain'
