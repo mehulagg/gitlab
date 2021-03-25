@@ -13,13 +13,12 @@ module Mutations
       argument :operation_mode,
                Types::MutationOperationModeEnum,
                required: false,
+               default_value: Types::MutationOperationModeEnum.default_mode,
                description: 'The operation to perform. Defaults to REPLACE.'
     end
 
-    def resolve(project_path:, iid:, assignee_usernames:, operation_mode: Types::MutationOperationModeEnum.enum[:replace])
+    def resolve(project_path:, iid:, assignee_usernames:, operation_mode:)
       resource = authorized_find!(project_path: project_path, iid: iid)
-
-      Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/36098') if resource.is_a?(MergeRequest)
 
       update_service_class.new(
         resource.project,
@@ -35,18 +34,17 @@ module Mutations
 
     private
 
-    def assignee_ids(resource, usernames, operation_mode)
-      assignee_ids = []
-      assignee_ids += resource.assignees.map(&:id) if Types::MutationOperationModeEnum.enum.values_at(:remove, :append).include?(operation_mode)
-      user_ids = UsersFinder.new(current_user, username: usernames).execute.map(&:id)
+    def assignee_ids(resource, usernames, mode)
+      old = current_assignee_ids(resource, mode)
+      new = UsersFinder.new(current_user, username: usernames).execute.map(&:id)
 
-      if operation_mode == Types::MutationOperationModeEnum.enum[:remove]
-        assignee_ids -= user_ids
-      else
-        assignee_ids |= user_ids
-      end
+      Types::MutationOperationModeEnum.transform_list(mode, old, new)
+    end
 
-      assignee_ids
+    def current_assignee_ids(resource, mode)
+      return unless ::Types::MutationOperationModeEnum.transform_modes.include?(mode)
+
+      resource.assignees.map(&:id)
     end
   end
 end

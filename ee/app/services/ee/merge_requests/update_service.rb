@@ -9,7 +9,7 @@ module EE
 
       override :execute
       def execute(merge_request)
-        unless update_task_event?
+        unless update_task_event? || cannot_update_approvers?
           should_remove_old_approvers = params.delete(:remove_old_approvers)
           old_approvers = merge_request.overall_approvers(exclude_code_owners: true)
         end
@@ -18,9 +18,7 @@ module EE
 
         merge_request = super(merge_request)
 
-        if should_remove_old_approvers && merge_request.valid?
-          cleanup_approvers(merge_request, reload: true)
-        end
+        cleanup_approvers(merge_request, reload: true) if should_remove_old_approvers && merge_request.valid?
 
         merge_request.reset_approval_cache!
 
@@ -41,6 +39,10 @@ module EE
       end
 
       private
+
+      def cannot_update_approvers?
+        [:assignee_ids].to_set.superset?(params.keys.to_set)
+      end
 
       override :after_update
       def after_update(merge_request)

@@ -96,7 +96,8 @@ RSpec.describe 'Setting assignees of a merge request' do
   end
 
   context 'when passing append as true' do
-    let(:input) { { assignee_usernames: [assignee2.username], operation_mode: Types::MutationOperationModeEnum.enum[:append] } }
+    let(:mode) { Types::MutationOperationModeEnum.enum[:append] }
+    let(:input) { { assignee_usernames: [assignee2.username], operation_mode: mode } }
 
     before do
       # In CE, APPEND is a NOOP as you can't have multiple assignees
@@ -116,7 +117,8 @@ RSpec.describe 'Setting assignees of a merge request' do
   end
 
   context 'when passing remove as true' do
-    let(:input) { { assignee_usernames: [assignee.username], operation_mode: Types::MutationOperationModeEnum.enum[:remove] } }
+    let(:mode) { Types::MutationOperationModeEnum.enum[:remove] }
+    let(:input) { { assignee_usernames: [assignee.username], operation_mode: mode } }
     let(:expected_result) { [] }
 
     before do
