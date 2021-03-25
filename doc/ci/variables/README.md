@@ -7,14 +7,19 @@ type: reference
 
 # GitLab CI/CD variables **(FREE)**
 
-CI/CD variables are part of the environment in which [pipelines](../pipelines/index.md)
-and jobs run. For example, you could:
+CI/CD variables are a type of environment variable that you can use to control the
+behavior of your jobs and [pipelines](../pipelines/index.md). Use variables to
+store values you want to reuse, and avoid hard coding values in your `.gitlab-ci.yml`
+file.
 
-- Use the value of a `TEMP` variable to know the correct location to store temporary files.
-- Use a `DATABASE_URL` variable for the URL to a database that can be reused in different scripts.
+For example, you could:
 
-Variables can be used to customize your jobs in [GitLab CI/CD](../README.md).
-When you use variables, you don't have to hard-code values.
+- Use a `TEMP` variable to store the correct location to store temporary files.
+- Use a `DATABASE_URL` variable to store the URL to a database, and reuse the variable
+  in multiple jobs.
+
+You can use CI/CD variable values for more dynamic `.gitlab-ci.yml` file configuration
+and scripts.
 
 > For more information about advanced use of GitLab CI/CD:
 >
@@ -25,25 +30,20 @@ When you use variables, you don't have to hard-code values.
 
 ## Predefined CI/CD variables
 
-GitLab CI/CD has a [default set of predefined CI/CD variables](predefined_variables.md)
-that you can use without any additional specification.
-You can call issue numbers, user names, branch names,
-pipeline and commit IDs, and much more.
+GitLab CI/CD has a [default set of predefined CI/CD variables](predefined_variables.md).
+Every time a pipeline starts, GitLab generates predefined variables for branch names,
+pipeline and commit IDs, and so on.
 
-Predefined variables are provided by GitLab for the local environment of the runner.
-
-GitLab reads the `.gitlab-ci.yml` file and sends the information
-to the runner, where the variables are exposed. The runner then runs the script commands.
+When a GitLab runner picks up a job, it also picks up the variables and makes them
+available to the environment the script runs in.
 
 ### Use predefined CI/CD variables
 
-You can choose one of the existing predefined CI/CD variables
-to be output by the runner.
+You can use predefined CI/CD variables in your `.gitlab-ci.yml`immediately and do
+not need to declare them first.
 
-This example shows how to output a job's stage by using the predefined variable `CI_JOB_STAGE`.
-
-In your `.gitlab-ci.yml` file, call the variable from your script. Ensure
-you use the correct [syntax](#syntax-of-cicd-variables-in-job-scripts).
+This example shows how to output a job's stage by using the `CI_JOB_STAGE`
+predefined variable:
 
 ```yaml
 test_variable:
@@ -52,42 +52,73 @@ test_variable:
     - echo $CI_JOB_STAGE
 ```
 
-In this case, the runner outputs the `stage` for the
-job `test_variable`, which is `test`:
+The script outputs the `stage` for the `test_variable`, which is `test`:
 
 ![Output `$CI_JOB_STAGE`](img/ci_job_stage_output_example.png)
 
-## Custom CI/CD variables
+## Use custom CI/CD variables
 
-When you need a specific custom variable, you can
-[set it up in the UI](#create-a-custom-variable-in-the-ui), in [the API](../../api/project_level_variables.md),
-or directly [in the `.gitlab-ci.yml` file](#create-a-custom-variable-in-gitlab-ciyml).
+When you need a specific custom variable, you can [create it in the UI](#create-a-custom-variable-in-the-ui),
+in [the API](../../api/project_level_variables.md), or directly
+[in the `.gitlab-ci.yml` file](#create-a-custom-variable-in-gitlab-ciyml).
 
-The variables are used by the runner any time the pipeline runs.
-You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs),
+You can [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs),
 or have them [prefilled in manual pipelines](../pipelines/index.md#prefill-variables-in-manual-pipelines).
 
-There are two types of variables: **Variable** and **File**. You cannot set types in
-the `.gitlab-ci.yml` file, but you can set them in the UI and API.
+There are two types of variables: **Variable** and **File**. Variables configured
+in the `.gitlab-ci.yml` file are always **Variable** type. Variables stored in project,
+group or instance settings can be set to either type.
 
 ### Create a custom variable in `.gitlab-ci.yml`
 
-To create a custom `env_var` variable in the [`.gitlab-ci.yml`](../yaml/README.md#variables) file,
-define the variable/value pair under `variables`:
+To create a custom variable in the [`.gitlab-ci.yml`](../yaml/README.md#variables) file,
+define the variable and value with `variables` keyword.
+
+You can use the `variables` keyword at the top level or in a job. If the variable is
+at the top level, all jobs can use it. If it's defined in a job, only that job can use it.
 
 ```yaml
 variables:
-  TEST: "HELLO WORLD"
+  TEST_VAR: "All jobs can use this variable's value"
+
+job1:
+  TEST_VAR_JOB: "Only job1 can use this variable's value"
+  script:
+    - echo $TEST_VAR and $TEST_VAR_JOB
 ```
 
-You can then call its value in your script:
+Variables saved in the `.gitlab-ci.yml` file should store only non-sensitive project
+configuration, like a `RAILS_ENV` or `DATABASE_URL` variable. These variables are
+visible in the repository. Store sensitive variables containing secrets, keys, and so on
+in project settings.
+
+The YAML-defined variables are also made available in [service containers](../docker/using_docker_images.md).
+
+If you don't want globally defined variables to be available in a job, set `variables`
+to `{}`:
 
 ```yaml
-script:
-  - echo "$TEST"
+job1:
+  variables: {}
+  script:
+    - echo This job does not need any variables
 ```
 
-For more details, see [`.gitlab-ci.yml` defined variables](#gitlab-ciyml-defined-variables).
+You can use variables to help define other variables. To use a variable name inside
+another variable (without using the value of the variable), use `$$` with the variable
+name:
+
+```yaml
+variables:
+  LS_CMD: 'ls $FLAGS $$TMP_DIR'
+  FLAGS: '-al'
+script:
+  - 'eval $LS_CMD'  # will execute 'ls -al $TMP_DIR'
+```
+
+Use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
+keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
+when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
 
 ### Create a custom variable in the UI
 
@@ -365,49 +396,7 @@ export GITLAB_USER_EMAIL="user@example.com"
 export GITLAB_USER_ID="42"
 ```
 
-## `.gitlab-ci.yml` defined variables
-
-You can add CI/CD variables to `.gitlab-ci.yml`. These variables are saved in the repository,
-and they are meant to store non-sensitive project configuration, like `RAILS_ENV` or
-`DATABASE_URL`.
-
-For example, if you set the variable below globally (not inside a job), it is
-used in all executed commands and scripts:
-
-```yaml
-variables:
-  DATABASE_URL: "postgres://postgres@postgres/my_database"
-```
-
-The YAML-defined variables are also set to all created
-[service containers](../docker/using_docker_images.md), so that you can fine
-tune them.
-
-Variables can be defined at a global level, but also at a job level. To turn off
-global defined variables in your job, define an empty hash:
-
-```yaml
-job_name:
-  variables: {}
-```
-
-You are able to use other variables inside your variable definition (or escape them with `$$`):
-
-```yaml
-variables:
-  LS_CMD: 'ls $FLAGS $$TMP_DIR'
-  FLAGS: '-al'
-script:
-  - 'eval $LS_CMD'  # will execute 'ls -al $TMP_DIR'
-```
-
-Use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
-keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
-when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
-
 ## Group-level CI/CD variables
-
-> Introduced in GitLab 9.4.
 
 You can define per-project or per-group variables that are set in the pipeline environment.
 Group-level variables are stored out of the repository (not in `.gitlab-ci.yml`).
@@ -1029,48 +1018,6 @@ if [[ -d "/builds/gitlab-examples/ci-debug-trace/.git" ]]; then
 ++ CI_COMMIT_REF_NAME=master
 ++ export CI_COMMIT_REF_SLUG=master
 ++ CI_COMMIT_REF_SLUG=master
-++ export CI_COMMIT_MESSAGE=s/CI/Runner
-++ CI_COMMIT_MESSAGE=s/CI/Runner
-++ export CI_COMMIT_TITLE=s/CI/Runner
-++ CI_COMMIT_TITLE=s/CI/Runner
-++ export CI_COMMIT_DESCRIPTION=
-++ CI_COMMIT_DESCRIPTION=
-++ export CI_COMMIT_REF_PROTECTED=true
-++ CI_COMMIT_REF_PROTECTED=true
-++ export CI_BUILD_REF=dd648b2e48ce6518303b0bb580b2ee32fadaf045
-++ CI_BUILD_REF=dd648b2e48ce6518303b0bb580b2ee32fadaf045
-++ export CI_BUILD_BEFORE_SHA=0000000000000000000000000000000000000000
-++ CI_BUILD_BEFORE_SHA=0000000000000000000000000000000000000000
-++ export CI_BUILD_REF_NAME=master
-++ CI_BUILD_REF_NAME=master
-++ export CI_BUILD_REF_SLUG=master
-++ CI_BUILD_REF_SLUG=master
-++ export CI_RUNNER_ID=1337
-++ CI_RUNNER_ID=1337
-++ export CI_RUNNER_DESCRIPTION=shared-runners-manager-4.gitlab.com
-++ CI_RUNNER_DESCRIPTION=shared-runners-manager-4.gitlab.com
-++ export 'CI_RUNNER_TAGS=gce, east-c, shared, docker, linux, ruby, mysql, postgres, mongo, git-annex'
-++ CI_RUNNER_TAGS='gce, east-c, shared, docker, linux, ruby, mysql, postgres, mongo, git-annex'
-++ export CI_DEBUG_TRACE=true
-++ CI_DEBUG_TRACE=true
-++ export GITLAB_USER_ID=42
-++ GITLAB_USER_ID=42
-++ export GITLAB_USER_EMAIL=user@example.com
-++ GITLAB_USER_EMAIL=user@example.com
-++ export GITLAB_USER_LOGIN=root
-++ GITLAB_USER_LOGIN=root
-++ export 'GITLAB_USER_NAME=User'
-++ GITLAB_USER_NAME='User'
-++ export CI_DISPOSABLE_ENVIRONMENT=true
-++ CI_DISPOSABLE_ENVIRONMENT=true
-++ export CI_RUNNER_VERSION=12.5.0
-++ CI_RUNNER_VERSION=12.5.0
-++ export CI_RUNNER_REVISION=577f813d
-++ CI_RUNNER_REVISION=577f813d
-++ export CI_RUNNER_EXECUTABLE_ARCH=linux/amd64
-++ CI_RUNNER_EXECUTABLE_ARCH=linux/amd64
-++ export VERY_SECURE_VARIABLE=imaverysecurevariable
-++ VERY_SECURE_VARIABLE=imaverysecurevariable
 
 ...
 ```
