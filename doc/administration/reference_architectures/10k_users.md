@@ -2400,9 +2400,10 @@ Each Webservice pod will consume roughly 4 vCPUs and 4.5 GB of memory using
 the [recommended topology](#cluster-topology) because four worker processes
 are created by default and each pod has other small processes running.
 
-The [provided recommendations](#cluster-topology) allow the deployment of up to 20
-Webservice pods. Expand available resources using the ratio of 1 vCPU to 1.125 GB of memory
-_per each worker process_ for each additional Webservice pod.
+For 10k users we recommend a total Puma worker count of around 80.
+With the [provided recommendations](#cluster-topology) this allow the deployment of up to 20
+Webservice pods with 4 works per pod. Expand available resources using the ratio of 1 vCPU
+to 1.125 GB of memory _per each worker process_ for each additional Webservice pod.
 
 For further information on resource usage, see the [Webservice resources](https://docs.gitlab.com/charts/charts/gitlab/webservice/#resources).
 
