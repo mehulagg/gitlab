@@ -68,7 +68,10 @@ module Types
     end
 
     def request_headers
-      nil
+      return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
+      return unless object.secret_variables.where(key: ::Dast::SiteProfileSecretVariable::REQUEST_HEADERS).exists?
+
+      '[Redacted]'
     end
 
     def normalized_target_url
