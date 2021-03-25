@@ -11,6 +11,8 @@ module Gitlab
           def perform!
             raise ArgumentError, 'missing YAML processor result' unless @command.yaml_processor_result
 
+            raise RuntimeError, 'the seeding needs to be executed outside of transaction' if ActiveRecord::Base.connection.transaction_open?
+
             # Allocate next IID. This operation must be outside of transactions of pipeline creations.
             pipeline.ensure_project_iid!
             pipeline.ensure_ci_ref!
