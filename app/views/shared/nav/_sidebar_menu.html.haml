@@ -4,6 +4,9 @@
       = sprite_icon(sidebar_menu.sprite_icon)
     %span.nav-item-name{ **sidebar_menu.menu_name_html_options }
       = sidebar_menu.menu_name
+    - if sidebar_menu.has_pill?
+      %span.badge.badge-pill.count{ **sidebar_menu.pill_html_options }
+        = number_with_delimiter(sidebar_menu.pill_count)
 
   - if sidebar_menu.has_renderable_items?
     %ul.sidebar-sub-level-items

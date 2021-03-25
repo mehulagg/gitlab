@@ -9,11 +9,9 @@ module Projects
 
           add_item(Items::IssueListsMenuItem.new(context))
           add_item(Items::BoardsMenuItem.new(context))
-          # add_item(Items::BranchesMenuItem.new(context))
-          # add_item(Items::TagsMenuItem.new(context))
-          # add_item(Items::ContributorsMenuItem.new(context))
-          # add_item(Items::GraphsMenuItem.new(context))
-          # add_item(Items::CompareMenuItem.new(context))
+          add_item(Items::LabelsMenuItem.new(context))
+          add_item(Items::ServiceDeskMenuItem.new(context))
+          add_item(Items::MilestonesMenuItem.new(context))
         end
 
         override :link_to_href
@@ -36,7 +34,7 @@ module Projects
         override :menu_name_html_options
         def menu_name_html_options
           {
-            id: 'js-onboarding-repo-link'
+            id: 'js-onboarding-issues-link'
           }
         end
 
@@ -49,44 +47,26 @@ module Projects
         def render?
           can?(context.current_user, :read_issue, context.project)
         end
+
+        override :has_pill?
+        def has_pill?
+          context.project.issues_enabled?
+        end
+
+        override :pill_count
+        def pill_count
+          context.project.open_issues_count(context.current_user)
+        end
+
+        override :pill_html_options
+        def pill_html_options
+          {
+            class: 'issue_counter'
+          }
+        end
       end
     end
   end
 end
 
-# Projects::Sidebar::Menus::IssuesMenu.prepend_if_ee('EE::Projects::Sidebar::Menus::IssuesMenu')
-
-# - if project_nav_tab? :issues
-#   = nav_link(controller: @project.issues_enabled? ? ['projects/issues', :labels, :milestones, :boards, :iterations] : 'projects/issues') do
-#     = link_to project_issues_path(@project), class: 'shortcuts-issues qa-issues-item' do
-#       .nav-icon-container
-#         = sprite_icon('issues')
-#       %span.nav-item-name#js-onboarding-issues-link
-#         = _('Issues')
-#       - if @project.issues_enabled? <--------- *********
-#         %span.badge.badge-pill.count.issue_counter
-#           = number_with_delimiter(@project.open_issues_count(current_user))
-
-#     %ul.sidebar-sub-level-items
-#       = nav_link(controller: 'projects/issues', action: :index, html_options: { class: "fly-out-top-item" } ) do
-#         = link_to project_issues_path(@project) do
-#           %strong.fly-out-top-item-name
-#             = _('Issues')
-#           - if @project.issues_enabled?
-#             %span.badge.badge-pill.count.issue_counter.fly-out-badge
-#               = number_with_delimiter(@project.open_issues_count(current_user))
-#       %li.divider.fly-out-top-item
-
-#       = nav_link(controller: :labels) do
-#         = link_to project_labels_path(@project), title: _('Labels'), class: 'qa-labels-link' do
-#           %span
-#             = _('Labels')
-
-#       = render 'projects/sidebar/issues_service_desk'
-
-#       = nav_link(controller: :milestones) do
-#         = link_to project_milestones_path(@project), title: _('Milestones'), class: 'qa-milestones-link' do
-#           %span
-#             = _('Milestones')
-
-#       = render_if_exists 'layouts/nav/sidebar/project_iterations_link'
+Projects::Sidebar::Menus::IssuesMenu.prepend_if_ee('EE::Projects::Sidebar::Menus::IssuesMenu')

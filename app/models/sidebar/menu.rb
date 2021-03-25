@@ -71,5 +71,17 @@ module Sidebar
     def sprite_icon
       raise NotImplementedError
     end
+
+    def has_pill?
+      false
+    end
+
+    def pill_count
+      raise NotImplementedError
+    end
+
+    def pill_html_options
+      {}
+    end
   end
 end
