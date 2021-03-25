@@ -105,7 +105,7 @@ module Types
             description: 'Indicates if the pipeline is active.'
 
       field :uses_needs, GraphQL::BOOLEAN_TYPE, null: true,
-            description: 'Indicates if the pipeline has jobs that use needs.'
+            description: 'Indicates if the pipeline has jobs with `needs` dependencies.'
 
       def uses_needs
         object.builds.any? { |build| build.scheduling_type == 'dag' }

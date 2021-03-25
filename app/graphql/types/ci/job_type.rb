@@ -23,7 +23,7 @@ module Types
       field :duration, GraphQL::INT_TYPE, null: true,
             description: 'Duration of the job in seconds.'
       field :scheduling_type, GraphQL::STRING_TYPE, null: true,
-            description: 'Type of scheduling dependent on if a job has needs or not. If it has needs, the value will be `dag`, otherwise it will be `stage`.'
+            description: 'Type of pipeline scheduling. Value is `dag` if the pipeline uses the `needs` keyword, and `stage` otherwise.'
 
       def pipeline
         Gitlab::Graphql::Loaders::BatchModelLoader.new(::Ci::Pipeline, object.pipeline_id).find
