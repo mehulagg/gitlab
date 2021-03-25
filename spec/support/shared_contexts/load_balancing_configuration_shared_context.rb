@@ -11,7 +11,11 @@ RSpec.shared_context 'clear DB Load Balancing configuration' do
     ::Gitlab::Database::LoadBalancing::Session.clear_session
   end
 
-  after do
+  around do |example|
+    clear_load_balancing_configuration
+
+    example.run
+
     clear_load_balancing_configuration
   end
 end
