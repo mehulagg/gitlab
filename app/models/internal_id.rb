@@ -35,7 +35,7 @@ class InternalId < ApplicationRecord
     def track_greatest(subject, scope, usage, new_value, init)
       # update existing record
       next_iid = update_record!(subject, scope, usage,
-        "GREATEST(last_value, #{connection.quote(new_value)})")
+        "last_value = GREATEST(last_value, #{connection.quote(new_value)})")
       return next_iid if next_iid
 
       # create a new record
@@ -50,7 +50,7 @@ class InternalId < ApplicationRecord
       # if we cannot increment, it means that object does not exist
       # create and retry
       next_iid = update_record!(subject, scope, usage,
-        "last_value+1")
+        "last_value = last_value + 1")
       return next_iid if next_iid
 
       # create a new record
@@ -65,7 +65,7 @@ class InternalId < ApplicationRecord
       return false unless value
 
       iid = update_record!(subject, scope.merge(last_value: value), usage,
-        "last_value - 1")
+        "last_value = last_value - 1")
       iid == value - 1
     end
 
@@ -83,18 +83,26 @@ class InternalId < ApplicationRecord
     private
 
     def update_record!(subject, scope, usage, new_value_sql)
-      # TODO: figure out how to do it better, we miss the `returning last_value`
-      # especially if we can use `.filter_by()`
-      next_value_sql = "UPDATE internal_ids "
-      next_value_sql += "SET last_value = #{new_value_sql} "
-      next_value_sql += "WHERE usage=#{connection.quote(self.usages[usage.to_s])} "
-      scope.each do |key, value|
-        next_value_sql += "AND #{key}=#{connection.quote(value)} "
-      end
-      next_value_sql += "RETURNING last_value"
+      # taken from: activerecord/lib/active_record/relation.rb:440
+      stmt = Arel::UpdateManager.new
+      stmt.set Arel.sql(sanitize_sql_for_assignment(new_value_sql))
+      stmt.key = arel_attribute(primary_key)
+      stmt.table(arel_table)
+      stmt.where(filter_by(scope, usage).arel.constraints)
 
-      result = connection.execute(next_value_sql)
-      result.values[0].first if result.values.any?
+      # taken from: activerecord/lib/active_record/connection_adapters/abstract_adapter.rb:739
+      collector = Arel::Collectors::Composite.new(
+        Arel::Collectors::SQLString.new,
+        Arel::Collectors::Bind.new,
+      )
+
+      # taken from: activerecord/lib/active_record/connection_adapters/abstract/database_statements.rb:25
+      next_value_sql, binds = connection.visitor.compile(stmt.ast, collector)
+
+      # execute and get a first row, and a first value of `RETURNING`
+      result = connection.exec_query("#{next_value_sql} RETURNING last_value", "Update InternalID", binds)
+
+      result.rows&.first&.first
     end
 
     def create_record!(subject, scope, usage, init)

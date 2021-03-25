@@ -7,7 +7,7 @@ RSpec.describe InternalId do
   let(:usage) { :issues }
   let(:issue) { build(:issue, project: project) }
   let(:id_subject) { issue }
-  let(:scope) { { project_id: project.id } }
+  let(:scope) { { project: project } }
   let(:init) { ->(issue, scope) { issue&.project&.issues&.size || Issue.where(**scope).count } }
 
   it_behaves_like 'having unique enum values'
