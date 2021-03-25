@@ -6,6 +6,10 @@ module EE
       extend ::Gitlab::Utils::Override
       include ::Gitlab::Utils::StrongMemoize
 
+      def self.prepended(base)
+        base.prepend_before_action :use_replica_if_possible, only: [:info_refs]
+      end
+
       override :render_ok
       def render_ok
         set_workhorse_internal_api_content_type
@@ -29,6 +33,10 @@ module EE
       end
 
       private
+
+      def use_replica_if_possible
+        ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible!
+      end
 
       def user
         super || geo_push_user&.user

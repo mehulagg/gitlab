@@ -139,6 +139,40 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
     end
   end
 
+  describe '#use_replica_if_possible!' do
+    let(:instance) { described_class.new }
+
+    it 'sets use_replica to true' do
+      instance.use_replica_if_possible!
+
+      expect(instance.use_replica?).to eq(true)
+    end
+
+    context 'when primary was used before' do
+      before do
+        instance.use_primary!
+      end
+
+      it 'uses primary' do
+        instance.use_replica_if_possible!
+
+        expect(instance.use_replica?).to eq(false)
+      end
+    end
+
+    context 'when a write was performed before' do
+      before do
+        instance.write!
+      end
+
+      it 'uses primary' do
+        instance.use_replica_if_possible!
+
+        expect(instance.use_replica?).to eq(false)
+      end
+    end
+  end
+
   describe '#use_replica_if_possible' do
     let(:instance) { described_class.new }
 

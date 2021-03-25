@@ -1,0 +1,5 @@
+---
+title: Use replica DB servers for GitHttpController info_refs controller action
+merge_request: 57469
+author:
+type: performance
