@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module LabelsHelper
+  include ::Gitlab::Utils::StrongMemoize
+
   extend self
 
   def show_label_issuables_link?(label, issuables_type, current_user: nil)
@@ -164,10 +166,12 @@ module LabelsHelper
   end
 
   def label_subscription_status(label, project)
-    return 'group-level' if label.subscribed?(current_user)
-    return 'project-level' if label.subscribed?(current_user, project)
+    strong_memoize(:label_subscription_status) do
+      next 'group-level' if label.subscribed?(current_user)
+      next 'project-level' if label.subscribed?(current_user, project)
 
-    'unsubscribed'
+      'unsubscribed'
+    end
   end
 
   def toggle_subscription_label_path(label, project)
