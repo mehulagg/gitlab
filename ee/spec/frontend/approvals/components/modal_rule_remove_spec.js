@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import ModalRuleRemove from 'ee/approvals/components/modal_rule_remove.vue';
 import { stubComponent } from 'helpers/stub_component';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
+import { createExternalRule } from '../mocks';
 
 const MODAL_MODULE = 'deleteModal';
 const TEST_MODAL_ID = 'test-delete-modal-id';
@@ -14,6 +15,7 @@ const TEST_RULE = {
     .fill(1)
     .map((x, id) => ({ id })),
 };
+const EXTERNAL_RULE = createExternalRule();
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -61,6 +63,7 @@ describe('Approvals ModalRuleRemove', () => {
     };
     actions = {
       deleteRule: jest.fn(),
+      deleteExternalApprovalRule: jest.fn(),
     };
   });
 
@@ -99,14 +102,20 @@ describe('Approvals ModalRuleRemove', () => {
     expect(findModal().element).toMatchSnapshot();
   });
 
-  it('deletes rule when modal is submitted', () => {
+  it.each`
+    typeType      | action                          | rule
+    ${'regular'}  | ${'deleteRule'}                 | ${TEST_RULE}
+    ${'external'} | ${'deleteExternalApprovalRule'} | ${EXTERNAL_RULE}
+  `('calls $action when the modal is submitted for a $regular rule', ({ action, rule }) => {
+    deleteModalState.data = rule;
+
     factory();
 
-    expect(actions.deleteRule).not.toHaveBeenCalled();
+    expect(actions[action]).not.toHaveBeenCalled();
 
     const modal = findModal();
     modal.vm.$emit('ok', new Event('submit'));
 
-    expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);
+    expect(actions[action]).toHaveBeenCalledWith(expect.anything(), rule.id);
   });
 });

@@ -1,8 +1,15 @@
 <script>
 import { groupBy, isNumber } from 'lodash';
 import { mapState, mapActions } from 'vuex';
-import { sprintf, __ } from '~/locale';
-import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
+import { isSafeURL } from '~/lib/utils/url_utility';
+import { sprintf, __, s__ } from '~/locale';
+import {
+  TYPE_USER,
+  TYPE_GROUP,
+  TYPE_HIDDEN_GROUPS,
+  RULE_TYPE_EXTERNAL_APPROVAL,
+} from '../constants';
+import ApproverType from './approver_type.vue';
 import ApproversList from './approvers_list.vue';
 import ApproversSelect from './approvers_select.vue';
 import BranchesSelect from './branches_select.vue';
@@ -11,6 +18,10 @@ const DEFAULT_NAME = 'Default';
 const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
 const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
 const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
+const APPROVER_TYPE_OPTIONS = [
+  { type: 'user_or_group', text: s__('ApprovalRule|Users or groups') },
+  { type: RULE_TYPE_EXTERNAL_APPROVAL, text: s__('ApprovalRule|Approval service API') },
+];
 
 function mapServerResponseToValidationErrors(messages) {
   return Object.entries(messages).flatMap(([key, msgs]) => msgs.map((msg) => `${key} ${msg}`));
@@ -21,6 +32,7 @@ export default {
     ApproversList,
     ApproversSelect,
     BranchesSelect,
+    ApproverType,
   },
   props: {
     initRule: {
@@ -44,6 +56,7 @@ export default {
       name: this.defaultRuleName,
       approvalsRequired: 1,
       minApprovalsRequired: 0,
+      externalUrl: null,
       approvers: [],
       approversToAdd: [],
       branches: [],
@@ -52,6 +65,7 @@ export default {
       isFallback: false,
       containsHiddenGroups: false,
       serverValidationErrors: [],
+      ruleType: null,
       ...this.getInitialData(),
     };
 
@@ -59,6 +73,12 @@ export default {
   },
   computed: {
     ...mapState(['settings']),
+    showApprovalGate() {
+      return !this.isMrEdit && !READONLY_NAMES.includes(this.name);
+    },
+    externalApprover() {
+      return this.showApprovalGate && this.ruleType === RULE_TYPE_EXTERNAL_APPROVAL;
+    },
     rule() {
       // If we are creating a new rule with a suggested approval name
       return this.defaultRuleName ? null : this.initRule;
@@ -85,15 +105,31 @@ export default {
 
       const invalidObject = {
         name: this.invalidName,
-        approvalsRequired: this.invalidApprovalsRequired,
-        approvers: this.invalidApprovers,
       };
 
       if (!this.isMrEdit) {
         invalidObject.branches = this.invalidBranches;
       }
 
+      if (this.externalApprover) {
+        invalidObject.externalUrl = this.invalidApprovalGateUrl;
+      } else {
+        invalidObject.approvers = this.invalidApprovers;
+        invalidObject.approvalsRequired = this.invalidApprovalsRequired;
+      }
+
       return invalidObject;
+    },
+    invalidApprovalGateUrl() {
+      console.log(
+        this.serverValidationErrors,
+        this.serverValidationErrors.includes('External url has already been taken'),
+      );
+      if (this.serverValidationErrors.includes('External url has already been taken')) {
+        return __('External url has already been taken');
+      } else if (!this.externalUrl || !isSafeURL(this.externalUrl)) {
+        return __('Please provide a valid URL');
+      }
     },
     invalidName() {
       let error = '';
@@ -175,8 +211,26 @@ export default {
         protectedBranchIds: this.branches,
       };
     },
+    isEditing() {
+      return Boolean(this.initRule);
+    },
+    externalRuleSubmissionData() {
+      const { id, name, protectedBranchIds } = this.submissionData;
+      return {
+        id,
+        name,
+        protectedBranchIds,
+        externalUrl: this.externalUrl,
+      };
+    },
     showProtectedBranch() {
       return !this.isMrEdit && this.settings.allowMultiRule;
+    },
+    approvalGateLabel() {
+      if (this.isEditing) {
+        return s__('ApprovalRule|Approvel gate');
+      }
+      return s__('ApprovalRule|Add approvel gate');
     },
   },
   watch: {
@@ -188,7 +242,15 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['putFallbackRule', 'postRule', 'putRule', 'deleteRule', 'postRegularRule']),
+    ...mapActions([
+      'putFallbackRule',
+      'putExternalApprovalRule',
+      'postExternalApprovalRule',
+      'postRule',
+      'putRule',
+      'deleteRule',
+      'postRegularRule',
+    ]),
     addSelection() {
       if (!this.approversToAdd.length) {
         return;
@@ -219,9 +281,14 @@ export default {
       }
 
       submission.catch((failureResponse) => {
-        this.serverValidationErrors = mapServerResponseToValidationErrors(
-          failureResponse?.response?.data?.message || {},
-        );
+        // TODO: Handle better
+        if (this.externalApprover) {
+          this.serverValidationErrors = failureResponse?.response?.data?.message || [];
+        } else {
+          this.serverValidationErrors = mapServerResponseToValidationErrors(
+            failureResponse?.response?.data?.message || {},
+          );
+        }
       });
 
       return submission;
@@ -230,12 +297,14 @@ export default {
      * Submit the rule, by either put-ing or post-ing.
      */
     submitRule() {
+      if (this.externalApprover) {
+        const data = this.externalRuleSubmissionData;
+        return data.id ? this.putExternalApprovalRule(data) : this.postExternalApprovalRule(data);
+      }
       const data = this.submissionData;
-
       if (!this.settings.allowMultiRule && this.settings.prefix === 'mr-edit') {
         return data.id ? this.putRule(data) : this.postRegularRule(data);
       }
-
       return data.id ? this.putRule(data) : this.postRule(data);
     },
     /**
@@ -280,6 +349,16 @@ export default {
         };
       }
 
+      if (this.initRule.ruleType === RULE_TYPE_EXTERNAL_APPROVAL) {
+        return {
+          name: this.initRule.name || '',
+          externalUrl: this.initRule.externalUrl,
+          branches: this.initRule.protectedBranches?.map((x) => x.id) || [],
+          ruleType: this.initRule.ruleType,
+          approvers: [],
+        };
+      }
+
       const { containsHiddenGroups = false, removeHiddenGroups = false } = this.initRule;
 
       const users = this.initRule.users.map((x) => ({ ...x, type: TYPE_USER }));
@@ -290,6 +369,7 @@ export default {
         name: this.initRule.name || '',
         approvalsRequired: this.initRule.approvalsRequired || 0,
         minApprovalsRequired: this.initRule.minApprovalsRequired || 0,
+        ruleType: this.initRule.ruleType,
         containsHiddenGroups,
         approvers: groups
           .concat(users)
@@ -300,6 +380,7 @@ export default {
       };
     },
   },
+  approverTypeOptions: APPROVER_TYPE_OPTIONS,
 };
 </script>
 
@@ -334,7 +415,11 @@ export default {
         {{ __('Apply this approval rule to any branch or a specific protected branch.') }}
       </small>
     </div>
-    <div class="form-group gl-form-group">
+    <div v-if="!isEditing && showApprovalGate" class="form-group gl-form-group">
+      <label class="col-form-label">{{ s__('ApprovalRule|Approver Type') }}</label>
+      <approver-type v-model="ruleType" :approver-type-options="$options.approverTypeOptions" />
+    </div>
+    <div v-if="!externalApprover" class="form-group gl-form-group">
       <label class="col-form-label">{{ s__('ApprovalRule|Approvals required') }}</label>
       <input
         v-model.number="approvalsRequired"
@@ -347,7 +432,7 @@ export default {
       />
       <span class="invalid-feedback">{{ validation.approvalsRequired }}</span>
     </div>
-    <div class="form-group gl-form-group">
+    <div v-if="!externalApprover" class="form-group gl-form-group">
       <label class="col-form-label">{{ s__('ApprovalRule|Add approvers') }}</label>
       <approvers-select
         v-model="approversToAdd"
@@ -359,7 +444,21 @@ export default {
       />
       <span class="invalid-feedback">{{ validation.approvers }}</span>
     </div>
-    <div class="bordered-box overflow-auto h-12em">
+    <div v-if="externalApprover" class="form-group gl-form-group">
+      <label class="col-form-label">{{ approvalGateLabel }}</label>
+      <input
+        v-model.url="externalUrl"
+        :class="{ 'is-invalid': validation.externalUrl }"
+        class="gl-form-input form-control"
+        name="approval_gate_url"
+        type="url"
+      />
+      <span class="invalid-feedback">{{ validation.externalUrl }}</span>
+      <small class="form-text text-gl-muted">
+        {{ s__('ApprovalRule|Invoke an external API as part of the approvals') }}
+      </small>
+    </div>
+    <div v-if="!externalApprover" class="bordered-box overflow-auto h-12em">
       <approvers-list v-model="approvers" />
     </div>
   </form>

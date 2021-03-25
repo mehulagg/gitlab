@@ -47,9 +47,13 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['deleteRule']),
+    ...mapActions(['deleteRule', 'deleteExternalApprovalRule']),
     submit() {
-      this.deleteRule(this.rule.id);
+      if (this.rule.externalUrl) {
+        this.deleteExternalApprovalRule(this.rule.id);
+      } else {
+        this.deleteRule(this.rule.id);
+      }
     },
   },
   buttonActions: {

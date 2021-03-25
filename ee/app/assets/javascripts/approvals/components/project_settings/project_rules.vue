@@ -6,6 +6,7 @@ import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR } from '../../constants';
 
+import ApprovalGate from '../approval_gate.vue';
 import EmptyRule from '../empty_rule.vue';
 import RuleInput from '../mr_edit/rule_input.vue';
 import RuleBranches from '../rule_branches.vue';
@@ -15,6 +16,7 @@ import UnconfiguredSecurityRules from '../security_configuration/unconfigured_se
 
 export default {
   components: {
+    ApprovalGate,
     RuleControls,
     Rules,
     UserAvatarList,
@@ -132,13 +134,19 @@ export default {
               class="js-members"
               :class="settings.allowMultiRule ? 'd-none d-sm-table-cell' : null"
             >
-              <user-avatar-list :items="rule.approvers" :img-size="24" empty-text="" />
+              <user-avatar-list
+                v-if="!rule.externalUrl"
+                :items="rule.approvers"
+                :img-size="24"
+                empty-text=""
+              />
+              <approval-gate v-else :url="rule.externalUrl" />
             </td>
             <td v-if="settings.allowMultiRule" class="js-branches">
               <rule-branches :rule="rule" />
             </td>
             <td class="js-approvals-required">
-              <rule-input :rule="rule" />
+              <rule-input v-if="!rule.externalUrl" :rule="rule" />
             </td>
             <td class="text-nowrap px-2 w-0 js-controls">
               <rule-controls v-if="canEdit(rule)" :rule="rule" />

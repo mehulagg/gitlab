@@ -1,3 +1,10 @@
+export const createExternalRule = () => ({
+  id: 9,
+  name: 'API Gate',
+  externalUrl: 'https://gitlab.com',
+  ruleType: 'external_approval',
+});
+
 export const createProjectRules = () => [
   {
     id: 1,
