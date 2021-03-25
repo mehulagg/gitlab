@@ -277,7 +277,7 @@ gem 'licensee', '~> 9.14.1'
 gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
-gem 'mimemagic', '~> 0.3.2'
+gem 'mimemagic', '~> 0.3.2', git: 'https://github.com/minad/mimemagic.git', ref: '01f92d86d15d85cfd0f20dabd025dcbd36a8a60f' # rubocop:disable Cop/GemFetcher
 
 # Faster blank
 gem 'fast_blank'
