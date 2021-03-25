@@ -264,18 +264,18 @@ describe('Api', () => {
     it('fetches group labels', (done) => {
       const options = { params: { search: 'foo' } };
       const expectedGroup = 'gitlab-org';
-      const expectedUrl = `${dummyUrlRoot}/groups/${expectedGroup}/-/labels`;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${expectedGroup}/labels`;
       mock.onGet(expectedUrl).reply(httpStatus.OK, [
         {
           id: 1,
-          title: 'Foo Label',
+          name: 'Foo Label',
         },
       ]);
 
       Api.groupLabels(expectedGroup, options)
         .then((res) => {
           expect(res.length).toBe(1);
-          expect(res[0].title).toBe('Foo Label');
+          expect(res[0].name).toBe('Foo Label');
         })
         .then(done)
         .catch(done.fail);
