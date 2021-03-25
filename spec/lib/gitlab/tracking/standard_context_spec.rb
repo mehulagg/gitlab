@@ -58,10 +58,16 @@ RSpec.describe Gitlab::Tracking::StandardContext do
     end
 
     context 'with extra data' do
-      subject { described_class.new(foo: 'bar') }
+      subject { described_class.new(foo: 'bar', a: 'b') }
 
-      it 'creates a Snowplow context with the given data' do
-        expect(snowplow_context.to_json.dig(:data, :foo)).to eq('bar')
+      it 'includes extra data in `extra` hash' do
+        expect(snowplow_context.to_json.dig(:data, :extra)).to eq(foo: 'bar', a: 'b')
+      end
+    end
+
+    context 'without extra data' do
+      it 'contains an empty `extra` hash' do
+        expect(snowplow_context.to_json.dig(:data, :extra)).to be_empty
       end
     end
 
