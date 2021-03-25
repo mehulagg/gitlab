@@ -7,8 +7,6 @@ disqus_identifier: 'https://docs.gitlab.com/ee/workflow/file_finder.html'
 
 # File finder **(FREE)**
 
-> [Introduced](https://github.com/gitlabhq/gitlabhq/pull/9889) in GitLab 8.4.
-
 The file finder feature allows you to search for a file in a repository using the
 GitLab UI. To use it:
 

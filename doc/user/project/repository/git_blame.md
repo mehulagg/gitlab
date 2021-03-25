@@ -8,17 +8,16 @@ description: "Documentation on Git file blame."
 
 # Git file blame **(FREE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/commit/39c657930625ddc3ac8a921f01ffc83acadce68f) in GitLab 2.5.
-
 [Git blame](https://git-scm.com/docs/git-blame) provides more information
 about every line in a file, including the last modified time, author, and
-commit hash.
+commit hash. To view it for a file:
 
-You can find the **Blame** button with each file in a project.
+1. Navigate to your project.
+1. In the left sidebar, go to **Repository > Files**.
+1. Click the file you want to review.
+1. In the upper right corner, click **Blame**.
 
-![File blame button](img/file_blame_button_v12_6.png "Blame button")
-
-When you select the **Blame** button, this information is shown:
+When you click **Blame**, this information is shown:
 
 ![Git blame output](img/file_blame_output_v12_6.png "Blame button output")
 
