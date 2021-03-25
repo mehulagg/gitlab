@@ -50,6 +50,7 @@ class Issue < ApplicationRecord
 
   belongs_to :moved_to, class_name: 'Issue'
   has_one :moved_from, class_name: 'Issue', foreign_key: :moved_to_id
+  has_one :relative_position, class_name: 'IssuesRelativePosition', foreign_key: :issue_id
 
   has_internal_id :iid, scope: :project, track_if: -> { !importing? }
 
@@ -107,7 +108,8 @@ class Issue < ApplicationRecord
   scope :order_due_date_asc, -> { reorder(::Gitlab::Database.nulls_last_order('due_date', 'ASC')) }
   scope :order_due_date_desc, -> { reorder(::Gitlab::Database.nulls_last_order('due_date', 'DESC')) }
   scope :order_closest_future_date, -> { reorder(Arel.sql('CASE WHEN issues.due_date >= CURRENT_DATE THEN 0 ELSE 1 END ASC, ABS(CURRENT_DATE - issues.due_date) ASC')) }
-  scope :order_relative_position_asc, -> { reorder(::Gitlab::Database.nulls_last_order('relative_position', 'ASC')) }
+  scope :order_relative_position_asc, -> { left_joins(:relative_position).reorder(::Gitlab::Database.nulls_last_order('issues_relative_positions.bucket', 'ASC'), ::Gitlab::Database.nulls_last_order('issues_relative_positions.relative_position', 'ASC')) }
+  scope :order_relative_position_desc, -> { left_joins(:relative_position).reorder(::Gitlab::Database.nulls_last_order('issues_relative_positions.bucket', 'DESC'), ::Gitlab::Database.nulls_last_order('issues_relative_positions.relative_position', 'DESC')) }
   scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
   scope :order_created_at_desc, -> { reorder(created_at: :desc) }
   scope :order_severity_asc, -> { includes(:issuable_severity).order('issuable_severities.severity ASC NULLS FIRST') }
@@ -257,9 +259,8 @@ class Issue < ApplicationRecord
   # errors in postgres when using CTE search optimisation
   def self.order_by_position_and_priority(with_cte: false)
     order_labels_priority(with_cte: with_cte)
-      .reorder(Gitlab::Database.nulls_last_order('relative_position', 'ASC'),
-              Gitlab::Database.nulls_last_order('highest_priority', 'ASC'),
-              "id DESC")
+      .group("issues_relative_positions.bucket, issues_relative_positions.relative_position")
+      .order_relative_position_asc.order(Gitlab::Database.nulls_last_order('highest_priority', 'ASC'), "id DESC")
   end
 
   def hook_attrs

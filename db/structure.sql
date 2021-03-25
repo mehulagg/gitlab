@@ -13834,6 +13834,23 @@ CREATE TABLE issues_prometheus_alert_events (
     updated_at timestamp with time zone NOT NULL
 );
 
+CREATE TABLE issues_relative_positions (
+    id bigint NOT NULL,
+    issue_id bigint NOT NULL,
+    relative_position bigint,
+    bucket smallint,
+    clumped_position integer DEFAULT 0
+);
+
+CREATE SEQUENCE issues_relative_positions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE issues_relative_positions_id_seq OWNED BY issues_relative_positions.id;
+
 CREATE TABLE issues_self_managed_prometheus_alert_events (
     issue_id bigint NOT NULL,
     self_managed_prometheus_alert_event_id bigint NOT NULL,
@@ -19422,6 +19439,8 @@ ALTER TABLE ONLY issue_user_mentions ALTER COLUMN id SET DEFAULT nextval('issue_
 
 ALTER TABLE ONLY issues ALTER COLUMN id SET DEFAULT nextval('issues_id_seq'::regclass);
 
+ALTER TABLE ONLY issues_relative_positions ALTER COLUMN id SET DEFAULT nextval('issues_relative_positions_id_seq'::regclass);
+
 ALTER TABLE ONLY iterations_cadences ALTER COLUMN id SET DEFAULT nextval('iterations_cadences_id_seq'::regclass);
 
 ALTER TABLE ONLY jira_connect_installations ALTER COLUMN id SET DEFAULT nextval('jira_connect_installations_id_seq'::regclass);
@@ -20754,6 +20773,9 @@ ALTER TABLE ONLY issues
 ALTER TABLE ONLY issues_prometheus_alert_events
     ADD CONSTRAINT issues_prometheus_alert_events_pkey PRIMARY KEY (issue_id, prometheus_alert_event_id);
 
+ALTER TABLE ONLY issues_relative_positions
+    ADD CONSTRAINT issues_relative_positions_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY issues_self_managed_prometheus_alert_events
     ADD CONSTRAINT issues_self_managed_prometheus_alert_events_pkey PRIMARY KEY (issue_id, self_managed_prometheus_alert_event_id);
 
@@ -21683,6 +21705,8 @@ CREATE INDEX idx_issues_on_project_id_and_rel_position_and_state_id_and_id ON is
 CREATE INDEX idx_issues_on_project_id_and_updated_at_and_id_and_state_id ON issues USING btree (project_id, updated_at, id, state_id);
 
 CREATE INDEX idx_issues_on_state_id ON issues USING btree (state_id);
+
+CREATE INDEX idx_issues_relative_positions_on_bucket_and_relative_position ON issues_relative_positions USING btree (bucket, relative_position);
 
 CREATE INDEX idx_jira_connect_subscriptions_on_installation_id ON jira_connect_subscriptions USING btree (jira_connect_installation_id);
 
@@ -22861,6 +22885,8 @@ CREATE INDEX index_issues_on_title_trigram ON issues USING gin (title gin_trgm_o
 CREATE INDEX index_issues_on_updated_at ON issues USING btree (updated_at);
 
 CREATE INDEX index_issues_on_updated_by_id ON issues USING btree (updated_by_id) WHERE (updated_by_id IS NOT NULL);
+
+CREATE INDEX index_issues_relative_positions_on_issue_id ON issues_relative_positions USING btree (issue_id);
 
 CREATE INDEX index_iterations_cadences_on_group_id ON iterations_cadences USING btree (group_id);
 
@@ -25636,6 +25662,9 @@ ALTER TABLE ONLY issue_user_mentions
 
 ALTER TABLE ONLY namespace_settings
     ADD CONSTRAINT fk_rails_3896d4fae5 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY issues_relative_positions
+    ADD CONSTRAINT fk_rails_38a2a48829 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY self_managed_prometheus_alert_events
     ADD CONSTRAINT fk_rails_3936dadc62 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

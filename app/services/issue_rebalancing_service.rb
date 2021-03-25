@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class IssueRebalancingService
-  MAX_ISSUE_COUNT = 10_000
+  MAX_ISSUE_COUNT = 500_000
   BATCH_SIZE = 100
   TooManyIssues = Class.new(StandardError)
 
@@ -16,29 +16,28 @@ class IssueRebalancingService
 
     raise TooManyIssues, "#{issue_count} issues" if issue_count > MAX_ISSUE_COUNT
 
-    start = RelativePositioning::START_POSITION - (gaps / 2) * gap_size
+    start = RelativePositioning::START_POSITION + (gaps / 2) * gap_size
 
-    if Feature.enabled?(:issue_rebalancing_optimization)
-      Issue.transaction do
-        assign_positions(start, indexed_ids)
-          .sort_by(&:first)
-          .each_slice(BATCH_SIZE) do |pairs_with_position|
-          update_positions(pairs_with_position, 'rebalance issue positions in batches ordered by id')
-        end
-      end
-    else
-      Issue.transaction do
-        indexed_ids.each_slice(BATCH_SIZE) do |pairs|
-          pairs_with_position = assign_positions(start, pairs)
-          update_positions(pairs_with_position, 'rebalance issue positions')
-        end
-      end
+    while have_issues_in_bucket?(0)
+      # todo: each batch can go in an async worker.
+      pairs_with_position = assign_positions(start, get_issues(0, BATCH_SIZE).sort_by(&:first))
+      start -= (BATCH_SIZE * gap_size)
+
+      update_positions(pairs_with_position, 'rebalance issue positions')
     end
   end
 
   private
 
   attr_reader :issue, :base
+
+  def have_issues_in_bucket?(bucket)
+    base.joins(:relative_position).where("issues_relative_positions.bucket": bucket).exists? # rubocop: disable CodeReuse/ActiveRecord
+  end
+
+  def get_issues(bucket, count)
+    base.order_relative_position_desc.where("issues_relative_positions.bucket": bucket).limit(count).pluck(:id).each_with_index # rubocop: disable CodeReuse/ActiveRecord
+  end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def indexed_ids
@@ -66,10 +65,10 @@ class IssueRebalancingService
        SELECT *
        FROM (VALUES #{values}) as t (id, pos)
       )
-      UPDATE #{Issue.table_name}
-      SET relative_position = cte.new_pos
+      UPDATE #{IssuesRelativePosition.table_name}
+      SET relative_position = cte.new_pos, bucket = 1
       FROM cte
-      WHERE cte_id = id
+      WHERE cte_id = issue_id
     SQL
   end
 
