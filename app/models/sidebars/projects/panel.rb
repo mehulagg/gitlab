@@ -12,6 +12,7 @@ module Sidebars
         add_menu(Sidebars::Projects::Menus::Issues::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::ExternalIssueTracker::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::Labels::Menu.new(context))
+        add_menu(Sidebars::Projects::Menus::MergeRequests::Menu.new(context))
       end
 
       override :aria_label

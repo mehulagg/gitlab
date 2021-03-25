@@ -3,71 +3,70 @@
 module Sidebars
   module Projects
     module Menus
-      module Issues
+      module MergeRequests
         class Menu < ::Sidebars::Menu
-          override :configure_menu_items
-          def configure_menu_items
-            add_item(MenuItems::List.new(context))
-            add_item(MenuItems::Boards.new(context))
-            add_item(MenuItems::Labels.new(context))
-            add_item(MenuItems::ServiceDesk.new(context))
-            add_item(MenuItems::Milestones.new(context))
-          end
-
           override :link_to_href
           def link_to_href
-            project_issues_path(context.project)
+            project_merge_requests_path(context.project)
           end
 
           override :link_to_attributes
           def link_to_attributes
             {
-              class: 'shortcuts-issues qa-issues-item'
+              class: 'shortcuts-merge_requests',
+              data: { qa_selector: 'merge_requests_link' }
             }
           end
 
           override :menu_name
           def menu_name
-            _('Issues')
+            _('Merge Requests')
           end
 
           override :menu_name_html_options
           def menu_name_html_options
             {
-              id: 'js-onboarding-issues-link'
+              id: 'js-onboarding-mr-link'
             }
           end
 
           override :sprite_icon
           def sprite_icon
-            'issues'
+            'git-merge'
           end
 
           override :render?
           def render?
-            can?(context.current_user, :read_issue, context.project)
+            context.project.repo_exists? && can?(context.current_user, :read_merge_request, context.project)
           end
 
           override :has_pill?
           def has_pill?
-            context.project.issues_enabled?
+            true
           end
 
           override :pill_count
           def pill_count
-            @pill_count ||= context.project.open_issues_count(context.current_user)
+            @pill_count ||= context.project.open_merge_requests_count
           end
 
           override :pill_html_options
           def pill_html_options
             {
-              class: 'issue_counter'
+              class: 'merge_counter js-merge-counter'
             }
+          end
+
+          override :nav_link_params
+          def nav_link_params
+            if context.project.issues_enabled?
+              { controller: :merge_requests }
+            else
+              { controller: [:merge_requests, :milestones] }
+            end
           end
         end
       end
     end
   end
 end
-
-Sidebars::Projects::Menus::Issues::Menu.prepend_if_ee('EE::Sidebars::Projects::Menus::Issues::Menu')
