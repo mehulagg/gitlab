@@ -61,7 +61,7 @@ module Security
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
       # Vulnerabilities::Finding (`vulnerability_occurrences`)
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
-        create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
+        find_or_create_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       update_vulnerability_scanner(finding)
 
@@ -87,16 +87,16 @@ module Security
       create_vulnerability(vulnerability_finding, pipeline)
     end
 
-    def create_or_find_vulnerability_finding(finding, create_params)
+    def find_or_create_vulnerability_finding(finding, create_params)
       if ::Feature.enabled?(:vulnerability_finding_fingerprints, project)
-        create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
+        find_or_create_vulnerability_finding_with_fingerprints(finding, create_params)
       else
-        create_or_find_vulnerability_finding_normal(finding, create_params)
+        find_or_create_vulnerability_finding_with_location(finding, create_params)
       end
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def create_or_find_vulnerability_finding_normal(finding, create_params)
+    def find_or_create_vulnerability_finding_with_location(finding, create_params)
       find_params = {
         scanner: scanners_objects[finding.scanner.key],
         primary_identifier: identifiers_objects[finding.primary_identifier.key],
@@ -135,7 +135,7 @@ module Security
       end
     end
 
-    def create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
+    def find_or_create_vulnerability_finding_with_fingerprints(finding, create_params)
       find_params = {
         # this isn't taking prioritization into account (happens in the filter
         # block below), but it *does* limit the number of findings we have to sift through
