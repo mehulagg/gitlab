@@ -25,8 +25,7 @@ module Sidebars
                   projects/on_demand_scans#index
                   projects/on_demand_scans#new
                   projects/on_demand_scans#edit
-                ]
-              }
+                ] }
             end
 
             override :item_name

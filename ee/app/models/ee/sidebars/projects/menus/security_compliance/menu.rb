@@ -39,7 +39,7 @@ module EE
               add_item(::Sidebars::Projects::Menus::SecurityCompliance::MenuItems::AuditEvents.new(context))
             end
 
-            private
+            # private
 
             # def selected_menu
             #   dashboard_menu = renderable_items.find { |i| it.is_a?(::Sidebars::Projects::Menus::SecurityCompliance::MenuItems::Dashboard) }
@@ -72,4 +72,3 @@ module EE
     end
   end
 end
-
