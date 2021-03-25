@@ -1,6 +1,7 @@
 require "mimemagic/version"
 
-module Mimemagic
+module MimeMagic
   class Error < StandardError; end
-  # Your code goes here...
+
+  raise Error, 'This gem should never be required'
 end
