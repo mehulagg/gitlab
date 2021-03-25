@@ -1,6 +1,7 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { mockTracking } from 'helpers/tracking_helper';
+import Api from '~/api';
 import GroupedTestReportsApp from '~/reports/grouped_test_report/grouped_test_reports_app.vue';
 import { getStoreConfig } from '~/reports/grouped_test_report/store';
 
@@ -12,6 +13,8 @@ import successTestReports from '../mock_data/no_failures_report.json';
 import recentFailuresTestReports from '../mock_data/recent_failures_report.json';
 import resolvedFailures from '../mock_data/resolved_failures.json';
 
+jest.mock('~/api.js');
+
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
@@ -21,7 +24,7 @@ describe('Grouped test reports app', () => {
   let wrapper;
   let mockStore;
 
-  const mountComponent = ({ props = { pipelinePath } } = {}) => {
+  const mountComponent = ({ props = { pipelinePath }, glFeatures = {} } = {}) => {
     wrapper = mount(GroupedTestReportsApp, {
       store: mockStore,
       localVue,
@@ -29,6 +32,9 @@ describe('Grouped test reports app', () => {
         endpoint,
         pipelinePath,
         ...props,
+      },
+      provide: {
+        glFeatures,
       },
     });
   };
@@ -105,20 +111,20 @@ describe('Grouped test reports app', () => {
   describe('`Expand` button', () => {
     let trackingSpy;
 
-    beforeEach(() => {
+    it('tracks an event on click', () => {
       setReports(newFailedTestReports);
       mountComponent();
-      document.body.dataset.page = 'projects:merge_requests:show';
       trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
-    });
-
-    it('tracks an event on click', () => {
       findExpandButton().trigger('click');
 
       expect(trackingSpy).toHaveBeenCalledWith(undefined, 'expand_test_report_widget', {});
     });
 
     it('only tracks the first expansion', () => {
+      setReports(newFailedTestReports);
+      mountComponent();
+      trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
+
       expect(trackingSpy).not.toHaveBeenCalled();
 
       const button = findExpandButton();
@@ -128,6 +134,29 @@ describe('Grouped test reports app', () => {
       button.trigger('click');
 
       expect(trackingSpy).toHaveBeenCalledTimes(1);
+    });
+
+    describe('with :usage_data_i_testing_summary_widget_total enabled', () => {
+      it('does track usage ping metric', () => {
+        setReports(newFailedTestReports);
+        mountComponent({ glFeatures: { usageDataITestingSummaryWidgetTotal: true } });
+        findExpandButton().trigger('click');
+
+        expect(Api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
+        expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(
+          wrapper.vm.$options.expandUsagePingEvent,
+        );
+      });
+    });
+
+    describe('with :usage_data_i_testing_summary_widget_total disabled', () => {
+      it('does not track usage ping metric', () => {
+        setReports(newFailedTestReports);
+        mountComponent({ glFeatures: { usageDataITestingSummaryWidgetTotal: false } });
+        findExpandButton().trigger('click');
+
+        expect(Api.trackRedisHllUserEvent).not.toHaveBeenCalled();
+      });
     });
   });
 
