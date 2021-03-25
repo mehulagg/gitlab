@@ -380,7 +380,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
 
       it 'returns the expected hash with no fingerprints' do
         expect(finding.fingerprints.length).to eq(0)
-        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_fingerprint.hash)
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_identifier_fingerprint.hash)
       end
 
       it 'returns the expected hash with fingerprints' do
@@ -388,7 +388,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         finding.fingerprints << high_priority_fingerprint
 
         expect(finding.fingerprints.length).to eq(2)
-        expect(finding.hash).to eq(finding.report_type.hash ^ high_priority_fingerprint.fingerprint_hex.hash ^ finding.primary_fingerprint.hash)
+        expect(finding.hash).to eq(finding.report_type.hash ^ high_priority_fingerprint.fingerprint_hex.hash ^ finding.primary_identifier_fingerprint.hash)
       end
     end
 
@@ -404,7 +404,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
       end
 
       it 'returns the expected hash' do
-        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_fingerprint.hash)
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_identifier_fingerprint.hash)
       end
     end
   end
