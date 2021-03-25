@@ -2,6 +2,11 @@ query getSlaDueAt($iid: String!, $fullPath: ID!) {
   project(fullPath: $fullPath) {
     issue(iid: $iid) {
       slaDueAt
+      labels {
+        nodes {
+          title
+        }
+      }
     }
   }
 }

@@ -6,6 +6,8 @@ import { isValidSlaDueAt } from './utils';
 
 export default {
   i18n: {
+    achievedSLAText: s__('IncidentManagement|Achieved SLA'),
+    missedSLAText: s__('IncidentManagement|Missed SLA'),
     longTitle: s__('IncidentManagement|%{hours} hours, %{minutes} minutes remaining'),
     shortTitle: s__('IncidentManagement|%{minutes} minutes remaining'),
   },
@@ -19,6 +21,11 @@ export default {
       required: false,
       default: null,
     },
+    labels: {
+      type: Object,
+      required: true,
+      default: () => ({}),
+    },
   },
   data() {
     return {
@@ -26,6 +33,15 @@ export default {
     };
   },
   computed: {
+    labelList() {
+      return this.labels?.nodes?.map((label) => label.title) || [];
+    },
+    isMissedSLA() {
+      return this.remainingTime === 0 && this.labelList.includes('missed::SLA');
+    },
+    isAchievedSLA() {
+      return this.remainingTime === 0 && !this.labelList.includes('missed::SLA');
+    },
     shouldShow() {
       return isValidSlaDueAt(this.slaDueAt);
     },
@@ -33,12 +49,24 @@ export default {
       return this.clientRemainingTime ?? calculateRemainingMilliseconds(this.slaDueAt);
     },
     slaText() {
+      console.log(this.remainingTime, this.labelList);
+      if (this.isMissedSLA) {
+        return this.$options.i18n.missedSLAText;
+      }
+      if (this.isAchievedSLA) {
+        return this.$options.i18n.achievedSLAText;
+      }
+
       const remainingDuration = formatTime(this.remainingTime);
 
       // remove the seconds portion of the string
       return remainingDuration.substring(0, remainingDuration.length - 3);
     },
     slaTitle() {
+      if (this.isMissedSLA || this.isAchievedSLA) {
+        return null;
+      }
+
       const minutes = Math.floor(this.remainingTime / 1000 / 60) % 60;
       const hours = Math.floor(this.remainingTime / 1000 / 60 / 60);
 
@@ -49,7 +77,7 @@ export default {
     },
   },
   mounted() {
-    this.timer = setInterval(() => this.refreshTime(), this.$options.FIFTEEN_MINUTES);
+    this.timer = setInterval(this.refreshTime, this.$options.FIFTEEN_MINUTES);
   },
   beforeDestroy() {
     clearTimeout(this.timer);

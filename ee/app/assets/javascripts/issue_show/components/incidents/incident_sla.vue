@@ -22,8 +22,9 @@ export default {
       update(data) {
         return data?.project?.issue?.slaDueAt;
       },
-      result({ data }) {
-        const isValidSla = isValidSlaDueAt(data?.project?.issue?.slaDueAt);
+      result({ data: { project: { issue } = {} } = {} } = {}) {
+        const isValidSla = isValidSlaDueAt(issue.slaDueAt);
+        this.labels = issue.labels;
 
         // Render component
         this.hasData = isValidSla;
@@ -40,8 +41,9 @@ export default {
   },
   data() {
     return {
-      slaDueAt: null,
       hasData: false,
+      labels: {},
+      slaDueAt: null,
     };
   },
   computed: {
@@ -60,7 +62,7 @@ export default {
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
     <span class="gl-white-space-nowrap">
       <gl-icon name="timer" />
-      <service-level-agreement :sla-due-at="slaDueAt" />
+      <service-level-agreement :labels="labels" :sla-due-at="slaDueAt" />
     </span>
   </div>
 </template>

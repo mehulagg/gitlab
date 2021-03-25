@@ -369,7 +369,11 @@ export default {
           </template>
 
           <template v-if="slaFeatureAvailable" #cell(incidentSla)="{ item }">
-            <service-level-agreement-cell :sla-due-at="item.slaDueAt" data-testid="incident-sla" />
+            <service-level-agreement-cell
+              :labels="item.labels"
+              :sla-due-at="item.slaDueAt"
+              data-testid="incident-sla"
+            />
           </template>
 
           <template #cell(assignees)="{ item }">
