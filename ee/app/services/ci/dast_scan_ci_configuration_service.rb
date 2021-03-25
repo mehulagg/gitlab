@@ -8,7 +8,12 @@ module Ci
       target_url: 'DAST_WEBSITE',
       use_ajax_spider: 'DAST_USE_AJAX_SPIDER',
       show_debug_messages: 'DAST_DEBUG',
-      full_scan_enabled: 'DAST_FULL_SCAN_ENABLED'
+      full_scan_enabled: 'DAST_FULL_SCAN_ENABLED',
+      excluded_urls: 'DAST_EXCLUDE_URLS',
+      auth_url: 'DAST_AUTH_URL',
+      auth_username_field: 'DAST_USERNAME_FIELD',
+      auth_password_field: 'DAST_PASSWORD_FIELD',
+      auth_username: 'DAST_USERNAME'
     }.freeze
 
     def self.execute(args)

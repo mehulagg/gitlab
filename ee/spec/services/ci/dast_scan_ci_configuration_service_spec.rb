@@ -14,7 +14,12 @@ RSpec.describe Ci::DastScanCiConfigurationService do
           target_url: 'https://gitlab.local',
           use_ajax_spider: true,
           show_debug_messages: true,
-          full_scan_enabled: true
+          full_scan_enabled: true,
+          excluded_urls: 'https://gitlab.local/hello,https://gitlab.local/world',
+          auth_url: 'https://gitlab.local/login',
+          auth_username_field: 'session[username]',
+          auth_password_field: 'session[password]',
+          auth_username: 'tanuki'
         }
       end
 
@@ -32,6 +37,11 @@ RSpec.describe Ci::DastScanCiConfigurationService do
           DAST_USE_AJAX_SPIDER: 'true'
           DAST_DEBUG: 'true'
           DAST_FULL_SCAN_ENABLED: 'true'
+          DAST_EXCLUDE_URLS: https://gitlab.local/hello,https://gitlab.local/world
+          DAST_AUTH_URL: https://gitlab.local/login
+          DAST_USERNAME_FIELD: session[username]
+          DAST_PASSWORD_FIELD: session[password]
+          DAST_USERNAME: tanuki
         YAML
       end
 
