@@ -111,7 +111,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
 
         context 'when retry limit is reached on a subtask' do
           before do
-            subtask.update!(retry_attempt: Elastic::ClusterReindexingService::REINDEX_MAX_RETRY_LIMIT)
+            subtask.update!(retry_attempt: described_class::REINDEX_MAX_RETRY_LIMIT)
           end
 
           it 'errors and changes task state from reindexing to failed' do
@@ -136,7 +136,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
 
         context 'when retry limit is reached on a subtask' do
           before do
-            subtask.update!(retry_attempt: Elastic::ClusterReindexingService::REINDEX_MAX_RETRY_LIMIT)
+            subtask.update!(retry_attempt: described_class::REINDEX_MAX_RETRY_LIMIT)
           end
 
           it 'errors and changes task state from reindexing to failed' do
