@@ -2349,29 +2349,43 @@ considered and customer technical support will be considered out of scope.
   </a>
 </div>
 
-## Cloud Native Deployment (optional)
+## Hybrid Reference Architecture with Helm Charts (Alternative)
+
+As an alternative approach you can also run select components in Kubernetes
+via our official [Helm Charts](https://docs.gitlab.com/charts/).
+
+In this setup we support running the equivalent of GitLab Rails and Sidekiq nodes
+in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition to
+this several other supporting services, such as Grafana, NGINX, etc... are also
+supported here.
+
+Note that the listed components above are the **only** components we support running
+in Kubernetes and all other components should continue to be run via Omnibus or
+alternatively on PAAS services such as AWS RDS for Database, etc...
 
 Hybrid installations leverage the benefits of both cloud native and traditional
-deployments. We recommend shifting the Sidekiq and Webservice components into
-Kubernetes to reap cloud native workload management benefits while the others
-are deployed using the traditional server method already described.
+deployments together. By shifting the Sidekiq and Webservice components into
+Kubernetes you can reap certain cloud native workload management benefits while
+the others are deployed in compute VMs with Omnibus as described above in this
+page.
 
-The following sections detail this hybrid approach.
+It should be noted though that this is an advanced setup. Running services in
+Kubernetes is well known to be complex. **This setup is only recommended** if
+you have strong working knowledge and experience in Kubernetes. The rest of this
+section will assume this.
 
 ### Cluster topology
 
-The following table provides a starting point for hybrid
-deployment infrastructure. The recommendations use Google Cloud's Kubernetes Engine (GKE)
+The following table provides a starting point for the hybrid
+environment. The recommendations use Google Cloud's Kubernetes Engine (GKE)
 and associated machine types, but the memory and CPU requirements should
 translate to most other providers.
 
 Machine count | Machine type | Allocatable vCPUs | Allocatable memory (GB) | Purpose
 -|-|-|-|-
-2 | `n1-standard-4` | 7.75  | 25  | Non-GitLab resources, including Grafana, NGINX, and Prometheus
-4 | `n1-standard-4` | 15.5  | 50  | GitLab Sidekiq pods
 4 | `n1-highcpu-32` | 127.5 | 118 | GitLab Webservice pods
-
-"Allocatable" in this table refers to the amount of resources available to workloads deployed in Kubernetes _after_ accounting for the overhead of running Kubernetes itself.
+4 | `n1-standard-4` | 15.5  | 50  | GitLab Sidekiq pods
+2 | `n1-standard-4` | 7.75  | 25  | Non-GitLab supporting resources, including Grafana, NGINX, and Prometheus
 
 ### Resource usage settings
 
@@ -2379,28 +2393,28 @@ The following formulas help when calculating how many pods may be deployed withi
 The [10k reference architecture example values file](https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/ref/10k.yaml)
 documents how to apply the calculated configuration to the Helm Chart.
 
+#### Webservice
+
+Webservice pods typically need about 1 vCPU and 1.125 GB of memory _per worker_.
+Each Webservice pod will consume roughly 4 vCPUs and 4.5 GB of memory using
+the [recommended topology](#cluster-topology) because four worker processes
+are created by default and each pod has other small processes running.
+
+The [provided recommendations](#cluster-topology) allow the deployment of up to 20
+Webservice pods. Expand available resources using the ratio of 1 vCPU to 1.125 GB of memory
+_per each worker process_ for each additional Webservice pod.
+
+For further information on resource usage, see the [Webservice resources](https://docs.gitlab.com/charts/charts/gitlab/webservice/#resources).
+
 #### Sidekiq
 
 Sidekiq pods should generally have 1 vCPU and 2 GB of memory.
 
 [The provided starting point](#cluster-topology) allows the deployment of up to
-16 Sidekiq pods. Expand available resources using the 1vCPU to 2GB memory
+16 Sidekiq pods. Expand available resources using the 1 vCPU to 2GB memory
 ratio for each additional pod.
 
 For further information on resource usage, see the [Sidekiq resources](https://docs.gitlab.com/charts/charts/gitlab/sidekiq/#resources).
-
-#### Webservice
-
-Webservice pods typically need about 1 vCPU and 1.25 GB of memory _per worker_.
-Each Webservice pod will consume roughly 2 vCPUs and 2.5 GB of memory using
-the [recommended topology](#cluster-topology) because two worker processes
-are created by default.
-
-The [provided recommendations](#cluster-topology) allow the deployment of up to 28
-Webservice pods. Expand available resources using the ratio of 1 vCPU to 1.25 GB of memory
-_per each worker process_ for each additional Webservice pod.
-
-For further information on resource usage, see the [Webservice resources](https://docs.gitlab.com/charts/charts/gitlab/webservice/#resources).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
