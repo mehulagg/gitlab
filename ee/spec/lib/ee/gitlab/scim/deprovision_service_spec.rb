@@ -44,7 +44,7 @@ RSpec.describe ::EE::Gitlab::Scim::DeprovisionService do
           response = service.execute
 
           expect(response.error?).to be true
-          expect(response.errors).to include("Did not remove user from group: Cannot remove last group owner.")
+          expect(response.errors).to include("Could not remove user from group. Cannot remove last group owner.")
         end
       end
 
@@ -57,7 +57,7 @@ RSpec.describe ::EE::Gitlab::Scim::DeprovisionService do
           response = service.execute
 
           expect(response.error?).to be true
-          expect(response.errors).to include("Did not remove user from group: User is not a group member.")
+          expect(response.errors).to include("Could not remove user from group. User is not a group member.")
         end
       end
     end

@@ -13,8 +13,8 @@ module EE
         end
 
         def execute
-          return error(_('Did not remove user from group: User is not a group member.')) unless group_membership
-          return error(_('Did not remove user from group: Cannot remove last group owner.')) if group.last_owner?(user)
+          return error(_('Could not remove user from group. User is not a group member.')) unless group_membership
+          return error(_('Could not remove user from group. Cannot remove last group owner.')) if group.last_owner?(user)
 
           ScimIdentity.transaction do
             identity.update!(active: false)

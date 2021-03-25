@@ -8671,6 +8671,12 @@ msgstr ""
 msgid "Could not remove the trigger."
 msgstr ""
 
+msgid "Could not remove user from group. Cannot remove last group owner."
+msgstr ""
+
+msgid "Could not remove user from group. User is not a group member."
+msgstr ""
+
 msgid "Could not restore the group"
 msgstr ""
 
@@ -10818,12 +10824,6 @@ msgid "DevopsReport|DevOps score metrics are based on usage over the last 30 day
 msgstr ""
 
 msgid "DevopsReport|Score"
-msgstr ""
-
-msgid "Did not remove user from group: Cannot remove last group owner."
-msgstr ""
-
-msgid "Did not remove user from group: User is not a group member."
 msgstr ""
 
 msgid "Diff content limits"

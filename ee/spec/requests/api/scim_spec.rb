@@ -350,7 +350,7 @@ RSpec.describe API::Scim do
         end
 
         it 'returns the last group owner error' do
-          expect(response.body).to include("Did not remove user from group: Cannot remove last group owner.")
+          expect(response.body).to include("Could not remove user from group. Cannot remove last group owner.")
         end
 
         it 'does not deactivate the identity' do
@@ -482,7 +482,7 @@ RSpec.describe API::Scim do
         end
 
         it 'returns the last group owner error' do
-          expect(response.body).to include("Did not remove user from group: Cannot remove last group owner.")
+          expect(response.body).to include("Could not remove user from group. Cannot remove last group owner.")
         end
 
         it 'does not deactivate the identity' do
