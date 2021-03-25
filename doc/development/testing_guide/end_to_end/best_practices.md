@@ -226,8 +226,8 @@ In summary:
 ## `let` variables vs instance variables
 
 By default, follow the [testing best practices](../best_practices.md#subject-and-let-variables) when using `let`
-or instance variables. However, in end-to-end tests, setup such as creating resources are expensive. If `let` is used
-to store such resources, they will be created for each example separately. If a resource can be shared by multiple examples, an
+or instance variables. However, in end-to-end tests, setup such as creating resources is expensive. If `let` is used
+to store such resources they will be created for each example separately. If a resource can be shared by multiple examples, an
 instance variable can be used to store it instead of `let` to save run time.
 
 ## Limit the use of the UI in `before(:context)` and `after` hooks
