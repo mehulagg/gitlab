@@ -97,6 +97,7 @@ module Elastic
       end
 
       current_task.update!(state: :reindexing)
+
       true
     end
 

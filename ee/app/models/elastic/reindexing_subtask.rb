@@ -5,6 +5,6 @@ class Elastic::ReindexingSubtask < ApplicationRecord
 
   belongs_to :elastic_reindexing_task, class_name: 'Elastic::ReindexingTask'
 
-  validates :index_name_from, :index_name_to, :elastic_task, :elastic_slice, :elastic_max_slice, :retry_attempt, presence: true
-  validates :elastic_slice, :elastic_max_slice, numericality: { greater_than_or_equal_to: 0 }
+  validates :index_name_from, :index_name_to, :elastic_task, presence: true
+  validates :elastic_slice, :elastic_max_slice, :retry_attempt, presence: true, numericality: { greater_than_or_equal_to: 0 }
 end
