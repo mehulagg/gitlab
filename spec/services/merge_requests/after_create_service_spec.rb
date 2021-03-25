@@ -93,5 +93,96 @@ RSpec.describe MergeRequests::AfterCreateService do
         expect(merge_request.reload).to be_unchecked
       end
     end
+
+    it 'increments the usage data counter of create event' do
+      counter = Gitlab::UsageDataCounters::MergeRequestCounter
+
+      expect { execute_service }.to change { counter.read(:create) }.by(1)
+    end
+
+    context 'todos' do
+      it 'does not creates todos' do
+        attributes = {
+          project: merge_request.target_project,
+          target_id: merge_request.id,
+          target_type: merge_request.class.name
+        }
+
+        expect(Todo.where(attributes).count).to be_zero
+      end
+
+      context 'when merge request is assigned to someone' do
+        it 'creates a todo for new assignee' do
+          assignee = create(:user)
+          merge_request.assignees = [assignee]
+          merge_request.save!
+          attributes = {
+            project: merge_request.target_project,
+            author: merge_request.author,
+            user: assignee,
+            target_id: merge_request.id,
+            target_type: merge_request.class.name,
+            action: Todo::ASSIGNED,
+            state: :pending
+          }
+
+          execute_service
+
+          expect(Todo.where(attributes).count).to eq 1
+        end
+      end
+
+      context 'when reviewer is assigned' do
+        it 'creates a todo for new reviewer' do
+          reviewer = create(:user)
+          merge_request.reviewers = [reviewer]
+          merge_request.save!
+          attributes = {
+            project: merge_request.target_project,
+            author: merge_request.author,
+            user: reviewer,
+            target_id: merge_request.id,
+            target_type: merge_request.class.name,
+            action: Todo::REVIEW_REQUESTED,
+            state: :pending
+          }
+
+          execute_service
+
+          expect(Todo.where(attributes).count).to eq 1
+        end
+      end
+    end
+
+    context 'while saving references to issues that the created merge request closes' do
+      let(:first_issue) { create(:issue, project: merge_request.target_project) }
+      let(:second_issue) { create(:issue, project: merge_request.target_project) }
+
+      it 'creates a `MergeRequestsClosingIssues` record for each issue' do
+        merge_request.description = "Closes #{first_issue.to_reference} and #{second_issue.to_reference}"
+        merge_request.source_branch = "feature"
+        merge_request.target_branch = merge_request.target_project.default_branch
+        merge_request.save!
+
+        execute_service
+
+        issue_ids = MergeRequestsClosingIssues.where(merge_request: merge_request).pluck(:issue_id)
+        expect(issue_ids).to match_array([first_issue.id, second_issue.id])
+      end
+    end
+
+    it 'tracks merge request creation in usage data' do
+      expect(Gitlab::UsageDataCounters::MergeRequestCounter).to receive(:count).with(:create)
+
+      execute_service
+    end
+
+    it 'calls MergeRequests::LinkLfsObjectsService#execute' do
+      service = double('service')
+      expect(service).to receive(:execute).with(merge_request)
+      expect(MergeRequests::LinkLfsObjectsService).to receive(:new).with(merge_request.target_project).and_return(service)
+
+      execute_service
+    end
   end
 end
