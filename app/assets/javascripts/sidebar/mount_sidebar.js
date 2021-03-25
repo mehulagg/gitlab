@@ -94,7 +94,6 @@ function mountAssigneesComponent() {
     provide: {
       canUpdate: editable,
       projectMembersPath,
-      signedIn: el.hasAttribute('data-signed-in'),
       directlyInviteMembers: el.hasAttribute('data-directly-invite-members'),
       indirectlyInviteMembers: el.hasAttribute('data-indirectly-invite-members'),
     },

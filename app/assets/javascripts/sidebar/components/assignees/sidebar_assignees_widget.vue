@@ -51,9 +51,6 @@ export default {
     indirectlyInviteMembers: {
       default: false,
     },
-    signedIn: {
-      default: false,
-    },
   },
   props: {
     iid: {
@@ -215,6 +212,9 @@ export default {
     },
     noUsersFound() {
       return !this.isSearchEmpty && this.searchUsers.length === 0;
+    },
+    signedIn() {
+      return this.currentUser.username !== undefined;
     },
     showCurrentUser() {
       return (
