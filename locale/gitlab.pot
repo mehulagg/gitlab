@@ -16409,6 +16409,9 @@ msgstr ""
 msgid "Information about additional Pages templates and how to install them can be found in our %{pages_getting_started_guide}."
 msgstr ""
 
+msgid "Infrastructure Registry"
+msgstr ""
+
 msgid "Inherited"
 msgstr ""
 
