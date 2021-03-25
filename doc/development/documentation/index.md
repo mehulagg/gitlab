@@ -189,14 +189,29 @@ To add a redirect:
 1. To move or rename the documentation file, create a new file with the new
    name or location, but don't delete the existing documentation file.
 1. In the original documentation file, add the redirect code for
-   `/help`. Use the following template exactly, and change only the links and
-   date. Use relative paths and `.md` for a redirect to another documentation
+   `/help` using the raketask:
+
+   ```shell
+   bundle exec rake gitlab:docs:redirect
+   ```
+
+   You will be asked to enter the values of both the old and new file paths.
+   Use relative paths and `.md` for a redirect to another documentation
    page. Use the full URL (with `https://`) to redirect to a different project or
-   site:
+   site.
+
+   For example, if the old path is under `doc/user/search/old_file.md`
+   and you want to redirect to `doc/api/new_file.md`, the values you would
+   enter would be:
+
+   - Old file: `user/search/old_file.md`
+   - New file: `../../api/new_file.md`
+
+   The raketask uses the following template:
 
    ```markdown
    ---
-   redirect_to: '../path/to/file/index.md'
+   redirect_to: '../newpath/to/file/index.md'
    ---
 
    This document was moved to [another location](../path/to/file/index.md).
@@ -205,6 +220,7 @@ To add a redirect:
    <!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->
    ```
 
+   NOTE:
    Redirect files linking to docs in any of the internal documentations projects
    are removed after three months. Redirect files linking to external sites are
    removed after one year.
