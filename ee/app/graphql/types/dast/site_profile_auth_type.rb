@@ -1,3 +1,4 @@
+# coding: utf-8
 # frozen_string_literal: true
 
 module Types
@@ -39,7 +40,9 @@ module Types
             description: 'Redacted password to authenticate with on the target website.'
 
       def password
-        nil
+        return unless object.secret_variables.where(key: ::Dast::SiteProfileSecretVariable::PASSWORD).exists?
+
+        '••••••••'
       end
     end
   end
