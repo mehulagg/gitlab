@@ -225,12 +225,11 @@ To see a list of your billable users on your GitLab group page go to **Settings 
 
 ## Subscription expiry
 
-When your license expires, GitLab locks down features, like Git pushes
-and issue creation. Then, your instance becomes read-only and
-an expiration message is displayed to all administrators.
+When your license expires, you can continue to use GitLab for 14 days.
+On the 15th day, paid features are no longer available. You can
+continue to use free features.
 
-- To resume functionality, upload a new license.
-- To fall back to Free features, delete the expired license.
+To resume paid feature functionality, upload a new license.
 
 ## CI pipeline minutes
 
