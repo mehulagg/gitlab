@@ -17,7 +17,7 @@ module Gitlab
         end
 
         def fields_with_markdown
-          %i(title pretext text fields)
+          %i(pretext text)
         end
 
         def pretext
@@ -35,7 +35,6 @@ module Gitlab
               fallback:     fallback_message,
               pretext:      custom_pretext,
               text:         text,
-              fields:       [],
               mrkdwn_in:    fields_with_markdown
             }
           ]
