@@ -36,6 +36,7 @@ class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
     BuildHooksWorker.perform_async(build.id)
     ExpirePipelineCacheWorker.perform_async(build.pipeline_id)
     ChatNotificationWorker.perform_async(build.id) if build.pipeline.chat?
+    ::Ci::MergeRequests::AddTodoWhenBuildFailsWorker.perform_async(build.id) if build.failed?
 
     ##
     # We want to delay sending a build trace to object storage operation to

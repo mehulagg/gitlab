@@ -13506,9 +13506,9 @@ CREATE TABLE incident_management_oncall_rotations (
     length_unit smallint NOT NULL,
     starts_at timestamp with time zone NOT NULL,
     name text NOT NULL,
-    ends_at timestamp with time zone,
     active_period_start time without time zone,
     active_period_end time without time zone,
+    ends_at timestamp with time zone,
     CONSTRAINT check_5209fb5d02 CHECK ((char_length(name) <= 200))
 );
 
@@ -16176,7 +16176,8 @@ CREATE TABLE project_ci_cd_settings (
     merge_trains_enabled boolean DEFAULT false,
     auto_rollback_enabled boolean DEFAULT false NOT NULL,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
-    restrict_user_defined_variables boolean DEFAULT false NOT NULL
+    restrict_user_defined_variables boolean DEFAULT false NOT NULL,
+    allow_merge_before_pipeline_completes boolean DEFAULT true NOT NULL
 );
 
 CREATE SEQUENCE project_ci_cd_settings_id_seq
