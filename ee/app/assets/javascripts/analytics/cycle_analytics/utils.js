@@ -14,6 +14,7 @@ import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
 import { s__, sprintf } from '~/locale';
 import { dateFormats } from '../shared/constants';
 import { toYmd } from '../shared/utils';
+import { OVERVIEW_STAGE_ID } from './constants';
 
 const EVENT_TYPE_LABEL = 'label';
 const ERROR_NAME_RESERVED = 'is reserved';
@@ -356,6 +357,29 @@ export const throwIfUserForbidden = (error) => {
 export const isStageNameExistsError = ({ status, errors }) =>
   status === httpStatus.UNPROCESSABLE_ENTITY && errors?.name?.includes(ERROR_NAME_RESERVED);
 
+// TODO: this assumes only days, we can support months, hours etc
+const timeSummaryForPathNavigation = ({ hours, days, minutes }) =>
+  days ? sprintf(s__('ValueStreamAnalytics|%{days}d'), { days }) : '-';
+
+export const formatMedianValuesWithOverview = (medians = {}) => {
+  const ps = (value) =>
+    timeSummaryForPathNavigation(parseSeconds(value, { daysPerWeek: 7, hoursPerDay: 24 }));
+  let overviewMedian = 0;
+  const calculatedMedians = Object.entries(medians).reduce((acc, [key, data]) => {
+    const nextValue = data?.value || 0;
+    overviewMedian += nextValue;
+    return {
+      ...acc,
+      [key]: nextValue ? ps(nextValue) : '-',
+      [OVERVIEW_STAGE_ID]: acc[OVERVIEW_STAGE_ID] + nextValue,
+    };
+  }, {});
+  return {
+    ...calculatedMedians,
+    [OVERVIEW_STAGE_ID]: overviewMedian ? ps(overviewMedian) : '-',
+  };
+};
+
 /**
  * Takes the stages and median data, combined with the selected stage, to build an
  * array which is formatted to proivde the data required for the path navigation.
@@ -367,14 +391,8 @@ export const isStageNameExistsError = ({ status, errors }) =>
  */
 export const transformStagesForPathNavigation = ({ stages, medians, selectedStage }) => {
   const formattedStages = stages.map((stage) => {
-    const { days } = parseSeconds(medians[stage.id], {
-      daysPerWeek: 7,
-      hoursPerDay: 24,
-      limitToDays: true,
-    });
-
     return {
-      metric: days ? sprintf(s__('ValueStreamAnalytics|%{days}d'), { days }) : null,
+      metric: medians[stage?.id],
       selected: stage.title === selectedStage.title,
       icon: null,
       ...stage,
