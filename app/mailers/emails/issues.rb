@@ -19,22 +19,19 @@ module Emails
       mail_answer_thread(@issue, issue_thread_options(updated_by_user_id, recipient_id, reason))
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def reassigned_issue_email(recipient_id, issue_id, previous_assignee_ids, updated_by_user_id, reason = nil)
       setup_issue_mail(issue_id, recipient_id)
 
       @previous_assignees = []
-      @previous_assignees = User.where(id: previous_assignee_ids) if previous_assignee_ids.any?
+      @previous_assignees = find_user_name(previous_assignee_ids) if previous_assignee_ids.any?
 
       mail_answer_thread(@issue, issue_thread_options(updated_by_user_id, recipient_id, reason))
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def closed_issue_email(recipient_id, issue_id, updated_by_user_id, reason: nil, closed_via: nil)
       setup_issue_mail(issue_id, recipient_id, closed_via: closed_via)
 
-      @updated_by = User.find(updated_by_user_id)
-      @recipient = User.find(recipient_id)
+      @updated_by = find_user_name(updated_by_user_id)
 
       mail_answer_thread(@issue, issue_thread_options(updated_by_user_id, recipient_id, reason))
     end
@@ -67,7 +64,7 @@ module Emails
       setup_issue_mail(issue_id, recipient_id)
 
       @issue_status = status
-      @updated_by = User.find(updated_by_user_id)
+      @updated_by = find_user_name(updated_by_user_id)
       mail_answer_thread(@issue, issue_thread_options(updated_by_user_id, recipient_id, reason))
     end
 
@@ -91,7 +88,7 @@ module Emails
     end
 
     def import_issues_csv_email(user_id, project_id, results)
-      @user = User.find(user_id)
+      @user = User.select(:notification_email).find(user_id)
       @project = Project.find(project_id)
       @results = results
 
@@ -131,7 +128,7 @@ module Emails
     def issue_thread_options(sender_id, recipient_id, reason)
       {
         from: sender(sender_id),
-        to: User.find(recipient_id).notification_email_for(@project.group),
+        to: User.select(:id, :notification_email).find(recipient_id).notification_email_for(@project.group),
         subject: subject("#{@issue.title} (##{@issue.iid})"),
         'X-GitLab-NotificationReason' => reason
       }

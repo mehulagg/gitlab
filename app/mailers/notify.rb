@@ -67,7 +67,7 @@ class Notify < ApplicationMailer
   # Return an email address that displays the name of the sender.
   # Only the displayed name changes; the actual email address is always the same.
   def sender(sender_id, send_from_user_email: false, sender_name: nil)
-    return unless sender = User.find(sender_id)
+    return unless sender = User.select(:name, :username, :email).find(sender_id)
 
     address = default_sender_address
     address.display_name = sender_name.presence || "#{sender.name} (#{sender.to_reference})"
@@ -220,6 +220,13 @@ class Notify < ApplicationMailer
 
     headers['List-Unsubscribe'] = list_unsubscribe_methods.map { |e| "<#{e}>" }.join(',')
     @unsubscribe_url = unsubscribe_sent_notification_url(@sent_notification)
+  end
+
+  def find_user_name(ids)
+    select = User.select(:name)
+    return select.where(id: ids) if ids.is_a?(Array) # rubocop: disable CodeReuse/ActiveRecord
+
+    select.find(ids)
   end
 end
 
