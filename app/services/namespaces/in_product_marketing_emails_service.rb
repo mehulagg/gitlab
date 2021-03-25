@@ -75,13 +75,15 @@ module Namespaces
     end
 
     def users_for_group(group)
-      group.users.where(email_opted_in: true)
+      group.users
+        .where(email_opted_in: true)
         .where.not(id: current_batch_user_ids)
-        .left_outer_joins(:in_product_marketing_emails)
-        .merge(
-          Users::InProductMarketingEmail.without_track_or_series(track, series)
-            .or(Users::InProductMarketingEmail.where(id: nil))
-        )
+        .where.not(id:
+          Users::InProductMarketingEmail
+            .where(track: track, series: series)
+            .joins(:user)
+            .merge(group.users)
+            .select(:user_id))
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -101,7 +103,7 @@ module Namespaces
     def send_email(user, group)
       NotificationService.new.in_product_marketing(user.id, group.id, track, series)
 
-      track_sent_email(user, group, track, series)
+      track_sent_email(user, track, series)
     end
 
     def completed_actions
@@ -126,7 +128,7 @@ module Namespaces
       Users::InProductMarketingEmail.bulk_insert!(in_product_marketing_email_records)
     end
 
-    def track_sent_email(user, group, track, series)
+    def track_sent_email(user, track, series)
       current_batch_user_ids << user.id
 
       in_product_marketing_email_records << Users::InProductMarketingEmail.new(
