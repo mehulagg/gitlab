@@ -2351,7 +2351,7 @@ considered and customer technical support will be considered out of scope.
 
 ## Hybrid Reference Architecture with Helm Charts (Alternative)
 
-As an alternative approach you can also run select components in Kubernetes
+As an alternative approach you can also run select components of GitLab in Kubernetes
 via our official [Helm Charts](https://docs.gitlab.com/charts/).
 
 In this setup we support running the equivalent of GitLab Rails and Sidekiq nodes
@@ -2369,7 +2369,7 @@ Kubernetes you can reap certain cloud native workload management benefits while
 the others are deployed in compute VMs with Omnibus as described above in this
 page.
 
-It should be noted though that this is an advanced setup. Running services in
+It should be noted though that this is an advanced setup as running services in
 Kubernetes is well known to be complex. **This setup is only recommended** if
 you have strong working knowledge and experience in Kubernetes. The rest of this
 section will assume this.
@@ -2401,7 +2401,7 @@ the [recommended topology](#cluster-topology) because four worker processes
 are created by default and each pod has other small processes running.
 
 For 10k users we recommend a total Puma worker count of around 80.
-With the [provided recommendations](#cluster-topology) this allow the deployment of up to 20
+With the [provided recommendations](#cluster-topology) this allows the deployment of up to 20
 Webservice pods with 4 works per pod. Expand available resources using the ratio of 1 vCPU
 to 1.125 GB of memory _per each worker process_ for each additional Webservice pod.
 
