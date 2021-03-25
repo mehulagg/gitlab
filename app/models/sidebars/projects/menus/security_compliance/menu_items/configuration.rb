@@ -21,7 +21,7 @@ module Sidebars
 
             override :nav_link_params
             def nav_link_params
-              { path: 'projects/security/configuration#show' }
+              { path: ['projects/security/configuration#show'] }
             end
 
             override :item_name
@@ -39,3 +39,5 @@ module Sidebars
     end
   end
 end
+
+Sidebars::Projects::Menus::SecurityCompliance::MenuItems::Configuration.prepend_if_ee('EE::Sidebars::Projects::Menus::SecurityCompliance::MenuItems::Configuration')
