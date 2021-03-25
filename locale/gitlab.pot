@@ -14375,8 +14375,8 @@ msgid "GithubIntegration|Repository URL"
 msgstr ""
 
 msgid ""
-"GithubIntegration|Select this if you want GitHub to mark status checks as \"Required\". When enabled, appends your\n"
-"          GitLab instance host name to the status check name. When disabled, it uses the branch name."
+"GithubIntegration|Select this if you want GitHub to mark status checks as Required. When enabled, this appends your\n"
+"        GitLab instance host name to the status check name. When disabled, it uses the branch name."
 msgstr ""
 
 msgid "GithubIntegration|Static status check names (optional)"
