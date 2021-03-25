@@ -1,3 +1,5 @@
+- expires_at_description = ::Key.expiration_enforced? ? s_('Profiles|Key will be deleted on this date.') : s_('Profiles|Key can still be used after expiration.')
+
 %div
   = form_for [:profile, @key], html: { class: 'js-requires-input' } do |f|
     = form_errors(@key)
@@ -15,6 +17,7 @@
       .col.form-group
         = f.label :expires_at, s_('Profiles|Expires at'), class: 'label-bold'
         = f.date_field :expires_at, class: "form-control input-lg", min: Date.tomorrow, data: { qa_selector: 'key_expiry_date_field' }
+        %p.form-text.text-muted= expires_at_description
 
     .js-add-ssh-key-validation-warning.hide
       .bs-callout.bs-callout-warning{ role: 'alert', aria_live: 'assertive' }
