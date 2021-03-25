@@ -8,8 +8,8 @@ module EE
           module Menu
             extend ::Gitlab::Utils::Override
 
-            override :initialize
-            def initialize(context)
+            override :configure_menu_items
+            def configure_menu_items
               super
 
               add_item(::Sidebars::Projects::Menus::Repository::MenuItems::FileLocks.new(context))

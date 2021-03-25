@@ -5,9 +5,8 @@ module Sidebars
     module Menus
       module Issues
         class Menu < ::Sidebars::Menu
-          def initialize(context)
-            super
-
+          override :configure_menu_items
+          def configure_menu_items
             add_item(MenuItems::List.new(context))
             add_item(MenuItems::Boards.new(context))
             add_item(MenuItems::Labels.new(context))

@@ -5,9 +5,8 @@ module Sidebars
     module Menus
       module Repository
         class Menu < ::Sidebars::Menu
-          def initialize(context)
-            super
-
+          override :configure_menu_items
+          def configure_menu_items
             add_item(MenuItems::Files.new(context))
             add_item(MenuItems::Commits.new(context))
             add_item(MenuItems::Branches.new(context))

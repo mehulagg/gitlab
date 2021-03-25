@@ -15,6 +15,12 @@ module Sidebars
     def initialize(context)
       @context = context
       @items = []
+
+      configure_menu_items
+    end
+
+    def configure_menu_items
+      # No-op
     end
 
     def render?
@@ -63,7 +69,19 @@ module Sidebars
     end
 
     def sprite_icon
-      raise NotImplementedError
+      nil
+    end
+
+    def image_path
+      nil
+    end
+
+    def image_html_options
+      {}
+    end
+
+    def icon_or_image?
+      sprite_icon || image_path
     end
   end
 end

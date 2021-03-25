@@ -5,9 +5,8 @@ module Sidebars
     module Menus
       module ProjectOverview
         class Menu < ::Sidebars::Menu
-          def initialize(context)
-            super
-
+          override :configure_menu_items
+          def configure_menu_items
             add_item(MenuItems::Details.new(context))
             add_item(MenuItems::Activity.new(context))
             add_item(MenuItems::Releases.new(context))

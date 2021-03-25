@@ -23,11 +23,19 @@ module Sidebars
     # `page`, `controller`.
     # Param 'action' is not supported.
     def nav_link_params
-      raise NotImplementedError
+      {}
     end
 
     def item_name
       raise NotImplementedError
+    end
+
+    def sprite_icon
+      nil
+    end
+
+    def sprite_icon_html_options
+      {}
     end
   end
 end
