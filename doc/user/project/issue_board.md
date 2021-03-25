@@ -343,10 +343,8 @@ As in other list types, click the trash icon to remove a list.
 ### Iteration lists **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250479) in GitLab 13.10.
-> - It's [deployed behind the `board_new_lists` feature flag](../feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
+> - It's [deployed behind the `board_new_lists` feature flag](../feature_flags.md), enabled by default.
 > - It's recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-new-add-list-form).
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
