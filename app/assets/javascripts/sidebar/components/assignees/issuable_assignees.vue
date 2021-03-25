@@ -1,11 +1,13 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import { n__ } from '~/locale';
+import CollapsedAssigneeList from '~/sidebar/components/assignees/collapsed_assignee_list.vue';
 import UncollapsedAssigneeList from '~/sidebar/components/assignees/uncollapsed_assignee_list.vue';
 
 export default {
   components: {
     GlButton,
+    CollapsedAssigneeList,
     UncollapsedAssigneeList,
   },
   props: {
@@ -37,9 +39,10 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-flex-direction-column issuable-assignees">
+    <collapsed-assignee-list :users="users" :issuable-type="issuableType" />
     <div
       v-if="emptyUsers"
-      class="gl-display-flex gl-align-items-center gl-text-gray-500"
+      class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-mt-2 hide-collapsed"
       data-testid="none"
     >
       <span> {{ __('None') }}</span>
@@ -56,6 +59,11 @@ export default {
         </gl-button>
       </template>
     </div>
-    <uncollapsed-assignee-list v-else :users="users" :issuable-type="issuableType" />
+    <uncollapsed-assignee-list
+      v-else
+      :users="users"
+      :issuable-type="issuableType"
+      class="gl-mt-2 hide-collapsed"
+    />
   </div>
 </template>

@@ -103,7 +103,7 @@ export default {
     v-gl-tooltip="tooltipOption"
     :href="assigneeUrl"
     :title="tooltipTitle"
-    class="d-inline-block"
+    class="gl-inline-block"
   >
     <!-- use d-flex so that slot can be appropriately styled -->
     <span class="d-flex">
