@@ -293,6 +293,9 @@
 ################
 .shared:rules:update-cache:
   rules:
+    # FIXME: Temporarily disable updating of cache to avoid scheduled pipeline failures
+    # until mimemagic is removed
+    - when: never
     - <<: *if-master-schedule-2-hourly
     - <<: *if-security-schedule
     - <<: *if-merge-request-title-update-caches
