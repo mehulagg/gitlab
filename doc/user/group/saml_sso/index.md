@@ -96,7 +96,7 @@ Please note that the certificate [fingerprint algorithm](../../../integration/sa
 - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/292811) in GitLab 13.8, with an updated timeout experience.
 - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/211962) in GitLab 13.8 with allowing group owners to not go through SSO.
 
-With this option enabled, users must go through your group's GitLab single sign-on URL if they wish to access group/project resources. Log in with username/password is still possbile but when trying to access the group resources, they will be redirected to login through the SSO URL. They may also be added via SCIM, if configured. Users can't be added manually, and may only access project/group resources via the UI by signing in through the SSO URL.
+With this option enabled, users must go through your group's GitLab single sign-on URL if they wish to access group/project resources. Log in with username/password is still possbile but when trying to access the group resources, they will be redirected to log in through the SSO URL. They may also be added via SCIM, if configured. Users can't be added manually, and may only access project/group resources via the UI by signing in through the SSO URL.
 
 However, users are not prompted to sign in through SSO on each visit. GitLab checks whether a user
 has authenticated through SSO. If it's been more than 1 day since the last sign-in, GitLab
