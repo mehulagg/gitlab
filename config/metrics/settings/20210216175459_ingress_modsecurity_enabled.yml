@@ -8,7 +8,7 @@ product_category: web_firewall
 value_type: boolean
 status: deprecated
 time_frame: none
-data_source:
+data_source: database
 distribution:
 - ce
 - ee
