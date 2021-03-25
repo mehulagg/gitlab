@@ -68,6 +68,26 @@ module Sidebars
       @items << item
     end
 
+    def insert_item_before(before_item, new_item)
+      index = index_of(before_item)
+
+      if index
+        @items.insert(index, new_item)
+      else
+        @items.unshift(new_item)
+      end
+    end
+
+    def insert_item_after(after_item, new_item)
+      index = index_of(after_item)
+
+      if index
+        @items.insert(index + 1, new_item)
+      else
+        add_menu(new_item)
+      end
+    end
+
     def renderable_items
       @renderable_items ||= @items.select(&:render?)
     end
@@ -86,6 +106,12 @@ module Sidebars
 
     def icon_or_image?
       sprite_icon || image_path
+    end
+
+    private
+
+    def index_of(item)
+      @items.index { |m| m.is_a?(item) }
     end
   end
 end
