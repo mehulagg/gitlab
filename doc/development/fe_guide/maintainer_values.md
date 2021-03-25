@@ -86,6 +86,20 @@ At GitLab, we aim to be as inclusive as possible and this includes making space 
 
 If you find yourself working with a merge request that is not going to meet the quality bench mark, aim to let the author absorb that as a learning experience but help to foster the right response of being inspired to try again with another, better merge, not fear of being seeing as lacking in someway. 
 
+### Nitpicks => A special mention
+
+> Perfectionism is toxic
+
+Nitpicks are born from a wonderful place for most reviewers of wanting to ensure they provide the most end-to-end review possible and highlight every single potential issue. This generally translates into two types of comments:
+
+- Show stoppers 
+- Nitpicks 
+
+While showstoppers and important to voice as a maintainer(even if it initially born from a personal preference), but smaller non-blocking nitpicks have the issue that they create a lot of noise - useful feedback in a code review which can at best bog down a review, or at worst create a toxic merge for the author. 
+
+While Paul Slaughter has a wonderful method for helping to inject context into your comments via [conventionalcomments](https://conventionalcomments.org/), it's always worth sanity checking yourself if you have a lot of nitpicks to offer in a review and if they will really make a positive difference for the author. 
+
+If you want to see more reasons for this you should check out [stop nitpicking](https://blog.danlew.net/2021/02/23/stop-nitpicking-in-code-reviews/)
 ## TL;DR
 
 - Stick to the high-level stuff where you can. Nitty gritty is often not useful. 
