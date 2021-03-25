@@ -35,8 +35,9 @@ module Gitlab
       def to_h
         {
           environment: environment,
-          source: source
-        }.merge(@data)
+          source: source,
+          extra: @data
+        }
       end
     end
   end
