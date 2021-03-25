@@ -15,7 +15,7 @@ module QA
             element :pipeline_graph, /class.*pipeline-graph.*/ # rubocop:disable QA/ElementWithPattern
           end
 
-          view 'app/assets/javascripts/pipelines/components/jobs_shared/job_item.vue' do
+          view 'app/assets/javascripts/pipelines/components/graph/job_item.vue' do
             element :job_item_container
             element :job_link
             element :action_button
