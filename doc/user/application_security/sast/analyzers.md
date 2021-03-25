@@ -48,12 +48,12 @@ GitLab, but users can also integrate their own **custom images**.
 For an analyzer to be considered Generally Available, it is expected to minimally 
 support the following features.
 
-* [Customizable configuration](index.md#available-variables)
-* [Customizable rulesets](index.md#customize-rulesets)
-* [Scan projects](index.md#supported-languages-and-frameworks)
-* [Multi-project support](index.md#multi-project-support)
-* [Offline support](index.md#running-sast-in-an-offline-environment)
-* [Emits JSON report format](index.md#reports-json-format)
+- [Customizable configuration](index.md#available-variables)
+- [Customizable rulesets](index.md#customize-rulesets)
+- [Scan projects](index.md#supported-languages-and-frameworks)
+- [Multi-project support](index.md#multi-project-support)
+- [Offline support](index.md#running-sast-in-an-offline-environment)
+- [Emits JSON report format](index.md#reports-json-format)
 
 ## Official default analyzers
 
