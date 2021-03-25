@@ -12,12 +12,11 @@ description: "Documentation on Git file blame."
 about every line in a file, including the last modified time, author, and
 commit hash. To view it for a file:
 
-1. Navigate to your project.
-1. In the left sidebar, go to **Repository > Files**.
-1. Click the file you want to review.
-1. In the upper right corner, click **Blame**.
+1. Go to your project's **Repository > Files**.
+1. Select the file you want to review.
+1. In the upper right corner, select **Blame**.
 
-When you click **Blame**, this information is shown:
+When you select **Blame**, this information is displayed:
 
 ![Git blame output](img/file_blame_output_v12_6.png "Blame button output")
 

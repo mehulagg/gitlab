@@ -13,9 +13,10 @@ with a file. To use it:
 
 1. Navigate to your project.
 1. In the left sidebar, go to **Repository > Files**.
-1. In the upper right corner, click **History**.
+1. Go to your project's **Repository > Files**.
+1. In the upper right corner, select **History**.
 
-When you click **History**, this information displays:
+When you select **History**, this information is displayed:
 
 ![Git log output](img/file_history_output_v12_6.png "History button output")
 
