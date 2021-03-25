@@ -1,5 +1,5 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import ActionComponent from '~/pipelines/components/graph/action_component.vue';
+import ActionComponent from '~/pipelines/components/jobs_shared/action_component.vue';
 import JobItem from '~/pipelines/components/graph/job_item.vue';
 import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 

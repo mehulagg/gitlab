@@ -79,10 +79,10 @@ export default {
       return this.dropdownLength === 1 ? 'viewport' : 'scrollParent';
     },
     detailsPath() {
-      return this.status.details_path
+      return this.status.details_path;
     },
     hasDetails() {
-      return this.status.has_details
+      return this.status.has_details;
     },
     status() {
       return this.job && this.job.status ? this.job.status : {};

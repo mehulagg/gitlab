@@ -8,7 +8,7 @@ import {
   PIPELINES_DETAIL_LINKS_JOB_RATIO,
 } from '~/performance/constants';
 import * as perfUtils from '~/performance/utils';
-import * as sentryUtils from '~/pipelines/components/graph/utils';
+import * as sentryUtils from '~/pipelines/utils';
 import * as Api from '~/pipelines/components/graph_shared/api';
 import LinksInner from '~/pipelines/components/graph_shared/links_inner.vue';
 import { createJobsHash } from '~/pipelines/utils';
