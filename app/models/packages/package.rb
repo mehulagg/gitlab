@@ -70,7 +70,7 @@ class Packages::Package < ApplicationRecord
                        composer: 6, generic: 7, golang: 8, debian: 9,
                        rubygems: 10 }
 
-  enum status: { default: 0, hidden: 1, processing: 2 }
+  enum status: { default: 0, hidden: 1, processing: 2, error: 3 }
 
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
