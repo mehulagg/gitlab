@@ -15,16 +15,11 @@ class AsanaService < Service
   end
 
   def help
-    'Add commit messages as comments to Asana tasks. When enabled,
+    s_('AsanaService|Add commit messages as comments to Asana tasks. When enabled,
 commit messages are checked for Asana task URLs
 (for example, `https://app.asana.com/0/123456/987654`) or task IDs starting with
 `#` (for example, `#987654`). Every task ID found gets the commit comment added
-to it.
-
-You can also close a task with a message like `fix #123456`.
-You can use either: `fix`, `fixed`, `fixes`, `fixing`, `close`, `closes`, `closed`, or `closing`.
-
-Learn about your Personal Access Tokens here: <https://developers.asana.com/docs/personal-access-token>.'
+to it.')
   end
 
   def self.to_param
