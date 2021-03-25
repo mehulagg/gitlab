@@ -5,11 +5,13 @@ require 'spec_helper'
 RSpec.describe 'Setting assignees of a merge request' do
   include GraphqlHelpers
 
-  let(:current_user) { create(:user) }
-  let(:merge_request) { create(:merge_request) }
-  let(:project) { merge_request.project }
-  let(:assignee) { create(:user) }
-  let(:assignee2) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:current_user) { create(:user, developer_projects: [project]) }
+  let_it_be(:assignee) { create(:user) }
+  let_it_be(:assignee2) { create(:user) }
+  let_it_be_with_reload(:merge_request) { create(:merge_request, source_project: project) }
+
+  let(:db_query_limit) { 30 }
   let(:input) { { assignee_usernames: [assignee.username] } }
   let(:expected_result) do
     [{ 'username' => assignee.username }]
@@ -44,8 +46,15 @@ RSpec.describe 'Setting assignees of a merge request' do
     mutation_response['mergeRequest']['assignees']['nodes']
   end
 
+  def run_mutation!
+    recorder = ActiveRecord::QueryRecorder.new do
+      post_graphql_mutation(mutation, current_user: current_user)
+    end
+
+    expect(recorder.count).to be <= db_query_limit
+  end
+
   before do
-    project.add_developer(current_user)
     project.add_developer(assignee)
     project.add_developer(assignee2)
   end
@@ -56,13 +65,16 @@ RSpec.describe 'Setting assignees of a merge request' do
     expect(graphql_errors).not_to be_empty
   end
 
-  it 'does not allow members without the right permission to add assignees' do
-    user = create(:user)
-    project.add_guest(user)
+  context 'when the current user does not have permission to add assignees' do
+    let(:current_user) { create(:user) }
 
-    post_graphql_mutation(mutation, current_user: user)
+    it 'does not change the assignees' do
+      project.add_guest(current_user)
 
-    expect(graphql_errors).not_to be_empty
+      expect { run_mutation! }.not_to change { merge_request.reset.assignees.pluck(:id) }
+
+      expect(graphql_errors).not_to be_empty
+    end
   end
 
   context 'with assignees already assigned' do
@@ -71,8 +83,10 @@ RSpec.describe 'Setting assignees of a merge request' do
       merge_request.save!
     end
 
+    let(:db_query_limit) { 80 }
+
     it 'replaces the assignee' do
-      post_graphql_mutation(mutation, current_user: current_user)
+      run_mutation!
 
       expect(response).to have_gitlab_http_status(:success)
       expect(mutation_assignee_nodes).to match_array(expected_result)
@@ -81,6 +95,7 @@ RSpec.describe 'Setting assignees of a merge request' do
 
   context 'when passing an empty list of assignees' do
     let(:input) { { assignee_usernames: [] } }
+    let(:db_query_limit) { 50 }
 
     before do
       merge_request.assignees = [assignee2]
@@ -88,7 +103,7 @@ RSpec.describe 'Setting assignees of a merge request' do
     end
 
     it 'removes assignee' do
-      post_graphql_mutation(mutation, current_user: current_user)
+      run_mutation!
 
       expect(response).to have_gitlab_http_status(:success)
       expect(mutation_assignee_nodes).to eq([])
@@ -109,7 +124,7 @@ RSpec.describe 'Setting assignees of a merge request' do
     end
 
     it 'does not replace the assignee in CE' do
-      post_graphql_mutation(mutation, current_user: current_user)
+      run_mutation!
 
       expect(response).to have_gitlab_http_status(:success)
       expect(mutation_assignee_nodes).to match_array(expected_result)
@@ -117,6 +132,7 @@ RSpec.describe 'Setting assignees of a merge request' do
   end
 
   context 'when passing remove as true' do
+    let(:db_query_limit) { 50 }
     let(:mode) { Types::MutationOperationModeEnum.enum[:remove] }
     let(:input) { { assignee_usernames: [assignee.username], operation_mode: mode } }
     let(:expected_result) { [] }
@@ -127,7 +143,7 @@ RSpec.describe 'Setting assignees of a merge request' do
     end
 
     it 'removes the users in the list, while adding none' do
-      post_graphql_mutation(mutation, current_user: current_user)
+      run_mutation!
 
       expect(response).to have_gitlab_http_status(:success)
       expect(mutation_assignee_nodes).to match_array(expected_result)
