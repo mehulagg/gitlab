@@ -23,6 +23,8 @@ RSpec.describe 'Projects > Files > User uploads files' do
 
     include_examples 'it uploads and commit a new image file'
 
+    include_examples 'it uploads and commit a new pdf file'
+
     include_examples 'it uploads a file to a sub-directory'
   end
 

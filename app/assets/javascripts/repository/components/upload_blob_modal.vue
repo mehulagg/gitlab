@@ -179,7 +179,12 @@ export default {
       :action-cancel="cancelOptions"
       @primary.prevent="uploadFile"
     >
-      <upload-dropzone class="gl-h-200! gl-mb-4" single-file-selection @change="setFile">
+      <upload-dropzone
+        class="gl-h-200! gl-mb-4"
+        single-file-selection
+        :valid-file-mimetypes="['']"
+        @change="setFile"
+      >
         <div
           v-if="file"
           class="card upload-dropzone-card upload-dropzone-border gl-w-full gl-h-full gl-align-items-center gl-justify-content-center gl-p-3"

@@ -58,6 +58,32 @@ RSpec.shared_examples 'it uploads and commit a new image file' do
   end
 end
 
+RSpec.shared_examples 'it uploads and commit a new pdf file' do
+  it 'uploads and commit a new pdf file', :js do
+    find('.add-to-tree').click
+
+    page.within('.dropdown-menu') do
+      click_link('Upload file')
+
+      wait_for_requests
+    end
+
+    attach_file('upload_file', File.join(Rails.root, 'spec', 'fixtures', 'git-cheat-sheet.pdf'), make_visible: true)
+
+    page.within('#modal-upload-blob') do
+      fill_in(:commit_message, with: 'New commit message')
+      fill_in(:branch_name, with: 'upload_image', visible: true)
+      click_button('Upload file')
+    end
+
+    wait_for_all_requests
+
+    visit(project_blob_path(project, 'upload_image/git-cheat-sheet.pdf'))
+
+    expect(page).to have_css('.js-pdf-viewer')
+  end
+end
+
 RSpec.shared_examples 'it uploads and commit a new file to a forked project' do
   let(:fork_message) do
     "You're not allowed to make changes to this project directly. "\
