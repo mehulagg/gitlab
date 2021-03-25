@@ -787,7 +787,7 @@ for how to use its API to query for data.
 
 ### Fallback values for UsagePing
 
-There are a few fallback values that we use, which are returned in case the following cases:
+We return fallback values in these cases:
 
 | Case                        | Value |
 |-----------------------------|-------|
