@@ -45,7 +45,6 @@ module QA
         Page::Admin::Settings::General.perform do |general_settings|
           general_settings.expand_sign_up_restrictions do |signup_settings|
             signup_settings.disable_signups
-            signup_settings.save_changes
           end
         end
       end

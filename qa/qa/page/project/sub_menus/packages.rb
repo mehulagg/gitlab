@@ -13,6 +13,7 @@ module QA
             base.class_eval do
               view 'app/views/layouts/nav/sidebar/_project_packages_link.html.haml' do
                 element :packages_link
+                element :container_registry_link
               end
             end
           end
