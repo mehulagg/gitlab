@@ -21,10 +21,6 @@ user is cloning or fetching, and whether the clone is shallow, partial
 or neither. When the cache is enabled, anything that uses
 PostUploadPack or SSHUploadPack can benefit from it.
 
-The pack-objects cache is a local cache: it stores its metadata in
-memory in the Gitaly process it is enabled in, and it stores the
-actual Git data it is caching in files on local storage.
-
 The pack-objects cache is designed for CI clone traffic: many clones
 that ask for the same Git objects in a short time window. It will have
 fewer, or even no benefits for other types of traffic. The cache key
@@ -32,9 +28,11 @@ is determined by the set of Git objects that the client is trying to
 fetch. That means that for clones that fetch all branches, only one
 branch has to change and you will get a cache miss.
 
-Because the pack-objects cache can lead to a significant increase in
-disk write IO and because its cache entries can be large it is off by
-default.
+The pack-objects cache is a local cache: it stores its metadata in
+memory in the Gitaly process it is enabled in, and it stores the
+actual Git data it is caching in files on local storage. Because the
+pack-objects cache can lead to a significant increase in disk write IO
+it is off by default.
 
 ## Configuration
 
@@ -43,6 +41,14 @@ default.
 |`enabled`|`false`|Turns on the cache. When off, Gitaly runs a dedicated `git pack-objects` process for each request.|
 |`dir`|`<PATH TO FIRST STORAGE>/+gitaly/PackObjectsCache`|Local directory where cache files get stored, see discussion below.|
 |`max_age`|`5m` (5 minutes)|Cache entries older than this get expired and removed from disk.|
+
+In `gitlab.rb`:
+
+```ruby
+gitaly['pack_objects_cache_enabled'] = true
+# gitaly['pack_objects_cache_dir'] = '/var/opt/gitlab/git-data/repositories/+gitaly/PackObjectsCache'
+# gitaly['pack_objects_cache_max_age'] = '5m'
+```
 
 ### Cache storage directory `dir`
 
@@ -55,51 +61,52 @@ storage defined in the config file.
 - If the cache disk runs out of **IO bandwidth**, all clones, and probably the entire server, will **slow down** 
 
 It is allowed for multiple Gitaly processes to use the same directory
-for cache storage but be aware that they will not share cache entries:
-there is no benefit in sharing. Each Gitaly processes uses a unique
+for cache storage. Each Gitaly processes uses a unique
 random string as part of the cache filenames it creates so they will
 not collide.
-
-It is technically OK to put the cache directory on an NFS server but
-it may not be optimal for performance, depending on your traffic and
-on the performance characteristics of your NFS server.
 
 While the default is to use a subdirectory of the first repository
 storage directory defined in the Gitaly configuration file, there is
 no technical need for the cache to be on the same filesystem as the
-repositories. We chouse this default because the repository storage
-filesystem is likely to have enough space and IO bandwidth; at least
-that has been our experience on GitLab.com.
+repositories. We chose this default because the repository storage
+filesystem is likely to have enough space and IO bandwidth.
 
-The cache directory does not have to persist across server restarts.
-This is because the cache is automatically invalidated when the Gitaly
-process restarts, and a server restart implies a process restart.
-
-The amount of bandwidth required depends on the size and shape of the
-repositories on your Gitaly server and on the kind of traffic your
-users generate. You can use the network egress rate as an estimate.
+The amount of IO bandwidth required from the disk depends on the size
+and shape of the repositories on your Gitaly server and on the kind of
+traffic your users generate. You can use the network egress rate as an
+estimate.
 
 The amount of space required depends on the bytes per second that your
 users pull from the cache and the size of the `max_age` cache eviction
 window. If your users pull 100 MB/s and you use a 5 minute window,
-then on average you will have 5*60*100MB = 30GB of data in your cache
-directory. The pack-objects cache does not enforce a limit on the
-amount of data stored so there may be peaks that exceed the average,
-all depending on your repositories and your traffic.
+then on average you will have `5*60*100MB = 30GB` of data in your cache
+directory.
 
 ### Cache eviction window `max_age`
 
 The `max_age` configuration setting lets us control how much data is
 stored in the cache. Entries older than `max_age` get evicted from the
-in-memory metadata store, and deleted from disk. Note that this does not
-interfere with ongoing requests, so it is OK for `max_age` to be less
-than the time it takes to do a clone over a slow connection. This is
-because Unix filesystems do not truly delete a file until all
-processes that are reading the deleted file have closed it.
+in-memory metadata store, and deleted from disk.
+
+Note that this does not interfere with ongoing requests, so it is OK
+for `max_age` to be less than the time it takes to do a clone over a
+slow connection. This is because Unix filesystems do not truly delete
+a file until all processes that are reading the deleted file have
+closed it.
 
 The default value of 5 minutes was chosen after a traffic analysis on
 GitLab.com; it seemed a reasonable number in terms of cache hit ratio
 and cache storage size.
+
+## Observability
+
+### Logs
+
+|Message|Fields|Description|
+|:---|:---|:---|
+
+
+### Metrics
 
 ## Design notes
 
