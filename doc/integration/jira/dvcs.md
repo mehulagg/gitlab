@@ -53,8 +53,12 @@ If you're using GitLab.com and Jira Cloud, use the
 1. Go to your DVCS account:
    - *For Jira Server,* go to **Settings (gear) > Applications > DVCS accounts**.
    - *For Jira Cloud,* go to **Settings (gear) > Products > DVCS accounts**.
-1. To create a new integration, click **Link GitHub Enterprise account**.
-1. For **Host**, select **GitHub Enterprise**.
+1. To create a new integration, select the appropriate value for **Host**:
+   - *For Jira versions 8.14 and later:* Select **GitLab** or
+     <!-- vale gitlab.Substitutions = NO -->
+     **GitLab Self-Hosted**.
+     <!-- vale gitlab.Substitutions = YES -->
+   - *For Jira versions 8.13 and earlier:* Select **GitHub Enterprise**.
 1. For **Team or User Account**, enter either
    - The relative path of a top-level GitLab group that you have access to.
    - The relative path of your personal namespace.
