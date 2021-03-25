@@ -27,7 +27,12 @@ Response Code Legend:
 
 ## Configuration
 
-Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL and enable `ci_external_validation_service` feature flag.
+Set the `EXTERNAL_VALIDATION_SERVICE_URL` environment variable to the external service URL and
+enable `ci_external_validation_service` feature flag.
+
+Requests to the external service time out by default after 5 seconds.
+To override the duration, set `EXTERNAL_VALIDATION_SERVICE_TIMEOUT` environment variable to the
+desired number of seconds.
 
 ## Payload Schema
 
