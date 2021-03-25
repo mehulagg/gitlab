@@ -58,10 +58,10 @@ RSpec.describe Gitlab::Tracking::StandardContext do
     end
 
     context 'with extra data' do
-      subject { described_class.new(foo: 'bar', a: 'b') }
+      subject { described_class.new(extra_key_1: 'extra value 1', extra_key_2: 'extra value 2') }
 
       it 'includes extra data in `extra` hash' do
-        expect(snowplow_context.to_json.dig(:data, :extra)).to eq(foo: 'bar', a: 'b')
+        expect(snowplow_context.to_json.dig(:data, :extra)).to eq(extra_key_1: 'extra value 1', extra_key_2: 'extra value 2')
       end
     end
 
