@@ -250,7 +250,7 @@ GitLab currently supports post-processing for following service providers:
 Third party cloud and SaaS providers can [express integration interest by filling out this form](https://forms.gle/wWpvrtLRK21Q2WJL9). Learn more about the [technical details of post-processing secrets](https://gitlab.com/groups/gitlab-org/-/epics/4639).
 
 NOTE:
-Post-processing is currently limited to a project's default branch, see the above epic for future efforts to support additional branches
+Post-processing is currently limited to a project's default branch, see the above epic for future efforts to support additional branches.
 
 ```mermaid
 sequenceDiagram
