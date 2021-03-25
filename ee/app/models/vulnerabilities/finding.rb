@@ -76,6 +76,7 @@ module Vulnerabilities
 
     scope :by_report_types, -> (values) { where(report_type: values) }
     scope :by_projects, -> (values) { where(project_id: values) }
+    scope :by_scanners, -> (values) { where(scanner_id: values) }
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
     scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }

@@ -1064,7 +1064,11 @@ RSpec.describe API::Projects do
       end
 
       context 'delayed project removal is enabled for group' do
-        let(:group) { create(:group, delayed_project_removal: true) }
+        let(:group) { create(:group) }
+
+        before do
+          group.namespace_settings.update(delayed_project_removal: true)
+        end
 
         it_behaves_like 'marks project for deletion'
 
