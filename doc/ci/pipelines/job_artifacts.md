@@ -8,11 +8,7 @@ type: reference, howto
 
 # Job artifacts
 
-> - Introduced in GitLab 8.2 and GitLab Runner 0.7.0.
-> - Starting with GitLab 8.4 and GitLab Runner 1.0, the artifacts archive format changed to `ZIP`, and it's now possible to browse its contents, with the added ability of downloading the files separately.
-> - In GitLab 8.17, builds were renamed to jobs.
-> - The artifacts browser is available only for new artifacts that are sent to GitLab using GitLab Runner version 1.0 and up. You cannot browse old artifacts already uploaded to GitLab.
-> - Introduced in [GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16675), artifacts in internal and private projects can be previewed when [GitLab Pages access control](../../administration/pages/index.md#access-control) is enabled.
+> Introduced in [GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16675), artifacts in internal and private projects can be previewed when [GitLab Pages access control](../../administration/pages/index.md#access-control) is enabled.
 
 Jobs can output an archive of files and directories. This output is known as a job artifact.
 
@@ -22,9 +18,6 @@ You can download job artifacts by using the GitLab UI or the [API](../../api/job
 For an overview, watch the video [GitLab CI Pipeline, Artifacts, and Environments](https://www.youtube.com/watch?v=PCKDICEe10s).
 Watch also [GitLab CI pipeline tutorial for beginners](https://www.youtube.com/watch?v=Jav4vbUrqII).
 
-NOTE:
-Select artifacts in internal and private projects can be previewed only when
-[GitLab Pages access control](../../administration/pages/index.md#access-control) is enabled.
 
 ## Define artifacts in the `.gitlab-ci.yml` file
 
@@ -42,15 +35,8 @@ pdf:
 A job named `pdf` calls the `xelatex` command to build a PDF file from the
 LaTeX source file, `mycv.tex`.
 
-The `paths` keyword determines where to create the job artifacts.
+The `paths` keyword determines which files to add to the job artifacts.
 All paths to files and directories are relative to the repository where the job was created.
-
-The [`artifacts:when`](../yaml/README.md#artifactswhen) keyword determines when to create the job artifacts.
-You can specify that they are created:
-
-- When the job succeeds. (Default)
-- Always.
-- Only when the job fails.
 
 The `expire_in` keyword determines how long GitLab keeps the job artifacts.
 You can also [use the UI to keep job artifacts from expiring](#download-job-artifacts).
@@ -61,9 +47,6 @@ is used.
 For more examples, view the [keyword reference for the `.gitlab-ci.yml` file](../yaml/README.md#artifacts).
 
 ## Download job artifacts
-
-> - From GitLab 9.2, PDFs, images, videos, and other formats can be previewed directly in the job artifacts browser without the need to download them.
-> - Introduced in [GitLab 10.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14399), HTML files in a public project can be previewed directly in a new tab without the need to download them when [GitLab Pages](../../administration/pages/index.md) is enabled. The same applies for textual formats (currently supported extensions: `.txt`, `.json`, and `.log`).
 
 You can download job artifacts or view the job archive:
 
@@ -87,7 +70,12 @@ You can download job artifacts or view the job archive:
 
   ![Job artifacts browser](img/job_artifacts_browser.png)
 
-## Access job artifacts by URL
+  If [GitLab Pages](../../administration/pages/index.md) is enabled in the project, you can preview
+  HTML files in the artifacts directly in your browser. If the project is internal or private, you must
+  enable [GitLab Pages access control](../../administration/pages/index.md#access-control) to preview
+  HTML files.
+
+## Access the latest job artifacts by URL
 
 You can download the latest job artifacts by using a URL.
 
@@ -155,7 +143,7 @@ WARNING:
 This is a destructive action that leads to data loss. Use with caution.
 
 You can erase a single job, which also removes the job's
-artifacts and trace. You must be:
+artifacts and log. You must be:
 
 - The owner of the job.
 - A [Maintainer](../../user/permissions.md#gitlab-cicd-permissions) of the project.
@@ -163,7 +151,7 @@ artifacts and trace. You must be:
 To erase a job:
 
 1. Go to a job's detail page.
-1. At the top right of the job's trace, select the trash icon.
+1. At the top right of the job's log, select the trash icon.
 1. Confirm the deletion.
 
 ## Use GitLab CI/CD to retrieve job artifacts for private projects
@@ -174,9 +162,9 @@ the artifact.
 
 ## The latest job artifacts
 
-Job artifacts are created in the most recent successful pipeline
-for a specific ref. If you run two types of pipelines for the same ref,
-timing determines the latest job artifacts.
+Job artifacts created in the most recent successful pipeline for a specific ref
+are considered the latest artifacts. If you run two types of pipelines for the same ref,
+timing determines which artifacts are the latest.
 
 For example, if a merge request creates a branch pipeline at the same time as
 a scheduled pipeline, the pipeline that finished most recently creates the latest job artifact.
@@ -186,7 +174,7 @@ for [parent and child pipelines](../parent_child_pipelines.md) are searched in h
 order from parent to child. For example, if both parent and child pipelines have a
 job with the same name, the job artifact from the parent pipeline is returned.
 
-## Keep artifacts from most recent successful jobs
+### Keep artifacts from most recent successful jobs
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16267) in GitLab 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229936) in GitLab 13.4.
