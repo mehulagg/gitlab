@@ -6,93 +6,94 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Jira DVCS connector
 
-If you're using GitLab.com and Jira Cloud, use the
-[GitLab for Jira app](connect-app.md) unless you have a specific need for the DVCS Connector.
+Use the Jira DVCS (distributed version control system) connector if you self-host
+your Jira instance and want to sync information to your GitLab instance. If you use
+Jira Cloud and GitLab.com, use the [GitLab for Jira app](connect-app.md) unless
+you have a specific need for the DVCS Connector.
 
-When configuring Jira DVCS Connector:
+When you configure the Jira DVCS connector, make sure your GitLab and Jira instances
+are accessible:
 
-- If you are using self-managed GitLab, make sure your GitLab instance is accessible by Jira.
-- If you're connecting to Jira Cloud, ensure your instance is accessible through the internet.
-- If you are using Jira Server, make sure your instance is accessible however your network is set up.
+- **Self-managed GitLab**: Your GitLab instance must be accessible by Jira.
+- **Jira Cloud**: Your instance must be accessible through the internet.
+- **Jira Server**: Your network must allow access to your instance.
 
-## GitLab account configuration for DVCS
+## Configure a GitLab application for DVCS
 
-NOTE:
-To ensure that regular user account maintenance doesn't impact your integration,
-create and use a single-purpose `jira` user in GitLab.
+We recommend you create and use a `jira` user in GitLab, and use the account only
+for integration work. A separate account ensures regular account maintenance does not affect
+your integration.
 
-1. In GitLab, create a new application to allow Jira to connect with your GitLab account.
-1. Sign in to the GitLab account that you want Jira to use to connect to GitLab.
-1. In the top-right corner, select your avatar.
-1. Select **Edit profile**.
+1. In GitLab, [create a new user](../../user/profile/account/create_accounts.md) for Jira to
+   use when connecting to GitLab. If Jira should have access to all projects,
+   a user with [Administrator](../../user/permissions.md) permissions should
+   create this new user.
+1. In the top right corner, click the account's avatar, and select **Edit profile**.
 1. In the left sidebar, select **Applications**.
 1. In the **Name** field, enter a descriptive name for the integration, such as `Jira`.
-1. In the **Redirect URI** field, enter `https://<gitlab.example.com>/login/oauth/callback`,
-   replacing `<gitlab.example.com>` with your GitLab instance domain. For example, if you are using GitLab.com,
-   this would be `https://gitlab.com/login/oauth/callback`.
+1. In the **Redirect URI** field, enter the URI appropriate for your version of GitLab,
+   replacing `<gitlab.example.com>` with your GitLab instance domain:
 
-   NOTE:
-   If using a GitLab version earlier than 11.3, the `Redirect URI` must be
-   `https://<gitlab.example.com>/-/jira/login/oauth/callback`. If you want Jira
-   to have access to all projects, GitLab recommends that an administrator create the
-   application.
+   - *For GitLab versions 11.3 and later,* use `https://<gitlab.example.com>/login/oauth/callback`.
+     If you use GitLab.com, the URL is `https://gitlab.com/login/oauth/callback`.
+   - *For GitLab versions 11.2 and earlier,* use
+     `https://<gitlab.example.com>/-/jira/login/oauth/callback`.
 
-   ![GitLab application setup](img/jira_dev_panel_gl_setup_1.png)
+1. For **Scopes**, select `api` and clear any other checkboxes.
+1. Click **Submit**.
+1. GitLab displays the generated **Application ID**
+   and **Secret** values. Copy these values, as you need them to configure Jira.
 
-1. Check **API** in the **Scopes** section, and clear any other checkboxes.
-1. Click **Save application**. GitLab displays the generated **Application ID**
-   and **Secret** values. Copy these values, which you use in Jira.
-
-## Jira DVCS Connector setup
+## Configure Jira for DVCS
 
 If you're using GitLab.com and Jira Cloud, use the
 [GitLab for Jira app](connect-app.md) unless you have a specific need for the DVCS Connector.
 
-1. Ensure you have completed the [GitLab configuration](#gitlab-account-configuration-for-dvcs).
-1. If you're using Jira Server, go to **Settings (gear) > Applications > DVCS accounts**.
-   If you're using Jira Cloud, go to **Settings (gear) > Products > DVCS accounts**.
-1. Click **Link GitHub Enterprise account** to start creating a new integration.
-   (We're pretending to be GitHub in this integration, until there's additional platform support in Jira.)
-1. Complete the form:
-
-1. Select **GitHub Enterprise** for the **Host** field.
-
-1. In the **Team or User Account** field, enter either:
-
+1. Ensure you have completed the [GitLab configuration](#configure-a-gitlab-application-for-dvcs).
+1. Go to your DVCS account:
+   - *For Jira Server,* go to **Settings (gear) > Applications > DVCS accounts**.
+   - *For Jira Cloud,* go to **Settings (gear) > Products > DVCS accounts**.
+1. To create a new integration, click **Link GitHub Enterprise account**.
+1. For **Host**, select **GitHub Enterprise**.
+1. For **Team or User Account**, enter either
    - The relative path of a top-level GitLab group that you have access to.
    - The relative path of your personal namespace.
 
-   ![Creation of Jira DVCS integration](img/jira_dev_panel_jira_setup_2.png)
+1. In the **Host URL** field, enter the URI appropriate for your version of GitLab,
+   replacing `<gitlab.example.com>` with your GitLab instance domain:
 
-1. In the **Host URL** field, enter `https://<gitlab.example.com>/`,
-   replacing `<gitlab.example.com>` with your GitLab instance domain. For example, if you are using GitLab.com,
-   this would be `https://gitlab.com/`.
+   - *For GitLab versions 11.3 and later,* use `https://<gitlab.example.com>/`.
+   - *For GitLab versions 11.2 and earlier,* use
+     `https://<gitlab.example.com>/-/jira`.
 
-   NOTE:
-   If using a GitLab version earlier than 11.3 the **Host URL** value should be `https://<gitlab.example.com>/-/jira`
+1. For **Client ID**, use the **Application ID** value from the previous section.
 
-1. For the **Client ID** field, use the **Application ID** value from the previous section.
-
-1. For the **Client Secret** field, use the **Secret** value from the previous section.
+1. For **Client Secret**, use the **Secret** value from the previous section.
 
 1. Ensure that the rest of the checkboxes are checked.
 
 1. Click **Add** to complete and create the integration.
 
- Jira takes up to a few minutes to know about (import behind the scenes) all the commits and branches
- for all the projects in the GitLab group you specified in the previous step. These are refreshed
- every 60 minutes.
+Jira begins to import the commits and branches for all projects in the GitLab group
+you specified. This import takes a few minutes, after completed, is refreshed
+every 60 minutes.
 
- In the future, we plan on implementing real-time integration. If you need
- to refresh the data manually, you can do this from the `Applications -> DVCS
- accounts` screen where you initially set up the integration:
+To connect additional GitLab projects from other GitLab top-level groups, or
+personal namespaces, repeat the previous steps with additional Jira DVCS accounts.
 
- ![Refresh GitLab information in Jira](img/jira_dev_panel_manual_refresh.png)
+After you configure the integration, read more about [how to test and use it](index.md#usage).
 
-To connect additional GitLab projects from other GitLab top-level groups (or personal namespaces), repeat the previous
-steps with additional Jira DVCS accounts.
+## Refresh data imported to Jira
 
-Now that the integration is configured, read more about how to test and use it in [Usage](index.md#usage).
+Jira imports the commits and branches every 60 minutes for your projects. Real-time
+integration is planned, and you can refresh the data manually from the Jira interface:
+
+1. Sign in to your Jira instance as the user you configured the integration with.
+1. Go to **Settings (gear) > Applications**.
+1. Select **DVCS accounts**.
+1. In the table, identify the repository you want to refresh. In its **Last Activity**
+   column, click the icon:
+   ![Refresh GitLab information in Jira](img/jira_dev_panel_manual_refresh.png)
 
 ## Troubleshooting your DVCS connection
 
@@ -100,39 +101,47 @@ Refer to the items in this section if you're having problems with your DVCS conn
 
 ### Jira cannot access GitLab server
 
+If you complete the **Add New Account** form, authorize access, and you receive
+this error, Jira and GitLab cannot connect to each other. No other error messages
+appear in any logs:
+
 ```plaintext
 Error obtaining access token. Cannot access https://gitlab.example.com from Jira.
 ```
 
-This error message is generated in Jira, after completing the **Add New Account**
-form and authorizing access. It indicates a connectivity issue from Jira to
-GitLab. No other error messages appear in any logs.
+### SSL and TLS problems
 
-If there was an issue with SSL/TLS, this error message is generated.
+Problems with SSL and TLS can cause this error message:
 
-- The [GitLab Jira integration](../../user/project/integrations/jira.md) requires GitLab to connect to Jira. Any
-  TLS issues that arise from a private certificate authority or self-signed
-  certificate [are resolved on the GitLab server](https://docs.gitlab.com/omnibus/settings/ssl.html#other-certificate-authorities),
+```plaintext
+Error obtaining access token. Cannot access https://gitlab.example.com from Jira.
+```
+
+- The [GitLab Jira integration](../../user/project/integrations/jira.md) requires
+  GitLab to connect to Jira. Any TLS issues that arise from a private certificate
+  authority or self-signed certificate are resolved
+  [on the GitLab server](https://docs.gitlab.com/omnibus/settings/ssl.html#other-certificate-authorities),
   as GitLab is the TLS client.
 - The Jira Development panel integration requires Jira to connect to GitLab, which
   causes Jira to be the TLS client. If your GitLab server's certificate is not
   issued by a public certificate authority, the Java Truststore on Jira's server
-  needs to have the appropriate certificate added to it (such as your organization's
-  root certificate).
+  must have the appropriate certificate (such as your organization's
+  root certificate) added to it .
 
 Refer to Atlassian's documentation and Atlassian Support for assistance setting up Jira correctly:
 
-- [Adding a certificate to the trust store](https://confluence.atlassian.com/kb/how-to-import-a-public-ssl-certificate-into-a-jvm-867025849.html).
-  - Simplest approach is to use [`keytool`](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html).
+- [Add a certificate](https://confluence.atlassian.com/kb/how-to-import-a-public-ssl-certificate-into-a-jvm-867025849.html)
+  to the trust store.
+  - The simplest approach is [`keytool`](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html).
   - Add additional roots to Java's default Truststore (`cacerts`) to allow Jira to
     also trust public certificate authorities.
-  - If the integration stops working after upgrading Jira's Java runtime, this
-    might be because the `cacerts` Truststore got replaced.
+  - If the integration stops working after upgrading Jira's Java runtime, the
+    `cacerts` Truststore may have been replaced during the upgrade.
 
-- [Troubleshooting connectivity up to and including TLS handshaking](https://confluence.atlassian.com/kb/unable-to-connect-to-ssl-services-due-to-pkix-path-building-failed-error-779355358.html),
+- Troubleshooting connectivity [up to and including TLS handshaking](https://confluence.atlassian.com/kb/unable-to-connect-to-ssl-services-due-to-pkix-path-building-failed-error-779355358.html),
   using the a java class called `SSLPoke`.
 
-- Download the class from Atlassian's knowledge base to Jira's server, for example to `/tmp`.
+- Download the class from Atlassian's knowledge base to a directory on Jira's server, such as `/tmp`.
 - Use the same Java runtime as Jira.
 - Pass all networking-related parameters that Jira is called with, such as proxy
   settings or an alternative root Truststore (`-Djavax.net.ssl.trustStore`):
@@ -154,39 +163,42 @@ The requested scope is invalid, unknown, or malformed.
 
 Potential resolutions:
 
-- Verify the URL shown in the browser after being redirected from Jira in step 5 of [Jira DVCS Connector Setup](#jira-dvcs-connector-setup) includes `scope=api` in the query string.
-- If `scope=api` is missing from the URL, return to [GitLab account configuration](#gitlab-account-configuration-for-dvcs) and ensure the application you created in step 1 has the `api` box checked under scopes.
+1. Verify the URL shown in the browser after being redirected from Jira in the
+   [Jira DVCS connector setup](#configure-jira-for-dvcs) includes `scope=api` in
+   the query string.
+1. If `scope=api` is missing from the URL, edit the
+   [GitLab account configuration](#configure-a-gitlab-application-for-dvcs). Review
+   the **Scopes** field and ensure the `api` check box is selected.
 
 ### Jira error adding account and no repositories listed
 
-```plaintext
-Error!
-Failed adding the account: [Error retrieving list of repositories]
-```
+If, after you complete the **Add New Account** form in Jira and authorize access, you
+encounter these issues:
 
-This error message is generated in Jira after completing the **Add New Account**
-form in Jira and authorizing access. Attempting to click **Try Again** returns
-`Account is already integrated with JIRA.` The account is set up in the DVCS
-accounts view, but no repositories are listed.
+- An `Error! Failed adding the account: [Error retrieving list of repositories]` error.
+- An `Account is already integrated with JIRA` error when you click **Try Again**.
+- An account is visible in the DVCS accounts view, but no repositories are listed.
 
-Potential resolutions:
+To resolve this issue:
 
-- If you're using GitLab versions 11.10-12.7, upgrade to GitLab 12.8.10 or later
-  to resolve an identified [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/37012).
 - If you're using GitLab Free or GitLab Starter, be sure you're using
   GitLab 13.4 or later.
+- *If you're using GitLab versions 11.10-12.7,* upgrade to GitLab 12.8.10 or later
+  to resolve [an identified issue](https://gitlab.com/gitlab-org/gitlab/-/issues/37012).
 
 [Contact GitLab Support](https://about.gitlab.com/support/) if none of these reasons apply.
 
-### Fixing synchronization issues
+### Fix synchronization issues
 
-If Jira displays incorrect information (such as deleted branches), you may need to
+If Jira displays incorrect information, such as deleted branches, you may need to
 resynchronize the information. To do so:
 
 1. In Jira, go to **Jira Administration > Applications > DVCS accounts**.
 1. At the account (group or subgroup) level, Jira displays an option to
    **Refresh repositories** in the `...` (ellipsis) menu.
 1. For each project, there's a sync button displayed next to the **last activity** date.
-   To perform a *soft resync*, click the button, or complete a *full sync* by shift clicking
-   the button. For more information, see
-   [Atlassian's documentation](https://support.atlassian.com/jira-cloud-administration/docs/synchronize-jira-cloud-to-bitbucket/).
+   - To perform a *soft resync*, click the button.
+   - To complete a *full sync*, shift-click the button.
+
+For more information, read
+[Atlassian's documentation](https://support.atlassian.com/jira-cloud-administration/docs/synchronize-jira-cloud-to-bitbucket/).
