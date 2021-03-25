@@ -8724,6 +8724,9 @@ msgstr ""
 msgid "Create %{environment}"
 msgstr ""
 
+msgid "Create %{humanized_resource_name}"
+msgstr ""
+
 msgid "Create %{type}"
 msgstr ""
 
@@ -29096,9 +29099,6 @@ msgid "Subkeys"
 msgstr ""
 
 msgid "Submit"
-msgstr ""
-
-msgid "Submit %{humanized_resource_name}"
 msgstr ""
 
 msgid "Submit a review"

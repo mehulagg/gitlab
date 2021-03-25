@@ -66,7 +66,7 @@ RSpec.describe 'Merge request > User sets approval rules', :js do
       end
 
       it "persists hidden groups that author has no access to when creating MR" do
-        click_on("Submit merge request")
+        click_on("Create merge request")
         wait_for_requests
 
         click_on("View eligible approvers")
