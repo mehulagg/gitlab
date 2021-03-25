@@ -91,7 +91,7 @@ module Gitlab
           end
 
           def eql?(other)
-            return false unless report_type == other.report_type && primary_fingerprint == other.primary_fingerprint
+            return false unless report_type == other.report_type && primary_identifier_fingerprint == other.primary_identifier_fingerprint
 
             if @vulnerability_finding_fingerprints_enabled
               matches_fingerprints(other.fingerprints, other.uuid)
@@ -103,9 +103,9 @@ module Gitlab
           def hash
             if @vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
               highest_fingerprint = fingerprints.max_by(&:priority)
-              report_type.hash ^ highest_fingerprint.fingerprint_hex.hash ^ primary_fingerprint.hash
+              report_type.hash ^ highest_fingerprint.fingerprint_hex.hash ^ primary_identifier_fingerprint.hash
             else
-              report_type.hash ^ location.fingerprint.hash ^ primary_fingerprint.hash
+              report_type.hash ^ location.fingerprint.hash ^ primary_identifier_fingerprint.hash
             end
           end
 
@@ -119,7 +119,7 @@ module Gitlab
             end
           end
 
-          def primary_fingerprint
+          def primary_identifier_fingerprint
             primary_identifier&.fingerprint
           end
 

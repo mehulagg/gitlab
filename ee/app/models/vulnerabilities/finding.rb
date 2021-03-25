@@ -333,7 +333,7 @@ module Vulnerabilities
     alias_method :==, :eql?
 
     def eql?(other)
-      return false unless other.report_type == report_type && other.first_fingerprint == first_fingerprint
+      return false unless other.report_type == report_type && other.primary_identifier_fingerprint == primary_identifier_fingerprint
 
       if ::Feature.enabled?(:vulnerability_finding_fingerprints, project)
         matches_fingerprints(other.fingerprints, other.uuid)
@@ -350,7 +350,7 @@ module Vulnerabilities
       # when Finding is persisted and identifiers are not preloaded.
       return super if persisted? && !identifiers.loaded?
 
-      report_type.hash ^ location_fingerprint.hash ^ first_fingerprint.hash
+      report_type.hash ^ location_fingerprint.hash ^ primary_identifier_fingerprint.hash
     end
 
     def severity_value
@@ -382,7 +382,7 @@ module Vulnerabilities
 
     protected
 
-    def first_fingerprint
+    def primary_identifier_fingerprint
       identifiers.first&.fingerprint
     end
 
