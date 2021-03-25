@@ -79,7 +79,7 @@ function mountAssigneesComponentDeprecated(mediator) {
 }
 
 function mountAssigneesComponent() {
-  const el = document.getElementById('js-vue-sidebar-assignees-widget');
+  const el = document.getElementById('js-vue-sidebar-assignees');
 
   if (!el) return;
 
@@ -369,8 +369,11 @@ function mountCopyEmailComponent() {
 }
 
 export function mountSidebar(mediator) {
-  mountAssigneesComponent();
-  mountAssigneesComponentDeprecated(mediator);
+  if (isInIssuePage() || isInDesignPage()) {
+    mountAssigneesComponent();
+  } else {
+    mountAssigneesComponentDeprecated(mediator);
+  }
   mountReviewersComponent(mediator);
   mountConfidentialComponent(mediator);
   mountReferenceComponent(mediator);
