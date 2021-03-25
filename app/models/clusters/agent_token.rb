@@ -18,6 +18,8 @@ module Clusters
 
     before_save :ensure_token
 
+    scope :ordered_by_last_used, -> { order(last_used_at: :desc) }
+
     validates :description, length: { maximum: 1024 }
     validates :name, presence: true, length: { maximum: 255 }, on: :create
 
