@@ -14,14 +14,14 @@ class AddIndexMirrorDataOnRetryNextExecutionWhereStatus < ActiveRecord::Migratio
 
   def up
     add_concurrent_index :project_mirror_data,
-      [:retry_count, :next_execution_timestamp],
+      [:next_execution_timestamp, :retry_count],
       where: "(status)::text <> ALL ('{scheduled,started}'::text[])",
       name: INDEX_NAME
   end
 
   def down
     remove_concurrent_index :project_mirror_data,
-      [:retry_count, :next_execution_timestamp],
+      [:next_execution_timestamp, :retry_count],
       where: "(status)::text <> ALL ('{scheduled,started}'::text[])",
       name: INDEX_NAME
   end
