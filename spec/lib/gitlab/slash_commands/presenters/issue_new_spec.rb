@@ -14,6 +14,6 @@ RSpec.describe Gitlab::SlashCommands::Presenters::IssueNew do
   it 'shows the issue' do
     expect(subject[:response_type]).to be(:in_channel)
     expect(subject).to have_key(:attachments)
-    expect(attachment[:title]).to start_with(issue.title)
+    expect(attachment[:fallback]).to include(issue.title)
   end
 end
