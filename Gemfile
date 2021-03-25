@@ -396,6 +396,8 @@ group :development, :test do
   gem 'parallel', '~> 1.19', require: false
 
   gem 'rblineprof', '~> 0.3.6', platform: :mri, require: false
+
+  gem 'prosopite', require: false
 end
 
 group :development, :test, :danger do

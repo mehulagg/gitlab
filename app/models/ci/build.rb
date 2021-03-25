@@ -370,11 +370,19 @@ module Ci
     end
 
     def other_manual_actions
-      pipeline.manual_actions.where.not(name: name)
+      if pipeline.manual_actions.loaded?
+        pipeline.manual_actions.reject { |job| job.name == name }
+      else
+        pipeline.manual_actions.where.not(name: name)
+      end
     end
 
     def other_scheduled_actions
-      pipeline.scheduled_actions.where.not(name: name)
+      if pipeline.manual_actions.loaded?
+        pipeline.scheduled_actions.reject { |job| job.name == name }
+      else
+        pipeline.scheduled_actions.where.not(name: name)
+      end
     end
 
     def pages_generator?

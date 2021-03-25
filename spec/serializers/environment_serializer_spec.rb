@@ -207,4 +207,65 @@ RSpec.describe EnvironmentSerializer do
       end
     end
   end
+
+  describe 'avoid N+1 queries', :request_store do
+    def expect_no_nplusone_queries(allow_list: [])
+      require 'prosopite'
+
+      Prosopite.raise = true
+      Prosopite.allow_list = allow_list
+      Prosopite.scan
+
+      yield
+
+      Prosopite.finish
+    end
+
+    let_it_be(:project) { create(:project, :repository) }
+
+    it 'avoids more queries' do
+      create_record
+      control = ActiveRecord::QueryRecorder.new { serialize }
+
+      p control.count, control.cached_count
+
+      create_record
+
+      control = ActiveRecord::QueryRecorder.new { serialize }
+
+      p control.count, control.cached_count
+
+      expect { serialize }.not_to exceed_all_query_limit(control)
+
+      allow_list = %w[
+        find_platform_kubernetes_with_cte
+        find_instance_cluster_platform_kubernetes
+        protected_environment_by_name
+      ]
+
+      expect_no_nplusone_queries(allow_list: allow_list) do
+        serialize
+      end
+    end
+
+    def create_record
+      environment = create(:environment, project: project)
+
+      create_deployment(environment, :success) # last_deployment
+      create_deployment(environment, :running) # upcoming_deployment
+    end
+
+    def create_deployment(environment, status)
+      pipeline = create(:ci_pipeline, status, project: project)
+      deployable = create(:ci_build, status, project: project, pipeline: pipeline)
+
+      create(:deployment, status, project: project, environment: environment, deployable: deployable)
+    end
+
+    def serialize
+      described_class
+        .new(current_user: user, project: project)
+        .represent(Environment.all)
+    end
+  end
 end

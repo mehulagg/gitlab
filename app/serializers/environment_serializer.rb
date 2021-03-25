@@ -23,6 +23,8 @@ class EnvironmentSerializer < BaseSerializer
           latest: super(item.latest, opts) }
       end
     else
+      resource = resource.eager_load_for_serialization
+
       super(resource, opts)
     end
   end
