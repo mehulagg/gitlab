@@ -1489,12 +1489,17 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 If your GitLab instance already has repositories on single Gitaly nodes, these aren't migrated to
 Gitaly Cluster automatically.
 
-Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md). Note that this API cannot move all repository types. For moving other repositories types, see:
+### Prior to migration
 
-- [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md).
-- [Group repository storage moves API](../../api/group_repository_storage_moves.md).
+The Gitaly Cluster must be configured on your GitLab Instance in addition to the existing single Gitaly nodes. Repositories are moved while the Gitlab instance is online so all storages must be accessible to the GitLab instance.
 
-To move repositories to Gitaly Cluster:
+[Configure repository storage weights](../repository_storage_paths.md#configure-where-new-repositories-are-stored) so that the Gitaly Cluster receives all new projects. This will ensure that new projects do not get created on existing single Gitaly nodes while the migration is in progress.
+
+### Schedule repository moves
+
+In GitLab repositories can be associated with projects, groups and snippets. Each of these types have a separate API to schedule the respective repositories to move. To move all repositories on a GitLab instance each of these types must be scheduled to move and for each storage.
+
+#### Bulk schedule projects
 
 1. [Schedule repository storage moves for all projects on a storage shard](../../api/project_repository_storage_moves.md#schedule-repository-storage-moves-for-all-projects-on-a-storage-shard) using the API. For example:
 
@@ -1513,9 +1518,36 @@ To move repositories to Gitaly Cluster:
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
 
-In a similar way, you can move other repository types by using the
-[Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md) **(FREE SELF)**
-or the [Groups repository storage moves API](../../api/group_repository_storage_moves.md) **(PREMIUM SELF)**.
+1. Repeat for each storage as required.
+
+#### Bulk schedule snippets
+
+1. [Schedule repository storage moves for all snippets on a storage shard](../../api/snippet_repository_storage_moves.md#schedule-repository-storage-moves-for-all-snippets-on-a-storage-shard) using the API. For example:
+
+    ```shell
+    curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+    --data '{"source_storage_name":"gitaly","destination_storage_name":"praefect"}' "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
+    ```
+
+1. [Query the most recent repository moves](../../api/snippet_repository_storage_moves.md#retrieve-all-snippet-repository-storage-moves)
+   using the API. The query indicates either:
+   - The moves have completed successfully. The `state` field is `finished`.
+   - The moves are in progress. Re-query the repository move until it completes successfully.
+   - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
+
+1. Repeat for each storage as required.
+
+#### Bulk schedule groups **(PREMIUM SELF)**
+
+1. [Schedule repository storage moves for all groups on a storage shard](../../api/group_repository_storage_moves.md#schedule-repository-storage-moves-for-all-groups-on-a-storage-shard) using the API.
+
+1. [Query the most recent repository moves](../../api/group_repository_storage_moves.md#retrieve-all-group-repository-storage-moves)
+   using the API. The query indicates either:
+   - The moves have completed successfully. The `state` field is `finished`.
+   - The moves are in progress. Re-query the repository move until it completes successfully.
+   - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
+
+1. Repeat for each storages as required.
 
 ## Debugging Praefect
 
