@@ -23484,6 +23484,8 @@ CREATE INDEX index_project_statistics_on_wiki_size_and_project_id ON project_sta
 
 CREATE UNIQUE INDEX index_project_tracing_settings_on_project_id ON project_tracing_settings USING btree (project_id);
 
+CREATE INDEX index_projects_active_mirrors ON projects USING btree (id) WHERE ((archived = false) AND (pending_delete = false) AND (mirror = true));
+
 CREATE INDEX index_projects_aimed_for_deletion ON projects USING btree (marked_for_deletion_at) WHERE ((marked_for_deletion_at IS NOT NULL) AND (pending_delete = false));
 
 CREATE INDEX index_projects_api_created_at_id_desc ON projects USING btree (created_at, id DESC);
