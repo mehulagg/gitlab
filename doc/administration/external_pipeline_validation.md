@@ -19,15 +19,23 @@ data as payload. GitLab then invalidates the pipeline based on the response
 code. If there's an error or the request times out, the pipeline is not
 invalidated.
 
-Response Code Legend:
+Response Code Legend for GitLab.com:
 
 - `200` - Accepted
 - `406` - Not Accepted
 - Other Codes - Accepted and Logged
 
+Response Code Legend:
+
+- `200` - Accepted
+- `4XX` - Not Accepted
+- Other Codes - Accepted and Logged
+
+This will change to match the GitLab.com legend.
+
 ## Configuration
 
-Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL and enable `ci_external_validation_service` feature flag.
+Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL. For GitLab.com the `ci_external_validation_service` feature flag must be enabled as well.
 
 ## Payload Schema
 
@@ -123,3 +131,6 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL and enable
   }
 }
 ```
+
+NOTE:
+The `namespace` fields are available only in the EE distribution.
