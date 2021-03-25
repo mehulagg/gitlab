@@ -113,6 +113,23 @@ function UsersSelect(currentUser, els, options = {}) {
       return $selectbox.find(`input[name="${$dropdown.data('fieldName')}"]`);
     };
 
+    // const dropdownHeaderNeeded = function (data, header) {
+    //   let index;
+    //   let obj;
+    //   let len;
+    //
+    //   for (index = 0, len = data.length; index < len; index += 1) {
+    //     obj = data[index];
+    //     console.log(obj, header, '***BEFORE MATCH**');
+    //
+    //     if (obj.content === header) {
+    //       console.log(obj.content, header, '***MATCH**');
+    //       return false;
+    //     }
+    //   }
+    //   return true;
+    // };
+
     const getSelected = function () {
       return getSelectedUserInputs()
         .map((index, input) => parseInt(input.value, 10))
@@ -261,6 +278,19 @@ function UsersSelect(currentUser, els, options = {}) {
       processData(term, data, callback) {
         let users = data;
 
+        // the next 2 loops remove the duplicate header and dividers on reloads w/out refresh
+        users.forEach((user, index, object) => {
+          if (user.content === $dropdown.data('dropdownHeader')) {
+            object.splice(index, 1);
+          }
+        });
+
+        users.forEach((user, index, object) => {
+          if (user.type === 'divider') {
+            object.splice(index, 1);
+          }
+        });
+
         // Only show assigned user list when there is no search term
         if ($dropdown.hasClass('js-multiselect') && term.length === 0) {
           const selectedInputs = getSelectedUserInputs();
@@ -355,6 +385,10 @@ function UsersSelect(currentUser, els, options = {}) {
               selectedUsers.forEach((selectedUser) => {
                 showDivider += 1;
                 users.splice(showDivider, 0, selectedUser);
+                // console.log(users[showDivider], users[showDivider + 1], users[showDivider + 2], '***HEADER***')
+                // if (users[showDivider + 2].content === $dropdown.data('dropdownHeader')) {
+                //   users.splice(showDivider + 2, 1);
+                // }
               });
 
               users.splice(showDivider + 1, 0, { type: 'divider' });
