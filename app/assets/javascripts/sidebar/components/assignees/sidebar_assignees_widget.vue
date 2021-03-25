@@ -18,6 +18,11 @@ import SidebarParticipant from './sidebar_participant.vue';
 export const assigneesWidget = Vue.observable({
   updateAssignees: null,
 });
+
+const hideDropdownEvent = new CustomEvent('hiddenGlDropdown', {
+  bubbles: true,
+});
+
 export default {
   i18n: {
     unassigned: __('Unassigned'),
@@ -284,6 +289,7 @@ export default {
     },
     saveAssignees() {
       this.updateAssignees(this.selectedUserNames);
+      this.$el.dispatchEvent(hideDropdownEvent);
     },
     isChecked(id) {
       return this.selectedUserNames.includes(id);
@@ -309,6 +315,9 @@ export default {
     collapseWidget() {
       this.$refs.toggle.collapse();
     },
+    expandWidget() {
+      this.$refs.toggle.expand();
+    },
     showDivider(list) {
       return list.length > 0 && this.isSearchEmpty;
     },
@@ -319,7 +328,7 @@ export default {
 <template>
   <div
     v-if="isAssigneesLoading"
-    class="gl-display-flex gl-align-items-center assignee"
+    class="gl-display-flex gl-align-items-center assignee hide-collapsed"
     data-testid="loading-assignees"
   >
     {{ __('Assignee') }}
@@ -340,6 +349,7 @@ export default {
           :issuable-type="issuableType"
           :signed-in="signedIn"
           @assign-self="assignSelf"
+          @expand-widget="expandWidget"
         />
       </template>
 

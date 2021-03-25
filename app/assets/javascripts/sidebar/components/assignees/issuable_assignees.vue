@@ -39,7 +39,11 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-flex-direction-column issuable-assignees">
-    <collapsed-assignee-list :users="users" :issuable-type="issuableType" />
+    <collapsed-assignee-list
+      :users="users"
+      :issuable-type="issuableType"
+      @click.native="$emit('expand-widget')"
+    />
     <div
       v-if="emptyUsers"
       class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-mt-2 hide-collapsed"
