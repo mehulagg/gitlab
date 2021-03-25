@@ -18,7 +18,7 @@ The Package Registry works with:
 - [twine](https://pypi.org/project/twine/)
 
 For documentation of the specific API endpoints that the `pip` and `twine`
-clients use, see the [PyPI API documentation](../../../api/packages/pypi.md)
+clients use, see the [PyPI API documentation](../../../api/packages/pypi.md).
 
 ## Build a PyPI package
 

@@ -8,22 +8,24 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 This is the API documentation for [PyPI Packages](../../user/packages/pypi_repository/index.md).
 
+WARNING:
 This API is used by the [PyPI package manager client](https://pypi.apache.org/)
 and is generally not meant for manual consumption.
 
 For instructions on how to upload and install PyPI packages from the GitLab
-package registry, please see the [PyPI package registry documentation](../../user/packages/pypi_repository/index.md)
+package registry, see the [PyPI package registry documentation](../../user/packages/pypi_repository/index.md).
 
 NOTE:
 These endpoints do not adhere to the standard API authentication methods.
-See [PyPI package registry documentation](../../user/packages/pypi_repository/index.md)
+See the [PyPI package registry documentation](../../user/packages/pypi_repository/index.md)
 for details on which headers and token types are supported.
 
 ## Download a package file
 
 > Introduced in GitLab 12.10.
 
-Download a PyPI package file. This URL would normally be supplied by the [simple API](#simple-api-entry-point)
+Download a PyPI package file. The [simple API](#simple-api-entry-point)
+normally supplies this URL.
 
 ```plaintext
 GET projects/:id/packages/pypi/files/:sha256/:file_identifier
@@ -51,7 +53,7 @@ This writes the downloaded file to `my.pypi.package-0.0.1.tar.gz` in the current
 
 > Introduced in GitLab 12.10.
 
-Returns the package descriptor as an HTML file
+Returns the package descriptor as an HTML file:
 
 ```plaintext
 GET projects/:id/packages/pypi/simple/:package_name
@@ -93,7 +95,7 @@ This writes the downloaded file to `simple.html` in the current directory.
 
 > Introduced in GitLab 11.3.
 
-Upload a PyPI package
+Upload a PyPI package:
 
 ```plaintext
 PUT projects/:id/packages/pypi
