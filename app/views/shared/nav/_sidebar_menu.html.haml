@@ -13,7 +13,7 @@
       %span.badge.badge-pill.count{ **sidebar_menu.pill_html_options }
         = number_with_delimiter(sidebar_menu.pill_count)
 
-  %ul.sidebar-sub-level-items
+  %ul.sidebar-sub-level-items{ class: ('is-fly-out-only' unless sidebar_menu.has_items?) }
     = nav_link(**sidebar_menu.all_nav_link_params, html_options: { class: 'fly-out-top-item' } ) do
       = link_to sidebar_menu.link_to_href do
         %strong.fly-out-top-item-name

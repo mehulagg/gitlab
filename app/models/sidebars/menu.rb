@@ -56,6 +56,10 @@ module Sidebars
       raise NotImplementedError
     end
 
+    def has_items?
+      @items.any?
+    end
+
     def has_renderable_items?
       renderable_items.any?
     end

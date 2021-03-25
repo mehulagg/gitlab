@@ -22,3 +22,5 @@ module Sidebars
     end
   end
 end
+
+Sidebars::Projects::Panel.prepend_if_ee('EE::Sidebars::Projects::Panel')
