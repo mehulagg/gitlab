@@ -105,6 +105,7 @@ module QA
         end
 
         view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_merged.vue' do
+          element :revert_button
           element :cherry_pick_button
         end
 
@@ -363,6 +364,17 @@ module QA
 
         def cherry_pick!
           click_element(:cherry_pick_button, Page::Component::CommitModal)
+          click_element(:submit_commit_button)
+        end
+
+        def revert_with_merge_request!
+          click_element(:revert_button, Page::Component::CommitModal)
+          click_element(:submit_commit_button)
+        end
+
+        def revert_without_merge_request!
+          click_element(:revert_button, Page::Component::CommitModal)
+          uncheck_element(:create_merge_request_checkbox)
           click_element(:submit_commit_button)
         end
       end

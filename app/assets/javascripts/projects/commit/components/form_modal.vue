@@ -145,6 +145,7 @@ export default {
         v-model="checked"
         name="create_merge_request"
         class="gl-mt-3"
+        data-qa-selector="create_merge_request_checkbox"
       >
         <gl-sprintf :message="i18n.startMergeRequest">
           <template #newMergeRequest>
