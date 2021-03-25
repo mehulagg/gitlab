@@ -881,7 +881,7 @@ On GitLab.com, the Product Intelligence team regularly monitors Usage Ping. They
 #### 1. Setup local repositories
 
 - Clone and start [GitLab](https://gitlab.com/gitlab-org/gitlab-development-kit)
-- Clone and start (Versions Application)[https://gitlab.com/gitlab-services/version-gitlab-com], make sure to run `docker-compose up` to start a PostgreSQL and Redis instance.
+- Clone and start [Versions Application](https://gitlab.com/gitlab-services/version-gitlab-com), make sure to run `docker-compose up` to start a PostgreSQL and Redis instance.
 - Point GitLab to the Versions Application endpoint instead of the default endpoint: Open [submit_usage_ping_service.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L4) in your local and modified `PRODUCTION_URL`, and set it to the local Versions Application url `http://localhost:3000/usage_data`
 
 #### 2. Testing local setup
