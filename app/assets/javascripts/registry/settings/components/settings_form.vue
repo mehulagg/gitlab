@@ -291,8 +291,8 @@ export default {
         type="submit"
         :disabled="isSubmitButtonDisabled"
         :loading="showLoadingIcon"
-        variant="success"
         category="primary"
+        variant="confirm"
         class="js-no-auto-disable gl-mr-4"
       >
         {{ $options.i18n.SET_CLEANUP_POLICY_BUTTON }}
