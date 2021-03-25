@@ -19,8 +19,21 @@ module Gitlab
           RequestStore.delete(CACHE_KEY)
         end
 
-        def self.without_sticky_writes(&block)
-          current.ignore_writes(&block)
+        # Writes done in a new transaction will not propagate outside
+        # Stickiness will be inherited into a transaction unless requires_new is true
+        def self.transaction(requires_new: false, &block)
+          current_session = RequestStore[CACHE_KEY]
+
+          RequestStore[CACHE_KEY] =
+            if requires_new
+              new
+            else
+              current_session&.dup
+            end
+
+          yield
+        ensure
+          RequestStore[CACHE_KEY] = current_session
         end
 
         def initialize

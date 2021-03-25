@@ -9,7 +9,7 @@ module EE
 
       override :record_activity
       def record_activity
-        ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes { super }
+        ::Gitlab::Database::LoadBalancing::Session.transaction { super }
       end
     end
   end

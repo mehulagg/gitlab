@@ -22,7 +22,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
     end
   end
 
-  describe '.without_sticky_writes' do
+  describe '.transaction' do
     it 'ignores sticky write events sent by a connection proxy' do
       described_class.without_sticky_writes do
         described_class.current.write!

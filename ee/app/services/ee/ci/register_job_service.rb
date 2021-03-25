@@ -40,6 +40,15 @@ module EE
         super
       end
 
+      def process_build(build, params)
+        return super unless ::Feature.enabled?(:ci_runner_builds_process_on_replicas, runner, default_enabled: :yaml)
+
+        # We introduce a new transaction around build processing
+        # to ensure that writes (that can happen due to concurrent access)
+        # do not propagate to subsequent ones
+        ::Gitlab::Database::LoadBalancing::Session.transaction(requires_new: true) { super }
+      end
+
       def builds_for_shared_runner
         return super unless shared_runner_build_limits_feature_enabled?
 
