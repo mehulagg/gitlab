@@ -65,11 +65,22 @@ RSpec.describe Resolvers::IssuesResolver do
 
       describe 'filtering by iteration' do
         let_it_be(:iteration1) { create(:iteration, group: group) }
-        let_it_be(:issue_with_iteration) { create(:issue, project: project, iteration: iteration1) }
+        let_it_be(:iteration2) { create(:iteration, group: group) }
+        let_it_be(:issue_with_iteration1) { create(:issue, project: project, iteration: iteration1) }
+        let_it_be(:issue_with_iteration2) { create(:issue, project: project, iteration: iteration2) }
         let_it_be(:issue_without_iteration) { create(:issue, project: project) }
 
-        it 'returns issues with iteration' do
-          expect(resolve_issues(iteration_id: [iteration1.id])).to contain_exactly(issue_with_iteration)
+        it 'returns issues with iteration using raw id' do
+          expect(resolve_issues(iteration_id: [iteration1.id])).to contain_exactly(issue_with_iteration1)
+        end
+
+        it 'returns issues with iteration using global id' do
+          expect(resolve_issues(iteration_id: [iteration1.to_global_id])).to contain_exactly(issue_with_iteration1)
+        end
+
+        it 'returns issues with list iterations using global id' do
+          expect(resolve_issues(iteration_id: [iteration1.to_global_id, iteration2.to_global_id]))
+            .to contain_exactly(issue_with_iteration1, issue_with_iteration2)
         end
       end
 
