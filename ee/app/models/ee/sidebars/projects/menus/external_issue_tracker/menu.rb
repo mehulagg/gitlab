@@ -16,16 +16,9 @@ module EE
               add_item(::Sidebars::Projects::Menus::ExternalIssueTracker::MenuItems::OpenJira.new(context))
             end
 
-            override :link_to_href
-            def link_to_href
+            override :menu_link
+            def menu_link
               project_integrations_jira_issues_path(context.project)
-            end
-
-            override :link_to_attributes
-            def link_to_attributes
-              {
-                title: menu_name
-              }
             end
 
             override :menu_name

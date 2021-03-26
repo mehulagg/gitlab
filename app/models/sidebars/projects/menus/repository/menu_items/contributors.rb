@@ -6,8 +6,8 @@ module Sidebars
       module Repository
         module MenuItems
           class Contributors < ::Sidebars::MenuItem
-            override :link_to_href
-            def link_to_href
+            override :item_link
+            def item_link
               project_graph_path(context.project, context.current_ref)
             end
 

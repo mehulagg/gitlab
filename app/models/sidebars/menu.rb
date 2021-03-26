@@ -6,7 +6,6 @@ module Sidebars
     include ::Gitlab::Routing
     include GitlabRoutingHelper
     include Gitlab::Allowable
-    include ::Sidebars::Linkable
     include ::Sidebars::HasPill
 
     attr_reader :context
@@ -25,6 +24,20 @@ module Sidebars
 
     def render?
       true
+    end
+
+    def menu_link
+      nil
+    end
+
+    def menu_container_html_options
+      {
+        title: menu_name
+      }.merge(extra_menu_container_html_options)
+    end
+
+    def extra_menu_container_html_options
+      {}
     end
 
     # This method normalizes the information retrieved from the submenus and this menu

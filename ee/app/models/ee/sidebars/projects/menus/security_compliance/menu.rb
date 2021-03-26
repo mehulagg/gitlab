@@ -8,18 +8,18 @@ module EE
           module Menu
             extend ::Gitlab::Utils::Override
 
-            override :link_to_href
-            def link_to_href
+            override :menu_link
+            def menu_link
               # Depending on the items enabled,
               # the link and html attributes of the menu changes
-              return selected_menu.link_to_href if has_renderable_items?
+              return selected_item.item_link if has_renderable_items?
 
               project_security_discover_path(context.project) if context.show_discover_project_security
             end
 
-            override :link_to_attributes
-            def link_to_attributes
-              super[:data] = selected_menu.link_to_attributes[:data]
+            override :extra_menu_container_html_options
+            def extra_menu_container_html_options
+              super[:data] = selected_item.extra_item_container_html_options[:data]
             end
 
             override :configure_menu_items
@@ -44,8 +44,8 @@ module EE
 
             # This method selects which item is the one to retrieve info from
             # for the menu
-            def selected_menu
-              @selected_menu ||= begin
+            def selected_item
+              @selected_item ||= begin
                 return top_list_items[:dashboard] if top_list_items[:dashboard].render?
                 return top_list_items[:audit_events] if top_list_items[:audit_events].render?
 

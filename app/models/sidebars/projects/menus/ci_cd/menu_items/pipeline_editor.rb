@@ -6,16 +6,9 @@ module Sidebars
       module CiCd
         module MenuItems
           class PipelineEditor < ::Sidebars::MenuItem
-            override :link_to_href
-            def link_to_href
+            override :item_link
+            def item_link
               project_ci_pipeline_editor_path(context.project)
-            end
-
-            override :link_to_attributes
-            def link_to_attributes
-              {
-                title: item_name
-              }
             end
 
             override :nav_link_params

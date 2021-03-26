@@ -7,8 +7,8 @@ module Sidebars
         class Menu < ::Sidebars::Menu
           include LearnGitlabHelper
 
-          override :link_to_href
-          def link_to_href
+          override :menu_link
+          def menu_link
             project_learn_gitlab_path(context.project)
           end
 

@@ -6,7 +6,6 @@ module Sidebars
     include ::Gitlab::Routing
     include GitlabRoutingHelper
     include Gitlab::Allowable
-    include ::Sidebars::Linkable
 
     attr_reader :context
 
@@ -16,6 +15,20 @@ module Sidebars
 
     def render?
       true
+    end
+
+    def item_link
+      raise NotImplementedError
+    end
+
+    def item_container_html_options
+      {
+        title: item_name
+      }.merge(extra_item_container_html_options)
+    end
+
+    def extra_item_container_html_options
+      {}
     end
 
     # This method returns the possible values for the

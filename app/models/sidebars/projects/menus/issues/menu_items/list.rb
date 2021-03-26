@@ -6,13 +6,13 @@ module Sidebars
       module Issues
         module MenuItems
           class List < ::Sidebars::MenuItem
-            override :link_to_href
-            def link_to_href
+            override :item_link
+            def item_link
               project_issues_path(context.project)
             end
 
-            override :link_to_attributes
-            def link_to_attributes
+            override :extra_item_container_html_options
+            def extra_item_container_html_options
               {
                 title: _('Issues')
               }

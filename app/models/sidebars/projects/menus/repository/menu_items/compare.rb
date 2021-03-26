@@ -6,8 +6,8 @@ module Sidebars
       module Repository
         module MenuItems
           class Compare < ::Sidebars::MenuItem
-            override :link_to_href
-            def link_to_href
+            override :item_link
+            def item_link
               project_compare_index_path(context.project, from: context.project.repository.root_ref, to: context.current_ref)
             end
 

@@ -1,5 +1,5 @@
 = nav_link(**sidebar_menu_item.nav_link_params) do
-  = link_to sidebar_menu_item.link_to_href, **sidebar_menu_item.link_to_attributes do
+  = link_to sidebar_menu_item.item_link, **sidebar_menu_item.item_container_html_options do
     %span
       = sidebar_menu_item.item_name
       - if sidebar_menu_item.sprite_icon

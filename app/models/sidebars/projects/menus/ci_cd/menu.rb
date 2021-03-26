@@ -14,13 +14,13 @@ module Sidebars
             add_item(MenuItems::PipelineSchedules.new(context))
           end
 
-          override :link_to_href
-          def link_to_href
+          override :menu_link
+          def menu_link
             project_pipelines_path(context.project)
           end
 
-          override :link_to_attributes
-          def link_to_attributes
+          override :extra_menu_container_html_options
+          def extra_menu_container_html_options
             {
               class: 'shortcuts-pipelines qa-link-pipelines rspec-link-pipelines',
               data: { qa_selector: 'ci_cd_link' }

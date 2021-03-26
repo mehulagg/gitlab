@@ -16,13 +16,13 @@ module Sidebars
             add_item(MenuItems::Compare.new(context))
           end
 
-          override :link_to_href
-          def link_to_href
+          override :menu_link
+          def menu_link
             project_tree_path(context.project)
           end
 
-          override :link_to_attributes
-          def link_to_attributes
+          override :extra_menu_container_html_options
+          def extra_menu_container_html_options
             {
               class: 'shortcuts-tree',
               data: { qa_selector: 'repository_link' }

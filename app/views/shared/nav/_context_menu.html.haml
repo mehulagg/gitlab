@@ -1,5 +1,5 @@
 .context-header
-  = link_to context_menu.link_to_href, **context_menu.link_to_attributes do
+  = link_to context_menu.menu_link, **context_menu.menu_container_html_options do
     .avatar-container.rect-avatar.s40.project-avatar
       = source_icon(context_menu.container, alt: context_menu.menu_name, class: 'avatar s40 avatar-tile', width: 40, height: 40)
     .sidebar-context-title

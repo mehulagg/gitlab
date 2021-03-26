@@ -5,15 +5,14 @@ module Sidebars
     module Menus
       module Requirements
         class Menu < ::Sidebars::Menu
-          override :link_to_href
-          def link_to_href
+          override :menu_link
+          def menu_link
             project_requirements_management_requirements_path(context.project)
           end
 
-          override :link_to_attributes
-          def link_to_attributes
+          override :extra_menu_container_html_options
+          def extra_menu_container_html_options
             {
-              title: menu_name,
               class: 'qa-project-requirements-link'
             }
           end

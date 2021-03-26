@@ -10,15 +10,14 @@ module Sidebars
             add_item(MenuItems::Configuration.new(context))
           end
 
-          override :link_to_href
-          def link_to_href
+          override :menu_link
+          def menu_link
             project_security_configuration_path(context.project)
           end
 
-          override :link_to_attributes
-          def link_to_attributes
+          override :extra_menu_container_html_options
+          def extra_menu_container_html_options
             {
-              title: menu_name,
               data: { qa_selector: 'security_configuration_link' }
             }
           end

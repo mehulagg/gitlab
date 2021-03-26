@@ -10,13 +10,13 @@ module Sidebars
             external_issue_tracker
           end
 
-          override :link_to_href
-          def link_to_href
+          override :menu_link
+          def menu_link
             external_issue_tracker.issue_tracker_path
           end
 
-          override :link_to_attributes
-          def link_to_attributes
+          override :extra_menu_container_html_options
+          def extra_menu_container_html_options
             {
               target: '_blank',
               rel: 'noopener noreferrer',

@@ -6,16 +6,9 @@ module Sidebars
       module SecurityCompliance
         module MenuItems
           class ThreatMonitoring < ::Sidebars::MenuItem
-            override :link_to_href
-            def link_to_href
+            override :item_link
+            def item_link
               project_threat_monitoring_path(context.project)
-            end
-
-            override :link_to_attributes
-            def link_to_attributes
-              {
-                title: item_name
-              }
             end
 
             override :nav_link_params
