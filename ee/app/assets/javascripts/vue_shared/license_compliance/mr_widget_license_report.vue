@@ -191,7 +191,6 @@ export default {
         <gl-button
           v-if="licenseManagementSettingsPath"
           data-testid="manage-licenses-button"
-          size="small"
           :class="{ 'gl-mr-3': isCollapsible }"
           :href="licenseManagementSettingsPath"
           data-qa-selector="manage_licenses_button"
