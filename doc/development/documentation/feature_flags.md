@@ -121,7 +121,7 @@ use:
 
 > - [Introduced](link-to-issue) in GitLab 12.0.
 > - It was [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
-> - [Became enabled by default](link-to-issue) on GitLab 12.1.
+> - [Became enabled by default](link-to-issue) in GitLab 12.1.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
