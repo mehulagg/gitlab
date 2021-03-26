@@ -18,6 +18,9 @@ module Sidebars
         add_menu(Sidebars::Projects::Menus::Monitoring::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::Infrastructure::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::Analytics::Menu.new(context))
+        add_menu(Sidebars::Projects::Menus::Confluence::Menu.new(context))
+        add_menu(Sidebars::Projects::Menus::Wiki::Menu.new(context))
+        add_menu(Sidebars::Projects::Menus::ExternalWiki::Menu.new(context))
       end
 
       override :aria_label

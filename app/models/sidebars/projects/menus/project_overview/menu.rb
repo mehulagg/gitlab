@@ -25,11 +25,6 @@ module Sidebars
             }
           end
 
-          # override :active_routes
-          # def active_routes
-          #   { path: 'projects#show' }
-          # end
-
           override :menu_name
           def menu_name
             _('Project overview')
