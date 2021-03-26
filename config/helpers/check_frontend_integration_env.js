@@ -1,8 +1,10 @@
 const fs = require('fs');
+const path = require('path');
+const {
+  createErrorMessage,
+  GRAPHQL_SCHEMA_PATH,
+} = require('../../spec/frontend/__helpers__/require_gitlab_schema_graphql');
 const isESLint = require('./is_eslint');
-
-const GRAPHQL_SCHEMA_PATH = 'tmp/tests/graphql/gitlab_schema.graphql';
-const GRAPHQL_SCHEMA_JOB = 'bundle exec rake gitlab:graphql:schema:dump';
 
 const shouldIgnoreWarnings = JSON.parse(process.env.GL_IGNORE_WARNINGS || '0');
 
@@ -15,14 +17,10 @@ const failCheck = (message) => {
 };
 
 const checkGraphqlSchema = () => {
-  if (!fs.existsSync(GRAPHQL_SCHEMA_PATH)) {
-    const message = `
-ERROR: Expected to find "${GRAPHQL_SCHEMA_PATH}" but file does not exist. Try running:
+  const shcemaPath = path.resolve(__dirname, '../../', GRAPHQL_SCHEMA_PATH);
 
-    ${GRAPHQL_SCHEMA_JOB}
-`;
-
-    failCheck(message);
+  if (!fs.existsSync(shcemaPath)) {
+    failCheck(createErrorMessage());
   }
 };
 
