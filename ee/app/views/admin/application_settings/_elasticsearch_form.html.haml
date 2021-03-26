@@ -72,19 +72,20 @@
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201").')
 
-            .form-group
-              = f.label :elasticsearch_shards, _('Number of Elasticsearch shards'), class: 'label-bold'
-              = f.number_field :elasticsearch_shards, value: Elastic::IndexSetting.number_of_shards, class: 'form-control gl-form-input'
-              .form-text.gl-text-gray-600.gl-mt-0
-                = _('How many shards to split the Elasticsearch index over.')
-                = recreate_index_text
-
-            .form-group
-              = f.label :elasticsearch_replicas, _('Number of Elasticsearch replicas'), class: 'label-bold'
-              = f.number_field :elasticsearch_replicas, value: Elastic::IndexSetting.number_of_replicas, class: 'form-control gl-form-input'
-              .form-text.gl-text-gray-600.gl-mt-0
-                = _('How many replicas each Elasticsearch shard has.')
-                = recreate_index_text
+            %table.table
+              %thead
+                %tr
+                  %th{:scope => "col"}= _('Index')
+                  %th{:scope => "col"}= _('Number of shards')
+                  %th{:scope => "col"}= _('Number of replicas')
+              %tbody
+                - @elasticsearch_index_settings.each do |setting|
+                  %tr
+                    %td= setting.alias_name
+                    %td
+                      = f.number_field :elasticsearch_shards, name: "application_setting[elasticsearch_shards][#{setting.alias_name}]", value: setting.number_of_shards, class: 'form-control gl-form-input'
+                    %td
+                      = f.number_field :elasticsearch_replicas, name: "application_setting[elasticsearch_replicas][#{setting.alias_name}]", value: setting.number_of_replicas, class: 'form-control gl-form-input'
 
             .form-group
               = f.label :elasticsearch_indexed_file_size_limit_kb, _('Maximum file size indexed (KiB)'), class: 'label-bold'
