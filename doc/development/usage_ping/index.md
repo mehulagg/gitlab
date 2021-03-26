@@ -800,7 +800,7 @@ We return fallback values in these cases:
 #### UsageDataQueries API
 
 > - Introduced in [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016)
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - It's deployed behind a [feature flag](../../user/feature_flags.md), disabled by default.
 
 1. Get UsagePing raw SQL queries via an API.
 
