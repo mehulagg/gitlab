@@ -69,7 +69,7 @@ RSpec.describe Spam::SpamActionService do
     let(:captcha_response) { 'abc123' }
     let(:spam_log_id) { existing_spam_log.id }
     let(:spam_params) do
-      Spam::SpamActionService.filter_spam_params!(
+      ::Spam::SpamParams.new(
         api: api,
         captcha_response: captcha_response,
         spam_log_id: spam_log_id
@@ -112,7 +112,7 @@ RSpec.describe Spam::SpamActionService do
 
     context 'when the captcha params are passed in the headers' do
       let(:request) { double(:request, env: env, headers: headers) }
-      let(:spam_params) { Spam::SpamActionService.filter_spam_params!(api: api) }
+      let(:spam_params) { Spam::SpamActionService.filter_spam_params!({ api: api }, request) }
       let(:headers) do
         {
           'X-GitLab-Captcha-Response' => captcha_response,

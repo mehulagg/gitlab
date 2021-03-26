@@ -22,18 +22,11 @@ module Spam
       @spam_log_id = spam_log_id
     end
 
-    def with_request_headers!(headers)
-      return if headers.nil?
-
-      @captcha_response ||= headers['X-GitLab-Captcha-Response']
-      @spam_log_id ||= headers['X-GitLab-Spam-Log-Id']&.to_i
-    end
-
     def ==(other)
-      other.class == self.class &&
-        other.api == self.api &&
-        other.captcha_response == self.captcha_response &&
-        other.spam_log_id == self.spam_log_id
+      other.class <= self.class &&
+        other.api == api &&
+        other.captcha_response == captcha_response &&
+        other.spam_log_id == spam_log_id
     end
   end
 end
