@@ -51,7 +51,7 @@ module Mutations
 
       case kind
       when :needs_captcha_response
-        delete fields[:spam]
+        fields.delete :spam
         raise NeedsCaptchaResponseError.new(NEEDS_CAPTCHA_RESPONSE_MESSAGE, extensions: fields)
       when :spam
         raise SpamDisallowedError.new(SPAM_DISALLOWED_MESSAGE, extensions: { spam: true })
