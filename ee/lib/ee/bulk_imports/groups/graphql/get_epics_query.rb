@@ -9,11 +9,11 @@ module EE
 
           def to_s
             <<-'GRAPHQL'
-            query($full_path: ID!, $cursor: String) {
+            query($full_path: ID!, $cursor: String, $per_page: Int) {
               group(fullPath: $full_path) {
                 epics(
                   includeDescendantGroups: false,
-                  first: 100,
+                  first: $per_page,
                   after: $cursor
                 ) {
                   page_info: pageInfo {
@@ -61,7 +61,8 @@ module EE
           def variables(context)
             {
               full_path: context.entity.source_full_path,
-              cursor: context.tracker.next_page
+              cursor: context.tracker.next_page,
+              per_page: ::BulkImports::Tracker::DEFAULT_PAGE_SIZE
             }
           end
 
