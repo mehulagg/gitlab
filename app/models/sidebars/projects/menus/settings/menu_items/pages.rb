@@ -23,7 +23,7 @@ module Sidebars
 
             override :render?
             def render?
-              contextproject.pages_available?
+              context.project.pages_available?
             end
           end
         end
