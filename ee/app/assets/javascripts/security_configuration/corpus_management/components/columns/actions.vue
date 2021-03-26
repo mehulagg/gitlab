@@ -16,11 +16,6 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      showConfirmationModal: false,
-    };
-  },
   modal: {
     actionPrimary: {
       text: s__('Delete'),
