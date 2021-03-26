@@ -7,6 +7,7 @@ module Sidebars
     include GitlabRoutingHelper
     include Gitlab::Allowable
     include ::Sidebars::HasIcon
+    include ::Sidebars::HasHint
 
     attr_reader :context
 

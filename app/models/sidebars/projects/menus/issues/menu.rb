@@ -48,6 +48,11 @@ module Sidebars
             can?(context.current_user, :read_issue, context.project)
           end
 
+          override :active_routes
+          def active_routes
+            { controller: 'projects/issues' }
+          end
+
           override :has_pill?
           def has_pill?
             context.project.issues_enabled?
