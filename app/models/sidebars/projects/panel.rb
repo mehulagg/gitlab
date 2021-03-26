@@ -22,6 +22,7 @@ module Sidebars
         add_menu(Sidebars::Projects::Menus::Wiki::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::ExternalWiki::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::Snippets::Menu.new(context))
+        add_menu(Sidebars::Projects::Menus::ProjectMembers::Menu.new(context))
       end
 
       override :aria_label
