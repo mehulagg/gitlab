@@ -1,51 +1,27 @@
 # frozen_string_literal: true
 
 module Members
-  class InviteService < Members::BaseService
-    BlankEmailsError = Class.new(StandardError)
-    TooManyEmailsError = Class.new(StandardError)
+  class InviteService < Members::BaseInviteService
+    extend ::Gitlab::Utils::Override
 
     def initialize(*args)
       super
 
       @errors = {}
-      @emails = params[:email]&.split(',')&.uniq&.flatten
-    end
-
-    def execute(source)
-      @source = source
-      validate_emails!
-
-      emails.each(&method(:process_email))
-      result
-    rescue BlankEmailsError, TooManyEmailsError => e
-      error(e.message)
+      @invites = params[:email]&.split(',')&.uniq&.flatten
     end
 
     private
 
-    attr_reader :source, :errors, :emails
+    alias_method :formatted_errors, :errors
 
-    def validate_emails!
-      raise BlankEmailsError, s_('AddMember|Email cannot be blank') if emails.blank?
+    override :process_invite
+    def process_invite(invite)
+      return if existing_member?(invite)
+      return if existing_invite?(invite)
+      return if existing_request?(invite)
 
-      if user_limit && emails.size > user_limit
-        raise TooManyEmailsError, s_("AddMember|Too many users specified (limit is %{user_limit})") % { user_limit: user_limit }
-      end
-    end
-
-    def user_limit
-      limit = params.fetch(:limit, Members::CreateService::DEFAULT_LIMIT)
-
-      limit < 0 ? nil : limit
-    end
-
-    def process_email(email)
-      return if existing_member?(email)
-      return if existing_invite?(email)
-      return if existing_request?(email)
-
-      add_member(email)
+      add_member(invite)
     end
 
     def existing_member?(email)
@@ -88,17 +64,8 @@ module Members
         errors[email] = new_member.errors.full_messages.to_sentence
       else
         after_execute(member: new_member)
-      end
-    end
-
-    def result
-      if errors.any?
-        error(errors)
-      else
-        success
+        @successfully_created_namespace_id ||= source.is_a?(Project) ? source.namespace_id : source.id
       end
     end
   end
 end
-
-Members::InviteService.prepend_if_ee('EE::Members::InviteService')

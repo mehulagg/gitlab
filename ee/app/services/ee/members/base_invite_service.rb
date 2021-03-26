@@ -2,14 +2,14 @@
 
 module EE
   module Members
-    module InviteService
+    module BaseInviteService
       private
 
-      def validate_emails!
+      def validate_invites!
         super
 
         if invite_quota_exceeded?
-          raise ::Members::InviteService::TooManyEmailsError,
+          raise ::Members::CreateService::TooManyInvitesError,
                 s_("AddMember|Invite limit of %{daily_invites} per day exceeded") %
                   { daily_invites: source.actual_limits.daily_invites }
         end
@@ -20,7 +20,7 @@ module EE
 
         invite_count = ::Member.invite.created_today.in_hierarchy(source).count
 
-        source.actual_limits.exceeded?(:daily_invites, invite_count + emails.count)
+        source.actual_limits.exceeded?(:daily_invites, invite_count + invites.count)
       end
 
       def after_execute(member:)

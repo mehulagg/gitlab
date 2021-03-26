@@ -1,70 +1,46 @@
 # frozen_string_literal: true
 
 module Members
-  class CreateService < Members::BaseService
-    include Gitlab::Utils::StrongMemoize
+  class CreateService < Members::BaseInviteService
+    extend ::Gitlab::Utils::Override
 
-    DEFAULT_LIMIT = 100
+    def initialize(*args)
+      super
 
-    def execute(source)
-      return error(s_('AddMember|No users specified.')) if user_ids.blank?
-
-      return error(s_("AddMember|Too many users specified (limit is %{user_limit})") % { user_limit: user_limit }) if
-        user_limit && user_ids.size > user_limit
-
-      members = source.add_users(
-        user_ids,
-        params[:access_level],
-        expires_at: params[:expires_at],
-        current_user: current_user
-      )
-
-      errors = []
-
-      members.each do |member|
-        if member.invalid?
-          current_error =
-            # Invited users may not have an associated user
-            if member.user.present?
-              "#{member.user.username}: "
-            else
-              ""
-            end
-
-          current_error += member.errors.full_messages.to_sentence
-          errors << current_error
-        else
-          after_execute(member: member)
-        end
-      end
-
-      enqueue_onboarding_progress_action(source) if members.size > errors.size
-
-      return success unless errors.any?
-
-      error(errors.to_sentence)
+      @errors = []
+      @invites = params[:user_ids]&.split(',')&.uniq&.flatten
     end
 
     private
 
-    def user_ids
-      strong_memoize(:user_ids) do
-        ids = params[:user_ids] || ''
-        ids.split(',').uniq.flatten
+    override :process_invite
+    def process_invite(invite)
+      add_member(invite)
+    end
+
+    def add_member(invite)
+      invite = parse_invite(invite)
+      new_member = source.add_user(invite, params[:access_level], current_user: current_user, expires_at: params[:expires_at])
+
+      if new_member.invalid?
+        prefix = ''
+        prefix += "#{new_member.user.username}: " if new_member.user.present?
+
+        errors << prefix + new_member.errors.full_messages.to_sentence
+      else
+        after_execute(member: new_member)
+        @successfully_created_namespace_id ||= source.is_a?(Project) ? source.namespace_id : source.id
       end
     end
 
-    def user_limit
-      limit = params.fetch(:limit, DEFAULT_LIMIT)
+    def parse_invite(invite)
+      return invite unless invite.match?(/\A\d+\Z/)
 
-      limit && limit < 0 ? nil : limit
+      invite.to_i
     end
 
-    def enqueue_onboarding_progress_action(source)
-      namespace_id = source.is_a?(Project) ? source.namespace_id : source.id
-      Namespaces::OnboardingUserAddedWorker.perform_async(namespace_id)
+    def formatted_errors
+      errors.to_sentence
     end
   end
 end
-
-Members::CreateService.prepend_if_ee('EE::Members::CreateService')

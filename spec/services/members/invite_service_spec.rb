@@ -34,14 +34,14 @@ RSpec.describe Members::InviteService, :aggregate_failures do
 
     it 'returns an error' do
       expect(result[:status]).to eq(:error)
-      expect(result[:message]).to eq('Email cannot be blank')
+      expect(result[:message]).to eq('No users specified.')
     end
   end
 
   context 'when email param is not included' do
     it 'returns an error' do
       expect(result[:status]).to eq(:error)
-      expect(result[:message]).to eq('Email cannot be blank')
+      expect(result[:message]).to eq('No users specified.')
     end
   end
 
