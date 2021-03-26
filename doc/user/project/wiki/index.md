@@ -241,3 +241,9 @@ There are a few limitations compared to project wikis:
 - Changes to group wikis don't show up in the group's activity feed.
 
 For updates, follow [the epic that tracks feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
+
+## Resources
+
+- [Wiki settings for administrators](../../../administration/wikis/index.md)
+- [Project wikis API](../../../api/wikis.md)
+- [Group wikis API](../../../api/group_wikis.md)
