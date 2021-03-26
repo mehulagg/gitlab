@@ -11,7 +11,13 @@ export default {
     longTitle: s__('IncidentManagement|%{hours} hours, %{minutes} minutes remaining'),
     shortTitle: s__('IncidentManagement|%{minutes} minutes remaining'),
   },
-  FIFTEEN_MINUTES: 15 * 60 * 1000, // in milliseconds
+  refreshIntervals: {
+    // Refresh the timer display every 15 minutes.
+    timer: 15 * 60 * 1000,
+    // The missed::SLA label is applied via a cron-job that runs every 2 minutes.
+    // Delay the final label fetch by this duration to ensure an accurate result.
+    labels: 2 * 60 * 1000,
+  },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -77,21 +83,26 @@ export default {
     },
   },
   mounted() {
-    this.timer = setInterval(this.refreshTime, this.$options.FIFTEEN_MINUTES);
+    this.timer = setInterval(this.refreshTime, this.$options.refreshIntervals.timer);
   },
   beforeDestroy() {
     clearTimeout(this.timer);
   },
   methods: {
     refreshTime() {
-      if (this.remainingTime > this.$options.FIFTEEN_MINUTES) {
+      if (this.remainingTime > this.$options.refreshIntervals.timer) {
         // This may introduce drift, but it will be minimal given the length of time
         // between updates.
-        this.clientRemainingTime = this.remainingTime - this.$options.FIFTEEN_MINUTES;
+        this.clientRemainingTime = this.remainingTime - this.$options.refreshIntervals.timer;
       } else {
-        this.clientRemainingTime = 0;
         clearTimeout(this.timer);
+        this.timer = this.setTimeout(this.refetchLabels, this.$options.refreshIntervals.labels);
       }
+    },
+    async refetchLabels() {
+      await this.$emit('refetch-labels');
+      this.clientRemainingTime = 0;
+      clearTimeout(this.timer);
     },
   },
 };
