@@ -90,8 +90,8 @@ integration is planned, and you can refresh the data manually from the Jira inte
 1. Sign in to your Jira instance as the user you configured the integration with.
 1. Go to **Settings (gear) > Applications**.
 1. Select **DVCS accounts**.
-1. In the table, identify the repository you want to refresh. In its **Last Activity**
-   column, click the icon:
+1. In the table, for the repository you want to refresh, in the **Last Activity**
+   column, select the icon:
    ![Refresh GitLab information in Jira](img/jira_dev_panel_manual_refresh.png)
 
 ## Troubleshooting your DVCS connection
@@ -101,7 +101,7 @@ Refer to the items in this section if you're having problems with your DVCS conn
 ### Jira cannot access GitLab server
 
 If you complete the **Add New Account** form, authorize access, and you receive
-this error, Jira and GitLab cannot connect to each other. No other error messages
+this error, Jira and GitLab cannot connect. No other error messages
 appear in any logs:
 
 ```plaintext
@@ -139,7 +139,6 @@ Refer to Atlassian's documentation and Atlassian Support for assistance setting 
 
 - Troubleshooting connectivity [up to and including TLS handshaking](https://confluence.atlassian.com/kb/unable-to-connect-to-ssl-services-due-to-pkix-path-building-failed-error-779355358.html),
   using the a java class called `SSLPoke`.
-
 - Download the class from Atlassian's knowledge base to a directory on Jira's server, such as `/tmp`.
 - Use the same Java runtime as Jira.
 - Pass all networking-related parameters that Jira is called with, such as proxy
@@ -162,7 +161,7 @@ The requested scope is invalid, unknown, or malformed.
 
 Potential resolutions:
 
-1. Verify the URL shown in the browser after being redirected from Jira in the
+1. Verify that the URL shown in the browser after being redirected from Jira in the
    [Jira DVCS connector setup](#configure-jira-for-dvcs) includes `scope=api` in
    the query string.
 1. If `scope=api` is missing from the URL, edit the
@@ -171,7 +170,7 @@ Potential resolutions:
 
 ### Jira error adding account and no repositories listed
 
-If, after you complete the **Add New Account** form in Jira and authorize access, you
+After you complete the **Add New Account** form in Jira and authorize access, you might
 encounter these issues:
 
 - An `Error! Failed adding the account: [Error retrieving list of repositories]` error.
@@ -194,7 +193,7 @@ resynchronize the information. To do so:
 
 1. In Jira, go to **Jira Administration > Applications > DVCS accounts**.
 1. At the account (group or subgroup) level, Jira displays an option to
-   **Refresh repositories** in the `...` (ellipsis) menu.
+   **Refresh repositories** in the **{ellipsis_h}** (ellipsis) menu.
 1. For each project, there's a sync button displayed next to the **last activity** date.
    - To perform a *soft resync*, click the button.
    - To complete a *full sync*, shift-click the button.
