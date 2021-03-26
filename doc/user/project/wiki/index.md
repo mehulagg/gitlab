@@ -19,9 +19,6 @@ You can create Wiki pages in the web interface or
 [locally using Git](#create-or-edit-wiki-pages-locally) since every Wiki is
 a separate Git repository.
 
-[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5,
-**group wikis** became available. Their usage is similar to project wikis, with a few [limitations](../../group/index.md#group-wikis).
-
 ## Create the wiki home page
 
 The first time you visit a Wiki, you are directed to create the Home page.
@@ -226,6 +223,21 @@ Example for `_sidebar` (using Markdown format):
 
 Support for displaying a generated table of contents with a custom side navigation is planned.
 
-## Resources
+## Group wikis **(PREMIUM)**
 
-- [Group wikis](../../group/index.md#group-wikis)
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
+
+Group wikis work the same way as [project wikis](../project/wiki/index.md). Their usage is similar to project wikis, with a few [limitations](#group-wikis).
+
+Group wikis can be edited by members with [Developer permissions](../user/permissions.md#group-members-permissions)
+and above.
+
+You can move group wiki repositories by using the [Group repository storage moves API](../../api/group_repository_storage_moves.md).
+
+There are a few limitations compared to project wikis:
+
+- Git LFS is not supported.
+- Group wikis are not included in global search.
+- Changes to group wikis don't show up in the group's activity feed.
+
+For updates, follow [the epic that tracks feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
