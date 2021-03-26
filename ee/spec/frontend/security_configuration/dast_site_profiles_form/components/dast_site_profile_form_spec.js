@@ -167,10 +167,11 @@ describe('DastSiteProfileForm', () => {
       createFullComponent();
     });
 
-    it('should render correctly', () => {
+    it('should render correctly with default values', () => {
       expect(findAuthSection().exists()).toBe(true);
       expect(findExcludedUrlsInput().exists()).toBe(true);
       expect(findRequestHeadersInput().exists()).toBe(true);
+      expect(findSiteTypeOption().vm.$attrs.checked).toBe('WEBSITE');
     });
 
     it('should have maxlength constraint', () => {
@@ -227,6 +228,7 @@ describe('DastSiteProfileForm', () => {
 
     it('populates the fields with the data passed in via the siteProfile prop', () => {
       expect(findProfileNameInput().element.value).toBe(siteProfile?.name ?? '');
+      // add here
     });
 
     describe('submission', () => {
