@@ -3,23 +3,29 @@
 module Sidebars
   module Projects
     module Menus
-      module ExternalWiki
+      module Snippets
         class Menu < ::Sidebars::Menu
           override :menu_link
           def menu_link
-            context.project.external_wiki.external_wiki_url
+            project_snippets_path(context.project)
           end
 
           override :extra_menu_container_html_options
           def extra_menu_container_html_options
             {
-              class: 'shortcuts-external_wiki'
+              class: 'shortcuts-snippets',
+              data: { qa_selector: 'snippets_link' }
             }
           end
 
           override :menu_name
           def menu_name
-            _('External Wiki')
+            _('Snippets')
+          end
+
+          override :active_routes
+          def active_routes
+            { controller: :snippets }
           end
 
           override :menu_name_html_options
@@ -31,12 +37,12 @@ module Sidebars
 
           override :sprite_icon
           def sprite_icon
-            'external-link'
+            'snippet'
           end
 
           override :render?
           def render?
-            context.project.external_wiki
+            can?(context.current_user, :read_snippet, context.project)
           end
         end
       end
