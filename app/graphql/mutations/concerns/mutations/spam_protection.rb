@@ -37,10 +37,14 @@ module Mutations
 
     def spam_action_response(object)
       fields = spam_action_response_fields(object)
-      kind = if fields[:needs_captcha_response]
-               :needs_captcha_response
-             elsif fields[:spam]
+
+      # If the SpamActionService detected something as spam,
+      # this is non-recoverable and the needs_captcha_response
+      # should not be considered
+      kind = if fields[:spam]
                :spam
+             elsif fields[:needs_captcha_response]
+               :needs_captcha_response
              end
 
       [kind, fields]

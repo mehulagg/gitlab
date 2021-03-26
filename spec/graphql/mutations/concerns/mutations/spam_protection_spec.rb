@@ -46,17 +46,17 @@ RSpec.describe Mutations::SpamProtection do
       end
     end
 
-    context 'when the object is not spam and a CAPTCHA is required' do
-      let(:spam) { false }
+    context 'when the object is spam and a CAPTCHA is required' do
+      let(:spam) { true }
       let(:render_captcha) { true }
 
-      it 'raises NeedsCaptchaResponseError' do
-        expect { check_spam }.to raise_error(described_class::NeedsCaptchaResponseError)
+      it 'raises SpamDisallowedError' do
+        expect { check_spam }.to raise_error(described_class::SpamDisallowedError)
       end
     end
 
-    context 'when the object is be spam and a CAPTCHA is required' do
-      let(:spam) { true }
+    context 'when the object is not spam and a CAPTCHA is required' do
+      let(:spam) { false }
       let(:render_captcha) { true }
 
       it 'raises NeedsCaptchaResponseError' do
