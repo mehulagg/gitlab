@@ -34,6 +34,12 @@ module Gitlab
       end
     end
 
+    def branch_names
+      changes.branch_changes.map do |change|
+        Gitlab::Git.branch_name(change[:ref])
+      end
+    end
+
     private
 
     def parse_changes(changes)

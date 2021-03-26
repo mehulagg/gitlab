@@ -10,6 +10,9 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   weight 5
   loggable_arguments 0, 1, 2, 3
 
+  FORCED_BRANCH_DETECTION_MAX_TIME_S = 120
+  FORCED_BRANCH_DETECTION_DELAY_S = 5
+
   def perform(gl_repository, identifier, changes, push_options = {})
     container, project, repo_type = Gitlab::GlRepository.parse(gl_repository)
 
@@ -89,8 +92,13 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   # Expire the repository status, branch, and tag cache once per push.
   def expire_caches(post_received, repository)
     repository.expire_status_cache if repository.empty?
-    repository.expire_branches_cache if post_received.includes_branches?
     repository.expire_caches_for_tags if post_received.includes_tags?
+
+    if post_received.includes_branches?
+      keep_checking_until_branches_exist(repository, post_received.branch_names) do
+        repository.expire_branches_cache
+      end
+    end
   end
 
   # Schedule an update for the repository size and commit count if necessary.
@@ -131,6 +139,23 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
 
   def log(message)
     Gitlab::GitLogger.error("POST-RECEIVE: #{message}")
+  end
+
+  def keep_checking_until_branches_exist(repository, branch_names, max_time_s: FORCED_BRANCH_DETECTION_MAX_TIME_S, delay_s: FORCED_BRANCH_DETECTION_DELAY_S)
+    if Feature.enabled?(:forced_branch_detection_in_post_receive, type: :ops)
+      time_taken_s = 0
+
+      until time_taken_s >= max_time_s
+        yield
+
+        break if branch_names.all? { |branch| repository.branch_names.include?(branch) }
+
+        sleep delay_s
+        time_taken_s += delay_s
+      end
+    else
+      yield
+    end
   end
 end
 

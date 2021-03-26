@@ -135,4 +135,18 @@ RSpec.describe ::Gitlab::GitPostReceive do
       end
     end
   end
+
+  describe '#branch_names' do
+    let(:changes) do
+      <<~EOF
+        654322 210986 refs/heads/test1
+        654321 210987 refs/tags/test2
+        654323 210985 refs/heads/#{project.default_branch}
+      EOF
+    end
+
+    it 'returns the branch names' do
+      expect(subject.branch_names).to eq(['test1', project.default_branch])
+    end
+  end
 end

@@ -17,8 +17,51 @@ RSpec.describe PostReceive do
     create(:project, :repository, auto_cancel_pending_pipelines: 'disabled')
   end
 
+  let(:worker) do
+    described_class.new
+  end
+
   def perform(changes: base64_changes)
-    described_class.new.perform(gl_repository, key_id, changes)
+    worker.perform(gl_repository, key_id, changes)
+  end
+
+  before do
+    stub_feature_flags(forced_branch_detection_in_post_receive: false)
+  end
+
+  shared_examples "forced_branch_detection_in_post_receive" do
+    let(:repository) { nil }
+
+    let(:changes) do
+      <<~EOF
+          123456 789012 refs/heads/tést1
+          123456 789012 refs/heads/tést2
+      EOF
+    end
+
+    context "forced_branch_detection_in_post_receive flag is enabled", skip: true do
+      before do
+        stub_feature_flags(forced_branch_detection_in_post_receive: true)
+      end
+
+      it "repeatedly clears the cache until the branches exist in it" do
+        stub_const("PostReceive::FORCED_BRANCH_DETECTION_MAX_TIME_S", 1)
+        stub_const("PostReceive::FORCED_BRANCH_DETECTION_MAX_TIME_S", 0.2)
+
+        expect(repository).to receive(:branch_names).and_call_original
+        expect(repository).to receive(:branch_names).exactly(4).times.and_return([])
+        expect(repository).to receive(:branch_names).once.and_call_original
+        expect(repository).to receive(:expire_branches_cache).exactly(5).times.and_call_original
+
+        expect(repository.branch_names).not_to include("tést1")
+        expect(repository.branch_names).not_to include("tést2")
+
+        perform
+
+        expect(repository.branch_names).to include("tést1")
+        expect(repository.branch_names).to include("tést2")
+      end
+    end
   end
 
   context 'as a sidekiq worker' do
@@ -206,6 +249,10 @@ RSpec.describe PostReceive do
 
         it_behaves_like 'updating remote mirrors'
 
+        it_behaves_like 'forced_branch_detection_in_post_receive' do
+          let(:repository) { project.repository }
+        end
+
         context 'with a default branch' do
           let(:changes) do
             <<~EOF
@@ -374,6 +421,10 @@ RSpec.describe PostReceive do
 
         perform
       end
+
+      it_behaves_like 'forced_branch_detection_in_post_receive' do
+        let(:repository) { project.wiki.repository }
+      end
     end
   end
 
@@ -455,6 +506,10 @@ RSpec.describe PostReceive do
             expect(Snippets::UpdateStatisticsService).to receive(:new).with(snippet).and_call_original
 
             perform
+          end
+
+          it_behaves_like 'forced_branch_detection_in_post_receive' do
+            let(:repository) { snippet.repository }
           end
         end
 
