@@ -7,10 +7,10 @@ RSpec.describe Vulnerabilities::Finding do
   it { is_expected.to define_enum_for(:report_type) }
   it { is_expected.to define_enum_for(:severity) }
 
-  where(vulnerability_finding_fingerprints_enabled: [true, false])
+  where(vulnerability_finding_signatures_enabled: [true, false])
   with_them do
     before do
-      stub_feature_flags(vulnerability_finding_fingerprints: vulnerability_finding_fingerprints_enabled)
+      stub_feature_flags(vulnerability_finding_signatures: vulnerability_finding_signatures_enabled)
     end
 
     describe 'associations' do
@@ -1032,28 +1032,28 @@ RSpec.describe Vulnerabilities::Finding do
               location_fingerprint: location_fingerprint2)
       end
 
-      it 'matches the finding based on enabled fingerprinting methods (if feature flag enabled)' do
-        fingerprint1 = create(
-          :vulnerabilities_finding_fingerprint,
+      it 'matches the finding based on enabled tracking methods (if feature flag enabled)' do
+        signature1 = create(
+          :vulnerabilities_finding_signature,
           finding: finding1
         )
 
-        fingerprint2 = create(
-          :vulnerabilities_finding_fingerprint,
+        signature2 = create(
+          :vulnerabilities_finding_signature,
           finding: finding2,
-          fingerprint_sha256: fingerprint1.fingerprint_sha256
+          signature_sha: signature1.signature_sha
         )
 
-        # verify that the fingerprints do exist and that they match
-        expect(finding1.fingerprints.size).to eq(1)
-        expect(finding2.fingerprints.size).to eq(1)
-        expect(fingerprint1.eql?(fingerprint2)).to be(true)
+        # verify that the signatures do exist and that they match
+        expect(finding1.signatures.size).to eq(1)
+        expect(finding2.signatures.size).to eq(1)
+        expect(signature1.eql?(signature2)).to be(true)
 
         # now verify that the correct matching method was used for eql?
-        expect(finding1.eql?(finding2)).to be(vulnerability_finding_fingerprints_enabled)
+        expect(finding1.eql?(finding2)).to be(vulnerability_finding_signatures_enabled)
       end
 
-      context 'short circuits on the highest priority fingerprint match' do
+      context 'short circuits on the highest priority signature match' do
         using RSpec::Parameterized::TableSyntax
 
         let(:same_hash) { false }
@@ -1061,46 +1061,46 @@ RSpec.describe Vulnerabilities::Finding do
         let(:create_scope_offset) { false }
         let(:same_scope_offset) { false}
 
-        let(:create_fingerprints) do
-          fingerprint1_hash = create(
-            :vulnerabilities_finding_fingerprint,
+        let(:create_signatures) do
+          signature1_hash = create(
+            :vulnerabilities_finding_signature,
             algorithm_type: 'hash',
             finding: finding1
           )
-          sha = same_hash ? fingerprint1_hash.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
+          sha = same_hash ? signature1_hash.signature_sha : ::Digest::SHA1.digest(SecureRandom.hex(50))
           create(
-            :vulnerabilities_finding_fingerprint,
+            :vulnerabilities_finding_signature,
             algorithm_type: 'hash',
             finding: finding2,
-            fingerprint_sha256: sha
+            signature_sha: sha
           )
 
-          fingerprint1_location = create(
-            :vulnerabilities_finding_fingerprint,
+          signature1_location = create(
+            :vulnerabilities_finding_signature,
             algorithm_type: 'location',
             finding: finding1
           )
-          sha = same_location ? fingerprint1_location.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
+          sha = same_location ? signature1_location.signature_sha : ::Digest::SHA1.digest(SecureRandom.hex(50))
           create(
-            :vulnerabilities_finding_fingerprint,
+            :vulnerabilities_finding_signature,
             algorithm_type: 'location',
             finding: finding2,
-            fingerprint_sha256: sha
+            signature_sha: sha
           )
 
-          fingerprint1_scope_offset = create(
-            :vulnerabilities_finding_fingerprint,
+          signature1_scope_offset = create(
+            :vulnerabilities_finding_signature,
             algorithm_type: 'scope_offset',
             finding: finding1
           )
 
           if create_scope_offset
-            sha = same_scope_offset ? fingerprint1_scope_offset.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
+            sha = same_scope_offset ? signature1_scope_offset.signature_sha : ::Digest::SHA1.digest(SecureRandom.hex(50))
             create(
-              :vulnerabilities_finding_fingerprint,
+              :vulnerabilities_finding_signature,
               algorithm_type: 'scope_offset',
               finding: finding2,
-              fingerprint_sha256: sha
+              signature_sha: sha
             )
           end
         end
@@ -1114,9 +1114,9 @@ RSpec.describe Vulnerabilities::Finding do
         end
         with_them do
           it 'matches correctly' do
-            next unless vulnerability_finding_fingerprints_enabled
+            next unless vulnerability_finding_signatures_enabled
 
-            create_fingerprints
+            create_signatures
             expect(finding1.eql?(finding2)).to be(should_match)
           end
         end

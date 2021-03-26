@@ -47,12 +47,12 @@ module Security
       report_finding = report_finding_for(security_finding)
       return Vulnerabilities::Finding.new unless report_finding
 
-      finding_data = report_finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :links, :fingerprints)
+      finding_data = report_finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :links, :signatures)
       identifiers = report_finding.identifiers.map do |identifier|
         Vulnerabilities::Identifier.new(identifier.to_hash)
       end
-      fingerprints = report_finding.fingerprints.map do |fingerprint|
-        Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
+      signatures = report_finding.signatures.map do |signature|
+        Vulnerabilities::FindingSignature.new(signature.to_hash)
       end
 
       Vulnerabilities::Finding.new(finding_data).tap do |finding|
@@ -62,7 +62,7 @@ module Security
         finding.sha = pipeline.sha
         finding.scanner = security_finding.scanner
         finding.identifiers = identifiers
-        finding.fingerprints = fingerprints
+        finding.signatures = signatures
       end
     end
 

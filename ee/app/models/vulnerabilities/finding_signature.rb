@@ -5,9 +5,7 @@ module Vulnerabilities
     self.table_name = 'vulnerability_finding_signatures'
 
     include BulkInsertSafe
-    include VulnerabilityFindingFingerprintHelpers
-
-    self.table_name = 'vulnerability_finding_fingerprints'
+    include VulnerabilityFindingSignatureHelpers
 
     belongs_to :finding, foreign_key: 'finding_id', inverse_of: :signatures, class_name: 'Vulnerabilities::Finding'
 
@@ -15,13 +13,13 @@ module Vulnerabilities
 
     validates :finding, presence: true
 
-    def fingerprint_hex
-      fingerprint_sha256.unpack1("H*")
+    def signature_hex
+      signature_sha.unpack1("H*")
     end
 
     def eql?(other)
       other.algorithm_type == algorithm_type &&
-        other.fingerprint_sha256 == fingerprint_sha256
+        other.signature_sha == signature_sha
     end
 
     alias_method :==, :eql?

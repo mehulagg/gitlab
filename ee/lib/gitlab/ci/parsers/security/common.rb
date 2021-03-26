@@ -7,14 +7,14 @@ module Gitlab
         class Common
           SecurityReportParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
 
-          def self.parse!(json_data, report, vulnerability_finding_fingerprints_enabled = false)
-            new(json_data, report, vulnerability_finding_fingerprints_enabled).parse!
+          def self.parse!(json_data, report, vulnerability_finding_signatures_enabled = false)
+            new(json_data, report, vulnerability_finding_signatures_enabled).parse!
           end
 
-          def initialize(json_data, report, vulnerability_finding_fingerprints_enabled = false)
+          def initialize(json_data, report, vulnerability_finding_signatures_enabled = false)
             @json_data = json_data
             @report = report
-            @vulnerability_finding_fingerprints_enabled = vulnerability_finding_fingerprints_enabled
+            @vulnerability_finding_signatures_enabled = vulnerability_finding_signatures_enabled
           end
 
           def parse!
@@ -81,13 +81,13 @@ module Gitlab
             links = create_links(data['links'])
             location = create_location(data['location'] || {})
             remediations = create_remediations(data['remediations'])
-            fingerprints = create_signatures(location, tracking_data(data))
+            signatures = create_signatures(location, tracking_data(data))
 
-            if @vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
-              # NOT the fingerprint_sha256 - the compare key is hashed
+            if @vulnerability_finding_signatures_enabled && !signatures.empty?
+              # NOT the signature_sha - the compare key is hashed
               # to create the project_fingerprint
-              highest_priority_fingerprint = fingerprints.max_by(&:priority)
-              uuid = calculate_uuid_v5(identifiers.first, highest_priority_fingerprint.fingerprint_hex)
+              highest_priority_signature = signatures.max_by(&:priority)
+              uuid = calculate_uuid_v5(identifiers.first, highest_priority_signature.signature_hex)
             else
               uuid = calculate_uuid_v5(identifiers.first, location&.fingerprint)
             end
@@ -111,7 +111,7 @@ module Gitlab
                 details: data['details'] || {},
                 signatures: signatures,
                 project_id: report.project_id,
-                vulnerability_finding_fingerprints_enabled: @vulnerability_finding_fingerprints_enabled))
+                vulnerability_finding_signatures_enabled: @vulnerability_finding_signatures_enabled))
           end
 
           def create_signatures(location, tracking)
@@ -120,7 +120,7 @@ module Gitlab
             signature_algorithms = Hash.new { |hash, key| hash[key] = [] }
 
             tracking['items'].each do |item|
-              next unless item.key?('fingerprints')
+              next unless item.key?('signatures')
 
               item['signatures'].each do |signature|
                 alg = signature['algorithm']
@@ -129,10 +129,10 @@ module Gitlab
             end
 
             # We should *always* include the hash or physical-location-based
-            # fingerprint!
+            # signature!
             #
-            # See the comments in VulnerabilityFindingFingerprintHelpers about
-            # creating default fingerprints from location data
+            # See the comments in VulnerabilityFindingSignatureHelpers about
+            # creating default signatures from location data
             is_location = [:file_path, :start_line].all? { |x| location.respond_to?(x) }
             algorithm_type = is_location ? 'location' : 'hash'
             unless signature_algorithms.has_key?(algorithm_type)
@@ -141,7 +141,7 @@ module Gitlab
 
             signature_algorithms.map do |algorithm, values|
               value = values.join('|')
-              signature = ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
+              signature = ::Gitlab::Ci::Reports::Security::FindingSignature.new(
                 algorithm_type: algorithm,
                 signature_value: value
               )
@@ -212,8 +212,8 @@ module Gitlab
             raise NotImplementedError
           end
 
-          def create_tracking_location(tracking_data, fingerprint)
-            Reports::Security::Locations::Tracking.new(tracking_data, fingerprint)
+          def create_tracking_location(tracking_data, signature)
+            Reports::Security::Locations::Tracking.new(tracking_data, signature)
           end
 
           def finding_name(data, identifiers, location)
