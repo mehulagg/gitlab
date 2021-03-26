@@ -286,7 +286,6 @@ describe('Settings Form', () => {
         });
 
         await waitForPromises();
-        await wrapper.vm.$nextTick();
 
         findForm().trigger('submit');
 
