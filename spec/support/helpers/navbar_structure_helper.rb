@@ -45,7 +45,7 @@ module NavbarStructureHelper
     )
   end
 
-  def insert_terraform_registry_nav
+  def insert_infrastructure_registry_nav
     insert_after_sub_nav_item(
       _('Package Registry'),
       within: _('Packages & Registries'),
