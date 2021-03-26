@@ -7,12 +7,16 @@ RSpec.describe Resolvers::AlertManagement::IntegrationsResolver do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
+  let_it_be(:project2) { create(:project) }
   let_it_be(:prometheus_integration) { create(:prometheus_service, project: project) }
   let_it_be(:active_http_integration) { create(:alert_management_http_integration, project: project) }
   let_it_be(:inactive_http_integration) { create(:alert_management_http_integration, :inactive, project: project) }
-  let_it_be(:other_proj_integration) { create(:alert_management_http_integration) }
+  let_it_be(:other_proj_integration) { create(:alert_management_http_integration, project: project2) }
+  let_it_be(:other_proj_prometheus_integration) { create(:prometheus_service, project: project2) }
 
-  subject { sync(resolve_http_integrations) }
+  let(:params) { {} }
+
+  subject { sync(resolve_http_integrations(params)) }
 
   specify do
     expect(described_class).to have_nullable_graphql_type(Types::AlertManagement::IntegrationType.connection_type)
@@ -25,14 +29,49 @@ RSpec.describe Resolvers::AlertManagement::IntegrationsResolver do
   context 'user has permission' do
     before do
       project.add_maintainer(current_user)
+      project2.add_maintainer(current_user)
     end
 
     it { is_expected.to contain_exactly(active_http_integration, prometheus_integration) }
+
+    context 'when HTTP Integration ID is given' do
+      context 'when integration is from the current project' do
+        let(:params) { { id: GitlabSchema.id_from_object(inactive_http_integration).to_s } }
+
+        it { is_expected.to contain_exactly(inactive_http_integration) }
+      end
+
+      context 'when integration is from other project' do
+        let(:params) { { id: GitlabSchema.id_from_object(other_proj_integration).to_s } }
+
+        it { is_expected.to be_empty }
+      end
+    end
+
+    context 'when Prometheus Integration ID is given' do
+      context 'when integration is from the current project' do
+        let(:params) { { id: GitlabSchema.id_from_object(prometheus_integration).to_s } }
+
+        it { is_expected.to contain_exactly(prometheus_integration) }
+      end
+
+      context 'when integration is from other project' do
+        let(:params) { { id: GitlabSchema.id_from_object(other_proj_prometheus_integration).to_s } }
+
+        it { is_expected.to be_empty }
+      end
+    end
+
+    context 'when non-integration ID is given' do
+      let(:params) { { id: GitlabSchema.id_from_object(current_user).to_s } }
+
+      it { is_expected.to be_empty }
+    end
   end
 
   private
 
   def resolve_http_integrations(args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: project, ctx: context)
+    resolve(described_class, obj: project, args: args, ctx: context)
   end
 end
