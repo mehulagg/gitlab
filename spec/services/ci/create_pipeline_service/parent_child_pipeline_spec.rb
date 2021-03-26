@@ -91,6 +91,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
 
       it 'creates bridge job with resource group', :aggregate_failures do
         pipeline = create_pipeline!
+        Ci::Pipelines::InitialProcessWorker.new.perform(pipeline.id)
 
         test = pipeline.statuses.find_by(name: 'instrumentation_test')
         expect(pipeline).to be_created_successfully
