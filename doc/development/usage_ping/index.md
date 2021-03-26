@@ -795,6 +795,25 @@ We return fallback values in these cases:
 | Timeouts, general failures  | -1    |
 | Standard errors in counters | -2    |
 
+### UsagePing Admin APIs
+
+#### UsageDataQueries API
+
+> - Introduced in [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016)
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+
+1. Get UsagePing raw SQL queries via an API.
+
+Only available to GitLab instance Admin users.
+
+Get all the raw sql queries used to compute usage ping.
+
+```plaintext
+GET /usage_data/queries
+```
+
+Sample response can be checked via [the snippet](https://gitlab.com/-/snippets/2094332).
+
 ## Developing and testing Usage Ping
 
 ### 1. Naming and placing the metrics
