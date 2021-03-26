@@ -24,7 +24,7 @@ const mockJob = {
 const mockGroups = Array(4)
   .fill(0)
   .map((item, idx) => {
-    return { ...mockJob, id: idx, name: `fish-${idx}` };
+    return { ...mockJob, jobs: [mockJob], id: idx, name: `fish-${idx}` };
   });
 
 const defaultProps = {
@@ -104,13 +104,19 @@ describe('stage column component', () => {
           props: {
             groups: [
               {
-                id: 4259,
+                ...mockJob,
                 name: '<img src=x onerror=alert(document.domain)>',
-                status: {
-                  icon: 'status_success',
-                  label: 'success',
-                  tooltip: '<img src=x onerror=alert(document.domain)>',
-                },
+                jobs: [
+                  {
+                    id: 4259,
+                    name: '<img src=x onerror=alert(document.domain)>',
+                    status: {
+                      icon: 'status_success',
+                      label: 'success',
+                      tooltip: '<img src=x onerror=alert(document.domain)>',
+                    },
+                  },
+                ],
               },
             ],
             title: 'test <img src=x onerror=alert(document.domain)>',
@@ -159,6 +165,7 @@ describe('stage column component', () => {
                 label: 'success',
                 tooltip: '<img src=x onerror=alert(document.domain)>',
               },
+              jobs: [mockJob],
             },
           ],
           title: 'test',
@@ -191,6 +198,7 @@ describe('stage column component', () => {
                 label: 'success',
                 tooltip: '<img src=x onerror=alert(document.domain)>',
               },
+              jobs: [mockJob],
             },
           ],
           title: 'test',

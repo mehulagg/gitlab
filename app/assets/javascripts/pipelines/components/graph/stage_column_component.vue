@@ -97,6 +97,23 @@ export default {
     isFadedOut(jobName) {
       return this.highlightedJobs.length > 1 && !this.highlightedJobs.includes(jobName);
     },
+    isParallel(group) {
+      return group.size > 1 && group.jobs.length > 1;
+    },
+    singleJobExists(group) {
+      const firstJobDefined = Boolean(group.jobs?[0]);
+
+      if (!firstJobDefined) {
+        const currentGroup = this.groups.find((element) => element.name === group.name);
+        const serializedGroup = Object.entries(currentGroup).join(' ');
+        reportToSentry(
+          'stage_column_component',
+          `undefined_job_hunt, serialized group: ${serializedGroup}`,
+        );
+      }
+
+      return group.size === 1 && firstJobDefined;
+    },
   },
 };
 </script>
@@ -130,7 +147,7 @@ export default {
         @mouseleave="$emit('jobHover', '')"
       >
         <job-item
-          v-if="group.size === 1"
+          v-if="singleJobExists(group)"
           :job="group.jobs[0]"
           :job-hovered="jobHovered"
           :pipeline-expanded="pipelineExpanded"
@@ -139,7 +156,7 @@ export default {
           :class="{ 'gl-opacity-3': isFadedOut(group.name) }"
           @pipelineActionRequestComplete="$emit('refreshPipelineGraph')"
         />
-        <div v-else :class="{ 'gl-opacity-3': isFadedOut(group.name) }">
+        <div v-else-if="isParallel(group)" :class="{ 'gl-opacity-3': isFadedOut(group.name) }">
           <job-group-dropdown :group="group" :pipeline-id="pipelineId" />
         </div>
       </div>
