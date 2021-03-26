@@ -14365,7 +14365,7 @@ msgstr ""
 msgid "Gitea Import"
 msgstr ""
 
-msgid "GithubIntegration|Create a <a href=\"https://github.com/settings/tokens\">personal access token</a> with <code>repo:status</code> access granted and paste it here."
+msgid "GithubIntegration|Create a %{token_html} with %{status_html} access granted and paste it here."
 msgstr ""
 
 msgid "GithubIntegration|Obtain statuses for commits and pull requests."
@@ -14374,9 +14374,7 @@ msgstr ""
 msgid "GithubIntegration|Repository URL"
 msgstr ""
 
-msgid ""
-"GithubIntegration|Select this if you want GitHub to mark status checks as Required. When enabled, this appends your\n"
-"        GitLab instance host name to the status check name. When disabled, it uses the branch name."
+msgid "GithubIntegration|Select this if you want GitHub to mark status checks as Required. When enabled, this appends your GitLab instance host name to the status check name. When disabled, it uses the branch name."
 msgstr ""
 
 msgid "GithubIntegration|Static status check names (optional)"

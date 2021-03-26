@@ -43,7 +43,7 @@ class GithubService < Service
         name: "token",
         required: true,
         placeholder: "8d3f016698e...",
-        help: s_('GithubIntegration|Create a <a href="https://github.com/settings/tokens">personal access token</a> with <code>repo:status</code> access granted and paste it here.').html_safe },
+        help: s_("GithubIntegration|Create a %{token_html} with %{status_html} access granted and paste it here." % {token_html: '<a href="https://github.com/settings/tokens">personal access token</a>', status_html: '<code>repo:status</code>'}).html_safe },
       { type: 'text',
         name: "repository_url",
         title: s_('GithubIntegration|Repository URL'),
@@ -52,8 +52,7 @@ class GithubService < Service
       { type: 'checkbox',
         name: "static_context",
         title: s_('GithubIntegration|Static status check names (optional)'),
-        help: s_('GithubIntegration|Select this if you want GitHub to mark status checks as Required. When enabled, this appends your
-        GitLab instance host name to the status check name. When disabled, it uses the branch name.') }
+        help: s_('GithubIntegration|Select this if you want GitHub to mark status checks as Required. When enabled, this appends your GitLab instance host name to the status check name. When disabled, it uses the branch name.') }
     ]
   end
 
