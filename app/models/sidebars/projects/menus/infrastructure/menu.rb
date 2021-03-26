@@ -14,7 +14,7 @@ module Sidebars
 
           override :menu_link
           def menu_link
-            @renderable_items.first.item_link
+            renderable_items.first.item_link
           end
 
           override :menu_name
