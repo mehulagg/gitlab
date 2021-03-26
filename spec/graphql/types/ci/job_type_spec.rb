@@ -13,6 +13,7 @@ RSpec.describe Types::Ci::JobType do
       created_at
       detailedStatus
       duration
+      tags
       finished_at
       id
       name
