@@ -29,7 +29,7 @@ Complete these steps on GitHub:
 1. Ensure that `repo:status` is checked and select **Generate token**.
 1. Copy the generated token to use in GitLab.
 
-Complete these steps on GitLab:
+Complete these steps in GitLab:
 
 1. Go to the project you want to configure.
 1. Go to the [Integrations page](overview.md#accessing-integrations)
