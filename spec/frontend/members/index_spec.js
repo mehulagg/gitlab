@@ -1,4 +1,5 @@
 import { createWrapper } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import MembersApp from '~/members/components/app.vue';
 import { initMembersApp } from '~/members/index';
 import { membersJsonString, members } from './mock_data';
@@ -16,7 +17,7 @@ describe('initMembersApp', () => {
       requestFormatter: () => ({}),
       filteredSearchBar: { show: false },
     });
-    wrapper = createWrapper(vm);
+    wrapper = extendedWrapper(createWrapper(vm));
   };
 
   beforeEach(() => {
@@ -42,31 +43,31 @@ describe('initMembersApp', () => {
     expect(wrapper.find(MembersApp).exists()).toBe(true);
   });
 
-  it('sets `currentUserId` in Vuex store', () => {
+  it('sets `currentUserId` in provide/inject', () => {
     setup();
 
-    expect(vm.$store.state.currentUserId).toBe(123);
+    expect(wrapper.provided('currentUserId')).toBe(123);
   });
 
   describe('when `gon.current_user_id` is not set (user is not logged in)', () => {
-    it('sets `currentUserId` as `null` in Vuex store', () => {
+    it('sets `currentUserId` as `null` in provide/inject', () => {
       window.gon = {};
       setup();
 
-      expect(vm.$store.state.currentUserId).toBeNull();
+      expect(wrapper.provided('currentUserId')).toBeNull();
     });
   });
 
-  it('parses and sets `data-source-id` as `sourceId` in Vuex store', () => {
+  it('parses and sets `data-source-id` as `sourceId` in provide/inject', () => {
     setup();
 
-    expect(vm.$store.state.sourceId).toBe(234);
+    expect(wrapper.provided('sourceId')).toBe(234);
   });
 
   it('parses and sets `data-can-manage-members` as `canManageMembers` in Vuex store', () => {
     setup();
 
-    expect(vm.$store.state.canManageMembers).toBe(true);
+    expect(wrapper.provided('canManageMembers')).toBe(true);
   });
 
   it('parses and sets `members` in Vuex store', () => {

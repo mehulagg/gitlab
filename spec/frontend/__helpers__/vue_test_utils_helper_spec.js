@@ -105,5 +105,52 @@ describe('Vue test utils helpers', () => {
         expect(mockComponent.findAllByTestId(testId)).toHaveLength(2);
       });
     });
+
+    describe('provided', () => {
+      let wrapper;
+
+      beforeEach(() => {
+        wrapper = extendedWrapper(
+          shallowMount({
+            template: '<div>mock component</div>',
+            provide: { fooBar: 'baz', company: 'GitLab' },
+          }),
+        );
+      });
+
+      describe('when called without `key` argument', () => {
+        it('returns an object of provided attributes', () => {
+          expect(wrapper.provided()).toEqual({ fooBar: 'baz', company: 'GitLab' });
+        });
+      });
+
+      describe('when called with `key` argument', () => {
+        describe('when `key` exists in provided attributes', () => {
+          it('returns value of provided attribute', () => {
+            expect(wrapper.provided('fooBar')).toBe('baz');
+          });
+        });
+
+        describe('when `key` does not exist in provided attributes', () => {
+          it('returns `undefined`', () => {
+            expect(wrapper.provided('invalidKey')).toBeUndefined();
+          });
+        });
+      });
+
+      describe('when no attributes are provided', () => {
+        beforeEach(() => {
+          wrapper = extendedWrapper(
+            shallowMount({
+              template: '<div>mock component</div>',
+            }),
+          );
+        });
+
+        it('returns an empty object', () => {
+          expect(wrapper.provided()).toEqual({});
+        });
+      });
+    });
   });
 });

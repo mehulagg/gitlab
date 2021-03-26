@@ -19,8 +19,6 @@ describe('MemberList', () => {
           table: { 'data-qa-selector': 'members_list' },
           tr: { 'data-qa-selector': 'member_row' },
         },
-        sourceId: 1,
-        currentUserId: 1,
         ...state,
       },
     });
@@ -30,6 +28,10 @@ describe('MemberList', () => {
     wrapper = mount(MembersTable, {
       localVue,
       store: createStore(state),
+      provide: {
+        sourceId: 1,
+        currentUserId: 1,
+      },
       stubs: [
         'member-avatar',
         'member-source',

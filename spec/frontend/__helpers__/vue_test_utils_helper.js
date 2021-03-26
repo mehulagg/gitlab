@@ -56,5 +56,15 @@ export const extendedWrapper = (wrapper) => {
         return this.findAll(`[data-testid="${id}"]`);
       },
     },
+    // Returns attributes provided to the component via provide/inject
+    // https://vuejs.org/v2/api/#provide-inject
+    provided: {
+      value(key) {
+        // eslint-disable-next-line no-underscore-dangle
+        const provided = this.vm?._provided || {};
+
+        return key ? provided[key] : provided;
+      },
+    },
   });
 };
