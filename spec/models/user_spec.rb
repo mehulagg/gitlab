@@ -2480,6 +2480,67 @@ RSpec.describe User do
     end
   end
 
+  describe '.update_todos_count_cache' do
+    let_it_be(:user1) { create(:user) }
+    let_it_be(:user2) { create(:user) }
+
+    before do
+      allow(Rails).to receive(:cache).and_return(memory_store)
+      Rails.cache.clear
+
+      user1.update_todos_count_cache
+      user2.update_todos_count_cache
+
+      create(:todo, user: user1, state: :done)
+      create(:todo, user: user1, state: :pending)
+      create(:todo, user: user2, state: :done)
+      create(:todo, user: user2, state: :pending)
+    end
+
+    let(:memory_store) { ActiveSupport::Cache.lookup_store(:memory_store) }
+
+    it 'updates the todos_count for all users' do
+      expect { User.update_todos_count_cache }
+        .to change(user1, :todos_done_count)
+        .and change(user1, :todos_pending_count)
+        .and change(user2, :todos_done_count)
+        .and change(user2, :todos_pending_count)
+    end
+
+    it 'updates the todos_count only for users in the current ActiveRecord::Relation' do
+      expect { User.where(id: user1.id).update_todos_count_cache }
+        .to change(user1, :todos_done_count)
+        .and change(user1, :todos_pending_count)
+        .and not_change(user2, :todos_done_count)
+        .and not_change(user2, :todos_pending_count)
+    end
+
+    it 'updates the todos_counts for an array of users passed as parameter' do
+      expect { User.update_todos_count_cache([user1]) }
+        .to change(user1, :todos_done_count)
+        .and change(user1, :todos_pending_count)
+        .and not_change(user2, :todos_done_count)
+        .and not_change(user2, :todos_pending_count)
+    end
+
+    it 'updates the todos_counts for a single user passed as parameter' do
+      expect { User.update_todos_count_cache(user1) }
+        .to change(user1, :todos_done_count)
+        .and change(user1, :todos_pending_count)
+        .and not_change(user2, :todos_done_count)
+        .and not_change(user2, :todos_pending_count)
+    end
+
+    it 'avoids N+1 queries' do
+      Rails.cache.clear
+      control_count = ActiveRecord::QueryRecorder.new { User.where(id: user1.id).update_todos_count_cache }.count
+
+      Rails.cache.clear
+
+      expect { User.where(id: [user1.id, user2.id]).update_todos_count_cache }.not_to exceed_query_limit(control_count)
+    end
+  end
+
   describe 'all_ssh_keys' do
     it { is_expected.to have_many(:keys).dependent(:destroy) }
 
