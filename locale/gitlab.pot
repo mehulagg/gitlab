@@ -9695,6 +9695,9 @@ msgstr ""
 msgid "DastProfiles|Request headers"
 msgstr ""
 
+msgid "DastProfiles|Rest API"
+msgstr ""
+
 msgid "DastProfiles|Run scan"
 msgstr ""
 
@@ -9738,6 +9741,9 @@ msgid "DastProfiles|Site Profiles"
 msgstr ""
 
 msgid "DastProfiles|Site name"
+msgstr ""
+
+msgid "DastProfiles|Site type"
 msgstr ""
 
 msgid "DastProfiles|Spider timeout"
@@ -9786,6 +9792,9 @@ msgid "DastProfiles|Validated"
 msgstr ""
 
 msgid "DastProfiles|Validation status"
+msgstr ""
+
+msgid "DastProfiles|Website"
 msgstr ""
 
 msgid "DastSiteValidation|Copy HTTP header to clipboard"
