@@ -30,30 +30,35 @@ RSpec.describe 'Issue Sidebar' do
       let(:user2) { create(:user) }
       let(:issue2) { create(:issue, project: project, author: user2) }
 
-      include_examples 'issuable invite members experiments' do
-        let(:issuable_path) { project_issue_path(project, issue2) }
-      end
+      # include_examples 'issuable invite members experiments' do
+      #   let(:issuable_path) { project_issue_path(project, issue2) }
+      # end
 
       context 'when user is a developer' do
         before do
           project.add_developer(user)
           visit_issue(project, issue2)
+        end
 
+        it 'shows author in assignee dropdown' do
           page.within('.assignee') do
             click_button('Edit')
             wait_for_requests
           end
-        end
 
-        it 'shows author in assignee dropdown' do
           page.within '.dropdown-menu-user' do
             expect(page).to have_content(user2.name)
           end
         end
 
         it 'shows author when filtering assignee dropdown' do
+          page.within('.assignee') do
+            click_button('Edit')
+            wait_for_requests
+          end
+
           page.within '.dropdown-menu-user' do
-            find('.dropdown-input-field').set(user2.name)
+            find('.js-dropdown-input-field').find('input').set(user2.name)
 
             wait_for_requests
 
@@ -62,25 +67,21 @@ RSpec.describe 'Issue Sidebar' do
         end
 
         it 'assigns yourself' do
-          find('.block.assignee .dropdown-menu-toggle').click
-
           click_button 'assign yourself'
-
           wait_for_requests
 
+          page.within '.assignee' do
+            expect(page).to have_content(user.name)
+          end
+        end
+
+        it 'keeps your filtered term after filtering and dismissing the dropdown' do
           page.within('.assignee') do
             click_button('Edit')
             wait_for_requests
           end
 
-          page.within '.dropdown-menu-user' do
-            expect(page.find('.dropdown-header')).to be_visible
-            expect(page.find('.dropdown-menu-user-link.is-active')).to have_content(user.name)
-          end
-        end
-
-        it 'keeps your filtered term after filtering and dismissing the dropdown' do
-          find('.dropdown-input-field').set(user2.name)
+          find('.js-dropdown-input-field').find('input').set(user2.name)
 
           wait_for_requests
 

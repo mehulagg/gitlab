@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { __ } from '~/locale';
 
 export default {
   components: { GlButton, GlLoadingIcon },
@@ -20,6 +21,11 @@ export default {
       required: false,
       default: false,
     },
+    isDirty: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     tracking: {
       type: Object,
       required: false,
@@ -34,6 +40,11 @@ export default {
     return {
       edit: false,
     };
+  },
+  computed: {
+    editButtonText() {
+      return this.isDirty ? __('Apply') : __('Edit');
+    },
   },
   destroyed() {
     window.removeEventListener('click', this.collapseWhenOffClick);
@@ -105,7 +116,7 @@ export default {
         @keyup.esc="toggle"
         @click="toggle"
       >
-        {{ __('Edit') }}
+        {{ editButtonText }}
       </gl-button>
     </div>
     <div v-show="!edit" data-testid="collapsed-content">

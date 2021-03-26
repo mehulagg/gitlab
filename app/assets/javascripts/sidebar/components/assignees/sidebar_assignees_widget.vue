@@ -88,6 +88,7 @@ export default {
       selected: [],
       isSettingAssignees: false,
       isSearching: false,
+      isDirty: false,
     };
   },
   apollo: {
@@ -262,6 +263,7 @@ export default {
         });
     },
     selectAssignee(name) {
+      this.isDirty = true;
       if (name === undefined) {
         this.clearSelected();
         return;
@@ -276,6 +278,7 @@ export default {
     },
     unselect(name) {
       this.selected = this.selected.filter((user) => user.username !== name);
+      this.isDirty = true;
 
       if (!this.multipleAssignees) {
         this.collapseWidget();
@@ -288,6 +291,7 @@ export default {
       this.selected = [];
     },
     saveAssignees() {
+      this.isDirty = false;
       this.updateAssignees(this.selectedUserNames);
       this.$el.dispatchEvent(hideDropdownEvent);
     },
@@ -340,6 +344,7 @@ export default {
       ref="toggle"
       :loading="isSettingAssignees"
       :title="assigneeText"
+      :is-dirty="isDirty"
       @open="focusSearch"
       @close="saveAssignees"
     >
@@ -361,7 +366,11 @@ export default {
           @toggle="collapseWidget"
         >
           <template #search>
-            <gl-search-box-by-type ref="search" v-model.trim="search" />
+            <gl-search-box-by-type
+              ref="search"
+              v-model.trim="search"
+              class="js-dropdown-input-field"
+            />
           </template>
           <template #items>
             <gl-loading-icon
