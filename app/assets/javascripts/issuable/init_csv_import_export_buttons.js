@@ -28,9 +28,7 @@ export default () => {
       showExportButton: parseBoolean(showExportButton),
       showImportButton: parseBoolean(showImportButton),
       issuableType,
-      issuableCount,
       email,
-      exportCsvPath,
       importCsvIssuesPath,
       containerClass,
       canEdit: parseBoolean(canEdit),
@@ -39,7 +37,12 @@ export default () => {
       showLabel,
     },
     render(h) {
-      return h(ImportExportButtons);
+      return h(ImportExportButtons, {
+        props: {
+          exportCsvPath,
+          issuableCount,
+        },
+      });
     },
   });
 };

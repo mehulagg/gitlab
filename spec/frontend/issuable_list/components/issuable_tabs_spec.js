@@ -64,10 +64,12 @@ describe('IssuableTabs', () => {
     });
 
     it('renders gl-badge component within a tab', () => {
-      const badgeEl = wrapper.findAll(GlBadge).at(0);
+      const badgeEl = wrapper.findAll(GlBadge);
 
-      expect(badgeEl.exists()).toBe(true);
-      expect(badgeEl.text()).toBe(`${mockIssuableListProps.tabCounts.opened}`);
+      // Does not render `All` tab since it has an undefined count
+      expect(badgeEl).toHaveLength(2);
+      expect(badgeEl.at(0).text()).toBe(`${mockIssuableListProps.tabCounts.opened}`);
+      expect(badgeEl.at(1).text()).toBe(`${mockIssuableListProps.tabCounts.closed}`);
     });
 
     it('renders contents for slot "nav-actions"', () => {

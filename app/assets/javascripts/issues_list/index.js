@@ -73,12 +73,22 @@ export function initIssuesListApp() {
   }
 
   const {
+    calendarUrl,
+    canBulkUpdate,
     endpoint,
     fullPath,
     hasBlockedIssuesFeature,
     hasIssuableHealthStatusFeature,
     hasIssueWeightsFeature,
     issuesPath,
+    newIssuePath,
+    rssUrl,
+    showNewIssueLink,
+    canEdit,
+    email,
+    exportCsvPath,
+    importCsvIssuesPath,
+    projectImportJiraPath,
   } = el.dataset;
 
   return new Vue({
@@ -87,12 +97,26 @@ export function initIssuesListApp() {
     // issue is fixed upstream in https://github.com/vuejs/vue-apollo/pull/1153
     apolloProvider: {},
     provide: {
+      calendarUrl,
+      canBulkUpdate: parseBoolean(canBulkUpdate),
       endpoint,
       fullPath,
       hasBlockedIssuesFeature: parseBoolean(hasBlockedIssuesFeature),
       hasIssuableHealthStatusFeature: parseBoolean(hasIssuableHealthStatusFeature),
       hasIssueWeightsFeature: parseBoolean(hasIssueWeightsFeature),
       issuesPath,
+      newIssuePath,
+      rssUrl,
+      showNewIssueLink: parseBoolean(showNewIssueLink),
+      // For CsvImportExportButtons component
+      canEdit: parseBoolean(canEdit),
+      email,
+      exportCsvPath,
+      importCsvIssuesPath,
+      maxAttachmentSize: `${gon.max_file_size || 10} MB`, // eslint-disable-line @gitlab/require-i18n-strings
+      projectImportJiraPath,
+      showExportButton: true,
+      showImportButton: true,
     },
     render: (createComponent) => createComponent(IssuesListApp),
   });
