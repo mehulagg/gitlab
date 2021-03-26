@@ -17,6 +17,7 @@ module Sidebars
         add_menu(Sidebars::Projects::Menus::SecurityCompliance::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::Monitoring::Menu.new(context))
         add_menu(Sidebars::Projects::Menus::Infrastructure::Menu.new(context))
+        add_menu(Sidebars::Projects::Menus::Analytics::Menu.new(context))
       end
 
       override :aria_label
