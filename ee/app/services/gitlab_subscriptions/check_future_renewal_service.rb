@@ -14,8 +14,6 @@ module GitlabSubscriptions
     end
 
     def execute
-      return false unless Feature.enabled?(:gitlab_subscription_future_renewal, default_enabled: :yaml)
-
       future_renewal
     end
 

@@ -1,0 +1,5 @@
+---
+title: Fix subscription expiry message when renewed
+merge_request: 57591
+author:
+type: fixed
