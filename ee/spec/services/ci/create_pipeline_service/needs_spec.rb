@@ -71,7 +71,9 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'creates a pipeline with regular_job and bridge_dag_job pending' do
-      processables = execute.processables
+      pipeline = execute
+      processables = pipeline.processables
+      Ci::Pipelines::InitialProcessWorker.new.perform(pipeline.id)
 
       regular_job = processables.find { |processable| processable.name == 'regular_job' }
       bridge_dag_job = processables.find { |processable| processable.name == 'bridge_dag_job' }
