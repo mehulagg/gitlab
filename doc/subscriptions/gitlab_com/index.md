@@ -225,11 +225,11 @@ To see a list of your billable users on your GitLab group page go to **Settings 
 
 ## Subscription expiry
 
-When your license expires, you can continue to use GitLab for 14 days.
+When your subscription expires, you can continue to use GitLab for 14 days.
 On the 15th day, paid features are no longer available. You can
 continue to use free features.
 
-To resume paid feature functionality, upload a new license.
+To resume paid feature functionality, purchase a new subscription.
 
 ## CI pipeline minutes
 
