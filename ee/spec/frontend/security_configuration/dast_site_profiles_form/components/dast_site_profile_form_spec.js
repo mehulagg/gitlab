@@ -55,6 +55,7 @@ describe('DastSiteProfileForm', () => {
   const findExcludedUrlsInput = () => wrapper.findByTestId('excluded-urls-input');
   const findRequestHeadersInput = () => wrapper.findByTestId('request-headers-input');
   const findAuthCheckbox = () => wrapper.findByTestId('auth-enable-checkbox');
+  const findSiteTypeOption = () => wrapper.findByTestId('site-type-option');
   const findSubmitButton = () => wrapper.findByTestId('dast-site-profile-form-submit-button');
   const findCancelButton = () => wrapper.findByTestId('dast-site-profile-form-cancel-button');
   const findAlert = () => wrapper.findByTestId('dast-site-profile-form-alert');
@@ -111,6 +112,7 @@ describe('DastSiteProfileForm', () => {
         provide: {
           glFeatures: {
             securityDastSiteProfilesAdditionalFields: true,
+            securityDastSiteProfilesApiOption: true,
           },
         },
       },
@@ -255,6 +257,7 @@ describe('DastSiteProfileForm', () => {
               fullPath,
               auth: siteProfileOne.auth,
               excludedUrls: siteProfileOne.excludedUrls,
+              siteType: siteProfileOne.siteType,
               ...mutationVars,
             },
           });
@@ -345,11 +348,12 @@ describe('DastSiteProfileForm', () => {
     });
   });
 
-  describe('when feature flag is off', () => {
+  describe('when all feature flags are off', () => {
     const mountOpts = {
       provide: {
         glFeatures: {
           securityDastSiteProfilesAdditionalFields: false,
+          securityDastSiteProfilesApiOption: false,
         },
       },
     };
@@ -366,6 +370,7 @@ describe('DastSiteProfileForm', () => {
       expect(findAuthSection().exists()).toBe(false);
       expect(findExcludedUrlsInput().exists()).toBe(false);
       expect(findRequestHeadersInput().exists()).toBe(false);
+      expect(findSiteTypeOption().exists()).toBe(false);
     });
 
     describe.each`
