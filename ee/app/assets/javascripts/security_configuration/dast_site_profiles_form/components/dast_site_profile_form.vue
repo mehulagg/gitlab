@@ -8,6 +8,7 @@ import {
   GlModal,
   GlFormTextarea,
   GlFormText,
+  GlFormRadioGroup,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
@@ -21,6 +22,7 @@ import {
   MAX_CHAR_LIMIT_EXCLUDED_URLS,
   MAX_CHAR_LIMIT_REQUEST_HEADERS,
   EXCLUDED_URLS_SEPARATOR,
+  targetTypes,
 } from '../constants';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
@@ -39,6 +41,7 @@ export default {
     DastSiteAuthSection,
     GlFormText,
     tooltipIcon,
+    GlFormRadioGroup,
   },
   directives: {
     validation: validation(),
@@ -61,7 +64,13 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = [], auth = {} } = this.siteProfile || {};
+    const {
+      name = '',
+      targetUrl = '',
+      excludedUrls = [],
+      auth = {},
+      targetType = targetTypes.website.value,
+    } = this.siteProfile || {};
 
     const form = {
       state: false,
@@ -79,6 +88,7 @@ export default {
           required: false,
           skipValidation: true,
         }),
+        targetType: initFormField({ value: targetType, skipValidation: true }),
       },
     };
 
@@ -92,6 +102,7 @@ export default {
       token: null,
       errorMessage: '',
       errors: [],
+      targetTypesOptions: Object.values(targetTypes),
     };
   },
   computed: {
@@ -171,7 +182,9 @@ export default {
       this.hideErrors();
       const { errorMessage } = this.i18n;
 
-      const { profileName, targetUrl, ...additionalFields } = serializeFormObject(this.form.fields);
+      const { profileName, targetUrl, targetType, ...additionalFields } = serializeFormObject(
+        this.form.fields,
+      );
 
       const variables = {
         input: {
@@ -179,6 +192,9 @@ export default {
           ...(this.isEdit ? { id: this.siteProfile.id } : {}),
           profileName,
           targetUrl,
+          ...(this.glFeatures.securityDastSiteProfilesApiOption && {
+            targetType,
+          }),
           ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
             ...additionalFields,
             auth: serializeFormObject(this.authSection.fields),
@@ -307,6 +323,17 @@ export default {
       </gl-form-group>
 
       <hr class="gl-border-gray-100" />
+
+      <gl-form-group
+        v-if="glFeatures.securityDastSiteProfilesApiOption"
+        :label="s__('DastProfiles|Site type')"
+      >
+        <gl-form-radio-group
+          v-model="form.fields.targetType.value"
+          :options="targetTypesOptions"
+          data-testid="site-type-option"
+        />
+      </gl-form-group>
 
       <gl-form-group
         data-testid="target-url-input-group"

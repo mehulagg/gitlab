@@ -54,6 +54,7 @@ export const siteProfiles = [
     excludedUrls: ['https://foo.com/logout', 'https://foo.com/send_mail'],
     requestHeaders: 'log-identifier: dast-active-scan',
     referencedInSecurityPolicies: [],
+    targetType: 'WEBSITE',
   },
   {
     id: 'gid://gitlab/DastSiteProfile/2',
@@ -72,6 +73,7 @@ export const siteProfiles = [
     excludedUrls: ['https://bar.com/logout'],
     requestHeaders: 'auth: gitlab-dast',
     referencedInSecurityPolicies: [],
+    targetType: 'API',
   },
 ];
 
@@ -87,4 +89,5 @@ export const policySiteProfile = {
   },
   excludedUrls: ['https://bar.com/logout'],
   referencedInSecurityPolicies: ['some_policy'],
+  targetType: 'WEBSITE',
 };

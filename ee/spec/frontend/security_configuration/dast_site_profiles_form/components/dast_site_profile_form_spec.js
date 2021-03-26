@@ -54,6 +54,7 @@ describe('DastSiteProfileForm', () => {
   const findExcludedUrlsInput = () => wrapper.findByTestId('excluded-urls-input');
   const findRequestHeadersInput = () => wrapper.findByTestId('request-headers-input');
   const findAuthCheckbox = () => wrapper.findByTestId('auth-enable-checkbox');
+  const findTargetTypeOption = () => wrapper.findByTestId('site-type-option');
   const findSubmitButton = () => wrapper.findByTestId('dast-site-profile-form-submit-button');
   const findCancelButton = () => wrapper.findByTestId('dast-site-profile-form-cancel-button');
   const findAlert = () => wrapper.findByTestId('dast-site-profile-form-alert');
@@ -110,6 +111,7 @@ describe('DastSiteProfileForm', () => {
         provide: {
           glFeatures: {
             securityDastSiteProfilesAdditionalFields: true,
+            securityDastSiteProfilesApiOption: true,
           },
         },
       },
@@ -175,10 +177,11 @@ describe('DastSiteProfileForm', () => {
       createFullComponent();
     });
 
-    it('should render correctly', () => {
+    it('should render correctly with default values', () => {
       expect(findAuthSection().exists()).toBe(true);
       expect(findExcludedUrlsInput().exists()).toBe(true);
       expect(findRequestHeadersInput().exists()).toBe(true);
+      expect(findTargetTypeOption().vm.$attrs.checked).toBe('WEBSITE');
     });
 
     it('should have maxlength constraint', () => {
@@ -233,6 +236,7 @@ describe('DastSiteProfileForm', () => {
 
     it('populates the fields with the data passed in via the siteProfile prop', () => {
       expect(findProfileNameInput().element.value).toBe(siteProfile?.name ?? '');
+      // add here
     });
 
     describe('submission', () => {
@@ -263,6 +267,7 @@ describe('DastSiteProfileForm', () => {
               fullPath,
               auth: siteProfileOne.auth,
               excludedUrls: siteProfileOne.excludedUrls,
+              targetType: siteProfileOne.targetType,
               ...mutationVars,
             },
           });
@@ -355,11 +360,12 @@ describe('DastSiteProfileForm', () => {
     });
   });
 
-  describe('when feature flag is off', () => {
+  describe('when all feature flags are off', () => {
     const mountOpts = {
       provide: {
         glFeatures: {
           securityDastSiteProfilesAdditionalFields: false,
+          securityDastSiteProfilesApiOption: false,
         },
       },
     };
@@ -376,6 +382,7 @@ describe('DastSiteProfileForm', () => {
       expect(findAuthSection().exists()).toBe(false);
       expect(findExcludedUrlsInput().exists()).toBe(false);
       expect(findRequestHeadersInput().exists()).toBe(false);
+      expect(findTargetTypeOption().exists()).toBe(false);
     });
 
     describe.each`
