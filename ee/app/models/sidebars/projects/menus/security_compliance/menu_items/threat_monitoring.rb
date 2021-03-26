@@ -11,8 +11,8 @@ module Sidebars
               project_threat_monitoring_path(context.project)
             end
 
-            override :nav_link_params
-            def nav_link_params
+            override :active_routes
+            def active_routes
               { controller: ['projects/threat_monitoring'] }
             end
 

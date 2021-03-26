@@ -23,8 +23,8 @@ module Sidebars
               !context.project.empty_repo? && can?(context.current_user, :read_release, context.project)
             end
 
-            override :nav_link_params
-            def nav_link_params
+            override :active_routes
+            def active_routes
               { controller: :releases }
             end
 

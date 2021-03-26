@@ -37,8 +37,8 @@ module Sidebars
             'shield'
           end
 
-          override :nav_link_params
-          def nav_link_params
+          override :active_routes
+          def active_routes
             { path: 'requirements#index' }
           end
         end

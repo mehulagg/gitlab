@@ -7,6 +7,7 @@ module Sidebars
     include GitlabRoutingHelper
     include Gitlab::Allowable
     include ::Sidebars::HasPill
+    include ::Sidebars::HasIcon
 
     attr_reader :context
     delegate :current_user, :container, to: :@context
@@ -43,9 +44,9 @@ module Sidebars
     # This method normalizes the information retrieved from the submenus and this menu
     # Value from menus is something like: [{ path: 'foo', path: 'bar', controller: :foo }]
     # This method filters the information and returns: { path: ['foo', 'bar'], controller: :foo }
-    def all_nav_link_params
-      @all_nav_link_params ||= begin
-        ([nav_link_params] + renderable_items.map(&:nav_link_params)).flatten.each_with_object({}) do |pairs, hash|
+    def all_active_routes
+      @all_active_routes ||= begin
+        ([active_routes] + renderable_items.map(&:active_routes)).flatten.each_with_object({}) do |pairs, hash|
           pairs.each do |k, v|
             hash[k] ||= []
             hash[k] += Array(v)
@@ -57,7 +58,7 @@ module Sidebars
       end
     end
 
-    def nav_link_params
+    def active_routes
       {}
     end
 
@@ -103,22 +104,6 @@ module Sidebars
 
     def renderable_items
       @renderable_items ||= @items.select(&:render?)
-    end
-
-    def sprite_icon
-      nil
-    end
-
-    def image_path
-      nil
-    end
-
-    def image_html_options
-      {}
-    end
-
-    def icon_or_image?
-      sprite_icon || image_path
     end
 
     private

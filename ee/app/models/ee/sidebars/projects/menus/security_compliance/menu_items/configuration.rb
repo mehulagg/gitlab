@@ -9,8 +9,8 @@ module EE
             module Configuration
               extend ::Gitlab::Utils::Override
 
-              override :nav_link_params
-              def nav_link_params
+              override :active_routes
+              def active_routes
                 super.tap do |params|
                   params[:path] += %w[
                     projects/security/sast_configuration#show

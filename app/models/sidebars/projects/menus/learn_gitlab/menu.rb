@@ -12,8 +12,8 @@ module Sidebars
             project_learn_gitlab_path(context.project)
           end
 
-          override :nav_link_params
-          def nav_link_params
+          override :active_routes
+          def active_routes
             { controller: :learn_gitlab }
           end
 

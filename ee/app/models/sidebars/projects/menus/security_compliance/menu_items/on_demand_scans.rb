@@ -18,8 +18,8 @@ module Sidebars
               }
             end
 
-            override :nav_link_params
-            def nav_link_params
+            override :active_routes
+            def active_routes
               { path: %w[
                   projects/on_demand_scans#index
                   projects/on_demand_scans#new

@@ -11,8 +11,8 @@ module Sidebars
               project_graph_path(context.project, context.current_ref)
             end
 
-            override :nav_link_params
-            def nav_link_params
+            override :active_routes
+            def active_routes
               { path: 'graphs#show' }
             end
 

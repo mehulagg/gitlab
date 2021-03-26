@@ -11,8 +11,8 @@ module Sidebars
               project_tree_path(context.project, context.current_ref)
             end
 
-            override :nav_link_params
-            def nav_link_params
+            override :active_routes
+            def active_routes
               { controller: %w(tree blob blame edit_tree new_tree find_file) }
             end
 

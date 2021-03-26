@@ -11,8 +11,8 @@ module Sidebars
               service_desk_project_issues_path(context.project)
             end
 
-            override :nav_link_params
-            def nav_link_params
+            override :active_routes
+            def active_routes
               { path: 'issues#service_desk' }
             end
 

@@ -6,6 +6,7 @@ module Sidebars
     include ::Gitlab::Routing
     include GitlabRoutingHelper
     include Gitlab::Allowable
+    include ::Sidebars::HasIcon
 
     attr_reader :context
 
@@ -35,20 +36,12 @@ module Sidebars
     # nav_link helper method. It can be either `path`,
     # `page`, `controller`.
     # Param 'action' is not supported.
-    def nav_link_params
+    def active_routes
       {}
     end
 
     def item_name
       raise NotImplementedError
-    end
-
-    def sprite_icon
-      nil
-    end
-
-    def sprite_icon_html_options
-      {}
     end
   end
 end

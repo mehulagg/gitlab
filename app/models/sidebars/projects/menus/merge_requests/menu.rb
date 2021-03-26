@@ -57,8 +57,8 @@ module Sidebars
             }
           end
 
-          override :nav_link_params
-          def nav_link_params
+          override :active_routes
+          def active_routes
             if context.project.issues_enabled?
               { controller: :merge_requests }
             else
