@@ -45,7 +45,12 @@ your integration.
 
 ## Configure Jira for DVCS
 
-If you use Jira Cloud and GitLab.com, use the [GitLab for Jira app](connect-app.md) unless you specifically need the DVCS Connector.
+If you use Jira Cloud and GitLab.com, use the [GitLab for Jira app](connect-app.md)
+unless you specifically need the DVCS Connector.
+
+Configure this connection when you want to import all GitLab commits and branches,
+for the groups you specify, into Jira. This import takes a few minutes and, after
+it completes, refreshes every 60 minutes:
 
 1. Ensure you have completed the [GitLab configuration](#configure-a-gitlab-application-for-dvcs).
 1. Go to your DVCS account:
@@ -72,10 +77,6 @@ If you use Jira Cloud and GitLab.com, use the [GitLab for Jira app](connect-app.
 1. For **Client Secret**, use the **Secret** value from the previous section.
 1. Ensure that the rest of the checkboxes are checked.
 1. Select **Add** to complete and create the integration.
-
-Jira begins to import the commits and branches for all projects in the GitLab group
-you specified. This import takes a few minutes, after completed, is refreshed
-every 60 minutes.
 
 To connect additional GitLab projects from other GitLab top-level groups, or
 personal namespaces, repeat the previous steps with additional Jira DVCS accounts.
