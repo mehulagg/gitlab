@@ -165,7 +165,11 @@ module Security
         end
 
         vulnerability_finding.uuid = finding.uuid
-        vulnerability_finding.location_fingerprint = finding.location.fingerprint
+        if finding.fingerprints.length == 0
+          vulnerability_finding.location_fingerprint = finding.location.fingerprint
+        else
+          vulnerability_finding.location_fingerprint = finding.fingerprints.max_by(&:priority).fingerprint_hex
+        end
         vulnerability_finding.location = create_params.dig(:location)
         vulnerability_finding.save!
 
