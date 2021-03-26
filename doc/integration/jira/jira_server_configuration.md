@@ -11,9 +11,9 @@ create a Jira user account for your Jira projects to access projects in GitLab.
 This Jira user account must have write access to your Jira projects. To create the
 credentials, you must:
 
-1. [Create a Jira Server user](#create-jira-server-user).
+1. [Create a Jira Server user](#create-a-jira-server-user).
 1. [Create a Jira Server group](#create-a-jira-server-group) for the user to belong to.
-1. [Add permissions to the group](#add-permissions-to-the-group).
+1. [Create a permission scheme for your group](#create-a-permission-scheme-for-your-group).
 
 ## Create a Jira Server user
 
@@ -37,7 +37,7 @@ After you create the user, create a group for it.
 
 ## Create a Jira Server group
 
-After you [create a Jira Server user](#create-jira-server-user), you can create a
+After you [create a Jira Server user](#create-a-jira-server-user), you can create a
 group to assign permissions to the user:
 
 1. Sign in to your Jira instance as an administrator.
