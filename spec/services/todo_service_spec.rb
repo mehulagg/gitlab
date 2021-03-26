@@ -343,11 +343,10 @@ RSpec.describe TodoService do
 
     describe '#destroy_target' do
       it 'refreshes the todos count cache for users with todos on the target' do
-        create(:todo, target: issue, user: john_doe, author: john_doe, project: issue.project)
+        create(:todo, state: :pending, target: issue, user: john_doe, author: john_doe, project: issue.project)
+        john_doe.update_todos_count_cache
 
-        expect_any_instance_of(User).to receive(:update_todos_count_cache).and_call_original
-
-        service.destroy_target(issue) { }
+        expect { service.destroy_target(issue) { |target| target.todos.delete_all } }.to change(john_doe, :todos_pending_count).from(1).to(0)
       end
 
       it 'does not refresh the todos count cache for users with only done todos on the target' do
@@ -1099,13 +1098,7 @@ RSpec.describe TodoService do
   it 'updates cached counts when a todo is created' do
     issue = create(:issue, project: project, assignees: [john_doe], author: author)
 
-    expect(john_doe.todos_pending_count).to eq(0)
-    expect(john_doe).to receive(:update_todos_count_cache).and_call_original
-
-    service.new_issue(issue, author)
-
-    expect(Todo.where(user_id: john_doe.id, state: :pending).count).to eq 1
-    expect(john_doe.todos_pending_count).to eq(1)
+    expect { service.new_issue(issue, author) }.to change(john_doe, :todos_pending_count).from(0).to(1)
   end
 
   shared_examples 'updating todos state' do |state, new_state, new_resolved_by = nil|

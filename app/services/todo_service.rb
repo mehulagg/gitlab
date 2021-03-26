@@ -43,11 +43,11 @@ class TodoService
   # updates the todo counts for those users.
   #
   def destroy_target(target)
-    todo_users = UsersWithPendingTodosFinder.new(target).execute.to_a
+    todo_users = UsersWithPendingTodosFinder.new(target).execute
 
     yield target
 
-    todo_users.each(&:update_todos_count_cache)
+    todo_users.update_todos_count_cache
   end
 
   # When we reassign an assignable object (issuable, alert) we should:
@@ -222,6 +222,8 @@ class TodoService
   def create_todos(users, attributes)
     users = Array(users)
 
+    todos = users.map do |user|
+
     return if users.empty?
 
     users_with_pending_todos = pending_todos(users, attributes).pluck_user_id
@@ -231,10 +233,12 @@ class TodoService
       issue_type = attributes.delete(:issue_type)
       track_todo_creation(user, issue_type)
 
-      todo = Todo.create(attributes.merge(user_id: user.id))
-      user.update_todos_count_cache
-      todo
+      Todo.create(attributes.merge(user_id: user.id))
     end
+
+    User.update_todos_count_cache(users)
+
+    todos
   end
 
   def new_issuable(issuable, author)
