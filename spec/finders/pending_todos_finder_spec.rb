@@ -3,16 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe PendingTodosFinder do
-  let(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:todo_done) { create(:todo, :done, user: user) }
+  let_it_be(:todo_pending) { create(:todo, :pending, user: user) }
 
   describe '#execute' do
     it 'returns only pending todos' do
-      create(:todo, :done, user: user)
-
-      todo = create(:todo, :pending, user: user)
-      todos = described_class.new(user).execute
-
-      expect(todos).to eq([todo])
+      expect(described_class.new(user).execute).to eq([todo_pending])
     end
 
     it 'supports retrieving of todos for a specific project' do
