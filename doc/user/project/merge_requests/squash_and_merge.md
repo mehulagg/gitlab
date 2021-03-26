@@ -106,7 +106,7 @@ squashing can itself be considered equivalent to rebasing.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17613) in GitLab 13.2.
 > - It was deployed behind a feature flag, disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39382) on GitLab 13.3.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39382) in GitLab 13.3.
 > - It's enabled on GitLab.com.
 > - It can be enabled per project.
 > - It's recommended for production use.

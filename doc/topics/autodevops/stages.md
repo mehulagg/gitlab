@@ -422,10 +422,10 @@ including support for `Deployment` in the `extensions/v1beta1` version.
 
 To use Auto Deploy on a Kubernetes 1.16+ cluster:
 
-1. If you are deploying your application for the first time on GitLab 13.0 or
+1. If you are deploying your application for the first time in GitLab 13.0 or
    newer, no configuration should be required.
 
-1. On GitLab 12.10 or older, set the following in the [`.gitlab/auto-deploy-values.yaml` file](customize.md#customize-values-for-helm-chart):
+1. In GitLab 12.10 or older, set the following in the [`.gitlab/auto-deploy-values.yaml` file](customize.md#customize-values-for-helm-chart):
 
    ```yaml
    deploymentApiVersion: apps/v1
@@ -439,7 +439,7 @@ To use Auto Deploy on a Kubernetes 1.16+ cluster:
    GitLab 12.9 or 12.10, set `AUTO_DEVOPS_POSTGRES_CHANNEL` to `2`.
 
 WARNING:
-On GitLab 12.9 and 12.10, opting into
+In GitLab 12.9 and 12.10, opting into
 `AUTO_DEVOPS_POSTGRES_CHANNEL` version `2` deletes the version `1` PostgreSQL
 database. Follow the [guide to upgrading PostgreSQL](upgrading_postgresql.md)
 to back up and restore your database before opting into version `2` (On

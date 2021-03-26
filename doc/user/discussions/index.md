@@ -488,7 +488,7 @@ introduced by [#25381](https://gitlab.com/gitlab-org/gitlab/-/issues/25381).
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25486) in GitLab 13.1 as an [alpha feature](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha).
 > - It was deployed behind a feature flag, disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/227799) on GitLab 13.2.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/227799) in GitLab 13.2.
 > - It's enabled on GitLab.com.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-batch-suggestions).
 

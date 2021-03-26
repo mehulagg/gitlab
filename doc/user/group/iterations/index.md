@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214713) in GitLab 13.1.
 > - It was deployed behind a feature flag, disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/221047) on GitLab 13.2.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/221047) in GitLab 13.2.
 > - It's enabled on GitLab.com.
 > - It's able to be enabled or disabled per-group.
 > - It's recommended for production use.
