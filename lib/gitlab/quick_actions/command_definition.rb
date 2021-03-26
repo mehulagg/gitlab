@@ -56,15 +56,16 @@ module Gitlab
       end
 
       def execute(context, arg)
-        return unless executable?(context)
+        return if noop?
 
         count_commands_executed_in(context)
 
-        execute_block(action_block, context, arg)
+        execute_block(action_block, context, arg) if executable?(context)
       end
 
       def execute_message(context, arg)
-        return unless executable?(context)
+        return if noop?
+        return _('Could not apply %{name} command.') % { name: name } unless available?(context)
 
         if execution_message.respond_to?(:call)
           execute_block(execution_message, context, arg)

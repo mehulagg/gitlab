@@ -8653,6 +8653,9 @@ msgstr ""
 msgid "Could not add admins as members"
 msgstr ""
 
+msgid "Could not apply %{name} command."
+msgstr ""
+
 msgid "Could not archive %{design}. Please try again."
 msgstr ""
 
