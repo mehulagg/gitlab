@@ -51,6 +51,7 @@ module EE
       scope :upcoming, -> { with_state(:upcoming) }
       scope :started, -> { with_state(:started) }
       scope :closed, -> { with_state(:closed) }
+      scope :by_iteration_cadence_ids, ->(cadence_ids) { where(iterations_cadence_id: cadence_ids) }
 
       scope :within_timeframe, -> (start_date, end_date) do
         where('start_date <= ?', end_date).where('due_date >= ?', start_date)

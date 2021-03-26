@@ -47,6 +47,7 @@ class IterationsFinder
     items = Iteration.all
     items = by_id(items)
     items = by_iid(items)
+    items = by_iteration_cadences(items)
     items = by_groups_and_projects(items)
     items = by_title(items)
     items = by_search_title(items)
@@ -119,6 +120,12 @@ class IterationsFinder
     return items unless params[:state].present?
 
     Iteration.filter_by_state(items, params[:state])
+  end
+
+  def by_iteration_cadences(items)
+    return items unless params[:iterations_cadence_id].present?
+
+    items.by_iteration_cadence_ids(params[:iterations_cadence_id])
   end
 
   # rubocop: disable CodeReuse/ActiveRecord

@@ -25,6 +25,10 @@ module Resolvers
              required: false,
              description: 'Whether to include ancestor iterations. Defaults to true.'
 
+    argument :iterations_cadence_id, ::Types::GlobalIDType[::Iterations::Cadence],
+              required: false,
+              description: 'Global ID of the Iteration Cadence by which to look up the Iterations.'
+
     type Types::IterationType.connection_type, null: true
 
     def resolve(**args)
@@ -32,7 +36,8 @@ module Resolvers
 
       authorize!
 
-      args[:id] = id_from_args(args)
+      args[:id] = id_from_args(args, :id, ::Iteration)
+      args[:iterations_cadence_id] = id_from_args(args, :iterations_cadence_id, ::Iterations::Cadence)
       args[:include_ancestors] = true if args[:include_ancestors].nil? && args[:iid].nil?
 
       iterations = IterationsFinder.new(context[:current_user], iterations_finder_params(args)).execute
@@ -49,6 +54,7 @@ module Resolvers
       IterationsFinder.params_for_parent(parent, include_ancestors: args[:include_ancestors]).merge!(
         id: args[:id],
         iid: args[:iid],
+        iterations_cadence_id: args[:iterations_cadence_id],
         state: args[:state] || 'all',
         start_date: args[:start_date],
         end_date: args[:end_date],
@@ -66,12 +72,12 @@ module Resolvers
 
     # Originally accepted a raw model id. Now accept a gid, but allow a raw id
     # for backward compatibility
-    def id_from_args(args)
-      return unless args[:id].present?
+    def id_from_args(args, param, expected_type)
+      return unless args[param].present?
 
-      GitlabSchema.parse_gid(args[:id], expected_type: ::Iteration).model_id
+      GitlabSchema.parse_gid(args[param], expected_type: expected_type).model_id
     rescue Gitlab::Graphql::Errors::ArgumentError
-      args[:id]
+      args[param]
     end
   end
 end
