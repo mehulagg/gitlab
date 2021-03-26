@@ -150,6 +150,8 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
 
         break if branch_names.all? { |branch| repository.branch_names.include?(branch) }
 
+        Gitlab::GitLogger.error("POST-RECEIVE: Branch(es) missing from cache: #{branch_names.join(',')}. Delaying for: #{delay_s}. Max delay: #{max_time_s}")
+
         sleep delay_s
         time_taken_s += delay_s
       end
