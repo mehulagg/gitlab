@@ -1,6 +1,7 @@
 import { GlSprintf, GlLink, GlAlert } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
+import { createGqlMockFactory } from 'helpers/create_gql_mock_factory';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import component from '~/packages_and_registries/settings/group/components/group_settings_app.vue';
@@ -16,15 +17,23 @@ import {
 import updateNamespacePackageSettings from '~/packages_and_registries/settings/group/graphql/mutations/update_group_packages_settings.mutation.graphql';
 import getGroupPackagesSettingsQuery from '~/packages_and_registries/settings/group/graphql/queries/get_group_packages_settings.query.graphql';
 import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
-import {
-  groupPackageSettingsMock,
-  groupPackageSettingsMutationMock,
-  groupPackageSettingsMutationErrorMock,
-} from '../mock_data';
+import { groupPackageSettingsMutationGraphQLError } from '../mock_data';
 
 jest.mock('~/flash');
 
 const localVue = createLocalVue();
+const mockGql = createGqlMockFactory({
+  mocks: {
+    Mutation: {
+      updateNamespacePackageSettings: ({ input }) => ({
+        packageSettings: {
+          mavenDuplicateExceptionRegex: input.mavenDuplicateExceptionRegex,
+        },
+        errors: [],
+      }),
+    },
+  },
+});
 
 describe('Group Settings App', () => {
   let wrapper;
@@ -36,10 +45,22 @@ describe('Group Settings App', () => {
     groupPath: 'foo_group_path',
   };
 
+  const createResolver = () =>
+    jest
+      .fn()
+      .mockImplementation((variables) => mockGql.resolve(getGroupPackagesSettingsQuery, variables));
+
+  const createMutationResolver = (mockOverrides = {}) =>
+    jest.fn().mockImplementation((variables) =>
+      mockGql.resolve(updateNamespacePackageSettings, variables, {
+        updateNamespacePackageSettings: mockOverrides,
+      }),
+    );
+
   const mountComponent = ({
     provide = defaultProvide,
-    resolver = jest.fn().mockResolvedValue(groupPackageSettingsMock),
-    mutationResolver = jest.fn().mockResolvedValue(groupPackageSettingsMutationMock()),
+    resolver = createResolver(),
+    mutationResolver = createMutationResolver(),
     data = {},
   } = {}) => {
     localVue.use(VueApollo);
@@ -134,7 +155,8 @@ describe('Group Settings App', () => {
   });
 
   it('calls the graphql API with the proper variables', () => {
-    const resolver = jest.fn().mockResolvedValue(groupPackageSettingsMock);
+    const resolver = createResolver();
+
     mountComponent({ resolver });
 
     expect(resolver).toHaveBeenCalledWith({
@@ -150,16 +172,19 @@ describe('Group Settings App', () => {
     });
 
     it('assigns duplication allowness and exception props', async () => {
-      mountComponent();
+      const resolver = createResolver();
+
+      mountComponent({ resolver });
 
       expect(findMavenSettings().props('loading')).toBe(true);
 
       await waitForApolloQueryAndRender();
 
+      const mockedResult = await resolver.mock.results[0].value;
       const {
         mavenDuplicatesAllowed,
         mavenDuplicateExceptionRegex,
-      } = groupPackageSettingsMock.data.group.packageSettings;
+      } = mockedResult.data.group.packageSettings;
 
       expect(findMavenSettings().props()).toMatchObject({
         mavenDuplicatesAllowed,
@@ -170,7 +195,8 @@ describe('Group Settings App', () => {
     });
 
     it('on update event calls the mutation', async () => {
-      const mutationResolver = jest.fn().mockResolvedValue(groupPackageSettingsMutationMock());
+      const mutationResolver = createMutationResolver();
+
       mountComponent({ mutationResolver });
 
       await waitForApolloQueryAndRender();
@@ -205,7 +231,7 @@ describe('Group Settings App', () => {
 
         await waitForApolloQueryAndRender();
 
-        expect(findMavenSettings().props('mavenDuplicateExceptionRegex')).toBe('');
+        expect(findMavenSettings().props('mavenDuplicateExceptionRegex')).toBe('^test$');
 
         emitSettingsUpdate({ mavenDuplicateExceptionRegex });
 
@@ -235,7 +261,9 @@ describe('Group Settings App', () => {
       it('mutation payload with root level errors', async () => {
         // note this is a complex test that covers all the path around errors that are shown in the form
         // it's one single it case, due to the expensive preparation and execution
-        const mutationResolver = jest.fn().mockResolvedValue(groupPackageSettingsMutationErrorMock);
+        const mutationResolver = jest
+          .fn()
+          .mockResolvedValue({ errors: [groupPackageSettingsMutationGraphQLError] });
         mountComponent({ mutationResolver });
 
         await waitForApolloQueryAndRender();
@@ -246,7 +274,7 @@ describe('Group Settings App', () => {
 
         // errors are bound to the component
         expect(findMavenSettings().props('mavenDuplicateExceptionRegexError')).toBe(
-          groupPackageSettingsMutationErrorMock.errors[0].extensions.problems[0].message,
+          groupPackageSettingsMutationGraphQLError.extensions.problems[0].message,
         );
 
         // general error message is shown
@@ -263,7 +291,7 @@ describe('Group Settings App', () => {
 
       it.each`
         type         | mutationResolver
-        ${'local'}   | ${jest.fn().mockResolvedValue(groupPackageSettingsMutationMock({ errors: ['foo'] }))}
+        ${'local'}   | ${createMutationResolver({ errors: ['test'] })}
         ${'network'} | ${jest.fn().mockRejectedValue()}
       `('mutation payload with $type error', async ({ mutationResolver }) => {
         mountComponent({ mutationResolver });
