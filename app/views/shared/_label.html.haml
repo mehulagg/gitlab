@@ -60,6 +60,6 @@
                     %span= _('Subscribe at group level')
         - else
           %button.gl-button.js-subscribe-button.label-subscribe-button.btn.btn-default.gl-ml-3{ data: { status: status, url: toggle_subscription_path, toggle: 'tooltip' }, title: tooltip_title }
-            %span= label_subscription_toggle_button_text(label, @project)
+            %span= label_subscription_toggle_button_text(status)
 
 = render 'shared/delete_label_modal', label: label

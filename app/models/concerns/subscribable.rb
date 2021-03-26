@@ -24,6 +24,21 @@ module Subscribable
     end
   end
 
+  def lazy_subscribed?(user, project = nil)
+    return false unless user
+
+    BatchLoader.for(id).batch(key: self.class) do |ids, loader, args|
+      subscribable_type = args[:key].ancestors.include?(Label) ? 'Label' : self.class.name
+      subscriptions = Subscription.where(subscribable_id: ids, subscribable_type: subscribable_type, project: project, user: user).index_by(&:subscribable_id)
+
+      ids.each do |id|
+        subscribed = subscriptions[id]&.subscribed || subscribed_without_subscriptions?(user, project)
+
+        loader.call(id, subscribed)
+      end
+    end
+  end
+
   # Override this method to define custom logic to consider a subscribable as
   # subscribed without an explicit subscription record.
   def subscribed_without_subscriptions?(user, project)
