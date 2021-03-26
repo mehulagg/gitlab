@@ -32,7 +32,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         pipeline = create_pipeline!
 
         expect(pipeline).to be_persisted
-        expect(pipeline).to be_pending
+        expect(pipeline).to be_created
       end
     end
 
