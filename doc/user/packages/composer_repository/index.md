@@ -15,6 +15,9 @@ Then, install the packages whenever you need to use them as a dependency.
 Only Composer 1.x is supported. Consider contributing or even adding support for
 [Composer 2.0 in the Package Registry](https://gitlab.com/gitlab-org/gitlab/-/issues/259840).
 
+For documentation of the specific API endpoints that the Composer
+client uses, see the [Composer API documentation](../../../api/packages/composer.md).
+
 ## Create a Composer package
 
 If you do not have a Composer package, create one and check it in to
