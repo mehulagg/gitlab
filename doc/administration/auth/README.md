@@ -46,7 +46,7 @@ Links are provided above for most configurations.
 
 | Capability                                      | SaaS                                    | Self-Managed                       |
 |-------------------------------------------------|-----------------------------------------|------------------------------------|
-| **User Provisioning**                           | SCIM<br>SAML JIT Provisioning           | LDAP Sync                          |
+| **User Provisioning**                           | SCIM<br>JIT Provisioning                | LDAP Sync                          |
 | **User Detail Updating** (not group management) | Not Available                           | LDAP Sync                          |
 | **Authentication**                              | SAML at top-level group (1 provider)    | LDAP (multiple providers)<br>Generic OAuth2<br>SAML (only 1 permitted per unique provider)<br>Kerberos<br>JWT<br>Smartcard<br>OmniAuth Providers (only 1 permitted per unique provider) |
 | **Provider-to-GitLab Role Sync**                | SAML Group Sync                         | LDAP Group Sync                    |
