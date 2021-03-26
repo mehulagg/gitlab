@@ -2,7 +2,6 @@ import { shallowMount } from '@vue/test-utils';
 import GeoNodeSecondaryOtherInfo from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_secondary_other_info.vue';
 import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 describe('GeoNodeSecondaryOtherInfo', () => {
   let wrapper;
@@ -42,21 +41,17 @@ describe('GeoNodeSecondaryOtherInfo', () => {
       });
 
       it('renders the last event correctly', () => {
-        const lastEventText = `${MOCK_NODES[1].lastEventId} (${timeagoMixin.methods.timeFormatted(
-          MOCK_NODES[1].lastEventTimestamp * 1000,
-        )})`;
-
         expect(findLastEvent().exists()).toBe(true);
-        expect(findLastEvent().text()).toBe(lastEventText);
+        expect(findLastEvent().props('time')).toBe(
+          new Date(MOCK_NODES[1].lastEventTimestamp * 1000).toString(),
+        );
       });
 
       it('renders the last cursor event correctly', () => {
-        const lastCursorEventText = `${
-          MOCK_NODES[1].cursorLastEventId
-        } (${timeagoMixin.methods.timeFormatted(MOCK_NODES[1].cursorLastEventTimestamp * 1000)})`;
-
         expect(findLastCursorEvent().exists()).toBe(true);
-        expect(findLastCursorEvent().text()).toBe(lastCursorEventText);
+        expect(findLastCursorEvent().props('time')).toBe(
+          new Date(MOCK_NODES[1].cursorLastEventTimestamp * 1000).toString(),
+        );
       });
 
       it('renders the storage shards', () => {

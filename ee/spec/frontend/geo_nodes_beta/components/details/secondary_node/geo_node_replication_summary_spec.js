@@ -32,27 +32,25 @@ describe('GeoNodeReplicationSummary', () => {
   const findGeoNodeSyncSettings = () => wrapper.findByTestId('sync-settings');
 
   describe('template', () => {
-    describe('always', () => {
-      beforeEach(() => {
-        createComponent();
-      });
+    beforeEach(() => {
+      createComponent();
+    });
 
-      it('renders the GlButton as a link', () => {
-        expect(findGlButton().exists()).toBe(true);
-        expect(findGlButton().attributes('href')).toBe(MOCK_NODES[1].webGeoProjectsUrl);
-      });
+    it('renders the GlButton as a link', () => {
+      expect(findGlButton().exists()).toBe(true);
+      expect(findGlButton().attributes('href')).toBe(MOCK_NODES[1].webGeoProjectsUrl);
+    });
 
-      it('renders the geo node replication status', () => {
-        expect(findGeoNodeReplicationStatus().exists()).toBe(true);
-      });
+    it('renders the geo node replication status', () => {
+      expect(findGeoNodeReplicationStatus().exists()).toBe(true);
+    });
 
-      it('renders the geo node replication counts', () => {
-        expect(findGeoNodeReplicationCounts().exists()).toBe(true);
-      });
+    it('renders the geo node replication counts', () => {
+      expect(findGeoNodeReplicationCounts().exists()).toBe(true);
+    });
 
-      it('renders the geo node sync settings', () => {
-        expect(findGeoNodeSyncSettings().exists()).toBe(true);
-      });
+    it('renders the geo node sync settings', () => {
+      expect(findGeoNodeSyncSettings().exists()).toBe(true);
     });
   });
 });
