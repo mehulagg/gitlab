@@ -49,15 +49,3 @@ module Sidebars
     end
   end
 end
-
-# = nav_link(controller: :project_members) do
-#   = link_to project_project_members_path(@project), title: _('Members'), class: 'qa-members-link', id: 'js-onboarding-members-link' do
-#     .nav-icon-container
-#       = sprite_icon('users')
-#     %span.nav-item-name
-#       = _('Members')
-#   %ul.sidebar-sub-level-items.is-fly-out-only
-#     = nav_link(path: %w[members#show], html_options: { class: "fly-out-top-item" } ) do
-#       = link_to project_project_members_path(@project) do
-#         %strong.fly-out-top-item-name
-#           = _('Members')

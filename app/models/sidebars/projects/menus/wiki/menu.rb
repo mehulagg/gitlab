@@ -28,13 +28,6 @@ module Sidebars
             { controller: :wikis }
           end
 
-          override :menu_name_html_options
-          def menu_name_html_options
-            {
-              data: { qa_selector: 'analytics_link' }
-            }
-          end
-
           override :sprite_icon
           def sprite_icon
             'book'

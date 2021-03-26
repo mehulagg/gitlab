@@ -24,13 +24,6 @@ module Sidebars
             _('Confluence')
           end
 
-          override :menu_name_html_options
-          def menu_name_html_options
-            {
-              data: { qa_selector: 'analytics_link' }
-            }
-          end
-
           override :image_path
           def image_path
             'confluence.svg'
