@@ -67,6 +67,8 @@ module Gitlab
             if strong_memoized?(name) || !redis_set_cache.exist?(name)
               __send__(name).include?(value) # rubocop:disable GitlabSecurity/PublicSend
             else
+              puts "EXPIRING FIRST!"
+              redis_set_cache.expire(name)
               redis_set_cache.include?(name, value)
             end
 

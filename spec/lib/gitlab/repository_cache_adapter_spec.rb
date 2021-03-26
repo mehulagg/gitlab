@@ -29,6 +29,10 @@ RSpec.describe Gitlab::RepositoryCacheAdapter do
 
         def project
         end
+
+        def cached_methods
+          [:letters]
+        end
       end
     end
 
@@ -87,6 +91,13 @@ RSpec.describe Gitlab::RepositoryCacheAdapter do
             expect(fake_repository.letters_include?('d')).to eq(false)
             expect(fake_repository.letters_include?('d')).to eq(false)
           end
+
+          it 'does not race when the cache key is removed partway through the operation' do
+            # prefill the cache, clear the memoization
+            expect(fake_repository.letters_include?('a')).to eq(true)
+            expect(fake_repository.letters_include?('d')).to eq(false)
+          end
+
         end
       end
     end
