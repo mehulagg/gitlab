@@ -721,7 +721,7 @@ RSpec.describe Projects::PipelinesController do
 
           pipeline = project.ci_pipelines.last
           expected_redirect_path = Gitlab::Routing.url_helpers.project_pipeline_path(project, pipeline)
-          expect(pipeline).to be_pending
+          expect(pipeline).to be_created
           expect(response).to redirect_to(expected_redirect_path)
         end
       end
