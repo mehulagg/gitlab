@@ -12,7 +12,16 @@ Once enabled, commit messages are checked for Asana task URLs (for example,
 (for example, `#987654`). Every task ID found gets the commit comment added to it.
 
 You can also close a task with a message containing: `fix #123456`.
-You can use either: `fix`, `fixed`, `fixes`, `fixing`, `close`, `closes`, `closed`, or `closing`.
+You can use either of these words:
+
+- `fix`
+- `fixed`
+- `fixes`
+- `fixing`
+- `close`
+- `closes`
+- `closed`
+- `closing`
 
 See also the [Asana service API documentation](../../../api/services.md#asana).
 
