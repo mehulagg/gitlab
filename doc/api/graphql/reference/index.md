@@ -8003,7 +8003,6 @@ State of a Sentry error.
 | `FLOWDOCK_SERVICE` | FlowdockService type |
 | `GITHUB_SERVICE` | GithubService type |
 | `HANGOUTS_CHAT_SERVICE` | HangoutsChatService type |
-| `HIPCHAT_SERVICE` | HipchatService type |
 | `IRKER_SERVICE` | IrkerService type |
 | `JENKINS_SERVICE` | JenkinsService type |
 | `JIRA_SERVICE` | JiraService type |
