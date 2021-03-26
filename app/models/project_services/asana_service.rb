@@ -15,11 +15,7 @@ class AsanaService < Service
   end
 
   def help
-    s_('AsanaService|Add commit messages as comments to Asana tasks. When enabled,
-commit messages are checked for Asana task URLs
-(for example, `https://app.asana.com/0/123456/987654`) or task IDs starting with
-`#` (for example, `#987654`). Every task ID found gets the commit comment added
-to it.')
+    s_('Add commit messages as comments to Asana tasks.')
   end
 
   def self.to_param

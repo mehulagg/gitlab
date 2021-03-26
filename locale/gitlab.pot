@@ -1901,6 +1901,9 @@ msgstr ""
 msgid "Add comment to design"
 msgstr ""
 
+msgid "Add commit messages as comments to Asana tasks."
+msgstr ""
+
 msgid "Add deploy freeze"
 msgstr ""
 
@@ -4155,14 +4158,6 @@ msgid "AsanaService|%{user} pushed to branch %{branch} of %{project_name} ( %{co
 msgstr ""
 
 msgid "AsanaService|Add commit messages as comments to Asana tasks."
-msgstr ""
-
-msgid ""
-"AsanaService|Add commit messages as comments to Asana tasks. When enabled,\n"
-"commit messages are checked for Asana task URLs\n"
-"(for example, `https://app.asana.com/0/123456/987654`) or task IDs starting with\n"
-"`#` (for example, `#987654`). Every task ID found gets the commit comment added\n"
-"to it."
 msgstr ""
 
 msgid "AsanaService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches."
