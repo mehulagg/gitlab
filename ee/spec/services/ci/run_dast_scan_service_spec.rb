@@ -173,11 +173,6 @@ RSpec.describe Ci::RunDastScanService do
         expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 
-      it 'enqueues a build' do
-        build = pipeline.builds.first
-        expect(build.queued_at).not_to be_nil
-      end
-
       context 'when the pipeline fails to save' do
         before do
           allow_any_instance_of(Ci::Pipeline).to receive(:created_successfully?).and_return(false)
