@@ -128,17 +128,6 @@ module Gitlab
               end
             end
 
-            # We should *always* include the hash or physical-location-based
-            # fingerprint!
-            #
-            # See the comments in VulnerabilityFindingFingerprintHelpers about
-            # creating default fingerprints from location data
-            is_location = [:file_path, :start_line].all? { |x| location.respond_to?(x) }
-            algorithm_type = is_location ? 'location' : 'hash'
-            unless fingerprint_algorithms.has_key?(algorithm_type)
-              fingerprint_algorithms[algorithm_type] = [location.fingerprint_data]
-            end
-
             fingerprint_algorithms.map do |algorithm, values|
               value = values.join('|')
               fingerprint = ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
