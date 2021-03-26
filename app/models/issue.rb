@@ -343,6 +343,8 @@ class Issue < ApplicationRecord
                        .preload(preload)
                        .reorder('issue_link_id')
 
+    related_issues = yield related_issues if block_given?
+
     cross_project_filter = -> (issues) { issues.where(project: project) }
     Ability.issues_readable_by_user(related_issues,
       current_user,

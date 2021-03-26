@@ -11,6 +11,7 @@ module API
     params do
       requires :id, type: String, desc: 'The ID of a project'
       requires :issue_iid, type: Integer, desc: 'The internal ID of a project issue'
+      use :pagination
     end
     resource :projects, requirements: { id: %r{[^/]+} } do
       desc 'Get related issues' do
@@ -18,7 +19,11 @@ module API
       end
       get ':id/issues/:issue_iid/links' do
         source_issue = find_project_issue(params[:issue_iid])
-        related_issues = source_issue.related_issues(current_user)
+        related_issues = source_issue.related_issues(current_user) do |issues|
+          next issues.with_api_entity_associations unless Feature.enabled?(:paginate_issue_links, default_enabled: :yaml)
+
+          paginate(issues.with_api_entity_associations)
+        end
 
         present related_issues,
                 with: Entities::RelatedIssue,
