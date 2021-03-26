@@ -14,6 +14,8 @@ localVue.use(VueApollo);
 describe('RunnerInstructions component', () => {
   let wrapper;
   let fakeApollo;
+  let runnerPlatformsHandler;
+  let runnerSetupInstructionsHandler;
 
   const findModalButton = () => wrapper.find('[data-testid="show-modal-button"]');
   const findPlatformButtons = () => wrapper.findAll('[data-testid="platform-button"]');
@@ -22,10 +24,10 @@ describe('RunnerInstructions component', () => {
   const findBinaryInstructionsSection = () => wrapper.find('[data-testid="binary-instructions"]');
   const findRunnerInstructionsSection = () => wrapper.find('[data-testid="runner-instructions"]');
 
-  beforeEach(async () => {
+  const createComponent = () => {
     const requestHandlers = [
-      [getRunnerPlatforms, jest.fn().mockResolvedValue(mockGraphqlRunnerPlatforms)],
-      [getRunnerSetupInstructions, jest.fn().mockResolvedValue(mockGraphqlInstructions)],
+      [getRunnerPlatforms, runnerPlatformsHandler],
+      [getRunnerSetupInstructions, runnerSetupInstructionsHandler],
     ];
 
     fakeApollo = createMockApollo(requestHandlers);
@@ -37,6 +39,13 @@ describe('RunnerInstructions component', () => {
       localVue,
       apolloProvider: fakeApollo,
     });
+  };
+
+  beforeEach(async () => {
+    runnerPlatformsHandler = jest.fn().mockResolvedValue(mockGraphqlRunnerPlatforms);
+    runnerSetupInstructionsHandler = jest.fn().mockResolvedValue(mockGraphqlInstructions);
+
+    createComponent();
 
     await wrapper.vm.$nextTick();
   });
@@ -109,5 +118,20 @@ describe('RunnerInstructions component', () => {
     const runner = findRunnerInstructionsSection();
 
     expect(runner.text()).toMatch(mockGraphqlInstructions.data.runnerSetup.registerInstructions);
+  });
+
+  describe('when instructions cannot be loaded', () => {
+    beforeEach(async () => {
+      runnerSetupInstructionsHandler.mockRejectedValue();
+
+      createComponent();
+
+      await wrapper.vm.$nextTick();
+    });
+
+    it('should not show instructions', () => {
+      expect(findBinaryInstructionsSection().exists()).toBe(false);
+      expect(findRunnerInstructionsSection().exists()).toBe(false);
+    });
   });
 });
