@@ -42,58 +42,38 @@ RSpec.describe 'Query.project(fullPath).apiFuzzingCiConfiguration' do
     ).to_return(body: profiles_yaml)
   end
 
-  context 'when the api_fuzzing_configuration_ui feature flag is enabled' do
+  context 'when the user can read vulnerabilities for the project' do
     before do
-      stub_feature_flags(api_fuzzing_configuration_ui: true)
+      stub_licensed_features(security_dashboard: true)
     end
 
-    context 'when the user can read vulnerabilities for the project' do
-      before do
-        stub_licensed_features(security_dashboard: true)
-      end
+    it 'returns scan modes and scan profiles' do
+      post_graphql(query, current_user: user)
 
-      it 'returns scan modes and scan profiles' do
-        post_graphql(query, current_user: user)
+      expect(response).to have_gitlab_http_status(:ok)
 
-        expect(response).to have_gitlab_http_status(:ok)
-
-        fuzzing_config = graphql_data.dig('project', 'apiFuzzingCiConfiguration')
-        modes = fuzzing_config['scanModes']
-        profiles = fuzzing_config['scanProfiles']
-        expect(modes).to contain_exactly('HAR', 'OPENAPI', 'POSTMAN')
-        expect(profiles).to contain_exactly({
-          'name' => 'Quick-10',
-          'description' => 'Fuzzing 10 times per parameter',
-          'yaml' => "---\nName: Quick-10\n"
-        })
-      end
-    end
-
-    context 'when the user cannot read vulnerabilities for the project' do
-      before do
-        stub_licensed_features(security_dashboard: false)
-      end
-
-      it 'returns nil' do
-        post_graphql(query, current_user: user)
-
-        expect(response).to have_gitlab_http_status(:ok)
-
-        fuzzing_config = graphql_data.dig('project', 'apiFuzzingCiConfiguration')
-        expect(fuzzing_config).to be_nil
-      end
+      fuzzing_config = graphql_data.dig('project', 'apiFuzzingCiConfiguration')
+      modes = fuzzing_config['scanModes']
+      profiles = fuzzing_config['scanProfiles']
+      expect(modes).to contain_exactly('HAR', 'OPENAPI', 'POSTMAN')
+      expect(profiles).to contain_exactly({
+        'name' => 'Quick-10',
+        'description' => 'Fuzzing 10 times per parameter',
+        'yaml' => "---\nName: Quick-10\n"
+      })
     end
   end
 
-  context 'when the api_fuzzing_configuration_ui feature flag is disabled' do
+  context 'when the user cannot read vulnerabilities for the project' do
     before do
-      stub_feature_flags(api_fuzzing_configuration_ui: false)
+      stub_licensed_features(security_dashboard: false)
     end
 
     it 'returns nil' do
       post_graphql(query, current_user: user)
 
       expect(response).to have_gitlab_http_status(:ok)
+
       fuzzing_config = graphql_data.dig('project', 'apiFuzzingCiConfiguration')
       expect(fuzzing_config).to be_nil
     end
