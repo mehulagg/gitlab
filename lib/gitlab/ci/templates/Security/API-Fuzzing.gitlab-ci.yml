@@ -45,7 +45,7 @@ apifuzzer_fuzz:
         entrypoint: ["/bin/bash", "-l", "-c"]
     variables:
         FUZZAPI_PROJECT: $CI_PROJECT_PATH
-        FUZZAPI_API: http://localhost:80
+        FUZZAPI_API: http://localhost:5000
         FUZZAPI_NEW_REPORT: 1
         FUZZAPI_LOG_SCANNER: gl-apifuzzing-api-scanner.log
         TZ: America/Los_Angeles
@@ -107,7 +107,7 @@ apifuzzer_fuzz_dnd:
         DOCKER_DRIVER: overlay2
         DOCKER_TLS_CERTDIR: ""
         FUZZAPI_PROJECT: $CI_PROJECT_PATH
-        FUZZAPI_API: http://apifuzzer:80
+        FUZZAPI_API: http://apifuzzer:5000
     allow_failure: true
     rules:
         - if: $FUZZAPI_D_TARGET_IMAGE == null && $FUZZAPI_D_WORKER_IMAGE == null
