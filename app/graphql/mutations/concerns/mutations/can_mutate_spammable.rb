@@ -8,7 +8,7 @@ module Mutations
     extend ActiveSupport::Concern
 
     DEPRECATION_NOTICE = {
-      reason: 'Use SPAM protection with HTTP Headers instead',
+      reason: 'Use spam protection with HTTP Headers instead',
       milestone: '13.11'
     }.freeze
 
