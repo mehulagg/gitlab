@@ -58,3 +58,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Ci::Pipeline::Metrics.prepend_if_ee('EE::Gitlab::Ci::Pipeline::Metrics')

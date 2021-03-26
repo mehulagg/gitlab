@@ -13,11 +13,11 @@ module Ci
       idempotent!
 
       def perform(pipeline_id)
-        Ci::Pipeline.find_by_id(pipeline_id).try do |pipeline|
-          Ci::ProcessPipelineService
-            .new(pipeline)
-            .execute
-        end
+        Ci::Pipeline.find_by_id(pipeline_id).try(&method(:process_pipeline))
+      end
+
+      def process_pipeline(pipeline)
+        Ci::ProcessPipelineService.new(pipeline).execute
       end
     end
   end

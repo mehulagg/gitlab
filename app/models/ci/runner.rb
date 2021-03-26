@@ -263,6 +263,12 @@ module Ci
       end
     end
 
+    def matches_build?(build)
+      return false if self.ref_protected? && !build.protected?
+
+      accepting_tags?(build)
+    end
+
     def match_build_if_online?(build)
       active? && online? && can_pick?(build)
     end
@@ -391,12 +397,6 @@ module Ci
       unless groups.one?
         errors.add(:runner, 'needs to be assigned to exactly one group')
       end
-    end
-
-    def matches_build?(build)
-      return false if self.ref_protected? && !build.protected?
-
-      accepting_tags?(build)
     end
 
     def accepting_tags?(build)

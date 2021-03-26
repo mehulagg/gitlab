@@ -40,6 +40,16 @@ FactoryBot.define do
       end
     end
 
+    trait :with_namespace_statistics do
+      transient do
+        shared_runners_seconds { 0 }
+      end
+
+      after(:create) do |namespace, evaluator|
+        create(:namespace_statistics, namespace: namespace, shared_runners_seconds: evaluator.shared_runners_seconds)
+      end
+    end
+
     trait :shared_runners_disabled do
       shared_runners_enabled { false }
     end
