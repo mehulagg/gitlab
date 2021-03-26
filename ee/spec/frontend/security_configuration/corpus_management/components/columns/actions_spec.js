@@ -1,5 +1,5 @@
 import { GlButton, GlModal } from '@gitlab/ui';
-import { shallowMount, mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Actions from 'ee/security_configuration/corpus_management/components/columns/actions.vue';
 import { s__ } from '~/locale';
@@ -19,7 +19,6 @@ describe('Action buttons', () => {
   };
 
   const createComponent = createComponentFactory();
-  const createMountedComponent = createComponentFactory(mount);
 
   afterEach(() => {
     wrapper.destroy();
@@ -33,17 +32,22 @@ describe('Action buttons', () => {
 
     describe('delete confirmation modal', () => {
       beforeEach(() => {
-        createMountedComponent();
-        wrapper.findComponents(GlButton).at(1).trigger('click');
-        return nextTick();
+        createComponent({ stubs: { GlModal } });
       });
 
       it('shows the delete confirmation', () => {
         const deleteModal = wrapper.findComponent(GlModal);
-        // This fails
-        expect(deleteModal.text()).toBe(
+
+        expect(deleteModal.vm.$slots['modal-title'][0].text).toContain(
           s__('Corpus Management|Are you sure you want to delete the corpus?'),
         );
+      });
+
+      it('calls the deleteCorpus method', async () => {
+        wrapper.findComponent(GlModal).vm.$emit('primary');
+        await nextTick();
+
+        expect(wrapper.emitted().delete).toBeTruthy();
       });
     });
   });
