@@ -808,4 +808,35 @@ RSpec.describe Deployment do
       end
     end
   end
+
+  describe '#update_merge_request_metrics!' do
+    {
+      'gprd' => false,
+      'prod' => true,
+      'prod-test' => false,
+      'PROD' => true,
+      'production' => true,
+      'production-test' => false,
+      'PRODUCTION' => true,
+      'production/eu' => true,
+      'PRODUCTION/EU' => true,
+      'production/www.gitlab.com' => true,
+      'productioneu' => false,
+      'Production' => true,
+      'Production/eu' => true,
+      'test-production' => false
+    }.each do |name, expected_value|
+      it "returns #{expected_value} for #{name}" do
+        env = create(:environment, name: name)
+
+        if expected_value
+          expect(MergeRequest::Metrics).to receive(:update_all)
+        else
+          expect(MergeRequest::Metrics).not_to receive(:update_all)
+        end
+
+        env.update_merge_request_metrics!
+      end
+    end
+  end
 end
