@@ -19,12 +19,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  props: {
-    vulnerabilitiesExportEndpoint: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['vulnerabilitiesExportEndpoint'],
   data() {
     return {
       isPreparingCsvExport: false,
@@ -44,12 +39,7 @@ export default {
   methods: {
     closePopover() {
       this.showPopover = false;
-
-      try {
-        localStorage.setItem(STORAGE_KEY, 'true');
-      } catch (e) {
-        // Ignore the error - this is just a safety measure.
-      }
+      localStorage.setItem(STORAGE_KEY, 'true');
     },
     initiateCsvExport() {
       this.isPreparingCsvExport = true;
@@ -87,9 +77,10 @@ export default {
   >
     {{ __('Export') }}
     <gl-popover
+      v-if="showPopover"
       ref="popover"
       :target="() => $refs.csvExportButton.$el"
-      :show="showPopover"
+      show
       placement="left"
       triggers="manual"
     >

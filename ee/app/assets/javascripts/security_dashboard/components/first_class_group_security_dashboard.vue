@@ -20,12 +20,6 @@ export default {
     VulnerabilitiesCountList,
   },
   inject: ['groupFullPath'],
-  props: {
-    vulnerabilitiesExportEndpoint: {
-      type: String,
-      required: true,
-    },
-  },
   apollo: {
     projects: {
       query: vulnerableProjectsQuery,
@@ -74,7 +68,7 @@ export default {
           <h2 class="gl-flex-grow-1 gl-my-0">
             {{ s__('SecurityReports|Vulnerability Report') }}
           </h2>
-          <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
+          <csv-export-button />
         </header>
         <vulnerabilities-count-list
           :scope="$options.vulnerabilitiesSeverityCountScopes.group"
