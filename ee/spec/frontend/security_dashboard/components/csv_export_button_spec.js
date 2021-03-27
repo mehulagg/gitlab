@@ -29,7 +29,7 @@ describe('Csv Button Export', () => {
 
   const createComponent = () => {
     return shallowMount(CsvExportButton, {
-      propsData: {
+      provide: {
         vulnerabilitiesExportEndpoint,
       },
       stubs: {

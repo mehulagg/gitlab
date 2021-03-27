@@ -19,12 +19,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  props: {
-    vulnerabilitiesExportEndpoint: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['vulnerabilitiesExportEndpoint'],
   data() {
     return {
       isPreparingCsvExport: false,
