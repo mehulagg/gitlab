@@ -204,7 +204,7 @@ karma-as-if-foss:
   extends: .frontend-test-base
   script:
     - *yarn-install
-    - run_timed_command "yarn jest --ci --coverage --testSequencer ./scripts/frontend/parallel_ci_sequencer.js"
+    - run_timed_command "yarn jest --ci --runInBand --coverage --testSequencer ./scripts/frontend/parallel_ci_sequencer.js"
 
 jest:
   extends:
