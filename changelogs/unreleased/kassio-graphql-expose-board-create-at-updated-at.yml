@@ -1,0 +1,5 @@
+---
+title: Expose Boards created_at and updated_at in the GraphQL API
+merge_request: 57645
+author:
+type: changed
