@@ -25,7 +25,7 @@ func checkNotModified(r *http.Request, modtime time.Time) bool {
 	return !modtime.Truncate(time.Second).After(t)
 }
 
-// isZeroTime reports whether t is obviously unspecified (either zero or Unix epoch time).
+// isZeroTime reports whether t is unspecified (either zero or Unix epoch time).
 func isZeroTime(t time.Time) bool {
 	return t.IsZero() || t.Equal(time.Unix(0, 0))
 }

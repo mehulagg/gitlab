@@ -38,7 +38,7 @@ production: &base
     max_request_duration_seconds: 57
 
     # Uncomment this line below if your ssh host is different from HTTP/HTTPS one
-    # (you'd obviously need to replace ssh.host_example.com with your own host).
+    # (you'd need to replace ssh.host_example.com with your own host).
     # Otherwise, ssh host will be set to the `host:` value above
     # ssh_host: ssh.host_example.com
 

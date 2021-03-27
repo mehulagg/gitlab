@@ -19,8 +19,8 @@ module EE
 
                   # Shuffle providers to prevent a scenario where sync fails after a time
                   # and only the first provider or two get synced. This shuffles the order
-                  # so subsequent syncs should eventually get to all providers. Obviously
-                  # we should avoid failure, but this is an additional safeguard.
+                  # so subsequent syncs should eventually get to all providers.
+                  # We should avoid failure, but this is an additional safeguard.
                   ::Gitlab::Auth::Ldap::Config.providers.shuffle.each do |provider|
                     Sync::Proxy.open(provider) do |proxy|
                       new(group, proxy).update_permissions
