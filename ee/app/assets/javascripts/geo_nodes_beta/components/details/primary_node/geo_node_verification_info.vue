@@ -2,7 +2,8 @@
 import { GlCard, GlIcon, GlPopover, GlLink } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
 import { HELP_INFO_URL } from 'ee/geo_nodes_beta/constants';
-import { sprintf, s__, __ } from '~/locale';
+import { s__, __ } from '~/locale';
+import GeoNodeProgressBar from '../geo_node_progress_bar.vue';
 
 export default {
   name: 'GeoNodeVerificationInfo',
@@ -12,13 +13,14 @@ export default {
       'Geo|Replicated data is verified with the secondary node(s) using checksums.',
     ),
     learnMore: __('Learn more'),
-    progressBarPlaceholder: s__('Geo|Progress Bar Placeholder'),
+    progressBarTitle: s__('Geo|%{title} checksum progress'),
   },
   components: {
     GlCard,
     GlIcon,
     GlPopover,
     GlLink,
+    GeoNodeProgressBar,
   },
   props: {
     node: {
@@ -30,11 +32,6 @@ export default {
     ...mapGetters(['verificationInfo']),
     verificationInfoBars() {
       return this.verificationInfo(this.node.id);
-    },
-  },
-  methods: {
-    buildTitle(title) {
-      return sprintf(s__('Geo|%{title} checksum progress'), { title });
     },
   },
   HELP_INFO_URL,
@@ -60,8 +57,14 @@ export default {
       </gl-popover>
     </template>
     <div v-for="bar in verificationInfoBars" :key="bar.title" class="gl-mb-5">
-      <span data-testid="verification-bar-title">{{ buildTitle(bar.title) }}</span>
-      <p data-testid="verification-progress-bar">{{ $options.i18n.progressBarPlaceholder }}</p>
+      <span data-testid="verification-bar-title">{{
+        sprintf($options.i18n.progressBarTitle, { title: bar.title })
+      }}</span>
+      <geo-node-progress-bar
+        class="gl-mt-3"
+        :title="sprintf($options.i18n.progressBarTitle, { title: bar.title })"
+        :values="bar.values"
+      />
     </div>
   </gl-card>
 </template>

@@ -1983,6 +1983,10 @@ To disable directed acyclic graphs (DAG), set the limit to `0`.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14311) in GitLab v12.6.
 
+When a job uses `needs`, it no longer downloads all artifacts from previous stages
+by default, because jobs with `needs` can start before earlier stages complete. With
+`needs` you can only download artifacts from the jobs listed in the `needs:` configuration.
+
 Use `artifacts: true` (default) or `artifacts: false` to control when artifacts are
 downloaded in jobs that use `needs`.
 
@@ -3072,6 +3076,13 @@ The artifacts are sent to GitLab after the job finishes. They are
 available for download in the GitLab UI if the size is not
 larger than the [maximum artifact size](../../user/gitlab_com/index.md#gitlab-cicd).
 
+By default, jobs in later stages automatically download all the artifacts created
+by jobs in earlier stages. You can control artifact download behavior in jobs with
+[`dependencies`](#dependencies).
+
+When using the [`needs`](#artifact-downloads-with-needs) keyword, jobs can only download
+artifacts from the jobs defined in the `needs` configuration.
+
 Job artifacts are only collected for successful jobs by default, and
 artifacts are restored after [caches](#cache).
 
@@ -3228,7 +3239,7 @@ Note the following:
 - Artifacts do not display in the merge request UI when using variables to define the `artifacts:paths`.
 - A maximum of 10 job artifacts per merge request can be exposed.
 - Glob patterns are unsupported.
-- If a directory is specified, the link is to the job [artifacts browser](../pipelines/job_artifacts.md#browsing-artifacts) if there is more than
+- If a directory is specified, the link is to the job [artifacts browser](../pipelines/job_artifacts.md#download-job-artifacts) if there is more than
   one file in the directory.
 - For exposed single file artifacts with `.html`, `.htm`, `.txt`, `.json`, `.xml`,
   and `.log` extensions, if [GitLab Pages](../../administration/pages/index.md) is:
@@ -3497,7 +3508,7 @@ deploy:
 
 If the artifacts of the job that is set as a dependency are
 [expired](#artifactsexpire_in) or
-[erased](../pipelines/job_artifacts.md#erasing-artifacts), then
+[erased](../pipelines/job_artifacts.md#erase-job-artifacts), then
 the dependent job fails.
 
 You can ask your administrator to
@@ -4090,6 +4101,7 @@ finishes.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/19298) in GitLab 13.2.
 
 Use `release` to create a [release](../../user/project/releases/index.md).
+Requires the `release-cli` to be available in your GitLab Runner Docker or shell executor.
 
 These keywords are supported:
 
@@ -4110,6 +4122,69 @@ You must specify the Docker image to use for the `release-cli`:
 ```yaml
 image: registry.gitlab.com/gitlab-org/release-cli:latest
 ```
+
+#### `release-cli` for shell executors
+
+> [Introduced](https://gitlab.com/gitlab-org/release-cli/-/issues/21) in GitLab 13.8.
+
+For GitLab Runner shell executors, you can download and install the `release-cli` manually for your [supported OS and architecture](https://release-cli-downloads.s3.amazonaws.com/latest/index.html).
+Once installed, the `release` keyword should be available to you.
+
+**Install on Unix/Linux**
+
+1. Download the binary for your system, in the following example for amd64 systems:
+
+  ```shell
+  curl --location --output /usr/local/bin/release-cli "https://release-cli-downloads.s3.amazonaws.com/latest/release-cli-linux-amd64"
+  ```
+
+1. Give it permissions to execute:
+
+  ```shell
+  sudo chmod +x /usr/local/bin/release-cli
+  ```
+
+1. Verify `release-cli` is available:
+
+  ```shell
+  $ release-cli -v
+
+  release-cli version 0.6.0
+  ```
+
+**Install on Windows PowerShell**
+
+1. Create a folder somewhere in your system, for example `C:\GitLab\Release-CLI\bin`
+
+  ```shell
+  New-Item -Path 'C:\GitLab\Release-CLI\bin' -ItemType Directory
+  ```
+
+1. Download the executable file:
+
+  ```shell
+  PS C:\> Invoke-WebRequest -Uri "https://release-cli-downloads.s3.amazonaws.com/latest/release-cli-windows-amd64.exe" -OutFile "C:\GitLab\Release-CLI\bin\release-cli.exe"
+
+      Directory: C:\GitLab\Release-CLI
+  Mode                LastWriteTime         Length Name
+  ----                -------------         ------ ----
+  d-----        3/16/2021   4:17 AM                bin
+
+  ```
+
+1. Add the directory to your `$env:PATH`:
+
+  ```shell
+  $env:PATH += ";C:\GitLab\Release-CLI\bin"
+  ```
+
+1. Verify `release-cli` is available:
+
+  ```shell
+  PS C:\> release-cli -v
+
+  release-cli version 0.6.0
+  ```
 
 #### `script`
 
@@ -4821,7 +4896,7 @@ reused in the `test` job:
       - !reference [.teardown, after_script]
   ```
 
-In the following example, `test-vars-1` reuses the all the variables in `.vars`, while `test-vars-2`
+In the following example, `test-vars-1` reuses all the variables in `.vars`, while `test-vars-2`
 selects a specific variable and reuses it as a new `MY_VAR` variable.
 
 ```yaml

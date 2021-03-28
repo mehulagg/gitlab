@@ -94,7 +94,7 @@ export default {
     </template>
 
     <template #cell(manage)="{ item }">
-      <manage-feature :feature="item" :auto-devops-enabled="autoDevopsEnabled" />
+      <manage-feature :feature="item" />
     </template>
   </gl-table>
 </template>

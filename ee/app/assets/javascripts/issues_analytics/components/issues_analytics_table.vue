@@ -171,7 +171,6 @@ export default {
             <gl-popover
               :target="`${item.id}-labels`"
               placement="top"
-              triggers="hover"
               :css-classes="['issue-labels-popover']"
             >
               <div class="gl-display-flex gl-justify-content-start gl-flex-wrap gl-mr-1">

@@ -20,7 +20,7 @@ localVue.use(VueApollo);
 
 const [siteProfileOne] = siteProfiles;
 const fullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
+const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_scans`;
 const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';

@@ -62,9 +62,11 @@ exports[`Security Charts error states has unavailable pages 1`] = `
         <p>
           Either you don't have permission to view this dashboard or the dashboard has not been setup. Please check your permission settings with your administrator or check your dashboard configurations to proceed.
         </p>
-        <div>
+        <div
+          class="gl-display-flex gl-flex-wrap gl-justify-content-center"
+        >
           <a
-            class="btn btn-success btn-md gl-button"
+            class="btn gl-mb-3 btn-confirm btn-md gl-button gl-mx-2"
             href="/test/dashboard_page"
           >
             <span

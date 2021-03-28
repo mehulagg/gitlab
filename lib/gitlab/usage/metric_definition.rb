@@ -22,6 +22,16 @@ module Gitlab
         attributes
       end
 
+      def json_schema_path
+        return '' unless has_json_schema?
+
+        "#{BASE_REPO_PATH}/#{attributes[:object_json_schema]}"
+      end
+
+      def has_json_schema?
+        attributes[:value_type] == 'object' && attributes[:object_json_schema].present?
+      end
+
       def yaml_path
         "#{BASE_REPO_PATH}#{path.delete_prefix(Rails.root.to_s)}"
       end
@@ -49,7 +59,8 @@ module Gitlab
           @paths ||= [Rails.root.join('config', 'metrics', '**', '*.yml')]
         end
 
-        def definitions
+        def definitions(skip_validation: false)
+          @skip_validation = skip_validation
           @definitions ||= load_all!
         end
 
@@ -95,7 +106,7 @@ module Gitlab
       end
 
       def skip_validation?
-        !!attributes[:skip_validation]
+        !!attributes[:skip_validation] || @skip_validation
       end
     end
   end

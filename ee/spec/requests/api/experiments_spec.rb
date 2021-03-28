@@ -6,26 +6,21 @@ RSpec.describe API::Experiments do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, name: 'GitLab.com', path: 'gitlab-com') }
 
+  let(:definition_yaml) { Rails.root.join('config', 'feature_flags', 'experiment', 'null_hypothesis.yml') }
+
   describe 'GET /experiments' do
     context 'when on .com' do
-      let(:experiments) do
-        {
-          experiment_1: {
-            tracking_category: 'something'
-          },
-          experiment_2: {
-            tracking_category: 'something_else'
-          }
-        }
-      end
-
       before do
-        skip_feature_flags_yaml_validation
-        skip_default_enabled_yaml_check
-        stub_const('Gitlab::Experimentation::EXPERIMENTS', experiments)
-        Feature.enable_percentage_of_time('experiment_1_experiment_percentage', 10)
-        Feature.disable('experiment_2_experiment_percentage')
         allow(Gitlab).to receive(:com?).and_return(true)
+
+        definition = YAML.load_file(definition_yaml).deep_symbolize_keys!
+        allow(Feature::Definition.definitions).to receive(:values).and_return([
+          Feature::Definition.new(definition_yaml.to_s, definition),
+          Feature::Definition.new(
+            "foo/non_experiment.yml",
+            definition.merge(type: 'development', name: 'non_experiment')
+          )
+        ])
       end
 
       it 'returns a 401 for anonymous users' do
@@ -49,23 +44,41 @@ RSpec.describe API::Experiments do
         expect(response).to have_gitlab_http_status(:forbidden)
       end
 
-      it 'returns the feature list for gitlab team members' do
-        expected_experiments = [
-          {
-            'key' => 'experiment_1',
-            'enabled' => true
-          },
-          {
-            'key' => 'experiment_2',
-            'enabled' => false
-          }
-        ]
-        group.add_developer(user)
+      context 'for gitlab team members' do
+        before do
+          group.add_developer(user)
+        end
 
-        get api('/experiments', user)
+        it 'returns the feature flag details' do
+          get api('/experiments', user)
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response).to match_array(expected_experiments)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to include({
+            key: "null_hypothesis",
+            state: :off,
+            enabled: false,
+            name: "null_hypothesis",
+            introduced_by_url: "https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45840",
+            rollout_issue_url: nil,
+            milestone: "13.7",
+            type: "experiment",
+            group: "group::adoption",
+            default_enabled: false
+          }.as_json)
+        end
+
+        it 'understands the state of the feature flag and what that means for an experiment' do
+          Feature.enable_percentage_of_actors(:null_hypothesis, 1)
+
+          get api('/experiments', user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to include(hash_including({
+            state: :conditional,
+            enabled: true,
+            name: "null_hypothesis"
+          }.as_json))
+        end
       end
     end
 

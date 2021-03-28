@@ -12,6 +12,7 @@ RSpec.describe PushRule do
 
   describe "Associations" do
     it { is_expected.to belong_to(:project).inverse_of(:push_rule) }
+    it { is_expected.to have_one(:group).inverse_of(:push_rule).autosave(true) }
   end
 
   describe "Validation" do

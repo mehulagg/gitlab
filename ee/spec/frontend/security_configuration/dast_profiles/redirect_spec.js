@@ -3,7 +3,7 @@ import { TEST_HOST } from 'helpers/test_constants';
 import * as urlUtility from '~/lib/utils/url_utility';
 
 const fullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
+const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_scans`;
 const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const urlParamKey = 'site_profile_id';
 const originalReferrer = document.referrer;

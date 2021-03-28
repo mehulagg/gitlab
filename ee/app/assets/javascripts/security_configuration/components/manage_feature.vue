@@ -1,53 +1,23 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { propsUnion } from '~/vue_shared/components/lib/utils/props_utils';
+import { REPORT_TYPE_DAST_PROFILES } from '~/vue_shared/security_reports/constants';
+import ManageDastProfiles from './manage_dast_profiles.vue';
+import ManageGeneric from './manage_generic.vue';
+
+const scannerComponentMap = {
+  [REPORT_TYPE_DAST_PROFILES]: ManageDastProfiles,
+};
 
 export default {
-  components: {
-    GlButton,
-  },
-  props: {
-    feature: {
-      type: Object,
-      required: true,
-    },
-    autoDevopsEnabled: {
-      type: Boolean,
-      required: true,
-    },
-  },
+  props: propsUnion([ManageGeneric, ...Object.values(scannerComponentMap)]),
   computed: {
-    canConfigureFeature() {
-      return Boolean(this.feature.configuration_path);
-    },
-    canManageProfiles() {
-      return this.feature.type === 'dast_profiles';
+    manageComponent() {
+      return scannerComponentMap[this.feature.type] ?? ManageGeneric;
     },
   },
 };
 </script>
 
 <template>
-  <gl-button
-    v-if="canManageProfiles"
-    :href="feature.configuration_path"
-    data-testid="manageButton"
-    >{{ s__('SecurityConfiguration|Manage') }}</gl-button
-  >
-
-  <gl-button
-    v-else-if="canConfigureFeature && feature.configured"
-    :href="feature.configuration_path"
-    data-testid="configureButton"
-    >{{ s__('SecurityConfiguration|Configure') }}</gl-button
-  >
-
-  <gl-button
-    v-else-if="canConfigureFeature"
-    variant="success"
-    category="primary"
-    :href="feature.configuration_path"
-    data-testid="enableButton"
-    :data-qa-selector="`${feature.type}_enable_button`"
-    >{{ s__('SecurityConfiguration|Enable') }}</gl-button
-  >
+  <component :is="manageComponent" v-bind="$props" />
 </template>

@@ -6,6 +6,7 @@ import DashboardNotConfigured from 'ee/security_dashboard/components/empty_state
 import ProjectSecurityCharts from 'ee/security_dashboard/components/project_security_charts.vue';
 import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
 import projectsHistoryQuery from 'ee/security_dashboard/graphql/queries/project_vulnerabilities_by_day_and_count.query.graphql';
+import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import {
   mockProjectSecurityChartsWithData,
@@ -83,6 +84,8 @@ describe('Project Security Charts component', () => {
   });
 
   describe('when there is history data', () => {
+    useFakeDate(2021, 3, 11);
+
     beforeEach(() => {
       wrapper = createComponent({
         query: mockProjectSecurityChartsWithData(),
@@ -108,6 +111,19 @@ describe('Project Security Charts component', () => {
       const option = findLineChart().props('option').toolbox.feature;
       expect(option.dataZoom.icon.zoom).toBe('path://mockSvgPathContent');
       expect(option.dataZoom.icon.back).toBe('path://mockSvgPathContent');
+    });
+
+    it('contains the timeline slider', () => {
+      const { dataZoom } = findLineChart().props('option');
+      expect(dataZoom[0]).toMatchObject({
+        type: 'slider',
+        handleIcon: 'path://mockSvgPathContent',
+        startValue: '2021-03-12',
+        dataBackground: {
+          lineStyle: { width: 1 },
+          areaStyle: null,
+        },
+      });
     });
   });
 

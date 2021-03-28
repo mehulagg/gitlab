@@ -198,7 +198,7 @@ gem 'acts-as-taggable-on', '~> 7.0'
 gem 'sidekiq', '~> 5.2.7'
 gem 'sidekiq-cron', '~> 1.0'
 gem 'redis-namespace', '~> 1.7.0'
-gem 'gitlab-sidekiq-fetcher', '0.5.5', require: 'sidekiq-reliable-fetch'
+gem 'gitlab-sidekiq-fetcher', '0.5.6', require: 'sidekiq-reliable-fetch'
 
 # Cron Parser
 gem 'fugit', '~> 1.2.1'
@@ -238,9 +238,6 @@ gem 'redis-rails', '~> 5.0.2'
 # Discord integration
 gem 'discordrb-webhooks', '~> 3.4', require: false
 
-# HipChat integration
-gem 'hipchat', '~> 1.5.0'
-
 # Jira integration
 gem 'jira-ruby', '~> 2.1.4'
 gem 'atlassian-jwt', '~> 0.2.0'
@@ -277,7 +274,10 @@ gem 'licensee', '~> 9.14.1'
 gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
-gem 'mimemagic', '~> 0.3.2', git: 'https://github.com/minad/mimemagic.git', ref: '01f92d86d15d85cfd0f20dabd025dcbd36a8a60f' # rubocop:disable Cop/GemFetcher
+gem 'ruby-magic-static', '~> 0.3.4'
+
+# Fake version of the gem to trick bundler
+gem 'mimemagic', '0.3.7', path: 'vendor/shims/mimemagic', require: false
 
 # Faster blank
 gem 'fast_blank'
@@ -480,7 +480,7 @@ gem 'gitaly', '~> 13.9.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
-gem 'google-protobuf', '~> 3.12'
+gem 'google-protobuf', '~> 3.14.0'
 
 gem 'toml-rb', '~> 1.0.0'
 
@@ -514,7 +514,7 @@ gem 'erubi', '~> 1.9.0'
 gem 'mail', '= 2.7.1'
 
 # File encryption
-gem 'lockbox', '~> 0.3.3'
+gem 'lockbox', '~> 0.6.2'
 
 # Email validation
 gem 'valid_email', '~> 0.1'

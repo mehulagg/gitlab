@@ -26,6 +26,7 @@ export const fetchSettings = ({ commit }, endpoint) => {
 export const updateSettings = ({ commit, state }, endpoint) => {
   const payload = {
     allow_author_approval: !state.settings.preventAuthorApproval,
+    require_password_to_approve: state.settings.requireUserPassword,
   };
 
   commit(types.REQUEST_UPDATE_SETTINGS);

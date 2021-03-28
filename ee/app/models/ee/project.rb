@@ -439,6 +439,12 @@ module EE
       group_hooks.hooks_for(hooks_scope).any?
     end
 
+    def execute_external_compliance_hooks(data)
+      external_approval_rules.each do |approval_rule|
+        approval_rule.async_execute(data)
+      end
+    end
+
     def execute_hooks(data, hooks_scope = :push_hooks)
       super
 
@@ -851,7 +857,7 @@ module EE
 
     # Return the group's setting for delayed deletion, false for user namespace projects
     def group_deletion_mode_configured?
-      group && group.delayed_project_removal?
+      group && group.namespace_settings.delayed_project_removal?
     end
   end
 end

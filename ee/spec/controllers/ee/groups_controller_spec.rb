@@ -535,7 +535,7 @@ RSpec.describe GroupsController do
           subject
 
           expect(response).to have_gitlab_http_status(:found)
-          expect(group.reload.delayed_project_removal).to eq(params[:delayed_project_removal])
+          expect(group.reload.namespace_settings.delayed_project_removal).to eq(params[:delayed_project_removal])
         end
       end
 
@@ -546,7 +546,7 @@ RSpec.describe GroupsController do
           subject
 
           expect(response).to have_gitlab_http_status(:found)
-          expect(group.reload.delayed_project_removal).not_to eq(params[:delayed_project_removal])
+          expect(group.reload.namespace_settings.delayed_project_removal).not_to eq(params[:delayed_project_removal])
         end
       end
     end

@@ -334,4 +334,30 @@ RSpec.describe GroupsController, type: :request do
       end
     end
   end
+
+  describe 'DELETE #destroy' do
+    before do
+      group.add_owner(user)
+      login_as(user)
+    end
+
+    it 'does not delete a group with a gitlab.com subscription' do
+      create(:gitlab_subscription, :ultimate, namespace: group)
+
+      Sidekiq::Testing.fake! do
+        expect { delete(group_path(group)) }.not_to change(GroupDestroyWorker.jobs, :size)
+        expect(response).to redirect_to(edit_group_path(group))
+      end
+    end
+
+    it 'deletes a subgroup with a parent group with a gitlab.com subscription' do
+      create(:gitlab_subscription, :ultimate, namespace: group)
+      subgroup = create(:group, parent: group)
+
+      Sidekiq::Testing.fake! do
+        expect { delete(group_path(subgroup)) }.to change(GroupDestroyWorker.jobs, :size).by(1)
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
 end

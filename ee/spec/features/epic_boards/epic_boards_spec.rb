@@ -73,10 +73,13 @@ RSpec.describe 'epic boards', :js do
       click_button 'Create list'
       wait_for_all_requests
 
-      page.within("[data-testid='board-add-new-column']") do
+      click_button 'Select a label'
+
+      page.within(".dropdown-menu") do
         find('label', text: label2.title).click
-        click_button 'Add'
       end
+
+      click_button 'Add to board'
 
       wait_for_all_requests
 

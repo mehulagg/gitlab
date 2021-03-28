@@ -71,6 +71,12 @@ RSpec.describe Epics::UpdateService do
         expect(note.note).to start_with('changed title')
         expect(note.noteable).to eq(epic)
       end
+
+      it 'records epic title changed after saving' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_title_changed_action)
+
+        update_epic(title: 'New title')
+      end
     end
 
     context 'when description has changed' do
@@ -81,6 +87,12 @@ RSpec.describe Epics::UpdateService do
 
         expect(note.note).to start_with('changed the description')
         expect(note.noteable).to eq(epic)
+      end
+
+      it 'records epic description changed after saving' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_description_changed_action)
+
+        update_epic(description: 'New description')
       end
     end
 
@@ -344,6 +356,20 @@ RSpec.describe Epics::UpdateService do
           expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_inherited_action)
 
           update_epic(start_date_is_fixed: false)
+        end
+      end
+
+      context 'epic due date fixed or inherited' do
+        it 'tracks the user action to set as fixed' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_due_date_set_as_fixed_action)
+
+          update_epic(due_date_is_fixed: true, due_date_fixed: Date.today)
+        end
+
+        it 'tracks the user action to set as inherited' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_due_date_set_as_inherited_action)
+
+          update_epic(due_date_is_fixed: false)
         end
       end
 

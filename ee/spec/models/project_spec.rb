@@ -874,6 +874,16 @@ RSpec.describe Project do
     end
   end
 
+  describe '#execute_external_compliance_hooks' do
+    let_it_be(:rule) { create(:external_approval_rule) }
+
+    it 'enqueues the correct number of workers' do
+      allow(rule).to receive(:async_execute).once
+
+      rule.project.execute_external_compliance_hooks({})
+    end
+  end
+
   describe "#execute_hooks" do
     context "group hooks" do
       let(:group) { create(:group) }
@@ -889,7 +899,7 @@ RSpec.describe Project do
         project.execute_hooks(some: 'info')
       end
 
-      context 'when group_webhooks frature is enabled' do
+      context 'when group_webhooks feature is enabled' do
         before do
           stub_licensed_features(group_webhooks: true)
         end
@@ -2699,7 +2709,7 @@ RSpec.describe Project do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
         stub_application_setting(deletion_adjourned_period: adjourned_period)
-        allow(group).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
+        allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
       end
 
       it { is_expected.to be result }

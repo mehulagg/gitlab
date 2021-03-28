@@ -14,7 +14,7 @@ module EE
                 epic(iid: $epic_iid) {
                   events(first: 100, after: $cursor) {
                     page_info: pageInfo {
-                      end_cursor: endCursor
+                      next_page: endCursor
                       has_next_page: hasNextPage
                     }
                     nodes {

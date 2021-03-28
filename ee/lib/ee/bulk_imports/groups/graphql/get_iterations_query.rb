@@ -13,7 +13,7 @@ module EE
               group(fullPath: $full_path) {
                 iterations(first: 100, after: $cursor, includeAncestors: false) {
                   page_info: pageInfo {
-                    end_cursor: endCursor
+                    next_page: endCursor
                     has_next_page: hasNextPage
                   }
                   nodes {

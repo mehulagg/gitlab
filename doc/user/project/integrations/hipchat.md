@@ -6,6 +6,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Atlassian HipChat **(FREE)**
 
+WARNING:
+This feature, and the integration for it, were
+[deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57434) in
+GitLab 13.11. The HipChat integration no longer sends any notifications to HipChat.
+
 GitLab provides a way to send HipChat notifications upon a number of events,
 such as when a user pushes code, creates a branch or tag, adds a comment, and
 creates a merge request.

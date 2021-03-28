@@ -276,6 +276,9 @@ class MergeRequest < ApplicationRecord
   scope :by_squash_commit_sha, -> (sha) do
     where(squash_commit_sha: sha)
   end
+  scope :by_merge_or_squash_commit_sha, -> (sha) do
+    from_union([by_squash_commit_sha(sha), by_merge_commit_sha(sha)])
+  end
   scope :by_related_commit_sha, -> (sha) do
     from_union(
       [
@@ -313,6 +316,7 @@ class MergeRequest < ApplicationRecord
   }
 
   scope :with_csv_entity_associations, -> { preload(:assignees, :approved_by_users, :author, :milestone, metrics: [:merged_by]) }
+  scope :with_jira_integration_associations, -> { preload(:metrics, :assignees, :author, :target_project, :source_project) }
 
   scope :by_target_branch_wildcard, ->(wildcard_branch_name) do
     where("target_branch LIKE ?", ApplicationRecord.sanitize_sql_like(wildcard_branch_name).tr('*', '%'))

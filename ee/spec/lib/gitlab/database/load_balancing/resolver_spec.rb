@@ -57,6 +57,23 @@ RSpec.describe Gitlab::Database::LoadBalancing::Resolver do
             )
           end
         end
+
+        context 'when DNS does not respond' do
+          it 'raises an exception' do
+            allow_next_instance_of(Resolv::Hosts) do |instance|
+              allow(instance).to receive(:getaddress).with('localhost').and_raise(Resolv::ResolvError)
+            end
+
+            allow(Net::DNS::Resolver).to receive(:start)
+              .with('localhost', Net::DNS::A)
+              .and_raise(Net::DNS::Resolver::NoResponseError)
+
+            expect { subject }.to raise_exception(
+              described_class::UnresolvableNameserverError,
+              'no response from DNS server(s)'
+            )
+          end
+        end
       end
     end
   end

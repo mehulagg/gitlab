@@ -7,7 +7,7 @@ module Gitlab
         class DependencyScanning < Common
           include Security::Concerns::DeprecatedSyntax
 
-          DEPRECATED_REPORT_VERSION = "1.3".freeze
+          DEPRECATED_REPORT_VERSION = "1.3"
 
           private
 

@@ -487,7 +487,7 @@ internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 ### Using a custom Certificate Authority (CA)
 
 When using certificates issued by a custom CA, [Access Control](../../user/project/pages/pages_access_control.md#gitlab-pages-access-control) and
-the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#browsing-artifacts)
+the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#download-job-artifacts)
 fails to work if the custom CA is not recognized.
 
 This usually results in this error:
@@ -646,6 +646,9 @@ The default is 100MB.
 ### Override maximum pages size per project or group **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16610) in GitLab 12.7.
+
+NOTE:
+Only GitLab admin users will be able to view and override the **Maximum size of Pages** setting.
 
 To override the global maximum pages size for a specific project:
 
