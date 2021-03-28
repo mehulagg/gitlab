@@ -57,36 +57,37 @@ export default {
 </script>
 
 <template>
-  <div>
-    <template v-if="pipeline.id">
-      <auto-fix-user-callout
-        v-if="shouldShowAutoFixUserCallout"
-        :help-page-path="autoFixDocumentation"
-        @close="handleAutoFixUserCalloutClose"
-      />
-      <security-dashboard-layout>
-        <template #header>
-          <div class="gl-mt-6 gl-display-flex">
-            <h4 class="gl-flex-grow-1 gl-my-0">{{ __('Vulnerability Report') }}</h4>
-            <csv-export-button />
-          </div>
-          <project-pipeline-status :pipeline="pipeline" />
-          <vulnerabilities-count-list
-            class="gl-mt-6"
-            :scope="$options.vulnerabilitiesSeverityCountScopes.project"
-            :full-path="projectFullPath"
-            :filters="filters"
-          />
-        </template>
-        <template #sticky>
-          <filters @filterChange="handleFilterChange" />
-        </template>
-        <project-vulnerabilities-app
-          :dashboard-documentation="dashboardDocumentation"
+  <div v-if="pipeline.id">
+    <security-dashboard-layout>
+      <template #header>
+        <auto-fix-user-callout
+          v-if="!shouldShowAutoFixUserCallout"
+          :help-page-path="autoFixDocumentation"
+          @close="handleAutoFixUserCalloutClose"
+        />
+
+        <h4 class="gl-mt-6 gl-display-flex gl-align-items-center">
+          {{ s__('SecurityReports|Vulnerability Report') }}
+          <csv-export-button class="gl-ml-auto" />
+        </h4>
+        <project-pipeline-status :pipeline="pipeline" />
+        <vulnerabilities-count-list
+          class="gl-mt-6"
+          :scope="$options.vulnerabilitiesSeverityCountScopes.project"
+          :full-path="projectFullPath"
           :filters="filters"
         />
-      </security-dashboard-layout>
-    </template>
-    <reports-not-configured v-else :help-path="securityDashboardHelpPath" />
+      </template>
+
+      <template #sticky>
+        <filters @filterChange="handleFilterChange" />
+      </template>
+
+      <project-vulnerabilities-app
+        :dashboard-documentation="dashboardDocumentation"
+        :filters="filters"
+      />
+    </security-dashboard-layout>
   </div>
+  <reports-not-configured v-else :help-path="securityDashboardHelpPath" />
 </template>

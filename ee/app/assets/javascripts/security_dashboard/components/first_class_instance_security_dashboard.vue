@@ -1,4 +1,5 @@
 <script>
+import { GlLoadingIcon } from '@gitlab/ui';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
@@ -18,6 +19,7 @@ export default {
     Filters,
     DashboardNotConfigured,
     VulnerabilitiesCountList,
+    GlLoadingIcon,
   },
   apollo: {
     projects: {
@@ -40,14 +42,8 @@ export default {
     isLoadingProjects() {
       return this.$apollo.queries.projects.loading;
     },
-    hasProjectsData() {
-      return !this.isLoadingProjects && this.projects.length > 0;
-    },
-    shouldShowDashboard() {
-      return this.hasProjectsData;
-    },
-    shouldShowEmptyState() {
-      return !this.isLoadingProjects && this.projects.length === 0;
+    hasNoProjects() {
+      return this.projects.length === 0;
     },
   },
   methods: {
@@ -60,30 +56,25 @@ export default {
 </script>
 
 <template>
-  <security-dashboard-layout>
-    <dashboard-not-configured v-if="shouldShowEmptyState" />
+  <gl-loading-icon v-if="isLoadingProjects" size="lg" class="gl-mt-6" />
 
-    <template #header>
-      <div v-if="shouldShowDashboard">
-        <header class="gl-my-6 gl-display-flex gl-align-items-center" data-testid="header">
-          <h2 class="gl-flex-grow-1 gl-my-0">
-            {{ s__('SecurityReports|Vulnerability Report') }}
-          </h2>
-          <csv-export-button />
-        </header>
-        <vulnerabilities-count-list
-          :scope="$options.vulnerabilitiesSeverityCountScopes.instance"
-          :filters="filters"
-        />
-      </div>
+  <security-dashboard-layout v-else>
+    <dashboard-not-configured v-if="hasNoProjects" />
+    <template v-else #header>
+      <h2 class="gl-my-6 gl-display-flex gl-align-items-center">
+        {{ s__('SecurityReports|Vulnerability Report') }}
+        <csv-export-button class="gl-ml-auto" />
+      </h2>
+      <vulnerabilities-count-list
+        :scope="$options.vulnerabilitiesSeverityCountScopes.instance"
+        :filters="filters"
+      />
     </template>
+
     <template #sticky>
-      <filters v-if="shouldShowDashboard" :projects="projects" @filterChange="handleFilterChange" />
+      <filters :projects="projects" @filterChange="handleFilterChange" />
     </template>
-    <instance-security-vulnerabilities
-      v-if="shouldShowDashboard"
-      :projects="projects"
-      :filters="filters"
-    />
+
+    <instance-security-vulnerabilities :projects="projects" :filters="filters" />
   </security-dashboard-layout>
 </template>

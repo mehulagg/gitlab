@@ -1,5 +1,15 @@
 <script>
+import { GlLoadingIcon } from '@gitlab/ui';
+
 export default {
+  components: { GlLoadingIcon },
+  props: {
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   computed: {
     hasHeaderSlot() {
       return Boolean(this.$slots.header);
@@ -7,35 +17,28 @@ export default {
     hasStickySlot() {
       return Boolean(this.$slots.sticky);
     },
-    hasAsideSlot() {
-      return Boolean(this.$slots.aside);
-    },
   },
 };
 </script>
 
 <template>
-  <section>
-    <header v-if="hasHeaderSlot">
-      <slot name="header"></slot>
-    </header>
+  <section class="gl-mt-4">
+    <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-6" />
 
-    <section
-      v-if="hasStickySlot"
-      data-testid="sticky-section"
-      class="position-sticky gl-z-index-3 security-dashboard-filters"
-    >
-      <slot name="sticky"></slot>
-    </section>
+    <template v-else>
+      <header v-if="hasHeaderSlot">
+        <slot name="header"></slot>
+      </header>
 
-    <div class="row mt-4">
-      <article class="col" :class="{ 'col-xl-7': hasAsideSlot }">
-        <slot></slot>
-      </article>
+      <section
+        v-if="hasStickySlot"
+        data-testid="sticky-section"
+        class="position-sticky gl-z-index-3 security-dashboard-filters"
+      >
+        <slot name="sticky"></slot>
+      </section>
 
-      <aside v-if="hasAsideSlot" class="col-xl-5">
-        <slot name="aside"></slot>
-      </aside>
-    </div>
+      <slot></slot>
+    </template>
   </section>
 </template>
