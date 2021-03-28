@@ -13,6 +13,10 @@ module Boards
         @board ||= parent.epic_boards.find(params[:board_id])
       end
 
+      def board_label_ids
+        ::Label.ids_on_epic_board(board.id)
+      end
+
       def reposition_parent
         { board_id: board.id }
       end
