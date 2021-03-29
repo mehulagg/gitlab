@@ -114,8 +114,8 @@ class Environment < ApplicationRecord
 
   scope :eager_load_for_serialization, -> do
     includes(
-      :project,
       :latest_opened_most_severe_alert,
+      project: [:protected_environments],
       upcoming_deployment: [:project, :user, {
         project: [:namespace],
         deployable: [:metadata, {
@@ -128,7 +128,7 @@ class Environment < ApplicationRecord
           pipeline: [:manual_actions, :scheduled_actions]
         }]
       }]
-    )
+    ).where(ProtectedEnvironment.with_environment_id)
   end
 
   enum tier: {

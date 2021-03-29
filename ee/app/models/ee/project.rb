@@ -672,7 +672,11 @@ module EE
       key = "protected_environment_by_name:#{id}:#{environment_name}"
 
       ::Gitlab::SafeRequestStore.fetch(key) do
-        protected_environments.find_by(name: environment_name)
+        if protected_environments.loaded?
+          protected_environments.find { |environment| environment.name == environment_name }
+        else
+          protected_environments.find_by(name: environment_name)
+        end
       end
     end
 
