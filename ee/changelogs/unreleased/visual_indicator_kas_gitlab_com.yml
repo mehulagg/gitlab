@@ -1,0 +1,6 @@
+---
+title: Show visual indicator that GitLab Kubernetes Agent is enabled for the project
+  on GitLab.com
+merge_request: 57767
+author:
+type: changed

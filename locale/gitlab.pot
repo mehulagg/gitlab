@@ -6878,6 +6878,9 @@ msgstr ""
 msgid "ClusterIntegration|GitLab Integration"
 msgstr ""
 
+msgid "ClusterIntegration|GitLab Kubernetes Agent is now available for your project!"
+msgstr ""
+
 msgid "ClusterIntegration|GitLab Runner"
 msgstr ""
 
