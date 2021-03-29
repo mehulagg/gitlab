@@ -36,7 +36,7 @@ module EE
 
     def add_to_slack_data(projects)
       {
-        projects: projects,
+        projects: projects.select([:id, :name]).map { |p| serialize_project(p) },
         sign_in_path: new_session_path(:user, redirect_to_referer: 'yes'),
         is_signed_in: current_user.present?,
         slack_link_profile_slack_path: slack_link_profile_slack_path,
@@ -55,6 +55,15 @@ module EE
       {
         issues_show_path: project_integrations_jira_issue_path(@project, params[:id], format: :json),
         issues_list_path: project_integrations_jira_issues_path(@project)
+      }
+    end
+
+    private
+
+    def serialize_project(project)
+      {
+        id: project.id,
+        name: project.name
       }
     end
   end
