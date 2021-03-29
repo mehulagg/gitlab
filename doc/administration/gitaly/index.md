@@ -94,8 +94,7 @@ The availability objectives for Gitaly clusters are:
   circumstances.
 
 - **Recovery Time Objective (RTO):** Less than 10 seconds.
-
-  Outages are detected by a health checks run by each Praefect node every
+  Outages are detected by a health check run by each Praefect node every
   second. Failover requires ten consecutive failed health checks on each
   Praefect node.
 
@@ -116,7 +115,7 @@ for improvements including
 ### Overview
 
 Git storage is provided through the Gitaly service in GitLab, and is essential
-to correct proper operation of the GitLab application. When the number of
+to the operation of the GitLab application. When the number of
 users, repositories, and activity grows, it is important to scale Gitaly
 appropriately by:
 
