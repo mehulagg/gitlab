@@ -329,7 +329,7 @@ export default {
       icon="pencil"
       size="small"
       category="tertiary"
-      class="note-action-button js-note-edit btn btn-transparent"
+      class="note-action-button js-note-edit btn"
       data-qa-selector="note_edit_button"
       @click="onEdit"
     />
@@ -340,7 +340,7 @@ export default {
       size="small"
       icon="remove"
       category="tertiary"
-      class="note-action-button js-note-delete btn btn-transparent"
+      class="note-action-button js-note-delete btn"
       @click="onDelete"
     />
     <div v-else-if="shouldShowActionsDropdown" class="dropdown more-actions">
@@ -350,7 +350,7 @@ export default {
         icon="ellipsis_v"
         size="small"
         category="tertiary"
-        class="note-action-button more-actions-toggle btn btn-transparent"
+        class="note-action-button more-actions-toggle btn"
         data-toggle="dropdown"
         @click="closeTooltip"
       />

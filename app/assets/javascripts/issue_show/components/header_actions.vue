@@ -26,7 +26,7 @@ export default {
   },
   actionPrimary: {
     text: __('Yes, close issue'),
-    attributes: [{ variant: 'warning' }],
+    attributes: [{ variant: 'default' }],
   },
   i18n: {
     promoteErrorMessage: __(
@@ -87,9 +87,6 @@ export default {
     },
     qaSelector() {
       return this.isClosed ? 'reopen_issue_button' : 'close_issue_button';
-    },
-    buttonVariant() {
-      return this.isClosed ? 'default' : 'warning';
     },
     dropdownText() {
       return sprintf(__('%{issueType} actions'), {
