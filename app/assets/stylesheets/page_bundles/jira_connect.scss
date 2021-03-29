@@ -98,3 +98,14 @@ svg {
     }
   }
 }
+
+// Modal
+.groups-list-nav {
+  .nav-link {
+    &:active,
+    &:focus,
+    &:focus:active {
+      @include gl-inset-border-b-2-theme-indigo-500;
+    }
+  }
+}

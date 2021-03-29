@@ -64,7 +64,7 @@ export default {
       {{ errorMessage }}
     </gl-alert>
 
-    <gl-tabs>
+    <gl-tabs nav-class="groups-list-nav">
       <gl-tab :title="__('Groups and subgroups')" class="gl-pt-3">
         <gl-loading-icon v-if="isLoading" size="md" />
         <div v-else-if="groups.length === 0" class="gl-text-center">
