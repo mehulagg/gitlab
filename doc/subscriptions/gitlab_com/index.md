@@ -7,7 +7,7 @@ type: index, reference
 
 # GitLab SaaS subscription **(PREMIUM SAAS)**
 
-GitLab SaaS is GitLab Inc.'s software-as-a-service offering. You don't need to
+GitLab SaaS is the GitLab software-as-a-service offering. You don't need to
 install anything to use GitLab SaaS, you only need to
 [sign up](https://gitlab.com/users/sign_up) and start using GitLab straight away.
 
@@ -15,9 +15,9 @@ This page reviews the details of your GitLab SaaS subscription.
 
 ## Choose a GitLab SaaS tier
 
-Pricing is [tier-based](https://about.gitlab.com/pricing/), allowing you to choose
-the features which fit your budget. For information on what features are available
-at each tier, see the
+Pricing is [tier-based](https://about.gitlab.com/pricing/), so you can choose
+the features that fit your budget. For information on the features available
+for each tier, see the
 [GitLab SaaS feature comparison](https://about.gitlab.com/pricing/gitlab-com/feature-comparison/).
 
 ## Choose the number of users
@@ -161,7 +161,7 @@ You can adjust the number of users before renewing your GitLab SaaS subscription
 
 - To renew for more users than are currently included in your GitLab SaaS plan, [add users to your subscription](#add-users-to-your-subscription).
 - To renew for fewer users than are currently included in your GitLab SaaS plan,
-either [disable](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user) or [block](../../user/admin_area/blocking_unblocking_users.md#blocking-a-user) the user accounts you no longer need.
+[remove](#remove-billable-user) the user accounts you no longer need.
 
 For details on upgrading your subscription tier, see
 [Upgrade your GitLab SaaS subscription tier](#upgrade-your-gitlab-saas-subscription-tier).

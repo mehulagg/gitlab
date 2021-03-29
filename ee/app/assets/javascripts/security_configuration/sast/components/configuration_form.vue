@@ -156,6 +156,7 @@ export default {
       v-if="shouldRenderAnalyzersSection"
       class="gl-mb-5"
       data-testid="analyzers-section"
+      data-qa-selector="analyzer_settings_content"
     >
       <template #heading>
         {{ $options.i18n.analyzersHeading }}
@@ -208,6 +209,7 @@ export default {
         type="submit"
         variant="success"
         category="primary"
+        data-qa-selector="submit_button"
         >{{ $options.i18n.submitButton }}</gl-button
       >
 

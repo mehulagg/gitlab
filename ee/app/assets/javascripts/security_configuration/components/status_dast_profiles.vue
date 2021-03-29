@@ -2,7 +2,6 @@
 import { s__ } from '~/locale';
 
 export default {
-  inheritAttrs: false,
   i18n: {
     availableForOnDemand: s__('SecurityConfiguration|Available for on-demand DAST'),
   },

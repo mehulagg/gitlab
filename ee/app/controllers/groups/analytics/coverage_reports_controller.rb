@@ -3,7 +3,7 @@
 class Groups::Analytics::CoverageReportsController < Groups::Analytics::ApplicationController
   feature_category :code_testing
 
-  COVERAGE_PARAM = 'coverage'.freeze
+  COVERAGE_PARAM = 'coverage'
 
   before_action :load_group
   before_action -> { check_feature_availability!(:group_coverage_reports) }

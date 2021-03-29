@@ -23,11 +23,11 @@ const URL_HOST = 'https://localhost/';
 const helpPagePath = '/application_security/dast/index#on-demand-scans';
 const projectPath = 'group/project';
 const defaultBranch = 'master';
-const profilesLibraryPath = '/security/configuration/dast_profiles';
-const scannerProfilesLibraryPath = '/security/configuration/dast_profiles#scanner-profiles';
-const siteProfilesLibraryPath = '/security/configuration/dast_profiles#site-profiles';
-const newScannerProfilePath = '/security/configuration/dast_profiles/dast_scanner_profile/new';
-const newSiteProfilePath = `/${projectPath}/-/security/configuration/dast_profiles`;
+const profilesLibraryPath = '/security/configuration/dast_scans';
+const scannerProfilesLibraryPath = '/security/configuration/dast_scans#scanner-profiles';
+const siteProfilesLibraryPath = '/security/configuration/dast_scans#site-profiles';
+const newScannerProfilePath = '/security/configuration/dast_scans/dast_scanner_profile/new';
+const newSiteProfilePath = `/${projectPath}/-/security/configuration/dast_scans`;
 
 const defaultProps = {
   helpPagePath,
@@ -56,7 +56,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
 }));
 
-const LOCAL_STORAGE_KEY = 'on-demand-scans-new-form';
+const LOCAL_STORAGE_KEY = 'group/project/on-demand-scans-new-form';
 
 describe('OnDemandScansForm', () => {
   let localVue;
@@ -268,6 +268,7 @@ describe('OnDemandScansForm', () => {
             name: 'My daily scan',
             selectedScannerProfileId: 'gid://gitlab/DastScannerProfile/1',
             selectedSiteProfileId: 'gid://gitlab/DastSiteProfile/1',
+            selectedBranch: 'some-other-branch',
           }),
         ],
       ]);
@@ -626,6 +627,26 @@ describe('OnDemandScansForm', () => {
 
       expect(findScannerProfilesSelector().attributes('value')).toBe(scannerProfile.id);
       expect(findSiteProfilesSelector().attributes('value')).toBe(siteProfile.id);
+    });
+  });
+
+  describe('when no repository exists', () => {
+    beforeEach(() => {
+      mountShallowSubject({
+        propsData: {
+          /**
+           * The assumption here is that, if a default branch is not defined, then the project
+           * does not have a repository.
+           */
+          defaultBranch: '',
+        },
+      });
+    });
+
+    it('shows an error message', () => {
+      expect(subject.text()).toContain(
+        'You must create a repository within your project to run an on-demand scan.',
+      );
     });
   });
 

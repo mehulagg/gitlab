@@ -6,6 +6,7 @@ module Security
 
     before_action do
       push_frontend_feature_flag(:custom_security_scanners, current_user)
+      push_frontend_feature_flag(:vulnerability_management_survey, type: :ops, default_enabled: :yaml)
     end
   end
 end

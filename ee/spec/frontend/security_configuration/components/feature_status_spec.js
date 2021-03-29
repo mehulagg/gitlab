@@ -17,7 +17,7 @@ const props = {
 };
 
 const attrs = {
-  'data-foo': 'bar',
+  'data-qa-selector': 'foo',
 };
 
 describe('FeatureStatus component', () => {
@@ -29,6 +29,17 @@ describe('FeatureStatus component', () => {
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  describe('always', () => {
+    beforeEach(() => {
+      const [feature] = generateFeatures(1);
+      createComponent({ attrs, propsData: { feature, ...props } });
+    });
+
+    it('passes through attributes to the expected component', () => {
+      expect(wrapper.attributes()).toMatchObject(attrs);
+    });
   });
 
   describe.each`
@@ -43,10 +54,7 @@ describe('FeatureStatus component', () => {
     beforeEach(() => {
       [feature] = generateFeatures(1, { type });
 
-      createComponent({
-        propsData: { feature, ...props },
-        attrs,
-      });
+      createComponent({ propsData: { feature, ...props } });
 
       component = wrapper.findComponent(expectedComponent);
     });

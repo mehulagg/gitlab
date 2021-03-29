@@ -26,7 +26,7 @@ RSpec.describe 'User sees Security Configuration table', :js do
         within_sast_row do
           expect(page).to have_text('SAST')
           expect(page).to have_text('Not enabled')
-          expect(page).to have_css('[data-testid="enableButton"]')
+          expect(page).to have_css('[data-testid="enable-button"]')
         end
       end
     end
@@ -43,7 +43,7 @@ RSpec.describe 'User sees Security Configuration table', :js do
         within_sast_row do
           expect(page).to have_text('SAST')
           expect(page).to have_text('Enabled')
-          expect(page).to have_css('[data-testid="configureButton"]')
+          expect(page).to have_css('[data-testid="configure-button"]')
         end
       end
     end

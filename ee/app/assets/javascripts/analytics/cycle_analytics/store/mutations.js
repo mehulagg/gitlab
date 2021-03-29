@@ -19,11 +19,11 @@ export default {
   [types.REQUEST_VALUE_STREAM_DATA](state) {
     state.isLoading = true;
   },
-  [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state) {
+  [types.RECEIVE_VALUE_STREAM_DATA_SUCCESS](state) {
     state.errorCode = null;
     state.isLoading = false;
   },
-  [types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state, errCode) {
+  [types.RECEIVE_VALUE_STREAM_DATA_ERROR](state, errCode) {
     state.errorCode = errCode;
     state.isLoading = false;
   },

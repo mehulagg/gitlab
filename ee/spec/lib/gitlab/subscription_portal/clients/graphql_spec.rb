@@ -182,4 +182,66 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
       end
     end
   end
+
+  describe '#subscription_last_term' do
+    let(:query) do
+      <<~GQL
+        query($namespaceId: ID!) {
+          subscription(namespaceId: $namespaceId) {
+            lastTerm
+          }
+        }
+      GQL
+    end
+
+    it 'returns success' do
+      expected_args = {
+        query: query,
+        variables: {
+          namespaceId: 'namespace-id'
+        }
+      }
+
+      expected_response = {
+        success: true,
+        data: {
+          "data" => {
+            "subscription" => {
+              "lastTerm" => true
+            }
+          }
+        }
+      }
+
+      expect(client).to receive(:execute_graphql_query).with(expected_args).and_return(expected_response)
+
+      result = client.subscription_last_term('namespace-id')
+
+      expect(result).to eq({ success: true, last_term: true })
+    end
+
+    it 'returns failure' do
+      error = "some error"
+      expect(client).to receive(:execute_graphql_query).and_return(
+        {
+          success: false,
+          data: {
+            errors: error
+          }
+        }
+      )
+
+      result = client.subscription_last_term('failing-namespace-id')
+
+      expect(result).to eq({ success: false, errors: error })
+    end
+
+    context 'with no namespace_id' do
+      it 'returns failure' do
+        expect(client).not_to receive(:execute_graphql_query)
+
+        expect(client.subscription_last_term(nil)).to eq({ success: false, errors: 'Must provide a namespace ID' })
+      end
+    end
+  end
 end

@@ -73,7 +73,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
 
     describe 'edit_path field' do
       it 'is the relative path to edit the dast_site_profile' do
-        path = "/#{project.full_path}/-/security/configuration/dast_profiles/dast_site_profiles/#{dast_site_profile.id}/edit"
+        path = "/#{project.full_path}/-/security/configuration/dast_scans/dast_site_profiles/#{dast_site_profile.id}/edit"
 
         expect(first_dast_site_profile['editPath']).to eq(path)
       end

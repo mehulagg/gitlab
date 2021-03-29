@@ -15,7 +15,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 const projectFullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/security/configuration/dast_profiles`;
+const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/security/configuration/dast_scans`;
 const onDemandScansPath = `${TEST_HOST}/${projectFullPath}/-/on_demand_scans`;
 const defaultProfile = scannerProfiles[0];
 

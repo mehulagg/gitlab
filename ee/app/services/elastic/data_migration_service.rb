@@ -25,6 +25,10 @@ module Elastic
         migrations.find { |m| m.version == version }
       end
 
+      def find_by_name(name)
+        migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+      end
+
       def drop_migration_has_finished_cache!(migration)
         Rails.cache.delete cache_key(:migration_has_finished, migration.name_for_key)
       end
@@ -36,7 +40,7 @@ module Elastic
       end
 
       def migration_has_finished_uncached?(name)
-        migration = migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+        migration = find_by_name(name)
 
         !!migration&.load_from_index&.dig('_source', 'completed')
       end

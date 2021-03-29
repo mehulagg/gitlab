@@ -48,16 +48,38 @@ RSpec.describe API::EpicIssues do
         let!(:epic_issue1) { create(:epic_issue, epic: epic, issue: issues[0]) }
         let!(:epic_issue2) { create(:epic_issue, epic: epic, issue: issues[1]) }
 
-        before do
-          get api(url, user)
+        def perform_request(params = {})
+          get api(url, user), params: params
         end
 
-        it 'returns 200 status' do
+        it 'responds 200 and matches the response schema' do
+          perform_request
+
           expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to match_response_schema('public_api/v4/epic_issues', dir: 'ee')
+          expect(response.parsed_body.size).to eq(2)
         end
 
-        it 'matches the response schema' do
+        it 'accepts pagination params' do
+          perform_request({ per_page: 1 })
+
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('public_api/v4/epic_issues', dir: 'ee')
+          expect(response.parsed_body.size).to eq(1)
+        end
+
+        context 'returns multiple issues without performing N + 1' do
+          it 'returns multiple issues without performing N + 1' do
+            perform_request
+
+            control_count = ActiveRecord::QueryRecorder.new { perform_request }.count
+
+            issue = create(:issue, project: project)
+            create(:epic_issue, epic: epic, issue: issue)
+
+            # Existing N + 1 for calculating subscribed? field: https://gitlab.com/gitlab-org/gitlab/-/issues/325898
+            expect { perform_request }.not_to exceed_query_limit(control_count + 2)
+          end
         end
       end
     end

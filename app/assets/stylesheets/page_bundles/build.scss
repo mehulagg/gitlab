@@ -86,18 +86,6 @@
     padding: 10px 0 9px;
   }
 
-  .header-action-buttons {
-    display: flex;
-
-    @include media-breakpoint-down(xs) {
-      .sidebar-toggle-btn {
-        margin-top: 0;
-        margin-left: 10px;
-        max-height: 34px;
-      }
-    }
-  }
-
   .header-content {
     a {
       color: $gl-text-color;
@@ -230,10 +218,6 @@
         background-color: var(--gray-50, $gray-50);
       }
     }
-  }
-
-  .link-commit {
-    color: var(--blue-600, $blue-600);
   }
 }
 

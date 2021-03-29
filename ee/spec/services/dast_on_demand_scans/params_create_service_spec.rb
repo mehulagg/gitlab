@@ -17,7 +17,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
 
       it 'responds with error message', :aggregate_failures do
         expect(subject).not_to be_success
-        expect(subject.message).to eq('Site Profile was not provided')
+        expect(subject.message).to eq('Dast site profile was not provided')
       end
     end
 
@@ -39,8 +39,12 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
 
         it 'returns prepared scanner params in the payload' do
           expect(subject.payload).to eq(
-            branch: 'master',
-            target_url: dast_site_profile.dast_site.url
+            branch: project.default_branch,
+            target_url: dast_site_profile.dast_site.url,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
+            auth_username_field: dast_site_profile.auth_username_field,
+            auth_password_field: dast_site_profile.auth_password_field,
+            auth_username: dast_site_profile.auth_username
           )
         end
       end
@@ -51,11 +55,15 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
         it 'returns prepared scanner params in the payload' do
           expect(subject.payload).to eq(
             branch: project.default_branch,
+            target_url: dast_site_profile.dast_site.url,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
+            auth_username_field: dast_site_profile.auth_username_field,
+            auth_password_field: dast_site_profile.auth_password_field,
+            auth_username: dast_site_profile.auth_username,
             full_scan_enabled: false,
             show_debug_messages: false,
             spider_timeout: nil,
             target_timeout: nil,
-            target_url: dast_site_profile.dast_site.url,
             use_ajax_spider: false
           )
         end

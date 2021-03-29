@@ -1,0 +1,258 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PathNavigation displays correctly loading is false matches the snapshot 1`] = `
+<div
+  class="gl-path-nav"
+  data-testid="gl-path-nav"
+  style="--path-bg-color: white;"
+>
+  <span
+    class="gl-path-fade gl-path-fade-left"
+    style="display: none;"
+  >
+    <button
+      aria-label="Scroll left"
+      class="gl-clear-icon-button"
+    >
+      <svg
+        aria-hidden="true"
+        class="gl-icon s32"
+        data-testid="chevron-left-icon"
+      >
+        <use
+          href="#chevron-left"
+        />
+      </svg>
+    </button>
+  </span>
+   
+  <ul
+    class="gl-path-nav-list"
+  >
+    <li
+      class="gl-path-nav-list-item"
+      id="path-6-item-0"
+    >
+      <button
+        class="gl-path-button gl-path-active-item-indigo"
+      >
+        <!---->
+        
+        Issue
+        <!---->
+      </button>
+       
+      <div
+        class="gl-popover"
+        data-testid="stage-item-popover"
+      >
+         
+        <div
+          class="gl-display-table"
+        >
+          <div
+            class="gl-display-table-row"
+          >
+            <div
+              class="gl-display-table-cell gl-pr-4 gl-pb-4"
+            >
+              
+            Start
+          
+            </div>
+             
+            <div
+              class="gl-display-table-cell gl-pb-4 stage-event-description"
+            >
+              <p
+                data-sourcepos="1:1-1:13"
+                dir="auto"
+              >
+                Issue created
+              </p>
+            </div>
+          </div>
+           
+          <div
+            class="gl-display-table-row"
+          >
+            <div
+              class="gl-display-table-cell gl-pr-4"
+            >
+              Stop
+            </div>
+             
+            <div
+              class="gl-display-table-cell stage-event-description"
+            >
+              <p
+                data-sourcepos="1:1-1:71"
+                dir="auto"
+              >
+                Issue first associated with a milestone or issue first added to a board
+              </p>
+            </div>
+          </div>
+        </div>
+        Issue
+      </div>
+    </li>
+    <li
+      class="gl-path-nav-list-item"
+      id="path-6-item-1"
+    >
+      <button
+        class="gl-path-button"
+      >
+        <!---->
+        
+        Plan
+        <!---->
+      </button>
+       
+      <div
+        class="gl-popover"
+        data-testid="stage-item-popover"
+      >
+         
+        <div
+          class="gl-display-table"
+        >
+          <div
+            class="gl-display-table-row"
+          >
+            <div
+              class="gl-display-table-cell gl-pr-4 gl-pb-4"
+            >
+              
+            Start
+          
+            </div>
+             
+            <div
+              class="gl-display-table-cell gl-pb-4 stage-event-description"
+            >
+              <p
+                data-sourcepos="1:1-1:71"
+                dir="auto"
+              >
+                Issue first associated with a milestone or issue first added to a board
+              </p>
+            </div>
+          </div>
+           
+          <div
+            class="gl-display-table-row"
+          >
+            <div
+              class="gl-display-table-cell gl-pr-4"
+            >
+              Stop
+            </div>
+             
+            <div
+              class="gl-display-table-cell stage-event-description"
+            >
+              <p
+                data-sourcepos="1:1-1:33"
+                dir="auto"
+              >
+                Issue first mentioned in a commit
+              </p>
+            </div>
+          </div>
+        </div>
+        Plan
+      </div>
+    </li>
+    <li
+      class="gl-path-nav-list-item"
+      id="path-6-item-2"
+    >
+      <button
+        class="gl-path-button"
+      >
+        <!---->
+        
+        Code
+        <!---->
+      </button>
+       
+      <div
+        class="gl-popover"
+        data-testid="stage-item-popover"
+      >
+         
+        <div
+          class="gl-display-table"
+        >
+          <div
+            class="gl-display-table-row"
+          >
+            <div
+              class="gl-display-table-cell gl-pr-4 gl-pb-4"
+            >
+              
+            Start
+          
+            </div>
+             
+            <div
+              class="gl-display-table-cell gl-pb-4 stage-event-description"
+            >
+              <p
+                data-sourcepos="1:1-1:33"
+                dir="auto"
+              >
+                Issue first mentioned in a commit
+              </p>
+            </div>
+          </div>
+           
+          <div
+            class="gl-display-table-row"
+          >
+            <div
+              class="gl-display-table-cell gl-pr-4"
+            >
+              Stop
+            </div>
+             
+            <div
+              class="gl-display-table-cell stage-event-description"
+            >
+              <p
+                data-sourcepos="1:1-1:21"
+                dir="auto"
+              >
+                Merge request created
+              </p>
+            </div>
+          </div>
+        </div>
+        Code
+      </div>
+    </li>
+  </ul>
+   
+  <span
+    class="gl-path-fade gl-path-fade-right"
+    style="display: none;"
+  >
+    <button
+      aria-label="Scroll right"
+      class="gl-clear-icon-button"
+    >
+      <svg
+        aria-hidden="true"
+        class="gl-icon s32"
+        data-testid="chevron-right-icon"
+      >
+        <use
+          href="#chevron-right"
+        />
+      </svg>
+    </button>
+  </span>
+</div>
+`;

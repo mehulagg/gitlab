@@ -14,7 +14,6 @@ const scannerComponentMap = {
 };
 
 export default {
-  inheritAttrs: false,
   props: propsUnion([StatusGeneric, ...Object.values(scannerComponentMap)]),
   computed: {
     statusComponent() {

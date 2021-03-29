@@ -55,6 +55,24 @@ module Gitlab
           @ignore_writes = false
         end
 
+        # Indicate that all the SQL statements from anywhere inside this block
+        # should use a replica. This is a weak enforcement. The queries
+        # prioritize using a primary over a replica in those cases:
+        # - If the queries are about to write
+        # - The current session already performed writes
+        # - It prefers to use primary, aka, use_primary or use_primary! were called
+        def use_replica_if_possible(&blk)
+          used_replica = @use_replica
+          @use_replica = true
+          yield
+        ensure
+          @use_replica = used_replica
+        end
+
+        def use_replica?
+          @use_replica == true && !use_primary? && !performed_write?
+        end
+
         def write!
           @performed_write = true
 

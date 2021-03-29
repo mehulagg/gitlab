@@ -1,0 +1,5 @@
+query getNamespaces {
+  namespaces @client {
+    id
+  }
+}

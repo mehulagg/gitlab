@@ -89,11 +89,12 @@ export default {
         :gitlab-ci-present="gitlabCiPresent"
         :gitlab-ci-history-path="gitlabCiHistoryPath"
         :auto-devops-enabled="autoDevopsEnabled"
+        :data-qa-selector="`${item.type}_status`"
       />
     </template>
 
     <template #cell(manage)="{ item }">
-      <manage-feature :feature="item" :auto-devops-enabled="autoDevopsEnabled" />
+      <manage-feature :feature="item" />
     </template>
   </gl-table>
 </template>

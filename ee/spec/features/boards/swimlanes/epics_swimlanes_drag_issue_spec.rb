@@ -124,6 +124,8 @@ RSpec.describe 'epics swimlanes', :js do
     page.within('.board-swimlanes-toggle-wrapper') do
       page.find('.dropdown-toggle').click
       page.find('.dropdown-item', text: 'Epic').click
+
+      wait_for_requests
     end
   end
 

@@ -115,14 +115,14 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
 export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_VALUE_STREAM_DATA);
 
 export const receiveCycleAnalyticsDataSuccess = ({ commit, dispatch }) => {
-  commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS);
+  commit(types.RECEIVE_VALUE_STREAM_DATA_SUCCESS);
   dispatch('typeOfWork/fetchTopRankedGroupLabels');
 };
 
 export const receiveCycleAnalyticsDataError = ({ commit }, { response = {} }) => {
   const { status = httpStatus.INTERNAL_SERVER_ERROR } = response;
 
-  commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR, status);
+  commit(types.RECEIVE_VALUE_STREAM_DATA_ERROR, status);
   if (status !== httpStatus.FORBIDDEN) {
     createFlash(__('There was an error while fetching value stream analytics data.'));
   }

@@ -1,17 +1,15 @@
 <script>
-import { GlButton, GlForm, GlFormGroup, GlFormCheckbox, GlIcon, GlLink } from '@gitlab/ui';
+import { GlButton, GlForm, GlFormGroup } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import { __ } from '~/locale';
+import ApprovalSettingsCheckbox from './approval_settings_checkbox.vue';
 
 export default {
   components: {
+    ApprovalSettingsCheckbox,
     GlButton,
     GlForm,
     GlFormGroup,
-    GlFormCheckbox,
-    GlIcon,
-    GlLink,
   },
   props: {
     approvalSettingsPath: {
@@ -35,17 +33,14 @@ export default {
     },
   },
   links: {
-    preventAuthorApprovalDocsPath: helpPagePath(
-      'user/project/merge_requests/merge_request_approvals',
-      {
-        anchor: 'allowing-merge-request-authors-to-approve-their-own-merge-requests',
-      },
-    ),
+    preventAuthorApprovalDocsAnchor:
+      'allowing-merge-request-authors-to-approve-their-own-merge-requests',
+    requireUserPasswordDocsAnchor: 'require-authentication-when-approving-a-merge-request',
   },
   i18n: {
     authorApprovalLabel: __('Prevent MR approvals by the author.'),
+    requireUserPasswordLabel: __('Require user password for approvals.'),
     saveChanges: __('Save changes'),
-    helpLabel: __('Help'),
   },
 };
 </script>
@@ -53,15 +48,18 @@ export default {
 <template>
   <gl-form @submit.prevent="onSubmit">
     <gl-form-group>
-      <gl-form-checkbox
+      <approval-settings-checkbox
         v-model="settings.preventAuthorApproval"
+        :label="$options.i18n.authorApprovalLabel"
+        :anchor="$options.links.preventAuthorApprovalDocsAnchor"
         data-testid="prevent-author-approval"
-      >
-        {{ $options.i18n.authorApprovalLabel }}
-        <gl-link :href="$options.links.preventAuthorApprovalDocsPath" target="_blank">
-          <gl-icon name="question-o" :aria-label="$options.i18n.helpLabel" :size="16"
-        /></gl-link>
-      </gl-form-checkbox>
+      />
+      <approval-settings-checkbox
+        v-model="settings.requireUserPassword"
+        :label="$options.i18n.requireUserPasswordLabel"
+        :anchor="$options.links.requireUserPasswordDocsAnchor"
+        data-testid="require-user-password"
+      />
     </gl-form-group>
     <gl-button type="submit" variant="success" category="primary" :disabled="isLoading">
       {{ $options.i18n.saveChanges }}

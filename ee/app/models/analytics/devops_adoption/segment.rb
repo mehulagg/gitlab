@@ -13,12 +13,5 @@ class Analytics::DevopsAdoption::Segment < ApplicationRecord
 
   scope :ordered_by_name, -> { includes(:namespace).order('"namespaces"."name" ASC') }
   scope :for_namespaces, -> (namespaces) { where(namespace_id: namespaces) }
-  scope :for_parent, -> (namespace) {
-    if Feature.enabled?(:recursive_namespace_lookup_as_inner_join, namespace)
-      join_sql = namespace.self_and_descendants.to_sql
-      joins("INNER JOIN (#{join_sql}) namespaces ON namespaces.id=#{self.arel_table.name}.namespace_id")
-    else
-      for_namespaces(namespace.self_and_descendants)
-    end
-  }
+  scope :for_parent, -> (namespace) { for_namespaces(namespace.self_and_descendants) }
 end

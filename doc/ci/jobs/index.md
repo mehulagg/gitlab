@@ -172,7 +172,7 @@ Add a variable name (key) and value here to override the value defined in
 [the UI or `.gitlab-ci.yml`](../variables/README.md#custom-cicd-variables),
 for a single run of the manual job.
 
-![Manual job variables](img/manual_job_variables.png)
+![Manual job variables](img/manual_job_variables_v13_10.png)
 
 ## Delay a job
 
@@ -200,10 +200,10 @@ the duration.
 
 In the following example:
 
-- Two sections are collapsed and can be expanded.
+- Three sections are collapsed and can be expanded.
 - Three sections are expanded and can be collapsed.
 
-![Collapsible sections](img/collapsible_log_v12_6.png)
+![Collapsible sections](img/collapsible_log_v13_10.png)
 
 ### Custom collapsible sections
 
@@ -226,6 +226,9 @@ job1:
     - echo 'this line should be hidden when collapsed'
     - echo -e "\e[0Ksection_end:`date +%s`:my_first_section\r\e[0K"
 ```
+
+Depending on the shell that your runner uses, for example if it is using ZSH, you may need to
+escape the special characters like so: `\\e` and `\\r`.
 
 In the example above:
 

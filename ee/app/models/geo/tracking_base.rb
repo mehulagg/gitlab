@@ -6,7 +6,7 @@ module Geo
   class TrackingBase < ApplicationRecord
     self.abstract_class = true
 
-    NOT_CONFIGURED_MSG     = 'Geo secondary database is not configured'.freeze
+    NOT_CONFIGURED_MSG     = 'Geo secondary database is not configured'
     SecondaryNotConfigured = Class.new(StandardError)
 
     if ::Gitlab::Geo.geo_database_configured?

@@ -14,7 +14,8 @@ module Gitlab
       ].freeze
 
       ES_SEPARATE_CLASSES = [
-        Issue
+        Issue,
+        Note
       ].freeze
 
       attr_reader :version, :client
@@ -260,7 +261,7 @@ module Gitlab
       end
 
       def get_settings(index_name: nil)
-        index = index_name || target_index_name
+        index = target_index_name(target: index_name)
         settings = client.indices.get_settings(index: index)
         settings.dig(index, 'settings', 'index')
       end

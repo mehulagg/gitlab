@@ -11,6 +11,7 @@ module EE
       alias_method :ee_authorize_admin_group!, :authorize_admin_group!
 
       before_action :ee_authorize_admin_group!, only: [:restore]
+      before_action :check_subscription!, only: [:destroy]
 
       feature_category :subgroups, [:restore]
     end
@@ -57,6 +58,14 @@ module EE
     end
 
     private
+
+    def check_subscription!
+      if group.paid?
+        redirect_to edit_group_path(group),
+          status: :found,
+          alert: _('This group is linked to a subscription')
+      end
+    end
 
     def group_params_ee
       [

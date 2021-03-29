@@ -11,8 +11,8 @@ module EE
 
     include AuditorUserHelper
 
-    DEFAULT_ROADMAP_LAYOUT = 'months'.freeze
-    DEFAULT_GROUP_VIEW = 'details'.freeze
+    DEFAULT_ROADMAP_LAYOUT = 'months'
+    DEFAULT_GROUP_VIEW = 'details'
     MAX_USERNAME_SUGGESTION_ATTEMPTS = 15
 
     prepended do

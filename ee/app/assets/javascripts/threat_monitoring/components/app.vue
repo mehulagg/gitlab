@@ -99,7 +99,7 @@ export default {
         >
           <gl-icon name="question" />
         </gl-link>
-        <gl-popover :target="() => $refs.helpLink" triggers="hover focus">
+        <gl-popover :target="() => $refs.helpLink">
           {{ $options.helpPopoverText }}
         </gl-popover>
       </h2>

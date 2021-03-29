@@ -26,6 +26,7 @@ RSpec.describe Namespace do
   it { is_expected.to delegate_method(:trial_days_remaining).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:trial_percentage_complete).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:upgradable?).to(:gitlab_subscription) }
+  it { is_expected.to delegate_method(:trial_extended_or_reactivated?).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:email).to(:owner).with_prefix.allow_nil }
   it { is_expected.to delegate_method(:additional_purchased_storage_size).to(:namespace_limit) }
   it { is_expected.to delegate_method(:additional_purchased_storage_size=).to(:namespace_limit).with_arguments(:args) }
@@ -768,6 +769,22 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#paid?' do
+    it 'returns true for a root namespace with a paid plan' do
+      create(:gitlab_subscription, :ultimate, namespace: namespace)
+
+      expect(namespace.paid?).to eq(true)
+    end
+
+    it 'returns false for a subgroup of a group with a paid plan' do
+      group = create(:group)
+      subgroup = create(:group, parent: group)
+      create(:gitlab_subscription, :ultimate, namespace: group)
+
+      expect(subgroup.paid?).to eq(false)
+    end
+  end
+
   describe '#actual_plan_name' do
     context 'when namespace does not have a subscription associated' do
       it 'returns default plan' do
@@ -1227,6 +1244,60 @@ RSpec.describe Namespace do
           end
         end
       end
+    end
+  end
+
+  describe '#can_extend?' do
+    subject { namespace.can_extend? }
+
+    where(:trial_active, :trial_extended_or_reactivated, :can_extend) do
+      false | false | false
+      false | true  | false
+      true  | false | true
+      true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(trial_active)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+      end
+
+      it { is_expected.to be can_extend }
+    end
+  end
+
+  describe '#can_reactivate?' do
+    subject { namespace.can_reactivate? }
+
+    where(:trial_active, :never_had_trial, :trial_extended_or_reactivated, :free_plan, :can_reactivate) do
+      false | false | false | false | false
+      false | false | false | true  | true
+      false | false | true  | false | false
+      false | false | true  | true  | false
+      false | true  | false | false | false
+      false | true  | false | true  | false
+      false | true  | true  | false | false
+      false | true  | true  | true  | false
+      true  | false | false | false | false
+      true  | false | false | true  | false
+      true  | false | true  | false | false
+      true  | false | true  | true  | false
+      true  | true  | false | false | false
+      true  | true  | false | true  | false
+      true  | true  | true  | false | false
+      true  | true  | true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(trial_active)
+        allow(namespace).to receive(:never_had_trial?).and_return(never_had_trial)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+        allow(namespace).to receive(:free_plan?).and_return(free_plan)
+      end
+
+      it { is_expected.to be can_reactivate }
     end
   end
 

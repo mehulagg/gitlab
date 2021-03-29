@@ -171,7 +171,7 @@ URL scheme: `https://<namespace>.example.io/<project_slug>`
 NGINX proxies all requests to the daemon. Pages daemon doesn't listen to the
 outside world.
 
-1. Place the certificate and key inside `/etc/gitlab/ssl`
+1. Place the `example.io` certificate and key inside `/etc/gitlab/ssl`.
 1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
@@ -189,6 +189,9 @@ then you'll need to also add the full paths as shown below:
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. If you're using [Pages Access Control](#access-control), update the redirect URI in the GitLab Pages
+[System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
+to use the HTTPS protocol.
 
 WARNING:
 Multiple wildcards for one instance is not supported. Only one wildcard per instance can be assigned.
@@ -303,7 +306,7 @@ In that case, the Pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
 world. Custom domains are supported, but no TLS.
 
-1. Edit `/etc/gitlab/gitlab.rb`:
+1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
    pages_external_url "http://example.io"
@@ -334,23 +337,35 @@ In that case, the Pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
 world. Custom domains and TLS are supported.
 
-1. Edit `/etc/gitlab/gitlab.rb`:
+1. Place the `example.io` certificate and key inside `/etc/gitlab/ssl`.
+1. In `/etc/gitlab/gitlab.rb` specify the following configuration:
 
    ```ruby
    pages_external_url "https://example.io"
    nginx['listen_addresses'] = ['192.0.2.1']
    pages_nginx['enable'] = false
-   gitlab_pages['cert'] = "/etc/gitlab/ssl/example.io.crt"
-   gitlab_pages['cert_key'] = "/etc/gitlab/ssl/example.io.key"
    gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80']
    gitlab_pages['external_https'] = ['192.0.2.2:443', '[2001:db8::2]:443']
+   # Redirect pages from HTTP to HTTPS
+   gitlab_pages['redirect_http'] = true
    ```
 
    where `192.0.2.1` is the primary IP address that GitLab is listening to and
    `192.0.2.2` and `2001:db8::2` are the secondary IPs where the GitLab Pages daemon
    listens on. If you don't have IPv6, you can omit the IPv6 address.
 
+1. If you haven't named your certificate and key `example.io.crt` and `example.io.key` respectively,
+then you'll need to also add the full paths as shown below:
+
+   ```ruby
+   gitlab_pages['cert'] = "/etc/gitlab/ssl/example.io.crt"
+   gitlab_pages['cert_key'] = "/etc/gitlab/ssl/example.io.key"
+   ```
+
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. If you're using [Pages Access Control](#access-control), update the redirect URI in the GitLab Pages
+[System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
+to use the HTTPS protocol.
 
 ### Custom domain verification
 
@@ -472,7 +487,7 @@ internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 ### Using a custom Certificate Authority (CA)
 
 When using certificates issued by a custom CA, [Access Control](../../user/project/pages/pages_access_control.md#gitlab-pages-access-control) and
-the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#browsing-artifacts)
+the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#download-job-artifacts)
 fails to work if the custom CA is not recognized.
 
 This usually results in this error:
@@ -631,6 +646,9 @@ The default is 100MB.
 ### Override maximum pages size per project or group **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16610) in GitLab 12.7.
+
+NOTE:
+Only GitLab admin users will be able to view and override the **Maximum size of Pages** setting.
 
 To override the global maximum pages size for a specific project:
 
@@ -1115,3 +1133,8 @@ gitlab_pages['env'] = {'TMPDIR' => '<new_tmp_path>'}
 
 Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
 `sudo gitlab-ctl restart`.
+
+### `The redirect URI included is not valid.` when using Pages Access Control
+
+Verify that the **Callback URL**/Redirect URI in the GitLab Pages [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
+is using the protocol (HTTP or HTTPS) that `pages_external_url` is configured to use.

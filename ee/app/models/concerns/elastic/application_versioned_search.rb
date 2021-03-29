@@ -93,7 +93,7 @@ module Elastic
       end
 
       def use_separate_indices?
-        Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.include?(self) && Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+        false
       end
 
       # Mark a dependant association as needing to be updated when a specific

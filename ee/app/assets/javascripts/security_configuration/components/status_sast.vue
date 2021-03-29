@@ -7,7 +7,6 @@ export default {
     GlLink,
     StatusGeneric,
   },
-  inheritAttrs: false,
   props: {
     feature: {
       type: Object,

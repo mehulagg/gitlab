@@ -327,7 +327,7 @@ describe('Value Stream Analytics actions', () => {
   describe('receiveCycleAnalyticsDataError', () => {
     beforeEach(() => {});
 
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a 403 response`, () => {
+    it(`commits the ${types.RECEIVE_VALUE_STREAM_DATA_ERROR} mutation on a 403 response`, () => {
       const response = { status: 403 };
       return testAction(
         actions.receiveCycleAnalyticsDataError,
@@ -335,7 +335,7 @@ describe('Value Stream Analytics actions', () => {
         state,
         [
           {
-            type: types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR,
+            type: types.RECEIVE_VALUE_STREAM_DATA_ERROR,
             payload: response.status,
           },
         ],
@@ -343,7 +343,7 @@ describe('Value Stream Analytics actions', () => {
       );
     });
 
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a non 403 error response`, () => {
+    it(`commits the ${types.RECEIVE_VALUE_STREAM_DATA_ERROR} mutation on a non 403 error response`, () => {
       const response = { status: 500 };
       return testAction(
         actions.receiveCycleAnalyticsDataError,
@@ -351,7 +351,7 @@ describe('Value Stream Analytics actions', () => {
         state,
         [
           {
-            type: types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR,
+            type: types.RECEIVE_VALUE_STREAM_DATA_ERROR,
             payload: response.status,
           },
         ],

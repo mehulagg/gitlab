@@ -78,7 +78,7 @@ export default {
     >
     <span
       v-if="hasToday"
-      :style="getIndicatorStyles($options.PRESET_TYPES.WEEKS)"
+      :style="getIndicatorStyles($options.PRESET_TYPES.WEEKS, timeframeItem)"
       class="current-day-indicator-header preset-weeks"
     ></span>
   </div>

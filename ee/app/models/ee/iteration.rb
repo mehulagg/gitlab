@@ -211,6 +211,7 @@ module EE
       ::Iterations::Cadence.create_with(
         title: cadence_title,
         start_date: start_date,
+        automatic: false,
         # set to 0, i.e. unspecified when creating default iterations as we do validate for presence.
         iterations_in_advance: 0,
         duration_in_weeks: 0

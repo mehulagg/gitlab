@@ -4,6 +4,7 @@ module EE
   module ProjectFeature
     extend ActiveSupport::Concern
 
+    # When updating this array, make sure to update rubocop/cop/gitlab/feature_available_usage.rb as well.
     EE_FEATURES = %i(requirements).freeze
     NOTES_PERMISSION_TRACKED_FIELDS = %w(
       issues_access_level

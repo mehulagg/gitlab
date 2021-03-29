@@ -4,7 +4,7 @@ require 'faker'
 
 module QA
   RSpec.describe 'Verify' do
-    describe 'Merge train', :runner, :requires_admin do
+    describe 'Merge train', :runner, :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/324122', type: :bug } do
       let(:file_name) { Faker::Lorem.word }
       let(:mr_title) { Faker::Lorem.sentence }
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(8)}" }
@@ -94,7 +94,7 @@ module QA
       end
 
       context 'when system cancels a merge request' do
-        it 'creates a TODO task', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/927' do
+        it 'creates a TODO task', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1741' do
           # Create a merge conflict
           Resource::Repository::Commit.fabricate_via_api! do |commit|
             commit.api_client = user_api_client

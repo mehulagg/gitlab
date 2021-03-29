@@ -52,10 +52,6 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
 
     subject(:segments) { described_class.for_parent(group) }
 
-    before do
-      stub_feature_flags(recursive_namespace_lookup_as_inner_join: true)
-    end
-
     it 'selects segments for given namespace only' do
       expect(segments).to match_array([segment1, segment2])
     end

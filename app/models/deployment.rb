@@ -45,6 +45,7 @@ class Deployment < ApplicationRecord
   scope :active, -> { where(status: %i[created running]) }
   scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
   scope :with_deployable, -> { joins('INNER JOIN ci_builds ON ci_builds.id = deployments.deployable_id').preload(:deployable) }
+  scope :with_api_entity_associations, -> { preload({ deployable: { runner: [], tags: [], user: [], job_artifacts_archive: [] } }) }
 
   scope :finished_after, ->(date) { where('finished_at >= ?', date) }
   scope :finished_before, ->(date) { where('finished_at < ?', date) }
@@ -243,19 +244,16 @@ class Deployment < ApplicationRecord
 
   def previous_deployment
     @previous_deployment ||=
-      project.deployments.joins(:environment)
-      .where(environments: { name: self.environment.name }, ref: self.ref)
-      .where.not(id: self.id)
+      self.class.for_environment(environment_id)
+      .where(ref: ref)
+      .where.not(id: id)
       .order(id: :desc)
       .take
   end
 
   def previous_environment_deployment
-    project
-      .deployments
+    self.class.for_environment(environment_id)
       .success
-      .joins(:environment)
-      .where(environments: { name: environment.name })
       .where.not(id: self.id)
       .order(id: :desc)
       .take

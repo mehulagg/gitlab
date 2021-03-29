@@ -10,7 +10,7 @@ RSpec.describe Resolvers::DastSiteProfileResolver do
   end
 
   let_it_be(:project) { create(:project) }
-  let_it_be(:developer) { create(:user, developer_projects: [project] ) }
+  let_it_be(:developer) { create(:user, developer_projects: [project]) }
   let_it_be(:dast_site_profile1) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_site_profile2) { create(:dast_site_profile, project: project) }
 

@@ -4,8 +4,10 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
+import { IID_FAILURE } from '~/pipelines/components/graph/constants';
 import PipelineGraph from '~/pipelines/components/graph/graph_component.vue';
 import PipelineGraphWrapper from '~/pipelines/components/graph/graph_component_wrapper.vue';
+import GraphViewSelector from '~/pipelines/components/graph/graph_view_selector.vue';
 import { mockPipelineResponse } from './mock_data';
 
 const defaultProvide = {
@@ -22,15 +24,19 @@ describe('Pipeline graph wrapper', () => {
   const getAlert = () => wrapper.find(GlAlert);
   const getLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const getGraph = () => wrapper.find(PipelineGraph);
+  const getViewSelector = () => wrapper.find(GraphViewSelector);
 
   const createComponent = ({
     apolloProvider,
     data = {},
-    provide = defaultProvide,
+    provide = {},
     mountFn = shallowMount,
   } = {}) => {
     wrapper = mountFn(PipelineGraphWrapper, {
-      provide,
+      provide: {
+        ...defaultProvide,
+        ...provide,
+      },
       apolloProvider,
       data() {
         return {
@@ -40,13 +46,14 @@ describe('Pipeline graph wrapper', () => {
     });
   };
 
-  const createComponentWithApollo = (
+  const createComponentWithApollo = ({
     getPipelineDetailsHandler = jest.fn().mockResolvedValue(mockPipelineResponse),
-  ) => {
+    provide = {},
+  } = {}) => {
     const requestHandlers = [[getPipelineDetails, getPipelineDetailsHandler]];
 
     const apolloProvider = createMockApollo(requestHandlers);
-    createComponent({ apolloProvider });
+    createComponent({ apolloProvider, provide });
   };
 
   afterEach(() => {
@@ -100,7 +107,9 @@ describe('Pipeline graph wrapper', () => {
 
   describe('when there is an error', () => {
     beforeEach(async () => {
-      createComponentWithApollo(jest.fn().mockRejectedValue(new Error('GraphQL error')));
+      createComponentWithApollo({
+        getPipelineDetailsHandler: jest.fn().mockRejectedValue(new Error('GraphQL error')),
+      });
       jest.runOnlyPendingTimers();
       await wrapper.vm.$nextTick();
     });
@@ -111,6 +120,31 @@ describe('Pipeline graph wrapper', () => {
 
     it('displays the alert', () => {
       expect(getAlert().exists()).toBe(true);
+    });
+
+    it('does not display the graph', () => {
+      expect(getGraph().exists()).toBe(false);
+    });
+  });
+
+  describe('when there is no pipeline iid available', () => {
+    beforeEach(async () => {
+      createComponentWithApollo({
+        provide: {
+          pipelineIid: '',
+        },
+      });
+      jest.runOnlyPendingTimers();
+      await wrapper.vm.$nextTick();
+    });
+
+    it('does not display the loading icon', () => {
+      expect(getLoadingIcon().exists()).toBe(false);
+    });
+
+    it('displays the no iid alert', () => {
+      expect(getAlert().exists()).toBe(true);
+      expect(getAlert().text()).toBe(wrapper.vm.$options.errorTexts[IID_FAILURE]);
     });
 
     it('does not display the graph', () => {
@@ -154,7 +188,7 @@ describe('Pipeline graph wrapper', () => {
         .mockResolvedValueOnce(mockPipelineResponse)
         .mockResolvedValueOnce(errorData);
 
-      createComponentWithApollo(failSucceedFail);
+      createComponentWithApollo({ getPipelineDetailsHandler: failSucceedFail });
       await wrapper.vm.$nextTick();
     });
 
@@ -172,6 +206,39 @@ describe('Pipeline graph wrapper', () => {
       await advanceApolloTimers();
       expect(getAlert().exists()).toBe(true);
       expect(getGraph().exists()).toBe(true);
+    });
+  });
+
+  describe('view dropdown', () => {
+    describe('when feature flag is off', () => {
+      beforeEach(async () => {
+        createComponentWithApollo();
+        jest.runOnlyPendingTimers();
+        await wrapper.vm.$nextTick();
+      });
+
+      it('does not appear', () => {
+        expect(getViewSelector().exists()).toBe(false);
+      });
+    });
+
+    describe('when feature flag is on', () => {
+      beforeEach(async () => {
+        createComponentWithApollo({
+          provide: {
+            glFeatures: {
+              pipelineGraphLayersView: true,
+            },
+          },
+        });
+
+        jest.runOnlyPendingTimers();
+        await wrapper.vm.$nextTick();
+      });
+
+      it('appears', () => {
+        expect(getViewSelector().exists()).toBe(true);
+      });
     });
   });
 });

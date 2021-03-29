@@ -65,6 +65,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
             updated_at: updated_at # Friday @ 6:00
           )
         end
+
         let_it_be(:active_period) { active_period_for_date_with_tz(updated_at, rotation) }
 
         around do |example|
@@ -171,6 +172,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
             starts_at: starts_at
           )
         end
+
         let_it_be(:active_period) { active_period_for_date_with_tz(starts_at, rotation) }
         let_it_be(:existing_shift) do
           create(

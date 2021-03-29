@@ -38,6 +38,16 @@ RSpec.describe 'Container-Scanning.gitlab-ci.yml' do
         end
       end
 
+      context 'with CS_MAJOR_VERSION greater than 3' do
+        before do
+          create(:ci_variable, project: project, key: 'CS_MAJOR_VERSION', value: '4')
+        end
+
+        it 'includes job' do
+          expect(build_names).to match_array(%w[container_scanning_new])
+        end
+      end
+
       context 'when CONTAINER_SCANNING_DISABLED=1' do
         before do
           create(:ci_variable, project: project, key: 'CONTAINER_SCANNING_DISABLED', value: '1')

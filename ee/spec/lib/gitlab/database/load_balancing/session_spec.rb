@@ -138,4 +138,144 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
       expect(instance).to be_using_primary
     end
   end
+
+  describe '#use_replica_if_possible' do
+    let(:instance) { described_class.new }
+
+    it 'uses replica during block' do
+      expect do |blk|
+        instance.use_replica_if_possible do
+          expect(instance.use_replica?).to eq(true)
+
+          # call yield probe
+          blk.to_proc.call
+        end
+      end.to yield_control
+
+      expect(instance.use_replica?).to eq(false)
+    end
+
+    it 'restores state after use' do
+      expect do |blk|
+        instance.use_replica_if_possible do
+          instance.use_replica_if_possible do
+            expect(instance.use_replica?).to eq(true)
+
+            # call yield probe
+            blk.to_proc.call
+          end
+
+          expect(instance.use_replica?).to eq(true)
+        end
+      end.to yield_control
+
+      expect(instance.use_replica?).to eq(false)
+    end
+
+    context 'when primary was used before' do
+      before do
+        instance.use_primary!
+      end
+
+      it 'uses primary during block' do
+        expect(instance.use_replica?).to eq(false)
+
+        expect do |blk|
+          instance.use_replica_if_possible do
+            expect(instance.use_replica?).to eq(false)
+
+            # call yield probe
+            blk.to_proc.call
+          end
+        end.to yield_control
+
+        expect(instance.use_replica?).to eq(false)
+      end
+    end
+
+    context 'when a write was performed before' do
+      before do
+        instance.write!
+      end
+
+      it 'uses primary during block' do
+        expect(instance.use_replica?).to eq(false)
+
+        expect do |blk|
+          instance.use_replica_if_possible do
+            expect(instance.use_replica?).to eq(false)
+
+            # call yield probe
+            blk.to_proc.call
+          end
+        end.to yield_control
+
+        expect(instance.use_replica?).to eq(false)
+      end
+    end
+
+    context 'when primary was used inside the block' do
+      it 'uses primary aterward' do
+        expect(instance.use_replica?).to eq(false)
+
+        instance.use_replica_if_possible do
+          expect(instance.use_replica?).to eq(true)
+
+          instance.use_primary!
+
+          expect(instance.use_replica?).to eq(false)
+        end
+
+        expect(instance.use_replica?).to eq(false)
+      end
+
+      it 'restores state after use' do
+        instance.use_replica_if_possible do
+          instance.use_replica_if_possible do
+            expect(instance.use_replica?).to eq(true)
+
+            instance.use_primary!
+
+            expect(instance.use_replica?).to eq(false)
+          end
+
+          expect(instance.use_replica?).to eq(false)
+        end
+
+        expect(instance.use_replica?).to eq(false)
+      end
+    end
+
+    context 'when a write was performed inside the block' do
+      it 'uses primary aterward' do
+        expect(instance.use_replica?).to eq(false)
+
+        instance.use_replica_if_possible do
+          expect(instance.use_replica?).to eq(true)
+
+          instance.write!
+
+          expect(instance.use_replica?).to eq(false)
+        end
+
+        expect(instance.use_replica?).to eq(false)
+      end
+
+      it 'restores state after use' do
+        instance.use_replica_if_possible do
+          instance.use_replica_if_possible do
+            expect(instance.use_replica?).to eq(true)
+
+            instance.write!
+
+            expect(instance.use_replica?).to eq(false)
+          end
+
+          expect(instance.use_replica?).to eq(false)
+        end
+
+        expect(instance.use_replica?).to eq(false)
+      end
+    end
+  end
 end

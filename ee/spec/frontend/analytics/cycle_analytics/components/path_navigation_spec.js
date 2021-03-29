@@ -56,6 +56,42 @@ describe('PathNavigation', () => {
         it('hides the gl-skeleton-loading component', () => {
           expect(wrapper.find(GlSkeletonLoading).exists()).toBe(false);
         });
+
+        it('matches the snapshot', () => {
+          expect(wrapper.element).toMatchSnapshot();
+        });
+
+        describe('popovers', () => {
+          const modifiedStages = [
+            ...transformedStagePathData.slice(0, 2),
+            {
+              ...transformedStagePathData[2],
+              startEventHtmlDescription: null,
+              endEventHtmlDescription: null,
+            },
+          ];
+
+          beforeEach(() => {
+            wrapper = createComponent({ stages: modifiedStages });
+          });
+
+          it('renders popovers only for stages with either a start event and/or and end event', () => {
+            expect(wrapper.findAll('[data-testid="stage-item-popover"]')).toHaveLength(2);
+          });
+
+          it('shows the sanitized start event description for the first stage item', () => {
+            const firsPpopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            const expectedStartEventDescription = 'Issue created';
+            expect(firsPpopover.text()).toContain(expectedStartEventDescription);
+          });
+
+          it('shows the sanitized end event description for the first stage item', () => {
+            const firsPpopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            const expectedStartEventDescription =
+              'Issue first associated with a milestone or issue first added to a board';
+            expect(firsPpopover.text()).toContain(expectedStartEventDescription);
+          });
+        });
       });
 
       describe('is true', () => {

@@ -8,7 +8,9 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
   let_it_be(:user_with_permissions) { create(:user) }
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be(:current_user) { user_with_permissions }
-  let_it_be(:starts_at) { Time.current.change(usec: 0) }
+
+  let(:execution_time) { DateTime.new(2021, 3, 1, 4, 5, 6) }
+  let(:starts_at) { DateTime.new(2021, 3, 1) }
 
   let(:participants) do
     [
@@ -40,7 +42,9 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       end
     end
 
-    subject(:execute) { service.execute }
+    subject(:execute) do
+      travel_to(execution_time) { service.execute }
+    end
 
     context 'when the current_user is anonymous' do
       let(:current_user) { nil }
@@ -159,6 +163,14 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
         it_behaves_like 'successfully creates rotation'
         it_behaves_like 'saved the active period times'
 
+        context 'when end active time is before start active time' do
+          let(:active_period_start) { '17:00' }
+          let(:active_period_end) { '08:00' }
+
+          it_behaves_like 'successfully creates rotation'
+          it_behaves_like 'saved the active period times'
+        end
+
         context 'when only active period end time is set' do
           let(:active_period_start) { nil }
 
@@ -169,13 +181,6 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
           let(:active_period_end) { nil }
 
           it_behaves_like 'error response', "Active period end can't be blank"
-        end
-
-        context 'when end active time is before start active time' do
-          let(:active_period_start) { '17:00' }
-          let(:active_period_end) { '08:00' }
-
-          it_behaves_like 'error response', "Active period end must be later than active period start"
         end
       end
 

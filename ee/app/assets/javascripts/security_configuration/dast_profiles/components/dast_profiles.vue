@@ -1,7 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { camelCase, kebabCase } from 'lodash';
 import { getLocationHash } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -45,17 +44,17 @@ export default {
     },
     tabIndex: {
       get() {
-        const activeTabIndex = Object.keys(this.profileSettings).indexOf(
-          camelCase(getLocationHash()),
+        const activeTabIndex = Object.values(this.profileSettings).findIndex(
+          ({ tabName }) => tabName === getLocationHash(),
         );
 
         return Math.max(0, activeTabIndex);
       },
       set(newTabIndex) {
-        const profileTypeName = Object.keys(this.profileSettings)[newTabIndex];
+        const { tabName } = Object.values(this.profileSettings)[newTabIndex];
 
-        if (profileTypeName) {
-          window.location.hash = kebabCase(profileTypeName);
+        if (tabName) {
+          window.location.hash = tabName;
         }
       },
     },

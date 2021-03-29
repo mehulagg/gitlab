@@ -53,7 +53,7 @@ class SamlProvider < ApplicationRecord
   class DefaultOptions
     include Gitlab::Routing
 
-    NAME_IDENTIFIER_FORMAT = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'.freeze
+    NAME_IDENTIFIER_FORMAT = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
 
     def initialize(group_path)
       @group_path = group_path

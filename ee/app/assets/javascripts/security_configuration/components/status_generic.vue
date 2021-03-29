@@ -2,7 +2,6 @@
 import { s__ } from '~/locale';
 
 export default {
-  inheritAttrs: false,
   props: {
     feature: {
       type: Object,

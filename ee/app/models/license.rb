@@ -8,7 +8,7 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
-  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
+  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
@@ -127,7 +127,6 @@ class License < ApplicationRecord
     scoped_labels
     smartcard_auth
     swimlanes
-    group_timelogs
     type_of_work_analytics
     minimal_access_role
     unprotection_restrictions

@@ -3,21 +3,27 @@
 // extends a valid Vue single file component.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
 import { mapGetters } from 'vuex';
+import { fullBoardId } from '~/boards/boards_util';
 import BoardFormFoss from '~/boards/components/board_form.vue';
+import { fullEpicBoardId } from '../boards_util';
 import createEpicBoardMutation from '../graphql/epic_board_create.mutation.graphql';
+import destroyEpicBoardMutation from '../graphql/epic_board_destroy.mutation.graphql';
+import updateEpicBoardMutation from '../graphql/epic_board_update.mutation.graphql';
 
 export default {
   extends: BoardFormFoss,
   computed: {
     ...mapGetters(['isEpicBoard']),
-    epicBoardCreateQuery() {
-      return createEpicBoardMutation;
+    currentEpicBoardMutation() {
+      return this.board.id ? updateEpicBoardMutation : createEpicBoardMutation;
     },
     mutationVariables() {
-      // TODO: Epic board scope will be added in a future iteration: https://gitlab.com/gitlab-org/gitlab/-/issues/231389
+      const { board } = this;
+
       return {
         ...this.baseMutationVariables,
-        ...(this.scopedIssueBoardFeatureEnabled && !this.isEpicBoard
+        ...(board.id && this.isEpicBoard && { id: fullEpicBoardId(board.id) }),
+        ...(this.scopedIssueBoardFeatureEnabled || this.isEpicBoard
           ? this.boardScopeMutationVariables
           : {}),
       };
@@ -27,9 +33,12 @@ export default {
     epicBoardCreateResponse(data) {
       return data.epicBoardCreate.epicBoard.webPath;
     },
+    epicBoardUpdateResponse(data) {
+      return data.epicBoardUpdate.epicBoard.webPath;
+    },
     async createOrUpdateBoard() {
       const response = await this.$apollo.mutate({
-        mutation: this.isEpicBoard ? this.epicBoardCreateQuery : this.currentMutation,
+        mutation: this.isEpicBoard ? this.currentEpicBoardMutation : this.currentMutation,
         variables: { input: this.mutationVariables },
       });
 
@@ -39,7 +48,17 @@ export default {
           : this.boardCreateResponse(response.data);
       }
 
-      return this.boardUpdateResponse(response.data);
+      return this.isEpicBoard
+        ? this.epicBoardUpdateResponse(response.data)
+        : this.boardUpdateResponse(response.data);
+    },
+    async deleteBoard() {
+      await this.$apollo.mutate({
+        mutation: this.isEpicBoard ? destroyEpicBoardMutation : this.deleteMutation,
+        variables: {
+          id: this.isEpicBoard ? fullEpicBoardId(this.board.id) : fullBoardId(this.board.id),
+        },
+      });
     },
   },
 };
