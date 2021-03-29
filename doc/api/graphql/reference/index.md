@@ -4167,6 +4167,7 @@ Represents a milestone.
 | `dueDate` | [`Time`](#time) | Timestamp of the milestone due date. |
 | `groupMilestone` | [`Boolean!`](#boolean) | Indicates if milestone is at group level. |
 | `id` | [`ID!`](#id) | ID of the milestone. |
+| `iid` | [`ID!`](#id) | Internal ID of the milestone. |
 | `projectMilestone` | [`Boolean!`](#boolean) | Indicates if milestone is at project level. |
 | `report` | [`TimeboxReport`](#timeboxreport) | Historically accurate report about the timebox. |
 | `startDate` | [`Time`](#time) | Timestamp of the milestone start date. |
