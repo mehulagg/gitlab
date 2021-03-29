@@ -17,7 +17,7 @@ module Subscribable
   def subscribed?(user, project = nil)
     return false unless user
 
-    if subscription = subscriptions.find_by(user: user, project: project)
+    if (subscription = subscriptions.find_by(user: user, project: project))
       subscription.subscribed
     else
       subscribed_without_subscriptions?(user, project)
@@ -27,7 +27,7 @@ module Subscribable
   def lazy_subscribed?(user, project = nil)
     return false unless user
 
-    if subscription = lazy_subscription(user, project)&.itself
+    if (subscription = lazy_subscription(user, project)&.itself)
       subscription.subscribed
     else
       subscribed_without_subscriptions?(user, project)
@@ -37,13 +37,15 @@ module Subscribable
   def lazy_subscription(user, project = nil)
     return unless user
 
-    BatchLoader.for(id).batch(key: self.class) do |ids, loader, args|
-      # handle project and group labels as well as issuable subscriptions
-      subscribable_type = args[:key].ancestors.include?(Label) ? 'Label' : self.class.name
-      subscriptions_by_id = Subscription.where(subscribable_id: ids, subscribable_type: subscribable_type, project: project, user: user).index_by(&:subscribable_id)
+    # handle project and group labels as well as issuable subscriptions
+    subscribable_type = self.class.ancestors.include?(Label) ? 'Label' : self.class.name
+    BatchLoader.for(id: id, subscribable_type: subscribable_type).batch do |items, loader|
+      ids = items.map { |i| i[:id] }
+      subscribable_types = items.map { |i| i[:subscribable_type] }.uniq
+      subscriptions = Subscription.where(subscribable_id: ids, subscribable_type: subscribable_types, project: project, user: user)
 
-      ids.each do |id|
-        loader.call(id, subscriptions_by_id[id])
+      subscriptions.each do |subscription|
+        loader.call({ id: subscription.subscribable_id, subscribable_type: subscription.subscribable_type }, subscription)
       end
     end
   end
