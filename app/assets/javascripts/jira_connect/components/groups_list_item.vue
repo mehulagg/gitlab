@@ -83,11 +83,12 @@ export default {
 
         <gl-button
           category="secondary"
-          variant="success"
+          variant="confirm"
           :loading="isLoading"
           @click.prevent="onClick"
-          >{{ __('Link') }}</gl-button
         >
+          {{ __('Link') }}
+        </gl-button>
       </div>
     </div>
   </li>
