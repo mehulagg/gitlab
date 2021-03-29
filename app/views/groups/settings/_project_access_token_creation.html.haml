@@ -1,0 +1,8 @@
+.form-group.gl-mb-3
+  .form-check
+    = f.check_box :resource_access_token_creation_allowed, checked: group.resource_access_token_creation_allowed?, class: 'form-check-input', data: { qa_selector: 'resource_access_token_creation_allowed_checkbox' }
+    = f.label :resource_access_token_creation_allowed, class: 'form-check-label' do
+      %span.gl-display-block= s_('GroupSettings|Project access tokens enabled')
+      - project_access_tokens_link = help_page_path('user/project/settings/project_access_tokens')
+      - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: project_access_tokens_link }
+      %span.text-muted= s_('GroupSettings|Projects in this group can use %{link_start}project access tokens%{link_end}.').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
