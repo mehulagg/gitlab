@@ -193,6 +193,18 @@ have to be taken here:
 The user can do either of these steps [in their
 profile](../../../user/profile/index.md#access-your-user-profile) or an administrator can do it.
 
+#### "Undefined method" and "projects limit" errors
+
+Errors such as `Undefined method provider for nil:nilclass`
+`Projects limit can't be blank` or
+`Projects limit is not a number`
+indicate that a limit or restriction is activate,
+but an associated field contains no data.
+Check your **Settings > General >  Account and limit ** or **Sign-up restrictions**
+pages, for example the **Default projects limit** or
+** Allowed domains for sign-ups** fields and
+ensure that a relevant value is configured.
+
 #### Debug LDAP user filter
 
 [`ldapsearch`](#ldapsearch) allows you to test your configured
