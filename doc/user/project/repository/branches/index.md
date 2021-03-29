@@ -19,7 +19,7 @@ After pushing your changes to a new branch, you can:
 - [Discuss](../../../discussions/index.md) your implementation with your team
 - Preview changes submitted to a new branch with [Review Apps](../../../../ci/review_apps/index.md).
 
-With [GitLab Starter](https://about.gitlab.com/pricing/), you can also request
+With [GitLab Free](https://about.gitlab.com/pricing/), you can also request
 [approval](../../merge_requests/merge_request_approvals.md) from your managers.
 
 For more information on managing branches using the GitLab UI, see:
