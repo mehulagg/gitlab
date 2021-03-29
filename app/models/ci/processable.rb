@@ -165,7 +165,9 @@ module Ci
     end
 
     def all_dependencies
-      dependencies.all
+      items = dependencies.all
+      preload_associations(items)
+      items
     end
 
     private
@@ -175,5 +177,11 @@ module Ci
         Ci::BuildDependencies.new(self)
       end
     end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def preload_associations(items)
+      ActiveRecord::Associations::Preloader.new.preload(items, :job_artifacts_archive)
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
   end
 end
