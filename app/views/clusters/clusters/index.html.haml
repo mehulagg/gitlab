@@ -14,6 +14,9 @@
         %li.nav-item{ role: 'presentation' }
           %a.nav-link{ href: "#agent-clusters-pane", id: "agent-clusters-tab", data: { toggle: 'tab' }, role: 'tab' }
             %span= s_('ClusterIntegration|GitLab Agent managed clusters')
+            - if display_gitlab_com_info?
+              %span.gl-display-inline-block.gl-ml-2{ title: s_('ClusterIntegration|GitLab Kubernetes Agent is now available for your project!'), data: { toggle: 'tooltip', container: 'body' } }
+                = sprite_icon('information-o', css_class: 'gl-text-blue-500 gl-hover-text-blue-800')
 
       .tab-content
         .tab-pane.active{ id: 'certificate-clusters-pane', role: 'tabpanel' }

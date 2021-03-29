@@ -9,6 +9,11 @@ module EE
       clusterable.is_a?(Project) && clusterable.feature_available?(:cluster_agents) && included_in_gitlab_com_rollout?(clusterable)
     end
 
+    override :display_gitlab_com_info?
+    def display_gitlab_com_info?
+      ::Gitlab.com?
+    end
+
     private
 
     def included_in_gitlab_com_rollout?(project)

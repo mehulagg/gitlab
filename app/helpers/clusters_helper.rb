@@ -16,6 +16,10 @@ module ClustersHelper
     false
   end
 
+  def display_gitlab_com_info?
+    false
+  end
+
   def js_cluster_agents_list_data(clusterable_project)
     {
       default_branch_name: clusterable_project.default_branch,
