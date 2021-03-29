@@ -24,6 +24,9 @@ class ProtectedEnvironment < ApplicationRecord
       .joins(:protected_environment).where(group: group)
   end
 
+  scope :for_project, -> (project) { where(project: project) }
+  scope :for_name, -> (name) { where(name: name) }
+
   def accessible_to?(user)
     deploy_access_levels
       .any? { |deploy_access_level| deploy_access_level.check_access(user) }

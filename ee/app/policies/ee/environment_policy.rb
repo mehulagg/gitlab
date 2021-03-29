@@ -21,7 +21,8 @@ module EE
       alias_method :environment, :subject
 
       def deployable_by_user?
-        environment.protected_deployable_by_user?(current_user)
+        ::Gitlab::Access::EnvironmentProtection
+          .new(user: user).has_access_to?(environment)
       end
     end
   end

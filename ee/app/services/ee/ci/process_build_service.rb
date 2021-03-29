@@ -16,11 +16,8 @@ module EE
       private
 
       def allowed_to_deploy?(build)
-        # We need to check if Protected Environments feature is available,
-        # as evaluating `build.expanded_environment_name` is expensive.
-        return true unless project.protected_environments_feature_available?
-
-        project.protected_environment_accessible_to?(build.expanded_environment_name, build.user)
+        ::Gitlab::Access::EnvironmentProtection
+          .new(user: build.user).has_access_to?(build.persisted_environment)
       end
     end
   end

@@ -62,11 +62,7 @@ module EE
     end
 
     def protected?
-      project.protected_environment_by_name(name).present?
-    end
-
-    def protected_deployable_by_user?(user)
-      project.protected_environment_accessible_to?(name, user)
+      ProtectedEnvironment.for_project(project_id).for_name(name).exist?
     end
   end
 end
