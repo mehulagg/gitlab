@@ -370,8 +370,8 @@ GitLab so it can use the new database.
 First, let's stop all of GitLab. Omnibus users can do so by running the
 following on their GitLab servers:
 
-```shell
 sudo gitlab-ctl stop unicorn
+sudo gitlab-ctl stop puma
 sudo gitlab-ctl stop sidekiq
 sudo gitlab-ctl stop mailroom
 ```
@@ -464,8 +464,7 @@ main
 
 Upload this script to the _target_ server and execute it as follows:
 
-```shell
-bash path/to/the/script/above.sh
+sudo bash path/to/the/script/above.sh
 ```
 
 This corrects the ownership of sequences and reset the next value for the
