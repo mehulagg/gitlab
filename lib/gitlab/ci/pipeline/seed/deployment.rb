@@ -7,6 +7,8 @@ module Gitlab
         class Deployment < Seed::Base
           attr_reader :job, :environment
 
+          AtomicInternalIdError = Class.new(RuntimeError)
+
           def initialize(job, environment)
             @job = job
             @environment = environment
@@ -34,6 +36,12 @@ module Gitlab
 
             # Allocate IID for deployments.
             # This operation must be outside of transactions of pipeline creations.
+            if ActiveRecord::Base.connection.transaction_open?
+              ex = AtomicInternalIdError.new('Deployment#ensure_project_iid! called from within transaction')
+              ex.set_backtrace(caller)
+              Gitlab::ErrorTracking.track_exception(ex, { project_id: job.project_id, job_id: job.id })
+            end
+
             deployment.ensure_project_iid!
 
             deployment

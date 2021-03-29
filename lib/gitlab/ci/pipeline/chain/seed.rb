@@ -8,10 +8,18 @@ module Gitlab
           include Chain::Helpers
           include Gitlab::Utils::StrongMemoize
 
+          AtomicInternalIdError = Class.new(RuntimeError)
+
           def perform!
             raise ArgumentError, 'missing YAML processor result' unless @command.yaml_processor_result
 
             # Allocate next IID. This operation must be outside of transactions of pipeline creations.
+            if ActiveRecord::Base.connection.transaction_open?
+              ex = AtomicInternalIdError.new('Ci::Pipeline#ensure_project_iid! called from within transaction')
+              ex.set_backtrace(caller)
+              Gitlab::ErrorTracking.track_exception(ex, { project_id: pipeline.project_id })
+            end
+
             pipeline.ensure_project_iid!
             pipeline.ensure_ci_ref!
 
