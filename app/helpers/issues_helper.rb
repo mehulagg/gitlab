@@ -71,6 +71,17 @@ module IssuesHelper
     end.to_h
   end
 
+  def awards_json_data(awardable, awards)
+    awards_sort(awards).map do |emoji, awards|
+      {
+        emoji: emoji,
+        count: awards.count,
+        has_awarded: current_user && awards.any? { |a| a.user_id == current_user.id },
+        title: award_user_list(awards, current_user)
+      }
+    end
+  end
+
   def link_to_discussions_to_resolve(merge_request, single_discussion = nil)
     link_text = [merge_request.to_reference]
     link_text << "(discussion #{single_discussion.first_note.id})" if single_discussion

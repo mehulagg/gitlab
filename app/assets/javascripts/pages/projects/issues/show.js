@@ -47,8 +47,15 @@ export default function initShowIssue() {
     new Issue(); // eslint-disable-line no-new
     new ShortcutsIssuable(); // eslint-disable-line no-new
     initIssuableSidebar();
-    loadAwardsHandler();
     initInviteMemberModal();
     initInviteMemberTrigger();
+
+    if (window.gon?.features?.improvedEmojiPicker) {
+      import('~/emoji/awards_app')
+        .then((m) => m.default())
+        .catch(() => {});
+    } else {
+      loadAwardsHandler();
+    }
   }
 }

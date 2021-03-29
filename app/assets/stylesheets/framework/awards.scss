@@ -150,6 +150,11 @@
     box-shadow: none;
     outline: 0;
 
+    &.gl-button {
+      background-color: $blue-50;
+      box-shadow: inset 0 0 0 1px $blue-200;
+    }
+
     .award-control-icon svg {
       fill: $blue-500;
     }
@@ -246,6 +251,11 @@
 
     path {
       fill: $award-emoji-positive-add-lines;
+    }
+
+    .vue-awards & {
+      left: 12px;
+      bottom: 8px;
     }
   }
 
