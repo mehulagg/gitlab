@@ -1,5 +1,5 @@
 <script>
-import { GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, n__, sprintf } from '~/locale';
 import userAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 
@@ -9,6 +9,7 @@ export default {
   },
   components: {
     userAvatarImage,
+    GlButton,
     GlIcon,
     GlLoadingIcon,
   },
@@ -118,9 +119,9 @@ export default {
       </div>
     </div>
     <div v-if="hasMoreParticipants" class="participants-more hide-collapsed">
-      <button type="button" class="btn-transparent btn-link" @click="toggleMoreParticipants">
+      <gl-button size="small" category="tertiary" @click="toggleMoreParticipants">
         {{ toggleLabel }}
-      </button>
+      </gl-button>
     </div>
   </div>
 </template>

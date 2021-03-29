@@ -620,29 +620,6 @@
   }
 }
 
-.participants-more,
-.user-list-more {
-  margin-left: 5px;
-
-  a,
-  .btn-link {
-    color: $gl-text-color-secondary;
-  }
-
-  .btn-link {
-    padding: 0;
-  }
-
-  .btn-link:hover {
-    @extend a:hover;
-    text-decoration: none;
-  }
-
-  .btn-link:focus {
-    text-decoration: none;
-  }
-}
-
 .issuable-status-box {
   align-self: stretch;
   display: flex;

@@ -84,9 +84,9 @@ export default {
       </div>
     </div>
     <div v-if="renderShowMoreSection" class="user-list-more gl-hover-text-blue-800">
-      <button
+      <gl-button
         type="button"
-        class="btn-link"
+        category="tertiary"
         data-qa-selector="more_assignees_link"
         @click="toggleShowLess"
       >
@@ -94,7 +94,7 @@ export default {
           {{ hiddenAssigneesLabel }}
         </template>
         <template v-else>{{ __('- show less') }}</template>
-      </button>
+      </gl-button>
     </div>
   </div>
 </template>
