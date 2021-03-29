@@ -100,18 +100,18 @@ module NotificationRecipients
       # Get project/group users with CUSTOM notification level
       # rubocop: disable CodeReuse/ActiveRecord
       def add_custom_notifications
-        user_ids = []
+        user_ids = Set.new
 
         # Users with a notification setting on group or project
-        user_ids += user_ids_notifiable_on(project, :custom)
-        user_ids += user_ids_notifiable_on(group, :custom)
+        user_ids.merge(user_ids_notifiable_on(project, :custom))
+        user_ids.merge(user_ids_notifiable_on(group, :custom))
 
         # Users with global level custom
-        user_ids_with_project_level_global = user_ids_notifiable_on(project, :global)
-        user_ids_with_group_level_global   = user_ids_notifiable_on(group, :global)
+        user_ids_with_project_level_global = user_ids_notifiable_on(project, :global).to_set
+        user_ids_with_group_level_global   = user_ids_notifiable_on(group, :global).to_set
 
-        global_users_ids = user_ids_with_project_level_global.concat(user_ids_with_group_level_global)
-        user_ids += user_ids_with_global_level_custom(global_users_ids, custom_action)
+        global_users_ids = user_ids_with_project_level_global.merge(user_ids_with_group_level_global)
+        user_ids.merge(user_ids_with_global_level_custom(global_users_ids, custom_action))
 
         add_recipients(user_scope.where(id: user_ids), :custom, nil)
       end
