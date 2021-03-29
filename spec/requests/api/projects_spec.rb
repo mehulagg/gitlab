@@ -1539,14 +1539,24 @@ RSpec.describe API::Projects do
     end
 
     shared_examples 'capped upload attachments' do
+      let(:file) { fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+
       it "limits the upload to 1 GB" do
         expect_next_instance_of(UploadService) do |instance|
           expect(instance).to receive(:override_max_attachment_size=).with(1.gigabyte).and_call_original
         end
 
-        post api("/projects/#{project.id}/uploads", user), params: { file: fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+        post api("/projects/#{project.id}/uploads", user), params: { file: file }
 
         expect(response).to have_gitlab_http_status(:created)
+      end
+
+      it "logs a warning if file exceeds attachment size" do
+        allow(Gitlab::CurrentSettings).to receive(:max_attachment_size).and_return(0)
+
+        expect(Gitlab::AppLogger).to receive(:info).with(hash_including(message: 'File exceeds maximum size')).and_call_original
+
+        post api("/projects/#{project.id}/uploads", user), params: { file: file }
       end
     end
 
