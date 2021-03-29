@@ -104,9 +104,6 @@ export default {
         ? setUrlParams({ commit_id: this.commit.prev_commit_id })
         : '';
     },
-    hasNeighborCommits() {
-      return this.commit.next_commit_id || this.commit.prev_commit_id;
-    },
   },
   created() {
     this.$nextTick(() => {
@@ -146,38 +143,6 @@ export default {
             class="input-group-text"
           />
         </gl-button-group>
-        <div v-if="hasNeighborCommits" class="commit-nav-buttons ml-3">
-          <gl-button-group>
-            <gl-button
-              :href="previousCommitUrl"
-              :disabled="!commit.prev_commit_id"
-              @click.prevent="moveToNeighboringCommit({ direction: 'previous' })"
-            >
-              <span
-                v-if="!commit.prev_commit_id"
-                v-gl-tooltip
-                class="h-100 w-100 position-absolute"
-                :title="__('You\'re at the first commit')"
-              ></span>
-              <gl-icon name="chevron-left" />
-              {{ __('Prev') }}
-            </gl-button>
-            <gl-button
-              :href="nextCommitUrl"
-              :disabled="!commit.next_commit_id"
-              @click.prevent="moveToNeighboringCommit({ direction: 'next' })"
-            >
-              <span
-                v-if="!commit.next_commit_id"
-                v-gl-tooltip
-                class="h-100 w-100 position-absolute"
-                :title="__('You\'re at the last commit')"
-              ></span>
-              {{ __('Next') }}
-              <gl-icon name="chevron-right" />
-            </gl-button>
-          </gl-button-group>
-        </div>
       </div>
       <div>
         <div class="d-flex float-left align-items-center align-self-start">

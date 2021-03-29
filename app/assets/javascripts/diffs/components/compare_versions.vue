@@ -56,6 +56,9 @@ export default {
     hasSourceVersions() {
       return this.diffCompareDropdownSourceVersions.length > 0;
     },
+    hasNeighborCommits() {
+      return this.commit.next_commit_id || this.commit.prev_commit_id;
+    },
   },
   created() {
     this.CENTERED_LIMITED_CONTAINER_CLASSES = CENTERED_LIMITED_CONTAINER_CLASSES;
@@ -91,6 +94,38 @@ export default {
       <div v-if="commit">
         {{ __('Viewing commit') }}
         <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
+       </div>
+       <div v-if="hasNeighborCommits" class="commit-nav-buttons ml-3">
+        <gl-button-group>
+          <gl-button
+            :href="previousCommitUrl"
+            :disabled="!commit.prev_commit_id"
+            @click.prevent="moveToNeighboringCommit({ direction: 'previous' })"
+          >
+            <span
+              v-if="!commit.prev_commit_id"
+              v-gl-tooltip
+              class="h-100 w-100 position-absolute"
+              :title="__('You\'re at the first commit')"
+            ></span>
+            <gl-icon name="chevron-left" />
+            {{ __('Prev') }}
+          </gl-button>
+          <gl-button
+            :href="nextCommitUrl"
+            :disabled="!commit.next_commit_id"
+            @click.prevent="moveToNeighboringCommit({ direction: 'next' })"
+          >
+            <span
+              v-if="!commit.next_commit_id"
+              v-gl-tooltip
+              class="h-100 w-100 position-absolute"
+              :title="__('You\'re at the last commit')"
+            ></span>
+            {{ __('Next') }}
+            <gl-icon name="chevron-right" />
+          </gl-button>
+        </gl-button-group>
       </div>
       <gl-sprintf
         v-else-if="hasSourceVersions"
