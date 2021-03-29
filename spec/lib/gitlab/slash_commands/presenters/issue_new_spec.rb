@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+include Rails.application.routes.url_helpers
 
 RSpec.describe Gitlab::SlashCommands::Presenters::IssueNew do
   let(:project) { create(:project) }
@@ -14,6 +15,6 @@ RSpec.describe Gitlab::SlashCommands::Presenters::IssueNew do
   it 'shows the issue' do
     expect(subject[:response_type]).to be(:in_channel)
     expect(subject).to have_key(:text)
-    expect(subject[:text]).to eq("I created an issue on <http://localhost/namespace2|@namespace2>'s behalf: *<http://localhost/namespace2/project2/-/issues/1|#1>* in <http://localhost/namespace2/project2|John Doe3 / project2>")
+    expect(subject[:text]).to eq("I created an issue on <#{url_for(issue.author)}|#{issue.author.to_reference}>'s behalf: *<#{project_issue_url(issue.project, issue)}|#{issue.to_reference}>* in <#{project.web_url}|#{project.full_name}>")
   end
 end
