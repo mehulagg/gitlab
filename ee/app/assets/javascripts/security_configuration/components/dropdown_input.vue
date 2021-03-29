@@ -1,11 +1,20 @@
 <script>
-import { GlFormGroup, GlDropdown, GlDropdownItem, GlFormText, GlLink, GlSprintf } from '@gitlab/ui';
+import {
+  GlFormGroup,
+  GlDropdown,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
+  GlFormText,
+  GlLink,
+  GlSprintf,
+} from '@gitlab/ui';
 import { CUSTOM_VALUE_MESSAGE } from './constants';
 
 export default {
   components: {
     GlFormGroup,
     GlDropdown,
+    GlDropdownSectionHeader,
     GlDropdownItem,
     GlFormText,
     GlLink,
@@ -50,6 +59,11 @@ export default {
       required: false,
       default: false,
     },
+    sectionHeader: {
+      type: String,
+      required: false,
+      default: '',
+    },
     options: {
       type: Array,
       required: true,
@@ -87,6 +101,9 @@ export default {
     </template>
 
     <gl-dropdown :id="field" :text="text" :disabled="disabled">
+      <gl-dropdown-section-header v-if="sectionHeader">{{
+        sectionHeader
+      }}</gl-dropdown-section-header>
       <gl-dropdown-item v-for="option in options" :key="option.value" @click="handleInput(option)">
         {{ option.text }}
       </gl-dropdown-item>
