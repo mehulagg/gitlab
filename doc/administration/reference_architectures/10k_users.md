@@ -2349,9 +2349,10 @@ considered and customer technical support will be considered out of scope.
   </a>
 </div>
 
-## Hybrid Reference Architecture with Helm Charts (Alternative)
-As an alternative approach, you can also run select components of GitLab in Kubernetes
-via our official [Helm Charts](https://docs.gitlab.com/charts/).
+## Cloud Native Hybrid reference architecture with Helm Charts (Alternative)
+
+As an alternative approach, you can also run select components of GitLab as Cloud Native
+in Kubernetes via our official [Helm Charts](https://docs.gitlab.com/charts/).
 In this setup, we support running the equivalent of GitLab Rails and Sidekiq nodes
 in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition to
 this several other supporting services, such as Grafana, NGINX, etc... are also
