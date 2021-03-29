@@ -253,7 +253,7 @@ class GroupPolicy < BasePolicy
   end
 
   def resource_access_token_creation_allowed?
-    group.resource_access_token_creation_allowed?
+    group.root_ancestor.resource_access_token_creation_allowed?
   end
 end
 
