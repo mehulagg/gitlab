@@ -288,6 +288,9 @@ export default {
       if (this.isHttp) {
         this.validationState.apiUrl = true;
         this.validateName();
+        if (!this.validationState.name) {
+          this.$refs.integrationName.$el.scrollIntoView({behavior: "smooth", block: "center"});
+        }
       } else if (this.isPrometheus) {
         this.validationState.name = true;
         this.validateApiUrl();
@@ -300,6 +303,11 @@ export default {
       this.$emit('save-and-test-alert-payload', this.dataForSave, this.testAlertPayload);
     },
     submit(testAfterSubmit = false) {
+      this.triggerValidation();
+
+      if (!this.isFormValid) {
+        return;
+      }
       const event = this.currentIntegration ? 'update-integration' : 'create-new-integration';
       this.$emit(event, this.dataForSave, testAfterSubmit);
     },
@@ -412,7 +420,6 @@ export default {
             :disabled="isSelectDisabled"
             class="gl-max-w-full"
             :options="integrationTypesOptions"
-            @change="triggerValidation"
           />
 
           <alert-settings-form-help-block
@@ -438,6 +445,7 @@ export default {
             :state="validationState.name"
           >
             <gl-form-input
+              ref="integrationName"
               id="name-integration"
               v-model="integrationForm.name"
               type="text"
