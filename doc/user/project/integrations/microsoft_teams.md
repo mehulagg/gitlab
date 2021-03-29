@@ -29,9 +29,6 @@ To configure Microsoft Teams to listen for notifications from GitLab:
    comes in through the webhook.
 1. Copy the webhook URL, as you need it to configure GitLab.
 
-Learn more about
-[setting up an incoming webhook on Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using#setting-up-a-custom-incoming-webhook).
-
 ## Configure your GitLab project
 
 After you configure Microsoft Teams to receive notifications, you must configure
@@ -57,3 +54,7 @@ GitLab to send the notifications:
    **Notify only broken pipelines** check box to push notifications only when pipelines break.
 1. Select the branches you want to send notifications for.
 1. Click **Save changes**.
+
+## Resources
+
+- [Setting up an incoming webhook on Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using#setting-up-a-custom-incoming-webhook).
