@@ -47,7 +47,7 @@ module Resolvers
       end
 
       def authorize!
-        Ability.allowed?(context[:current_user], :admin_compliance_framework, object) || raise_resource_not_available_error!
+        Ability.allowed?(context[:current_user], :read_compliance_framework, object) || raise_resource_not_available_error!
       end
     end
   end

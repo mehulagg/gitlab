@@ -19,6 +19,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    canManageComplianceFramework: {
+      type: Boolean,
+      required: true
+    }
   },
   computed: {
     isScoped() {
@@ -49,6 +53,7 @@ export default {
     </p>
     <div class="gl-display-flex">
       <gl-button
+        v-if="canManageComplianceFramework"
         v-gl-tooltip="$options.i18n.editFramework"
         :disabled="loading"
         :aria-label="$options.i18n.editFramework"
@@ -58,6 +63,7 @@ export default {
         category="tertiary"
       />
       <gl-button
+        v-if="canManageComplianceFramework"
         v-gl-tooltip="$options.i18n.deleteFramework"
         class="gl-ml-3"
         :loading="loading"

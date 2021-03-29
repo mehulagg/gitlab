@@ -15,6 +15,10 @@ export default {
       type: String,
       required: true,
     },
+    canManageComplianceFrameworks: {
+      type: Boolean,
+      required: true
+    }
   },
   i18n: {
     heading: s__('ComplianceFrameworks|There are no compliance frameworks set up yet'),
@@ -23,6 +27,14 @@ export default {
     ),
     addButton: s__('ComplianceFrameworks|Add framework'),
   },
+  computed: {
+    computedFrameworkPath: function addFrameworkPath() {
+      if (this.canManageComplianceFrameworks) {
+        return this.addFrameworkPath
+      }
+      return null
+    }
+  }
 };
 </script>
 
@@ -31,7 +43,7 @@ export default {
     :title="$options.i18n.heading"
     :description="$options.i18n.description"
     :svg-path="imagePath"
-    :primary-button-link="addFrameworkPath"
+    :primary-button-link="computedFrameworkPath"
     :primary-button-text="$options.i18n.addButton"
     compact
     :svg-height="110"

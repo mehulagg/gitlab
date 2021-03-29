@@ -28,6 +28,10 @@ export default {
       type: String,
       required: true,
     },
+    canManageComplianceFrameworks: {
+      type: Boolean,
+      required: true
+    },
     editFrameworkPath: {
       type: String,
       required: true,
@@ -147,7 +151,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-border-t-1 gl-border-t-solid gl-border-t-gray-100">
+  <div>
     <gl-alert
       v-if="alertMessage"
       class="gl-mt-5"
@@ -162,30 +166,25 @@ export default {
       v-if="isEmpty"
       :image-path="emptyStateSvgPath"
       :add-framework-path="addFrameworkPath"
+      :can-manage-compliance-frameworks="canManageComplianceFrameworks"
     />
-
-    <gl-tabs v-if="hasFrameworks">
-      <gl-tab class="gl-mt-6" :title="$options.i18n.allTab">
-        <list-item
-          v-for="framework in complianceFrameworks"
-          :key="framework.parsedId"
-          :framework="framework"
-          :loading="isDeleting(framework.id)"
-          @delete="markForDeletion"
-        />
-      </gl-tab>
-      <gl-tab disabled :title="$options.i18n.regulatedTab" />
-      <template #tabs-end>
-        <gl-button
-          class="gl-align-self-center gl-ml-auto"
-          category="primary"
-          variant="confirm"
-          :href="addFrameworkPath"
-        >
-          {{ $options.i18n.addBtn }}
-        </gl-button>
-      </template>
-    </gl-tabs>
+    <list-item
+      v-for="framework in complianceFrameworks"
+      :key="framework.parsedId"
+      :framework="framework"
+      :can-manage-compliance-framework="canManageComplianceFrameworks"
+      :loading="isDeleting(framework.id)"
+      @delete="markForDeletion"
+    />
+    <gl-button
+      v-if="canManageComplianceFrameworks && hasFrameworks"
+      class="gl-align-self-center gl-ml-auto"
+      category="primary"
+      variant="confirm"
+      :href="addFrameworkPath"
+    >
+      {{ $options.i18n.addBtn }}
+    </gl-button>
     <delete-modal
       v-if="hasFrameworks"
       :id="markedForDeletion.id"

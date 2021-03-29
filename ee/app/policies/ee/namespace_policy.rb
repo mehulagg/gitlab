@@ -17,6 +17,7 @@ module EE
         prevent :create_projects
       end
       rule { can?(:owner_access) & compliance_framework_available }.enable :admin_compliance_framework
+      rule { can?(:read_group) & compliance_framework_available }.enable :read_compliance_framework
     end
   end
 end

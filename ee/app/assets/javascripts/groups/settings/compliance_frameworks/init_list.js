@@ -15,7 +15,7 @@ const createComplianceFrameworksListApp = (el) => {
     return false;
   }
 
-  const { addFrameworkPath, editFrameworkPath, emptyStateSvgPath, groupPath } = el.dataset;
+  const { addFrameworkPath, canManageComplianceFrameworks, editFrameworkPath, emptyStateSvgPath, groupPath } = el.dataset;
 
   return new Vue({
     el,
@@ -24,6 +24,7 @@ const createComplianceFrameworksListApp = (el) => {
       return createElement(Form, {
         props: {
           addFrameworkPath,
+          canManageComplianceFrameworks,
           editFrameworkPath,
           emptyStateSvgPath,
           groupPath,

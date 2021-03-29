@@ -18,6 +18,8 @@ module ComplianceManagement
       enable :manage_compliance_framework
     end
 
+    rule { can?(:read_group) & custom_compliance_frameworks_enabled }.enable :read_compliance_framework
+
     rule { can?(:owner_access) & group_level_compliance_pipeline_enabled }.policy do
       enable :manage_group_level_compliance_pipeline_config
     end
