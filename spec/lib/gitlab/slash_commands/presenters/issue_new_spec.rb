@@ -14,6 +14,6 @@ RSpec.describe Gitlab::SlashCommands::Presenters::IssueNew do
   it 'shows the issue' do
     expect(subject[:response_type]).to be(:in_channel)
     expect(subject).to have_key(:text)
-    expect(subject[:text]).to include(issue.to_reference)
+    expect(subject[:text]).to eq("I created an issue on <http://localhost/namespace2|@namespace2>'s behalf: *<http://localhost/namespace2/project2/-/issues/1|#1>* in <http://localhost/namespace2/project2|John Doe3 / project2>")
   end
 end
