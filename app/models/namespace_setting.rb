@@ -35,10 +35,9 @@ class NamespaceSetting < ApplicationRecord
 
   def allow_resource_access_token_creation_for_group
     if namespace&.subgroup? && !resource_access_token_creation_allowed
-      errors.add(:resource_access_tokens_enabled, _('is not allowed since the group is not top-level group.'))
+      errors.add(:resource_access_token_creation_allowed, _('is not allowed since the group is not top-level group.'))
     end
   end
-
 end
 
 NamespaceSetting.prepend_if_ee('EE::NamespaceSetting')
