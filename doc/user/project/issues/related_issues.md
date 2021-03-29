@@ -37,7 +37,7 @@ in the header of the related issue block.
 
 1. Input the issue reference number or paste in the full URL of the issue.
 
-1. In Gitlab Premium and higher, select whether the current issue relates to, blocks, or is blocked by the issues being entered.
+1. In GitLab Premium and higher, select whether the current issue relates to, blocks, or is blocked by the issues being entered.
 
    ![Adding a related issue](img/related_issues_add_v12_8.png)
 
