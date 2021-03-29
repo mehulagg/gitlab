@@ -13,7 +13,6 @@ RSpec.describe GitlabSchema.types['Group'] do
 
   it { expect(described_class).to have_graphql_field(:iterations) }
   it { expect(described_class).to have_graphql_field(:iteration_cadences) }
-  it { expect(described_class).to have_graphql_field(:groupTimelogsEnabled) }
   it { expect(described_class).to have_graphql_field(:timelogs, complexity: 5) }
   it { expect(described_class).to have_graphql_field(:vulnerabilities) }
   it { expect(described_class).to have_graphql_field(:vulnerability_scanners) }

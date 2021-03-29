@@ -8,7 +8,7 @@ const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-sca
 const projectPath = 'group/project';
 const defaultBranch = 'master';
 const emptyStateSvgPath = `${TEST_HOST}/assets/illustrations/alert-management-empty-state.svg`;
-const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration/dast_profiles`;
+const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration/dast_scans`;
 
 describe('OnDemandScansApp', () => {
   let wrapper;

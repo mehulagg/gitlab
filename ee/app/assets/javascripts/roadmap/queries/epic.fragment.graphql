@@ -19,6 +19,7 @@ fragment BaseEpic on Epic {
     closedEpics
   }
   group {
+    id
     name
     fullName
     fullPath

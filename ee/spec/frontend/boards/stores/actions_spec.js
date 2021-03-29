@@ -1305,7 +1305,7 @@ describe('fetchIterations', () => {
     });
   }
 
-  it('sets iterationsLoading to true', async () => {
+  it('sets iterationsLoading to true', () => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     const store = createStore();

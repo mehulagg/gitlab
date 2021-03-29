@@ -314,6 +314,7 @@
   rules:
     - <<: *if-not-canonical-namespace
       when: never
+    - <<: *if-auto-deploy-branches
     - changes: *ci-build-images-patterns
     - changes: *code-qa-patterns
 
@@ -394,8 +395,8 @@
   rules:
     - <<: *if-not-canonical-namespace
       when: never
-    - <<: *if-default-refs
-      changes: *code-qa-patterns
+    - <<: *if-auto-deploy-branches
+    - changes: *code-qa-patterns
 
 .frontend:rules:compile-test-assets:
   rules:
@@ -1007,8 +1008,11 @@
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *frontend-patterns
     - <<: *if-dot-com-gitlab-org-merge-request
-      changes: *code-qa-patterns
+      changes: *code-patterns
       when: manual
+      allow_failure: true
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *qa-patterns
       allow_failure: true
     - <<: *if-dot-com-gitlab-org-schedule
 
@@ -1022,8 +1026,11 @@
       changes: *frontend-patterns
       allow_failure: true
     - <<: *if-dot-com-gitlab-org-merge-request
-      changes: *code-qa-patterns
+      changes: *code-patterns
       when: manual
+      allow_failure: true
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *qa-patterns
       allow_failure: true
     - <<: *if-dot-com-gitlab-org-schedule
       allow_failure: true
@@ -1067,13 +1074,16 @@
       when: manual
       allow_failure: true
 
-.review:rules:mr-only-manual:
+.review:rules:review-qa-all:
   rules:
     - <<: *if-not-ee
       when: never
     - <<: *if-dot-com-gitlab-org-merge-request
-      changes: *code-qa-patterns
+      changes: *code-patterns
       when: manual
+      allow_failure: true
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *qa-patterns
       allow_failure: true
 
 .review:rules:review-cleanup:

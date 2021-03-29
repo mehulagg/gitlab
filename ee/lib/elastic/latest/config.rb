@@ -23,8 +23,8 @@ module Elastic
 
       settings \
         index: {
-          number_of_shards: Elastic::AsJSON.new { Gitlab::CurrentSettings.elasticsearch_shards },
-          number_of_replicas: Elastic::AsJSON.new { Gitlab::CurrentSettings.elasticsearch_replicas },
+          number_of_shards: Elastic::AsJSON.new { Elastic::IndexSetting.default.number_of_shards },
+          number_of_replicas: Elastic::AsJSON.new { Elastic::IndexSetting.default.number_of_replicas },
           highlight: {
             # `highlight.max_analyzed_offset` is technically not measured in
             # bytes, but rather in characters. Since this is an uppper bound on

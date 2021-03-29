@@ -10,6 +10,7 @@ import { createProjectLoadingError } from '../helpers';
 import DashboardNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityChartsLayout from './security_charts_layout.vue';
 
+const CHART_DEFAULT_DAYS = 30;
 const MAX_DAYS = 100;
 const ISO_DATE = 'isoDate';
 const SEVERITIES = [
@@ -73,6 +74,9 @@ export default {
     };
   },
   computed: {
+    chartStartDate() {
+      return formatDate(getDateInPast(new Date(), CHART_DEFAULT_DAYS), ISO_DATE);
+    },
     startDate() {
       return formatDate(getDateInPast(new Date(), MAX_DAYS), ISO_DATE);
     },
@@ -124,6 +128,20 @@ export default {
           type: 'value',
           minInterval: 1,
         },
+        dataZoom: [
+          {
+            type: 'slider',
+            startValue: this.chartStartDate,
+            handleIcon: this.svgs['scroll-handle'],
+            dataBackground: {
+              lineStyle: {
+                width: 1,
+                color: '#bfbfbf',
+              },
+              areaStyle: null,
+            },
+          },
+        ],
         toolbox: {
           feature: {
             dataZoom: {
@@ -144,7 +162,7 @@ export default {
     this.chartWidth = this.$refs.layout.$el.clientWidth;
   },
   created() {
-    ['marquee-selection', 'redo', 'repeat', 'download'].forEach(this.setSvg);
+    ['marquee-selection', 'redo', 'repeat', 'download', 'scroll-handle'].forEach(this.setSvg);
   },
   methods: {
     async setSvg(name) {

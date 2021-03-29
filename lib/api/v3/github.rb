@@ -18,7 +18,7 @@ module API
       # Used to differentiate Jira Cloud requests from Jira Server requests
       # Jira Cloud user agent format: Jira DVCS Connector Vertigo/version
       # Jira Server user agent format: Jira DVCS Connector/version
-      JIRA_DVCS_CLOUD_USER_AGENT = 'Jira DVCS Connector Vertigo'.freeze
+      JIRA_DVCS_CLOUD_USER_AGENT = 'Jira DVCS Connector Vertigo'
 
       include PaginationParams
 
@@ -75,11 +75,14 @@ module API
         # rubocop: enable CodeReuse/ActiveRecord
 
         def authorized_merge_requests
-          MergeRequestsFinder.new(current_user, authorized_only: !current_user.admin?).execute
+          MergeRequestsFinder.new(current_user, authorized_only: !current_user.admin?)
+            .execute.with_jira_integration_associations
         end
 
         def authorized_merge_requests_for_project(project)
-          MergeRequestsFinder.new(current_user, authorized_only: !current_user.admin?, project_id: project.id).execute
+          MergeRequestsFinder
+            .new(current_user, authorized_only: !current_user.admin?, project_id: project.id)
+            .execute.with_jira_integration_associations
         end
 
         # rubocop: disable CodeReuse/ActiveRecord

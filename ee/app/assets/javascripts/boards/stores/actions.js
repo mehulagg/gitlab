@@ -115,7 +115,7 @@ const fetchAndFormatListEpics = (state, extraVariables) => {
 export default {
   ...actionsCE,
 
-  setFilters: ({ commit, dispatch }, filters) => {
+  setFilters: ({ commit, dispatch, getters }, filters) => {
     const filterParams = pick(filters, [
       'assigneeUsername',
       'authorUsername',
@@ -128,7 +128,10 @@ export default {
       'weight',
     ]);
 
-    filterParams.not = transformNotFilters(filters);
+    // Temporarily disabled until negated filters are supported for epic boards
+    if (!getters.isEpicBoard) {
+      filterParams.not = transformNotFilters(filters);
+    }
 
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
@@ -140,7 +143,7 @@ export default {
     } else if (filterParams.epicId) {
       filterParams.epicId = fullEpicId(filterParams.epicId);
     }
-    if (filterParams.not.epicId) {
+    if (!getters.isEpicBoard && filterParams.not.epicId) {
       filterParams.not.epicId = fullEpicId(filterParams.not.epicId);
     }
 

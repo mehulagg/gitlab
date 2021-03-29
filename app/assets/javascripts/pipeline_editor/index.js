@@ -3,6 +3,8 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
+import getCommitSha from './graphql/queries/client/commit_sha.graphql';
+import getCurrentBranch from './graphql/queries/client/current_branch.graphql';
 import { resolvers } from './graphql/resolvers';
 import typeDefs from './graphql/typedefs.graphql';
 import PipelineEditorApp from './pipeline_editor_app.vue';
@@ -40,10 +42,18 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(resolvers, { typeDefs }),
   });
+  const { cache } = apolloProvider.clients.defaultClient;
 
-  apolloProvider.clients.defaultClient.cache.writeData({
+  cache.writeQuery({
+    query: getCurrentBranch,
     data: {
       currentBranch: initialBranchName || defaultBranch,
+    },
+  });
+
+  cache.writeQuery({
+    query: getCommitSha,
+    data: {
       commitSha,
     },
   });

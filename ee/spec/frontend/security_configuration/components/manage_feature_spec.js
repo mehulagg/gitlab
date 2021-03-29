@@ -1,67 +1,58 @@
 import { shallowMount } from '@vue/test-utils';
-import { merge } from 'lodash';
+import ManageDastProfiles from 'ee/security_configuration/components/manage_dast_profiles.vue';
 import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
+import ManageGeneric from 'ee/security_configuration/components/manage_generic.vue';
+import { REPORT_TYPE_DAST_PROFILES } from '~/vue_shared/security_reports/constants';
 import { generateFeatures } from './helpers';
+
+const attrs = {
+  'data-qa-selector': 'foo',
+};
 
 describe('ManageFeature component', () => {
   let wrapper;
-  let feature;
 
   const createComponent = (options) => {
-    wrapper = shallowMount(
-      ManageFeature,
-      merge(
-        {
-          propsData: {
-            autoDevopsEnabled: false,
-          },
-        },
-        options,
-      ),
-    );
+    wrapper = shallowMount(ManageFeature, options);
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findTestId = (id) => wrapper.find(`[data-testid="${id}"]`);
+  describe('always', () => {
+    beforeEach(() => {
+      const [feature] = generateFeatures(1);
+      createComponent({ attrs, propsData: { feature } });
+    });
 
-  describe.each`
-    configured | expectedTestId
-    ${true}    | ${'configureButton'}
-    ${false}   | ${'enableButton'}
-  `('given feature.configured is $configured', ({ configured, expectedTestId }) => {
-    describe('given a configuration path', () => {
-      beforeEach(() => {
-        [feature] = generateFeatures(1, { configured, configuration_path: 'foo' });
-
-        createComponent({
-          propsData: { feature },
-        });
-      });
-
-      it('shows a button to configure the feature', () => {
-        const button = findTestId(expectedTestId);
-        expect(button.exists()).toBe(true);
-        expect(button.attributes('href')).toBe(feature.configuration_path);
-      });
+    it('passes through attributes to the expected component', () => {
+      expect(wrapper.attributes()).toMatchObject(attrs);
     });
   });
 
-  describe('given a feature with type "dast-profiles"', () => {
-    beforeEach(() => {
-      [feature] = generateFeatures(1, { type: 'dast_profiles', configuration_path: 'foo' });
+  describe.each`
+    type                         | expectedComponent
+    ${REPORT_TYPE_DAST_PROFILES} | ${ManageDastProfiles}
+    ${'foo'}                     | ${ManageGeneric}
+  `('given a $type feature', ({ type, expectedComponent }) => {
+    let feature;
+    let component;
 
-      createComponent({
-        propsData: { feature, autoDevopsEnabled: true },
-      });
+    beforeEach(() => {
+      [feature] = generateFeatures(1, { type });
+
+      createComponent({ propsData: { feature } });
+
+      component = wrapper.findComponent(expectedComponent);
     });
 
-    it('shows the DAST Profiles manage button', () => {
-      const button = findTestId('manageButton');
-      expect(button.exists()).toBe(true);
-      expect(button.attributes('href')).toBe(feature.configuration_path);
+    it('renders expected component', () => {
+      expect(component.exists()).toBe(true);
+    });
+
+    it('passes through props to expected component', () => {
+      expect(component.props()).toEqual({ feature });
     });
   });
 });

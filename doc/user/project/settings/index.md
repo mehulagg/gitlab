@@ -9,10 +9,15 @@ type: reference, index, howto
 
 NOTE:
 Only project maintainers and administrators have the [permissions](../../permissions.md#project-members-permissions)
-to access a project settings.
+to access project settings.
 
-You can adjust your [project](../index.md) settings by navigating
-to your project's homepage and clicking **Settings**.
+The **Settings** page in GitLab provides a centralized home for your
+[project](../index.md) configuration options. To access it, go to your project's homepage
+and, in the left navigation menu, clicking **Settings**. To reduce complexity, settings are
+grouped by topic into sections. To display all settings in a section, click **Expand**.
+
+In GitLab versions [13.10 and later](https://gitlab.com/groups/gitlab-org/-/epics/4842),
+GitLab displays a search box to help you find the settings you want to view.
 
 ## General settings
 
@@ -23,7 +28,7 @@ functionality of a project.
 
 Adjust your project's name, description, avatar, [default branch](../repository/branches/default.md), and topics:
 
-![general project settings](img/general_settings.png)
+![general project settings](img/general_settings_v13_11.png)
 
 The project description also partially supports [standard Markdown](../../markdown.md#standard-markdown-and-extensions-in-gitlab). You can use [emphasis](../../markdown.md#emphasis), [links](../../markdown.md#links), and [line-breaks](../../markdown.md#line-breaks) to add more context to the project description.
 
@@ -145,8 +150,6 @@ Set up your project's merge request settings:
 - Enable [merge only when all threads are resolved](../../discussions/index.md#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved).
 - Enable [`delete source branch after merge` option by default](../merge_requests/getting_started.md#deleting-the-source-branch)
 - Configure [suggested changes commit messages](../../discussions/index.md#configure-the-commit-message-for-applied-suggestions)
-
-![project's merge request settings](img/merge_requests_settings.png)
 
 ### Service Desk
 

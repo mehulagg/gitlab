@@ -13,9 +13,9 @@ module Members
     end
 
     def execute(source)
+      @source = source
       validate_emails!
 
-      @source = source
       emails.each(&method(:process_email))
       result
     rescue BlankEmailsError, TooManyEmailsError => e
@@ -84,7 +84,11 @@ module Members
     def add_member(email)
       new_member = source.add_user(email, params[:access_level], current_user: current_user, expires_at: params[:expires_at])
 
-      errors[email] = new_member.errors.full_messages.to_sentence if new_member.invalid?
+      if new_member.invalid?
+        errors[email] = new_member.errors.full_messages.to_sentence
+      else
+        after_execute(member: new_member)
+      end
     end
 
     def result
@@ -96,3 +100,5 @@ module Members
     end
   end
 end
+
+Members::InviteService.prepend_if_ee('EE::Members::InviteService')

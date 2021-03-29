@@ -21,12 +21,15 @@ module Types
         graphql_name(enum_mod.name) if use_name
         description(enum_mod.description) if use_description
 
-        enum_mod.definition.each { |key, content| value(key.to_s.upcase, **content) }
+        enum_mod.definition.each do |key, content|
+          desc = content.delete(:description)
+          value(key.to_s.upcase, description: desc, **content)
+        end
       end
 
       def value(*args, **kwargs, &block)
         enum[args[0].downcase] = kwargs[:value] || args[0]
-        kwargs = gitlab_deprecation(kwargs)
+        gitlab_deprecation(kwargs)
 
         super(*args, **kwargs, &block)
       end

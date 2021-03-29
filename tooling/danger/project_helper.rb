@@ -4,6 +4,7 @@ module Tooling
   module Danger
     module ProjectHelper
       LOCAL_RULES ||= %w[
+        changelog
         changes_size
         commit_messages
         database
@@ -20,7 +21,6 @@ module Tooling
 
       CI_ONLY_RULES ||= %w[
         ce_ee_vue_templates
-        changelog
         ci_templates
         metadata
         feature_flag
@@ -30,7 +30,7 @@ module Tooling
         specs
       ].freeze
 
-      MESSAGE_PREFIX = '==>'.freeze
+      MESSAGE_PREFIX = '==>'
 
       # First-match win, so be sure to put more specific regex at the top...
       CATEGORIES = {

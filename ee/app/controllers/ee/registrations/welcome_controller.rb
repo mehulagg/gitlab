@@ -43,7 +43,7 @@ module EE
       override :show_signup_onboarding?
       def show_signup_onboarding?
         !helpers.in_subscription_flow? &&
-          !helpers.in_invitation_flow? &&
+          !helpers.user_has_memberships? &&
           !helpers.in_oauth_flow? &&
           !helpers.in_trial_flow? &&
           helpers.signup_onboarding_enabled?

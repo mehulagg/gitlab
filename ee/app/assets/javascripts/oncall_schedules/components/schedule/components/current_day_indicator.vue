@@ -32,7 +32,7 @@ export default {
 <template>
   <span
     v-if="isVisible"
-    :style="getIndicatorStyles(presetType)"
+    :style="getIndicatorStyles(presetType, timeframeItem)"
     data-testid="current-day-indicator"
     class="current-day-indicator"
   ></span>

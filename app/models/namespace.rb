@@ -13,6 +13,9 @@ class Namespace < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include IgnorableColumns
   include Namespaces::Traversal::Recursive
+  include Namespaces::Traversal::Linear
+
+  ignore_column :delayed_project_removal, remove_with: '14.1', remove_after: '2021-05-22'
 
   # Prevent users from creating unreasonably deep level of nesting.
   # The number 20 was taken based on maximum nesting level of
@@ -82,8 +85,6 @@ class Namespace < ApplicationRecord
   after_update :move_dir, if: :saved_change_to_path_or_parent?
   before_destroy(prepend: true) { prepare_for_destroy }
   after_destroy :rm_dir
-
-  before_save :ensure_delayed_project_removal_assigned_to_namespace_settings, if: :delayed_project_removal_changed?
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
@@ -260,13 +261,8 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    return Project.where(namespace: self) if user?
-
-    if Feature.enabled?(:recursive_namespace_lookup_as_inner_join, self)
-      Project.joins("INNER JOIN (#{self_and_descendants.select(:id).to_sql}) namespaces ON namespaces.id=projects.namespace_id")
-    else
-      Project.where(namespace: self_and_descendants)
-    end
+    namespace = user? ? self : self_and_descendants
+    Project.where(namespace: namespace)
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups
@@ -347,6 +343,10 @@ class Namespace < ApplicationRecord
     Plan.default
   end
 
+  def paid?
+    root? && actual_plan.paid?
+  end
+
   def actual_limits
     # We default to PlanLimits.new otherwise a lot of specs would fail
     # On production each plan should already have associated limits record
@@ -411,13 +411,6 @@ class Namespace < ApplicationRecord
   end
 
   private
-
-  def ensure_delayed_project_removal_assigned_to_namespace_settings
-    return if Feature.disabled?(:migrate_delayed_project_removal, default_enabled: true)
-
-    self.namespace_settings || build_namespace_settings
-    namespace_settings.delayed_project_removal = delayed_project_removal
-  end
 
   def all_projects_with_pages
     if all_projects.pages_metadata_not_migrated.exists?

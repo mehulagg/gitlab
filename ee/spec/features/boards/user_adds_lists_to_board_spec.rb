@@ -98,7 +98,7 @@ RSpec.describe 'User adds milestone lists', :js do
       wait_for_all_requests
     end
 
-    it 'does not show other list types' do
+    it 'does not show other list types', :aggregate_failures do
       click_button 'Create list'
       wait_for_all_requests
 
@@ -106,7 +106,6 @@ RSpec.describe 'User adds milestone lists', :js do
         expect(page).not_to have_text('Iteration')
         expect(page).not_to have_text('Assignee')
         expect(page).not_to have_text('Milestone')
-        expect(page).not_to have_text('List type')
       end
     end
   end
@@ -115,12 +114,15 @@ RSpec.describe 'User adds milestone lists', :js do
     click_button 'Create list'
     wait_for_all_requests
 
-    select(list_type, from: 'List type')
+    page.choose(list_type)
 
-    page.within('.board-add-new-list') do
+    find_button("Select a").click
+
+    page.within('.dropdown-menu') do
       find('label', text: title).click
-      click_button 'Add'
     end
+
+    click_button 'Add to board'
 
     wait_for_all_requests
   end

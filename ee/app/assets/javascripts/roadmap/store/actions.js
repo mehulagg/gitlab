@@ -57,7 +57,7 @@ const fetchGroupEpics = (
         ? data?.group?.epic?.children?.edges || []
         : data?.group?.epics?.edges || [];
 
-      return epicUtils.extractGroupEpics(edges);
+      return edges.map((e) => e.node);
     });
 };
 
@@ -72,7 +72,7 @@ export const fetchChildrenEpics = (state, { parentItem }) => {
     })
     .then(({ data }) => {
       const edges = data?.group?.epic?.children?.edges || [];
-      return epicUtils.extractGroupEpics(edges);
+      return edges.map((e) => e.node);
     });
 };
 

@@ -18,7 +18,6 @@ import {
   mockEpicsWithParents,
   mockSortedBy,
   basePath,
-  epicsPath,
 } from 'ee_jest/roadmap/mock_data';
 
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
@@ -29,7 +28,6 @@ store.dispatch('setInitialData', {
   presetType: PRESET_TYPES.MONTHS,
   timeframe: mockTimeframeMonths,
   filterQueryString: '',
-  initialEpicsPath: epicsPath,
   basePath,
 });
 

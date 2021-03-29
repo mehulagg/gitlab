@@ -75,8 +75,8 @@ RSpec.describe Issue do
     context 'epics' do
       let_it_be(:epic1) { create(:epic) }
       let_it_be(:epic2) { create(:epic) }
-      let_it_be(:epic_issue1) { create(:epic_issue, epic: epic1) }
-      let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2) }
+      let_it_be(:epic_issue1) { create(:epic_issue, epic: epic1, relative_position: 2) }
+      let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, relative_position: 1) }
       let_it_be(:issue_no_epic) { create(:issue) }
 
       before do
@@ -128,6 +128,12 @@ RSpec.describe Issue do
           end
         end
       end
+
+      describe '.sorted_by_epic_position' do
+        it 'sorts by epic relative position' do
+          expect(described_class.sorted_by_epic_position.ids).to eq([epic_issue2.issue_id, epic_issue1.issue_id])
+        end
+      end
     end
 
     context 'iterations' do
@@ -165,7 +171,7 @@ RSpec.describe Issue do
       describe '.not_in_iterations' do
         it 'returns issues not in selected iterations' do
           expect(described_class.count).to eq 3
-          expect(described_class.not_in_iterations([iteration1])).to eq [iteration2_issue, issue_no_iteration]
+          expect(described_class.not_in_iterations([iteration1])).to contain_exactly(iteration2_issue, issue_no_iteration)
         end
       end
 

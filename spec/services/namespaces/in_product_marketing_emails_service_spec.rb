@@ -3,14 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
-  subject(:execute_service) do
-    travel_to(frozen_time) { described_class.new(track, interval).execute }
-  end
+  subject(:execute_service) { described_class.new(track, interval).execute }
 
   let(:track) { :create }
   let(:interval) { 1 }
 
-  let(:frozen_time) { Time.current }
+  let(:frozen_time) { Time.zone.parse('23 Mar 2021 10:14:40 UTC') }
   let(:previous_action_completed_at) { frozen_time - 2.days }
   let(:current_action_completed_at) { nil }
   let(:experiment_enabled) { true }
@@ -21,6 +19,7 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
   let_it_be(:user) { create(:user, email_opted_in: true) }
 
   before do
+    travel_to(frozen_time)
     create(:onboarding_progress, namespace: group, **actions_completed)
     group.add_developer(user)
     stub_experiment_for_subject(in_product_marketing_emails: experiment_enabled)
@@ -139,7 +138,7 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
     it { is_expected.not_to send_in_product_marketing_email }
   end
 
-  context 'when the user has already received a marketing email as part of another group' do
+  context 'when the user has already received any marketing email in this batch' do
     before do
       other_group = create(:group)
       other_group.add_developer(user)
@@ -150,14 +149,50 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
     it { is_expected.to send_in_product_marketing_email(user.id, anything, :create, 0) }
   end
 
+  context 'when user has already received a specific series in a track before' do
+    before do
+      described_class.new(:create, described_class::INTERVAL_DAYS.index(interval)).execute
+    end
+
+    # For any group Notify is called exactly once
+    it { is_expected.to send_in_product_marketing_email(user.id, anything, :create, described_class::INTERVAL_DAYS.index(interval)) }
+
+    context 'when different series' do
+      let(:interval) { 5 }
+      let(:actions_completed) { { created_at: frozen_time - 6.days } }
+
+      it { is_expected.to send_in_product_marketing_email(user.id, anything, :create, described_class::INTERVAL_DAYS.index(interval)) }
+    end
+
+    context 'when different track' do
+      let(:track) { :verify }
+      let(:interval) { 1 }
+      let(:actions_completed) { { created_at: frozen_time - 2.days, git_write_at: frozen_time - 2.days } }
+
+      it { is_expected.to send_in_product_marketing_email(user.id, anything, :verify, described_class::INTERVAL_DAYS.index(interval)) }
+    end
+  end
+
+  it 'records sent emails' do
+    expect { subject }.to change { Users::InProductMarketingEmail.count }.by(1)
+
+    expect(
+      Users::InProductMarketingEmail.where(
+        user: user,
+        track: Users::InProductMarketingEmail.tracks[:create],
+        series: 0
+      )
+    ).to exist
+  end
+
   context 'when invoked with a non existing track' do
     let(:track) { :foo }
 
     before do
-      stub_const("#{described_class}::TRACKS", { foo: :git_write })
+      stub_const("#{described_class}::TRACKS", { bar: :git_write })
     end
 
-    it { expect { subject }.to raise_error(NotImplementedError, 'No ability defined for track foo') }
+    it { expect { subject }.to raise_error(NotImplementedError, 'Track foo not defined') }
   end
 
   context 'when group is a sub-group' do

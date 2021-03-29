@@ -148,7 +148,7 @@ describe('EE - DastProfiles', () => {
 
     describe.each`
       tabName               | index | givenLocationHash
-      ${'Saved Scans'}      | ${0}  | ${'dast-profiles'}
+      ${'Saved Scans'}      | ${0}  | ${'saved-scans'}
       ${'Site Profiles'}    | ${1}  | ${'site-profiles'}
       ${'Scanner Profiles'} | ${2}  | ${'scanner-profiles'}
     `('with location hash set to "$givenLocationHash"', ({ tabName, index, givenLocationHash }) => {

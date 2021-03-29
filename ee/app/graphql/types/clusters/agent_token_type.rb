@@ -29,6 +29,11 @@ module Types
             null: true,
             description: 'Description of the token.'
 
+      field :last_used_at,
+            Types::TimeType,
+            null: true,
+            description: 'Timestamp the token was last used.'
+
       field :id,
             ::Types::GlobalIDType[::Clusters::AgentToken],
             null: false,

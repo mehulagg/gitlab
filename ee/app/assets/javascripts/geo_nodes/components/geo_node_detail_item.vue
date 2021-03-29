@@ -117,12 +117,7 @@ export default {
           __('Synchronization disabled')
         }}</span>
       </div>
-      <gl-popover
-        :target="`syncDisabled-${itemTitle}`"
-        placement="right"
-        triggers="hover focus"
-        :css-classes="['w-100']"
-      >
+      <gl-popover :target="`syncDisabled-${itemTitle}`" placement="right" :css-classes="['w-100']">
         <section>
           <gl-sprintf :message="$options.disabledText">
             <template #itemTitle>{{ itemTitle.toLowerCase() }}</template>

@@ -76,20 +76,6 @@ Layout/LineLength:
 Layout/MultilineOperationIndentation:
   Enabled: false
 
-# Offense count: 11
-# Cop supports --auto-correct.
-Layout/RescueEnsureAlignment:
-  Exclude:
-    - 'app/models/blob_viewer/dependency_manager.rb'
-    - 'app/models/project.rb'
-    - 'app/services/prometheus/proxy_service.rb'
-    - 'app/workers/concerns/reactive_cacheable_worker.rb'
-    - 'app/workers/delete_stored_files_worker.rb'
-    - 'config/initializers/1_settings.rb'
-    - 'config/initializers/trusted_proxies.rb'
-    - 'lib/api/internal/base.rb'
-    - 'lib/gitlab/highlight.rb'
-
 # Offense count: 53
 # Cop supports --auto-correct.
 Layout/SpaceAroundMethodCallOperator:
@@ -184,21 +170,6 @@ Lint/MixedRegexpCaptureTypes:
 Lint/RedundantCopDisableDirective:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: AllowedMethods.
-# AllowedMethods: instance_of?, kind_of?, is_a?, eql?, respond_to?, equal?
-Lint/RedundantSafeNavigation:
-  Exclude:
-    - 'app/controllers/concerns/labels_as_hash.rb'
-    - 'app/policies/note_policy.rb'
-    - 'app/services/users/update_canonical_email_service.rb'
-    - 'ee/app/presenters/iteration_presenter.rb'
-    - 'ee/app/services/ee/members/destroy_service.rb'
-    - 'ee/lib/ee/gitlab/email/handler/reply_processing.rb'
-    - 'qa/qa/specs/helpers/quarantine.rb'
-    - 'spec/controllers/boards/issues_controller_spec.rb'
-
 # Offense count: 1
 Lint/SelfAssignment:
   Exclude:
@@ -236,12 +207,6 @@ Metrics/CyclomaticComplexity:
 # Configuration parameters: IgnoredMethods.
 Metrics/PerceivedComplexity:
   Max: 25
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Migration/DepartmentName:
-  Exclude:
-    - 'app/models/commit.rb'
 
 # Offense count: 196
 # Configuration parameters: ExpectMatchingDefinition, CheckDefinitionPathHierarchy, Regex, IgnoreExecutableScripts, AllowedAcronyms.
@@ -931,11 +896,6 @@ Style/RedundantFetchBlock:
 # Offense count: 26
 # Cop supports --auto-correct.
 Style/RedundantFileExtensionInRequire:
-  Enabled: false
-
-# Offense count: 248
-# Cop supports --auto-correct.
-Style/RedundantFreeze:
   Enabled: false
 
 # Offense count: 206

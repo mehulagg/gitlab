@@ -49,7 +49,9 @@ More links:
 
 You can view the exact JSON payload sent to GitLab Inc. in the administration panel. To view the payload:
 
-1. Navigate to **Admin Area > Settings > Metrics and profiling**.
+1. Sign in as a user with [Administrator](../../user/permissions.md) permissions.
+1. In the top navigation bar, click **(admin)** **Admin Area**.
+1. In the left sidebar, go to **Settings > Metrics and profiling**.
 1. Expand the **Usage statistics** section.
 1. Click the **Preview payload** button.
 
@@ -57,9 +59,17 @@ For an example payload, see [Example Usage Ping payload](#example-usage-ping-pay
 
 ## Disable Usage Ping
 
-To disable Usage Ping in the GitLab UI, go to the **Settings** page of your administration panel and uncheck the **Usage Ping** checkbox.
+To disable Usage Ping in the GitLab UI:
 
-To disable Usage Ping and prevent it from being configured in the future through the administration panel, Omnibus installs can set the following in [`gitlab.rb`](https://docs.gitlab.com/omnibus/settings/configuration.html#configuration-options):
+1. Sign in as a user with [Administrator](../../user/permissions.md) permissions.
+1. In the top navigation bar, click **(admin)** **Admin Area**.
+1. In the left sidebar, go to **Settings > Metrics and profiling**.
+1. Expand the **Usage statistics** section.
+1. Clear the **Usage Ping** checkbox and click **Save changes**.
+
+To disable Usage Ping and prevent it from being configured in the future through
+the administration panel, Omnibus installs can set the following in
+[`gitlab.rb`](https://docs.gitlab.com/omnibus/settings/configuration.html#configuration-options):
 
 ```ruby
 gitlab_rails['usage_ping_enabled'] = false
@@ -785,6 +795,16 @@ end
 Please refer to [the `PrometheusClient` definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/prometheus_client.rb)
 for how to use its API to query for data.
 
+### Fallback values for UsagePing
+
+We return fallback values in these cases:
+
+| Case                        | Value |
+|-----------------------------|-------|
+| Deprecated Metric           | -1000 |
+| Timeouts, general failures  | -1    |
+| Standard errors in counters | -2    |
+
 ## Developing and testing Usage Ping
 
 ### 1. Naming and placing the metrics
@@ -930,7 +950,7 @@ WARNING:
 This feature is intended solely for internal GitLab use.
 
 To add data for aggregated metrics into Usage Ping payload you should add corresponding definition at [`lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/) for metrics available at Community Edition and at [`ee/lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/usage_data_counters/aggregated_metrics/) for Enterprise Edition ones.
- 
+
 Each aggregate definition includes following parts:
 
 - `name`: Unique name under which the aggregate metric is added to the Usage Ping payload.
@@ -999,7 +1019,7 @@ Aggregated metrics collected in `7d` and `28d` time frames are added into Usage 
 }
 ```
 
-Aggregated metrics for `all` time frame are present in the `count` top level key, with the `aggregate_` prefix added to their name. 
+Aggregated metrics for `all` time frame are present in the `count` top level key, with the `aggregate_` prefix added to their name.
 
 For example:
 
@@ -1007,7 +1027,7 @@ For example:
 
 Becomes:
 
-`counts.aggregate_example_metrics_intersection` 
+`counts.aggregate_example_metrics_intersection`
 
 ```ruby
 {

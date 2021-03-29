@@ -12,7 +12,9 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
         <span
-          class="gl-text-truncated"
+          aria-label="Rotation 242"
+          class="gl-text-truncate"
+          data-testid="rotation-name-gid://gitlab/IncidentManagement::OncallRotation/2"
         >
           Rotation 242
         </span>
@@ -72,7 +74,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         <span
           class="current-day-indicator"
           data-testid="current-day-indicator"
-          style="left: 7.142857142857143%;"
+          style="left: 29%;"
         />
          
         <div>

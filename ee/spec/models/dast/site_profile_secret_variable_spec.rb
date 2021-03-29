@@ -27,6 +27,7 @@ RSpec.describe Dast::SiteProfileSecretVariable, type: :model do
     it { is_expected.to be_valid }
     it { is_expected.to include_module(Ci::Maskable) }
     it { is_expected.to include_module(Ci::HasVariable) }
+    it { is_expected.to validate_presence_of(:dast_site_profile_id) }
     it { is_expected.to validate_inclusion_of(:masked).in_array([true]) }
     it { is_expected.to validate_uniqueness_of(:key).scoped_to(:dast_site_profile_id).with_message(/\(\w+\) has already been taken/) }
 

@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # GitLab Kubernetes Agent **(PREMIUM SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
-> - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
+> - [In GitLab 13.10](https://gitlab.com/gitlab-org/gitlab/-/issues/300960), KAS became available on GitLab.com under `wss://kas.gitlab.com` through an Early Adopter Program.
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -85,7 +85,7 @@ component, `agentk`.
 
 Upgrade your agent installations together with GitLab upgrades. To decide which version of `agentk`to install follow:
 
-1. Open the [GITLAB_KAS_VERSION](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_KAS_VERSION) file from the GitLab Repository, which contains the latest `agentk` version associated with the `master` branch.
+1. Open the [`GITLAB_KAS_VERSION`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_KAS_VERSION) file from the GitLab Repository, which contains the latest `agentk` version associated with the `master` branch.
 1. Change the `master` branch and select the Git tag associated with your version. For instance, you could change it to GitLab [v13.5.3-ee release](https://gitlab.com/gitlab-org/gitlab/-/blob/v13.5.3-ee/GITLAB_KAS_VERSION)
 
 The available `agentk` and `kas` versions can be found in
@@ -96,20 +96,21 @@ The available `agentk` and `kas` versions can be found in
 [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3834) in GitLab 13.10,
 the GitLab Kubernetes Agent Server (KAS) is available on GitLab.com under `wss://kas.gitlab.com`.
 If you are a GitLab.com user, skip this step and directly
-[set up the configuration repository](#define-a-configuration-repository) 
+[set up the configuration repository](#define-a-configuration-repository)
 for your agent.
 
-The GitLab Kubernetes Agent Server (KAS) can be deployed using [Omnibus
-GitLab](https://docs.gitlab.com/omnibus/) or the [GitLab
-chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
+The GitLab Kubernetes Agent Server (KAS) can be installed through Omnibus GitLab or
+through the GitLab Helm Chart. If you don't already have
 GitLab installed, please refer to our [installation
 documentation](https://docs.gitlab.com/ee/install/README.html).
+You can install the KAS within GitLab as explained below according to your GitLab installation method.
+You can also opt to use an [external KAS](#use-an-external-kas-installation).
 
-#### Install with Omnibus
+#### Install KAS with Omnibus
 
-When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
+For [Omnibus](https://docs.gitlab.com/omnibus/) package installations:
 
-1. Edit `/etc/gitlab/gitlab.rb`:
+1. Edit `/etc/gitlab/gitlab.rb` to enable the Kubernetes Agent Server:
 
    ```plaintext
    gitlab_kas['enable'] = true
@@ -121,9 +122,9 @@ To configure any additional options related to GitLab Kubernetes Agent Server,
 refer to the **Enable GitLab KAS** section of the
 [`gitlab.rb.template`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-config-template/gitlab.rb.template).
 
-#### Install with the Helm chart
+#### Install KAS with GitLab Helm Chart
 
-When installing or upgrading the GitLab Helm chart, consider the following Helm v3 example.
+For GitLab [Helm Chart](https://gitlab.com/gitlab-org/charts/gitlab) installations, consider the following Helm v3 example.
 If you're using Helm v2, you must modify this example. See our [notes regarding deploy with Helm](https://docs.gitlab.com/charts/installation/deployment.html#deploy-using-helm).
 
 You must set `global.kas.enabled=true` for the KAS to be properly installed and configured:
@@ -149,6 +150,29 @@ gitlab:
 ```
 
 For details, read [Using the GitLab-KAS chart](https://docs.gitlab.com/charts/charts/gitlab/kas/).
+
+#### Use an external KAS installation
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299850) in GitLab 13.10.
+
+Besides installing KAS with GitLab, you can opt to configure GitLab to use an external KAS.
+
+For GitLab instances installed through the GitLab Helm Chart, see [how to configure your external KAS](https://docs.gitlab.com/charts/charts/globals.html#external-kas).
+
+For GitLab instances installed through Omnibus packages:
+
+1. Edit `/etc/gitlab/gitlab.rb` adding the paths to your external KAS:
+
+   ```ruby
+   gitlab_kas['enable'] = false
+   gitlab_kas['api_secret_key'] = 'Your shared secret between GitLab and KAS'
+
+   gitlab_rails['gitlab_kas_enabled'] = true
+   gitlab_rails['gitlab_kas_external_url'] = 'wss://kas.gitlab.example.com' # User-facing URL for the in-cluster agentk
+   gitlab_rails['gitlab_kas_internal_url'] = 'grpc://kas.internal.gitlab.example.com' # Internal URL for the GitLab backend
+   ```
+
+1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 ### Define a configuration repository
 
@@ -176,23 +200,9 @@ documentation on the [Kubernetes Agent configuration repository](repository.md).
 
 ### Create an Agent record in GitLab
 
-Next, create an GitLab Rails Agent record so the Agent can associate itself with
+Next, create a GitLab Rails Agent record to associate it with
 the configuration repository project. Creating this record also creates a Secret needed to configure
-the Agent in subsequent steps. You can create an Agent record either:
-
-- Through the Rails console:
-
-  ```ruby
-  project = ::Project.find_by_full_path("path-to/your-configuration-project")
-  # agent-name should be the same as specified above in the config.yaml
-  agent = ::Clusters::Agent.create(name: "<agent-name>", project: project)
-  token = ::Clusters::AgentToken.create(agent: agent)
-  token.token # this will print out the token you need to use on the next step
-  ```
-
-   For full details, read [Starting a Rails console session](../../../administration/operations/rails_console.md#starting-a-rails-console-session).
-
-- Through GraphQL: **(PREMIUM SELF)**
+the Agent in subsequent steps. You can create an Agent record with GraphQL:
 
   ```graphql
   mutation createAgent {
@@ -294,7 +304,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
     `kas-address`, where `GitLab.host.tld` is your GitLab hostname.
   - When using the sub-chart, specify the `ws` scheme (such as `ws://kas.host.tld:80`)
     to use an unencrypted WebSockets connection.
-    When using the Omnibus GitLab, specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent`).
+    When using the Omnibus GitLab, specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent/`).
   - Specify the `grpc` scheme if both Agent and Server are installed in one cluster.
     In this case, you may specify `kas-address` value as
     `grpc://gitlab-kas.<your-namespace>:5005`) to use gRPC directly, where `gitlab-kas`
@@ -306,7 +316,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
   - When deploying KAS through the [GitLab chart](https://docs.gitlab.com/charts/), it's possible to customize the `kas-address` for `wss` and `ws` schemes to whatever you need.
     Check the [chart's KAS Ingress documentation](https://docs.gitlab.com/charts/charts/gitlab/kas/#ingress)
     to learn more about it.
-  - In the near future, Omnibus GitLab intends to provision `gitlab-kas` under a sub-domain by default, instead of the `/-/kubernetes-agent` path. Please follow [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784) for details.
+  - In the near future, Omnibus GitLab intends to provision `gitlab-kas` under a sub-domain by default, instead of the `/-/kubernetes-agent/` path. Please follow [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784) for details.
 - If you defined your own secret name, replace `gitlab-agent-token` with your
   secret name in the `secretName:` section.
 
@@ -642,7 +652,7 @@ Then in `resources.yml`:
         - --token-file=/config/token
         - --kas-address
         - wss://kas.host.tld:443 # change this line for the one below if using Omnibus GitLab
-        # - wss://gitlab.host.tld:443/-/kubernetes-agent
+        # - wss://gitlab.host.tld:443/-/kubernetes-agent/
         volumeMounts:
         - name: token-volume
           mountPath: /config
@@ -673,7 +683,7 @@ Alternatively, you can mount the certificate file at a different location and in
         - --token-file=/config/token
         - --kas-address
         - wss://kas.host.tld:443 # change this line for the one below if using Omnibus GitLab
-        # - wss://gitlab.host.tld:443/-/kubernetes-agent
+        # - wss://gitlab.host.tld:443/-/kubernetes-agent/
         volumeMounts:
         - name: token-volume
           mountPath: /config

@@ -194,7 +194,7 @@ export default {
               :title="__('More actions')"
             >
               <template #button-content>
-                <gl-icon name="ellipsis_v" />
+                <gl-icon name="ellipsis_v" class="gl-mr-0!" />
                 <span class="gl-sr-only">{{ __('Actions') }}</span>
               </template>
 

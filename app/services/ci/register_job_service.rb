@@ -24,7 +24,7 @@ module Ci
     def execute(params = {})
       @metrics.increment_queue_operation(:queue_attempt)
 
-      @metrics.observe_queue_time do
+      @metrics.observe_queue_time(:process) do
         process_queue(params)
       end
     end
@@ -110,20 +110,28 @@ module Ci
       end
 
       if Feature.enabled?(:ci_register_job_service_one_by_one, runner, default_enabled: true)
-        build_ids = builds.pluck(:id)
+        build_ids = retrieve_queue(-> { builds.pluck(:id) })
 
-        @metrics.observe_queue_size(-> { build_ids.size })
+        @metrics.observe_queue_size(-> { build_ids.size }, @runner.runner_type)
 
         build_ids.each do |build_id|
           yield Ci::Build.find(build_id)
         end
       else
-        @metrics.observe_queue_size(-> { builds.to_a.size })
+        builds_array = retrieve_queue(-> { builds.to_a })
 
-        builds.each(&blk)
+        @metrics.observe_queue_size(-> { builds_array.size }, @runner.runner_type)
+
+        builds_array.each(&blk)
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
+
+    def retrieve_queue(queue_query_proc)
+      @metrics.observe_queue_time(:retrieve) do
+        queue_query_proc.call
+      end
+    end
 
     def process_build(build, params)
       unless build.pending?
@@ -270,7 +278,7 @@ module Ci
       # Workaround for weird Rails bug, that makes `runner.groups.to_sql` to return `runner_id = NULL`
       groups = ::Group.joins(:runner_namespaces).merge(runner.runner_namespaces)
 
-      hierarchy_groups = Gitlab::ObjectHierarchy.new(groups).base_and_descendants
+      hierarchy_groups = Gitlab::ObjectHierarchy.new(groups, options: { use_distinct: Feature.enabled?(:use_distinct_in_register_job_object_hierarchy) }).base_and_descendants
       projects = Project.where(namespace_id: hierarchy_groups)
         .with_group_runners_enabled
         .with_builds_enabled

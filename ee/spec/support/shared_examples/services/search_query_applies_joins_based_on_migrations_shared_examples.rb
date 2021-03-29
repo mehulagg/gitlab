@@ -7,9 +7,7 @@ RSpec.shared_examples 'search query applies joins based on migrations shared exa
 
     context "when #{migration_name} migration is finished" do
       before do
-        allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-                                                  .with(migration_name)
-                                                  .and_return(true)
+        set_elasticsearch_migration_to migration_name, including: true
       end
 
       it 'does not use joins to apply permissions' do
@@ -25,9 +23,7 @@ RSpec.shared_examples 'search query applies joins based on migrations shared exa
 
     context "when #{migration_name} migration is not finished" do
       before do
-        allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-                                                  .with(migration_name)
-                                                  .and_return(false)
+        set_elasticsearch_migration_to migration_name, including: false
       end
 
       it 'uses joins to apply permissions' do

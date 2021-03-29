@@ -103,8 +103,7 @@ and the [Maven wrapper](https://github.com/takari/maven-wrapper).
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4895) in GitLab 13.7.
 
-GitLab SAST can scan repositories that contain multiple projects. All projects must be in the same
-language.
+GitLab SAST can scan repositories that contain multiple projects.
 
 The following analyzers have multi-project support:
 
@@ -537,7 +536,7 @@ The SAST tool emits a JSON report file. For more information, see the
 [schema for this report](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json).
 
 The JSON report file can be downloaded from the CI pipelines page, or the
-pipelines tab on merge requests by [setting `artifacts: paths`](../../../ci/pipelines/job_artifacts.md#defining-artifacts-in-gitlab-ciyml) to `gl-sast-report.json`. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
+pipelines tab on merge requests by [setting `artifacts: paths`](../../../ci/yaml/README.md#artifactspaths) to `gl-sast-report.json`. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
 
 Here's an example SAST report:
 

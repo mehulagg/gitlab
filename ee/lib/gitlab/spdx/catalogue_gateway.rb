@@ -3,7 +3,7 @@
 module Gitlab
   module SPDX
     class CatalogueGateway
-      URL = 'https://spdx.org/licenses/licenses.json'.freeze
+      URL = 'https://spdx.org/licenses/licenses.json'
       OFFLINE_CATALOGUE = Rails.root.join('vendor/spdx.json').freeze
 
       def fetch

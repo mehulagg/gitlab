@@ -4,7 +4,7 @@ module Projects
   class SlackApplicationInstallService < BaseService
     include Gitlab::Routing
 
-    SLACK_EXCHANGE_TOKEN_URL = 'https://slack.com/api/oauth.access'.freeze
+    SLACK_EXCHANGE_TOKEN_URL = 'https://slack.com/api/oauth.access'
 
     def execute
       slack_data = exchange_slack_token

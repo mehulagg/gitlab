@@ -43,6 +43,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:local_file_reviews, default_enabled: :yaml)
     push_frontend_feature_flag(:paginated_notes, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:new_pipelines_table, @project, default_enabled: :yaml)
+    push_frontend_feature_flag(:confidential_notes, @project, default_enabled: :yaml)
 
     record_experiment_user(:invite_members_version_b)
 
@@ -469,8 +470,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   end
 
   def disable_query_limiting
-    # Also see https://gitlab.com/gitlab-org/gitlab-foss/issues/42441
-    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42438')
+    # Also see https://gitlab.com/gitlab-org/gitlab/-/issues/20827
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20824')
   end
 
   def reports_response(report_comparison, pipeline = nil)

@@ -131,7 +131,6 @@ describe('AddEditRotationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findModal = () => wrapper.findComponent(GlModal);
@@ -143,16 +142,22 @@ describe('AddEditRotationModal', () => {
   });
 
   describe('Rotation create', () => {
-    it('makes a request with `oncallRotationCreate` to create a schedule rotation', () => {
+    beforeEach(() => {
+      createComponent({ data: { form: { name: mockRotation.name } } });
+    });
+
+    it('makes a request with `oncallRotationCreate` to create a schedule rotation and clears the form', async () => {
       mutate.mockResolvedValueOnce({});
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
         variables: { input: expect.objectContaining({ projectPath }) },
       });
+      await wrapper.vm.$nextTick();
+      expect(findForm().props('form').name).toBe(undefined);
     });
 
-    it('does not hide the rotation modal and shows error alert on fail', async () => {
+    it('does not hide the rotation modal and shows error alert on fail and does not clear the form', async () => {
       const error = 'some error';
       mutate.mockResolvedValueOnce({ data: { oncallRotationCreate: { errors: [error] } } });
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
@@ -160,6 +165,7 @@ describe('AddEditRotationModal', () => {
       expect(mockHideModal).not.toHaveBeenCalled();
       expect(findAlert().exists()).toBe(true);
       expect(findAlert().text()).toContain(error);
+      expect(findForm().props('form').name).toBe(mockRotation.name);
     });
 
     describe('Validation', () => {

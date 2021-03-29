@@ -12,7 +12,7 @@ process of working across these systems more efficient.
 The GitLab Jira integration, available in every GitLab project by default, allows you to connect
 to any Jira instance, whether on Atlassian cloud or self-managed.
 
-You can also install the [Jira Development Panel integration](../../../integration/jira_development_panel.md).
+You can also install the [Jira Development Panel integration](../../../integration/jira/index.md).
 For more information about the differences between the two integrations, see
 [Jira integrations](jira_integrations.md).
 
@@ -74,13 +74,13 @@ The process for configuring Jira depends on whether you host Jira on your own se
 
 Jira Server supports basic authentication. When connecting, a **username and password** are
 required. Connecting to Jira Server via CAS is not possible. For more information, see
-[set up a user in Jira Server](jira_server_configuration.md).
+[set up a user in Jira Server](../../../integration/jira/jira_server_configuration.md).
 
 #### Jira on Atlassian cloud
 
 Jira on Atlassian cloud supports authentication through an API token. When connecting to Jira on
 Atlassian cloud, an **email and API token** are required. For more information, see
-[set up a user in Jira on Atlassian cloud](jira_cloud_configuration.md).
+[set up a user in Jira on Atlassian cloud](../../../integration/jira/jira_cloud_configuration.md).
 
 ### Configure GitLab
 
@@ -261,14 +261,8 @@ Issues are grouped into tabs based on their [Jira status](https://confluence.atl
 
 #### View a Jira issue
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10.
-> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [enable it](#enable-or-disable-jira-issue-detail-view). **(PREMIUM)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10 behind a feature flag, disabled by default.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.11.
 
 When viewing the [Jira issues list](#view-jira-issues), select an issue from the
 list to open it in GitLab:
@@ -323,22 +317,3 @@ which may lead to a `401 unauthorized` error when testing your Jira integration.
 If CAPTCHA has been triggered, you can't use Jira's REST API to
 authenticate with the Jira site. You need to log in to your Jira instance
 and complete the CAPTCHA.
-
-## Enable or disable Jira issue detail view
-
-Jira issue detail view is under development but ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:jira_issues_show_integration)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:jira_issues_show_integration)
-```

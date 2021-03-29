@@ -111,6 +111,10 @@ RSpec.describe 'shared/billings/_eoa_bronze_plan_banner.html.haml' do
     it_behaves_like 'with a different plan than Bronze' do
       let(:namespace) { group }
     end
+
+    it_behaves_like 'when user dismissed the banner' do
+      let(:namespace) { group }
+    end
   end
 
   context 'with personal namespace' do
@@ -134,6 +138,10 @@ RSpec.describe 'shared/billings/_eoa_bronze_plan_banner.html.haml' do
     end
 
     it_behaves_like 'with a different plan than Bronze' do
+      let(:namespace) { current_user.namespace }
+    end
+
+    it_behaves_like 'when user dismissed the banner' do
       let(:namespace) { current_user.namespace }
     end
   end

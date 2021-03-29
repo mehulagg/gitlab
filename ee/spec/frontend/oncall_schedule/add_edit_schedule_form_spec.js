@@ -84,7 +84,7 @@ describe('AddEditScheduleForm', () => {
 
     describe('timezones filtering', () => {
       it('should filter options based on search term', async () => {
-        const searchTerm = 'Hawaii';
+        const searchTerm = 'Pacific';
         findTimezoneSearchBox().vm.$emit('input', searchTerm);
         await wrapper.vm.$nextTick();
         const options = findDropdownOptions();

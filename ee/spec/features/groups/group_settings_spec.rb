@@ -296,9 +296,11 @@ RSpec.describe 'Edit group settings' do
 
         within('[data-testid="merge-request-approval-settings"]') do
           click_button 'Expand'
-          expect(find('[data-testid="prevent-author-approval"]')).to be_checked
+          checkbox = find('[data-testid="prevent-author-approval"] > input')
 
-          find('[data-testid="prevent-author-approval"]').set(false)
+          expect(checkbox).to be_checked
+
+          checkbox.set(false)
           click_button 'Save changes'
           wait_for_all_requests
         end
@@ -308,7 +310,7 @@ RSpec.describe 'Edit group settings' do
 
         within('[data-testid="merge-request-approval-settings"]') do
           click_button 'Expand'
-          expect(find('[data-testid="prevent-author-approval"]')).not_to be_checked
+          expect(find('[data-testid="prevent-author-approval"] > input')).not_to be_checked
         end
       end
     end

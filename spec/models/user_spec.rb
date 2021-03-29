@@ -108,6 +108,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:merge_request_assignees).inverse_of(:assignee) }
     it { is_expected.to have_many(:merge_request_reviewers).inverse_of(:reviewer) }
     it { is_expected.to have_many(:created_custom_emoji).inverse_of(:creator) }
+    it { is_expected.to have_many(:in_product_marketing_emails) }
 
     describe "#user_detail" do
       it 'does not persist `user_detail` by default' do
@@ -1777,16 +1778,27 @@ RSpec.describe User do
     context 'when user has running CI pipelines' do
       let(:service) { double }
 
-      before do
-        pipeline = create(:ci_pipeline, :running, user: user)
-        create(:ci_build, :running, pipeline: pipeline)
+      context 'with abort_user_pipelines_on_block feature enabled' do
+        let(:pipelines) { build_list(:ci_pipeline, 3, :running) }
+
+        it 'aborts all running pipelines and related jobs' do
+          stub_feature_flags(abort_user_pipelines_on_block: true)
+          expect(user).to receive(:pipelines).and_return(pipelines)
+          expect(Ci::AbortPipelinesService).to receive(:new).and_return(service)
+          expect(service).to receive(:execute).with(pipelines)
+
+          user.block
+        end
       end
 
-      it 'cancels all running pipelines and related jobs' do
-        expect(Ci::CancelUserPipelinesService).to receive(:new).and_return(service)
-        expect(service).to receive(:execute).with(user)
+      context 'with abort_user_pipelines_on_block feature disabled' do
+        it 'cancels all running pipelines and related jobs' do
+          stub_feature_flags(abort_user_pipelines_on_block: false)
+          expect(Ci::CancelUserPipelinesService).to receive(:new).and_return(service)
+          expect(service).to receive(:execute).with(user)
 
-        user.block
+          user.block
+        end
       end
     end
 

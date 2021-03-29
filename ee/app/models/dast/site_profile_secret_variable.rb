@@ -18,6 +18,8 @@ module Dast
       key: Settings.attr_encrypted_db_key_base_32,
       encode: false # No need to encode for binary column https://github.com/attr-encrypted/attr_encrypted#the-encode-encode_iv-encode_salt-and-default_encoding-options
 
+    validates :dast_site_profile_id, presence: true
+
     # Secret variables must be masked to prevent them being readable in CI jobs
     validates :masked, inclusion: { in: [true] }
     validates :variable_type, inclusion: { in: ['env_var'] }

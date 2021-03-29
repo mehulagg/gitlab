@@ -768,6 +768,22 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#paid?' do
+    it 'returns true for a root namespace with a paid plan' do
+      create(:gitlab_subscription, :ultimate, namespace: namespace)
+
+      expect(namespace.paid?).to eq(true)
+    end
+
+    it 'returns false for a subgroup of a group with a paid plan' do
+      group = create(:group)
+      subgroup = create(:group, parent: group)
+      create(:gitlab_subscription, :ultimate, namespace: group)
+
+      expect(subgroup.paid?).to eq(false)
+    end
+  end
+
   describe '#actual_plan_name' do
     context 'when namespace does not have a subscription associated' do
       it 'returns default plan' do

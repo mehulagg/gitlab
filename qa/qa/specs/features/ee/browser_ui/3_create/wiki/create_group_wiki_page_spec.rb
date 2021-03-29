@@ -23,7 +23,7 @@ module QA
             EE::Page::Group::Wiki::Edit.perform do |edit|
               edit.set_title(wiki_title)
               edit.set_content(wiki_content)
-              edit.click_create_page
+              edit.click_submit
             end
 
             EE::Page::Group::Wiki::Show.perform do |wiki|
@@ -48,7 +48,7 @@ module QA
             EE::Page::Group::Wiki::Edit.perform do |edit|
               edit.set_title(wiki_title)
               edit.set_content(wiki_content)
-              edit.click_create_page
+              edit.click_submit
             end
 
             EE::Page::Group::Wiki::Show.perform do |wiki|

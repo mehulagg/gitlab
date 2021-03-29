@@ -12,6 +12,10 @@ module Boards
       def board
         @board ||= parent.epic_boards.find(params[:board_id])
       end
+
+      def reposition_parent
+        { board_id: board.id }
+      end
     end
   end
 end

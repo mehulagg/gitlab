@@ -66,6 +66,12 @@ RSpec.describe EpicIssues::CreateService do
         expect(note.noteable_type).to eq('Issue')
         expect(note.system_note_metadata.action).to eq('issue_added_to_epic')
       end
+
+      it 'records action on usage ping' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_issue_added).with(author: user)
+
+        subject
+      end
     end
 
     shared_examples 'returns an error' do

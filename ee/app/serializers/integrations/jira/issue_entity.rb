@@ -59,9 +59,7 @@ module Integrations
       end
 
       expose :gitlab_web_url do |jira_issue|
-        if ::Feature.enabled?(:jira_issues_show_integration, project, default_enabled: :yaml)
-          project_integrations_jira_issue_path(project, jira_issue.key)
-        end
+        project_integrations_jira_issue_path(project, jira_issue.key)
       end
 
       expose :references do |jira_issue|

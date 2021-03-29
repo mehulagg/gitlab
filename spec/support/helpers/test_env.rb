@@ -92,7 +92,7 @@ module TestEnv
   }.freeze
 
   TMP_TEST_PATH = Rails.root.join('tmp', 'tests').freeze
-  REPOS_STORAGE = 'default'.freeze
+  REPOS_STORAGE = 'default'
   SECOND_STORAGE_PATH = Rails.root.join('tmp', 'tests', 'second_storage')
 
   # Test environment
@@ -175,7 +175,7 @@ module TestEnv
           { 'default' => repos_path },
           force: true,
           options: {
-            prometheus_listen_addr: ':9236'
+            prometheus_listen_addr: 'localhost:9236'
           }
         )
         Gitlab::SetupHelper::Gitaly.create_configuration(

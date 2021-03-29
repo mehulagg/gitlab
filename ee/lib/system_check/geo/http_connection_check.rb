@@ -5,8 +5,8 @@ module SystemCheck
     class HttpConnectionCheck < SystemCheck::BaseCheck
       set_name 'GitLab Geo HTTP(S) connectivity'
 
-      NOT_SECONDARY_NODE = 'not a secondary node'.freeze
-      GEO_NOT_ENABLED = 'Geo is not enabled'.freeze
+      NOT_SECONDARY_NODE = 'not a secondary node'
+      GEO_NOT_ENABLED = 'Geo is not enabled'
 
       def skip?
         unless Gitlab::Geo.enabled?

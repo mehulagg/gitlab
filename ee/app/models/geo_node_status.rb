@@ -190,8 +190,8 @@ class GeoNodeStatus < ApplicationRecord
   }.merge(replicator_class_prometheus_metrics).freeze
 
   EXPIRATION_IN_MINUTES = 10
-  HEALTHY_STATUS = 'Healthy'.freeze
-  UNHEALTHY_STATUS = 'Unhealthy'.freeze
+  HEALTHY_STATUS = 'Healthy'
+  UNHEALTHY_STATUS = 'Unhealthy'
 
   def self.alternative_status_store_accessor(attr_names)
     attr_names.each do |attr_name|
