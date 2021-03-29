@@ -109,6 +109,16 @@ RSpec.describe GroupsHelper do
 
       subject
     end
+
+    it 'avoids N+1 queries' do
+      control_count = ActiveRecord::QueryRecorder.new do
+        helper.group_title(nested_group)
+      end
+
+      expect do
+        helper.group_title(very_deep_nested_group)
+      end.not_to exceed_query_limit(control_count)
+    end
   end
 
   describe '#share_with_group_lock_help_text' do

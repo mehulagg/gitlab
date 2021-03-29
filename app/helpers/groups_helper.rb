@@ -120,7 +120,9 @@ module GroupsHelper
     @has_group_title = true
     full_title = []
 
-    group.ancestors.reverse.each_with_index do |parent, index|
+    ancestors = group.ancestors.with_route
+
+    ancestors.reverse.each_with_index do |parent, index|
       if index > 0
         add_to_breadcrumb_dropdown(group_title_link(parent, hidable: false, show_avatar: true, for_dropdown: true), location: :before)
       else
