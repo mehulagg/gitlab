@@ -23,6 +23,7 @@ module Epics
 
         track_start_date_fixed_events(epic)
         track_due_date_fixed_events(epic)
+        track_fixed_dates_updated_events(epic)
 
         epic.reset
       end
@@ -58,6 +59,20 @@ module Epics
     end
 
     private
+
+    def track_fixed_dates_updated_events(epic)
+      fixed_start_date_updated = epic.saved_changes.key?('start_date_fixed')
+      fixed_due_date_updated = epic.saved_changes.key?('due_date_fixed')
+      return unless fixed_start_date_updated || fixed_due_date_updated
+
+      if fixed_start_date_updated
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_fixed_start_date_updated_action(author: current_user)
+      end
+
+      if fixed_due_date_updated
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_fixed_due_date_updated_action(author: current_user)
+      end
+    end
 
     def track_start_date_fixed_events(epic)
       return unless epic.saved_changes.key?('start_date_is_fixed')
