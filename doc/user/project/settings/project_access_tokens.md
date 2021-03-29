@@ -82,4 +82,4 @@ the following table.
 ## Enable or disable project access token creation
 
 You may enable or disable project access token creation for all projects in a group in **Group > Settings > General > Permissions, LFS, 2FA > Allow project access token creation**.
-Disabling this setting does not affect existing project access tokens.
+Even when creation is disabled, you can still use and revoke existing project access tokens.

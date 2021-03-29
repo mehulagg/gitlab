@@ -15122,6 +15122,9 @@ msgstr ""
 msgid "GroupSelect|Select a group"
 msgstr ""
 
+msgid "GroupSettings|Allow project access token creation"
+msgstr ""
+
 msgid "GroupSettings|Apply integration settings to all Projects"
 msgstr ""
 
@@ -15197,12 +15200,6 @@ msgstr ""
 msgid "GroupSettings|Prevent sharing a project within %{group} with other groups"
 msgstr ""
 
-msgid "GroupSettings|Project access token creation enabled"
-msgstr ""
-
-msgid "GroupSettings|Projects in this group can create %{link_start}project access tokens%{link_end}."
-msgstr ""
-
 msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{customization_link} in instance settings"
 msgstr ""
 
@@ -15240,6 +15237,9 @@ msgid "GroupSettings|This setting will prevent group members from forking projec
 msgstr ""
 
 msgid "GroupSettings|Transfer group"
+msgstr ""
+
+msgid "GroupSettings|Users can create %{link_start}project access tokens%{link_end} for projects in this group."
 msgstr ""
 
 msgid "GroupSettings|What are badges?"

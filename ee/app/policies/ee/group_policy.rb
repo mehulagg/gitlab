@@ -393,7 +393,7 @@ module EE
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
     override :resource_access_token_feature_available?
     def resource_access_token_feature_available?
-      return true unless ::Gitlab.com?
+      return super unless ::Gitlab.com?
 
       group.feature_available_non_trial?(:resource_access_token)
     end

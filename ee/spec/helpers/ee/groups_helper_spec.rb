@@ -109,17 +109,17 @@ RSpec.describe GroupsHelper do
     end
   end
 
-  describe '#render_project_access_token_creation_checkbox?' do
+  describe '#render_project_access_token_creation_permission?' do
     context 'with self-managed' do
       let_it_be(:parent) { create(:group) }
       let_it_be(:group) { create(:group, parent: parent) }
 
       it 'returns true if group is root' do
-        expect(helper.render_project_access_token_creation_checkbox?(parent)).to be_truthy
+        expect(helper.render_project_access_token_creation_permission?(parent)).to be_truthy
       end
 
       it 'returns false if group is subgroup' do
-        expect(helper.render_project_access_token_creation_checkbox?(group)).to be_falsy
+        expect(helper.render_project_access_token_creation_permission?(group)).to be_falsey
       end
     end
 
@@ -132,16 +132,21 @@ RSpec.describe GroupsHelper do
       context 'with a free plan' do
         let_it_be(:group) { create(:group) }
 
-        it 'returns false if group is free' do
-          expect(helper.render_project_access_token_creation_checkbox?(group)).to be_falsy
+        it 'returns false' do
+          expect(helper.render_project_access_token_creation_permission?(group)).to be_falsey
         end
       end
 
       context 'with a paid plan' do
-        let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+        let_it_be(:parent) { create(:group_with_plan, plan: :bronze_plan) }
+        let_it_be(:group) { create(:group, parent: parent) }
 
-        it 'returns true if group is paid' do
-          expect(helper.render_project_access_token_creation_checkbox?(group)).to be_truthy
+        it 'returns true if group is root' do
+          expect(helper.render_project_access_token_creation_permission?(parent)).to be_truthy
+        end
+
+        it 'returns false if group is subgroup' do
+          expect(helper.render_project_access_token_creation_permission?(group)).to be_falsey
         end
       end
     end

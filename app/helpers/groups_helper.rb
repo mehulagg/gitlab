@@ -220,7 +220,7 @@ module GroupsHelper
       !multiple_members?(group)
   end
 
-  def render_project_access_token_creation_checkbox?(group)
+  def render_project_access_token_creation_permission?(group)
     group.root?
   end
 

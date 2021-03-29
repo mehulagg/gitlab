@@ -68,7 +68,7 @@ RSpec.describe NamespaceSetting, type: :model do
     end
 
     describe '#allow_resource_access_token_creation_for_group' do
-      let(:settings) {  group.namespace_settings }
+      let(:settings) { group.namespace_settings }
 
       context 'group is top-level group' do
         let(:group) { create(:group) }

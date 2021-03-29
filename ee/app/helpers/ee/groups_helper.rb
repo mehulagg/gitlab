@@ -112,8 +112,8 @@ module EE
       group.feature_available?(:adjourned_deletion_for_projects_and_groups)
     end
 
-    override :render_project_access_token_creation_checkbox?
-    def render_project_access_token_creation_checkbox?(group)
+    override :render_project_access_token_creation_permission?
+    def render_project_access_token_creation_permission?(group)
       value_from_super = super
       return value_from_super unless ::Gitlab.com?
 
