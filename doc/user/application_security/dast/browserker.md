@@ -21,6 +21,8 @@ Crawling continues by taking more snapshots and finding subsequent actions.
 
 The benefit of crawling by following user actions in a browser is that Browserker can interact with the target application much like a real user would, identifying complex flows that traditional web crawlers don’t understand. This results in better coverage of both the user-facing website and their backend APIs.
 
+Scanning a web application with both Browserker and GitLab DAST should provide greater coverage, compared with only GitLab DAST.
+
 ## Enable Browserker
 
 Browserker is an extension to the GitLab DAST product. DAST should be included in the CI configuration and Browserker enabled using environment variables:
@@ -81,7 +83,7 @@ Selectors have the format `type`:`search string`. Browserker will search for the
 
 ## Vulnerability detection
 
-While Browserker provides users with a efficient crawler of modern web applications, vulnerability detection is still managed by the standard DAST/Zed Attack Proxy (ZAP) solution.
+While Browserker crawls modern web applications efficiently, vulnerability detection is still managed by the standard DAST/Zed Attack Proxy (ZAP) solution.
 
 Browserker runs the target website in a browser with DAST/ZAP configured as the proxy server. This ensures that all requests and responses made by the browser are passively scanned by DAST/ZAP.
 When running a full scan, active vulnerability checks executed by DAST/ZAP do not use a browser. This difference in how vulnerabilities are checked can cause issues that require certain features of the target website to be disabled to ensure the scan works as intended.
