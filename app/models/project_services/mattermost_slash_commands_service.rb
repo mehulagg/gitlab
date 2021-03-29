@@ -14,7 +14,7 @@ class MattermostSlashCommandsService < SlashCommandsService
   end
 
   def description
-    "Perform common operations in Mattermost"
+    "Perform common tasks in your project by entering slash commands in Mattermost."
   end
 
   def self.to_param
