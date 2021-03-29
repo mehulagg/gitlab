@@ -44,5 +44,32 @@ RSpec.describe NamespaceSettings::UpdateService do
           .from(nil).to(example_branch_name)
       end
     end
+
+    context "updating :resource_access_token_creation_allowed" do
+      let(:settings) { { resource_access_token_creation_allowed: false } }
+
+      context 'with admin user' do
+        let(:user) { create(:user) }
+
+        before do
+          group.add_owner(user)
+        end
+
+        it 'updates the setting' do
+          expect { service.execute }
+            .to change { group.resource_access_token_creation_allowed }
+            .from(true).to(false)
+        end
+      end
+
+      context 'with a non-admin user' do
+        let(:user) { create(:user) }
+
+        it 'does not update the setting' do
+          expect { service.execute }.not_to change { group.resource_access_token_creation_allowed }
+          expect(group.errors.messages[:resource_access_token_creation_allowed]).to include("can only be changed by a group admin.")
+        end
+      end
+    end
   end
 end

@@ -461,6 +461,19 @@ RSpec.describe GroupsHelper do
     end
   end
 
+  describe '#render_project_access_token_creation_checkbox?' do
+    let_it_be(:parent) { create(:group) }
+    let_it_be(:group) { create(:group, parent: parent) }
+
+    it 'returns true if group is root' do
+      expect(helper.render_project_access_token_creation_checkbox?(parent)).to be_truthy
+    end
+
+    it 'returns false if group is subgroup' do
+      expect(helper.render_project_access_token_creation_checkbox?(group)).to be_falsy
+    end
+  end
+
   describe '#group_open_issues_count' do
     let_it_be(:current_user) { create(:user) }
     let_it_be(:group) { create(:group, :public) }

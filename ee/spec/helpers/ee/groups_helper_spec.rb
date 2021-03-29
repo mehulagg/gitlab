@@ -109,6 +109,44 @@ RSpec.describe GroupsHelper do
     end
   end
 
+  describe '#render_project_access_token_creation_checkbox?' do
+    context 'with self-managed' do
+      let_it_be(:parent) { create(:group) }
+      let_it_be(:group) { create(:group, parent: parent) }
+
+      it 'returns true if group is root' do
+        expect(helper.render_project_access_token_creation_checkbox?(parent)).to be_truthy
+      end
+
+      it 'returns false if group is subgroup' do
+        expect(helper.render_project_access_token_creation_checkbox?(group)).to be_falsy
+      end
+    end
+
+    context 'on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+        stub_ee_application_setting(should_check_namespace_plan: true)
+      end
+
+      context 'with a free plan' do
+        let_it_be(:group) { create(:group) }
+
+        it 'returns false if group is free' do
+          expect(helper.render_project_access_token_creation_checkbox?(group)).to be_falsy
+        end
+      end
+
+      context 'with a paid plan' do
+        let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+
+        it 'returns true if group is paid' do
+          expect(helper.render_project_access_token_creation_checkbox?(group)).to be_truthy
+        end
+      end
+    end
+  end
+
   describe '#permanent_deletion_date' do
     let(:date) { 2.days.from_now }
 
