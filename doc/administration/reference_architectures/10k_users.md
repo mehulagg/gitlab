@@ -2350,22 +2350,18 @@ considered and customer technical support will be considered out of scope.
 </div>
 
 ## Hybrid Reference Architecture with Helm Charts (Alternative)
-
-As an alternative approach you can also run select components of GitLab in Kubernetes
+As an alternative approach, you can also run select components of GitLab in Kubernetes
 via our official [Helm Charts](https://docs.gitlab.com/charts/).
-
-In this setup we support running the equivalent of GitLab Rails and Sidekiq nodes
+In this setup, we support running the equivalent of GitLab Rails and Sidekiq nodes
 in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition to
 this several other supporting services, such as Grafana, NGINX, etc... are also
 supported here.
 
 Note that the listed components above are the **only** components we support running
-in Kubernetes and all other components should continue to be run via Omnibus or
-alternatively on PAAS services such as AWS RDS for Database, etc...
+alternatively on PAAS services, such as AWS RDS for the database.
 
 Hybrid installations leverage the benefits of both cloud native and traditional
-deployments together. By shifting the Sidekiq and Webservice components into
-Kubernetes you can reap certain cloud native workload management benefits while
+Kubernetes, you can reap certain cloud native workload management benefits while
 the others are deployed in compute VMs with Omnibus as described above in this
 page.
 
