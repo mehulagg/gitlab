@@ -18,10 +18,10 @@ to use this endpoint.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/245331) in GitLab Free 13.5.
 
-With Maintainer or higher [permissions](../../user/permissions.md), you can view
-the list of configured alerts integrations by navigating to
-**Settings > Operations** in your project's sidebar menu, and expanding **Alert integrations** section.
-The list displays the integration name, type, and status (enabled or disabled):
+With Maintainer or higher [permissions](../../user/permissions.md),
+you can view the list of configured alerts integrations by navigating to **Settings > Operations**
+in your project's sidebar menu, and expanding the **Alert integrations** section. The list displays
+the integration name, type, and status (enabled or disabled):
 
 ![Current Integrations](img/integrations_list_v13_5.png)
 
@@ -166,8 +166,8 @@ alert to confirm your integration works properly.
 1. Navigate to **Settings > Operations** in your project.
 1. Click **Alert integrations** to expand the section.
 1. Click the **{settings}** settings icon on the right side of the integration in [the list](#integrations-list). 
-1. Open **Send test alert** tab clicking on it.
-1. Enter a tes payload in the payload field (valid JSON is required).
+1. Select the **Send test alert** tab to open it.
+1. Enter a test payload in the payload field (valid JSON is required).
 1. Click **Send**.
 
 GitLab displays an error or success message, depending on the outcome of your test.
