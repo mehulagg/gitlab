@@ -15,7 +15,7 @@ This product is an early access and is considered a [beta](https://about.gitlab.
 Browserker is a crawler engine built by GitLab to test Single Page Applications (SPAs) as well as traditional web applications.
 Due to the reliance of modern web applications on JavaScript, handling SPAs or applications that are dependent on JavaScript is paramount to ensuring proper coverage of an application for Dynamic Application Security Testing (DAST).
 
-Browserker crawls by loading the target application into a specially instrumented browser. A snapshot of the page is taken prior to a search to find any actions that a user might perform,
+Browserker crawls by loading the target application into a specially instrumented Chromium browser. A snapshot of the page is taken prior to a search to find any actions that a user might perform,
 such as clicking on a link or filling in a form. For each action found, Browserker will execute it, take a new snapshot and determine what in the page changed from the previous snapshot.
 Crawling continues by taking more snapshots and finding subsequent actions.
 
@@ -68,7 +68,8 @@ The [DAST variables](index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `D
 
 #### Selectors
 
-Various environment variables are of type `selector`. Selectors have the format `type`:`search string`. Browserker will search for the selector using the search string based on the type.
+Selectors are used by environment variables to specify the location of an element displayed on a page in a browser.
+Selectors have the format `type`:`search string`. Browserker will search for the selector using the search string based on the type.
 
 | Selector type | Example                        | Description |
 | ------------- | ------------------------------ | ----------- |
@@ -83,7 +84,7 @@ Various environment variables are of type `selector`. Selectors have the format 
 While Browserker provides users with a efficient crawler of modern web applications, vulnerability detection is still managed by the standard DAST/Zed Attack Proxy (ZAP) solution.
 
 Browserker runs the target website in a browser with DAST/ZAP configured as the proxy server. This ensures that all requests and responses made by the browser are passively scanned by DAST/ZAP.
-When running a full scan, active vulnerability checks executed by DAST/ZAP do not use a browser. Depending on the target website, this may require additional configuration from users to ensure the scan works as intended.
+When running a full scan, active vulnerability checks executed by DAST/ZAP do not use a browser. This difference in how vulnerabilities are checked can cause issues that require certain features of the target website to be disabled to ensure the scan works as intended.
 
 For example, for a target website that contains forms with Anti-CSRF tokens, a passive scan will scan as intended because the browser displays pages/forms as if a user is viewing the page.
 However, active vulnerability checks run in a full scan will not be able to submit forms containing Anti-CSRF tokens. It is recommended in cases such as this to disable Anti-CSRF tokens when running a full scan.
@@ -97,9 +98,9 @@ This can come at a cost of increased scan time.
 
 The coverage/scan time trade-off can be managed by the user with the following measures:
 
-- Limiting the number of actions executed by the browser. The default is `10,000`.
-- Limiting the page depth that Browserker will check coverage on. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
-- Vertically scaling the runner and using a higher number of browsers. The default is `3`.
+- Limiting the number of actions executed by the browser with the [variable](available-variables) `DAST_BROWSERKER_MAX_ACTIONS`. The default is `10,000`.
+- Limiting the page depth that Browserker will check coverage on with the [variable](available-variables) `DAST_BROWSERKER_MAX_DEPTH`. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
+- Vertically scaling the runner and using a higher number of browsers with [variable](available-variables) `DAST_BROWSERKER_NUMBER_OF_BROWSERS`. The default is `3`.
 
 ## AJAX Crawler
 
