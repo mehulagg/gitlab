@@ -425,14 +425,24 @@ module EE
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
     override :resource_access_token_feature_available?
     def resource_access_token_feature_available?
+      return true unless ::Gitlab.com?
+
+      group = project.namespace
+
+      group.feature_available_non_trial?(:resource_access_token)
+    end
+
+    override :resource_access_token_creation_allowed?
+    def resource_access_token_creation_allowed?
       value_from_super = super
 
       return value_from_super unless ::Gitlab.com?
 
-      group = project.namespace
+      if project.group
+        return value_from_super && project.group.feature_available_non_trial?(:resource_access_token)
+      end
 
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      project.namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end
