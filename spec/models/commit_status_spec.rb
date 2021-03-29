@@ -510,9 +510,13 @@ RSpec.describe CommitStatus do
   end
 
   describe '#group_name' do
-    before do
-      stub_feature_flags(simplified_commit_status_group_name: true)
+    using RSpec::Parameterized::TableSyntax
+
+    let(:commit_status) do
+      build(:commit_status, pipeline: pipeline, stage: 'test')
     end
+
+    subject { commit_status.group_name }
 
     where(:name, :group_name) do
       'rspec1'                                              | 'rspec1'
