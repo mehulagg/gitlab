@@ -237,7 +237,7 @@ export default {
       >
         <gl-button
           category="tertiary"
-          variant="info"
+          variant="confirm"
           class="gl-w-full"
           @click="fetchMoreUnassignedIssues()"
         >
