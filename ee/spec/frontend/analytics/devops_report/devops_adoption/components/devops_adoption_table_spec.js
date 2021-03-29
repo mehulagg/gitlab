@@ -105,11 +105,15 @@ describe('DevopsAdoptionTable', () => {
         expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 1');
       });
 
-      describe.each`
-        ${'does not display the badge by default'}            | ${false} | ${null}
-        ${'displays the badge when there is an active group'} | ${true}  | ${{ groupGid: devopsAdoptionSegmentsData.nodes[0].namespace.id }}
-      `('"This group" badge', ({ scenario, expected, provide }) => {
-        it(scenario, () => {
+      describe('"This group" badge', () => {
+        const thisGroupGid = devopsAdoptionSegmentsData.nodes[0].namespace.id;
+
+        it.each`
+          scenario                            | expected | provide
+          ${'is not shown by default'}        | ${false} | ${null}
+          ${'is not shown for other groups'}  | ${false} | ${{ groupGid: 'anotherGroupGid' }}
+          ${'is shown for the current group'} | ${true}  | ${{ groupGid: thisGroupGid }}
+        `('$scenario', ({ expected, provide }) => {
           createComponent({ provide });
 
           const badge = findColSubComponent(TEST_IDS.SEGMENT, GlBadge);
