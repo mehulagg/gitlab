@@ -1,4 +1,4 @@
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Participants from '~/sidebar/components/participants/participants.vue';
@@ -17,13 +17,16 @@ const PARTICIPANT_LIST = [PARTICIPANT, { ...PARTICIPANT, id: 2 }, { ...PARTICIPA
 describe('Participants', () => {
   let wrapper;
 
-  const getMoreParticipantsButton = () => wrapper.find('button');
+  const getMoreParticipantsButton = () => wrapper.find(GlButton);
 
   const getCollapsedParticipantsCount = () => wrapper.find('[data-testid="collapsed-count"]');
 
   const mountComponent = (propsData) =>
     shallowMount(Participants, {
       propsData,
+      stubs: {
+        GlButton,
+      },
     });
 
   afterEach(() => {

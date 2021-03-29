@@ -1,4 +1,5 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import AssigneeAvatarLink from './assignee_avatar_link.vue';
 import UserNameWithStatus from './user_name_with_status.vue';
@@ -8,6 +9,7 @@ const DEFAULT_RENDER_COUNT = 5;
 export default {
   components: {
     AssigneeAvatarLink,
+    GlButton,
     UserNameWithStatus,
   },
   props: {
@@ -86,6 +88,7 @@ export default {
     <div v-if="renderShowMoreSection" class="user-list-more gl-hover-text-blue-800">
       <gl-button
         type="button"
+        size="small"
         category="tertiary"
         data-qa-selector="more_assignees_link"
         @click="toggleShowLess"
