@@ -98,9 +98,9 @@ This can come at a cost of increased scan time.
 
 The coverage/scan time trade-off can be managed by the user with the following measures:
 
-- Limiting the number of actions executed by the browser with the [variable](available-variables) `DAST_BROWSERKER_MAX_ACTIONS`. The default is `10,000`.
-- Limiting the page depth that Browserker will check coverage on with the [variable](available-variables) `DAST_BROWSERKER_MAX_DEPTH`. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
-- Vertically scaling the runner and using a higher number of browsers with [variable](available-variables) `DAST_BROWSERKER_NUMBER_OF_BROWSERS`. The default is `3`.
+- Limiting the number of actions executed by the browser with the [variable](#available-variables) `DAST_BROWSERKER_MAX_ACTIONS`. The default is `10,000`.
+- Limiting the page depth that Browserker will check coverage on with the [variable](#available-variables) `DAST_BROWSERKER_MAX_DEPTH`. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
+- Vertically scaling the runner and using a higher number of browsers with [variable](#available-variables) `DAST_BROWSERKER_NUMBER_OF_BROWSERS`. The default is `3`.
 
 ## AJAX Crawler
 
