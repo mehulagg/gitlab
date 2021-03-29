@@ -226,6 +226,42 @@ detected, add the following to `.gitattributes` in the root of your repository.
 *.proto linguist-detectable=true
 ```
 
+### Troubleshooting
+
+GitLab uses a Ruby Gem to scan all the files in the repository to determine what languages are used.
+[Sometimes this can use excessive CPU](https://gitlab.com/gitlab-org/gitaly/-/issues/1565) if
+a file type needs to be parsed by the Gem to determine what sort of file it is.
+This has been observed for files with the extension `.txt` and XML files with
+a file extension that is not defined by the Gem.
+
+- [The Gem contains a configuration file for known data types](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml)
+and associated file extensions.
+- [A second configuration file defines what file extensions will need to be parsed](https://github.com/github/linguist/blob/master/lib/linguist/heuristics.yml)
+
+Excessive CPU use (or misidentification of file types) can be worked around by specifying
+what file type to assign to specific file extensions, or potentially based on other wildcard
+file name matches.
+
+- Add or modify `.gitattributes` in the root of your repository:
+
+```plaintext
+*.txt linguist-language=Text
+```
+
+- Use the defined data types from the [Gem's configuration file](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml)
+, which is case sensitive, for example:
+
+```yaml
+Text:
+  type: prose
+  wrap: true
+  aliases:
+  - fundamental
+  - plain text
+  extensions:
+  - ".txt"
+```
+
 ## Locked files **(PREMIUM)**
 
 Use [File Locking](../file_lock.md) to
