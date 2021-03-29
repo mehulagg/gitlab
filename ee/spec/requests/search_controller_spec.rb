@@ -56,6 +56,16 @@ RSpec.describe SearchController, type: :request do
         it_behaves_like 'an efficient database result'
       end
 
+      context 'for milestone scope' do
+        let(:creation_traits) { [] }
+        let(:object) { :milestone }
+        let(:creation_args) { {} }
+        let(:params) { { search: '*', scope: 'milestones' } }
+        let(:threshold) { 0 }
+
+        it_behaves_like 'an efficient database result'
+      end
+
       context 'for project scope' do
         let(:creation_traits) { [:public] }
         let(:object) { :project }
