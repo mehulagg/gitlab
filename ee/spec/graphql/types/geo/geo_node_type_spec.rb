@@ -14,6 +14,7 @@ RSpec.describe GitlabSchema.types['GeoNode'] do
       minimum_reverification_interval merge_request_diff_registries
       package_file_registries snippet_repository_registries
       terraform_state_version_registries group_wiki_repository_registries
+      pipeline_artifact_registries
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

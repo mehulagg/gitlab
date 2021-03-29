@@ -4,6 +4,10 @@ module Ci
   module Artifactable
     extend ActiveSupport::Concern
 
+    include ObjectStorable
+
+    STORE_COLUMN = :file_store
+
     NotSupportedAdapterError = Class.new(StandardError)
 
     FILE_FORMAT_ADAPTERS = {
@@ -20,6 +24,7 @@ module Ci
 
       scope :expired_before, -> (timestamp) { where(arel_table[:expire_at].lt(timestamp)) }
       scope :expired, -> (limit) { expired_before(Time.current).limit(limit) }
+      scope :project_id_in, ->(ids) { where(project_id: ids) }
     end
 
     def each_blob(&blk)
@@ -39,3 +44,5 @@ module Ci
     end
   end
 end
+
+Ci::Artifactable.prepend_if_ee('::EE::Ci::Artifactable')
