@@ -106,8 +106,7 @@ describe('DevopsAdoptionTable', () => {
       });
 
       describe.each`
-        scenario                                              | expected | provide
-        ${'does not dispaly the badge by default'}            | ${false} | ${null}
+        ${'does not display the badge by default'}            | ${false} | ${null}
         ${'displays the badge when there is an active group'} | ${true}  | ${{ groupGid: devopsAdoptionSegmentsData.nodes[0].namespace.id }}
       `('"This group" badge', ({ scenario, expected, provide }) => {
         it(scenario, () => {
