@@ -262,22 +262,6 @@ license_scanning:
     LM_PYTHON_VERSION: 2
 ```
 
-If your project requires other non-latest version of Python. You need to first define the version by setting `ASDF_PYTHON_VERSION` CI/CD variable and pass a custom script to `SETUP_CMD` CI/CD variable to install the required version and dependancies. For example: 
-
-```yaml
-include:
-  - template: Security/License-Scanning.gitlab-ci.yml
-
-license_scanning:
-    SETUP_CMD: ./setup.sh
-    ASDF_PYTHON_VERSION: "3.7.2"
-  before_script:
-    - echo "asdf install python 3.7.2 && pip install -r requirements.txt" > setup.sh
-    - chmod +x setup.sh
-    - apt-get -y update
-    - apt-get -y install build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
-```
-
 ### Custom root certificates for Python
 
 You can supply a custom root certificate to complete TLS verification by using the
@@ -774,6 +758,24 @@ An approval is optional when a license report:
 - Contains only new licenses that are `allowed` or unknown.
 
 ## Troubleshooting
+
+### ASDF_PYTHON_VERSION does not automatically install the version
+
+At the moment, defining a non-latest Python version in ASDF_PYTHON_VERSION [doesn't make it automatically installed](https://gitlab.com/gitlab-org/gitlab/-/issues/325604). If your project requires other non-latest version of Python, you need to first define the version by setting `ASDF_PYTHON_VERSION` CI/CD variable and pass a custom script to `SETUP_CMD` CI/CD variable to install the required version and dependancies. For example: 
+
+```yaml
+include:
+  - template: Security/License-Scanning.gitlab-ci.yml
+
+license_scanning:
+    SETUP_CMD: ./setup.sh
+    ASDF_PYTHON_VERSION: "3.7.2"
+  before_script:
+    - echo "asdf install python 3.7.2 && pip install -r requirements.txt" > setup.sh
+    - chmod +x setup.sh
+    - apt-get -y update
+    - apt-get -y install build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+```
 
 ### `ERROR -- : asdf: No preset version installed for command`
 
