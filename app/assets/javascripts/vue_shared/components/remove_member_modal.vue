@@ -22,11 +22,20 @@ export default {
     isAccessRequest() {
       return parseBoolean(this.modalData.isAccessRequest);
     },
+    isInvite() {
+      return parseBoolean(this.modalData.isInvite);
+    },
     isGroupMember() {
       return this.modalData.memberType === 'GroupMember';
     },
     actionText() {
-      return this.isAccessRequest ? __('Deny access request') : __('Remove member');
+      if (this.isAccessRequest) {
+        return __('Deny access request');
+      } else if (this.isInvite) {
+        return __('Revoke invite');
+      }
+
+      return __('Remove member');
     },
     actionPrimary() {
       return {
@@ -35,6 +44,9 @@ export default {
           variant: 'danger',
         },
       };
+    },
+    showUnassignIssuablesCheckbox() {
+      return !this.isAccessRequest && !this.isInvite;
     },
   },
   mounted() {
@@ -76,7 +88,7 @@ export default {
       <gl-form-checkbox v-if="isGroupMember" name="remove_sub_memberships">
         {{ __('Also remove direct user membership from subgroups and projects') }}
       </gl-form-checkbox>
-      <gl-form-checkbox v-if="!isAccessRequest" name="unassign_issuables">
+      <gl-form-checkbox v-if="showUnassignIssuablesCheckbox" name="unassign_issuables">
         {{ __('Also unassign this user from related issues and merge requests') }}
       </gl-form-checkbox>
     </form>
