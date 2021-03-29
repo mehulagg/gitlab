@@ -31,10 +31,10 @@ module BulkImports
       def pipelines
         [
           BulkImports::Groups::Pipelines::GroupPipeline,
-          BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
-          BulkImports::Groups::Pipelines::MembersPipeline,
-          BulkImports::Groups::Pipelines::LabelsPipeline,
-          BulkImports::Groups::Pipelines::MilestonesPipeline
+          # BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
+          # BulkImports::Groups::Pipelines::MembersPipeline,
+          # BulkImports::Groups::Pipelines::LabelsPipeline,
+          # BulkImports::Groups::Pipelines::MilestonesPipeline
         ]
       end
     end

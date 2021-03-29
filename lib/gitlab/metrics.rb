@@ -88,7 +88,7 @@ module Gitlab
       trans.observe("gitlab_#{name}_cpu_duration_seconds".to_sym, cpu_time) do
         docstring "Measure #{name}"
         buckets EXECUTION_MEASUREMENT_BUCKETS
-        with_feature "prometheus_metrics_measure_#{name}_cpu_duration"
+        # with_feature "prometheus_metrics_measure_#{name}_cpu_duration"
       end
 
       retval

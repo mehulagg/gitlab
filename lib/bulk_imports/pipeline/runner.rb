@@ -37,6 +37,10 @@ module BulkImports
           end
         end
 
+        run_pipeline_step(:on_complete) do
+          on_complete if respond_to?(:on_complete)
+        end
+
         info(message: 'Pipeline finished')
       rescue MarkedAsFailedError
         skip!('Skipping pipeline due to failed entity')

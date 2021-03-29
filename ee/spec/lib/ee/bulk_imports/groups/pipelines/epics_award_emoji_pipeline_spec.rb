@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
+RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsAwardEmojiPipeline do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:epic) { create(:epic, group: group) }
