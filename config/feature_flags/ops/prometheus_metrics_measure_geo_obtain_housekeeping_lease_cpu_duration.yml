@@ -1,5 +1,5 @@
 ---
-name: prometheus_metrics_method_instrumentation
+name: prometheus_metrics_measure_geo_obtain_housekeeping_lease_cpu_duration
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4304
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/326202
 milestone: '10.5'

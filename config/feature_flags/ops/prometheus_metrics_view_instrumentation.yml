@@ -1,8 +1,8 @@
 ---
 name: prometheus_metrics_view_instrumentation
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4304
-rollout_issue_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/326202
 milestone: '10.5'
 type: ops
-group:
+group: group::monitor
 default_enabled: false
