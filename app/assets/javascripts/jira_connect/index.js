@@ -76,7 +76,7 @@ export async function initJiraConnect() {
   Vue.use(Translate);
   Vue.use(GlFeatureFlagsPlugin);
 
-  const { groupsPath, subscriptionsPath, usersPath } = el.dataset;
+  const { groupsPath, subscriptions, subscriptionsPath, usersPath } = el.dataset;
   AP.sizeToParent();
 
   return new Vue({
@@ -84,6 +84,7 @@ export async function initJiraConnect() {
     store,
     provide: {
       groupsPath,
+      subscriptions: JSON.parse(subscriptions),
       subscriptionsPath,
       usersPath,
     },
