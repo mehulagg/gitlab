@@ -256,6 +256,10 @@ module Trigger
       ENV['DOCS_BRANCH'] || 'master'
     end
 
+    def trigger_token
+      ENV['DOCS_PROJECT_API_TOKEN']
+    end
+
     def extra_variables
       {
         "BRANCH_#{project_slug.upcase}" => ENV['CI_COMMIT_REF_NAME'],
