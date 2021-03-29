@@ -11199,6 +11199,7 @@ CREATE TABLE cluster_agent_tokens (
     description text,
     name text,
     last_used_at timestamp with time zone,
+    CONSTRAINT check_0fb634d04d CHECK ((name IS NOT NULL)),
     CONSTRAINT check_2b79dbb315 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_4e4ec5070a CHECK ((char_length(description) <= 1024)),
     CONSTRAINT check_c60daed227 CHECK ((char_length(token_encrypted) <= 255))
@@ -13146,7 +13147,8 @@ CREATE TABLE gitlab_subscriptions (
     auto_renew boolean,
     seats_in_use integer DEFAULT 0 NOT NULL,
     seats_owed integer DEFAULT 0 NOT NULL,
-    trial_extension_type smallint
+    trial_extension_type smallint,
+    CONSTRAINT check_77fea3f0e7 CHECK ((namespace_id IS NOT NULL))
 );
 
 CREATE SEQUENCE gitlab_subscriptions_id_seq
@@ -13975,6 +13977,7 @@ CREATE TABLE jira_tracker_data (
     encrypted_proxy_username_iv text,
     encrypted_proxy_password text,
     encrypted_proxy_password_iv text,
+    jira_issue_transition_automatic boolean DEFAULT false NOT NULL,
     CONSTRAINT check_0bf84b76e9 CHECK ((char_length(vulnerabilities_issuetype) <= 255)),
     CONSTRAINT check_214cf6a48b CHECK ((char_length(project_key) <= 255))
 );
@@ -14639,6 +14642,24 @@ CREATE SEQUENCE milestones_id_seq
 
 ALTER SEQUENCE milestones_id_seq OWNED BY milestones.id;
 
+CREATE TABLE namespace_admin_notes (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    namespace_id bigint NOT NULL,
+    note text,
+    CONSTRAINT check_e9d2e71b5d CHECK ((char_length(note) <= 1000))
+);
+
+CREATE SEQUENCE namespace_admin_notes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE namespace_admin_notes_id_seq OWNED BY namespace_admin_notes.id;
+
 CREATE TABLE namespace_aggregation_schedules (
     namespace_id integer NOT NULL
 );
@@ -14680,6 +14701,7 @@ CREATE TABLE namespace_settings (
     default_branch_name text,
     repository_read_only boolean DEFAULT false NOT NULL,
     delayed_project_removal boolean DEFAULT false NOT NULL,
+    resource_access_token_creation_allowed boolean DEFAULT true NOT NULL,
     CONSTRAINT check_0ba93c78c7 CHECK ((char_length(default_branch_name) <= 255))
 );
 
@@ -15658,7 +15680,7 @@ CREATE TABLE packages_rubygems_metadata (
     CONSTRAINT check_b7b296b420 CHECK ((char_length(author) <= 255)),
     CONSTRAINT check_bf16b21a47 CHECK ((char_length(rdoc_options) <= 255)),
     CONSTRAINT check_ca641a3354 CHECK ((char_length(required_ruby_version) <= 255)),
-    CONSTRAINT check_ea02f4800f CHECK ((char_length(metadata) <= 255)),
+    CONSTRAINT check_ea02f4800f CHECK ((char_length(metadata) <= 30000)),
     CONSTRAINT check_f76bad1a9a CHECK ((char_length(require_paths) <= 255))
 );
 
@@ -17557,6 +17579,8 @@ CREATE TABLE snippet_repositories (
     verified_at timestamp with time zone,
     verification_checksum bytea,
     verification_failure text,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    verification_started_at timestamp with time zone,
     CONSTRAINT snippet_repositories_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
 
@@ -19508,6 +19532,8 @@ ALTER TABLE ONLY metrics_users_starred_dashboards ALTER COLUMN id SET DEFAULT ne
 
 ALTER TABLE ONLY milestones ALTER COLUMN id SET DEFAULT nextval('milestones_id_seq'::regclass);
 
+ALTER TABLE ONLY namespace_admin_notes ALTER COLUMN id SET DEFAULT nextval('namespace_admin_notes_id_seq'::regclass);
+
 ALTER TABLE ONLY namespace_statistics ALTER COLUMN id SET DEFAULT nextval('namespace_statistics_id_seq'::regclass);
 
 ALTER TABLE ONLY namespaces ALTER COLUMN id SET DEFAULT nextval('namespaces_id_seq'::regclass);
@@ -20233,14 +20259,8 @@ ALTER TABLE ONLY chat_names
 ALTER TABLE ONLY chat_teams
     ADD CONSTRAINT chat_teams_pkey PRIMARY KEY (id);
 
-ALTER TABLE cluster_agent_tokens
-    ADD CONSTRAINT check_0fb634d04d CHECK ((name IS NOT NULL)) NOT VALID;
-
 ALTER TABLE vulnerability_scanners
     ADD CONSTRAINT check_37608c9db5 CHECK ((char_length(vendor) <= 255)) NOT VALID;
-
-ALTER TABLE gitlab_subscriptions
-    ADD CONSTRAINT check_77fea3f0e7 CHECK ((namespace_id IS NOT NULL)) NOT VALID;
 
 ALTER TABLE sprints
     ADD CONSTRAINT check_ccd8a1eae0 CHECK ((start_date IS NOT NULL)) NOT VALID;
@@ -20895,6 +20915,9 @@ ALTER TABLE ONLY milestone_releases
 
 ALTER TABLE ONLY milestones
     ADD CONSTRAINT milestones_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY namespace_admin_notes
+    ADD CONSTRAINT namespace_admin_notes_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY namespace_aggregation_schedules
     ADD CONSTRAINT namespace_aggregation_schedules_pkey PRIMARY KEY (namespace_id);
@@ -23123,6 +23146,8 @@ CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_nulls_last ON merge
 
 CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_time_to_merge ON merge_request_metrics USING btree (target_project_id, merged_at, created_at) WHERE (merged_at > created_at);
 
+CREATE INDEX index_namespace_admin_notes_on_namespace_id ON namespace_admin_notes USING btree (namespace_id);
+
 CREATE UNIQUE INDEX index_namespace_aggregation_schedules_on_namespace_id ON namespace_aggregation_schedules USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_namespace_root_storage_statistics_on_namespace_id ON namespace_root_storage_statistics USING btree (namespace_id);
@@ -23851,9 +23876,17 @@ CREATE INDEX index_smartcard_identities_on_user_id ON smartcard_identities USING
 
 CREATE INDEX index_snippet_on_id_and_project_id ON snippets USING btree (id, project_id);
 
+CREATE INDEX index_snippet_repositories_failed_verification ON snippet_repositories USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
+
+CREATE INDEX index_snippet_repositories_needs_verification ON snippet_repositories USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
+
 CREATE UNIQUE INDEX index_snippet_repositories_on_disk_path ON snippet_repositories USING btree (disk_path);
 
 CREATE INDEX index_snippet_repositories_on_shard_id ON snippet_repositories USING btree (shard_id);
+
+CREATE INDEX index_snippet_repositories_pending_verification ON snippet_repositories USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
+
+CREATE INDEX index_snippet_repositories_verification_state ON snippet_repositories USING btree (verification_state);
 
 CREATE INDEX index_snippet_repository_storage_moves_on_snippet_id ON snippet_repository_storage_moves USING btree (snippet_id);
 
@@ -25162,7 +25195,7 @@ ALTER TABLE ONLY ci_builds
     ADD CONSTRAINT fk_d3130c9a7f FOREIGN KEY (commit_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY web_hooks
-    ADD CONSTRAINT fk_d47999a98a FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT fk_d47999a98a FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_sources_pipelines
     ADD CONSTRAINT fk_d4e29af7d7 FOREIGN KEY (source_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
@@ -25964,6 +25997,9 @@ ALTER TABLE ONLY approval_merge_request_rules_approved_approvers
 
 ALTER TABLE ONLY operations_feature_flags_clients
     ADD CONSTRAINT fk_rails_6650ed902c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY namespace_admin_notes
+    ADD CONSTRAINT fk_rails_666166ea7b FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY web_hook_logs
     ADD CONSTRAINT fk_rails_666826e111 FOREIGN KEY (web_hook_id) REFERENCES web_hooks(id) ON DELETE CASCADE;

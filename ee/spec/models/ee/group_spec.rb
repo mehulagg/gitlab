@@ -460,7 +460,7 @@ RSpec.describe Group do
       end
 
       it 'returns a comma separated string of ranges of its ip_restriction records' do
-        expect(group.ip_restriction_ranges).to eq('192.168.0.0/24,10.0.0.0/8')
+        expect(group.ip_restriction_ranges.split(',')).to contain_exactly(*ranges)
       end
     end
   end

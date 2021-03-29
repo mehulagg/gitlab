@@ -51,7 +51,11 @@ RSpec.describe DastOnDemandScans::CreateService do
 
         it 'delegates pipeline creation to Ci::RunDastScanService', :aggregate_failures do
           expected_params = {
-            branch: 'master',
+            auth_password_field: dast_site_profile.auth_password_field,
+            auth_username: dast_site_profile.auth_username,
+            auth_username_field: dast_site_profile.auth_username_field,
+            branch: project.default_branch_or_master,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
             full_scan_enabled: false,
             show_debug_messages: false,
             spider_timeout: nil,

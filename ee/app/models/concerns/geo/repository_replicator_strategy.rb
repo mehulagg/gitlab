@@ -61,5 +61,30 @@ module Geo
         full_path: model_record.repository.full_path
       )
     end
+
+    # Returns a checksum of the repository refs as defined by Gitaly
+    #
+    # @return [String] checksum of the repository refs
+    def calculate_checksum
+      repository.checksum
+    rescue Gitlab::Git::Repository::NoRepository => e
+      log_error('Repository cannot be checksummed because it does not exist', e, self.replicable_params)
+
+      raise
+    end
+
+    # Return whether it's capable of generating a checksum of itself
+    #
+    # @return [Boolean] whether it can generate a checksum
+    def checksummable?
+      repository.exists?
+    end
+
+    # Return whether it's immutable
+    #
+    # @return [Boolean] whether the replicable is immutable
+    def immutable?
+      false
+    end
   end
 end

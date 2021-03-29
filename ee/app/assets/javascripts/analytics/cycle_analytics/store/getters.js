@@ -4,7 +4,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import httpStatus from '~/lib/utils/http_status';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
-import { DEFAULT_VALUE_STREAM_ID } from '../constants';
+import { DEFAULT_VALUE_STREAM_ID, OVERVIEW_STAGE_CONFIG } from '../constants';
 import { transformStagesForPathNavigation } from '../utils';
 
 export const hasNoAccessError = (state) => state.errorCode === httpStatus.FORBIDDEN;
@@ -64,7 +64,7 @@ export const customStageFormActive = ({ isCreatingCustomStage, isEditingCustomSt
  */
 export const pathNavigationData = ({ stages, medians, selectedStage }) =>
   transformStagesForPathNavigation({
-    stages: filterStagesByHiddenStatus(stages, false),
+    stages: [OVERVIEW_STAGE_CONFIG, ...filterStagesByHiddenStatus(stages, false)],
     medians,
     selectedStage,
   });

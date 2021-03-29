@@ -11,6 +11,10 @@ module Gitlab
             http_post("trials", admin_headers, params)
           end
 
+          def extend_reactivate_trial(params)
+            http_put("trials/extend_reactivate_trial", admin_headers, params)
+          end
+
           def create_customer(params)
             http_post("api/customers", admin_headers, params)
           end
@@ -43,6 +47,14 @@ module Gitlab
 
           def http_post(path, headers, params = {})
             response = Gitlab::HTTP.post("#{base_url}/#{path}", body: params.to_json, headers: headers)
+
+            parse_response(response)
+          rescue *Gitlab::HTTP::HTTP_ERRORS => e
+            { success: false, data: { errors: e.message } }
+          end
+
+          def http_put(path, headers, params = {})
+            response = Gitlab::HTTP.put("#{base_url}/#{path}", body: params.to_json, headers: headers)
 
             parse_response(response)
           rescue *Gitlab::HTTP::HTTP_ERRORS => e

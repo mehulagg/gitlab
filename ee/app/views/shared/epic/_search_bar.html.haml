@@ -79,6 +79,21 @@
                     %span.dropdown-label-box{ style: 'background: {{color}}' }
                     %span.label-title.js-data-value
                       {{ title }}
+            #js-dropdown-my-reaction.filtered-search-input-dropdown-menu.dropdown-menu
+              %ul{ data: { dropdown: true } }
+                %li.filter-dropdown-item{ data: { value: 'None' } }
+                  %button.btn.btn-link{ type: 'button' }
+                    = _('None')
+                %li.filter-dropdown-item{ data: { value: 'Any' } }
+                  %button.btn.btn-link{ type: 'button' }
+                    = _('Any')
+                %li.divider.droplab-item-ignore
+              %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
+                %li.filter-dropdown-item
+                  %button.btn.btn-link{ type: 'button' }
+                    %gl-emoji
+                    %span.js-data-value.gl-ml-3
+                      {{ name }}
 
           %button.clear-search.hidden{ type: 'button' }
             = sprite_icon('close', size: 16, css_class: 'clear-search-icon')

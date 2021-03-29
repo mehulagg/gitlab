@@ -109,7 +109,7 @@ module BillingPlansHelper
     css_classes = %w[btn btn-success gl-button]
 
     css_classes << 'disabled' if is_current_plan && !namespace.trial_active?
-    css_classes << 'invisible' if plan.deprecated?
+    css_classes << 'invisible' if ::Feature.enabled?(:hide_deprecated_billing_plans) && plan.deprecated?
 
     css_classes.join(' ')
   end

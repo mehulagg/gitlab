@@ -54,6 +54,27 @@ RSpec.describe 'epic boards', :js do
 
       expect(page).to have_button('This is a new board')
     end
+
+    it 'deletes an epic board' do
+      in_boards_switcher_dropdown do
+        aggregate_failures do
+          expect(page).to have_content(epic_board.name)
+          expect(page).to have_content(epic_board2.name)
+        end
+
+        click_button 'Delete board'
+      end
+
+      click_button 'Delete'
+      wait_for_requests
+
+      in_boards_switcher_dropdown do
+        aggregate_failures do
+          expect(page).not_to have_content(epic_board.name)
+          expect(page).to have_content(epic_board2.name)
+        end
+      end
+    end
   end
 
   def visit_epic_boards_page

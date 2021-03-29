@@ -423,9 +423,11 @@ module EE
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
-    override :resource_access_token_available?
-    def resource_access_token_available?
-      return true unless ::Gitlab.com?
+    override :resource_access_token_feature_available?
+    def resource_access_token_feature_available?
+      value_from_super = super
+
+      return value_from_super unless ::Gitlab.com?
 
       group = project.namespace
 

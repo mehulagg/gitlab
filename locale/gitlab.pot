@@ -1773,11 +1773,6 @@ msgstr ""
 msgid "Add \"%{value}\""
 msgstr ""
 
-msgid "Add %d issue"
-msgid_plural "Add %d issues"
-msgstr[0] ""
-msgstr[1] ""
-
 msgid "Add %{linkStart}assets%{linkEnd} to your Release. GitLab automatically includes read-only assets, like source code and release evidence."
 msgstr ""
 
@@ -1926,9 +1921,6 @@ msgid "Add header and footer to emails. Please note that color settings will onl
 msgstr ""
 
 msgid "Add image comment"
-msgstr ""
-
-msgid "Add issues"
 msgstr ""
 
 msgid "Add italic text"
@@ -2244,9 +2236,6 @@ msgid "AdminArea|You’re about to stop all jobs.This will halt all current jobs
 msgstr ""
 
 msgid "AdminDashboard|Error loading the statistics. Please try again"
-msgstr ""
-
-msgid "AdminNote|Note"
 msgstr ""
 
 msgid "AdminProjects| You’re about to permanently delete the project %{projectName}, its repository, and all related resources including issues, merge requests, etc..  Once you confirm and press %{strong_start}Delete project%{strong_end}, it cannot be undone or recovered."
@@ -2684,6 +2673,12 @@ msgstr ""
 msgid "Admin|Additional users must be reviewed and approved by a system administrator. Learn more about %{help_link_start}usage caps%{help_link_end}."
 msgstr ""
 
+msgid "Admin|Admin notes"
+msgstr ""
+
+msgid "Admin|Note"
+msgstr ""
+
 msgid "Admin|View pending user approvals"
 msgstr ""
 
@@ -2915,6 +2910,9 @@ msgid "AlertSettings|Customize alert payload mapping (optional)"
 msgstr ""
 
 msgid "AlertSettings|Delete integration"
+msgstr ""
+
+msgid "AlertSettings|Edit integration"
 msgstr ""
 
 msgid "AlertSettings|Edit payload"
@@ -3538,6 +3536,9 @@ msgstr ""
 msgid "An error occurred while loading the file. Please try again later."
 msgstr ""
 
+msgid "An error occurred while loading the file. Please try again."
+msgstr ""
+
 msgid "An error occurred while loading the merge request changes."
 msgstr ""
 
@@ -3671,9 +3672,6 @@ msgid "An instance-level serverless domain already exists."
 msgstr ""
 
 msgid "An issue already exists"
-msgstr ""
-
-msgid "An issue can be a bug, a todo or a feature request that needs to be discussed in a project. Besides, issues are searchable and filterable."
 msgstr ""
 
 msgid "An issue title is required"
@@ -6437,7 +6435,7 @@ msgstr ""
 msgid "CloudLicense|Paste your activation code below"
 msgstr ""
 
-msgid "CloudLicense|This instance is currently using the Core plan."
+msgid "CloudLicense|This instance is currently using the %{planName} plan."
 msgstr ""
 
 msgid "Cluster"
@@ -8590,9 +8588,6 @@ msgstr ""
 msgid "Copy commit SHA"
 msgstr ""
 
-msgid "Copy email address"
-msgstr ""
-
 msgid "Copy environment"
 msgstr ""
 
@@ -8650,7 +8645,16 @@ msgstr ""
 msgid "CorpusManagement|Fuzz testing corpus management"
 msgstr ""
 
+msgid "CorpusManagement|New corpus"
+msgstr ""
+
+msgid "CorpusManagement|Total Size: %{totalSize}"
+msgstr ""
+
 msgid "Could not add admins as members"
+msgstr ""
+
+msgid "Could not apply %{name} command."
 msgstr ""
 
 msgid "Could not archive %{design}. Please try again."
@@ -8705,6 +8709,9 @@ msgid "Could not find design."
 msgstr ""
 
 msgid "Could not find iteration"
+msgstr ""
+
+msgid "Could not get the data properly"
 msgstr ""
 
 msgid "Could not load the user chart. Please refresh the page to try again."
@@ -10573,9 +10580,6 @@ msgid "Description:"
 msgstr ""
 
 msgid "Descriptive label"
-msgstr ""
-
-msgid "Deselect all"
 msgstr ""
 
 msgid "Design Management files and data"
@@ -12938,9 +12942,6 @@ msgstr ""
 msgid "Failed to update issue status"
 msgstr ""
 
-msgid "Failed to update issues, please try again."
-msgstr ""
-
 msgid "Failed to update the Canary Ingress."
 msgstr ""
 
@@ -14444,9 +14445,6 @@ msgid "Go back"
 msgstr ""
 
 msgid "Go back (while searching for files)"
-msgstr ""
-
-msgid "Go back to %{tagStart}Open issues%{tagEnd} and select some issues to add to your board."
 msgstr ""
 
 msgid "Go full screen"
@@ -17398,6 +17396,9 @@ msgstr ""
 msgid "JiraService|An error occurred while fetching issue list"
 msgstr ""
 
+msgid "JiraService|Automatically transitions Jira issues to the \"Done\" category. %{linkStart}Learn more%{linkEnd}"
+msgstr ""
+
 msgid "JiraService|Define the type of Jira issue to create from a vulnerability."
 msgstr ""
 
@@ -17408,6 +17409,9 @@ msgid "JiraService|Enable Jira issues"
 msgstr ""
 
 msgid "JiraService|Enable Jira issues creation from vulnerabilities"
+msgstr ""
+
+msgid "JiraService|Enable Jira transitions"
 msgstr ""
 
 msgid "JiraService|Enter new password or API token"
@@ -17458,10 +17462,10 @@ msgstr ""
 msgid "JiraService|Jira project key"
 msgstr ""
 
-msgid "JiraService|Jira workflow transition IDs"
+msgid "JiraService|Leave blank to use your current password or API token"
 msgstr ""
 
-msgid "JiraService|Leave blank to use your current password or API token"
+msgid "JiraService|Move to Done"
 msgstr ""
 
 msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
@@ -17482,7 +17486,7 @@ msgstr ""
 msgid "JiraService|Select issue type"
 msgstr ""
 
-msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
+msgid "JiraService|Set a custom final state by using transition IDs. %{linkStart}Learn about transition IDs%{linkEnd}"
 msgstr ""
 
 msgid "JiraService|Sign in to GitLab.com to get started."
@@ -17494,10 +17498,16 @@ msgstr ""
 msgid "JiraService|This issue is synchronized with Jira"
 msgstr ""
 
+msgid "JiraService|Transition Jira issues to their final state:"
+msgstr ""
+
 msgid "JiraService|Use a password for server version and an API token for cloud version"
 msgstr ""
 
 msgid "JiraService|Use a username for server version and an email for cloud version"
+msgstr ""
+
+msgid "JiraService|Use custom transitions"
 msgstr ""
 
 msgid "JiraService|Username or Email"
@@ -20763,6 +20773,9 @@ msgstr ""
 msgid "No authentication methods configured."
 msgstr ""
 
+msgid "No available branches"
+msgstr ""
+
 msgid "No available groups to fork the project."
 msgstr ""
 
@@ -21554,6 +21567,9 @@ msgstr ""
 msgid "OnDemandScans|You cannot run an active scan against an unvalidated site."
 msgstr ""
 
+msgid "OnDemandScans|You must create a repository within your project to run an on-demand scan."
+msgstr ""
+
 msgid "Once a project is permanently deleted, it %{strongStart}cannot be recovered%{strongEnd}. Permanently deleting this project will %{strongStart}immediately delete%{strongEnd} its repositories and %{strongStart}all related resources%{strongEnd}, including issues, merge requests etc."
 msgstr ""
 
@@ -21662,9 +21678,6 @@ msgid "Open in file view"
 msgstr ""
 
 msgid "Open in your IDE"
-msgstr ""
-
-msgid "Open issues"
 msgstr ""
 
 msgid "Open raw"
@@ -22045,6 +22058,9 @@ msgstr ""
 msgid "PackageRegistry|Remove package"
 msgstr ""
 
+msgid "PackageRegistry|RubyGems"
+msgstr ""
+
 msgid "PackageRegistry|Settings for Maven packages"
 msgstr ""
 
@@ -22139,6 +22155,9 @@ msgid "PackageType|NuGet"
 msgstr ""
 
 msgid "PackageType|PyPI"
+msgstr ""
+
+msgid "PackageType|RubyGems"
 msgstr ""
 
 msgid "PackageType|npm"
@@ -22900,9 +22919,6 @@ msgstr ""
 msgid "Please add a comment in the text area above"
 msgstr ""
 
-msgid "Please add a list to your board first"
-msgstr ""
-
 msgid "Please check the configuration file for this chart"
 msgstr ""
 
@@ -23054,6 +23070,9 @@ msgid "Please solve the captcha"
 msgstr ""
 
 msgid "Please try again"
+msgstr ""
+
+msgid "Please try and refresh the page. If the problem persists please contact support."
 msgstr ""
 
 msgid "Please type %{phrase_code} to proceed or close this modal to cancel."
@@ -26376,7 +26395,10 @@ msgstr ""
 msgid "Revoked project access token %{project_access_token_name}!"
 msgstr ""
 
-msgid "RightSidebar|Issue email: %{copyText}"
+msgid "RightSidebar|Copy email address"
+msgstr ""
+
+msgid "RightSidebar|Issue email"
 msgstr ""
 
 msgid "RightSidebar|adding a"
@@ -30587,9 +30609,6 @@ msgstr ""
 msgid "There are no issues to show"
 msgstr ""
 
-msgid "There are no issues to show."
-msgstr ""
-
 msgid "There are no issues with the selected labels"
 msgstr ""
 
@@ -31055,6 +31074,9 @@ msgstr ""
 msgid "This group"
 msgstr ""
 
+msgid "This group can't be removed because it is linked to a subscription. To remove this group, %{linkStart}link the subscription%{linkEnd} with a different group."
+msgstr ""
+
 msgid "This group cannot be invited to a project inside a group with enforced SSO"
 msgstr ""
 
@@ -31062,6 +31084,9 @@ msgid "This group does not have any group runners yet."
 msgstr ""
 
 msgid "This group has been scheduled for permanent removal on %{date}"
+msgstr ""
+
+msgid "This group is linked to a subscription"
 msgstr ""
 
 msgid "This group, including all subgroups, projects and git repositories, will be reachable from only the specified IP address ranges."
@@ -33458,6 +33483,12 @@ msgstr ""
 msgid "ValueStreamAnalytics|Median time from issue created to issue closed."
 msgstr ""
 
+msgid "ValueStreamEvent|Start"
+msgstr ""
+
+msgid "ValueStreamEvent|Stop"
+msgstr ""
+
 msgid "ValueStream|The Default Value Stream cannot be deleted"
 msgstr ""
 
@@ -34974,12 +35005,6 @@ msgid "You have set up 2FA for your account! If you lose access to your 2FA devi
 msgstr ""
 
 msgid "You have successfully purchased a %{plan} plan subscription for %{seats}. You’ll receive a receipt via email."
-msgstr ""
-
-msgid "You haven't added any issues to your project yet"
-msgstr ""
-
-msgid "You haven't selected any issues yet"
 msgstr ""
 
 msgid "You left the \"%{membershipable_human_name}\" %{source_type}."
@@ -36545,9 +36570,6 @@ msgstr ""
 msgid "must be greater than start date"
 msgstr ""
 
-msgid "must be later than active period start"
-msgstr ""
-
 msgid "must contain only valid frameworks"
 msgstr ""
 
@@ -36889,9 +36911,6 @@ msgid "to help your contributors communicate effectively!"
 msgstr ""
 
 msgid "to join %{source_name}"
-msgstr ""
-
-msgid "to list"
 msgstr ""
 
 msgid "toggle collapse"

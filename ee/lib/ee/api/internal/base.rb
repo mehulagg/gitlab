@@ -49,6 +49,21 @@ module EE
                 { success: false, message: 'Invalid OTP' }
               end
             end
+
+            override :geo_proxy
+            def geo_proxy
+              # The methods used here (or their underlying methods) are cached
+              # for:
+              #
+              # * 1 minute in memory
+              # * 2 minutes in Redis
+              #
+              if ::Feature.enabled?(:geo_secondary_proxy, default_enabled: :yaml) && ::Gitlab::Geo.secondary_with_primary?
+                { geo_proxy_url: ::Gitlab::Geo.primary_node.internal_url }
+              else
+                super
+              end
+            end
           end
         end
       end

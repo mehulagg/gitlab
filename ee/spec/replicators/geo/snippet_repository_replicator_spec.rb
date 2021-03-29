@@ -3,7 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Geo::SnippetRepositoryReplicator do
-  let(:model_record) { build(:snippet_repository, snippet: create(:snippet)) }
+  let(:snippet) { create(:snippet, :repository) }
+  let(:model_record) { snippet.snippet_repository }
 
   include_examples 'a repository replicator'
+  it_behaves_like 'a verifiable replicator'
 end

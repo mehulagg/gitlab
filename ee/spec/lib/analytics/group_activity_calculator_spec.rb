@@ -39,29 +39,12 @@ RSpec.describe Analytics::GroupActivityCalculator do
   end
 
   context 'with merge requests' do
-    let!(:recent_mr) do
-      create(:merge_request,
-        source_project: project,
-        source_branch: "my-personal-branch-1")
-    end
-
-    let!(:old_mr) do
-      create(:merge_request,
-        source_project: project,
-        source_branch: "my-personal-branch-2",
-        created_at: 100.days.ago)
-    end
-
-    it 'only returns the count of recent MRs' do
-      expect(subject.merge_requests_count).to eq 1
-    end
-
-    context 'when user does not have access to some MRs' do
-      let(:secret_mr) { create(:merge_request, source_project: secret_project) }
-
-      it 'does not include those MRs' do
-        expect { secret_mr }.not_to change { subject.merge_requests_count}
+    it 'calls RecentMergeRequestsCountService#count' do
+      expect_next_instance_of(Groups::RecentMergeRequestsCountService) do |count_service|
+        expect(count_service).to receive(:count)
       end
+
+      subject.merge_requests_count
     end
   end
 

@@ -21,6 +21,7 @@ RSpec.describe Namespace do
     it { is_expected.to have_many :custom_emoji }
     it { is_expected.to have_one :package_setting_relation }
     it { is_expected.to have_one :onboarding_progress }
+    it { is_expected.to have_one :admin_note }
   end
 
   describe 'validations' do
@@ -1412,6 +1413,12 @@ RSpec.describe Namespace do
 
         it_behaves_like 'fetching closest setting'
       end
+    end
+  end
+
+  describe '#paid?' do
+    it 'returns false for a root namespace with a free plan' do
+      expect(namespace.paid?).to eq(false)
     end
   end
 

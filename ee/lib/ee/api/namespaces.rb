@@ -45,6 +45,7 @@ module EE
               optional :trial, type: Grape::API::Boolean, desc: 'Whether the subscription is a trial'
               optional :trial_ends_on, type: Date, desc: 'End date of trial'
               optional :trial_starts_on, type: Date, desc: 'Start date of trial'
+              optional :trial_extension_type, type: Integer, desc: 'Whether subscription is an extended or reactivated trial'
             end
           end
 

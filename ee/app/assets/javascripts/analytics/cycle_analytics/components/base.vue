@@ -6,7 +6,7 @@ import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE } from '../constants';
+import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
@@ -86,17 +86,28 @@ export default {
     shouldDisplayFilters() {
       return !this.errorCode;
     },
+    isOverviewStageSelected() {
+      return this.selectedStage?.id === OVERVIEW_STAGE_ID;
+    },
     shouldDisplayDurationChart() {
-      return this.featureFlags.hasDurationChart && !this.hasNoAccessError;
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.featureFlags.hasDurationChart &&
+          this.isOverviewStageSelected &&
+          !this.hasNoAccessError)
+      );
     },
     shouldDisplayTypeOfWorkCharts() {
-      return !this.hasNoAccessError;
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.isOverviewStageSelected && !this.hasNoAccessError)
+      );
     },
     selectedStageReady() {
       return !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError;
+      return this.featureFlags.hasPathNavigation && this.selectedStageReady;
     },
     shouldDisplayVerticalNavigation() {
       return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
@@ -134,6 +145,7 @@ export default {
       'fetchStageData',
       'setSelectedProjects',
       'setSelectedStage',
+      'setDefaultSelectedStage',
       'setDateRange',
       'removeStage',
       'updateStage',
@@ -146,8 +158,12 @@ export default {
     },
     onStageSelect(stage) {
       this.hideForm();
-      this.setSelectedStage(stage);
-      this.fetchStageData(this.selectedStage.slug);
+      if (stage.slug === OVERVIEW_STAGE_ID) {
+        this.setDefaultSelectedStage();
+      } else {
+        this.setSelectedStage(stage);
+        this.fetchStageData(stage.slug);
+      }
     },
     onShowAddStageForm() {
       this.showCreateForm();
@@ -235,7 +251,7 @@ export default {
         </div>
       </div>
     </div>
-    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
+    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">
       <gl-empty-state
         v-if="hasNoAccessError"
         class="js-empty-state"
@@ -248,8 +264,13 @@ export default {
         "
       />
       <div v-else>
-        <metrics :group-path="currentGroupPath" :request-params="cycleAnalyticsRequestParams" />
+        <metrics
+          v-if="!featureFlags.hasPathNavigation || isOverviewStageSelected"
+          :group-path="currentGroupPath"
+          :request-params="cycleAnalyticsRequestParams"
+        />
         <stage-table
+          v-if="!featureFlags.hasPathNavigation || !isOverviewStageSelected"
           :key="stageCount"
           class="js-stage-table"
           :current-stage="selectedStage"

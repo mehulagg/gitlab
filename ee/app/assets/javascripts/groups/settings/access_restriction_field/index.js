@@ -2,7 +2,11 @@ import Vue from 'vue';
 import { __, sprintf } from '~/locale';
 import CommaSeparatedListTokenSelector from '../components/comma_separated_list_token_selector.vue';
 
-export default (el, props = {}, qaSelector, customValidator) => {
+export default (selector, props = {}, qaSelector, customValidator) => {
+  const el = document.querySelector(selector);
+
+  if (!el) return;
+
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -10,9 +14,7 @@ export default (el, props = {}, qaSelector, customValidator) => {
       CommaSeparatedListTokenSelector,
     },
     data() {
-      const { hiddenInputId, labelId, regexValidator, disallowedValues } = document.querySelector(
-        this.$options.el,
-      ).dataset;
+      const { hiddenInputId, labelId, regexValidator, disallowedValues } = el.dataset;
 
       return {
         hiddenInputId,

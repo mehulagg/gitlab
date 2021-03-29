@@ -174,3 +174,136 @@ export const mockStatusToken = {
   token: StatusToken,
   operators: [{ value: '=', description: 'is', default: 'true' }],
 };
+
+/* 
+  Mock data used for testing with mock apollo client
+*/
+
+export const mockInitialRequirementCounts = {
+  ARCHIVED: 0,
+  OPENED: 1,
+  ALL: 1,
+};
+
+export const mockProjectRequirementCounts = {
+  data: {
+    project: {
+      requirementStatesCount: {
+        opened: mockInitialRequirementCounts.OPENED,
+        archived: mockInitialRequirementCounts.ARCHIVED,
+        __typename: 'RequirementStatesCount',
+      },
+      __typename: 'Project',
+    },
+  },
+};
+
+const mockUser = {
+  ...mockAuthor,
+  id: 'gid://gitlab/User/1',
+  __typename: 'User',
+};
+
+export const mockTestReportConnectionPassed = {
+  nodes: [mockTestReport],
+  __typename: 'TestReportConnection',
+};
+
+export const mockTestReportConnectionFailed = {
+  nodes: [mockTestReportFailed],
+  __typename: 'TestReportConnection',
+};
+
+export const mockEmptyTestReportConnection = {
+  nodes: [],
+  __typename: 'TestReportConnection',
+};
+
+const projectRequirementBase = {
+  __typename: 'Requirement',
+  iid: '1',
+  title: 'Requirement 1',
+  titleHtml: 'Requirement 1',
+  description: '',
+  descriptionHtml: '',
+  createdAt: '2021-03-15T05:24:32Z',
+  updatedAt: '2021-03-15T05:24:32Z',
+  state: 'OPENED',
+  userPermissions: {
+    updateRequirement: true,
+    adminRequirement: true,
+    __typename: 'RequirementPermissions',
+  },
+  author: {
+    ...mockUser,
+  },
+};
+
+export const mockProjectRequirementFailed = {
+  ...projectRequirementBase,
+  lastTestReportState: 'FAILED',
+  lastTestReportManuallyCreated: true,
+  testReports: {
+    ...mockTestReportConnectionFailed,
+  },
+};
+
+export const mockProjectRequirementPassed = {
+  ...projectRequirementBase,
+  lastTestReportState: 'PASSED',
+  lastTestReportManuallyCreated: true,
+  testReports: {
+    ...mockTestReportConnectionPassed,
+  },
+};
+
+export const mockUpdateRequirementTitle = {
+  data: {
+    updateRequirement: {
+      clientMutationId: null,
+      errors: [],
+      requirement: {
+        ...mockProjectRequirementPassed,
+        title: 'edited title',
+      },
+      __typename: 'UpdateRequirementPayload',
+    },
+  },
+};
+
+export const mockUpdateRequirementToFailed = {
+  data: {
+    updateRequirement: {
+      clientMutationId: null,
+      errors: [],
+      requirement: {
+        ...mockProjectRequirementFailed,
+      },
+      __typename: 'UpdateRequirementPayload',
+    },
+  },
+};
+
+const mockRequirementConnection = {
+  nodes: [],
+  pageInfo: {
+    __typename: 'PageInfo',
+    hasNextPage: false,
+    hasPreviousPage: false,
+    startCursor: 'eyJpZCI6',
+    endCursor: 'eyJpZCI6I',
+  },
+  __typename: 'RequirementConnection',
+};
+
+export const mockProjectRequirements = {
+  data: {
+    project: {
+      requirements: {
+        ...mockRequirementConnection,
+        nodes: [{ ...mockProjectRequirementPassed }],
+      },
+      __typename: 'Project',
+    },
+  },
+};
