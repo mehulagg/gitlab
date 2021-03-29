@@ -31,7 +31,7 @@ module EE
               actor.update_last_used_at!
               user = actor.user
 
-              error_message = validate_actor_key(actor, params[:key_id])
+              error_message = validate_actor(actor)
 
               return { success: false, message: error_message } if error_message
 
