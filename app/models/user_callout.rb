@@ -35,9 +35,12 @@ class UserCallout < ApplicationRecord
   validates :user, presence: true
   validates :feature_name,
     presence: true,
-    uniqueness: { scope: :user_id },
+    uniqueness: { scope: [:user_id, :callout_scope], message: _('has already been assigned to this user for the same scope') },
     inclusion: { in: UserCallout.feature_names.keys }
+  validates :callout_scope, exclusion: { in: [nil], message: _('cannot be nil') }
 
   scope :with_feature_name, -> (feature_name) { where(feature_name: UserCallout.feature_names[feature_name]) }
   scope :with_dismissed_after, -> (dismissed_after) { where('dismissed_at > ?', dismissed_after) }
+  scope :within_scope, -> (callout_scope) { where(callout_scope: callout_scope) }
+  scope :without_scope, -> { where(callout_scope: '') }
 end

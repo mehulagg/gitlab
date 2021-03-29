@@ -1850,8 +1850,9 @@ class User < ApplicationRecord
     update_column(:role, REQUIRES_ROLE_VALUE)
   end
 
-  def dismissed_callout?(feature_name:, ignore_dismissal_earlier_than: nil)
+  def dismissed_callout?(feature_name:, scope: nil, ignore_dismissal_earlier_than: nil)
     callouts = self.callouts.with_feature_name(feature_name)
+    callouts = scope ? callouts.within_scope(scope) : callouts.without_scope
     callouts = callouts.with_dismissed_after(ignore_dismissal_earlier_than) if ignore_dismissal_earlier_than
 
     callouts.any?

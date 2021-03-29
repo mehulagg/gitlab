@@ -1,0 +1,5 @@
+---
+title: Added the callout_scope column to the user_callouts table
+merge_request: 57181
+author:
+type: added

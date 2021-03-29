@@ -18095,7 +18095,9 @@ CREATE TABLE user_callouts (
     id integer NOT NULL,
     feature_name integer NOT NULL,
     user_id integer NOT NULL,
-    dismissed_at timestamp with time zone
+    dismissed_at timestamp with time zone,
+    callout_scope text DEFAULT ''::text NOT NULL,
+    CONSTRAINT check_2329d8b81f CHECK ((char_length(callout_scope) <= 255))
 );
 
 CREATE SEQUENCE user_callouts_id_seq
@@ -24037,7 +24039,7 @@ CREATE INDEX index_user_agent_details_on_subject_id_and_subject_type ON user_age
 
 CREATE INDEX index_user_callouts_on_user_id ON user_callouts USING btree (user_id);
 
-CREATE UNIQUE INDEX index_user_callouts_on_user_id_and_feature_name ON user_callouts USING btree (user_id, feature_name);
+CREATE UNIQUE INDEX index_user_callouts_on_user_id_feature_name_and_callout_scope ON user_callouts USING btree (user_id, feature_name, callout_scope);
 
 CREATE INDEX index_user_canonical_emails_on_canonical_email ON user_canonical_emails USING btree (canonical_email);
 

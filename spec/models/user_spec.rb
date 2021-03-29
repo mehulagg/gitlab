@@ -5203,35 +5203,111 @@ RSpec.describe User do
   end
 
   describe '#dismissed_callout?' do
-    subject(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:feature_name) { UserCallout.feature_names.each_key.first }
 
-    let(:feature_name) { UserCallout.feature_names.each_key.first }
+    let(:scope) { nil }
+    let(:ignore_dismissal_earlier_than) { nil }
 
-    context 'when no callout dismissal record exists' do
-      it 'returns false when no ignore_dismissal_earlier_than provided' do
-        expect(user.dismissed_callout?(feature_name: feature_name)).to eq false
+    subject(:dismissed_callout?) do
+      user.dismissed_callout?(feature_name: feature_name, scope: scope, ignore_dismissal_earlier_than: ignore_dismissal_earlier_than)
+    end
+
+    context 'when no user callout dismissal record exists' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when user callout dismissal record exists' do
+      let_it_be(:user_callout) { create(:user_callout, user: user, feature_name: feature_name, dismissed_at: 4.months.ago) }
+
+      context 'when only feature name is provided' do
+        it { is_expected.to be_truthy }
       end
 
-      it 'returns false when ignore_dismissal_earlier_than provided' do
-        expect(user.dismissed_callout?(feature_name: feature_name, ignore_dismissal_earlier_than: 3.months.ago)).to eq false
+      context 'when the provided ignore_dismissal_earlier_than is earlier than dismissed_at' do
+        let(:ignore_dismissal_earlier_than) { 6.months.ago }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when the provided ignore_dismissal_earlier_than is later than dismissed_at' do
+        let(:ignore_dismissal_earlier_than) { 3.months.ago }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when a nil scope is provided' do
+        let(:scope) { nil }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when the default scope is provided' do
+        let(:scope) { '' }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when a different scope is provided' do
+        let(:scope) { 'foobar' }
+
+        it { is_expected.to be_falsey }
       end
     end
 
-    context 'when dismissed callout exists' do
-      before do
-        create(:user_callout, user: user, feature_name: feature_name, dismissed_at: 4.months.ago)
+    context 'when user callout dismissal record is scoped' do
+      let_it_be(:scoped_callout) { create(:user_callout, user: user, feature_name: feature_name, callout_scope: 'anything', dismissed_at: 4.months.ago) }
+
+      context 'when only feature name is provided' do
+        it { is_expected.to be_falsey }
       end
 
-      it 'returns true when no ignore_dismissal_earlier_than provided' do
-        expect(user.dismissed_callout?(feature_name: feature_name)).to eq true
+      context 'when ignore_dismissal_earlier_than is provided & is earlier than dismissed_at' do
+        let(:ignore_dismissal_earlier_than) { 6.months.ago }
+
+        it { is_expected.to be_falsey }
       end
 
-      it 'returns true when ignore_dismissal_earlier_than is earlier than dismissed_at' do
-        expect(user.dismissed_callout?(feature_name: feature_name, ignore_dismissal_earlier_than: 6.months.ago)).to eq true
+      context 'when ignore_dismissal_earlier_than is provided & is later than dismissed_at' do
+        let(:ignore_dismissal_earlier_than) { 3.months.ago }
+
+        it { is_expected.to be_falsey }
       end
 
-      it 'returns false when ignore_dismissal_earlier_than is later than dismissed_at' do
-        expect(user.dismissed_callout?(feature_name: feature_name, ignore_dismissal_earlier_than: 3.months.ago)).to eq false
+      context 'when a nil scope is provided' do
+        let(:scope) { nil }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the default scope is provided' do
+        let(:scope) { '' }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when a different scope is provided' do
+        let(:scope) { 'foobar' }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the correct scope is provided' do
+        let(:scope) { 'anything' }
+
+        it { is_expected.to be_truthy }
+
+        context 'when the provided ignore_dismissal_earlier_than is earlier than dismissed_at' do
+          let(:ignore_dismissal_earlier_than) { 6.months.ago }
+
+          it { is_expected.to be_truthy }
+        end
+
+        context 'when the provided ignore_dismissal_earlier_than is later than dismissed_at' do
+          let(:ignore_dismissal_earlier_than) { 3.months.ago }
+
+          it { is_expected.to be_falsey }
+        end
       end
     end
   end
