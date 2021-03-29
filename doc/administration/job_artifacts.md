@@ -582,3 +582,12 @@ If you need to manually remove **all** job artifacts associated with multiple jo
    - `1.year.ago`
 
 ### Job artifact upload fails with 500
+
+If a job artifact has failed to upload, review log [Workhorse Logs](https://docs.gitlab.com/ee/administration/logs.html#workhorse-logs) and check for this error message
+
+```json
+==> /var/log/gitlab/gitlab-workhorse/current <==
+{"error":"MissingRegion: could not find region configuration","level":"error","msg":"error uploading S3 session","time":"2021-03-16T22:10:55-04:00"}
+```
+
+To resolve, add `region` to the job artifact object storage definition [Jobs artifacts administration](https://docs.gitlab.com/ee/administration/job_artifacts.html).
