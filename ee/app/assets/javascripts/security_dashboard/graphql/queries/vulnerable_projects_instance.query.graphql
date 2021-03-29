@@ -1,8 +1,8 @@
 #import "../fragments/project.fragment.graphql"
 
-query group($fullPath: ID!) {
-  group(fullPath: $fullPath) {
-    projects(includeSubgroups: true) {
+query vulnerableProjects {
+  instanceSecurityDashboard {
+    projects {
       nodes {
         ...Project
       }

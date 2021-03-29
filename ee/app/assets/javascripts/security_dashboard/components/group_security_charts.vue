@@ -3,7 +3,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
 import vulnerabilityGradesQuery from '../graphql/queries/group_vulnerability_grades.query.graphql';
 import vulnerabilityHistoryQuery from '../graphql/queries/group_vulnerability_history.query.graphql';
-import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
+import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects_group.query.graphql';
 import { createProjectLoadingError } from '../helpers';
 import DashboardNotConfigured from './empty_states/group_dashboard_not_configured.vue';
 import VulnerabilityChart from './first_class_vulnerability_chart.vue';
