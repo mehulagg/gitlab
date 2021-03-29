@@ -9,10 +9,12 @@ module EE
         class_methods do
           extend ::Gitlab::Utils::Override
 
+          # rubocop: disable CodeReuse/ActiveRecord
           override :preload_relation
           def preload_relation(projects_relation, options = {})
-            super(projects_relation).with_compliance_framework_settings
+            super(projects_relation).with_compliance_framework_settings.preload(group: :saml_provider)
           end
+          # rubocop: enable CodeReuse/ActiveRecord
         end
 
         prepended do
