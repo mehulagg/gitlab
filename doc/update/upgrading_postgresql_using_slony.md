@@ -114,7 +114,7 @@ CREATE ROLE slony WITH SUPERUSER LOGIN REPLICATION ENCRYPTED PASSWORD 'password 
 ALTER ROLE slony SET statement_timeout TO 0;
 ```
 
-Make sure you replace "password string here" with the actual password for the
+Make sure you replace "password string here" with an actual password for the
 user. A password is required. This user must be created on both the old and
 new database server using the same password.
 
