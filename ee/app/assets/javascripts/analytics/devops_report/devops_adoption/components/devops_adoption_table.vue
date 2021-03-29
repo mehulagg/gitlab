@@ -115,7 +115,7 @@ export default {
     slotName(key) {
       return `head(${key})`;
     },
-    isActiveGroup(item) {
+    isCurrentGroup(item) {
       return item.namespace?.id === this.groupGid;
     },
   },
@@ -163,7 +163,7 @@ export default {
             <span class="gl-text-gray-400">{{ item.namespace.fullName }}</span>
             <gl-icon name="hourglass" class="gl-text-gray-400" />
           </template>
-          <gl-badge v-if="isActiveGroup(item)" class="gl-ml-1" variant="info">{{
+          <gl-badge v-if="isCurrentGroup(item)" class="gl-ml-1" variant="info">{{
             __('This group')
           }}</gl-badge>
         </div>
