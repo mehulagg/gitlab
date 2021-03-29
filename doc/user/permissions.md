@@ -209,7 +209,7 @@ The following table depicts the various user permission levels in a project.
 
 ### Wiki and issues
 
-Project features like [wikis](../project/wikis/index.md) and issues can be hidden from users depending on
+Project features like [wikis](../project/wiki/index.md) and issues can be hidden from users depending on
 which visibility level you select on project settings.
 
 - Disabled: disabled for everyone

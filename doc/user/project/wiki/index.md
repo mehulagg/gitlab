@@ -225,10 +225,10 @@ Support for displaying a generated table of contents with a custom side navigati
 
 Group wikis work the same way as project wikis. Their usage is similar to project wikis, with a few limitations.
 
-Group wikis can be edited by members with [Developer permissions](../user/permissions.md#group-members-permissions)
+Group wikis can be edited by members with [Developer permissions](../../permissions.md#group-members-permissions)
 and above.
 
-You can move group wiki repositories by using the [Group repository storage moves API](../../api/group_repository_storage_moves.md).
+You can move group wiki repositories by using the [Group repository storage moves API](../../../api/group_repository_storage_moves.md).
 
 There are a few limitations compared to project wikis:
 
