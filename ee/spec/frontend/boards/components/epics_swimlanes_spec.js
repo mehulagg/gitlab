@@ -19,6 +19,8 @@ jest.mock('ee/boards/boards_util');
 describe('EpicsSwimlanes', () => {
   let wrapper;
 
+  const fetchItemsForListSpy = jest.fn();
+
   const createStore = () => {
     return new Vuex.Store({
       state: {
@@ -39,6 +41,9 @@ describe('EpicsSwimlanes', () => {
         },
       },
       getters,
+      actions: {
+        fetchItemsForList: fetchItemsForListSpy,
+      },
     });
   };
 
@@ -60,6 +65,11 @@ describe('EpicsSwimlanes', () => {
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  it('calls fetchItemsForList on mounted', () => {
+    createComponent();
+    expect(fetchItemsForListSpy).toHaveBeenCalled();
   });
 
   describe('computed', () => {

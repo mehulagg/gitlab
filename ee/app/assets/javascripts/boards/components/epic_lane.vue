@@ -89,21 +89,8 @@ export default {
       return this.issuesCount > 0 || this.isLoading;
     },
   },
-  watch: {
-    filterParams: {
-      handler() {
-        if (!this.filterParams.epicId || this.filterParams.epicId === this.epic.id) {
-          this.fetchIssuesForEpic(this.epic.id);
-        }
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.fetchIssuesForEpic(this.epic.id);
-  },
   methods: {
-    ...mapActions(['fetchIssuesForEpic', 'updateBoardEpicUserPreferences']),
+    ...mapActions(['updateBoardEpicUserPreferences']),
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
 

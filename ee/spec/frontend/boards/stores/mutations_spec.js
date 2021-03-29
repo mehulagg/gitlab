@@ -76,53 +76,6 @@ describe('TOGGLE_PROMOTION_STATE', () => {
   expectNotImplemented(mutations.TOGGLE_PROMOTION_STATE);
 });
 
-describe('REQUEST_ISSUES_FOR_EPIC', () => {
-  it('sets isLoading epicsFlags in state for epicId to true', () => {
-    state = {
-      ...state,
-      epicsFlags: {
-        [epicId]: { isLoading: false },
-      },
-    };
-
-    mutations.REQUEST_ISSUES_FOR_EPIC(state, epicId);
-
-    expect(state.epicsFlags[epicId].isLoading).toBe(true);
-  });
-});
-
-describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
-  it('sets boardItemsByListId and issues state for epic issues and loading state to false', () => {
-    const listIssues = {
-      'gid://gitlab/List/1': [mockIssue.id],
-      'gid://gitlab/List/2': [mockIssue2.id],
-    };
-    const issues = {
-      436: mockIssue,
-      437: mockIssue2,
-    };
-
-    mutations.RECEIVE_ISSUES_FOR_EPIC_SUCCESS(state, {
-      listData: listIssues,
-      boardItems: issues,
-      epicId,
-    });
-
-    expect(state.boardItemsByListId).toEqual(listIssues);
-    expect(state.boardItems).toEqual(issues);
-    expect(state.epicsFlags[epicId].isLoading).toBe(false);
-  });
-});
-
-describe('RECEIVE_ISSUES_FOR_EPIC_FAILURE', () => {
-  it('sets loading state to false for epic and error message', () => {
-    mutations.RECEIVE_ISSUES_FOR_EPIC_FAILURE(state, epicId);
-
-    expect(state.error).toEqual('An error occurred while fetching issues. Please reload the page.');
-    expect(state.epicsFlags[epicId].isLoading).toBe(false);
-  });
-});
-
 describe('TOGGLE_EPICS_SWIMLANES', () => {
   it('toggles isShowingEpicsSwimlanes from true to false', () => {
     state = {

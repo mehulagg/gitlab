@@ -51,7 +51,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['epics', 'pageInfoByListId', 'listsFlags', 'addColumnForm']),
+    ...mapState(['epics', 'pageInfoByListId', 'listsFlags', 'addColumnForm', 'filterParams']),
     ...mapGetters(['getUnassignedIssues']),
     addColumnFormVisible() {
       return this.addColumnForm?.visible;
@@ -88,6 +88,17 @@ export default {
         this.unassignedIssuesCount > 0 &&
         this.lists.some((list) => this.pageInfoByListId[list.id]?.hasNextPage)
       );
+    },
+  },
+  watch: {
+    filterParams: {
+      handler() {
+        this.lists.forEach((list) => {
+          this.fetchItemsForList({ listId: list.id });
+        });
+      },
+      deep: true,
+      immediate: true,
     },
   },
   mounted() {

@@ -32,6 +32,8 @@ RSpec.describe 'epics swimlanes', :js do
     it 'displays epics swimlanes when link to boards with group_by epic in URL' do
       expect(page).to have_selector('[data-testid="board-swimlanes"]')
 
+      wait_for_all_requests
+
       epic_lanes = page.all(:css, '.board-epic-lane')
       expect(epic_lanes.length).to eq(2)
     end

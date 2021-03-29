@@ -77,11 +77,11 @@ export default {
       union(state.boardItemsByListId[listId] || [], listData[listId]),
     );
     Vue.set(state.pageInfoByListId, listId, listPageInfo[listId]);
-    Vue.set(state.listsFlags, listId, {
-      isLoading: false,
-      isLoadingMore: false,
-      unassignedIssuesCount: noEpicIssues ? listItemsCount : undefined,
-    });
+    Vue.set(state.listsFlags[listId], 'isLoading', false);
+    Vue.set(state.listsFlags[listId], 'isLoadingMore', false);
+    if (noEpicIssues) {
+      Vue.set(state.listsFlags[listId], 'unassignedIssuesCount', listItemsCount);
+    }
   },
 
   [mutationTypes.RECEIVE_ITEMS_FOR_LIST_FAILURE]: (state, listId) => {
@@ -90,28 +90,6 @@ export default {
         ? ErrorMessages.fetchEpicsError
         : ErrorMessages.fetchIssueError;
     Vue.set(state.listsFlags, listId, { isLoading: false, isLoadingMore: false });
-  },
-
-  [mutationTypes.REQUEST_ISSUES_FOR_EPIC]: (state, epicId) => {
-    Vue.set(state.epicsFlags, epicId, { isLoading: true });
-  },
-
-  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_SUCCESS]: (state, { listData, boardItems, epicId }) => {
-    Object.entries(listData).forEach(([listId, list]) => {
-      Vue.set(
-        state.boardItemsByListId,
-        listId,
-        union(state.boardItemsByListId[listId] || [], list),
-      );
-    });
-
-    Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
-    Vue.set(state.epicsFlags, epicId, { isLoading: false });
-  },
-
-  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_FAILURE]: (state, epicId) => {
-    state.error = s__('Boards|An error occurred while fetching issues. Please reload the page.');
-    Vue.set(state.epicsFlags, epicId, { isLoading: false });
   },
 
   [mutationTypes.TOGGLE_EPICS_SWIMLANES]: (state) => {

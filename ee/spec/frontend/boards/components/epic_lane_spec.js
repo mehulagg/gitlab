@@ -19,7 +19,6 @@ describe('EpicLane', () => {
   const createStore = ({ isLoading = false, boardItemsByListId = mockIssuesByListId }) => {
     return new Vuex.Store({
       actions: {
-        fetchIssuesForEpic: jest.fn(),
         updateBoardEpicUserPreferences: updateBoardEpicUserPreferencesSpy,
       },
       state: {
