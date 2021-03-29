@@ -56,13 +56,13 @@ export default {
     },
     cssClass() {
       const className = this.status.group;
-      return className ? `ci-status ci-${className} qa-status-badge` : 'ci-status qa-status-badge';
+      return className ? `ci-${className}` : '';
     },
   },
 };
 </script>
 <template>
-  <a v-gl-tooltip :href="detailsPath" :class="cssClass" :title="title">
+  <a v-gl-tooltip :href="detailsPath" class="ci-status" :class="cssClass" :title="title">
     <ci-icon :status="status" :css-classes="iconClasses" />
 
     <template v-if="showText">
