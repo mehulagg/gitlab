@@ -25,9 +25,9 @@ The benefit of crawling by following user actions in a browser is that Browserke
 
 Browserker is an extension to the GitLab DAST product. DAST should be included in the CI configuration and Browserker enabled using environment variables:
 
-- Install the DAST [prerequisites](index.md#prerequisites)
+- Install the DAST [prerequisites](index.md#prerequisite)
 - Include the [DAST CI template](index.md#include-the-dast-template)
-- Set the [target website](index.md#template-options)
+- Set the target website using the `DAST_WEBSITE` environment variable
 - Set the environment variable `DAST_BROWSERKER_SCAN` to `true`
  
 An example configuration might look like the following:
