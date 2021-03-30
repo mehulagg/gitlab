@@ -70,3 +70,9 @@ export const RENAME_ENTRY = 'RENAME_ENTRY';
 export const REVERT_RENAME_ENTRY = 'REVERT_RENAME_ENTRY';
 
 export const RESTORE_TREE = 'RESTORE_TREE';
+
+// Alert mutation types
+
+export const GITLAB_CI_STAGES = 'GITLAB_CI_STAGES';
+export const SET_USER_CALLOUTS = 'SET_USER_CALLOUTS';
+export const SET_USER_CALLOUT = 'SET_USER_CALLOUT';

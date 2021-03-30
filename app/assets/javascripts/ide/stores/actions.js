@@ -17,7 +17,10 @@ import * as types from './mutation_types';
 
 export const redirectToUrl = (self, url) => visitUrl(url);
 
-export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
+export const setInitialData = ({ commit }, data) => {
+  commit(types.SET_INITIAL_DATA, data);
+  dispatch('fetchCallouts');
+};
 
 export const discardAllChanges = ({ state, commit, dispatch }) => {
   state.changedFiles.forEach((file) => dispatch('restoreOriginalFile', file.path));
@@ -316,3 +319,4 @@ export * from './actions/tree';
 export * from './actions/file';
 export * from './actions/project';
 export * from './actions/merge_request';
+export * from './actions/alert';

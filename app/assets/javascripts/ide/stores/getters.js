@@ -1,5 +1,6 @@
 import Api from '~/api';
 import { addNumericSuffix } from '~/ide/utils';
+import { __ } from '~/locale';
 import {
   leftSidebarViews,
   packageJsonPath,
@@ -262,3 +263,5 @@ export const getJsonSchemaForPath = (state, getters) => (path) => {
     fileMatch: [`*${path}`],
   };
 };
+
+export * from './getters/alert';

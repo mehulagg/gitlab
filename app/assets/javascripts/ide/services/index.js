@@ -2,7 +2,10 @@ import getIdeProject from 'ee_else_ce/ide/queries/get_ide_project.query.graphql'
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
-import { query } from './gql';
+import ciConfig from '~/pipeline_editor/graphql/queries/ci_config.graphql';
+import dismissUserCallout from '../queries/dismiss_user_callout.mutation.graphql';
+import getUserCallouts from '../queries/get_user_callout.query.graphql';
+import { query, mutate } from './gql';
 
 const fetchApiProjectData = (projectPath) => Api.project(projectPath).then(({ data }) => data);
 
@@ -100,5 +103,20 @@ export default {
   pingUsage(projectPath) {
     const url = `${gon.relative_url_root}/${projectPath}/usage_ping/web_ide_pipelines_count`;
     return axios.post(url);
+  },
+  getCiConfig(projectPath, content) {
+    return query({
+      query: ciConfig,
+      variables: { projectPath, content },
+    }).then((res) => res.data.ciConfig);
+  },
+  getUserCallouts() {
+    return query({ query: getUserCallouts }).then((res) => res.data.currentUser);
+  },
+  dismissUserCallout(name) {
+    return mutate({
+      mutation: dismissUserCallout,
+      variables: { input: { featureName: name } },
+    }).then((res) => res.data);
   },
 };

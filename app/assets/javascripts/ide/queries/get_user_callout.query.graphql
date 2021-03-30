@@ -1,0 +1,10 @@
+{
+  currentUser {
+    callouts {
+      nodes {
+        featureName
+        dismissedAt
+      }
+    }
+  }
+}

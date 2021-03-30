@@ -75,6 +75,7 @@ export default {
     ...mapActions(['updateActivityBarView']),
     ...mapActions('commit', [
       'updateCommitMessage',
+      'maybeFetchGitlabCiYaml',
       'discardDraft',
       'commitChanges',
       'updateCommitAction',
@@ -102,6 +103,7 @@ export default {
       this.isCompact = !this.isCompact;
     },
     beginCommit() {
+      this.maybeFetchGitlabCiYaml();
       return this.updateActivityBarView(leftSidebarViews.commit.name).then(() => {
         this.isCompact = false;
       });

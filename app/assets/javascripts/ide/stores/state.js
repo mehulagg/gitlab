@@ -30,4 +30,6 @@ export default () => ({
   renderWhitespaceInCode: false,
   editorTheme: DEFAULT_THEME,
   codesandboxBundlerUrl: null,
+  gitlabCiStages: {},
+  callouts: {},
 });

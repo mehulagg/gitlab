@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { GlAlert,GlButton,GlLoadingIcon } from '@gitlab/ui';
+import { mapActions,mapGetters,mapState } from 'vuex';
 import { __ } from '~/locale';
 import {
   WEBIDE_MARK_APP_START,
@@ -18,7 +18,7 @@ import CannotPushCodeAlert from './cannot_push_code_alert.vue';
 import IdeSidebar from './ide_side_bar.vue';
 import RepoEditor from './repo_editor.vue';
 
-eventHub.$on(WEBIDE_MEASURE_FILE_AFTER_INTERACTION, () =>
+eventHub.$on(WEBIDE_MEASURE_FILE_AFTER_INTERACTION,() =>
   measurePerformance(
     WEBIDE_MARK_FILE_FINISH,
     WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
@@ -30,6 +30,7 @@ export default {
   components: {
     IdeSidebar,
     RepoEditor,
+    GlAlert,
     GlButton,
     GlLoadingIcon,
     ErrorMessage: () => import(/* webpackChunkName: 'ide_runtime' */ './error_message.vue'),
@@ -70,15 +71,19 @@ export default {
       'hasCurrentProject',
       'editorTheme',
       'getUrlForPath',
+      'showAlert'
     ]),
     themeName() {
       return window.gon?.user_color_scheme;
     },
+    alert() {
+      return this.showAlert(this.activeFile);
+    }
   },
   mounted() {
-    window.onbeforeunload = (e) => this.onBeforeUnload(e);
+    window.onbeforeunload=(e) => this.onBeforeUnload(e);
 
-    if (this.themeName)
+    if(this.themeName)
       document.querySelector('.navbar-gitlab').classList.add(`theme-${this.themeName}`);
   },
   beforeCreate() {
@@ -93,12 +98,12 @@ export default {
   },
   methods: {
     ...mapActions(['toggleFileFinder']),
-    onBeforeUnload(e = {}) {
-      const returnValue = __('Are you sure you want to lose unsaved changes?');
+    onBeforeUnload(e={}) {
+      const returnValue=__('Are you sure you want to lose unsaved changes?');
 
-      if (!this.someUncommittedChanges) return undefined;
+      if(!this.someUncommittedChanges) return undefined;
 
-      Object.assign(e, {
+      Object.assign(e,{
         returnValue,
       });
       return returnValue;
@@ -110,7 +115,7 @@ export default {
       this.$refs.newModal.open(modalTypes.blob);
     },
     loadDeferredComponents() {
-      this.loadDeferred = true;
+      this.loadDeferred=true;
     },
   },
 };
@@ -126,7 +131,10 @@ export default {
       :message="canPushCodeStatus.message"
       :action="canPushCodeStatus.action"
     />
-    <error-message v-if="errorMessage" :message="errorMessage" />
+    <error-message
+      v-if="errorMessage"
+      :message="errorMessage"
+    />
     <div class="ide-view flex-grow d-flex">
       <template v-if="loadDeferred">
         <find-file
@@ -142,10 +150,28 @@ export default {
       <div class="multi-file-edit-pane">
         <template v-if="activeFile">
           <template v-if="loadDeferred">
-            <commit-editor-header v-if="isCommitModeActive" :active-file="activeFile" />
-            <repo-tabs v-else :active-file="activeFile" :files="openFiles" :viewer="viewer" />
+            <commit-editor-header
+              v-if="isCommitModeActive"
+              :active-file="activeFile"
+            />
+            <repo-tabs
+              v-else
+              :active-file="activeFile"
+              :files="openFiles"
+              :viewer="viewer"
+            />
           </template>
-          <repo-editor :file="activeFile" class="multi-file-edit-pane-content" />
+          <gl-alert
+            v-if="alert"
+            v-bind="alert.props"
+            @dismiss="alert.dismiss($store)"
+          >
+            {{ alert.message  }}
+          </gl-alert>
+          <repo-editor
+            :file="activeFile"
+            class="multi-file-edit-pane-content"
+          />
         </template>
         <template v-else>
           <div class="ide-empty-state">
@@ -177,7 +203,10 @@ export default {
                       {{ __('New file') }}
                     </gl-button>
                   </template>
-                  <gl-loading-icon v-else-if="!currentTree || currentTree.loading" size="md" />
+                  <gl-loading-icon
+                    v-else-if="!currentTree || currentTree.loading"
+                    size="md"
+                  />
                   <p v-else>
                     {{
                       __(

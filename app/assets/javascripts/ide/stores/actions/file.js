@@ -183,6 +183,10 @@ export const changeFileContent = ({ commit, dispatch, state, getters }, { path, 
     commit(types.REMOVE_FILE_FROM_CHANGED, path);
   }
 
+  if (path === '.gitlab-ci.yml') {
+    dispatch('fetchGitlabCiYaml', content);
+  }
+
   dispatch('triggerFilesChange', { type: commitActionTypes.update, path });
 };
 
