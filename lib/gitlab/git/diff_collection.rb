@@ -82,6 +82,18 @@ module Gitlab
         !!@overflow
       end
 
+      def overflow_max_lines?
+        !!@overflow_max_lines
+      end
+
+      def overflow_max_bytes?
+        !!@overflow_max_bytes
+      end
+
+      def overflow_max_files?
+        !!@overflow_max_files
+      end
+
       def size
         @size ||= count # forces a loop using each method
       end
@@ -154,6 +166,7 @@ module Gitlab
 
           if @enforce_limits && i >= max_files
             @overflow = true
+            @overflow_max_files = true
             break
           end
 
@@ -166,10 +179,19 @@ module Gitlab
           @line_count += diff.line_count
           @byte_count += diff.diff.bytesize
 
-          if @enforce_limits && (@line_count >= max_lines || @byte_count >= max_bytes)
+          if @enforce_limits && @line_count >= max_lines
             # This last Diff instance pushes us over the lines limit. We stop and
             # discard it.
             @overflow = true
+            @overflow_max_lines = true
+            break
+          end
+
+          if @enforce_limits && @byte_count >= max_bytes
+            # This last Diff instance pushes us over the lines limit. We stop and
+            # discard it.
+            @overflow = true
+            @overflow_max_bytes = true
             break
           end
 

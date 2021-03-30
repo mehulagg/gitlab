@@ -194,6 +194,10 @@ module DiffHelper
       Gitlab::Metrics.add_event(:diffs_overflow_single_file_limits)
     end
 
+    Gitlab::Metrics.add_event(:diffs_overflow_max_bytes_limits) if diff_files.overflow_max_bytes?
+    Gitlab::Metrics.add_event(:diffs_overflow_max_files_limits) if diff_files.overflow_max_files?
+    Gitlab::Metrics.add_event(:diffs_overflow_max_lines_limits) if diff_files.overflow_max_lines?
+
     diff_files.overflow?.tap do |overflown|
       Gitlab::Metrics.add_event(:diffs_overflow_collection_limits) if overflown
     end
