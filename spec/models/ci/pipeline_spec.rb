@@ -3541,6 +3541,10 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   describe '#has_codequality_mr_diff_report?' do
     subject { pipeline.has_codequality_mr_diff_report? }
 
+    before do
+      stub_licensed_features(inline_codequality: true)
+    end
+
     context 'when pipeline has a codequality mr diff report' do
       let(:pipeline) { create(:ci_pipeline, :with_codequality_mr_diff_report, :running) }
 

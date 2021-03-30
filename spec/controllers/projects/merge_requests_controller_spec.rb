@@ -1212,6 +1212,8 @@ RSpec.describe Projects::MergeRequestsController do
 
     context 'when pipeline has jobs with codequality mr diff report' do
       before do
+        stub_licensed_features(inline_codequality: true)
+
         allow_any_instance_of(MergeRequest)
           .to receive(:has_codequality_mr_diff_report?)
           .and_return(true)

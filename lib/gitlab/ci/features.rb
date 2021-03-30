@@ -53,7 +53,8 @@ module Gitlab
       end
 
       def self.display_quality_on_mr_diff?(project)
-        ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: false)
+        ::License.feature_available?(:inline_codequality) &&
+          ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: false)
       end
 
       def self.display_codequality_backend_comparison?(project)

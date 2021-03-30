@@ -2065,6 +2065,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#has_codequality_mr_diff_report?' do
     subject { merge_request.has_codequality_mr_diff_report? }
 
+    before do
+      stub_licensed_features(inline_codequality: true)
+    end
+
     context 'when head pipeline has codequality mr diff report' do
       let(:merge_request) { create(:merge_request, :with_codequality_mr_diff_reports) }
 
@@ -2309,6 +2313,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:pipeline) { merge_request.head_pipeline }
 
     subject(:mr_diff_report) { merge_request.find_codequality_mr_diff_reports }
+
+    before do
+      stub_licensed_features(inline_codequality: true)
+    end
 
     context 'when head pipeline has coverage reports' do
       context 'when reactive cache worker is parsing results asynchronously' do

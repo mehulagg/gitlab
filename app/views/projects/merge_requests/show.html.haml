@@ -5,7 +5,6 @@
 - page_title "#{@merge_request.title} (#{@merge_request.to_reference})", _("Merge Requests")
 - page_description @merge_request.description_html
 - page_card_attributes @merge_request.card_attributes
-- inline_codequality_diff_available = @merge_request.project.feature_available?(:inline_codequality) && @merge_request.has_codequality_mr_diff_report?
 - suggest_changes_help_path = help_page_path('user/discussions/index.md', anchor: 'suggest-changes')
 - number_of_pipelines = @pipelines.size
 - mr_action = j(params[:tab].presence || 'show')
@@ -87,7 +86,7 @@
         endpoint_metadata: @endpoint_metadata_url,
         endpoint_batch: diffs_batch_project_json_merge_request_path(@project, @merge_request, 'json', params),
         endpoint_coverage: @coverage_path,
-        endpoint_codequality: (codequality_mr_diff_reports_project_merge_request_path(@project, @merge_request, 'json') if inline_codequality_diff_available),
+        endpoint_codequality: (codequality_mr_diff_reports_project_merge_request_path(@project, @merge_request, 'json') if @merge_request.has_codequality_mr_diff_report?),
         help_page_path: suggest_changes_help_path,
         current_user_data: @current_user_data,
         project_path: project_path(@merge_request.project),
