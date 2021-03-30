@@ -61,6 +61,7 @@ them categorized so their relationships can be better understood visually.
 ![Related issue block](img/related_issue_block_v12_8.png)
 
 ## Removing a related issue
+
 In the related issues block, click the remove button (**{close}**) on the right-side of each issue
 token that you wish to remove.
 
