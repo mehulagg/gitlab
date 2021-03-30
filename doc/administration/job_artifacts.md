@@ -604,13 +604,13 @@ then run `sudo gitlab-ctl reconfigure`.
 
 ### Error `Job artifact upload fails with 500`
 
-If a job artifact has failed to upload, review log [Workhorse Logs](logs.html#workhorse-logs) and check for this error message
+If a job artifact has failed to upload, review log [Workhorse Logs](logs.md#workhorse-logs) and check for this error message
 
 ```json
 ==> /var/log/gitlab/gitlab-workhorse/current <==
 {"error":"MissingRegion: could not find region configuration","level":"error","msg":"error uploading S3 session","time":"2021-03-16T22:10:55-04:00"}
 ```
 
-To resolve, add `region` to the job artifact object storage definition [Jobs artifacts administration](job_artifacts.html).
+To resolve, add `region` to the job artifact object storage definition [Jobs artifacts administration](job_artifacts.md).
 
 Related GitLab issue [Use GoCloud interface for S3 access](https://gitlab.com/gitlab-org/gitlab/-/issues/324867)
