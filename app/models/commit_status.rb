@@ -55,6 +55,7 @@ class CommitStatus < ApplicationRecord
   scope :for_ref, -> (ref) { where(ref: ref) }
   scope :by_name, -> (name) { where(name: name) }
   scope :in_pipelines, ->(pipelines) { where(pipeline: pipelines) }
+  scope :with_pipeline, -> { joins(:pipeline) }
 
   scope :for_project_paths, -> (paths) do
     where(project: Project.where_full_path_in(Array(paths)))
@@ -176,17 +177,6 @@ class CommitStatus < ApplicationRecord
         PipelineProcessWorker.perform_async(pipeline_id)
         ExpireJobCacheWorker.perform_async(id)
       end
-    end
-
-    after_transition any => :failed do |commit_status|
-      next unless commit_status.project
-
-      # rubocop: disable CodeReuse/ServiceClass
-      commit_status.run_after_commit do
-        MergeRequests::AddTodoWhenBuildFailsService
-          .new(project, nil).execute(self)
-      end
-      # rubocop: enable CodeReuse/ServiceClass
     end
   end
 
