@@ -91,6 +91,9 @@ The following table describes details of your subscription:
 > - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/292086) in GitLab 13.8 to include public
     email address.
 
+To view a list of seats being used, go to **Settings > Billing**.
+Under **Seats currently in use**, select **See usage**.
+
 The **Seat usage** page lists all users occupying seats. Details for each user include:
 
 - Full name
@@ -116,6 +119,14 @@ For example:
 |:-----------|:--------------|:--------|
 | Amir       | `ami`         | Yes     |
 | Amir       | `amr`         | No      |
+
+## Subscription expiry
+
+When your subscription expires, you can continue to use GitLab for 14 days.
+On the 15th day, paid features are no longer available. You can
+continue to use free features.
+
+To resume paid feature functionality, purchase a new subscription.
 
 ## Renew your GitLab SaaS subscription
 
@@ -145,23 +156,45 @@ It's important to regularly review your user accounts, because:
   attempt to renew a subscription for too few users.
 - Stale user accounts can be a security risk. A regular review helps reduce this risk.
 
-#### Users over License
+#### Seats owed
 
 A GitLab subscription is valid for a specific number of users. For details, see
 [Choose the number of users](#choose-the-number-of-users).
 
 If the number of [billable users](#view-your-gitlab-saas-subscription) exceeds the number included in the subscription, known
-as the number of _users over license_, you must pay for the excess number of
-users either before renewal, or at the time of renewal. This is also known the
-_true up_ process.
+as the number of _seats owed_, you must pay for the excess number of users before renewal.
+
+##### Seats owed example
+
+You purchase a subscription for 10 users.
+
+| Event                                              | Billable members | Maximum users |
+|:---------------------------------------------------|:-----------------|:--------------|
+| Ten people (users) occupy all 10 seats.            | 10               | 10            |
+| Two new people join.                               | 12               | 12            |
+| Three people leave and their accounts are removed. | 9                | 12            |
+
+Seats owed = 12 - 10 (Maximum users - users in subscription)
 
 ### Renew or change a GitLab SaaS subscription
 
-You can adjust the number of users before renewing your GitLab SaaS subscription.
+Starting 30 days before a subscription expires, GitLab notifies administrators
+of the date of expiry with a banner in the GitLab user interface.
 
-- To renew for more users than are currently included in your GitLab SaaS plan, [add users to your subscription](#add-users-to-your-subscription).
-- To renew for fewer users than are currently included in your GitLab SaaS plan,
-[remove](#remove-billable-user) the user accounts you no longer need.
+You can adjust the number of users while you renew your GitLab SaaS subscription.
+
+We recommend following these steps during renewal:
+
+1. Prune any [inactive or unwanted users](#remove-billable-user).
+1. Determine if you have a need for user growth in the upcoming subscription.
+1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in) and beneath your existing subscription, select the **Renew** button.
+1. In the first box, enter the total number of users you'll need for the upcoming year. Be sure this number is at least **equal to, or greater than** the number of billable users in the system at the time of performing the renewal.
+1. Enter the number of [seats owed](#seats-owed) in the second box.
+1. Review your renewal details and complete the payment process.
+1. A license for the renewal term is available for download on the [Manage Purchases](https://customers.gitlab.com/subscriptions) page on the relevant subscription card. Select **Copy license to clipboard** or **Download license** to get a copy.
+1. [Upload](../../user/admin_area/license.md#uploading-your-license) your new license to your instance.
+
+An invoice is generated for the renewal and available for viewing or download on the [View invoices](https://customers.gitlab.com/receipts) page. If you have difficulty during the renewal process, contact our [support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293) for assistance.
 
 For details on upgrading your subscription tier, see
 [Upgrade your GitLab SaaS subscription tier](#upgrade-your-gitlab-saas-subscription-tier).
@@ -234,14 +267,6 @@ To remove a billable user:
 1. In the **Seats currently in use** area, select **See usage**.
 1. In the row for the user you want to remove, on the right side, select the ellipsis and **Remove user**.
 1. Re-type the username and select **Remove user**.
-
-## Subscription expiry
-
-When your subscription expires, you can continue to use GitLab for 14 days.
-On the 15th day, paid features are no longer available. You can
-continue to use free features.
-
-To resume paid feature functionality, purchase a new subscription.
 
 ## CI pipeline minutes
 
