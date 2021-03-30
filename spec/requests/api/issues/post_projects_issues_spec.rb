@@ -619,7 +619,7 @@ RSpec.describe API::Issues do
 
        expect(response).to have_gitlab_http_status(:created)
        expect(json_response['project_id']).to eq(target_project2.id)
-     end
+    end
   end
 
   describe 'POST :id/issues/:issue_iid/subscribe' do
