@@ -14,6 +14,7 @@ import Metrics from './metrics.vue';
 import PathNavigation from './path_navigation.vue';
 import StageTable from './stage_table.vue';
 import StageTableNav from './stage_table_nav.vue';
+import StageTableNew from './stage_table_new.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
@@ -28,6 +29,7 @@ export default {
     TypeOfWorkCharts,
     CustomStageForm,
     StageTableNav,
+    StageTableNew,
     PathNavigation,
     FilterBar,
     ValueStreamSelect,
@@ -53,6 +55,7 @@ export default {
       'featureFlags',
       'isLoading',
       'isLoadingStage',
+      // NOTE: we can remove the `isEmptyStage` field when we remove the existing stage table
       'isEmptyStage',
       'currentGroup',
       'selectedProjects',
@@ -269,8 +272,17 @@ export default {
           :group-path="currentGroupPath"
           :request-params="cycleAnalyticsRequestParams"
         />
+        <div v-if="featureFlags.hasPathNavigation">
+          <stage-table-new
+            v-if="!isLoading && !isOverviewStageSelected"
+            :is-loading="isLoadingStage"
+            :stage-events="currentStageEvents"
+            :no-data-svg-path="noDataSvgPath"
+            :empty-state-message="selectedStageError"
+          />
+        </div>
         <stage-table
-          v-if="!featureFlags.hasPathNavigation || !isOverviewStageSelected"
+          v-else
           :key="stageCount"
           class="js-stage-table"
           :current-stage="selectedStage"
