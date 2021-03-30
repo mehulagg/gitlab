@@ -1,6 +1,5 @@
 <script>
 import { GlFormRadio, GlFormRadioGroup, GlTooltipDirective as GlTooltip } from '@gitlab/ui';
-import { cloneDeep } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
 import { ListType } from '~/boards/constants';
@@ -79,7 +78,11 @@ export default {
     },
 
     setSelectedItem(selectedId) {
-      this.selectedLabel = cloneDeep(this.labels.find(({ id }) => id === selectedId));
+      const label = this.labels.find(({ id }) => id === selectedId);
+      if (!selectedId || !label) {
+        this.selectedLabel = null;
+      }
+      this.selectedLabel = { ...label };
     },
   },
 };
