@@ -544,6 +544,84 @@ RSpec.describe API::Issues do
     end
   end
 
+  describe '/projects/:id/issues/:issue_iid/clone' do
+    let!(:target_project) { create(:project, creator_id: user.id, namespace: user.namespace ) }
+    let!(:target_project2) { create(:project, creator_id: non_member.id, namespace: non_member.namespace ) }
+
+    it 'clones an issue' do
+      post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user),
+        params: { to_project_id: target_project.id }
+
+      expect(response).to have_gitlab_http_status(:created)
+      expect(json_response['project_id']).to eq(target_project.id)
+    end
+
+    context 'when the user does not have the permission to clone issues' do
+      it 'returns 400 when trying to clone an issue' do
+        post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user),
+          params: { to_project_id: target_project2.id }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['message']).to eq(s_('CloneIssue|Cannot clone issue due to insufficient permissions!'))
+      end
+    end
+
+    it 'clones the issue to another namespace if I am admin' do
+      post api("/projects/#{project.id}/issues/#{issue.iid}/clone", admin),
+        params: { to_project_id: target_project2.id }
+
+      expect(response).to have_gitlab_http_status(:created)
+      expect(json_response['project_id']).to eq(target_project2.id)
+    end
+
+    context 'when using the issue ID instead of iid' do
+      it 'returns 404 when trying to move an issue' do
+        post api("/projects/#{project.id}/issues/#{issue.id}/clone", user),
+          params: { to_project_id: target_project.id }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Issue Not Found')
+      end
+    end
+
+    context 'when issue does not exist' do
+      it 'returns 404 when trying to clone an issue' do
+        post api("/projects/#{project.id}/issues/123/clone", user),
+          params: { to_project_id: target_project.id }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Issue Not Found')
+      end
+    end
+
+    context 'when source project does not exist' do
+      it 'returns 404 when trying to clone an issue' do
+        post api("/projects/0/issues/#{issue.iid}/clone", user),
+          params: { to_project_id: target_project.id }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Project Not Found')
+      end
+    end
+
+    context 'when target project does not exist' do
+      it 'returns 404 when trying to clone an issue' do
+        post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user),
+          params: { to_project_id: 0 }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    it 'clones the issue with notes when with_notes is true' do
+       post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user,
+         params: { to_project_id: target_project2.id, with_notes: true }
+
+       expect(response).to have_gitlab_http_status(:created)
+       expect(json_response['project_id']).to eq(target_project2.id)
+     end
+  end
+
   describe 'POST :id/issues/:issue_iid/subscribe' do
     it 'subscribes to an issue' do
       post api("/projects/#{project.id}/issues/#{issue.iid}/subscribe", user2)
