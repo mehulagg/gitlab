@@ -1,17 +1,22 @@
 <script>
-import { GlLink, GlSprintf, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlLink, GlSprintf } from '@gitlab/ui';
 import { bodyWithFallBack } from 'ee/vue_shared/security_reports/components/helpers';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 import { __ } from '~/locale';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
 import DetailItem from './detail_item.vue';
+import VulnerabilityDetailSection from './vulnerability_detail_section.vue';
 
 export default {
   name: 'VulnerabilityDetails',
-  components: { CodeBlock, GlLink, SeverityBadge, DetailItem, GlSprintf, GlIcon },
-  directives: {
-    GlTooltip: GlTooltipDirective,
+  components: {
+    CodeBlock,
+    GlLink,
+    SeverityBadge,
+    DetailItem,
+    GlSprintf,
+    VulnerabilityDetailSection,
   },
   props: {
     vulnerability: {
@@ -293,81 +298,37 @@ export default {
         </li>
       </ul>
     </template>
-
-    <section v-if="hasRequest" data-testid="request">
-      <h3>{{ s__('Vulnerability|Request/Response') }}</h3>
-      <ul>
-        <detail-item
-          v-for="({ label, isCode, content }, index) in requestData"
-          :key="`${index}:${label}`"
-          :sprintf-message="label"
-        >
-          <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
-          <template v-else>
-            {{ content }}
-          </template>
-        </detail-item>
-      </ul>
-    </section>
+    <vulnerability-detail-section
+      v-if="hasRequest"
+      data-testid="request"
+      :list-data="requestData"
+      :heading="s__('Vulnerability|Request/Response')"
+    />
 
     <div v-if="hasResponses" class="row">
-      <section
+      <vulnerability-detail-section
         v-if="hasRecordedResponse"
         :class="hasResponse ? 'col-6' : 'col'"
         data-testid="recorded-response"
-      >
-        <ul>
-          <detail-item
-            v-for="({ label, isCode, content }, index) in recordedResponseData"
-            :key="`${index}:${label}`"
-            :sprintf-message="label"
-          >
-            <gl-icon
-              v-gl-tooltip
-              name="information-o"
-              class="gl-hover-cursor-pointer gl-mr-3"
-              :title="
-                s__(
-                  'Vulnerability|The unmodified response is the original response that had no mutations done to the request',
-                )
-              "
-            />
-            <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
-            <template v-else>
-              {{ content }}
-            </template>
-          </detail-item>
-        </ul>
-      </section>
+        :list-data="recordedResponseData"
+        :icon-title="
+          s__(
+            'Vulnerability|The unmodified response is the original response that had no mutations done to the request',
+          )
+        "
+      />
 
-      <section
+      <vulnerability-detail-section
         v-if="hasResponse"
         :class="hasRecordedResponse ? 'col-6' : 'col'"
         data-testid="response"
-      >
-        <ul>
-          <detail-item
-            v-for="({ label, isCode, content }, index) in responseData"
-            :key="`${index}:${label}`"
-            :sprintf-message="label"
-          >
-            <gl-icon
-              v-gl-tooltip
-              name="information-o"
-              class="gl-hover-cursor-pointer gl-mr-3"
-              :title="
-                s__(
-                  'Vulnerability|Actual received response is the one received when this fault was detected',
-                )
-              "
-            />
-            <code-block v-if="isCode" class="gl-mt-2" :code="content" max-height="225px" />
-            <template v-else>
-              {{ content }}
-            </template>
-          </detail-item>
-        </ul>
-      </section>
+        :list-data="responseData"
+        :icon-title="
+          s__(
+            'Vulnerability|Actual received response is the one received when this fault was detected',
+          )
+        "
+      />
     </div>
 
     <template v-if="assertion">
