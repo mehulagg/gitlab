@@ -7,7 +7,10 @@ import DiffFileComponent from '~/diffs/components/diff_file.vue';
 
 import createDiffsStore from '~/diffs/store/modules';
 
-function createComponent({ file, first = false, last = false, options = {}, props = {} }) {
+const getReadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataReadable));
+
+function createComponent({ first = false, last = false, options = {}, props = {} }) {
+  const file = getReadableFile();
   const localVue = createLocalVue();
 
   localVue.use(Vuex);
@@ -41,17 +44,8 @@ function createComponent({ file, first = false, last = false, options = {}, prop
   };
 }
 
-const getReadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataReadable));
-
 describe('EE DiffFile', () => {
   let wrapper;
-  let store;
-
-  beforeEach(() => {
-    ({ wrapper, store } = createComponent({
-      file: getReadableFile(),
-    }));
-  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -61,7 +55,6 @@ describe('EE DiffFile', () => {
     it('is shown when there is diff data for the file', () => {
       ({ wrapper } = createComponent({
         props: {
-          file: store.state.diffs.diffFiles[0],
           codequalityDiff: [
             { line: 1, description: 'Unexpected alert.', severity: 'minor' },
             {
@@ -77,11 +70,7 @@ describe('EE DiffFile', () => {
     });
 
     it('is not shown when there is no diff data for the file', () => {
-      ({ wrapper } = createComponent({
-        props: {
-          file: store.state.diffs.diffFiles[0],
-        },
-      }));
+      ({ wrapper } = createComponent({}));
 
       expect(wrapper.find(CodeQualityBadge)).toExist();
     });
