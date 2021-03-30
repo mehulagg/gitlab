@@ -511,31 +511,6 @@
       ]
     },
     {
-      "id": "c32de74c8a47bddbe1223db1dda366bad8e3c01b65c6cac6f1b2a809ae7bb9d5",
-      "category": "sast",
-      "message": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
-      "cve": "python/imports/imports-aliases.py:f99f9721e27537fbcb6699a4cf39c6740d6234d2c6f06cfc2d9ea977313c483d:B602",
-      "severity": "Low",
-      "confidence": "High",
-      "scanner": {
-        "id": "bandit",
-        "name": "Bandit"
-      },
-      "location": {
-        "file": "python/imports/imports-aliases.py",
-        "start_line": 9,
-        "end_line": 9
-      },
-      "identifiers": [
-        {
-          "type": "bandit_test_id",
-          "name": "Bandit Test ID B602",
-          "value": "B602",
-          "url": "https://docs.openstack.org/bandit/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html"
-        }
-      ]
-    },
-    {
       "id": "ddaa8acc7a4b566c870855270ae8b00e829a94e12497507a95e85f8da773fcee",
       "category": "sast",
       "message": "Consider possible security implications associated with subprocess module.",
