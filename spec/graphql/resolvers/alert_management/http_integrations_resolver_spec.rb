@@ -46,13 +46,13 @@ RSpec.describe Resolvers::AlertManagement::HttpIntegrationsResolver do
 
     context 'when HTTP Integration ID is given' do
       context 'when integration is from the current project' do
-        let(:params) { { id: GitlabSchema.id_from_object(inactive_http_integration).to_s } }
+        let(:params) { { id: global_id_of(inactive_http_integration) } }
 
         it { is_expected.to contain_exactly(inactive_http_integration) }
       end
 
       context 'when integration is from other project' do
-        let(:params) { { id: GitlabSchema.id_from_object(other_proj_integration).to_s } }
+        let(:params) { { id: global_id_of(other_proj_integration) } }
 
         it { is_expected.to be_empty }
       end
