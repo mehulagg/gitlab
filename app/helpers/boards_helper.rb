@@ -15,6 +15,7 @@ module BoardsHelper
       full_path: full_path,
       bulk_update_path: @bulk_issues_path,
       can_update: (!!can?(current_user, :admin_issue, board)).to_s,
+      can_admin_list: can?(current_user, :admin_issue_board_list, current_board_parent).to_s,
       time_tracking_limit_to_hours: Gitlab::CurrentSettings.time_tracking_limit_to_hours.to_s,
       recent_boards_endpoint: recent_boards_path,
       parent: current_board_parent.model_name.param_key,

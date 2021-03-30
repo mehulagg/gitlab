@@ -38,6 +38,7 @@ describe('ee/BoardSettingsSidebar', () => {
         glFeatures: {
           wipLimits: isWipLimitsOn,
         },
+        canAdminList: false,
       },
       stubs: {
         'board-settings-sidebar-wip-limit': BoardSettingsWipLimit,

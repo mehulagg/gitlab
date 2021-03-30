@@ -13,10 +13,10 @@ describe('ee/BoardContent', () => {
       store,
       provide: {
         timeTrackingLimitToHours: false,
+        canAdminList: false,
       },
       propsData: {
         lists: [],
-        canAdminList: false,
         disabled: false,
       },
       stubs: {
