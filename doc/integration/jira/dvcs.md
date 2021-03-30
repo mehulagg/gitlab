@@ -7,9 +7,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Jira DVCS connector
 
 Use the Jira DVCS (distributed version control system) connector if you self-host
-your Jira instance and want to sync information to your GitLab instance. If you use
-Jira Cloud and GitLab.com, use the [GitLab for Jira app](connect-app.md) unless
-you have a specific need for the DVCS Connector.
+either your Jira instance or your GitLab instance, and you want to sync information
+between them. If you use Jira Cloud and GitLab.com, you should use the
+[GitLab for Jira app](connect-app.md) unless you specifically need the DVCS connector.
 
 When you configure the Jira DVCS connector, make sure your GitLab and Jira instances
 are accessible.
