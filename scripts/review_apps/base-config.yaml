@@ -139,8 +139,7 @@ postgresql:
     requests:
       cpu: 825m
       memory: 1000M
-    limits:
-      cpu: 1238m
+      cpu: 1300m
       memory: 1500M
 prometheus:
   install: false
