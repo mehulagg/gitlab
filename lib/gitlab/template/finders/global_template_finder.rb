@@ -41,6 +41,12 @@ module Gitlab
           end
         end
 
+        def all
+          Dir.glob(File.join(@base_dir, "**/*#{@extension}")).select do |f|
+            f =~ self.class.filter_regex(@extension)
+          end
+        end
+
         private
 
         def excluded?(file_name)
