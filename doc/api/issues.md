@@ -1349,7 +1349,7 @@ POST /projects/:id/issues/:issue_iid/clone
 | `id`            | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user  |
 | `issue_iid`     | integer | yes      | The internal ID of a project's issue |
 | `to_project_id` | integer | yes      | The ID of the new project            |
-| `with_notes`    | boolean | no       | Clone the issue with notes           |
+| `with_notes`    | boolean | no       | Clone the issue with [notes](notes.md)|
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" --form to_project_id=6 --form with_notes=true "https://gitlab.example.com/api/v4/projects/5/issues/1/clone"
