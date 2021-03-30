@@ -3,6 +3,8 @@
 module Resolvers
   module AlertManagement
     class IntegrationsResolver < BaseResolver
+      include ::Gitlab::Graphql::Laziness
+
       alias_method :project, :object
 
       argument :id, ::Types::GlobalIDType,
@@ -22,10 +24,8 @@ module Resolvers
       private
 
       def integration_by(gid:)
-        # Expected type is unknown. Can be either `AlertManagement::HttpIntegration` or `PrometheusService`
-        integration = GitlabSchema.object_from_id(gid)&.sync # rubocop:disable Graphql/GIDExpectedType
-
-        integration if integration&.class.in?(expected_integration_types) && project == integration&.project
+        defer { GitlabSchema.object_from_id(gid, expected_type: expected_integration_types) }
+          .then { |obj| obj if project == obj&.project }
       end
 
       def prometheus_integrations

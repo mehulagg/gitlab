@@ -61,12 +61,6 @@ RSpec.describe Resolvers::AlertManagement::IntegrationsResolver do
         it { is_expected.to be_empty }
       end
     end
-
-    context 'when non-integration ID is given' do
-      let(:params) { { id: GitlabSchema.id_from_object(current_user).to_s } }
-
-      it { is_expected.to be_empty }
-    end
   end
 
   private

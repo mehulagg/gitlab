@@ -3,6 +3,8 @@
 module Resolvers
   module AlertManagement
     class HttpIntegrationsResolver < BaseResolver
+      include ::Gitlab::Graphql::Laziness
+
       alias_method :project, :object
 
       argument :id, Types::GlobalIDType[::AlertManagement::HttpIntegration],
@@ -25,9 +27,8 @@ module Resolvers
 
       def integration_by(gid:)
         id = Types::GlobalIDType[::AlertManagement::HttpIntegration].coerce_isolated_input(gid)
-        integration = GitlabSchema.find_by_gid(id)&.sync
 
-        integration if project == integration&.project
+        defer { GitlabSchema.find_by_gid(id) }.then { |obj| obj if project == obj&.project }
       end
 
       def http_integrations
