@@ -1139,12 +1139,13 @@ Profiles:
 The API Fuzzing engine will show a error message when it cannot establish a connection with the scanner application component. This error message could be displayed in the output log when the default values for the variable `DAST_API_API` or `FUZZAPI_API` has been accidentally changed. 
 
 **Error message**
+
 - `Failed to start scanner session (version header not found).` [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/323939) in GitLab 13.11. 
 - `API Security version header not found.  Are you sure that you are connecting to the API Security server?` prior GitLab 13.11.
 
 **Solution** 
-1. Remove code that changes values for environmental variables `DAST_API_API` or `FUZZAPI_API`.
 
+1. Remove code that changes values for environmental variables `DAST_API_API` or `FUZZAPI_API`.
 
 <!--
 ### Target Container
