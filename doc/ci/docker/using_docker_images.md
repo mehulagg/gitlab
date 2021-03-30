@@ -219,7 +219,7 @@ To access private container registries, the GitLab Runner process can use:
 
 - [Statically defined credentials](#using-statically-defined-credentials). That is, a username and password for a specific registry.
 - [Credentials Store](#use-a-credentials-store). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credentials-store).
-- [Credential Helpers](#using-credential-helpers). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credential-helpers).
+- [Credential Helpers](#use-credential-helpers). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credential-helpers).
 
 To define which should be used, the GitLab Runner process reads the configuration in the following order:
 
