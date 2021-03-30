@@ -9501,6 +9501,71 @@ CREATE SEQUENCE application_settings_id_seq
 
 ALTER SEQUENCE application_settings_id_seq OWNED BY application_settings.id;
 
+CREATE TABLE approval_group_rules (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    group_id bigint NOT NULL,
+    approvals_required smallint DEFAULT 0 NOT NULL,
+    rule_type smallint DEFAULT 0 NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_25d42add43 CHECK ((char_length(name) <= 255))
+);
+
+CREATE TABLE approval_group_rules_group_protected_branches (
+    id bigint NOT NULL,
+    approval_group_rules_id bigint NOT NULL,
+    group_protected_branches_id bigint NOT NULL
+);
+
+CREATE SEQUENCE approval_group_rules_group_protected_branches_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE approval_group_rules_group_protected_branches_id_seq OWNED BY approval_group_rules_group_protected_branches.id;
+
+CREATE TABLE approval_group_rules_groups (
+    id bigint NOT NULL,
+    approval_group_rules_id bigint NOT NULL,
+    group_id bigint NOT NULL
+);
+
+CREATE SEQUENCE approval_group_rules_groups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE approval_group_rules_groups_id_seq OWNED BY approval_group_rules_groups.id;
+
+CREATE SEQUENCE approval_group_rules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE approval_group_rules_id_seq OWNED BY approval_group_rules.id;
+
+CREATE TABLE approval_group_rules_users (
+    id bigint NOT NULL,
+    approval_group_rules_id bigint NOT NULL,
+    users_id bigint NOT NULL
+);
+
+CREATE SEQUENCE approval_group_rules_users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE approval_group_rules_users_id_seq OWNED BY approval_group_rules_users.id;
+
 CREATE TABLE approval_merge_request_rule_sources (
     id bigint NOT NULL,
     approval_merge_request_rule_id bigint NOT NULL,
@@ -13372,6 +13437,26 @@ CREATE TABLE group_merge_request_approval_settings (
     retain_approvals_on_push boolean DEFAULT false NOT NULL,
     require_password_to_approve boolean DEFAULT false NOT NULL
 );
+
+CREATE TABLE group_protected_branches (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    group_id bigint NOT NULL,
+    code_owner_approval_required boolean DEFAULT false NOT NULL,
+    allow_force_push boolean DEFAULT false NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_b26d77d98f CHECK ((char_length(name) <= 255))
+);
+
+CREATE SEQUENCE group_protected_branches_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE group_protected_branches_id_seq OWNED BY group_protected_branches.id;
 
 CREATE TABLE group_repository_storage_moves (
     id bigint NOT NULL,
@@ -19062,6 +19147,14 @@ ALTER TABLE ONLY application_setting_terms ALTER COLUMN id SET DEFAULT nextval('
 
 ALTER TABLE ONLY application_settings ALTER COLUMN id SET DEFAULT nextval('application_settings_id_seq'::regclass);
 
+ALTER TABLE ONLY approval_group_rules ALTER COLUMN id SET DEFAULT nextval('approval_group_rules_id_seq'::regclass);
+
+ALTER TABLE ONLY approval_group_rules_group_protected_branches ALTER COLUMN id SET DEFAULT nextval('approval_group_rules_group_protected_branches_id_seq'::regclass);
+
+ALTER TABLE ONLY approval_group_rules_groups ALTER COLUMN id SET DEFAULT nextval('approval_group_rules_groups_id_seq'::regclass);
+
+ALTER TABLE ONLY approval_group_rules_users ALTER COLUMN id SET DEFAULT nextval('approval_group_rules_users_id_seq'::regclass);
+
 ALTER TABLE ONLY approval_merge_request_rule_sources ALTER COLUMN id SET DEFAULT nextval('approval_merge_request_rule_sources_id_seq'::regclass);
 
 ALTER TABLE ONLY approval_merge_request_rules ALTER COLUMN id SET DEFAULT nextval('approval_merge_request_rules_id_seq'::regclass);
@@ -19421,6 +19514,8 @@ ALTER TABLE ONLY group_deploy_tokens ALTER COLUMN id SET DEFAULT nextval('group_
 ALTER TABLE ONLY group_group_links ALTER COLUMN id SET DEFAULT nextval('group_group_links_id_seq'::regclass);
 
 ALTER TABLE ONLY group_import_states ALTER COLUMN group_id SET DEFAULT nextval('group_import_states_group_id_seq'::regclass);
+
+ALTER TABLE ONLY group_protected_branches ALTER COLUMN id SET DEFAULT nextval('group_protected_branches_id_seq'::regclass);
 
 ALTER TABLE ONLY group_repository_storage_moves ALTER COLUMN id SET DEFAULT nextval('group_repository_storage_moves_id_seq'::regclass);
 
@@ -20130,6 +20225,18 @@ ALTER TABLE ONLY application_setting_terms
 ALTER TABLE ONLY application_settings
     ADD CONSTRAINT application_settings_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY approval_group_rules_group_protected_branches
+    ADD CONSTRAINT approval_group_rules_group_protected_branches_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY approval_group_rules_groups
+    ADD CONSTRAINT approval_group_rules_groups_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY approval_group_rules
+    ADD CONSTRAINT approval_group_rules_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY approval_group_rules_users
+    ADD CONSTRAINT approval_group_rules_users_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY approval_merge_request_rule_sources
     ADD CONSTRAINT approval_merge_request_rule_sources_pkey PRIMARY KEY (id);
 
@@ -20717,6 +20824,9 @@ ALTER TABLE ONLY group_import_states
 
 ALTER TABLE ONLY group_merge_request_approval_settings
     ADD CONSTRAINT group_merge_request_approval_settings_pkey PRIMARY KEY (group_id);
+
+ALTER TABLE ONLY group_protected_branches
+    ADD CONSTRAINT group_protected_branches_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY group_repository_storage_moves
     ADD CONSTRAINT group_repository_storage_moves_pkey PRIMARY KEY (id);
@@ -21702,6 +21812,10 @@ CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, c
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
+CREATE INDEX idx_approval_group_rule_protected_branch_group_id ON approval_group_rules_group_protected_branches USING btree (group_protected_branches_id);
+
+CREATE INDEX idx_approval_group_rule_protected_branch_rule_id ON approval_group_rules_group_protected_branches USING btree (approval_group_rules_id);
+
 CREATE INDEX idx_audit_events_on_entity_id_desc_author_id_created_at ON audit_events_archived USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
@@ -21883,6 +21997,16 @@ CREATE UNIQUE INDEX index_application_settings_on_push_rule_id ON application_se
 CREATE INDEX index_application_settings_on_usage_stats_set_by_user_id ON application_settings USING btree (usage_stats_set_by_user_id);
 
 CREATE INDEX index_applicationsettings_on_instance_administration_project_id ON application_settings USING btree (instance_administration_project_id);
+
+CREATE INDEX index_approval_group_rules_groups_on_approval_group_rules_id ON approval_group_rules_groups USING btree (approval_group_rules_id);
+
+CREATE INDEX index_approval_group_rules_groups_on_group_id ON approval_group_rules_groups USING btree (group_id);
+
+CREATE INDEX index_approval_group_rules_on_group_id ON approval_group_rules USING btree (group_id);
+
+CREATE INDEX index_approval_group_rules_users_on_approval_group_rules_id ON approval_group_rules_users USING btree (approval_group_rules_id);
+
+CREATE INDEX index_approval_group_rules_users_on_users_id ON approval_group_rules_users USING btree (users_id);
 
 CREATE UNIQUE INDEX index_approval_merge_request_rule_sources_1 ON approval_merge_request_rule_sources USING btree (approval_merge_request_rule_id);
 
@@ -22785,6 +22909,8 @@ CREATE INDEX index_group_group_links_on_shared_with_group_id ON group_group_link
 CREATE INDEX index_group_import_states_on_group_id ON group_import_states USING btree (group_id);
 
 CREATE INDEX index_group_import_states_on_user_id ON group_import_states USING btree (user_id) WHERE (user_id IS NOT NULL);
+
+CREATE INDEX index_group_protected_branches_on_group_id ON group_protected_branches USING btree (group_id);
 
 CREATE INDEX index_group_repository_storage_moves_on_group_id ON group_repository_storage_moves USING btree (group_id);
 
@@ -25857,6 +25983,9 @@ ALTER TABLE ONLY status_page_settings
 ALTER TABLE ONLY ci_project_monthly_usages
     ADD CONSTRAINT fk_rails_508bcd4aa6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY approval_group_rules_groups
+    ADD CONSTRAINT fk_rails_50edc8134e FOREIGN KEY (group_id) REFERENCES namespaces(id);
+
 ALTER TABLE ONLY project_repository_storage_moves
     ADD CONSTRAINT fk_rails_5106dbd44a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -25874,6 +26003,9 @@ ALTER TABLE ONLY geo_node_namespace_links
 
 ALTER TABLE ONLY clusters_applications_knative
     ADD CONSTRAINT fk_rails_54fc91e0a0 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY group_protected_branches
+    ADD CONSTRAINT fk_rails_563fa28add FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY issuable_metric_images
     ADD CONSTRAINT fk_rails_56417a5a7f FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
@@ -26003,6 +26135,9 @@ ALTER TABLE ONLY namespace_admin_notes
 
 ALTER TABLE ONLY web_hook_logs
     ADD CONSTRAINT fk_rails_666826e111 FOREIGN KEY (web_hook_id) REFERENCES web_hooks(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY approval_group_rules
+    ADD CONSTRAINT fk_rails_6727675176 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY jira_imports
     ADD CONSTRAINT fk_rails_675d38c03b FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE SET NULL;
