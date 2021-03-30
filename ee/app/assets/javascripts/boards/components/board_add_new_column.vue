@@ -267,8 +267,9 @@ export default {
       const item = this.items.find(({ id }) => id === selectedId);
       if (!selectedId || !item) {
         this.selectedItem = null;
+      } else {
+        this.selectedItem = { ...item };
       }
-      this.selectedItem = { ...item };
     },
   },
 };

@@ -81,8 +81,9 @@ export default {
       const label = this.labels.find(({ id }) => id === selectedId);
       if (!selectedId || !label) {
         this.selectedLabel = null;
+      } else {
+        this.selectedLabel = { ...label };
       }
-      this.selectedLabel = { ...label };
     },
   },
 };
