@@ -8,10 +8,9 @@ type: index
 
 # Services
 
-The [`services`](../docker/using_docker_images.md#what-is-a-service)
-keyword defines a Docker image that runs during a `job` linked to the
-Docker image that the image keyword defines. This allows you to access
-the service image during build time.
+The `services` keyword defines a Docker image that runs during a `job`
+linked to the Docker image that the image keyword defines. This allows
+you to access the service image during build time.
 
 The service image can run any application, but the most common use
 case is to run a database container, for example:
@@ -129,7 +128,7 @@ test:2.7:
     - bundle exec rake spec
 ```
 
-Or you can pass some [extended configuration options](#extended-docker-configuration-options)
+Or you can pass some [extended configuration options](../docker/using_docker_images.md#extended-docker-configuration-options)
 for `image` and `services`:
 
 ```yaml
@@ -237,7 +236,7 @@ test:
 
 ## Starting multiple services from the same image
 
-> Introduced in GitLab and GitLab Runner 9.4. Read more about the [extended configuration options](#extended-docker-configuration-options).
+> Introduced in GitLab and GitLab Runner 9.4. Read more about the [extended configuration options](../docker/using_docker_images.md#extended-docker-configuration-options).
 
 Before the new extended Docker configuration options, the following configuration
 would not work properly:
@@ -270,7 +269,7 @@ in `.gitlab-ci.yml` file.
 
 ## Setting a command for the service
 
-> Introduced in GitLab and GitLab Runner 9.4. Read more about the [extended configuration options](#extended-docker-configuration-options).
+> Introduced in GitLab and GitLab Runner 9.4. Read more about the [extended configuration options](../docker/using_docker_images.md#extended-docker-configuration-options).
 
 Let's assume you have a `super/sql:latest` image with some SQL database
 in it. You would like to use it as a service for your job. Let's also

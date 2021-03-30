@@ -18,7 +18,7 @@ To run CI/CD jobs in a Docker container, you need to:
 - Specify an image in your `.gitlab-ci.yml` file. The runner creates a container from this image
   and runs the jobs in it.
 - Optional. Specify other images in your `.gitlab-ci.yml` file. These containers are known as
-  ["services"](#what-is-a-service) and you can use them to run services like MySQL separately.
+  ["services"](../services/index.md) and you can use them to run services like MySQL separately.
 
 ## Register a runner that uses the Docker executor
 
@@ -141,7 +141,7 @@ For example, the following two definitions are equal:
 
 ### Overriding the entrypoint of an image
 
-> Introduced in GitLab and GitLab Runner 9.4. Read more about the [extended configuration options](#extended-docker-configuration-options).
+> Introduced in GitLab and GitLab Runner 9.4. Read more about the [extended configuration options](../docker/using_docker_images.md#extended-docker-configuration-options).
 
 Before showing the available entrypoint override methods, let's describe
 how the runner starts. It uses a Docker image for the containers used in the
@@ -218,7 +218,7 @@ that runner.
 To access private container registries, the GitLab Runner process can use:
 
 - [Statically defined credentials](#using-statically-defined-credentials). That is, a username and password for a specific registry.
-- [Credentials Store](#using-credentials-store). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credentials-store).
+- [Credentials Store](#use-a-credentials-store). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credentials-store).
 - [Credential Helpers](#using-credential-helpers). For more information, read [the relevant Docker documentation](https://docs.docker.com/engine/reference/commandline/login/#credential-helpers).
 
 To define which should be used, the GitLab Runner process reads the configuration in the following order:
@@ -245,7 +245,7 @@ runtime.
   at least version **1.8** if you want to use private registries.
 - Available for [Kubernetes executor](https://docs.gitlab.com/runner/executors/kubernetes.html)
   in GitLab Runner 13.1 and later.
-- [Credentials Store](#using-credentials-store) and [Credential Helpers](#using-credential-helpers) require binaries to be added to the GitLab Runner's `$PATH`, and require access to do so. Therefore, these features are not available on shared runners, or any other runner where the user does not have access to the environment where the runner is installed.
+- [Credentials Store](#use-a-credentials-store) and [Credential Helpers](#using-credential-helpers) require binaries to be added to the GitLab Runner's `$PATH`, and require access to do so. Therefore, these features are not available on shared runners, or any other runner where the user does not have access to the environment where the runner is installed.
 
 ### Using statically-defined credentials
 
