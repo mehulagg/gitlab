@@ -760,6 +760,7 @@ An approval is optional when a license report:
 ## Troubleshooting
 
 ### ASDF_PYTHON_VERSION does not automatically install the version
+
 Defining a non-latest Python version in ASDF_PYTHON_VERSION [doesn't have it automatically installed](https://gitlab.com/gitlab-org/gitlab/-/issues/325604). If your project requires a non-latest version of Python:
 
 1. Define the required version by setting the `ASDF_PYTHON_VERSION` CI/CD variable.
