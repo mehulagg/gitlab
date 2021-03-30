@@ -15,7 +15,9 @@ module QA
           sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
         end
 
-        Runtime::Feature.enable(:invite_members_group_modal, group: @group)
+        [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item, :invite_members_group_modal].each do |flag|
+          Runtime::Feature.enable(flag)
+        end
 
         @saml_idp_service = Flow::Saml.run_saml_idp_service(@group.path)
 
@@ -38,9 +40,7 @@ module QA
         Flow::Saml.logout_from_idp(@saml_idp_service)
       end
 
-      it 'removes existing users from the group, forces existing users to create a new account and allows to leave group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/708' do
-        expect(@group.list_members.map { |item| item["username"] }).not_to include(@developer_user.username)
-
+      it 'forces existing users to create a new account and allows to leave group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/708' do
         visit_managed_group_url
 
         EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
@@ -121,10 +121,6 @@ module QA
     end
 
     def setup_and_enable_group_managed_accounts
-      [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item].each do |flag|
-        Runtime::Feature.enable(flag)
-      end
-
       Support::Retrier.retry_on_exception do
         # We need to logout from IDP. This is required if this is a retry.
         Flow::Saml.logout_from_idp(@saml_idp_service)
