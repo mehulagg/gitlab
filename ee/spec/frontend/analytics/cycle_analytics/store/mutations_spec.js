@@ -1,10 +1,9 @@
+import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 import {
   PAGINATION_SORT_DIRECTION_DESC,
   PAGINATION_SORT_FIELD_END_EVENT,
-} from 'ee/analytics/cycle_analytics/constants';
-import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
-import mutations from 'ee/analytics/cycle_analytics/store/mutations';
-
+} from '~/cycle_analytics/constants';
 import {
   issueStage,
   planStage,

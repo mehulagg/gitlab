@@ -9,15 +9,15 @@ import {
   GlBadge,
 } from '@gitlab/ui';
 import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
-import { __ } from '~/locale';
-import Tracking from '~/tracking';
 import {
   NOT_ENOUGH_DATA_ERROR,
   PAGINATION_SORT_FIELD_END_EVENT,
   PAGINATION_SORT_FIELD_DURATION,
   PAGINATION_SORT_DIRECTION_ASC,
   PAGINATION_SORT_DIRECTION_DESC,
-} from '../constants';
+} from '~/cycle_analytics/constants';
+import { __ } from '~/locale';
+import Tracking from '~/tracking';
 import TotalTime from './total_time_component.vue';
 
 const DEFAULT_WORKFLOW_TITLE_PROPERTIES = {
@@ -25,6 +25,7 @@ const DEFAULT_WORKFLOW_TITLE_PROPERTIES = {
   key: PAGINATION_SORT_FIELD_END_EVENT,
   sortable: true,
 };
+
 const WORKFLOW_COLUMN_TITLES = {
   issues: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Issues') },
   jobs: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Jobs') },

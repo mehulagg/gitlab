@@ -18,6 +18,7 @@ export default () => {
   const el = document.querySelector('#js-cycle-analytics-app');
   const { emptyStateSvgPath, noDataSvgPath, noAccessSvgPath } = el.dataset;
   const initialData = buildCycleAnalyticsInitialData(el.dataset);
+  console.log('initialData', initialData);
   const store = createStore();
   const { cycleAnalyticsScatterplotEnabled: hasDurationChart = false } = gon?.features;
 

@@ -3,9 +3,12 @@ import { decorateData, decorateEvents, formatMedianValues } from '../utils';
 import * as types from './mutation_types';
 
 export default {
-  [types.INITIALIZE_VSA](state, { requestPath, fullPath }) {
-    state.requestPath = requestPath;
-    state.fullPath = fullPath;
+  [types.INITIALIZE_VSA](state, { id, endpoints, currentGroup, createdAfter, createdBefore }) {
+    state.id = id;
+    state.endpoints = endpoints;
+    state.currentGroup = currentGroup;
+    state.createdBefore = createdBefore;
+    state.createdAfter = createdAfter;
   },
   [types.SET_LOADING](state, loadingState) {
     state.isLoading = loadingState;
@@ -16,8 +19,9 @@ export default {
   [types.SET_SELECTED_STAGE](state, stage) {
     state.selectedStage = stage;
   },
-  [types.SET_DATE_RANGE](state, { startDate }) {
-    state.startDate = startDate;
+  [types.SET_DATE_RANGE](state, { createdBefore, createdAfter }) {
+    state.createdBefore = createdBefore;
+    state.createdAfter = createdAfter;
   },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.valueStreams = [];
@@ -64,7 +68,7 @@ export default {
     state.selectedStageEvents = [];
     state.hasError = false;
   },
-  [types.RECEIVE_STAGE_DATA_SUCCESS](state, { events = [] }) {
+  [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
     const { selectedStage } = state;
     state.isLoadingStage = false;
     state.isEmptyStage = !events.length;

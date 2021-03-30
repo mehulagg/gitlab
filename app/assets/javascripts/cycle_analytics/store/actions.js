@@ -1,3 +1,4 @@
+import Api from 'ee/api';
 import {
   getProjectValueStreamStages,
   getProjectValueStreams,
@@ -6,7 +7,7 @@ import {
 } from '~/api/analytics_api';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
-import { DEFAULT_DAYS_TO_DISPLAY, DEFAULT_VALUE_STREAM } from '../constants';
+import { DEFAULT_VALUE_STREAM } from '../constants';
 import * as types from './mutation_types';
 
 export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
@@ -15,7 +16,10 @@ export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
 };
 
 export const fetchValueStreamStages = ({ commit, state }) => {
-  const { fullPath, selectedValueStream } = state;
+  const {
+    endpoints: { fullPath },
+    selectedValueStream,
+  } = state;
   commit(types.REQUEST_VALUE_STREAM_STAGES);
 
   return getProjectValueStreamStages(fullPath, selectedValueStream.id)
@@ -35,7 +39,9 @@ export const receiveValueStreamsSuccess = ({ commit, dispatch }, data = []) => {
 };
 
 export const fetchValueStreams = ({ commit, dispatch, state }) => {
-  const { fullPath } = state;
+  const {
+    endpoints: { fullPath },
+  } = state;
   commit(types.REQUEST_VALUE_STREAMS);
 
   return getProjectValueStreams(fullPath)
@@ -46,10 +52,18 @@ export const fetchValueStreams = ({ commit, dispatch, state }) => {
     });
 };
 
-export const fetchCycleAnalyticsData = ({ state: { requestPath, startDate }, commit }) => {
+export const fetchCycleAnalyticsData = ({
+  state: {
+    endpoints: { requestPath },
+  },
+  getters: { cycleAnalyticsRequestParams },
+  commit,
+}) => {
   commit(types.REQUEST_CYCLE_ANALYTICS_DATA);
 
-  return getProjectValueStreamMetrics(requestPath, { 'cycle_analytics[start_date]': startDate })
+  console.log('cycleAnalyticsRequestParams', cycleAnalyticsRequestParams);
+
+  return getProjectValueStreamMetrics(requestPath, cycleAnalyticsRequestParams)
     .then(({ data }) => commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS, data))
     .catch(() => {
       commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR);
@@ -59,14 +73,10 @@ export const fetchCycleAnalyticsData = ({ state: { requestPath, startDate }, com
     });
 };
 
-export const fetchStageData = ({ state: { requestPath, selectedStage, startDate }, commit }) => {
+export const fetchStageData = ({ getters: { requestParams, filterParams }, commit }) => {
   commit(types.REQUEST_STAGE_DATA);
 
-  return getProjectValueStreamStageData({
-    requestPath,
-    stageId: selectedStage.id,
-    params: { 'cycle_analytics[start_date]': startDate },
-  })
+  return Api.cycleAnalyticsStageEvents({ ...requestParams, params: filterParams })
     .then(({ data }) => {
       // when there's a query timeout, the request succeeds but the error is encoded in the response data
       if (data?.error) {
@@ -92,12 +102,18 @@ const refetchData = (dispatch, commit) => {
     .finally(() => commit(types.SET_LOADING, false));
 };
 
-export const setDateRange = ({ dispatch, commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }) => {
-  commit(types.SET_DATE_RANGE, { startDate });
+export const setFilters = ({ dispatch, commit }) => refetchData(dispatch, commit);
+
+export const setDateRange = ({ dispatch, commit }, { createdBefore, createdAfter }) => {
+  commit(types.SET_DATE_RANGE, { createdBefore, createdAfter });
   return refetchData(dispatch, commit);
 };
 
 export const initializeVsa = ({ commit, dispatch }, initialData = {}) => {
   commit(types.INITIALIZE_VSA, initialData);
+
+  const { endpoints } = initialData;
+  dispatch('setPaths', endpoints);
+
   return refetchData(dispatch, commit);
 };

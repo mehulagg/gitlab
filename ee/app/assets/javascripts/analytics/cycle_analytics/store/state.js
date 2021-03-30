@@ -1,11 +1,14 @@
-import { PAGINATION_SORT_FIELD_END_EVENT, PAGINATION_SORT_DIRECTION_DESC } from '../constants';
+import {
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_DIRECTION_DESC,
+} from '~/cycle_analytics/constants';
 
 export default () => ({
   featureFlags: {},
   defaultStageConfig: [],
 
-  startDate: null,
-  endDate: null,
+  createdAfter: null,
+  createdBefore: null,
 
   isLoading: false,
   isLoadingStage: false,

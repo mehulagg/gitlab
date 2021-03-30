@@ -18894,9 +18894,6 @@ msgid_plural "Last %d days"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Last %{days} days"
-msgstr ""
-
 msgid "Last 2 weeks"
 msgstr ""
 
@@ -26863,9 +26860,6 @@ msgstr ""
 msgid "Rejected (closed)"
 msgstr ""
 
-msgid "Related Issues"
-msgstr ""
-
 msgid "Related feature flags"
 msgstr ""
 
@@ -32170,9 +32164,6 @@ msgstr ""
 msgid "The character highlighter helps you keep the subject line to %{titleLength} characters and wrap the body at %{bodyLength} so they are readable in git."
 msgstr ""
 
-msgid "The collection of events added to the data gathered for that stage."
-msgstr ""
-
 msgid "The comment you are editing has been changed by another user. Would you like to keep your changes and overwrite the new description or discard your changes?"
 msgstr ""
 
@@ -32530,9 +32521,6 @@ msgid "The subject will be used as the title of the new issue, and the message w
 msgstr ""
 
 msgid "The tag name can't be changed for an existing release."
-msgstr ""
-
-msgid "The time taken by each data entry gathered by that stage."
 msgstr ""
 
 msgid "The update action will time out after %{number_of_minutes} minutes. For big repositories, use a clone/push combination."
@@ -36211,9 +36199,6 @@ msgstr ""
 msgid "Waiting for performance data"
 msgstr ""
 
-msgid "Want to see the data? Please ask an administrator for access."
-msgstr ""
-
 msgid "Warning"
 msgstr ""
 
@@ -37384,9 +37369,6 @@ msgid "You need a different license to enable FileLocks feature"
 msgstr ""
 
 msgid "You need git-lfs version %{min_git_lfs_version} (or greater) to continue. Please visit https://git-lfs.github.com"
-msgstr ""
-
-msgid "You need permission."
 msgstr ""
 
 msgid "You need to register a two-factor authentication app before you can set up a device."

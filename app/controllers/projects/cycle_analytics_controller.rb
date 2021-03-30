@@ -8,6 +8,7 @@ class Projects::CycleAnalyticsController < Projects::ApplicationController
   include GracefulTimeoutHandling
 
   before_action :authorize_read_cycle_analytics!
+  before_action :request_params, only: :show
 
   track_unique_visits :show, target_id: 'p_analytics_valuestream'
 
@@ -15,6 +16,7 @@ class Projects::CycleAnalyticsController < Projects::ApplicationController
 
   def show
     @cycle_analytics = Analytics::CycleAnalytics::ProjectLevel.new(project: @project, options: options(cycle_analytics_project_params))
+    @group = @project.group
 
     respond_to do |format|
       format.html do
