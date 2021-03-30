@@ -196,6 +196,20 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
+  describe '.by_scanners' do
+    context 'with found record' do
+      it 'returns found record' do
+        vulnerability1 = create(:vulnerabilities_finding)
+        create(:vulnerabilities_finding)
+        param = vulnerability1.scanner_id
+
+        result = described_class.by_scanners(param)
+
+        expect(result).to contain_exactly(vulnerability1)
+      end
+    end
+  end
+
   describe '.by_severities' do
     let!(:vulnerability_high) { create(:vulnerabilities_finding, severity: :high) }
     let!(:vulnerability_low) { create(:vulnerabilities_finding, severity: :low) }

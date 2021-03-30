@@ -92,5 +92,14 @@ module Geo
     def checksummable?
       carrierwave_uploader.file_storage? && file_exists?
     end
+
+    # Return whether it's immutable
+    #
+    # @return [Boolean] whether the replicable is immutable
+    def immutable?
+      # Most blobs are supposed to be immutable.
+      # Override this in your specific Replicator class if needed.
+      true
+    end
   end
 end

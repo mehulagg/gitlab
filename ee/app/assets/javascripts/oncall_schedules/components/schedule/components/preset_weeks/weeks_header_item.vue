@@ -48,7 +48,7 @@ export default {
         currentDateTime >= this.timeframeItem.getTime() &&
         currentDateTime <= lastDayOfCurrentWeekTime
       ) {
-        return 'label-dark label-bold';
+        return 'label-bold';
       }
 
       return '';
@@ -66,7 +66,7 @@ export default {
   <span class="timeline-header-item" :style="timelineHeaderStyles">
     <div
       :class="timelineHeaderClass"
-      class="item-label gl-pl-6 gl-py-4"
+      class="item-label label-dark gl-pl-5 gl-py-4"
       data-testid="timeline-header-label"
     >
       {{ timelineHeaderLabel }}

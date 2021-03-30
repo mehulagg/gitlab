@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, :wiki_repo, namespace: user.namespace) }
+  let(:projects) { create_list(:project, 5, :public, :repository, :wiki_repo) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
@@ -22,7 +23,11 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       control_count = ActiveRecord::QueryRecorder.new { visit path }.count
       expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
 
-      create_list(object, 10, *creation_traits, creation_args)
+      projects.each do |project|
+        creation_args[:source_project] = project if creation_args.key?(:source_project)
+        creation_args[:project] = project if creation_args.key?(:project)
+        create(object, *creation_traits, creation_args)
+      end
 
       ensure_elasticsearch_index!
 
@@ -40,7 +45,9 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       let(:object) { :issue }
       let(:creation_args) { { project: project, title: 'initial' } }
       let(:path) { search_path(search: 'initial', scope: 'issues') }
-      let(:query_count_multiplier) { 0 }
+      # N+1 queries still exist and will be fixed per
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/230712
+      let(:query_count_multiplier) { 1 }
 
       it_behaves_like 'an efficient database result'
     end
@@ -59,8 +66,8 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
 
     context 'searching merge requests' do
       let(:object) { :merge_request }
-      let(:creation_traits) { [:sequence_source_branch] }
-      let(:creation_args) { { source_project: project, title: 'initial' } }
+      let(:creation_traits) { [:unique_branches, :unique_author] }
+      let(:creation_args) { { title: 'initial', source_project: project } }
       let(:path) { search_path(search: '*', scope: 'merge_requests') }
       let(:query_count_multiplier) { 0 }
 
@@ -71,7 +78,9 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       let(:object) { :milestone }
       let(:creation_args) { { project: project } }
       let(:path) { search_path(search: '*', scope: 'milestones') }
-      let(:query_count_multiplier) { 0 }
+      # N+1 queries still exist and will be fixed per
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/325887
+      let(:query_count_multiplier) { 1 }
 
       it_behaves_like 'an efficient database result'
     end

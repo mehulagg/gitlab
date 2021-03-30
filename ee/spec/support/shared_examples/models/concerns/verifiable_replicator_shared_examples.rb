@@ -341,14 +341,44 @@ RSpec.shared_examples 'a verifiable replicator' do
   end
 
   describe '#after_verifiable_update' do
-    it 'calls verify_async if needed' do
-      allow(described_class).to receive(:verification_enabled?).and_return(true)
-      allow(replicator).to receive(:primary_checksum).and_return(nil)
-      allow(replicator).to receive(:checksummable?).and_return(true)
+    using RSpec::Parameterized::TableSyntax
 
-      expect(replicator).to receive(:verify_async)
+    where(:verification_enabled, :immutable, :checksum, :checksummable, :expect_verify_async) do
+      true  | true  | nil      | true  | true
+      true  | true  | nil      | false | false
+      true  | true  | 'abc123' | true  | false
+      true  | true  | 'abc123' | false | false
+      true  | false | nil      | true  | true
+      true  | false | nil      | false | false
+      true  | false | 'abc123' | true  | true
+      true  | false | 'abc123' | false | false
+      false | true  | nil      | true  | false
+      false | true  | nil      | false | false
+      false | true  | 'abc123' | true  | false
+      false | true  | 'abc123' | false | false
+      false | false | nil      | true  | false
+      false | false | nil      | false | false
+      false | false | 'abc123' | true  | false
+      false | false | 'abc123' | false | false
+    end
 
-      replicator.after_verifiable_update
+    with_them do
+      before do
+        allow(described_class).to receive(:verification_enabled?).and_return(verification_enabled)
+        allow(replicator).to receive(:immutable?).and_return(immutable)
+        allow(replicator).to receive(:primary_checksum).and_return(checksum)
+        allow(replicator).to receive(:checksummable?).and_return(checksummable)
+      end
+
+      it 'calls verify_async only if needed' do
+        if expect_verify_async
+          expect(replicator).to receive(:verify_async)
+        else
+          expect(replicator).not_to receive(:verify_async)
+        end
+
+        replicator.after_verifiable_update
+      end
     end
   end
 
@@ -533,6 +563,9 @@ RSpec.shared_examples 'a verifiable replicator' do
 
     context 'on a secondary' do
       before do
+        # Set the primary checksum
+        replicator.verify
+
         stub_secondary_node
       end
 

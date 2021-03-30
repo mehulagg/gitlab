@@ -34,7 +34,7 @@ RSpec.describe 'Container-Scanning.gitlab-ci.yml' do
 
       context 'by default' do
         it 'includes job' do
-          expect(build_names).to match_array(%w[container_scanning_deprecated])
+          expect(build_names).to match_array(%w[container_scanning])
         end
       end
 
@@ -44,7 +44,7 @@ RSpec.describe 'Container-Scanning.gitlab-ci.yml' do
         end
 
         it 'includes job' do
-          expect(build_names).to match_array(%w[container_scanning])
+          expect(build_names).to match_array(%w[container_scanning_new])
         end
       end
 

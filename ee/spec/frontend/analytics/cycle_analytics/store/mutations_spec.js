@@ -131,9 +131,9 @@ describe('Value Stream Analytics mutations', () => {
     );
   });
 
-  describe(`${types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS}`, () => {
+  describe(`${types.RECEIVE_VALUE_STREAM_DATA_SUCCESS}`, () => {
     it('will set isLoading=false and errorCode=null', () => {
-      mutations[types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, {
+      mutations[types.RECEIVE_VALUE_STREAM_DATA_SUCCESS](state, {
         stats: [],
         stages: [],
       });
@@ -157,11 +157,11 @@ describe('Value Stream Analytics mutations', () => {
     });
   });
 
-  describe(`${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR}`, () => {
+  describe(`${types.RECEIVE_VALUE_STREAM_DATA_ERROR}`, () => {
     it('sets errorCode correctly', () => {
       const errorCode = 403;
 
-      mutations[types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state, errorCode);
+      mutations[types.RECEIVE_VALUE_STREAM_DATA_ERROR](state, errorCode);
 
       expect(state.isLoading).toBe(false);
       expect(state.errorCode).toBe(errorCode);

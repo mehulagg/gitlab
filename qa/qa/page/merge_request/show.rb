@@ -67,8 +67,11 @@ module QA
           element :edit_in_ide_button
         end
 
-        view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
+        view 'app/assets/javascripts/diffs/components/diff_row.vue' do
           element :diff_comment_button
+        end
+
+        view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
           element :new_diff_line_link
         end
 
@@ -102,6 +105,10 @@ module QA
 
         view 'app/assets/javascripts/vue_shared/components/markdown/header.vue' do
           element :suggestion_button
+        end
+
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_merged.vue' do
+          element :cherry_pick_button
         end
 
         def start_review
@@ -355,6 +362,11 @@ module QA
 
         def apply_suggestions_batch
           all_elements(:apply_suggestions_batch_button, minimum: 1).first.click
+        end
+
+        def cherry_pick!
+          click_element(:cherry_pick_button, Page::Component::CommitModal)
+          click_element(:submit_commit_button)
         end
       end
     end

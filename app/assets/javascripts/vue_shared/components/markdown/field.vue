@@ -77,6 +77,11 @@ export default {
       required: false,
       default: null,
     },
+    lines: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
     note: {
       type: Object,
       required: false,
@@ -115,6 +120,20 @@ export default {
       return this.referencedUsers.length >= referencedUsersThreshold;
     },
     lineContent() {
+      if (this.lines.length) {
+        return this.lines
+          .map((line) => {
+            const { rich_text: richText, text } = line;
+
+            if (text) {
+              return text;
+            }
+
+            return unescape(stripHtml(richText).replace(/\n/g, ''));
+          })
+          .join('\\n');
+      }
+
       if (this.line) {
         const { rich_text: richText, text } = this.line;
 
@@ -148,6 +167,9 @@ export default {
         },
         false,
       );
+    },
+    suggestionsStartIndex() {
+      return Math.max(this.lines.length - 1, 0);
     },
   },
   watch: {
@@ -241,6 +263,7 @@ export default {
       :line-content="lineContent"
       :can-suggest="canSuggest"
       :show-suggest-popover="showSuggestPopover"
+      :suggestion-start-index="suggestionsStartIndex"
       @preview-markdown="showPreviewTab"
       @write-markdown="showWriteTab"
       @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"

@@ -1370,9 +1370,9 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return %w(datadog) unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w[datadog hipchat] unless Feature.enabled?(:datadog_ci_integration, self)
 
-    []
+    %w[hipchat]
   end
 
   def find_or_initialize_service(name)
@@ -2322,6 +2322,11 @@ class Project < ApplicationRecord
   def external_authorization_classification_label
     super || ::Gitlab::CurrentSettings.current_application_settings
                .external_authorization_service_default_label
+  end
+
+  # Overridden in EE::Project
+  def licensed_feature_available?(_feature)
+    false
   end
 
   def licensed_features

@@ -14,7 +14,6 @@ RSpec.describe 'Group or Project invitations' do
     allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
 
     visit invite_path(group_invite.raw_invite_token)
-    click_link 'Register now'
   end
 
   def fill_in_sign_up_form(user)

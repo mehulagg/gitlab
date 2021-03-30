@@ -84,7 +84,8 @@ module Gitlab
 
       # Returns true if load balancing is to be enabled.
       def self.enable?
-        return false if Gitlab::Runtime.rake? || Gitlab::Runtime.sidekiq?
+        return false if Gitlab::Runtime.rake?
+        return false if Gitlab::Runtime.sidekiq? && !Gitlab::Utils.to_boolean(ENV['ENABLE_LOAD_BALANCING_FOR_SIDEKIQ'], default: false)
         return false unless self.configured?
 
         true
@@ -113,7 +114,6 @@ module Gitlab
         #   -> Set @feature_available  to true
         #   -> return true
         # - Second call: return @feature_available right away
-
         return @feature_available if defined?(@feature_available)
 
         @feature_available = false
@@ -135,12 +135,6 @@ module Gitlab
         # `ActiveRecord::Base.connection` and all models use the same load
         # balancing proxy.
         ActiveRecord::Base.singleton_class.prepend(ActiveRecordProxy)
-      end
-
-      # Clear configuration
-      def self.clear_configuration
-        @proxy = nil
-        remove_instance_variable(:@feature_available) if defined?(@feature_available)
       end
 
       def self.active_record_models

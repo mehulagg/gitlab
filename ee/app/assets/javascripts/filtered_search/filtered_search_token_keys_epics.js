@@ -22,6 +22,19 @@ const tokenKeys = [
   },
 ];
 
+if (gon.current_user_id) {
+  // Appending tokenkeys only logged-in
+  tokenKeys.push({
+    formattedKey: __('My-Reaction'),
+    key: 'my-reaction',
+    type: 'string',
+    param: 'emoji',
+    symbol: '',
+    icon: 'thumb-up',
+    tag: 'emoji',
+  });
+}
+
 const alternativeTokenKeys = [
   {
     formattedKey: __('Label'),
@@ -44,6 +57,16 @@ const conditions = [
     tokenKey: 'label',
     value: 'none',
     operator: '!=',
+  },
+  {
+    url: 'my_reaction_emoji=None',
+    tokenKey: 'my-reaction',
+    value: __('None'),
+  },
+  {
+    url: 'my_reaction_emoji=Any',
+    tokenKey: 'my-reaction',
+    value: __('Any'),
   },
 ];
 

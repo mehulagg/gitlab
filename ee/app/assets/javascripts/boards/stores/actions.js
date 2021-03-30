@@ -126,6 +126,7 @@ export default {
       'releaseTag',
       'search',
       'weight',
+      'myReactionEmoji',
     ]);
 
     // Temporarily disabled until negated filters are supported for epic boards

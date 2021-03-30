@@ -114,7 +114,7 @@ RSpec.describe Dora::AggregateMetricsService do
 
       it 'returns the aggregated data' do
         expect(subject[:status]).to eq(:success)
-        expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 2 }])
+        expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 2, 'date' => Time.current.to_date.to_s, 'value' => 2 }])
       end
 
       context 'when interval is monthly' do
@@ -122,7 +122,7 @@ RSpec.describe Dora::AggregateMetricsService do
 
         it 'returns the aggregated data' do
           expect(subject[:status]).to eq(:success)
-          expect(subject[:data]).to eq([{ Time.current.beginning_of_month.to_date.to_s => 2 }])
+          expect(subject[:data]).to eq([{ Time.current.beginning_of_month.to_date.to_s => 2, 'date' => Time.current.beginning_of_month.to_date.to_s, 'value' => 2 }])
         end
       end
 
@@ -140,7 +140,7 @@ RSpec.describe Dora::AggregateMetricsService do
 
         it 'returns the aggregated data' do
           expect(subject[:status]).to eq(:success)
-          expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 1 }])
+          expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 1, 'date' => Time.current.to_date.to_s, 'value' => 1 }])
         end
       end
     end
@@ -174,7 +174,7 @@ RSpec.describe Dora::AggregateMetricsService do
 
       it 'returns the aggregated data' do
         expect(subject[:status]).to eq(:success)
-        expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 3 }])
+        expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 3, 'date' => Time.current.to_date.to_s, 'value' => 3 }])
       end
 
       context 'when interval is monthly' do
@@ -182,7 +182,7 @@ RSpec.describe Dora::AggregateMetricsService do
 
         it 'returns the aggregated data' do
           expect(subject[:status]).to eq(:success)
-          expect(subject[:data]).to eq([{ Time.current.beginning_of_month.to_date.to_s => 3 }])
+          expect(subject[:data]).to eq([{ Time.current.beginning_of_month.to_date.to_s => 3, 'date' => Time.current.beginning_of_month.to_date.to_s, 'value' => 3 }])
         end
       end
 

@@ -437,8 +437,17 @@ export default {
           :translations="{
             dropdownHeader: __('Select a branch'),
             searchPlaceholder: __('Search'),
+            noRefSelected: __('No available branches'),
+            noResults: __('No available branches'),
           }"
         />
+        <div v-if="!defaultBranch" class="gl-text-red-500 gl-mt-3">
+          {{
+            s__(
+              'OnDemandScans|You must create a repository within your project to run an on-demand scan.',
+            )
+          }}
+        </div>
       </gl-form-group>
 
       <scanner-profile-selector

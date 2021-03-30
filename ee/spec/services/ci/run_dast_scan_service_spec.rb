@@ -6,17 +6,36 @@ RSpec.describe Ci::RunDastScanService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, creator: user) }
   let(:branch) { project.default_branch }
+  let(:spider_timeout) { 42 }
+  let(:target_timeout) { 21 }
   let(:target_url) { generate(:url) }
   let(:use_ajax_spider) { true }
   let(:show_debug_messages) { false }
   let(:full_scan_enabled) { true }
+  let(:excluded_urls) { "#{target_url}/hello,#{target_url}/world" }
+  let(:auth_url) { "#{target_url}/login" }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
   describe '#execute' do
-    subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21, use_ajax_spider: use_ajax_spider, show_debug_messages: show_debug_messages, full_scan_enabled: full_scan_enabled) }
+    subject do
+      described_class.new(project, user).execute(
+        branch: branch,
+        target_url: target_url,
+        spider_timeout: spider_timeout,
+        target_timeout: target_timeout,
+        use_ajax_spider: use_ajax_spider,
+        show_debug_messages: show_debug_messages,
+        full_scan_enabled: full_scan_enabled,
+        excluded_urls: excluded_urls,
+        auth_url: auth_url,
+        auth_username_field: 'session[username]',
+        auth_password_field: 'session[password]',
+        auth_username: 'tanuki'
+      )
+    end
 
     let(:status) { subject.status }
     let(:pipeline) { subject.payload }
@@ -90,46 +109,67 @@ RSpec.describe Ci::RunDastScanService do
 
       it 'creates a build with appropriate variables' do
         build = pipeline.builds.first
+
         expected_variables = [
           {
-            'key' => 'DAST_VERSION',
-            'value' => '1',
+            'key' => 'DAST_AUTH_URL',
+            'value' => auth_url,
             'public' => true
           }, {
-            'key' => 'SECURE_ANALYZERS_PREFIX',
-            'value' => 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+            'key' => 'DAST_DEBUG',
+            'value' => 'false',
+            'public' => true
+          }, {
+            'key' => 'DAST_EXCLUDE_URLS',
+            'value' => excluded_urls,
+            'public' => true
+          }, {
+            'key' => 'DAST_FULL_SCAN_ENABLED',
+            'value' => 'true',
+            'public' => true
+          }, {
+            'key' => 'DAST_PASSWORD_FIELD',
+            'value' => 'session[password]',
+            'public' => true
+          }, {
+            'key' => 'DAST_SPIDER_MINS',
+            'value' => spider_timeout.to_s,
+            'public' => true
+          }, {
+            'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
+            'value' => target_timeout.to_s,
+            'public' => true
+          }, {
+            'key' => 'DAST_USERNAME',
+            'value' => 'tanuki',
+            'public' => true
+          }, {
+            'key' => 'DAST_USERNAME_FIELD',
+            'value' => 'session[username]',
+            'public' => true
+          }, {
+            'key' => 'DAST_USE_AJAX_SPIDER',
+            'value' => 'true',
+            'public' => true
+          }, {
+            'key' => 'DAST_VERSION',
+            'value' => '1',
             'public' => true
           }, {
             'key' => 'DAST_WEBSITE',
             'value' => target_url,
             'public' => true
-          },
-          {
-            'key' => 'DAST_SPIDER_MINS',
-            'value' => '42',
-            'public' => true
-          }, {
-            'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
-            'value' => '21',
-            'public' => true
-          }, {
-            'key' => "DAST_USE_AJAX_SPIDER",
-            'public' => true,
-            'value' => 'true'
-          }, {
-            'key' => "DAST_DEBUG",
-            'public' => true,
-            'value' => 'false'
-          }, {
-            'key' => "DAST_FULL_SCAN_ENABLED",
-            'public' => true,
-            'value' => 'true'
           }, {
             'key' => 'GIT_STRATEGY',
             'value' => 'none',
             'public' => true
+          }, {
+            'key' => 'SECURE_ANALYZERS_PREFIX',
+            'value' => 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+            'public' => true
           }
         ]
+
         expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 

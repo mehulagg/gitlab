@@ -81,5 +81,21 @@ RSpec.describe Members::InviteService, :aggregate_failures do
         expect(result[:status]).to eq(:success)
       end
     end
+
+    context 'with Audit Event logging' do
+      context 'when there are valid members created' do
+        it 'creates Audit Events' do
+          expect { result }.to change { AuditEvent.count }.by(2)
+        end
+      end
+
+      context 'when there are some invalid members' do
+        let(:params) { { email: %w[_bogus_ email2@example.org], access_level: Gitlab::Access::GUEST } }
+
+        it 'only creates Audit Events for valid members' do
+          expect { result }.to change { AuditEvent.count }.by(1)
+        end
+      end
+    end
   end
 end

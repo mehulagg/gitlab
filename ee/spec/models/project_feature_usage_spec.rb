@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ProjectFeatureUsage, :request_store do
+  include_context 'clear DB Load Balancing configuration'
+
   describe '#log_jira_dvcs_integration_usage' do
     let!(:project) { create(:project) }
 
@@ -15,10 +17,6 @@ RSpec.describe ProjectFeatureUsage, :request_store do
         ::Gitlab::Database::LoadBalancing.configure_proxy
         allow(ActiveRecord::Base).to receive(:connection).and_return(::Gitlab::Database::LoadBalancing.proxy)
         ::Gitlab::Database::LoadBalancing::Session.clear_session
-      end
-
-      after do
-        ::Gitlab::Database::LoadBalancing.clear_configuration
       end
 
       it 'logs Jira DVCS Cloud last sync' do

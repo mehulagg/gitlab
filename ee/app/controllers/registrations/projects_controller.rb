@@ -13,7 +13,7 @@ module Registrations
       authorize_create_project!
     end
 
-    feature_category :navigation
+    feature_category :onboarding
 
     def new
       @project = Project.new(namespace: @namespace)

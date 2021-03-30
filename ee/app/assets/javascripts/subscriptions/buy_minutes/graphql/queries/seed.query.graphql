@@ -1,0 +1,9 @@
+query seed {
+  seed @client {
+    plans
+    namespaces
+    newUser
+    fullName
+    setupForCompany
+  }
+}

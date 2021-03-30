@@ -4,7 +4,7 @@
   modify the passed parameter in conformity with non-ee BoardsStore.
 */
 
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { __, sprintf } from '~/locale';
@@ -192,7 +192,9 @@ class BoardsStoreEE {
         })
         .catch(() => {
           issue.setLoadingState('weight', false);
-          createFlash(__('An error occurred when updating the issue weight'));
+          createFlash({
+            message: __('An error occurred when updating the issue weight'),
+          });
         });
     }
   }
@@ -208,11 +210,11 @@ class BoardsStoreEE {
         this.store.state[listType] = data;
       })
       .catch(() => {
-        createFlash(
-          sprintf(__('Something went wrong while fetching %{listType} list'), {
+        createFlash({
+          message: sprintf(__('Something went wrong while fetching %{listType} list'), {
             listType,
           }),
-        );
+        });
       });
   }
 }

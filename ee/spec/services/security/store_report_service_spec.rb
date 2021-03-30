@@ -279,7 +279,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
     end
 
     context 'vulnerability issue link' do
-      context 'when there is no assoiciated issue feedback with finding' do
+      context 'when there is no associated issue feedback with finding' do
         it 'does not insert issue links from the new pipeline' do
           expect { subject }.to change { Vulnerabilities::IssueLink.count }.by(0)
         end

@@ -3,15 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::LoadBalancing do
+  include_context 'clear DB Load Balancing configuration'
+
   describe '.proxy' do
     context 'when configured' do
       before do
         allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
         subject.configure_proxy
-      end
-
-      after do
-        subject.clear_configuration
       end
 
       it 'returns the connection proxy' do
@@ -133,7 +131,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
 
     before do
-      subject.clear_configuration
+      clear_load_balancing_configuration
       allow(described_class).to receive(:hosts).and_return(%w(foo))
     end
 
@@ -144,7 +142,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     end
 
     it 'returns false when Sidekiq is being used' do
-      allow(described_class).to receive(:hosts).and_return(%w(foo))
       allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
 
       expect(described_class.enable?).to eq(false)
@@ -173,10 +170,22 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       expect(described_class.enable?).to eq(true)
     end
 
+    context 'when ENABLE_LOAD_BALANCING_FOR_SIDEKIQ environment variable is set' do
+      before do
+        stub_env('ENABLE_LOAD_BALANCING_FOR_SIDEKIQ', 'true')
+      end
+
+      it 'returns true when Sidekiq is being used' do
+        allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
+
+        expect(described_class.enable?).to eq(true)
+      end
+    end
+
     context 'without a license' do
       before do
         License.destroy_all # rubocop: disable Cop/DestroyAll
-        subject.clear_configuration
+        clear_load_balancing_configuration
       end
 
       it 'is disabled' do
@@ -207,10 +216,13 @@ RSpec.describe Gitlab::Database::LoadBalancing do
   describe '.configured?' do
     let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
 
+    before do
+      clear_load_balancing_configuration
+    end
+
     it 'returns true when Sidekiq is being used' do
       allow(described_class).to receive(:hosts).and_return(%w(foo))
       allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
-
       expect(described_class.configured?).to eq(true)
     end
 
@@ -238,7 +250,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     context 'without a license' do
       before do
         License.destroy_all # rubocop: disable Cop/DestroyAll
-        subject.clear_configuration
+        clear_load_balancing_configuration
       end
 
       it 'is not configured' do
@@ -248,10 +260,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
   end
 
   describe '.configure_proxy' do
-    after do
-      described_class.clear_configuration
-    end
-
     it 'configures the connection proxy' do
       allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
 
@@ -370,10 +378,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         subject.configure_proxy(proxy)
       end
 
-      after do
-        subject.clear_configuration
-      end
-
       context 'when the load balancer returns :replica' do
         it 'returns :replica' do
           allow(load_balancer).to receive(:db_role_for_connection).and_return(:replica)
@@ -445,7 +449,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         model.singleton_class.prepend ::Gitlab::Database::LoadBalancing::ActiveRecordProxy
 
         # Setup load balancing
-        subject.clear_configuration
+        clear_load_balancing_configuration
         allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
         subject.configure_proxy(::Gitlab::Database::LoadBalancing::ConnectionProxy.new(hosts))
         allow(ActiveRecord::Base.configurations[Rails.env])
@@ -453,10 +457,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           .with('load_balancing')
           .and_return('hosts' => hosts)
         ::Gitlab::Database::LoadBalancing::Session.clear_session
-      end
-
-      after do
-        subject.clear_configuration
       end
     end
 

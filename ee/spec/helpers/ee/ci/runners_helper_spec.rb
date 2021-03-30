@@ -3,7 +3,7 @@
 require "spec_helper"
 
 RSpec.describe EE::Ci::RunnersHelper do
-  let_it_be(:user) { create(:user) }
+  let_it_be(:user, refind: true) { create(:user) }
   let_it_be(:namespace) { create(:namespace, owner: user) }
   let_it_be(:project) { create(:project, namespace: namespace) }
 

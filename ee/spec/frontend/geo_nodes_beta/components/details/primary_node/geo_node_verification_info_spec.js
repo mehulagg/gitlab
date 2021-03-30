@@ -2,6 +2,7 @@ import { GlCard, GlIcon, GlPopover, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
+import GeoNodeProgressBar from 'ee/geo_nodes_beta/components/details/geo_node_progress_bar.vue';
 import GeoNodeVerificationInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_verification_info.vue';
 import { HELP_INFO_URL } from 'ee/geo_nodes_beta/constants';
 import { MOCK_NODES, MOCK_PRIMARY_VERIFICATION_INFO } from 'ee_jest/geo_nodes_beta/mock_data';
@@ -43,7 +44,7 @@ describe('GeoNodeVerificationInfo', () => {
   const findGlPopover = () => wrapper.findComponent(GlPopover);
   const findGlPopoverLink = () => findGlPopover().findComponent(GlLink);
   const findGeoNodeProgressBarTitles = () => wrapper.findAllByTestId('verification-bar-title');
-  const findGeoNodeProgressBars = () => wrapper.findAllByTestId('verification-progress-bar');
+  const findGeoNodeProgressBars = () => wrapper.findAllComponents(GeoNodeProgressBar);
 
   describe('template', () => {
     describe('always', () => {

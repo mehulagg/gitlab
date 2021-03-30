@@ -49,7 +49,9 @@ More links:
 
 You can view the exact JSON payload sent to GitLab Inc. in the administration panel. To view the payload:
 
-1. Navigate to **Admin Area > Settings > Metrics and profiling**.
+1. Sign in as a user with [Administrator](../../user/permissions.md) permissions.
+1. In the top navigation bar, click **(admin)** **Admin Area**.
+1. In the left sidebar, go to **Settings > Metrics and profiling**.
 1. Expand the **Usage statistics** section.
 1. Click the **Preview payload** button.
 
@@ -57,9 +59,17 @@ For an example payload, see [Example Usage Ping payload](#example-usage-ping-pay
 
 ## Disable Usage Ping
 
-To disable Usage Ping in the GitLab UI, go to the **Settings** page of your administration panel and uncheck the **Usage Ping** checkbox.
+To disable Usage Ping in the GitLab UI:
 
-To disable Usage Ping and prevent it from being configured in the future through the administration panel, Omnibus installs can set the following in [`gitlab.rb`](https://docs.gitlab.com/omnibus/settings/configuration.html#configuration-options):
+1. Sign in as a user with [Administrator](../../user/permissions.md) permissions.
+1. In the top navigation bar, click **(admin)** **Admin Area**.
+1. In the left sidebar, go to **Settings > Metrics and profiling**.
+1. Expand the **Usage statistics** section.
+1. Clear the **Usage Ping** checkbox and click **Save changes**.
+
+To disable Usage Ping and prevent it from being configured in the future through
+the administration panel, Omnibus installs can set the following in
+[`gitlab.rb`](https://docs.gitlab.com/omnibus/settings/configuration.html#configuration-options):
 
 ```ruby
 gitlab_rails['usage_ping_enabled'] = false
@@ -939,7 +949,7 @@ appear to be associated to any of the services running, because they all appear 
 WARNING:
 This feature is intended solely for internal GitLab use.
 
-To add data for aggregated metrics into Usage Ping payload you should add corresponding definition at [`lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/) for metrics available at Community Edition and at [`ee/lib/gitlab/usage_data_counters/aggregated_metrics/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/usage_data_counters/aggregated_metrics/) for Enterprise Edition ones.
+To add data for aggregated metrics into Usage Ping payload you should add corresponding definition at [`config/metrics/aggregates/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/aggregates/) for metrics available at Community Edition and at [`ee/config/metrics/aggregates/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/aggregates/) for Enterprise Edition ones.
 
 Each aggregate definition includes following parts:
 
@@ -968,7 +978,7 @@ Example aggregated metric entries:
 ```yaml
 - name: example_metrics_union
   operator: OR
-  events: 
+  events:
     - 'i_search_total'
     - 'i_search_advanced'
     - 'i_search_paid'
@@ -1101,7 +1111,7 @@ end
 #### Add new aggregated metric definition
 
 After all metrics are persisted, you can add an aggregated metric definition at
-[`aggregated_metrics/`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/).
+[`aggregated_metrics/`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/aggregates/).
 
 To declare the aggregate of metrics collected with [Estimated Batch Counters](#estimated-batch-counters),
 you must fulfill the following requirements:
@@ -1352,4 +1362,24 @@ bin/rake gitlab:usage_data:dump_sql_in_yaml > ~/Desktop/usage-metrics-2020-09-02
 
 ## Generating and troubleshooting usage ping
 
-To get a usage ping, or to troubleshoot caching issues on your GitLab instance, please follow [instructions to generate usage ping](../../administration/troubleshooting/gitlab_rails_cheat_sheet.md#generate-usage-ping).
+This activity is to be done via a detached screen session on a remote server.
+
+Before you begin these steps, make sure the key is added to the SSH agent locally
+with the `ssh-add` command.
+
+### Triggering
+
+1. Connect to bastion with agent forwarding: `$ ssh -A lb-bastion.gprd.gitlab.com`
+1. Create named screen: `$ screen -S <username>_usage_ping_<date>`
+1. Connect to console host: `$ ssh $USER-rails@console-01-sv-gprd.c.gitlab-production.internal`
+1. Run `SubmitUsagePingService.new.execute`
+1. Detach from screen: `ctrl + a, ctrl + d`
+1. Exit from bastion: `$ exit`
+
+### Verification (After approx 30 hours)
+
+1. Reconnect to bastion: `$ ssh -A lb-bastion.gprd.gitlab.com`
+1. Find your screen session: `$ screen -ls`
+1. Attach to your screen session: `$ screen -x 14226.mwawrzyniak_usage_ping_2021_01_22`
+1. Check the last payload in `raw_usage_data` table: `RawUsageData.last.payload`
+1. Check the when the payload was sent: `RawUsageData.last.sent_at`

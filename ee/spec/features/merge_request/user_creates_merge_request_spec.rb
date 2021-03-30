@@ -57,7 +57,7 @@ RSpec.describe "User creates a merge request", :js do
     # end
 
     fill_in("Title", with: title)
-    click_button("Submit merge request")
+    click_button("Create merge request")
 
     page.within(".js-issuable-actions") do
       click_link("Edit", match: :first)

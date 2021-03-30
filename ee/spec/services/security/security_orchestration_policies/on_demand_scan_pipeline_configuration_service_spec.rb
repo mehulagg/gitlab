@@ -50,7 +50,11 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
 
     it 'delegates variables preparation to ::Ci::DastScanCiConfigurationService' do
       expected_params = {
+        auth_password_field: site_profile.auth_password_field,
+        auth_username: site_profile.auth_username,
+        auth_username_field: site_profile.auth_username_field,
         branch: project.default_branch_or_master,
+        excluded_urls: site_profile.excluded_urls.join(','),
         full_scan_enabled: false,
         show_debug_messages: false,
         spider_timeout: nil,
@@ -76,19 +80,23 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
           stage: 'test',
           image: { name: '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION' },
           variables: {
-            DAST_VERSION: 1,
-            SECURE_ANALYZERS_PREFIX: 'registry.gitlab.com/gitlab-org/security-products/analyzers',
-            DAST_WEBSITE: site_profile.dast_site.url,
+            DAST_DEBUG: 'false',
+            DAST_EXCLUDE_URLS: site_profile.excluded_urls.join(','),
             DAST_FULL_SCAN_ENABLED: 'false',
+            DAST_PASSWORD_FIELD: site_profile.auth_password_field,
+            DAST_USERNAME: site_profile.auth_username,
+            DAST_USERNAME_FIELD: site_profile.auth_username_field,
             DAST_USE_AJAX_SPIDER: 'false',
-            DAST_DEBUG: 'false'
+            DAST_VERSION: 1,
+            DAST_WEBSITE: site_profile.dast_site.url,
+            SECURE_ANALYZERS_PREFIX: 'registry.gitlab.com/gitlab-org/security-products/analyzers'
           },
           allow_failure: true,
           script: ['/analyze'],
           artifacts: { reports: { dast: 'gl-dast-report.json' } }
         },
         'dast-on-demand-1': {
-          script: 'echo "Error during On-Demand Scan execution: Site Profile was not provided" && false',
+          script: 'echo "Error during On-Demand Scan execution: Dast site profile was not provided" && false',
           allow_failure: true
         }
       }

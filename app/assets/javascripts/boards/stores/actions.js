@@ -69,6 +69,7 @@ export default {
       'milestoneTitle',
       'releaseTag',
       'search',
+      'myReactionEmoji',
     ]);
     filterParams.not = transformNotFilters(filters);
     commit(types.SET_FILTERS, filterParams);
@@ -327,8 +328,8 @@ export default {
     commit(types.RESET_ISSUES);
   },
 
-  moveItem: ({ dispatch }) => {
-    dispatch('moveIssue');
+  moveItem: ({ dispatch }, payload) => {
+    dispatch('moveIssue', payload);
   },
 
   moveIssue: (

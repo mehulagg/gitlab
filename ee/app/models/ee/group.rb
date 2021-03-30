@@ -431,7 +431,7 @@ module EE
 
     override :users_count
     def users_count
-      return all_group_members.count unless minimal_access_role_allowed?
+      return all_group_members.count if minimal_access_role_allowed?
 
       members.count
     end

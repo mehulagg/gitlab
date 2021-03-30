@@ -13,7 +13,6 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
-import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import { initFormField } from 'ee/security_configuration/utils';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
@@ -47,23 +46,20 @@ export default {
       type: String,
       required: true,
     },
-    profilesLibraryPath: {
-      type: String,
-      required: true,
-    },
-    onDemandScansPath: {
-      type: String,
-      required: true,
-    },
     profile: {
       type: Object,
       required: false,
       default: () => ({}),
     },
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     const {
-      name = '',
+      profileName = '',
       spiderTimeout = '',
       targetTimeout = '',
       scanType = SCAN_TYPE.PASSIVE,
@@ -72,7 +68,7 @@ export default {
     } = this.profile;
 
     const form = {
-      profileName: initFormField({ value: name }),
+      profileName: initFormField({ value: profileName }),
       spiderTimeout: initFormField({ value: spiderTimeout }),
       targetTimeout: initFormField({ value: targetTimeout }),
       scanType: initFormField({ value: scanType }),
@@ -85,11 +81,6 @@ export default {
       initialFormValues: serializeFormObject(form),
       loading: false,
       showAlert: false,
-      returnToPreviousPage: returnToPreviousPageFactory({
-        onDemandScansPath: this.onDemandScansPath,
-        profilesLibraryPath: this.profilesLibraryPath,
-        urlParamKey: 'scanner_profile_id',
-      }),
     };
   },
   spiderTimeoutRange: {
@@ -150,7 +141,7 @@ export default {
       );
     },
     isSubmitDisabled() {
-      return this.formHasErrors || this.requiredFieldEmpty || this.isPolicyProfile;
+      return this.isPolicyProfile;
     },
     isPolicyProfile() {
       return Boolean(this.profile?.referencedInSecurityPolicies?.length);
@@ -210,7 +201,9 @@ export default {
               this.showErrors(errors);
               this.loading = false;
             } else {
-              this.returnToPreviousPage(id);
+              this.$emit('success', {
+                id,
+              });
             }
           },
         )
@@ -228,7 +221,7 @@ export default {
       }
     },
     discard() {
-      this.returnToPreviousPage();
+      this.$emit('cancel');
     },
     showErrors(errors = []) {
       this.errors = errors;
@@ -245,7 +238,7 @@ export default {
 
 <template>
   <gl-form @submit.prevent="onSubmit">
-    <h2 class="gl-mb-6">{{ i18n.title }}</h2>
+    <h2 v-if="showHeader" class="gl-mb-6">{{ i18n.title }}</h2>
 
     <gl-alert
       v-if="isPolicyProfile"
@@ -278,6 +271,7 @@ export default {
       <gl-form-group :label="s__('DastProfiles|Profile name')">
         <gl-form-input
           v-model="form.profileName.value"
+          name="profile_name"
           class="mw-460"
           data-testid="profile-name-input"
           type="text"
@@ -311,6 +305,7 @@ export default {
           </template>
           <gl-form-input-group
             v-model.number="form.spiderTimeout.value"
+            name="spider_timeout"
             class="mw-460"
             data-testid="spider-timeout-input"
             type="number"
@@ -338,6 +333,7 @@ export default {
           </template>
           <gl-form-input-group
             v-model.number="form.targetTimeout.value"
+            name="target_timeout"
             class="mw-460"
             data-testid="target-timeout-input"
             type="number"

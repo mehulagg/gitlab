@@ -476,10 +476,26 @@ RSpec.describe GitlabSubscription do
 
     let(:start_trial_on) { nil }
     let(:end_trial_on) { nil }
+    let(:trial_extension_type) { nil }
 
     before do
       gitlab_subscription.trial_starts_on = start_trial_on if start_trial_on
       gitlab_subscription.trial_ends_on = end_trial_on if end_trial_on
+      gitlab_subscription.trial_extension_type = trial_extension_type
+    end
+
+    describe '#trial_extended_or_reactivated?' do
+      subject { gitlab_subscription.trial_extended_or_reactivated? }
+
+      where(:trial_extension_type, :extended_or_reactivated) do
+        nil | false
+        1   | true
+        2   | true
+      end
+
+      with_them do
+        it { is_expected.to be(extended_or_reactivated) }
+      end
     end
 
     describe '#trial_days_remaining' do

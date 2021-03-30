@@ -8,7 +8,9 @@ query groupEpics(
   $authorUsername: String
   $labelName: [String!]
   $milestoneTitle: String = ""
+  $myReactionEmoji: String
   $confidential: Boolean
+  $search: String = ""
   $sortBy: EpicSort
   $firstPageSize: Int
   $lastPageSize: Int
@@ -21,7 +23,9 @@ query groupEpics(
       authorUsername: $authorUsername
       labelName: $labelName
       milestoneTitle: $milestoneTitle
+      myReactionEmoji: $myReactionEmoji
       confidential: $confidential
+      search: $search
       sort: $sortBy
       first: $firstPageSize
       last: $lastPageSize

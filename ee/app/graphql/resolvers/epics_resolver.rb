@@ -50,6 +50,10 @@ module Resolvers
              required: false,
              description: 'Filter epics by given confidentiality.'
 
+    argument :my_reaction_emoji, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Filter by reaction emoji applied by the current user.'
+
     type Types::EpicType, null: true
 
     def ready?(**args)

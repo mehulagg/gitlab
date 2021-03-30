@@ -4,8 +4,10 @@ import MockAdapter from 'axios-mock-adapter';
 import CsvExportButton, {
   STORAGE_KEY,
 } from 'ee/security_dashboard/components/csv_export_button.vue';
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import { TEST_HOST } from 'helpers/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
+import AccessorUtils from '~/lib/utils/accessor';
 import axios from '~/lib/utils/axios_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import downloader from '~/lib/utils/downloader';
@@ -13,6 +15,8 @@ import statusCodes from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 jest.mock('~/lib/utils/downloader');
+
+useLocalStorageSpy();
 
 const mockReportDate = formatDate(new Date(), 'isoDateTime');
 const vulnerabilitiesExportEndpoint = `${TEST_HOST}/vulnerability_findings.csv`;
@@ -29,7 +33,7 @@ describe('Csv Button Export', () => {
 
   const createComponent = () => {
     return shallowMount(CsvExportButton, {
-      propsData: {
+      provide: {
         vulnerabilitiesExportEndpoint,
       },
       stubs: {
@@ -49,7 +53,7 @@ describe('Csv Button Export', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.clear();
   });
 
   describe('when the user sees the button for the first time', () => {
@@ -89,7 +93,9 @@ describe('Csv Button Export', () => {
       await axios.waitForAll();
 
       expect(downloader).not.toHaveBeenCalled();
-      expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error while generating the report.',
+      });
     });
 
     it('shows the flash error when backend fails to generate the export', async () => {
@@ -98,7 +104,9 @@ describe('Csv Button Export', () => {
       findCsvExportButton().vm.$emit('click');
       await axios.waitForAll();
 
-      expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error while generating the report.',
+      });
     });
 
     it('displays the export icon when not loading and the loading icon when loading', async () => {
@@ -117,16 +125,33 @@ describe('Csv Button Export', () => {
     });
 
     it('displays the popover by default', () => {
-      expect(findPopover().attributes('show')).toBeTruthy();
+      expect(findPopover().exists()).toBe(true);
     });
 
-    it('closes the popover when the button is clicked', async () => {
-      const button = findPopoverButton();
-      expect(button.text().trim()).toBe('Got it!');
-      button.vm.$emit('click');
-      await wrapper.vm.$nextTick();
+    describe('closing the popover', () => {
+      it('closes the popover when the button is clicked', async () => {
+        expect(findPopoverButton().text()).toBe('Got it!');
+        findPopoverButton().vm.$emit('click');
+        await wrapper.vm.$nextTick();
 
-      expect(findPopover().attributes('show')).toBeUndefined();
+        expect(findPopover().exists()).toBe(false);
+      });
+
+      it('sets localStorage', async () => {
+        jest.spyOn(AccessorUtils, 'isLocalStorageAccessSafe').mockImplementation(() => true);
+        findPopoverButton().vm.$emit('click');
+        await wrapper.vm.$nextTick();
+
+        expect(localStorage.setItem).toHaveBeenCalledTimes(1);
+      });
+
+      it(`does not set localStorage if it's not available`, async () => {
+        jest.spyOn(AccessorUtils, 'isLocalStorageAccessSafe').mockImplementation(() => false);
+        findPopoverButton().vm.$emit('click');
+        await wrapper.vm.$nextTick();
+
+        expect(localStorage.setItem).toHaveBeenCalledTimes(0);
+      });
     });
   });
 
@@ -137,7 +162,7 @@ describe('Csv Button Export', () => {
     });
 
     it('does not display the popover anymore', () => {
-      expect(findPopover().attributes('show')).toBeFalsy();
+      expect(findPopover().exists()).toBe(false);
     });
   });
 });

@@ -5,13 +5,14 @@ import Api from 'ee/api';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
 import { s__, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import GenericReportSection from './generic_report/report_section.vue';
 import HistoryEntry from './history_entry.vue';
 import RelatedIssues from './related_issues.vue';
 import RelatedJiraIssues from './related_jira_issues.vue';
@@ -20,6 +21,7 @@ import StatusDescription from './status_description.vue';
 export default {
   name: 'VulnerabilityFooter',
   components: {
+    GenericReportSection,
     SolutionCard,
     MergeRequestNote,
     HistoryEntry,
@@ -136,11 +138,11 @@ export default {
           });
         })
         .catch(() => {
-          createFlash(
-            s__(
+          createFlash({
+            message: s__(
               'VulnerabilityManagement|Something went wrong while trying to retrieve the vulnerability history. Please try again later.',
             ),
-          );
+          });
         });
     },
     createNotesPoll() {
@@ -159,7 +161,9 @@ export default {
           this.lastFetchedAt = lastFetchedAt;
         },
         errorCallback: () =>
-          createFlash(__('Something went wrong while fetching latest comments.')),
+          createFlash({
+            message: __('Something went wrong while fetching latest comments.'),
+          }),
       });
     },
     updateNotes(notes) {
@@ -206,6 +210,11 @@ export default {
 <template>
   <div data-qa-selector="vulnerability_footer">
     <solution-card v-if="hasSolution" v-bind="solutionInfo" />
+    <generic-report-section
+      v-if="vulnerability.details"
+      class="md gl-mt-6"
+      :details="vulnerability.details"
+    />
     <div v-if="vulnerability.mergeRequestFeedback" class="card gl-mt-5">
       <merge-request-note
         :feedback="vulnerability.mergeRequestFeedback"

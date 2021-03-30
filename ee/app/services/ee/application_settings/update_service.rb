@@ -16,6 +16,9 @@ module EE
           params[:maintenance_mode_message] = nil
         end
 
+        elasticsearch_shards = params.delete(:elasticsearch_shards)
+        elasticsearch_replicas = params.delete(:elasticsearch_replicas)
+
         elasticsearch_namespace_ids = params.delete(:elasticsearch_namespace_ids)
         elasticsearch_project_ids = params.delete(:elasticsearch_project_ids)
 
@@ -23,6 +26,7 @@ module EE
           find_or_create_elasticsearch_index
           update_elasticsearch_containers(ElasticsearchIndexedNamespace, elasticsearch_namespace_ids)
           update_elasticsearch_containers(ElasticsearchIndexedProject, elasticsearch_project_ids)
+          update_elasticsearch_index_settings(number_of_replicas: elasticsearch_replicas, number_of_shards: elasticsearch_shards)
         end
 
         result
@@ -42,6 +46,15 @@ module EE
 
         # Add new containers
         new_container_ids.each { |id| klass.create!(klass.target_attr_name => id) }
+      end
+
+      def update_elasticsearch_index_settings(number_of_replicas:, number_of_shards:)
+        return if number_of_replicas.nil? && number_of_shards.nil?
+
+        Elastic::IndexSetting.default.update!(
+          number_of_replicas: number_of_replicas.to_i,
+          number_of_shards: number_of_shards.to_i
+        )
       end
 
       private

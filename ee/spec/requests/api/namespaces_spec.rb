@@ -290,7 +290,8 @@ RSpec.describe API::Namespaces do
           auto_renew: true,
           trial: true,
           trial_ends_on: '2019-05-01',
-          trial_starts_on: '2019-06-01'
+          trial_starts_on: '2019-06-01',
+          trial_extension_type: GitlabSubscription.trial_extension_types[:reactivated]
         }
       end
 
@@ -310,7 +311,8 @@ RSpec.describe API::Namespaces do
           auto_renew: true,
           trial: true,
           trial_starts_on: Date.parse(gitlab_subscription[:trial_starts_on]),
-          trial_ends_on: Date.parse(gitlab_subscription[:trial_ends_on])
+          trial_ends_on: Date.parse(gitlab_subscription[:trial_ends_on]),
+          trial_extension_type: 'reactivated'
         )
       end
 

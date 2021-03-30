@@ -1,5 +1,6 @@
 import { GlCard } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import GeoNodeProgressBar from 'ee/geo_nodes_beta/components/details/geo_node_progress_bar.vue';
 import GeoNodePrimaryOtherInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_primary_other_info.vue';
 import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -28,7 +29,7 @@ describe('GeoNodePrimaryOtherInfo', () => {
   });
 
   const findGlCard = () => wrapper.findComponent(GlCard);
-  const findGeoNodeProgressBar = () => wrapper.findByTestId('replication-progress-bar');
+  const findGeoNodeProgressBar = () => wrapper.findComponent(GeoNodeProgressBar);
   const findReplicationSlotWAL = () => wrapper.findByTestId('replication-slot-wal');
 
   describe('template', () => {

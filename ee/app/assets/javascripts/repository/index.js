@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import initTree from '~/repository';
@@ -34,7 +34,9 @@ export default () => {
         .then(() => window.location.reload())
         .catch(() => {
           toggleBtn.removeAttribute('disabled');
-          createFlash(__('An error occurred while initializing path locks'));
+          createFlash({
+            message: __('An error occurred while initializing path locks'),
+          });
         });
     });
   }

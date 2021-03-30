@@ -173,6 +173,7 @@ export const MOCK_NODES = [
     version: '10.4.0-pre',
     revision: 'b93c51849b',
     storageShardsMatch: true,
+    webGeoProjectsUrl: 'http://127.0.0.1:3002/replication/projects',
   },
 ];
 
@@ -235,5 +236,6 @@ export const MOCK_NODE_STATUSES_RES = [
     version: '10.4.0-pre',
     revision: 'b93c51849b',
     storage_shards_match: true,
+    web_geo_projects_url: 'http://127.0.0.1:3002/replication/projects',
   },
 ];

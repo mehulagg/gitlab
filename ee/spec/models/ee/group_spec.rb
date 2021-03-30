@@ -460,7 +460,7 @@ RSpec.describe Group do
       end
 
       it 'returns a comma separated string of ranges of its ip_restriction records' do
-        expect(group.ip_restriction_ranges).to eq('192.168.0.0/24,10.0.0.0/8')
+        expect(group.ip_restriction_ranges.split(',')).to contain_exactly(*ranges)
       end
     end
   end
@@ -761,6 +761,35 @@ RSpec.describe Group do
         it 'accepts higher level as argument' do
           expect(group.member?(user, ::Gitlab::Access::DEVELOPER)).to be_falsey
         end
+      end
+    end
+  end
+
+  describe '#users_count' do
+    subject { group.users_count }
+
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    context 'with `minimal_access_role` not licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it 'does not count the minimal access user' do
+        expect(group.users_count).to eq(0)
+      end
+    end
+
+    context 'with `minimal_access_role` licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it 'counts the minimal access user' do
+        expect(group.users_count).to eq(1)
       end
     end
   end

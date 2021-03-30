@@ -31,6 +31,7 @@ RSpec.describe Gitlab::Geo::ReplicableModel do
 
   it_behaves_like 'a replicable model' do
     let(:model_record) { subject }
+    let(:replicator_class) { Geo::DummyReplicator }
   end
 
   describe '#replicator' do

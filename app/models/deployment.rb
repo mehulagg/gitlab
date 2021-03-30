@@ -45,6 +45,7 @@ class Deployment < ApplicationRecord
   scope :active, -> { where(status: %i[created running]) }
   scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
   scope :with_deployable, -> { joins('INNER JOIN ci_builds ON ci_builds.id = deployments.deployable_id').preload(:deployable) }
+  scope :with_api_entity_associations, -> { preload({ deployable: { runner: [], tags: [], user: [], job_artifacts_archive: [] } }) }
 
   scope :finished_after, ->(date) { where('finished_at >= ?', date) }
   scope :finished_before, ->(date) { where('finished_at < ?', date) }
@@ -225,7 +226,7 @@ class Deployment < ApplicationRecord
   end
 
   def update_merge_request_metrics!
-    return unless environment.update_merge_request_metrics? && success?
+    return unless environment.production? && success?
 
     merge_requests = project.merge_requests
                      .joins(:metrics)
