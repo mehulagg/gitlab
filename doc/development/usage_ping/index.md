@@ -1364,36 +1364,36 @@ bin/rake gitlab:usage_data:dump_sql_in_yaml > ~/Desktop/usage-metrics-2020-09-02
 
 To get a usage ping, or to troubleshoot caching issues on your GitLab instance, please follow [instructions to generate usage ping](../../administration/troubleshooting/gitlab_rails_cheat_sheet.md#generate-usage-ping).
 
-## Generating UsagePing on Gitlab.com
+## Generating UsagePing on GitLab.com
 
 This activity is to be done via a detached screen session on a remote server.
 
 ### Prequisites
 
-1. Make sure the key is added to the ssh agent locally `ssh-add`.
+1. Make sure the key is added to the SSH agent locally `ssh-add`.
 
 ### Triggering
 
 1. Connect to bastion with agent forwarding `$ ssh -A lb-bastion.gprd.gitlab.com`
 
-2. Create named screen `$ screen -S <username>_usage_ping_<date>`
+1. Create named screen `$ screen -S <username>_usage_ping_<date>`
 
-3. Connect to console host `$ ssh $USER-rails@console-01-sv-gprd.c.gitlab-production.internal`
+1. Connect to console host `$ ssh $USER-rails@console-01-sv-gprd.c.gitlab-production.internal`
 
-4. Run `SubmitUsagePingService.new.execute`
+1. Run `SubmitUsagePingService.new.execute`
 
-5. Detach from screen `ctrl + a, ctrl + d`
+1. Detach from screen `ctrl + a, ctrl + d`
 
-6. Exit from bastion `$ exit`
+1. Exit from bastion `$ exit`
 
 ### Verification (After approx 30 hours)
 
 1. Reconnect to bastion `$ ssh -A lb-bastion.gprd.gitlab.com`
 
-2. Find your screen session `$ screen -ls`
+1. Find your screen session `$ screen -ls`
 
-3. Attach to your screen session `$ screen -x 14226.mwawrzyniak_usage_ping_2021_01_22`
+1. Attach to your screen session `$ screen -x 14226.mwawrzyniak_usage_ping_2021_01_22`
 
-4. Check the last payload in `raw_usage_data` table: `RawUsageData.last.payload`
+1. Check the last payload in `raw_usage_data` table: `RawUsageData.last.payload`
 
-5. Check the when the payload was sent `RawUsageData.last.sent_at`
+1. Check the when the payload was sent `RawUsageData.last.sent_at`
