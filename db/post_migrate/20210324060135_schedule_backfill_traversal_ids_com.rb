@@ -6,34 +6,31 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
 
   DOWNTIME = false
   BATCH_SIZE = 500
-  DELAY_INTERVAL = 2.minutes.to_i
+  DELAY_INTERVAL = 2.minutes
 
   disable_ddl_transaction!
-
-  class Namespace < ActiveRecord::Base
-    include ::EachBatch
-
-    self.table_name = 'namespaces'
-  end
 
   def up
     return unless Gitlab.com?
 
-    top_level_index = 0
-
     # Personal namespaces and top-level groups
-    Namespace.where(parent_id: nil).each_batch(of: BATCH_SIZE) do |batch, index|
-      delay = index * DELAY_INTERVAL
-      range = batch.pluck('MIN(id)', 'MAX(id)').first
-      BackgroundMigrationWorker.perform_in(delay, 'BackfillTopLevelTraversalIds', range)
-      top_level_index = index
-    end
+    queue_background_migration_jobs_by_range_at_intervals(
+      Namespace,
+      'Gitlab::BackgroundMigration::BackfillTopLevelTraversalIds',
+      DELAY_INTERVAL,
+      BATCH_SIZE,
+      track: true
+    )
 
     # Subgroups
-    Namespace.where('parent_id IS NOT NULL').each_batch(of: BATCH_SIZE) do |batch, index|
-      delay = (top_level_index + index) * DELAY_INTERVAL
-      range = batch.pluck('MIN(id)', 'MAX(id)').first
-      BackgroundMigrationWorker.perform_in(delay, 'BackfillTraversalIds', range)
-    end
+    initial_delay = (Namespace.count / BATCH_SIZE.to_f).ceil * DELAY_INTERVAL
+    queue_background_migration_jobs_by_range_at_intervals(
+      Namespace,
+      'Gitlab::BackgroundMigration::BackfillTraversalIds',
+      DELAY_INTERVAL,
+      BATCH_SIZE,
+      initial_delay: initial_delay,
+      track: true
+    )
   end
 end
