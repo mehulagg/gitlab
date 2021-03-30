@@ -164,6 +164,14 @@ class Label < ApplicationRecord
     "##{Digest::MD5.hexdigest(value)[0..5]}"
   end
 
+  def self.preload_label_subjects(labels)
+    project_labels, group_labels = labels.partition { |label| label.is_a? ProjectLabel }
+
+    preloader = ActiveRecord::Associations::Preloader.new
+    preloader.preload(project_labels, { project: [:project_feature, namespace: :route] })
+    preloader.preload(group_labels, { group: :route })
+  end
+
   def open_issues_count(user = nil)
     issues_count(user, state: 'opened')
   end

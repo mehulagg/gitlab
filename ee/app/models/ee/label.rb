@@ -3,6 +3,7 @@
 module EE
   module Label
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     SCOPED_LABEL_SEPARATOR = '::'
     SCOPED_LABEL_PATTERN = /^.*#{SCOPED_LABEL_SEPARATOR}/.freeze
@@ -22,6 +23,15 @@ module EE
 
     def scoped_label_value
       title.sub(SCOPED_LABEL_PATTERN, '')
+    end
+
+    override :preload_label_subjects
+    def self.preload_label_subjects(labels)
+      super
+      group_labels = labels.select { |label| label.is_a? GroupLabel }
+
+      preloader = ActiveRecord::Associations::Preloader.new
+      preloader.preload(group_labels, { group: [:ip_restrictions, :saml_provider] })
     end
   end
 end

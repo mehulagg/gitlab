@@ -93,6 +93,23 @@ RSpec.describe Projects::LabelsController do
       end
     end
 
+    context 'test' do
+      render_views
+
+      before do
+        list_labels
+      end
+
+      it 'avoids N+1 queries' do
+        control_count = ActiveRecord::QueryRecorder.new { list_labels }.count
+
+        create_list(:label, 3, project: project)
+
+        expect { list_labels }.not_to exceed_query_limit(control_count) # 18 extra, from other stuff???
+        expect(assigns(:labels).count).to eq(7)
+      end
+    end
+
     def list_labels
       get :index, params: { namespace_id: project.namespace.to_param, project_id: project }
     end
