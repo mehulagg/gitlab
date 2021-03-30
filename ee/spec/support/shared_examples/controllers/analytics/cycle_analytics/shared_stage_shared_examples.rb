@@ -234,6 +234,19 @@ RSpec.shared_examples 'Value Stream Analytics Stages controller' do
           expect(response).to have_gitlab_http_status(:ok)
         end
       end
+
+      context 'pagination' do
+        it 'exposes pagination headers' do
+          create_list(:merge_request, 3)
+          stub_const('Gitlab::Analytics::CycleAnalytics::RecordsFetcher::MAX_RECORDS', 2)
+          allow_any_instance_of(Gitlab::Analytics::CycleAnalytics::RecordsFetcher).to receive(:query).and_return(MergeRequest.join_metrics.all)
+
+          subject
+
+          expect(response.headers['X-Next-Page']).to eq('2')
+          expect(response.headers['Link']).to include('rel="next"')
+        end
+      end
     end
 
     describe 'GET #duration_chart' do

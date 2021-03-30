@@ -56,7 +56,18 @@ module Groups
         def records
           return render_403 unless can?(current_user, :read_group_stage, @group)
 
-          render json: data_collector.serialized_records
+          params_for_pagination = all_cycle_analytics_params
+          params_for_pagination[:page] ||= 1
+          params_for_pagination[:per_page] = Gitlab::Analytics::CycleAnalytics::RecordsFetcher::MAX_RECORDS
+
+          request_adapter = Gitlab::Pagination::OffsetPaginationControllerRequestContextAdapter.new(self, params_for_pagination)
+          offset_pagination = Gitlab::Pagination::OffsetPagination.new(request_adapter)
+
+          serialized_records = data_collector.serialized_records do |relation|
+            offset_pagination.paginate(relation, exclude_total_headers: true) # adds the pagination response headers based on the already paginated relation
+          end
+
+          render json: serialized_records
         end
 
         def duration_chart
