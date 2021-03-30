@@ -25509,6 +25509,9 @@ msgstr ""
 msgid "Remove Zoom meeting"
 msgstr ""
 
+msgid "Remove all approvals in a merge request when new commits are pushed to its source branch."
+msgstr ""
+
 msgid "Remove all or specific assignee(s)"
 msgstr ""
 
