@@ -19,7 +19,30 @@ class Feature
   end
 
   class ActiveSupportCacheStoreAdapter < Flipper::Adapters::ActiveSupportCacheStore
-    # overrides methods in EE
+    def enable(feature, gate, thing)
+      return super unless ENV['GITLAB_FEATURE_FLAG_CACHE_FIX'] == '1'
+
+      result = @adapter.enable(feature, gate, thing)
+      @cache.write(key_for(feature.key), @adapter.get(feature), @write_options)
+      result
+    end
+
+    def disable(feature, gate, thing)
+      return super unless ENV['GITLAB_FEATURE_FLAG_CACHE_FIX'] == '1'
+
+      result = @adapter.disable(feature, gate, thing)
+      @cache.write(key_for(feature.key), @adapter.get(feature), @write_options)
+      result
+    end
+
+    def remove(feature)
+      return super unless ENV['GITLAB_FEATURE_FLAG_CACHE_FIX'] == '1'
+
+      result = @adapter.remove(feature)
+      @cache.delete(FeaturesKey)
+      @cache.write(key_for(feature.key), {}, @write_options)
+      result
+    end
   end
 
   InvalidFeatureFlagError = Class.new(Exception) # rubocop:disable Lint/InheritException

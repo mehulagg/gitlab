@@ -487,6 +487,94 @@ RSpec.describe Feature, stub_feature_flags: false do
     end
   end
 
+  context 'caching with stale reads from the database', :use_clean_rails_redis_caching, :request_store, :aggregate_failures do
+    let(:actor) { stub_feature_flag_gate('CustomActor:5') }
+    let(:another_actor) { stub_feature_flag_gate('CustomActor:10') }
+
+    # This is a bit unpleasant. For these tests we want to simulate stale reads
+    # from the database (due to database load balancing). A simple way to do
+    # that is to stub the response on the adapter Flipper uses for reading from
+    # the database. However, there isn't a convenient API for this. We know that
+    # the ActiveRecord adapter is always at the 'bottom' of the chain, so we can
+    # find it that way.
+    let(:active_record_adapter) do
+      adapter = described_class.flipper
+
+      loop do
+        break adapter unless adapter.instance_variable_get(:@adapter)
+
+        adapter = adapter.instance_variable_get(:@adapter)
+      end
+    end
+
+    [true, false].each do |env_var_enabled|
+      context "with GITLAB_FEATURE_FLAG_CACHE_FIX #{env_var_enabled ? 'enabled' : 'disabled'}" do # rubocop:disable RSpec/EmptyExampleGroup
+        # Without this environment variable enabled we want the specs to fail.
+        method = env_var_enabled ? :it : :pending
+
+        before do
+          stub_env('GITLAB_FEATURE_FLAG_CACHE_FIX', '1') if env_var_enabled
+        end
+
+        send(method, 'gives the correct value when enabling for an additional actor') do
+          described_class.enable(:enabled_feature_flag, actor)
+          initial_gate_values = active_record_adapter.get(described_class.get(:enabled_feature_flag))
+
+          # This should only be enabled for `actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(false)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+
+          # Enable for `another_actor` and simulate a stale read
+          described_class.enable(:enabled_feature_flag, another_actor)
+          allow(active_record_adapter).to receive(:get).once.and_return(initial_gate_values)
+
+          # Should read from the cache and be enabled for both of these actors
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+        end
+
+        send(method, 'gives the correct value when disabling the flag') do
+          described_class.enable(:enabled_feature_flag, actor)
+          described_class.enable(:enabled_feature_flag, another_actor)
+          initial_gate_values = active_record_adapter.get(described_class.get(:enabled_feature_flag))
+
+          # This be enabled for `actor` and `another_actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+
+          # Disable for `another_actor` and simulate a stale read
+          described_class.disable(:enabled_feature_flag, another_actor)
+          allow(active_record_adapter).to receive(:get).once.and_return(initial_gate_values)
+
+          # Should read from the cache and be enabled only for `actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(false)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+        end
+
+        send(method, 'gives the correct value when deleting the flag') do
+          described_class.enable(:enabled_feature_flag, actor)
+          initial_gate_values = active_record_adapter.get(described_class.get(:enabled_feature_flag))
+
+          # This should only be enabled for `actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+
+          # Remove and simulate a stale read
+          described_class.remove(:enabled_feature_flag)
+          allow(active_record_adapter).to receive(:get).once.and_return(initial_gate_values)
+
+          # Should read from the cache and be disabled everywhere
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(false)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+        end
+      end
+    end
+  end
+
   describe Feature::Target do
     describe '#targets' do
       let(:project) { create(:project) }
