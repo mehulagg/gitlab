@@ -156,7 +156,7 @@ Example response:
 
 Get details of a runner.
 
-[Maintainer access or higher](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions) is required for queries on this endpoint.
+[Maintainer access or higher](doc/user/permissions.md) is required for queries on this endpoint.
 
 ```plaintext
 GET /runners/:id
