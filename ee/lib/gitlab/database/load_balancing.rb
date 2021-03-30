@@ -155,7 +155,7 @@ module Gitlab
       def self.db_role_for_connection(connection)
         return ROLE_PRIMARY if !enable? || @proxy.blank?
 
-        proxy.load_balancer.db_role_for_connection(connection) || ROLE_PRIMARY
+        proxy.load_balancer.db_role_for_connection(connection)
       end
     end
   end
