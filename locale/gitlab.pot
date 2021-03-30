@@ -7823,6 +7823,9 @@ msgstr ""
 msgid "CompareRevisions|Select target project"
 msgstr ""
 
+msgid "CompareRevisions|Swap revisions"
+msgstr ""
+
 msgid "CompareRevisions|Tags"
 msgstr ""
 

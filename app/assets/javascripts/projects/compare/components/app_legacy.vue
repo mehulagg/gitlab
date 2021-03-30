@@ -37,9 +37,21 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      from: this.paramsFrom,
+      to: this.paramsTo,
+    };
+  },
   methods: {
     onSubmit() {
       this.$refs.form.submit();
+    },
+    onSwapRevision() {
+      [this.from, this.to] = [this.to, this.from]; // swaps 'from' and 'to'
+    },
+    onSelectRevision({ direction, revision }) {
+      this[direction] = revision; // direction is either 'from' or 'to'
     },
   },
 };
@@ -57,17 +69,22 @@ export default {
       :refs-project-path="refsProjectPath"
       revision-text="Source"
       params-name="to"
-      :params-branch="paramsTo"
+      :params-branch="to"
+      @selectRevision="onSelectRevision"
     />
     <div class="compare-ellipsis gl-display-inline" data-testid="ellipsis">...</div>
     <revision-dropdown
       :refs-project-path="refsProjectPath"
       revision-text="Target"
       params-name="from"
-      :params-branch="paramsFrom"
+      :params-branch="from"
+      @selectRevision="onSelectRevision"
     />
     <gl-button category="primary" variant="success" class="gl-ml-3" @click="onSubmit">
       {{ s__('CompareRevisions|Compare') }}
+    </gl-button>
+    <gl-button class="btn btn-default gl-button gl-ml-3" @click="onSwapRevision">
+      {{ s__('CompareRevisions|Swap revisions') }}
     </gl-button>
     <gl-button
       v-if="projectMergeRequestPath"
