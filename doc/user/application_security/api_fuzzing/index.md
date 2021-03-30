@@ -1134,9 +1134,9 @@ Profiles:
 
 ## Troubleshooting
 
-### Overriding scan session environmental variables
+### Failed to start scanner session (version header not found)
 
-The API Fuzzing engine will show a error message when it cannot establish a connection with the scanner application component. This error message could be displayed in the output log when the default values for the variable `DAST_API_API` or `FUZZAPI_API` has been accidentally changed. 
+The API Fuzzing engine will show a error message when it cannot establish a connection with the scanner application component. The error message will be seen in the job output window for the `apifuzzer_fuzz` job. A common source of this issue is changing the `FUZZAPI_API` variable from it's default.
 
 **Error message**
 
@@ -1145,7 +1145,7 @@ The API Fuzzing engine will show a error message when it cannot establish a conn
 
 **Solution** 
 
-1. Remove code that changes values for environmental variables `DAST_API_API` or `FUZZAPI_API`.
+1. It's recommended to not set the `FUZZAPI_API` variable in order to use the template default. If the job definition from the API Fuzzing CI template has been copied or replicated, check to see if this value has changed in the latest version of the CI template.
 
 <!--
 ### Target Container
