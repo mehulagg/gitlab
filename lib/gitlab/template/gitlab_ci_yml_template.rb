@@ -3,10 +3,24 @@
 module Gitlab
   module Template
     class GitlabCiYmlTemplate < BaseTemplate
+      include Gitlab::Utils::StrongMemoize
+
       BASE_EXCLUDED_PATTERNS = [%r{\.latest\.}].freeze
 
       def description
         "# This file is a template, and might need editing before it works on your project."
+      end
+
+      def metadata
+        strong_memoize(:metadata) do
+          Metadata.new(parsed_content)
+        end
+      end
+
+      def parsed_content
+        strong_memoize(:parsed_content) do
+          YAML.safe_load(content)
+        end
       end
 
       class << self

@@ -99,6 +99,36 @@ Additional points to keep in mind when authoring templates:
 | Can include other job templates with `include`       | Yes                | No            |
 | Can include other pipeline templates with `include`. | No                 | No            |
 
+### Template metadata
+
+You must define metadata into the template file. All templates are tested in CI pipelines
+to check if they are following this guideline.
+You can embed a hidden anchor `.cicd-template-metadata` for declaring the metadata, which has
+the following attributes.
+
+| Attribute                    | Required | Description                                  |
+| ------------                 | -------- | -----------                                  |
+| `name`                       | Yes      | The name of the template.                    |
+| `description`                | Yes      | The description that end-users/customers can understand the purpose of this template. |
+| `type`                       | Yes      | The [type of the template](#template-types). |
+| `group`                      | Yes      | The GitLab group is responsible to maintain the template. |
+| `ignore_guideline_violation` | No       | If there is a strong reason NOT to follow this guideline, you can set `true` to skip the tests. |
+
+Here is an example:
+
+```yaml
+.cicd-template-metadata:
+    name: Auto-DevOps
+    description: |
+      This template provides end-to-end Auto DevOps workflow.
+      For customizing the workflow or setting up kubernetes clusters,
+      please see https://docs.gitlab.com/ee/topics/autodevops/.
+    type: pipeline
+    group: group::configure
+
+# And the main content starts from here...
+```
+
 ### Syntax guidelines
 
 To make templates easier to follow, templates should all use clear syntax styles,

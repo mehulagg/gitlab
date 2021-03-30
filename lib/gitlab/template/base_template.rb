@@ -4,6 +4,7 @@ module Gitlab
   module Template
     class BaseTemplate
       attr_accessor :category
+      attr_reader :path
 
       def initialize(path, project = nil, category: nil)
         @path = path
@@ -52,8 +53,11 @@ module Gitlab
       end
 
       class << self
-        def all(project = nil)
-          if categories.any?
+        def all(project = nil, ignore_category: false)
+          if ignore_category
+            files = finder(project).all
+            files.map { |f| new(f, project) }.sort
+          elsif categories.any?
             categories.keys.flat_map { |cat| by_category(cat, project) }
           else
             by_category("", project)
