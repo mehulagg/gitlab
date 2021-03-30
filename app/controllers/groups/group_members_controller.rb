@@ -11,6 +11,8 @@ class Groups::GroupMembersController < Groups::ApplicationController
     %i[index leave request_access]
   end
 
+  helper_method :can_manage_members?
+
   # Authorize
   before_action :authorize_admin_group_member!, except: admin_not_required_endpoints
 
@@ -24,13 +26,16 @@ class Groups::GroupMembersController < Groups::ApplicationController
   def index
     @sort = params[:sort].presence || sort_value_name
 
-    @project = @group.projects.find(params[:project_id]) if params[:project_id]
+    # tracked this back to https://gitlab.com/gitlab-org/gitlab/-/commit/aaa1c94239df831d10489d686d8883b49d601f43
+    # where 'people/members' were attached to a project
+    # no longer needed as @project isn't referenced
+    # @project = @group.projects.find(params[:project_id]) if params[:project_id]
 
     @members = GroupMembersFinder
       .new(@group, current_user, params: filter_params)
       .execute(include_relations: requested_relations)
 
-    if can_manage_members
+    if can_manage_members?
       @skip_groups = @group.related_group_ids
 
       @invited_members = @members.invite
@@ -52,20 +57,18 @@ class Groups::GroupMembersController < Groups::ApplicationController
 
   private
 
-  def can_manage_members
-    can?(current_user, :admin_group_member, @group)
+  def can_manage_members?
+    strong_memoize(:can_manage_members) do
+      can?(current_user, :admin_group_member, @group)
+    end
   end
 
   def present_invited_members(invited_members)
-    present_members(invited_members
-      .page(params[:invited_members_page])
-      .per(MEMBER_PER_PAGE_LIMIT))
+    present_members(invited_members.page(params[:invited_members_page]).per(MEMBER_PER_PAGE_LIMIT), admin: false)
   end
 
   def present_group_members(members)
-    present_members(members
-      .page(params[:page])
-      .per(MEMBER_PER_PAGE_LIMIT))
+    present_members(members.page(params[:page]).per(MEMBER_PER_PAGE_LIMIT), admin: false)
   end
 
   def filter_params

@@ -3,8 +3,8 @@
 module MembersPresentation
   extend ActiveSupport::Concern
 
-  def present_members(members)
-    preload_associations(members)
+  def present_members(members, admin: true)
+    preload_associations(members, admin)
 
     Gitlab::View::Presenter::Factory.new(
       members,
@@ -13,7 +13,7 @@ module MembersPresentation
     ).fabricate!
   end
 
-  def preload_associations(members)
-    MembersPreloader.new(members).preload_all
+  def preload_associations(members, admin)
+    MembersPreloader.new(members).preload_all(admin: admin)
   end
 end

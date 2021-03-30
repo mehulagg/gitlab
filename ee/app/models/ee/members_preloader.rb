@@ -5,10 +5,12 @@ module EE
     extend ::Gitlab::Utils::Override
 
     override :preload_all
-    def preload_all
+    def preload_all(**args)
       super
 
-      ActiveRecord::Associations::Preloader.new.preload(members.map(&:user), group_saml_identities: :saml_provider)
+      if args[:admin]
+        ActiveRecord::Associations::Preloader.new.preload(members.map(&:user), group_saml_identities: :saml_provider)
+      end
     end
   end
 end
