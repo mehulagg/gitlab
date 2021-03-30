@@ -560,6 +560,9 @@ Settings.cron_jobs['manage_evidence_worker']['job_class'] = 'Releases::ManageEvi
 Settings.cron_jobs['user_status_cleanup_batch_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['user_status_cleanup_batch_worker']['cron'] ||= '* * * * *'
 Settings.cron_jobs['user_status_cleanup_batch_worker']['job_class'] = 'UserStatusCleanup::BatchWorker'
+Settings.cron_jobs['users_deactivate_dormant_users_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['users_deactivate_dormant_users_worker']['cron'] ||= '42 1 * * *'
+Settings.cron_jobs['users_deactivate_dormant_users_worker']['job_class'] = 'Users::DeactivateDormantUsersWorker'
 
 Gitlab.com do
   Settings.cron_jobs['namespaces_in_product_marketing_emails_worker'] ||= Settingslogic.new({})
