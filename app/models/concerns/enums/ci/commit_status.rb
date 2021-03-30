@@ -26,7 +26,9 @@ module Enums
           bridge_pipeline_is_child_pipeline: 1_006, # not used anymore, but cannot be deleted because of old data
           downstream_pipeline_creation_failed: 1_007,
           secrets_provider_not_found: 1_008,
-          reached_max_descendant_pipelines_depth: 1_009
+          reached_max_descendant_pipelines_depth: 1_009,
+          user_blocked: 1_010,
+          project_deleted: 1_011
         }
       end
     end

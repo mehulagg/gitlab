@@ -2,29 +2,29 @@
 
 module Ci
   class AbortPipelinesService
-    # Danger: Cancels in bulk without callbacks
+    # NOTE: Fails pipelines in bulk without running callbacks.
     # Only for pipeline abandonment scenarios (examples: project delete, user block)
-    def execute(pipelines)
-      bulk_abort!(pipelines.cancelable, status: :canceled)
+    def execute(pipelines, failure_reason)
+      pipelines.cancelable.each_batch(of: 100) do |pipeline_batch|
+        bulk_fail_for(Ci::Stage, pipeline_batch)
+        bulk_fail_for(CommitStatus, pipeline_batch, failure_reason)
 
-      ServiceResponse.success(message: 'Pipelines canceled')
+        pipeline_batch.update_all(status: :failed, failure_reason: failure_reason, finished_at: Time.current)
+      end
+
+      ServiceResponse.success(message: 'Pipelines stopped')
     end
 
     private
 
-    def bulk_abort!(pipelines, status:)
-      pipelines.each_batch(of: 100) do |pipeline_batch|
-        update_status_for(Ci::Stage, pipeline_batch, status)
-        update_status_for(CommitStatus, pipeline_batch, status)
-        pipeline_batch.update_all(status: status, finished_at: Time.current)
-      end
-    end
+    def bulk_fail_for(klass, pipelines, failure_reason = nil)
+      attributes = { status: :failed }
+      attributes[:failure_reason] = failure_reason if failure_reason
 
-    def update_status_for(klass, pipelines, status)
       klass.in_pipelines(pipelines)
         .cancelable
         .in_batches(of: 150) # rubocop:disable Cop/InBatches
-        .update_all(status: status)
+        .update_all(attributes)
     end
   end
 end
