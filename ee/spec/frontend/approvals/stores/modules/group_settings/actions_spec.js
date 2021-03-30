@@ -74,6 +74,7 @@ describe('EE approvals group settings module actions', () => {
       state = {
         settings: {
           preventAuthorApproval: false,
+          preventMrApprovalRuleEdit: false,
           requireUserPassword: false,
         },
       };
@@ -81,7 +82,11 @@ describe('EE approvals group settings module actions', () => {
 
     describe('on success', () => {
       it('dispatches the request and updates payload', () => {
-        const data = { allow_author_approval: true, require_password_to_approve: true };
+        const data = {
+          allow_author_approval: true,
+          preventMrApprovalRuleEdit: true,
+          require_password_to_approve: true,
+        };
         mock.onPut(approvalSettingsPath).replyOnce(httpStatus.OK, data);
 
         return testAction(
