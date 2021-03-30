@@ -12,7 +12,11 @@ module Gitlab
             end
 
             pipeline.add_error_message(message)
-            pipeline.drop!(drop_reason) if drop_reason && persist_pipeline?
+
+            if drop_reason && persist_pipeline?
+              pipeline.ensure_project_iid!
+              pipeline.drop!(drop_reason)
+            end
 
             # TODO: consider not to rely on AR errors directly as they can be
             # polluted with other unrelated errors (e.g. state machine)
