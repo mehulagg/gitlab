@@ -13,7 +13,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       {
         'type' => 'source',
         'items' => [
-          'fingerprints' => [
+          'signatures' => [
             { 'algorithm' => 'hash', 'value' => 'hash_value' },
             { 'algorithm' => 'location', 'value' => 'location_value' },
             { 'algorithm' => 'scope_offset', 'value' => 'scope_offset_value' }
@@ -202,10 +202,10 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     describe 'parsing tracking' do
       context 'with valid tracking information' do
-        it 'creates fingerprints for each algorithm' do
+        it 'creates trackings for each algorithm' do
           finding = report.findings.first
-          expect(finding.fingerprints.size).to eq(3)
-          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location', 'scope_offset'])
+          expect(finding.trackings.size).to eq(3)
+          expect(finding.trackings.map(&:algorithm_type).to_set).to eq(Set['hash', 'location', 'scope_offset'])
         end
       end
 
@@ -214,7 +214,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
           {
             'type' => 'source',
             'items' => [
-              'fingerprints' => [
+              'signatures' => [
                 { 'algorithm' => 'hash', 'value' => 'hash_value' },
                 { 'algorithm' => 'location', 'value' => 'location_value' },
                 { 'algorithm' => 'INVALID', 'value' => 'scope_offset_value' }
@@ -225,8 +225,8 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
         it 'ignores invalid algorithm types' do
           finding = report.findings.first
-          expect(finding.fingerprints.size).to eq(2)
-          expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
+          expect(finding.trackings.size).to eq(2)
+          expect(finding.trackings.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
         end
       end
     end

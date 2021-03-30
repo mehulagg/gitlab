@@ -179,35 +179,35 @@ module Security
       to_update = {}
       to_create = []
 
-      poro_fingerprints = finding.fingerprints.index_by(&:algorithm_type)
+      poro_fingerprints = finding.trackings.index_by(&:algorithm_type)
 
-      vulnerability_finding.fingerprints.each do |fingerprint|
+      vulnerability_finding.trackings.each do |tracking|
         # NOTE: index_by takes the last entry if there are duplicates of the same algorithm, which should never occur.
-        poro_fingerprint = poro_fingerprints[fingerprint.algorithm_type]
+        poro_fingerprint = poro_fingerprints[tracking.algorithm_type]
 
-        # We're no longer generating these types of fingerprints. Since
+        # We're no longer generating these types of trackings. Since
         # we're updating the persisted vulnerability, no need to do anything
-        # with these fingerprints now. We will track growth with
+        # with these trackings now. We will track growth with
         # https://gitlab.com/gitlab-org/gitlab/-/issues/322186
         next if poro_fingerprint.nil?
 
-        poro_fingerprints.delete(fingerprint.algorithm_type)
-        to_update[fingerprint.id] = poro_fingerprint.to_h
+        poro_fingerprints.delete(tracking.algorithm_type)
+        to_update[tracking.id] = poro_fingerprint.to_h
       end
 
-      # any remaining poro fingerprints left are new
+      # any remaining poro trackings left are new
       poro_fingerprints.values.each do |poro_fingerprint|
         attributes = poro_fingerprint.to_h.merge(finding_id: vulnerability_finding.id)
-        to_create << ::Vulnerabilities::FindingFingerprint.new(attributes: attributes, created_at: Time.zone.now, updated_at: Time.zone.now)
+        to_create << ::Vulnerabilities::FindingTracking.new(attributes: attributes, created_at: Time.zone.now, updated_at: Time.zone.now)
       end
 
-      ::Vulnerabilities::FindingFingerprint.transaction do
+      ::Vulnerabilities::FindingTracking.transaction do
         if to_update.count > 0
-          ::Vulnerabilities::FindingFingerprint.update(to_update.keys, to_update.values)
+          ::Vulnerabilities::FindingTracking.update(to_update.keys, to_update.values)
         end
 
         if to_create.count > 0
-          ::Vulnerabilities::FindingFingerprint.bulk_insert!(to_create)
+          ::Vulnerabilities::FindingTracking.bulk_insert!(to_create)
         end
       end
     end

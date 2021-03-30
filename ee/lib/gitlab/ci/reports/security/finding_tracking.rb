@@ -4,27 +4,27 @@ module Gitlab
   module Ci
     module Reports
       module Security
-        class FindingFingerprint
-          attr_accessor :algorithm_type, :fingerprint_value
+        class FindingTracking
+          attr_accessor :algorithm_type, :tracking_value
 
           def initialize(params = {})
             @algorithm_type = params.dig(:algorithm_type)
-            @fingerprint_value = params.dig(:fingerprint_value)
+            @tracking_value = params.dig(:tracking_value)
           end
 
-          def fingerprint_sha256
-            Digest::SHA1.digest(fingerprint_value)
+          def tracking_sha
+            Digest::SHA1.digest(tracking_value)
           end
 
           def to_h
             {
               algorithm_type: algorithm_type,
-              fingerprint_sha256: fingerprint_sha256
+              tracking_sha: tracking_sha
             }
           end
 
           def valid?
-            ::Vulnerabilities::FindingFingerprint.algorithm_types.key?(algorithm_type)
+            ::Vulnerabilities::FindingTracking.algorithm_types.key?(algorithm_type)
           end
         end
       end

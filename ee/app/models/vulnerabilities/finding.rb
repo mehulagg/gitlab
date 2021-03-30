@@ -34,7 +34,7 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
-    has_many :fingerprints, class_name: 'Vulnerabilities::FindingFingerprint', inverse_of: :finding
+    has_many :trackings, class_name: 'Vulnerabilities::FindingTracking', inverse_of: :finding
 
     serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 

@@ -80,7 +80,7 @@ module Gitlab
             links = create_links(data['links'])
             location = create_location(data['location'] || {})
             remediations = create_remediations(data['remediations'])
-            fingerprints = create_fingerprints(tracking_data(data))
+            trackings = create_trackings(tracking_data(data))
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
@@ -99,30 +99,30 @@ module Gitlab
                 raw_metadata: data.to_json,
                 metadata_version: report_version,
                 details: data['details'] || {},
-                fingerprints: fingerprints))
+                trackings: trackings))
           end
 
-          def create_fingerprints(tracking)
-            return [] if tracking.nil? || tracking['items'].nil?
+          def create_trackings(_tracking_data)
+            return [] if _tracking_data.nil? || _tracking_data['items'].nil?
 
-            fingerprint_algorithms = Hash.new { |hash, key| hash[key] = [] }
-            tracking['items'].each do |item|
-              next unless item.key?('fingerprints')
+            tracking_algorithms = Hash.new { |hash, key| hash[key] = [] }
+            _tracking_data['items'].each do |item|
+              next unless item.key?('signatures')
 
-              item['fingerprints'].each do |fingerprint|
-                alg = fingerprint['algorithm']
-                fingerprint_algorithms[alg] << fingerprint['value']
+              item['signatures'].each do |signature|
+                alg = signature['algorithm']
+                tracking_algorithms[alg] << signature['value']
               end
             end
 
-            fingerprint_algorithms.map do |algorithm, values|
+            tracking_algorithms.map do |algorithm, values|
               value = values.join('|')
               begin
-                fingerprint = ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
+                tracking = ::Gitlab::Ci::Reports::Security::FindingTracking.new(
                   algorithm_type: algorithm,
-                  fingerprint_value: value
+                  tracking_value: value
                 )
-                fingerprint.valid? ? fingerprint : nil
+                tracking.valid? ? tracking : nil
               rescue ArgumentError => e
                 Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
                 nil
