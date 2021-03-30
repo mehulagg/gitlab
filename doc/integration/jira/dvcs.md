@@ -85,8 +85,8 @@ After you configure the integration, read more about [how to test and use it](in
 
 ## Refresh data imported to Jira
 
-Jira imports the commits and branches every 60 minutes for your projects. Real-time
-integration is planned, and you can refresh the data manually from the Jira interface:
+Jira imports the commits and branches every 60 minutes for your projects. You
+can refresh the data manually from the Jira interface:
 
 1. Sign in to your Jira instance as the user you configured the integration with.
 1. Go to **Settings (gear) > Applications**.
