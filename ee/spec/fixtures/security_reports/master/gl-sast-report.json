@@ -1,7 +1,8 @@
 {
-  "version": "1.2",
+  "version": "14.0.0",
   "vulnerabilities": [
     {
+      "id": "111f4ed30256ee990e5e3094efe8c97a635b90b87c55fee522cd8baad08eda1c",
       "category": "sast",
       "message": "Probable insecure usage of temp file/directory.",
       "cve": "python/hardcoded/hardcoded-tmp.py:52865813c884a507be1f152d654245af34aba8a391626d01f1ab6d3f52ec8779:B108",
@@ -24,11 +25,6 @@
           "url": "https://docs.openstack.org/bandit/latest/plugins/b108_hardcoded_tmp_directory.html"
         }
       ],
-      "priority": "Medium",
-      "file": "python/hardcoded/hardcoded-tmp.py",
-      "line": 1,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b108_hardcoded_tmp_directory.html",
-      "tool": "bandit",
       "tracking": {
         "type": "source",
         "items": [
@@ -37,78 +33,21 @@
             "start_line": 1,
             "end_line": 1,
             "fingerprints": [
-              { "algorithm": "hash", "value": "HASHVALUE" },
-              { "algorithm": "scope_offset", "value": "python/hardcoded/hardcoded-tmp.py:ClassA:method_b:2" }
+              {
+                "algorithm": "hash",
+                "value": "HASHVALUE"
+              },
+              {
+                "algorithm": "scope_offset",
+                "value": "python/hardcoded/hardcoded-tmp.py:ClassA[0]:method_b[0]:2"
+              }
             ]
           }
         ]
       }
     },
     {
-      "category": "sast",
-      "name": "Predictable pseudorandom number generator",
-      "message": "Predictable pseudorandom number generator",
-      "cve": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy:47:PREDICTABLE_RANDOM",
-      "severity": "Medium",
-      "confidence": "Medium",
-      "scanner": {
-        "id": "find_sec_bugs",
-        "name": "Find Security Bugs"
-      },
-      "location": {
-        "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-        "start_line": 47,
-        "end_line": 47,
-        "class": "com.gitlab.security_products.tests.App",
-        "method": "generateSecretToken2"
-      },
-      "identifiers": [
-        {
-          "type": "find_sec_bugs_type",
-          "name": "Find Security Bugs-PREDICTABLE_RANDOM",
-          "value": "PREDICTABLE_RANDOM",
-          "url": "https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM"
-        }
-      ],
-      "priority": "Medium",
-      "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-      "line": 47,
-      "url": "https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM",
-      "tool": "find_sec_bugs"
-    },
-    {
-      "category": "sast",
-      "name": "Predictable pseudorandom number generator",
-      "message": "Predictable pseudorandom number generator",
-      "cve": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy:41:PREDICTABLE_RANDOM",
-      "severity": "Medium",
-      "confidence": "Medium",
-      "scanner": {
-        "id": "find_sec_bugs",
-        "name": "Find Security Bugs"
-      },
-      "location": {
-        "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-        "start_line": 41,
-        "end_line": 41,
-        "class": "com.gitlab.security_products.tests.App",
-        "method": "generateSecretToken1"
-      },
-      "identifiers": [
-        {
-          "type": "find_sec_bugs_type",
-          "name": "Find Security Bugs-PREDICTABLE_RANDOM",
-          "value": "PREDICTABLE_RANDOM",
-          "url": "https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM"
-        }
-      ],
-      "priority": "Medium",
-      "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-      "line": 41,
-      "url": "https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM",
-      "tool": "find_sec_bugs"
-    },
-    {
+      "id": "10407f230708958f49aac4af3ff42ef952c175534257f4d2370222e1c4f7176d",
       "category": "sast",
       "message": "Use of insecure MD2, MD4, or MD5 hash function.",
       "cve": "python/imports/imports-aliases.py:cb203b465dffb0cb3a8e8bd8910b84b93b0a5995a938e4b903dbb0cd6ffa1254:B303",
@@ -129,13 +68,10 @@
           "name": "Bandit Test ID B303",
           "value": "B303"
         }
-      ],
-      "priority": "Medium",
-      "file": "python/imports/imports-aliases.py",
-      "line": 11,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "22f5567f5febf9f41ef2ffdab34737c69d56535c2642d80b959e1d905a511938",
       "category": "sast",
       "message": "Use of insecure MD2, MD4, or MD5 hash function.",
       "cve": "python/imports/imports-aliases.py:a7173c43ae66bd07466632d819d450e0071e02dbf782763640d1092981f9631b:B303",
@@ -156,13 +92,10 @@
           "name": "Bandit Test ID B303",
           "value": "B303"
         }
-      ],
-      "priority": "Medium",
-      "file": "python/imports/imports-aliases.py",
-      "line": 12,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "70145c073c82560245dc83d9791883a9c34713291daa431d17495ceb5842a7e8",
       "category": "sast",
       "message": "Use of insecure MD2, MD4, or MD5 hash function.",
       "cve": "python/imports/imports-aliases.py:017017b77deb0b8369b6065947833eeea752a92ec8a700db590fece3e934cf0d:B303",
@@ -183,13 +116,10 @@
           "name": "Bandit Test ID B303",
           "value": "B303"
         }
-      ],
-      "priority": "Medium",
-      "file": "python/imports/imports-aliases.py",
-      "line": 13,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "dc87c783fc78ca9d6cbd298110de9d7ae53b6e9574adde9850f166bbb6602eac",
       "category": "sast",
       "message": "Use of insecure MD2, MD4, or MD5 hash function.",
       "cve": "python/imports/imports-aliases.py:45fc8c53aea7b84f06bc4e590cc667678d6073c4c8a1d471177ca2146fb22db2:B303",
@@ -210,13 +140,10 @@
           "name": "Bandit Test ID B303",
           "value": "B303"
         }
-      ],
-      "priority": "Medium",
-      "file": "python/imports/imports-aliases.py",
-      "line": 14,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "f9196470e6d11153ea53233624c9c30aab8a169ca0c83e6056c3ae6513863979",
       "category": "sast",
       "message": "Pickle library appears to be in use, possible security issue.",
       "cve": "python/imports/imports-aliases.py:5f200d47291e7bbd8352db23019b85453ca048dd98ea0c291260fa7d009963a4:B301",
@@ -237,77 +164,10 @@
           "name": "Bandit Test ID B301",
           "value": "B301"
         }
-      ],
-      "priority": "Medium",
-      "file": "python/imports/imports-aliases.py",
-      "line": 15,
-      "tool": "bandit"
+      ]
     },
     {
-      "category": "sast",
-      "name": "ECB mode is insecure",
-      "message": "ECB mode is insecure",
-      "cve": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy:29:ECB_MODE",
-      "severity": "Medium",
-      "confidence": "High",
-      "scanner": {
-        "id": "find_sec_bugs",
-        "name": "Find Security Bugs"
-      },
-      "location": {
-        "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-        "start_line": 29,
-        "end_line": 29,
-        "class": "com.gitlab.security_products.tests.App",
-        "method": "insecureCypher"
-      },
-      "identifiers": [
-        {
-          "type": "find_sec_bugs_type",
-          "name": "Find Security Bugs-ECB_MODE",
-          "value": "ECB_MODE",
-          "url": "https://find-sec-bugs.github.io/bugs.htm#ECB_MODE"
-        }
-      ],
-      "priority": "Medium",
-      "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-      "line": 29,
-      "url": "https://find-sec-bugs.github.io/bugs.htm#ECB_MODE",
-      "tool": "find_sec_bugs"
-    },
-    {
-      "category": "sast",
-      "name": "Cipher with no integrity",
-      "message": "Cipher with no integrity",
-      "cve": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy:29:CIPHER_INTEGRITY",
-      "severity": "Medium",
-      "confidence": "High",
-      "scanner": {
-        "id": "find_sec_bugs",
-        "name": "Find Security Bugs"
-      },
-      "location": {
-        "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-        "start_line": 29,
-        "end_line": 29,
-        "class": "com.gitlab.security_products.tests.App",
-        "method": "insecureCypher"
-      },
-      "identifiers": [
-        {
-          "type": "find_sec_bugs_type",
-          "name": "Find Security Bugs-CIPHER_INTEGRITY",
-          "value": "CIPHER_INTEGRITY",
-          "url": "https://find-sec-bugs.github.io/bugs.htm#CIPHER_INTEGRITY"
-        }
-      ],
-      "priority": "Medium",
-      "file": "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
-      "line": 29,
-      "url": "https://find-sec-bugs.github.io/bugs.htm#CIPHER_INTEGRITY",
-      "tool": "find_sec_bugs"
-    },
-    {
+      "id": "3967afac9f41a8a34b7762674da653e05fdfd066592f3a66c2ff0139541c7568",
       "category": "sast",
       "message": "Probable insecure usage of temp file/directory.",
       "cve": "python/hardcoded/hardcoded-tmp.py:63dd4d626855555b816985d82c4614a790462a0a3ada89dc58eb97f9c50f3077:B108",
@@ -329,14 +189,10 @@
           "value": "B108",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b108_hardcoded_tmp_directory.html"
         }
-      ],
-      "priority": "Medium",
-      "file": "python/hardcoded/hardcoded-tmp.py",
-      "line": 14,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b108_hardcoded_tmp_directory.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "24684d882c7d346ad92fddc5b43cb2c15a7586cb0df3bc005c3731720f6ba906",
       "category": "sast",
       "message": "Probable insecure usage of temp file/directory.",
       "cve": "python/hardcoded/hardcoded-tmp.py:4ad6d4c40a8c263fc265f3384724014e0a4f8dd6200af83e51ff120420038031:B108",
@@ -358,14 +214,10 @@
           "value": "B108",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b108_hardcoded_tmp_directory.html"
         }
-      ],
-      "priority": "Medium",
-      "file": "python/hardcoded/hardcoded-tmp.py",
-      "line": 10,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b108_hardcoded_tmp_directory.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "d15a96fa330752d917a5726ac4dc64906b3470f95f275cc1bd4422fdbd9b7012",
       "category": "sast",
       "message": "Consider possible security implications associated with Popen module.",
       "cve": "python/imports/imports-aliases.py:2c3e1fa1e54c3c6646e8bcfaee2518153c6799b77587ff8d9a7b0631f6d34785:B404",
@@ -386,13 +238,10 @@
           "name": "Bandit Test ID B404",
           "value": "B404"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-aliases.py",
-      "line": 1,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "7dcd72c173b5e86337d72c3d0cf6e6bb9882a386c06450ace0c57812b7125953",
       "category": "sast",
       "message": "Consider possible security implications associated with pickle module.",
       "cve": "python/imports/imports.py:af58d07f6ad519ef5287fcae65bf1a6999448a1a3a8bc1ac2a11daa80d0b96bf:B403",
@@ -413,13 +262,10 @@
           "name": "Bandit Test ID B403",
           "value": "B403"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports.py",
-      "line": 2,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "aba971a65de1e23b2965cb5d3d30dd8d193725dab970aa63d9ab84775ed28465",
       "category": "sast",
       "message": "Consider possible security implications associated with subprocess module.",
       "cve": "python/imports/imports.py:8de9bc98029d212db530785a5f6780cfa663548746ff228ab8fa96c5bb82f089:B404",
@@ -440,13 +286,10 @@
           "name": "Bandit Test ID B404",
           "value": "B404"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports.py",
-      "line": 4,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "69f9c6d5711516ccf695025c9525f5f0afe77487c7b424adef28787e281bcdff",
       "category": "sast",
       "message": "Possible hardcoded password: 'blerg'",
       "cve": "python/hardcoded/hardcoded-passwords.py:97c30f1d76d2a88913e3ce9ae74087874d740f87de8af697a9c455f01119f633:B106",
@@ -468,14 +311,10 @@
           "value": "B106",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b106_hardcoded_password_funcarg.html"
         }
-      ],
-      "priority": "Low",
-      "file": "python/hardcoded/hardcoded-passwords.py",
-      "line": 22,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b106_hardcoded_password_funcarg.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "e5f8cad09439e9b609a905da1b7af5522192d1ee3dc9fb13d7f9f848790e53f0",
       "category": "sast",
       "message": "Possible hardcoded password: 'root'",
       "cve": "python/hardcoded/hardcoded-passwords.py:7431c73a0bc16d94ece2a2e75ef38f302574d42c37ac0c3c38ad0b3bf8a59f10:B105",
@@ -497,14 +336,10 @@
           "value": "B105",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html"
         }
-      ],
-      "priority": "Low",
-      "file": "python/hardcoded/hardcoded-passwords.py",
-      "line": 5,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "1496f55cf250061fff3f43cd24dea9ceacc560dd2e504e44803f26a6ddd9287f",
       "category": "sast",
       "message": "Possible hardcoded password: ''",
       "cve": "python/hardcoded/hardcoded-passwords.py:d2d1857c27caedd49c57bfbcdc23afcc92bd66a22701fcdc632869aab4ca73ee:B105",
@@ -526,14 +361,10 @@
           "value": "B105",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html"
         }
-      ],
-      "priority": "Low",
-      "file": "python/hardcoded/hardcoded-passwords.py",
-      "line": 9,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "142576266547c74fac19c6818d948d9b76f412a28498e07fd8bcd175d654af46",
       "category": "sast",
       "message": "Possible hardcoded password: 'ajklawejrkl42348swfgkg'",
       "cve": "python/hardcoded/hardcoded-passwords.py:fb3866215a61393a5c9c32a3b60e2058171a23219c353f722cbd3567acab21d2:B105",
@@ -555,14 +386,10 @@
           "value": "B105",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html"
         }
-      ],
-      "priority": "Low",
-      "file": "python/hardcoded/hardcoded-passwords.py",
-      "line": 13,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "b1f34a8ca12475f96925865540448f74c98522686ab14b440a6c7a022f5e432b",
       "category": "sast",
       "message": "Possible hardcoded password: 'blerg'",
       "cve": "python/hardcoded/hardcoded-passwords.py:63c62a8b7e1e5224439bd26b28030585ac48741e28ca64561a6071080c560a5f:B105",
@@ -584,14 +411,10 @@
           "value": "B105",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html"
         }
-      ],
-      "priority": "Low",
-      "file": "python/hardcoded/hardcoded-passwords.py",
-      "line": 23,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "b151e022776d687980085fbc2be96acea26cd8763782a4c0f2e6ea3befe8d6ef",
       "category": "sast",
       "message": "Possible hardcoded password: 'blerg'",
       "cve": "python/hardcoded/hardcoded-passwords.py:4311b06d08df8fa58229b341c531da8e1a31ec4520597bdff920cd5c098d86f9:B105",
@@ -613,14 +436,10 @@
           "value": "B105",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html"
         }
-      ],
-      "priority": "Low",
-      "file": "python/hardcoded/hardcoded-passwords.py",
-      "line": 24,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b105_hardcoded_password_string.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "c907765b8555daafd7d8730a33f28a1ce3156097bb05b16c271dcd80eee5447a",
       "category": "sast",
       "message": "Consider possible security implications associated with subprocess module.",
       "cve": "python/imports/imports-function.py:5858400c2f39047787702de44d03361ef8d954c9d14bd54ee1c2bef9e6a7df93:B404",
@@ -641,13 +460,10 @@
           "name": "Bandit Test ID B404",
           "value": "B404"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-function.py",
-      "line": 4,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "a5731480192d0cae159cbc36a2cf4ace36e469eaa03fd07fbadd613c5f878ffd",
       "category": "sast",
       "message": "Consider possible security implications associated with pickle module.",
       "cve": "python/imports/imports-function.py:dbda3cf4190279d30e0aad7dd137eca11272b0b225e8af4e8bf39682da67d956:B403",
@@ -668,13 +484,10 @@
           "name": "Bandit Test ID B403",
           "value": "B403"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-function.py",
-      "line": 2,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "969ae4d1d168c1b3f9545ee6af6088dfde40f3eb2f9fca04e2836c1654c01f64",
       "category": "sast",
       "message": "Consider possible security implications associated with Popen module.",
       "cve": "python/imports/imports-from.py:eb8a0db9cd1a8c1ab39a77e6025021b1261cc2a0b026b2f4a11fca4e0636d8dd:B404",
@@ -695,13 +508,10 @@
           "name": "Bandit Test ID B404",
           "value": "B404"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-from.py",
-      "line": 7,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "c32de74c8a47bddbe1223db1dda366bad8e3c01b65c6cac6f1b2a809ae7bb9d5",
       "category": "sast",
       "message": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
       "cve": "python/imports/imports-aliases.py:f99f9721e27537fbcb6699a4cf39c6740d6234d2c6f06cfc2d9ea977313c483d:B602",
@@ -723,14 +533,10 @@
           "value": "B602",
           "url": "https://docs.openstack.org/bandit/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-aliases.py",
-      "line": 9,
-      "url": "https://docs.openstack.org/bandit/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html",
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "ddaa8acc7a4b566c870855270ae8b00e829a94e12497507a95e85f8da773fcee",
       "category": "sast",
       "message": "Consider possible security implications associated with subprocess module.",
       "cve": "python/imports/imports-from.py:332a12ab1146698f614a905ce6a6a5401497a12281aef200e80522711c69dcf4:B404",
@@ -751,13 +557,10 @@
           "name": "Bandit Test ID B404",
           "value": "B404"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-from.py",
-      "line": 6,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "c85460e9f684b4601f6740702551405708f2d4292be07edcf9789af08ec688cb",
       "category": "sast",
       "message": "Consider possible security implications associated with Popen module.",
       "cve": "python/imports/imports-from.py:0a48de4a3d5348853a03666cb574697e3982998355e7a095a798bd02a5947276:B404",
@@ -778,13 +581,10 @@
           "name": "Bandit Test ID B404",
           "value": "B404"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-from.py",
-      "line": 1,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "c0179ac862648209abe577a0abc34d202ecbe4a30238029ecb5addc184c3bd25",
       "category": "sast",
       "message": "Consider possible security implications associated with pickle module.",
       "cve": "python/imports/imports-aliases.py:51b71661dff994bde3529639a727a678c8f5c4c96f00d300913f6d5be1bbdf26:B403",
@@ -805,13 +605,10 @@
           "name": "Bandit Test ID B403",
           "value": "B403"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-aliases.py",
-      "line": 7,
-      "tool": "bandit"
+      ]
     },
     {
+      "id": "4e858f4b631157efece875857f6d287842281798c7e26d1e8039cf3ac9973dae",
       "category": "sast",
       "message": "Consider possible security implications associated with loads module.",
       "cve": "python/imports/imports-aliases.py:6ff02aeb3149c01ab68484d794a94f58d5d3e3bb0d58557ef4153644ea68ea54:B403",
@@ -832,162 +629,19 @@
           "name": "Bandit Test ID B403",
           "value": "B403"
         }
-      ],
-      "priority": "Low",
-      "file": "python/imports/imports-aliases.py",
-      "line": 6,
-      "tool": "bandit"
-    },
-    {
-      "category": "sast",
-      "message": "Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)",
-      "cve": "c/subdir/utils.c:b466873101951fe96e1332f6728eb7010acbbd5dfc3b65d7d53571d091a06d9e:CWE-119!/CWE-120",
-      "confidence": "Low",
-      "solution": "Perform bounds checking, use functions that limit length, or ensure that the size is larger than the maximum possible length",
-      "scanner": {
-        "id": "flawfinder",
-        "name": "Flawfinder"
-      },
-      "location": {
-        "file": "c/subdir/utils.c",
-        "start_line": 4
-      },
-      "identifiers": [
-        {
-          "type": "flawfinder_func_name",
-          "name": "Flawfinder - char",
-          "value": "char"
-        },
-        {
-          "type": "cwe",
-          "name": "CWE-119",
-          "value": "119",
-          "url": "https://cwe.mitre.org/data/definitions/119.html"
-        },
-        {
-          "type": "cwe",
-          "name": "CWE-120",
-          "value": "120",
-          "url": "https://cwe.mitre.org/data/definitions/120.html"
-        }
-      ],
-      "file": "c/subdir/utils.c",
-      "line": 4,
-      "url": "https://cwe.mitre.org/data/definitions/119.html",
-      "tool": "flawfinder"
-    },
-    {
-      "category": "sast",
-      "message": "Check when opening files - can an attacker redirect it (via symlinks), force the opening of special file type (e.g., device files), move things around to create a race condition, control its ancestors, or change its contents? (CWE-362)",
-      "cve": "c/subdir/utils.c:bab681140fcc8fc3085b6bba74081b44ea145c1c98b5e70cf19ace2417d30770:CWE-362",
-      "confidence": "Low",
-      "scanner": {
-        "id": "flawfinder",
-        "name": "Flawfinder"
-      },
-      "location": {
-        "file": "c/subdir/utils.c",
-        "start_line": 8
-      },
-      "identifiers": [
-        {
-          "type": "flawfinder_func_name",
-          "name": "Flawfinder - fopen",
-          "value": "fopen"
-        },
-        {
-          "type": "cwe",
-          "name": "CWE-362",
-          "value": "362",
-          "url": "https://cwe.mitre.org/data/definitions/362.html"
-        }
-      ],
-      "file": "c/subdir/utils.c",
-      "line": 8,
-      "url": "https://cwe.mitre.org/data/definitions/362.html",
-      "tool": "flawfinder"
-    },
-    {
-      "category": "sast",
-      "message": "Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)",
-      "cve": "cplusplus/src/hello.cpp:c8c6dd0afdae6814194cf0930b719f757ab7b379cf8f261e7f4f9f2f323a818a:CWE-119!/CWE-120",
-      "confidence": "Low",
-      "solution": "Perform bounds checking, use functions that limit length, or ensure that the size is larger than the maximum possible length",
-      "scanner": {
-        "id": "flawfinder",
-        "name": "Flawfinder"
-      },
-      "location": {
-        "file": "cplusplus/src/hello.cpp",
-        "start_line": 6
-      },
-      "identifiers": [
-        {
-          "type": "flawfinder_func_name",
-          "name": "Flawfinder - char",
-          "value": "char"
-        },
-        {
-          "type": "cwe",
-          "name": "CWE-119",
-          "value": "119",
-          "url": "https://cwe.mitre.org/data/definitions/119.html"
-        },
-        {
-          "type": "cwe",
-          "name": "CWE-120",
-          "value": "120",
-          "url": "https://cwe.mitre.org/data/definitions/120.html"
-        }
-      ],
-      "file": "cplusplus/src/hello.cpp",
-      "line": 6,
-      "url": "https://cwe.mitre.org/data/definitions/119.html",
-      "tool": "flawfinder"
-    },
-    {
-      "category": "sast",
-      "message": "Does not check for buffer overflows when copying to destination [MS-banned] (CWE-120)",
-      "cve": "cplusplus/src/hello.cpp:331c04062c4fe0c7c486f66f59e82ad146ab33cdd76ae757ca41f392d568cbd0:CWE-120",
-      "confidence": "Low",
-      "solution": "Consider using snprintf, strcpy_s, or strlcpy (warning: strncpy easily misused)",
-      "scanner": {
-        "id": "flawfinder",
-        "name": "Flawfinder"
-      },
-      "location": {
-        "file": "cplusplus/src/hello.cpp",
-        "start_line": 7
-      },
-      "identifiers": [
-        {
-          "type": "flawfinder_func_name",
-          "name": "Flawfinder - strcpy",
-          "value": "strcpy"
-        },
-        {
-          "type": "cwe",
-          "name": "CWE-120",
-          "value": "120",
-          "url": "https://cwe.mitre.org/data/definitions/120.html"
-        }
-      ],
-      "file": "cplusplus/src/hello.cpp",
-      "line": 7,
-      "url": "https://cwe.mitre.org/data/definitions/120.html",
-      "tool": "flawfinder"
+      ]
     }
   ],
   "remediations": [],
   "scan": {
     "scanner": {
-      "id": "gosec",
-      "name": "Gosec",
-      "url": "https://github.com/securego/gosec",
+      "id": "bandit",
+      "name": "Bandit",
+      "url": "https://github.com/PyCQA/bandit",
       "vendor": {
         "name": "GitLab"
       },
-      "version": "2.3.0"
+      "version": "1.7.0"
     },
     "type": "sast",
     "status": "success",
