@@ -1,6 +1,7 @@
 <script>
 import { GlIcon, GlEmptyState, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import Cookies from 'js-cookie';
+import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
 import banner from './banner.vue';
@@ -29,6 +30,7 @@ export default {
     'stage-staging-component': stageStagingComponent,
     'stage-production-component': stageComponent,
     'stage-nav-item': stageNavItem,
+    PathNavigation,
   },
   props: {
     noDataSvgPath: {
@@ -57,11 +59,156 @@ export default {
       hasError: true,
       startDate: 30,
       isOverviewDialogDismissed: Cookies.get(OVERVIEW_DIALOG_COOKIE),
+      pathNavigationData: [
+        {
+          metric: null,
+          selected: true,
+          icon: 'home',
+          id: 'overview',
+          slug: 'overview',
+          title: 'Overview',
+          isUserAllowed: true,
+        },
+        {
+          metric: null,
+          selected: false,
+          icon: null,
+          hidden: false,
+          legend: '',
+          description: 'Time before an issue starts implementation',
+          startEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:71" dir="auto">Issue first associated with a milestone or issue first added to a board</p>',
+          endEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:33" dir="auto">Issue first mentioned in a commit</p>',
+          id: 91,
+          title: 'Plan',
+          custom: false,
+          slug: 91,
+          name: 'Plan',
+          isUserAllowed: true,
+        },
+        {
+          metric: null,
+          selected: false,
+          icon: null,
+          hidden: false,
+          legend: '',
+          description: 'From merge request merge until deploy to production',
+          startEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:20" dir="auto">Merge request merged</p>',
+          endEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:42" dir="auto">Merge request first deployed to production</p>',
+          id: 95,
+          title: 'Staging',
+          custom: false,
+          slug: 95,
+          name: 'Staging',
+          isUserAllowed: true,
+        },
+        {
+          metric: null,
+          selected: false,
+          icon: null,
+          hidden: false,
+          legend: '',
+          description: '',
+          startEventIdentifier: 'merge_request_created',
+          endEventIdentifier: 'merge_request_last_build_finished',
+          startEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:21" dir="auto">Merge request created</p>',
+          endEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:36" dir="auto">Merge request last build finish time</p>',
+          id: 97,
+          title: 'Another new stage',
+          custom: true,
+          slug: 97,
+          name: 'Another new stage',
+          isUserAllowed: true,
+        },
+        {
+          metric: null,
+          selected: false,
+          icon: null,
+          hidden: false,
+          legend: '',
+          description: '',
+          startEventIdentifier: 'issue_first_mentioned_in_commit',
+          endEventIdentifier: 'issue_label_added',
+          endEventLabel: {
+            id: 118,
+            title: 'Phount',
+            color: '#39dc2b',
+            description: null,
+            groupId: 142,
+            projectId: null,
+            template: false,
+            textColor: '#FFFFFF',
+            createdAt: '2020-09-09T15:12:51.463Z',
+            updatedAt: '2020-09-09T15:12:51.463Z',
+          },
+          startEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:33" dir="auto">Issue first mentioned in a commit</p>',
+          endEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:33" dir="auto"><span class="gl-label gl-label-sm"><a href="" data-original="~118" data-link="false" data-link-reference="false" data-group="142" data-label="118" data-reference-type="label" data-container="body" data-placement="top" title="" class="gfm gfm-label has-tooltip gl-link gl-label-link"><span class="gl-label-text gl-label-text-light" data-container="body" data-html="true" style="background-color: #39dc2b">Phount</span></a></span> label was added to the issue</p>',
+          id: 96,
+          title: 'new stage 1',
+          custom: true,
+          slug: 96,
+          name: 'new stage 1',
+          isUserAllowed: true,
+        },
+        {
+          metric: null,
+          selected: false,
+          icon: null,
+          hidden: false,
+          legend: '',
+          description: '',
+          startEventIdentifier: 'issue_first_added_to_board',
+          endEventIdentifier: 'issue_first_mentioned_in_commit',
+          startEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:28" dir="auto">Issue first added to a board</p>',
+          endEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:33" dir="auto">Issue first mentioned in a commit</p>',
+          id: 956,
+          title: 'fs fasfasd',
+          custom: true,
+          slug: 956,
+          name: 'fs fasfasd',
+          isUserAllowed: true,
+        },
+        {
+          metric: null,
+          selected: false,
+          icon: null,
+          hidden: false,
+          legend: '',
+          description: '',
+          startEventIdentifier: 'issue_first_added_to_board',
+          endEventIdentifier: 'issue_first_mentioned_in_commit',
+          startEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:28" dir="auto">Issue first added to a board</p>',
+          endEventHtmlDescription:
+            '<p data-sourcepos="1:1-1:33" dir="auto">Issue first mentioned in a commit</p>',
+          id: 957,
+          title: 'cooolll',
+          custom: true,
+          slug: 957,
+          name: 'cooolll',
+          isUserAllowed: true,
+        },
+      ],
     };
   },
   computed: {
     currentStage() {
       return this.store.currentActiveStage();
+    },
+    selectedStageReady() {
+      return !this.hasNoAccessError && this.selectedStage;
+    },
+    shouldDisplayPathNavigation() {
+      return this.currentStage;
     },
   },
   created() {
@@ -96,11 +243,13 @@ export default {
     },
     selectDefaultStage() {
       const stage = this.state.stages[0];
-      this.selectStage(stage);
+      this.onSelectStage(stage);
     },
-    selectStage(stage) {
+    onSelectStage(stage) {
+      console.log('stage', stage);
+
       if (this.isLoadingStage) return;
-      if (this.currentStage === stage) return;
+      if (this.currentStage?.slug === stage?.slug) return;
 
       if (!stage.isUserAllowed) {
         this.store.setActiveStage(stage);
@@ -141,8 +290,18 @@ export default {
 </script>
 <template>
   <div class="cycle-analytics">
+    <h3>Value Stream Analytics</h3>
     <gl-loading-icon v-if="isLoading" size="lg" />
     <div v-else class="wrapper">
+      <path-navigation
+        v-if="shouldDisplayPathNavigation"
+        :key="`path_navigation_key_${pathNavigationData.length}`"
+        class="js-path-navigation gl-w-full gl-pb-2"
+        :loading="isLoading"
+        :stages="pathNavigationData"
+        :selected-stage="currentStage"
+        @selected="(ev) => onSelectStage(ev)"
+      />
       <div class="card">
         <div class="card-header">{{ __('Recent Project Activity') }}</div>
         <div class="d-flex justify-content-between">
@@ -248,7 +407,7 @@ export default {
                   :is-user-allowed="stage.isUserAllowed"
                   :value="stage.value"
                   :is-active="stage.active"
-                  @select="selectStage(stage)"
+                  @select="onSelectStage(stage)"
                 />
               </ul>
             </nav>
