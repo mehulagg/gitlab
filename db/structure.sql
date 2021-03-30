@@ -14154,7 +14154,8 @@ CREATE TABLE licenses (
     id integer NOT NULL,
     data text NOT NULL,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    cloud boolean DEFAULT false
 );
 
 CREATE SEQUENCE licenses_id_seq
