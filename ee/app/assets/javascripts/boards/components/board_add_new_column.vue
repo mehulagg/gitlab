@@ -8,6 +8,7 @@ import {
   GlFormRadioGroup,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
+import { cloneDeep } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
 import { ListType } from '~/boards/constants';
@@ -72,6 +73,7 @@ export default {
   data() {
     return {
       selectedId: null,
+      selectedItem: null,
       columnType: ListType.label,
     };
   },
@@ -111,10 +113,6 @@ export default {
     },
     iterationTypeSelected() {
       return this.columnType === ListType.iteration;
-    },
-
-    selectedItem() {
-      return this.items.find(({ id }) => id === this.selectedId);
     },
 
     hasLabelSelection() {
@@ -262,11 +260,13 @@ export default {
     setColumnType(type) {
       this.columnType = type;
       this.selectedId = null;
+      this.setSelectedItem(null);
       this.filterItems();
     },
 
-    hideDropdown() {
-      this.$root.$emit('bv::dropdown::hide');
+    setSelectedItem(selectedId) {
+      const item = this.items.find(({ id }) => id === selectedId);
+      this.selectedItem = cloneDeep(item);
     },
   },
 };
@@ -337,7 +337,8 @@ export default {
       <gl-form-radio-group
         v-model="selectedId"
         class="gl-overflow-y-auto gl-px-5"
-        @change="hideDropdown"
+        data-testid="selectItem"
+        @change="setSelectedItem"
       >
         <label
           v-for="item in items"

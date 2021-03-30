@@ -17,6 +17,10 @@ describe('BoardAddNewColumn', () => {
   let wrapper;
   let shouldUseGraphQL;
 
+  const selectItem = (id) => {
+    wrapper.findByTestId('selectItem').vm.$emit('change', id);
+  };
+
   const createStore = ({ actions = {}, getters = {}, state = {} } = {}) => {
     return new Vuex.Store({
       state: {
@@ -76,6 +80,11 @@ describe('BoardAddNewColumn', () => {
         },
       }),
     );
+
+    // trigger change event
+    if (selectedId) {
+      selectItem(selectedId);
+    }
   };
 
   afterEach(() => {
