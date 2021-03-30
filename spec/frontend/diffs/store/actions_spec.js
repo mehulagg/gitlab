@@ -17,6 +17,8 @@ import {
   fetchDiffFilesBatch,
   fetchDiffFilesMeta,
   fetchCoverageFiles,
+  clearEtagPoll,
+  stopCodequalityPolling,
   fetchCodequality,
   assignDiscussionsToDiff,
   removeDiscussionsFromDiff,
@@ -310,7 +312,10 @@ describe('DiffsStoreActions', () => {
       mock = new MockAdapter(axios);
     });
 
-    afterEach(() => mock.restore());
+    afterEach(() => {
+      stopCodequalityPolling();
+      clearEtagPoll();
+    });
 
     it('should commit SET_CODEQUALITY_DATA with received response', (done) => {
       const data = {
