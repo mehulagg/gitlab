@@ -614,7 +614,7 @@ RSpec.describe API::Issues do
     end
 
     it 'clones the issue with notes when with_notes is true' do
-       post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user,
+       post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user),
          params: { to_project_id: target_project2.id, with_notes: true }
 
        expect(response).to have_gitlab_http_status(:created)
