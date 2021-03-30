@@ -7,10 +7,9 @@ RSpec.describe GitlabSubscriptions::CheckFutureRenewalService, :use_clean_rails_
 
   describe '#execute' do
     let(:namespace) { create(:namespace) }
-    let(:namespace_id) { namespace.id }
-    let(:cache_key) { "subscription:future_renewal:namespace:#{namespace_id}" }
+    let(:cache_key) { "subscription:future_renewal:namespace:#{namespace.cache_key}" }
 
-    subject(:execute_service) { described_class.new(namespace_id: namespace_id).execute }
+    subject(:execute_service) { described_class.new(namespace: namespace).execute }
 
     where(:in_last_term, :expected_response) do
       true  | false
