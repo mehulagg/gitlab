@@ -1,3 +1,14 @@
+.cicd-template-metadata:
+  name: npm
+  description: This is the CI/CD template for...
+  type: pipeline
+  group: group::access
+  input:
+    - key: CI_COMMIT_REF_NAME
+      type: String
+      purpose: This variable is to ...
+      required: true
+
 default:
   image: node:latest
 

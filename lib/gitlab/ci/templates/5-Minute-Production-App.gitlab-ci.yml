@@ -2,6 +2,17 @@
 # Use it with caution. For usage instruction please read
 # https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template/-/blob/v2.3.0/README.md
 
+.cicd-template-metadata:
+  name: 5-Minute-Production-App
+  description: This is the CI/CD template for...
+  type: pipeline
+  group: group::access
+  input:
+    - key: CI_COMMIT_REF_NAME
+      type: String
+      purpose: This variable is to ...
+      required: true
+
 include:
   # workflow rules to prevent duplicate detached pipelines
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
