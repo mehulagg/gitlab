@@ -8,6 +8,18 @@ RSpec.describe Gitlab::InstrumentationHelper do
 
     subject { described_class.add_instrumentation_data(payload) }
 
+    it 'includes DB counts' do
+      subject
+
+      expect(payload).to include(db_count: 0,
+                                 db_cached_count: 0,
+                                 db_write_count: 0,
+                                 db_replica_count: 0,
+                                 db_replica_cached_count: 0,
+                                 db_primary_count: 0,
+                                 db_primary_cached_count: 0)
+    end
+
     # We don't want to interact with Elasticsearch in GitLab FOSS so we test
     # this in ee/ only. The code exists in FOSS and won't do anything.
     context 'when Elasticsearch calls are made', :elastic do
