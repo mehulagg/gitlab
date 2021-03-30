@@ -46,7 +46,7 @@ export default {
 
 <template>
   <div>
-    <pipeline-editor-file-nav />
+    <pipeline-editor-file-nav v-on="$listeners" />
     <pipeline-editor-header
       :ci-config-data="ciConfigData"
       :is-new-ci-config-file="isNewCiConfigFile"

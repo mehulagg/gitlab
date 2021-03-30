@@ -42,6 +42,11 @@ export default {
       return this.branches.filter((branch) => branch.name !== this.currentBranch);
     },
   },
+  methods: {
+    selectBranch(branchName) {
+      this.$emit('switchBranch', branchName);
+    },
+  },
 };
 </script>
 
@@ -54,7 +59,11 @@ export default {
       <gl-icon name="check" />
       {{ currentBranch }}
     </gl-dropdown-item>
-    <gl-dropdown-item v-for="branch in branchListWithoutCurrentBranch" :key="branch.name">
+    <gl-dropdown-item
+      v-for="branch in branchListWithoutCurrentBranch"
+      :key="branch.name"
+      @click="selectBranch(branch.name)"
+    >
       <gl-icon name="check" class="gl-visibility-hidden" />
       {{ branch.name }}
     </gl-dropdown-item>

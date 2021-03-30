@@ -44,7 +44,9 @@ export default {
       failureType: null,
       failureReasons: [],
       showStartScreen: false,
+      isBranchSwitched: false,
       isNewCiConfigFile: false,
+      isSwitchedBranch: false,
       initialCiFileContent: '',
       lastCommittedContent: '',
       currentCiFileContent: '',
@@ -59,9 +61,10 @@ export default {
       // If it's a brand new file, we don't want to fetch the content.
       // Then when the user commits the first time, the query would run
       // to get the initial file content, but we already have it in `lastCommitedContent`
-      // so we skip the loading altogether.
-      skip({ isNewCiConfigFile, lastCommittedContent }) {
-        return isNewCiConfigFile || lastCommittedContent;
+      // so we skip the loading altogether. When the user switches branches, however,
+      // we want to make sure we can refetch and get the content from the new branch.
+      skip({ isNewCiConfigFile, lastCommittedContent, isSwitchedBranch }) {
+        return isNewCiConfigFile || (lastCommittedContent && !isSwitchedBranch);
       },
       variables() {
         return {
@@ -81,6 +84,11 @@ export default {
       },
       error(error) {
         this.handleBlobContentError(error);
+      },
+      watchLoading(isLoading) {
+        if (isLoading) {
+          this.setAppStatus(EDITOR_APP_STATUS_LOADING);
+        }
       },
     },
     ciConfigData: {
@@ -106,11 +114,6 @@ export default {
       },
       error() {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
-      },
-      watchLoading(isLoading) {
-        if (isLoading) {
-          this.setAppStatus(EDITOR_APP_STATUS_LOADING);
-        }
       },
     },
     appStatus: {
@@ -239,6 +242,14 @@ export default {
     showErrorAlert({ type, reasons = [] }) {
       this.reportFailure(type, reasons);
     },
+    async switchBranch(branch) {
+      this.isSwitchedBranch = true;
+
+      await this.$apollo.getClient().writeQuery({ query: getCurrentBranch, data: { currentBranch: branch } });
+      await this.$apollo.queries.initialCiFileContent.refetch();
+
+      this.isSwitchedBranch = false;
+    },
     updateCiConfig(ciFileContent) {
       this.currentCiFileContent = ciFileContent;
     },
@@ -282,6 +293,7 @@ export default {
         @commit="updateOnCommit"
         @resetContent="resetContent"
         @showError="showErrorAlert"
+        @switchBranch="switchBranch"
         @updateCiConfig="updateCiConfig"
       />
       <confirm-unsaved-changes-dialog :has-unsaved-changes="hasUnsavedChanges" />

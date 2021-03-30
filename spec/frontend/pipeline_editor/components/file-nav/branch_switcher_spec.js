@@ -99,5 +99,26 @@ describe('Pipeline editor branch switcher', () => {
 
       expect(icon.classes()).toContain('gl-visibility-hidden');
     });
+
+    it('does not emit the switchBrancher event when clicking on the current branch', () => {
+      const firstDropdownItem = findDropdownItems().at(0);
+
+      expect(wrapper.emitted('switchBranch')).toBeUndefined();
+
+      firstDropdownItem.vm.$emit('click');
+
+      expect(wrapper.emitted('switchBranch')).toBeUndefined();
+    });
+
+    it('emits the switchBrancher event when clicking on a different branch', () => {
+      const secondDropdownItem = findDropdownItems().at(1);
+
+      expect(wrapper.emitted('switchBranch')).toBeUndefined();
+
+      secondDropdownItem.vm.$emit('click');
+
+      expect(wrapper.emitted('switchBranch')).toBeDefined();
+      expect(wrapper.emitted('switchBranch')[0]).toEqual(['main']);
+    });
   });
 });

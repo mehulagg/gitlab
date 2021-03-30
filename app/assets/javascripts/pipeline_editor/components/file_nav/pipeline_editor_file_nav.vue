@@ -16,6 +16,6 @@ export default {
 </script>
 <template>
   <div class="gl-mb-5">
-    <branch-switcher v-if="showBranchSwitcher" />
+    <branch-switcher v-if="showBranchSwitcher" v-on="$listeners" />
   </div>
 </template>
