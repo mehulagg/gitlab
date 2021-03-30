@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require 'spec_helper'
 
 RSpec.describe Gitlab::SlashCommands::Presenters::IssueNew do
   include Gitlab::Routing
