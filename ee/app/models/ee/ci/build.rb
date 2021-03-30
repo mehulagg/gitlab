@@ -72,7 +72,7 @@ module EE
 
             parse_security_artifact_blob(security_report, blob)
           rescue => e
-            security_report.error = e
+            security_report.errors << { 'type' => 'ParsingError', message: e.class.name }
           end
         end
       end

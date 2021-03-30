@@ -5,8 +5,8 @@ module Gitlab
     module Reports
       module Security
         class Report
-          attr_reader :created_at, :type, :pipeline, :findings, :scanners, :identifiers
-          attr_accessor :scan, :scanned_resources, :error
+          attr_reader :created_at, :type, :pipeline, :findings, :scanners, :identifiers, :errors
+          attr_accessor :scan, :scanned_resources
 
           delegate :project_id, to: :pipeline
 
@@ -18,6 +18,7 @@ module Gitlab
             @scanners = {}
             @identifiers = {}
             @scanned_resources = []
+            @errors = []
           end
 
           def commit_sha
@@ -25,7 +26,7 @@ module Gitlab
           end
 
           def errored?
-            error.present?
+            errors.present?
           end
 
           def add_scanner(scanner)
