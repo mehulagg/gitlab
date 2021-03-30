@@ -22,6 +22,10 @@ RSpec.describe MergeRequestPollWidgetEntity do
   end
 
   describe 'merge_pipeline' do
+    before do
+      stub_feature_flags(merge_request_cached_merge_pipeline_serializer: false)
+    end
+
     it 'returns nil' do
       expect(subject[:merge_pipeline]).to be_nil
     end
@@ -34,6 +38,16 @@ RSpec.describe MergeRequestPollWidgetEntity do
         project.add_maintainer(user)
       end
 
+      context 'when user cannot read pipelines on target project' do
+        before do
+          project.add_guest(user)
+        end
+
+        it 'returns nil' do
+          expect(subject[:merge_pipeline]).to be_nil
+        end
+      end
+
       it 'returns merge_pipeline' do
         pipeline.reload
         pipeline_payload =
@@ -44,9 +58,9 @@ RSpec.describe MergeRequestPollWidgetEntity do
         expect(subject[:merge_pipeline]).to eq(pipeline_payload)
       end
 
-      context 'when user cannot read pipelines on target project' do
+      context 'when merge_request_cached_merge_pipeline_serializer is enabled' do
         before do
-          project.add_guest(user)
+          stub_feature_flags(merge_request_cached_merge_pipeline_serializer: false)
         end
 
         it 'returns nil' do
