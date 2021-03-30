@@ -58,6 +58,15 @@ module Elastic
       nil
     end
 
+    # Sometimes we can't use safely_read_attribute_for_elasticsearch
+    # but still want the same error handling and logging
+    def safely_read_anything_for_elasticsearch(name_for_error)
+      yield
+    rescue => err
+      target.logger.warn("Elasticsearch failed to read #{name_for_error} for #{target.class} #{target.id}: #{err}")
+      nil
+    end
+
     # protect against missing project and project_feature and set visibility to PRIVATE
     # if the project_feature is missing on a project
     def safely_read_project_feature_for_elasticsearch(feature)

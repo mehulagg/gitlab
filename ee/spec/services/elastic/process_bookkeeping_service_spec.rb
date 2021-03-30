@@ -234,6 +234,26 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
 
         expect { described_class.new.execute }.not_to exceed_all_query_limit(control)
       end
+
+      it 'does not have N+1 queries for issues' do
+        issues = []
+
+        2.times do
+          issues << create(:issue)
+        end
+
+        described_class.track!(*issues)
+
+        control = ActiveRecord::QueryRecorder.new { described_class.new.execute }
+
+        3.times do
+          issues << create(:issue)
+        end
+
+        described_class.track!(*issues)
+
+        expect { described_class.new.execute }.not_to exceed_all_query_limit(control)
+      end
     end
 
     def expect_processing(*refs, failures: [])

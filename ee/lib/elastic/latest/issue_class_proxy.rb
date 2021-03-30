@@ -28,6 +28,12 @@ module Elastic
         search(query_hash, options)
       end
 
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(project: [:project_feature], issue_assignees: [])
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
       private
 
       # Builds an elasticsearch query that will select documents from a
