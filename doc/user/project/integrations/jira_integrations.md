@@ -26,19 +26,18 @@ GitLab activity and Jira issues, with additional features:
 - [Jira development panel integration](../../../integration/jira/index.md). Connects all
   GitLab projects under a specified group or personal namespace.
 
-Jira development panel integration configuration depends on whether you are
-using Jira on [Atlassian cloud](https://www.atlassian.com/cloud) or on your own server:
+Jira development panel integration configuration depends on whether:
 
-- *If your Jira instance is hosted on Atlassian Cloud:*
-  - **GitLab.com (SaaS) customers**: Use the
-    [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview)
-    application installed from the [Atlassian Marketplace](https://marketplace.atlassian.com).
-  - **Self-managed installs**: Use the
-    [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview), with
-    [this workaround process](#install-the-gitlab-jira-cloud-application-for-self-managed-instances). Read the
-    [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/268278) for more information.
-- *If your Jira instance is hosted on your own server:*
-  Use the [Jira DVCS connector](../../../integration/jira/index.md).
+- You're using GitLab.com or a self-managed GitLab instance.
+- You're using Jira on [Atlassian cloud](https://www.atlassian.com/cloud) or on your own server.
+
+| You use Jira on: | For the Jira development panel integration, GitLab.com customers need:                                                                                                                                                        | For the Jira development panel integration, GitLab self-managed customers need:                                                                                                                                                                                               |
+|:-------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Atlassian cloud    | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview) application installed from the [Atlassian Marketplace](https://marketplace.atlassian.com). | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview), with [this workaround process](#install-the-gitlab-jira-cloud-application-for-self-managed-instances). Read the [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/268278) for more information.            |
+| Your own server    | The [Jira DVCS connector](../../../integration/jira_development_panel.md).                                                                                                                                                      | The [Jira DVCS connector](../../../integration/jira_development_panel.md).                                                                                                                                                                                                      |
+
+NOTE:
+DVCS means distributed version control system.
 
 ### Install the GitLab Jira Cloud application for self-managed instances **(FREE SELF)**
 
