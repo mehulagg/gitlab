@@ -40,9 +40,12 @@ module Subscribable
     # handle project and group labels as well as issuable subscriptions
     subscribable_type = self.class.ancestors.include?(Label) ? 'Label' : self.class.name
     BatchLoader.for(id: id, subscribable_type: subscribable_type).batch do |items, loader|
-      ids = items.map { |i| i[:id] }
-      subscribable_types = items.map { |i| i[:subscribable_type] }.uniq
-      subscriptions = Subscription.where(subscribable_id: ids, subscribable_type: subscribable_types, project: project, user: user)
+      values = items.each_with_object({ ids: Set.new, subscribable_types: Set.new }) do |item, result|
+        result[:ids] << item[:id]
+        result[:subscribable_types] << item[:subscribable_type]
+      end
+
+      subscriptions = Subscription.where(subscribable_id: values[:ids], subscribable_type: values[:subscribable_types], project: project, user: user)
 
       subscriptions.each do |subscription|
         loader.call({ id: subscription.subscribable_id, subscribable_type: subscription.subscribable_type }, subscription)
