@@ -1,0 +1,26 @@
+.test-template: &test
+  cache:
+    paths:
+      - vendor/ruby
+  before_script:
+    - ruby -v                                   # Print out ruby version for debugging
+    - gem install bundler --no-document         # Bundler is not installed with the image
+    - bundle install -j $(nproc) --path vendor  # Install dependencies into ./vendor/ruby
+  script:
+    - bundle exec rspec spec
+
+rspec-2.5:
+  image: "ruby:2.5"
+  <<: *test
+
+rspec-2.6:
+  image: "ruby:2.6"
+  <<: *test
+
+rspec-2.7:
+  image: "ruby:2.7"
+  <<: *test
+
+rspec-3.0:
+  image: "ruby:3.0"
+  <<: *test
