@@ -89,26 +89,34 @@ module ContainerExpirationPolicies
     # TODO remove this class when `container_registry_expiration_policies_loopless` is removed
     # Tracking issue: https://gitlab.com/gitlab-org/gitlab/-/issues/325273
     class NonLoopless
+      delegate :throttling_enabled?,
+               :log_extra_metadata_on_done,
+               :log_info,
+               :log_on_done,
+               :max_cleanup_execution_time,
+               :strong_memoize,
+               to: :@parent
+
       def initialize(parent)
         @parent = parent
       end
 
       def perform_work
-        return unless @parent.throttling_enabled?
+        return unless throttling_enabled?
         return unless container_repository
 
-        @parent.log_extra_metadata_on_done(:container_repository_id, container_repository.id)
-        @parent.log_extra_metadata_on_done(:project_id, project.id)
+        log_extra_metadata_on_done(:container_repository_id, container_repository.id)
+        log_extra_metadata_on_done(:project_id, project.id)
 
         unless allowed_to_run?(container_repository)
           container_repository.cleanup_unscheduled!
-          @parent.log_extra_metadata_on_done(:cleanup_status, :skipped)
+          log_extra_metadata_on_done(:cleanup_status, :skipped)
           return
         end
 
         result = ContainerExpirationPolicies::CleanupService.new(container_repository)
                                                             .execute
-        @parent.log_on_done(result)
+        log_on_done(result)
       end
 
       def remaining_work_count
@@ -116,7 +124,7 @@ module ContainerExpirationPolicies
         cleanup_unfinished_count = ContainerRepository.cleanup_unfinished.count
         total_count = cleanup_scheduled_count + cleanup_unfinished_count
 
-        @parent.log_info(
+        log_info(
           cleanup_scheduled_count: cleanup_scheduled_count,
           cleanup_unfinished_count: cleanup_unfinished_count,
           cleanup_total_count: total_count
@@ -130,7 +138,7 @@ module ContainerExpirationPolicies
       def allowed_to_run?(container_repository)
         return false unless policy&.enabled && policy&.next_run_at
 
-        Time.zone.now + @parent.max_cleanup_execution_time.seconds < policy.next_run_at
+        Time.zone.now + max_cleanup_execution_time.seconds < policy.next_run_at
       end
 
       def policy
@@ -142,7 +150,7 @@ module ContainerExpirationPolicies
       end
 
       def container_repository
-        @parent.strong_memoize(:container_repository) do
+        strong_memoize(:container_repository) do
           ContainerRepository.transaction do
             # rubocop: disable CodeReuse/ActiveRecord
             # We need a lock to prevent two workers from picking up the same row
