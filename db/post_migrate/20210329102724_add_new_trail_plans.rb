@@ -6,12 +6,38 @@
 class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   DOWNTIME = false
 
+  class Plan < ActiveRecord::Base
+    has_one :limits, class_name: 'PlanLimits', dependent: :destroy
+
+    def actual_limits
+      self.limits || self.build_limits
+    end
+  end
+
+  class PlanLimits < ActiveRecord::Base
+    belongs_to :plan
+  end
+
+  def create_plan_limits(plan_limit_name, plan)
+    plan_limit = Plan.find_or_initialize_by(name: plan_limit_name).actual_limits.dup
+    plan_limit.plan = plan
+    plan_limit.save
+  end
+
   def up
-    execute "INSERT INTO plans (name, title, created_at, updated_at) VALUES ('premium-trial', 'Premium Trial', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
-    execute "INSERT INTO plans (name, title, created_at, updated_at) VALUES ('ultimate-trial', 'Ultimate Trial', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+    return unless Gitlab.dev_env_org_or_com? || Gitlab.staging?
+
+    ultimate_trial = Plan.create(name: 'ultimate-trial', title: 'Ultimate Trial')
+    premium_trial = Plan.create(name: 'premium-trial', title: 'Premium Trial')
+
+    create_plan_limits('gold', ultimate_trial)
+    create_plan_limits('silver', premium_trial)
   end
 
   def down
-    execute "DELETE FROM plans WHERE name IN ('premium-trial', 'ultimate-trial')"
+    return unless Gitlab.dev_env_org_or_com? || Gitlab.staging?
+
+    Plan.find_by(name: 'ultimate-trial')&.destroy
+    Plan.find_by(name: 'premium-trial')&.destroy
   end
 end
