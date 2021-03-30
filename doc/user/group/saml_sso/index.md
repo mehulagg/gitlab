@@ -426,7 +426,9 @@ Alternatively, when users need to [link SAML to their existing GitLab.com accoun
 
 ### I need to change my SAML app
 
-Users will need to [unlink the current SAML identity](#unlinking-accounts) and [link their identity](#user-access-and-management) to the new SAML app.
+If the NameID is exactly the same, then no change is required.
+
+Otherwise, users will need to [unlink the current SAML identity](#unlinking-accounts) and [link their identity](#user-access-and-management) to the new SAML app.
 
 ### I need additional information to configure my identity provider
 
