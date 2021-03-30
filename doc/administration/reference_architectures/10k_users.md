@@ -2354,9 +2354,9 @@ considered and customer technical support will be considered out of scope.
 As an alternative approach, you can also run select components of GitLab as Cloud Native
 in Kubernetes via our official [Helm Charts](https://docs.gitlab.com/charts/).
 In this setup, we support running the equivalent of GitLab Rails and Sidekiq nodes
-in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition to
-this several other supporting services, such as Grafana, NGINX, etc... are also
-supported here.
+in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition, 
+the following other supporting services are supported: NGINX, Task Runner, Migrations,
+Prometheus and Grafana.
 
 Note that the listed components above are the **only** components we support running
 alternatively on PAAS services, such as AWS RDS for the database.
@@ -2392,15 +2392,16 @@ documents how to apply the calculated configuration to the Helm Chart.
 
 #### Webservice
 
-Webservice pods typically need about 1 vCPU and 1.125 GB of memory _per worker_.
-Each Webservice pod will consume roughly 4 vCPUs and 4.5 GB of memory using
+Webservice pods typically need about 1 vCPU and 1.25 GB of memory _per worker_.
+Each Webservice pod will consume roughly 4 vCPUs and 5 GB of memory using
 the [recommended topology](#cluster-topology) because four worker processes
 are created by default and each pod has other small processes running.
 
 For 10k users we recommend a total Puma worker count of around 80.
 With the [provided recommendations](#cluster-topology) this allows the deployment of up to 20
-Webservice pods with 4 works per pod. Expand available resources using the ratio of 1 vCPU
-to 1.125 GB of memory _per each worker process_ for each additional Webservice pod.
+Webservice pods with 4 workers per pod and 5 pods per node. Expand available resources using
+the ratio of 1 vCPU to 1.25 GB of memory _per each worker process_ for each additional
+Webservice pod.
 
 For further information on resource usage, see the [Webservice resources](https://docs.gitlab.com/charts/charts/gitlab/webservice/#resources).
 
