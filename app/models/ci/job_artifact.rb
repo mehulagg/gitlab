@@ -190,7 +190,7 @@ module Ci
     scope :scoped_project, -> { where('ci_job_artifacts.project_id = projects.id') }
 
     delegate :filename, :exists?, :open, to: :file
-    delegate :validate_schema, to: :job
+    delegate :validate_schema?, to: :job
 
     enum file_type: {
       archive: 1,
