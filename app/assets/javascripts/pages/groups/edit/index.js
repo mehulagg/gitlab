@@ -4,6 +4,7 @@ import dirtySubmitFactory from '~/dirty_submit/dirty_submit_factory';
 import initFilePickers from '~/file_pickers';
 import TransferDropdown from '~/groups/transfer_dropdown';
 import groupsSelect from '~/groups_select';
+import { initCascadingSettingLockPopover } from '~/namespaces/cascading_setting_lock_popover';
 import mountBadgeSettings from '~/pages/shared/mount_badge_settings';
 import projectSelect from '~/project_select';
 import initSearchSettings from '~/search_settings';
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   projectSelect();
 
   initSearchSettings();
+  initCascadingSettingLockPopover();
 
   return new TransferDropdown();
 });

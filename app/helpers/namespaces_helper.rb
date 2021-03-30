@@ -56,6 +56,10 @@ module NamespacesHelper
     namespaces_options(selected, **options)
   end
 
+  def cascading_namespace_settings_enabled?
+    ::Feature.enabled?(:cascading_namespace_settings, default_enabled: true)
+  end
+
   private
 
   # Many importers create a temporary Group, so use the real
