@@ -8,6 +8,7 @@ module Types
 
     implements(Types::Notes::NoteableType)
     implements(Types::CurrentUserTodos)
+    implements(Types::IssuableType)
 
     authorize :read_merge_request
 
@@ -183,6 +184,8 @@ module Types
           description: 'Selected auto merge strategy.'
     field :merge_user, Types::UserType, null: true,
           description: 'User who merged this merge request.'
+
+    field :label_events, resolver: ::Resolvers::ResourceLabelEventResolver
 
     def approved_by
       object.approved_by_users

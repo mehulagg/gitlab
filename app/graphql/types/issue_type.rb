@@ -8,6 +8,7 @@ module Types
 
     implements(Types::Notes::NoteableType)
     implements(Types::CurrentUserTodos)
+    implements(Types::IssuableType)
 
     authorize :read_issue
 
@@ -123,6 +124,8 @@ module Types
 
     field :create_note_email, GraphQL::STRING_TYPE, null: true,
           description: 'User specific email address for the issue.'
+
+    field :label_events, resolver: ::Resolvers::ResourceLabelEventResolver
 
     def author
       Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find

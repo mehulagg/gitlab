@@ -16,6 +16,7 @@ module Types
     implements(Types::Notes::NoteableType)
     implements(Types::CurrentUserTodos)
     implements(Types::EventableType)
+    implements(Types::IssuableType)
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the epic.'
@@ -146,6 +147,8 @@ module Types
           Types::AwardEmojis::AwardEmojiType.connection_type,
           null: true,
           description: 'A list of award emojis associated with the epic.'
+
+    field :label_events, resolver: ::Resolvers::ResourceLabelEventResolver
 
     def has_children?
       Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, COUNT) do |node, _aggregate_object|
