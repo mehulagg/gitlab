@@ -5606,19 +5606,41 @@ RSpec.describe User do
     end
   end
 
-  describe '.dormant' do
-    it 'returns dormant users' do
-      create(:user, :deactivated)
+  describe '.dormant_that_can_be_deactivated' do
+    it 'returns dormant users that can be deactivated' do
+      not_that_long_ago = (described_class::MINIMUM_INACTIVE_DAYS - 1).days.ago.to_date
+      too_long_ago = described_class::MINIMUM_INACTIVE_DAYS.days.ago.to_date
+
+      create(:user, :deactivated, last_activity_on: too_long_ago)
 
       User::INTERNAL_USER_TYPES.map do |user_type|
-        create(:user, state: :active, user_type: user_type, last_activity_on: 99.days.ago.to_date, current_sign_in_at: 99.days.ago)
+        create(:user, state: :active, user_type: user_type, last_activity_on: too_long_ago)
       end
 
-      create(:user, last_activity_on: 89.days.ago.to_date)
+      create(:user, last_activity_on: not_that_long_ago)
 
-      dormant_user = create(:user, last_activity_on: 90.days.ago.to_date)
+      dormant_user = create(:user, last_activity_on: too_long_ago)
 
-      expect(described_class.dormant).to contain_exactly(dormant_user)
+      expect(described_class.dormant_that_can_be_deactivated).to contain_exactly(dormant_user)
+    end
+  end
+
+  describe '.with_no_activity_that_can_be_deactivated' do
+    it 'returns users with no activity that can be deactivated' do
+      not_that_long_ago = (described_class::MINIMUM_INACTIVE_DAYS - 1).days.ago.to_date
+      too_long_ago = described_class::MINIMUM_INACTIVE_DAYS.days.ago.to_date
+
+      create(:user, :deactivated, last_activity_on: nil)
+
+      User::INTERNAL_USER_TYPES.map do |user_type|
+        create(:user, state: :active, user_type: user_type, last_activity_on: nil)
+      end
+
+      create(:user, last_activity_on: 1.day.ago)
+
+      user_with_no_activity = create(:user, last_activity_on: nil)
+
+      expect(described_class.with_no_activity_that_can_be_deactivated).to contain_exactly(user_with_no_activity)
     end
   end
 end

@@ -11,10 +11,16 @@ module Users
       return if Gitlab.com?
       return unless ::Gitlab::CurrentSettings.current_application_settings.deactivate_dormant_users
 
-      User.dormant.find_each do |user|
-        if user.can_be_deactivated?
-          with_context(user: user) { user.deactivate }
-        end
+      User.dormant_that_can_be_deactivated.find_each { |user| deactivate(user) }
+
+      User.with_no_activity_that_can_be_deactivated.find_each { |user| deactivate(user) }
+    end
+
+    private
+
+    def deactivate(user)
+      if user.can_be_deactivated?
+        with_context(user: user) { user.deactivate }
       end
     end
   end

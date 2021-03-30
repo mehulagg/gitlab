@@ -20,19 +20,29 @@ RSpec.describe Users::DeactivateDormantUsersWorker do
       end
 
       it 'deactivates dormant users' do
-        user_that_can_be_deactivated = spy(:user, can_be_deactivated?: true)
-        user_that_can_not_be_deactivated = spy(:user, can_be_deactivated?: false)
+        user_that_can_be_deactivated_1 = spy(:user, can_be_deactivated?: true)
+        user_that_can_be_deactivated_2 = spy(:user, can_be_deactivated?: true)
+        user_that_can_not_be_deactivated_1 = spy(:user, can_be_deactivated?: false)
+        user_that_can_not_be_deactivated_2 = spy(:user, can_be_deactivated?: false)
         dormant_users = double
+        users_with_no_activity = double
 
-        expect(User).to receive(:dormant).and_return(dormant_users)
+        expect(User).to receive(:dormant_that_can_be_deactivated).and_return(dormant_users)
         expect(dormant_users).to receive(:find_each)
-          .and_yield(user_that_can_be_deactivated)
-          .and_yield(user_that_can_not_be_deactivated)
+          .and_yield(user_that_can_be_deactivated_1)
+          .and_yield(user_that_can_not_be_deactivated_1)
+
+        expect(User).to receive(:with_no_activity_that_can_be_deactivated).and_return(users_with_no_activity)
+        expect(users_with_no_activity).to receive(:find_each)
+          .and_yield(user_that_can_be_deactivated_2)
+          .and_yield(user_that_can_not_be_deactivated_2)
 
         worker.perform
 
-        expect(user_that_can_be_deactivated).to have_received(:deactivate)
-        expect(user_that_can_not_be_deactivated).not_to have_received(:deactivate)
+        expect(user_that_can_be_deactivated_1).to have_received(:deactivate)
+        expect(user_that_can_not_be_deactivated_1).not_to have_received(:deactivate)
+        expect(user_that_can_be_deactivated_2).to have_received(:deactivate)
+        expect(user_that_can_not_be_deactivated_2).not_to have_received(:deactivate)
       end
     end
 
@@ -42,7 +52,8 @@ RSpec.describe Users::DeactivateDormantUsersWorker do
       end
 
       it 'does nothing' do
-        expect(User).not_to receive(:dormant)
+        expect(User).not_to receive(:dormant_that_can_be_deactivated)
+        expect(User).not_to receive(:with_no_activity_that_can_be_deactivated)
 
         worker.perform
       end
