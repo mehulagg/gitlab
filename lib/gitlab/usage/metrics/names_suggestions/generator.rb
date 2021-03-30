@@ -7,13 +7,7 @@ module Gitlab
         class Generator < ::Gitlab::UsageData
           FREE_TEXT_METRIC_NAME = "<please fill metric name>"
 
-          class << self
-            def generate(key_path)
-              uncached_data.deep_stringify_keys.dig(*key_path.split('.'))
-            end
-
-            private
-
+          module NamesSuggestionsInterceptor
             def count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
               name_suggestion(column: column, relation: relation, prefix: 'count')
             end
@@ -194,6 +188,20 @@ module Gitlab
                 relation.select(relation.all.table[column].count(distinct)).arel
               end
             end
+          end
+
+          class << self
+            def generate(key_path)
+              # uncached_data.deep_stringify_keys.dig(*key_path.split('.'))
+              definition = Gitlab::Usage::MetricDefinition.find_by(key_path: key_path)
+              instrumentation_class = definition.attributes[:instrumentation_class].constantize
+              Class.new(instrumentation_class) do
+                include NamesSuggestionsInterceptor
+              end.new.value
+            end
+
+            # private
+
           end
         end
       end
