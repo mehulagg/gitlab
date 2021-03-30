@@ -3,6 +3,7 @@
 class Todo < ApplicationRecord
   include Sortable
   include FromUnion
+  include EachBatch
 
   # Time to wait for todos being removed when not visible for user anymore.
   # Prevents TODOs being removed by mistake, for example, removing access from a user
@@ -147,6 +148,10 @@ class Todo < ApplicationRecord
       select("#{table_name}.*, (#{highest_priority}) AS highest_priority")
         .order(Gitlab::Database.nulls_last_order('highest_priority', 'ASC'))
         .order('todos.created_at')
+    end
+
+    def user_ids
+      pluck(:user_id)
     end
   end
 

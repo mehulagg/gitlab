@@ -3,12 +3,18 @@
 module Issuable
   class DestroyService < IssuableBaseService
     def execute(issuable)
-      TodoService.new.destroy_target(issuable) do |issuable|
-        if issuable.destroy
-          issuable.update_project_counter_caches
-          issuable.assignees.each(&:invalidate_cache_counts)
-        end
+      if issuable.destroy
+        delete_todos(issuable)
+        issuable.update_project_counter_caches
+        issuable.assignees.each(&:invalidate_cache_counts)
       end
+    end
+
+    private
+
+    def delete_todos(issuable)
+      TodosDestroyer::DestroyedIssuableWorker
+        .perform_async(issuable.id, issuable.class.name)
     end
   end
 end

@@ -9,6 +9,16 @@ RSpec.describe Issuable::DestroyService do
   subject(:service) { described_class.new(project, user) }
 
   describe '#execute' do
+    shared_examples_for 'service deleting todos' do
+      it 'destroys associated todos' do
+        allow(TodosDestroyer::DestroyedIssuableWorker)
+          .to receive(:perform_async)
+          .with(issuable.id, issuable.class.name)
+
+        subject.execute(issuable)
+      end
+    end
+
     context 'when issuable is an issue' do
       let!(:issue) { create(:issue, project: project, author: user, assignees: [user]) }
 
@@ -22,16 +32,13 @@ RSpec.describe Issuable::DestroyService do
         service.execute(issue)
       end
 
-      it 'updates the todo caches for users with todos on the issue' do
-        create(:todo, target: issue, user: user, author: user, project: project)
-
-        expect { service.execute(issue) }
-          .to change { user.todos_pending_count }.from(1).to(0)
-      end
-
       it 'invalidates the issues count cache for the assignees' do
         expect_any_instance_of(User).to receive(:invalidate_cache_counts).once
         service.execute(issue)
+      end
+
+      it_behaves_like 'service deleting todos' do
+        let(:issuable) { issue }
       end
     end
 
@@ -53,11 +60,8 @@ RSpec.describe Issuable::DestroyService do
         service.execute(merge_request)
       end
 
-      it 'updates the todo caches for users with todos on the merge request' do
-        create(:todo, target: merge_request, user: user, author: user, project: project)
-
-        expect { service.execute(merge_request) }
-          .to change { user.todos_pending_count }.from(1).to(0)
+      it_behaves_like 'service deleting todos' do
+        let(:issuable) { merge_request }
       end
     end
   end
