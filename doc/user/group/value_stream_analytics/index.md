@@ -78,7 +78,7 @@ The "Time" metrics near the top of the page are measured as follows:
 - **Lead time**: median time from issue created to issue closed.
 - **Cycle time**: median time from first commit to issue closed.
 
-A commit is associated with an issue by [crosslinking](../../project/issues/crosslinking_issues.md) in the commit message or by manually linking the merge request containing the commit.
+A commit is associated with an issue by [crosslinking in the commit message](../../project/issues/crosslinking_issues.md#from-commit-messages).
 
 ![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
 
