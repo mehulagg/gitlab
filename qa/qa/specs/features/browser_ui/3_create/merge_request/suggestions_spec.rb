@@ -2,10 +2,10 @@
 
 module QA
   RSpec.describe 'Create' do
-    context 'Transient tests', :transient do
+    context 'Add suggestions to a Merge Request' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
-          project.name = 'project-for-transient-test'
+          project.name = 'suggestions_project'
         end
       end
 
@@ -18,8 +18,8 @@ module QA
       let(:merge_request) do
         Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.project = project
-          merge_request.title = 'Transient MR'
-          merge_request.description = 'detecting transient bugs'
+          merge_request.title = 'Needs some suggestions'
+          merge_request.description = '... so please add them.'
           merge_request.file_content = File.read(code_for_merge)
         end
       end
@@ -30,6 +30,7 @@ module QA
 
       before do
         project.add_member(dev_user)
+
         Flow::Login.sign_in(as: dev_user, skip_page_validation: true)
 
         merge_request.visit!
@@ -47,7 +48,7 @@ module QA
         merge_request.visit!
       end
 
-      it 'applies multiple suggestions', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1177' do
+      it 'applies multiple suggestions', :transient, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1177' do
         Page::MergeRequest::Show.perform do |merge_request|
           merge_request.click_diffs_tab
           4.times { merge_request.add_suggestion_to_batch }
