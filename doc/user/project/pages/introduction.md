@@ -273,6 +273,10 @@ Sure. All you need to do is download the artifacts archive from the job page.
 Yes. GitLab Pages doesn't care whether you set your project's visibility level
 to private, internal or public.
 
+### Can I create a personal or a group website
+
+Yes. If you want the website to be available at [https://username.gitlab.io](), go to your project's **Settings > Advanced**, rename your project to `username.gitlab.io` and update its path to `username.gitlab.io` . This is what we call a user/group page. If you skip this step, your website will be available at [https://username.gitlab.io/projectname](), where username is your username on GitLab and projectname is the name of the project. This is what we call a project page.
+
 ### Do I need to create a user/group website before creating a project website?
 
 No, you don't. You can create your project first and access it under
