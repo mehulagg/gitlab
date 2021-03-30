@@ -1331,6 +1331,109 @@ NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
+## Clone an issue
+
+Clones an issue to a different project. If the target project
+is the source project or the user has insufficient permissions,
+an error message with status code `400` is returned.
+
+If a given label or milestone with the same name also exists in the target
+project, it's then assigned to the issue being moved.
+
+```plaintext
+POST /projects/:id/issues/:issue_iid/clone
+```
+
+| Attribute       | Type    | Required | Description                          |
+|-----------------|---------|----------|--------------------------------------|
+| `id`            | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user  |
+| `issue_iid`     | integer | yes      | The internal ID of a project's issue |
+| `to_project_id` | integer | yes      | The ID of the new project            |
+| `with_notes`    | boolean | no       | Clone the issue with notes           |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" --form to_project_id=6 --form with_notes=true "https://gitlab.example.com/api/v4/projects/5/issues/1/clone"
+```
+
+Example response:
+
+```json
+{
+  "id": 13,
+  "iid": 2,
+  "project_id": 6,
+  "title": "Testing issue cloning",
+  "description": "Testing issue cloning",
+  "state": "opened",
+  "created_at": "2021-03-30T14:07:33.919Z",
+  "updated_at": "2021-03-30T14:12:11.022Z",
+  "closed_at": null,
+  "closed_by": null,
+  "labels": [],
+  "milestone": null,
+  "assignees": [
+    {
+      "id": 2,
+      "name": "John",
+      "username": "john",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80&d=identicon",
+      "web_url": "https://gitlab.example.com/john"
+    }
+  ],
+  "author": {
+    "id": 2,
+    "name": "John",
+    "username": "john",
+    "state": "active",
+    "avatar_url": "https://secure.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/john"
+  },
+  "assignee": {
+    "id": 2,
+    "name": "John",
+    "username": "john",
+    "state": "active",
+    "avatar_url": "https://secure.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/john"
+  },
+  "user_notes_count": 1,
+  "merge_requests_count": 0,
+  "upvotes": 0,
+  "downvotes": 0,
+  "due_date": null,
+  "confidential": false,
+  "discussion_locked": null,
+  "web_url": "https://gitlab.example.com/john/my-other-awesome-project/-/issues/2",
+  "time_stats": {
+    "time_estimate": 0,
+    "total_time_spent": 0,
+    "human_time_estimate": null,
+    "human_total_time_spent": null
+  },
+  "task_completion_status": {
+    "count": 0,
+    "completed_count": 0
+  },
+  "blocking_issues_count": 0,
+  "has_tasks": false,
+  "_links": {
+    "self": "https://gitlab.example.com/api/v4/projects/6/issues/2",
+    "notes": "https://gitlab.example.com/api/v4/projects/6/issues/2/notes",
+    "award_emoji": "https://gitlab.example.com/api/v4/projects/6/issues/2/award_emoji",
+    "project": "https://gitlab.example.com/api/v4/projects/6"
+  },
+  "references": {
+    "short": "#2",
+    "relative": "my-other-awesome-project#2",
+    "full": "john/my-other-awesome-project#2"
+  },
+  "subscribed": true,
+  "moved_to_id": null,
+  "service_desk_reply_to": null
+}
+```
+
 ## Subscribe to an issue
 
 Subscribes the authenticated user to an issue to receive notifications.
