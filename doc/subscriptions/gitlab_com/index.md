@@ -181,8 +181,6 @@ Seats owed = 12 - 10 (Maximum users - users in subscription)
 Starting 30 days before a subscription expires, GitLab notifies administrators
 of the date of expiry with a banner in the GitLab user interface.
 
-You can adjust the number of users while you renew your GitLab SaaS subscription.
-
 We recommend following these steps during renewal:
 
 1. Prune any [inactive or unwanted users](#remove-billable-user).
