@@ -27,6 +27,7 @@ export const updateSettings = ({ commit, state }, endpoint) => {
   const payload = {
     allow_author_approval: !state.settings.preventAuthorApproval,
     require_password_to_approve: state.settings.requireUserPassword,
+    retain_approvals_on_push: !state.settings.removeApprovalsOnPush,
   };
 
   commit(types.REQUEST_UPDATE_SETTINGS);

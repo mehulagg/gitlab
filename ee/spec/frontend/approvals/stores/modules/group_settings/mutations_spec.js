@@ -21,10 +21,12 @@ describe('Group settings store mutations', () => {
       mutations.RECEIVE_SETTINGS_SUCCESS(state, {
         allow_author_approval: true,
         require_password_to_approve: true,
+        retain_approvals_on_push: true,
       });
 
       expect(state.settings.preventAuthorApproval).toBe(false);
       expect(state.settings.requireUserPassword).toBe(true);
+      expect(state.settings.removeApprovalsOnPush).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });
@@ -50,10 +52,12 @@ describe('Group settings store mutations', () => {
       mutations.UPDATE_SETTINGS_SUCCESS(state, {
         allow_author_approval: true,
         require_password_to_approve: true,
+        retain_approvals_on_push: true,
       });
 
       expect(state.settings.preventAuthorApproval).toBe(false);
       expect(state.settings.requireUserPassword).toBe(true);
+      expect(state.settings.removeApprovalsOnPush).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });

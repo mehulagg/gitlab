@@ -50,9 +50,10 @@ describe('ApprovalSettings', () => {
   });
 
   describe.each`
-    testid                       | setting                    | label                                     | anchor
-    ${'prevent-author-approval'} | ${'preventAuthorApproval'} | ${'Prevent MR approvals by the author.'}  | ${'allowing-merge-request-authors-to-approve-their-own-merge-requests'}
-    ${'require-user-password'}   | ${'requireUserPassword'}   | ${'Require user password for approvals.'} | ${'require-authentication-when-approving-a-merge-request'}
+    testid                        | setting                    | label                                                                                          | anchor
+    ${'prevent-author-approval'}  | ${'preventAuthorApproval'} | ${'Prevent MR approvals by the author.'}                                                       | ${'allowing-merge-request-authors-to-approve-their-own-merge-requests'}
+    ${'require-user-password'}    | ${'requireUserPassword'}   | ${'Require user password for approvals.'}                                                      | ${'require-authentication-when-approving-a-merge-request'}
+    ${'remove-approvals-on-push'} | ${'removeApprovalsOnPush'} | ${'Remove all approvals in a merge request when new commits are pushed to its source branch.'} | ${'resetting-approvals-on-push'}
   `('with $testid checkbox', ({ testid, setting, label, anchor }) => {
     let checkbox = null;
 

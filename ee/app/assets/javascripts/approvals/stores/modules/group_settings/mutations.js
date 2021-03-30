@@ -7,6 +7,7 @@ export default {
   [types.RECEIVE_SETTINGS_SUCCESS](state, data) {
     state.settings.preventAuthorApproval = !data.allow_author_approval;
     state.settings.requireUserPassword = data.require_password_to_approve;
+    state.settings.removeApprovalsOnPush = !data.retain_approvals_on_push;
     state.isLoading = false;
   },
   [types.RECEIVE_SETTINGS_ERROR](state) {
@@ -18,6 +19,7 @@ export default {
   [types.UPDATE_SETTINGS_SUCCESS](state, data) {
     state.settings.preventAuthorApproval = !data.allow_author_approval;
     state.settings.requireUserPassword = data.require_password_to_approve;
+    state.settings.removeApprovalsOnPush = !data.retain_approvals_on_push;
     state.isLoading = false;
   },
   [types.UPDATE_SETTINGS_ERROR](state) {

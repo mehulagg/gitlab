@@ -36,10 +36,14 @@ export default {
     preventAuthorApprovalDocsAnchor:
       'allowing-merge-request-authors-to-approve-their-own-merge-requests',
     requireUserPasswordDocsAnchor: 'require-authentication-when-approving-a-merge-request',
+    removeApprovalsOnPushDocsAnchor: 'resetting-approvals-on-push',
   },
   i18n: {
     authorApprovalLabel: __('Prevent MR approvals by the author.'),
     requireUserPasswordLabel: __('Require user password for approvals.'),
+    removeApprovalsOnPushLabel: __(
+      'Remove all approvals in a merge request when new commits are pushed to its source branch.',
+    ),
     saveChanges: __('Save changes'),
   },
 };
@@ -59,6 +63,12 @@ export default {
         :label="$options.i18n.requireUserPasswordLabel"
         :anchor="$options.links.requireUserPasswordDocsAnchor"
         data-testid="require-user-password"
+      />
+      <approval-settings-checkbox
+        v-model="settings.removeApprovalsOnPush"
+        :label="$options.i18n.removeApprovalsOnPushLabel"
+        :anchor="$options.links.removeApprovalsOnPushDocsAnchor"
+        data-testid="remove-approvals-on-push"
       />
     </gl-form-group>
     <gl-button type="submit" variant="success" category="primary" :disabled="isLoading">
