@@ -5605,4 +5605,20 @@ RSpec.describe User do
       end
     end
   end
+
+  describe '.dormant' do
+    it 'returns dormant users' do
+      create(:user, :deactivated)
+
+      User::INTERNAL_USER_TYPES.map do |user_type|
+        create(:user, state: :active, user_type: user_type, last_activity_on: 99.days.ago.to_date, current_sign_in_at: 99.days.ago)
+      end
+
+      create(:user, last_activity_on: 89.days.ago.to_date)
+
+      dormant_user = create(:user, last_activity_on: 90.days.ago.to_date)
+
+      expect(described_class.dormant).to contain_exactly(dormant_user)
+    end
+  end
 end
