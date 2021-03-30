@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Manage', :group_saml, :orchestrated, :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/issues/202260', type: :bug } do
-    describe 'Group SAML SSO - Group managed accounts' do
+    describe 'Group SAML SSO - Enforced SSO' do
       include Support::Api
 
       before(:all) do
@@ -15,7 +15,7 @@ module QA
           sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
         end
 
-        [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item, :invite_members_group_modal].each do |flag|
+        [:group_scim, :group_administration_nav_item, :invite_members_group_modal].each do |flag|
           Runtime::Feature.enable(flag)
         end
 
@@ -23,47 +23,29 @@ module QA
 
         @api_client = Runtime::API::Client.as_admin
 
-        @developer_user = Resource::User.fabricate_via_api!
-
         @group.add_member(@owner_user, QA::Resource::Members::AccessLevel::OWNER)
-
-        @group.add_member(@developer_user)
 
         @managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service)
 
         @saml_linked_for_admin = false
 
-        setup_and_enable_group_managed_accounts
+        enable_enforce_sso
 
         Page::Main::Menu.perform(&:sign_out_if_signed_in)
 
         Flow::Saml.logout_from_idp(@saml_idp_service)
       end
 
-      it 'forces existing users to create a new account and allows to leave group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/708' do
+      it 'creates a new account automatically and allows to leave group and join again', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/708' do
         visit_managed_group_url
 
         EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
 
         Flow::Saml.login_to_idp_if_required('user3', 'user3pass')
 
-        expect(page).to have_text("uses group managed accounts. You need to create a new GitLab account which will be managed by")
+        expect(page).to have_text("You have to confirm your email address before continuing")
 
-        Support::Retrier.retry_until(raise_on_failure: true) do
-          @idp_user_email = EE::Page::Group::SamlSSOSignUp.perform(&:current_email)
-
-          remove_user_if_exists(@idp_user_email)
-
-          @new_username = EE::Page::Group::SamlSSOSignUp.perform(&:current_username)
-
-          EE::Page::Group::SamlSSOSignUp.perform(&:click_register_button)
-
-          page.has_no_content?("Email has already been taken")
-        end
-
-        expect(page).to have_text("Sign up was successful! Please confirm your email to sign in.")
-
-        QA::Flow::User.confirm_user(@new_username)
+        QA::Flow::User.confirm_user('user_3@example.com')
 
         visit_managed_group_url
 
@@ -77,21 +59,41 @@ module QA
 
         Page::Main::Menu.perform(&:sign_out)
 
+        Flow::Saml.logout_from_idp(@saml_idp_service)
+
+        # When a user exists with a linked identity
+
         visit_managed_group_url
 
         EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
 
-        expect(page).to have_text("uses group managed accounts. You need to create a new GitLab account which will be managed by")
+        Flow::Saml.login_to_idp_if_required('user3', 'user3pass')
+
+        expect(page).to have_text("Login to a GitLab account to link with your SAML identity")
+
+        Flow::Saml.logout_from_idp(@saml_idp_service)
+
+        # When no user exists with a linked identity
+
+        remove_user_if_exists('user_3@example.com')
+
+        visit_managed_group_url
+
+        EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
+
+        Flow::Saml.login_to_idp_if_required('user3', 'user3pass')
+
+        expect(page).to have_text("You have to confirm your email address before continuing")
       end
 
       after(:all) do
         page.visit Runtime::Scenario.gitlab_address
 
-        [:group_managed_accounts, :sign_up_on_sso, :group_scim, :group_administration_nav_item].each do |flag|
+        [:group_scim, :group_administration_nav_item].each do |flag|
           Runtime::Feature.remove(flag)
         end
 
-        remove_user_if_exists(@idp_user_email)
+        remove_user_if_exists('user_3@example.com')
 
         @group.remove_via_api!
 
@@ -120,7 +122,7 @@ module QA
       end
     end
 
-    def setup_and_enable_group_managed_accounts
+    def enable_enforce_sso
       Support::Retrier.retry_on_exception do
         # We need to logout from IDP. This is required if this is a retry.
         Flow::Saml.logout_from_idp(@saml_idp_service)
@@ -135,7 +137,7 @@ module QA
           @saml_linked_for_admin = true
         end
 
-        # We must sign in with SAML before enabling Group Managed Accounts
+        # Sign in with SAML before enabling enforce sso
         visit_managed_group_url
 
         EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
@@ -148,21 +150,17 @@ module QA
           # Once the feature flags are enabled, it takes some time for the toggle buttons to show on the UI.
           # This issue does not happen manually. Only happens with the test as they are too fast.
           Support::Retrier.retry_until(sleep_interval: 1, raise_on_failure: true) do
-            condition_met = saml_sso.has_enforced_sso_button? && saml_sso.has_group_managed_accounts_button?
+            condition_met = saml_sso.has_enforced_sso_button?
             page.refresh unless condition_met
 
             condition_met
           end
 
           saml_sso.enforce_sso
-          saml_sso.enable_group_managed_accounts
           saml_sso.click_save_changes
 
           saml_sso.user_login_url_link_text
         end
-
-        Flow::Saml.visit_saml_sso_settings(@group, direct: true)
-        raise "Group managed accounts not setup correctly" unless EE::Page::Group::Settings::SamlSSO.perform(&:group_managed_accounts_enabled?)
       end
     end
 

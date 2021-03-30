@@ -3,7 +3,7 @@
 module GroupSaml
   module SamlProvider
     class CreateService
-      include BaseService
+      include GroupSaml::SamlProvider::BaseService
 
       def initialize(current_user, group, params:)
         @group = group
@@ -12,3 +12,5 @@ module GroupSaml
     end
   end
 end
+
+
