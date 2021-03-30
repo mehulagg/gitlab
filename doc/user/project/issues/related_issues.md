@@ -35,9 +35,11 @@ To manage related issues through our API, visit the [issue links API documentati
 1. Relate one issue to another by clicking the related issues "+" button
 in the header of the related issue block.
 
+1. Select the relationship the between the two issues. Either:
+   - **relates to**.
+   - **blocks**. **(PREMIUM)**
+   - **is blocked by**. **(PREMIUM)**
 1. Input the issue reference number or paste in the full URL of the issue.
-
-1. In GitLab Premium and higher, select whether the current issue relates to, blocks, or is blocked by the issues being entered.
 
    ![Adding a related issue](img/related_issues_add_v12_8.png)
 
@@ -59,8 +61,7 @@ them categorized so their relationships can be better understood visually.
 ![Related issue block](img/related_issue_block_v12_8.png)
 
 ## Removing a related issue
-
-In the related issues block, click the `X` icon on the right-side of each issue
+In the related issues block, click the remove button (**{close}**) on the right-side of each issue
 token that you wish to remove.
 
 Due to the bi-directional relationship, it no longer appears in either issue.
