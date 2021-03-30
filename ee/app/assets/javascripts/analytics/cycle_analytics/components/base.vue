@@ -2,34 +2,29 @@
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
-import DateRange from '../../shared/components/daterange.vue';
-import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
-import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
+import { OVERVIEW_STAGE_ID } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
-import FilterBar from './filter_bar.vue';
 import Metrics from './metrics.vue';
 import PathNavigation from './path_navigation.vue';
 import StageTable from './stage_table.vue';
 import StageTableNav from './stage_table_nav.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
+import ValueStreamFilters from './value_stream_filters.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
 export default {
   name: 'CycleAnalytics',
   components: {
-    DateRange,
     DurationChart,
     GlEmptyState,
-    ProjectsDropdownFilter,
     StageTable,
     TypeOfWorkCharts,
     CustomStageForm,
     StageTableNav,
     PathNavigation,
-    FilterBar,
+    ValueStreamFilters,
     ValueStreamSelect,
     UrlSync,
     Metrics,
@@ -131,12 +126,6 @@ export default {
     stageCount() {
       return this.activeStages.length;
     },
-    projectsQueryParams() {
-      return {
-        first: PROJECTS_PER_PAGE,
-        includeSubgroups: true,
-      };
-    },
   },
 
   methods: {
@@ -185,9 +174,6 @@ export default {
       this.reorderStage(data);
     },
   },
-  multiProjectSelect: true,
-  dateOptions: [7, 30, 90],
-  maxDateRange: DATE_RANGE_LIMIT,
 };
 </script>
 <template>
@@ -220,36 +206,15 @@ export default {
         :selected-stage="selectedStage"
         @selected="onStageSelect"
       />
-      <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
-        <filter-bar
-          v-if="shouldDisplayFilters"
-          class="js-filter-bar filtered-search-box gl-display-flex gl-mb-2 gl-mr-3 gl-border-none"
-          :group-path="currentGroupPath"
-        />
-        <div
-          v-if="shouldDisplayFilters"
-          class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
-        >
-          <projects-dropdown-filter
-            :key="currentGroup.id"
-            class="js-projects-dropdown-filter project-select gl-mb-2 gl-lg-mb-0"
-            :group-id="currentGroup.id"
-            :group-namespace="currentGroupPath"
-            :query-params="projectsQueryParams"
-            :multi-select="$options.multiProjectSelect"
-            :default-projects="selectedProjects"
-            @selected="onProjectsSelect"
-          />
-          <date-range
-            :start-date="startDate"
-            :end-date="endDate"
-            :max-date-range="$options.maxDateRange"
-            :include-selected-date="true"
-            class="js-daterange-picker"
-            @change="setDateRange"
-          />
-        </div>
-      </div>
+      <value-stream-filters
+        :group-id="currentGroup.id"
+        :group-path="currentGroupPath"
+        :selected-projects="selectedProjects"
+        :start-date="startDate"
+        :end-date="endDate"
+        @onSelectProject="onProjectsSelect"
+        @onSetDateRange="setDateRange"
+      />
     </div>
     <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">
       <gl-empty-state
