@@ -273,7 +273,7 @@ export default {
 
     <dropdown-input v-model="scanProfile.value" v-bind="scanProfile" />
     <template v-if="scanProfileYaml">
-      <gl-accordion>
+      <gl-accordion :header-level="3">
         <gl-accordion-item :title="s__('APIFuzzing|Show code snippet for the profile')">
           <pre data-testid="api-fuzzing-scan-profile-yaml-viewer">{{ scanProfileYaml }}</pre>
         </gl-accordion-item>
