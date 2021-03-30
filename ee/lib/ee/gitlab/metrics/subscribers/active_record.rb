@@ -34,8 +34,6 @@ module EE
 
           override :sql
           def sql(event)
-            db_role = ::Gitlab::Database::LoadBalancing.db_role_for_connection(event.payload[:connection])
-            puts "#{db_role}: #{event.payload[:sql].first(100)}"
             super
 
             return unless ::Gitlab::Database::LoadBalancing.enable?
@@ -43,6 +41,7 @@ module EE
             payload = event.payload
             return if ignored_query?(payload)
 
+            db_role = ::Gitlab::Database::LoadBalancing.db_role_for_connection(payload[:connection])
             increment_db_role_counters(db_role, payload)
             observe_db_role_duration(db_role, event)
           end
