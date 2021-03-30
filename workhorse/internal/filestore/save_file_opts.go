@@ -63,6 +63,8 @@ type SaveFileOpts struct {
 	PresignedCompleteMultipart string
 	// PresignedAbortMultipart is a presigned URL for AbortMultipartUpload
 	PresignedAbortMultipart string
+	// ExtractBase uses the base of the filename and strips directories
+	ExtractBase bool
 }
 
 // UseWorkhorseClientEnabled checks if the options require direct access to object storage
@@ -88,6 +90,7 @@ func GetOpts(apiResponse *api.Response) (*SaveFileOpts, error) {
 	}
 
 	opts := SaveFileOpts{
+		ExtractBase:        apiResponse.ExtractBase,
 		LocalTempPath:      apiResponse.TempPath,
 		RemoteID:           apiResponse.RemoteObject.ID,
 		RemoteURL:          apiResponse.RemoteObject.GetURL,

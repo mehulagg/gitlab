@@ -450,6 +450,10 @@ RSpec.describe ObjectStorage do
           expect(subject[:TempPath]).to include(described_class::TMP_UPLOAD_PATH)
         end
       end
+
+      it "returns true for ExtractsBase" do
+        expect(subject[:ExtractBase]).to be true
+      end
     end
 
     shared_examples 'uses remote storage' do
@@ -467,6 +471,10 @@ RSpec.describe ObjectStorage do
           expect(subject[:RemoteObject][:DeleteURL]).to include(described_class::TMP_UPLOAD_PATH)
           expect(subject[:RemoteObject][:StoreURL]).to include(described_class::TMP_UPLOAD_PATH)
         end
+      end
+
+      it "returns true for ExtractsBase" do
+        expect(subject[:ExtractBase]).to be true
       end
     end
 
