@@ -7,6 +7,13 @@ module EE
 
       private
 
+      override :ensure_container_repository!
+      def ensure_container_repository!(path, authorized_actions)
+        return super unless ::Feature.enabled?(:container_registry_non_sticky_repository_creation, self, default_enabled: :yaml)
+
+        ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes { super }
+      end
+
       override :can_access?
       def can_access?(requested_project, requested_action)
         if ::Gitlab.maintenance_mode? && requested_action != 'pull'

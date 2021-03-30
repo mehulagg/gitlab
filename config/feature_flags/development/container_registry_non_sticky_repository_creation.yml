@@ -1,0 +1,8 @@
+---
+name: container_registry_non_sticky_repository_creation
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.11'
+type: development
+group: group::continuous integration
+default_enabled: false
