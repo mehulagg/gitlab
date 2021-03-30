@@ -330,18 +330,6 @@ module Ci
         true
       end
 
-      after_transition any => [:failed] do |build|
-        next unless build.project
-
-        if build.auto_retry_allowed?
-          begin
-            Ci::Build.retry(build, build.user)
-          rescue Gitlab::Access::AccessDeniedError => ex
-            Gitlab::AppLogger.error "Unable to auto-retry job #{build.id}: #{ex}"
-          end
-        end
-      end
-
       after_transition pending: :running do |build|
         build.ensure_metadata.update_timeout_state
       end
