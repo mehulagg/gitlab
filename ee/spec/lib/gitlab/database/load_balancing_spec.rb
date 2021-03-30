@@ -702,6 +702,59 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       end
     end
 
+    context 'custom connection handling' do
+      where(:queries, :expected_role) do
+        [
+          # Reload cache. The schema loading queries should be handled by
+          # replicas.
+          [
+            -> {
+              model.connection.clear_cache!
+              model.first
+            },
+            :replica
+          ],
+
+          # Retrieve connection via #connection
+          [
+            -> {
+              model.connection.query('SELECT 1')
+              model.connection.pool.release_connection
+            },
+            :replica
+          ],
+
+          # Retrieve connection via #retrieve_connection
+          [
+            -> {
+              connection = model.retrieve_connection
+              connection.query('SELECT 1')
+              connection.pool.release_connection
+            },
+            :primary
+          ]
+        ]
+      end
+
+      with_them do
+        include_context 'LoadBalancing setup'
+
+        it 'redirects queries to the right roles' do
+          roles = []
+
+          subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
+            roles << ::Gitlab::Database::LoadBalancing.db_role_for_connection(event.payload[:connection])
+          end
+
+          self.instance_exec(&queries)
+
+          expect(roles).to all(eql(expected_role))
+        ensure
+          ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+        end
+      end
+    end
+
     context 'a write inside a transaction inside use_replica_if_possible block' do
       include_context 'LoadBalancing setup'
 
