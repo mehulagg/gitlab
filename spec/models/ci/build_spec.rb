@@ -4905,4 +4905,32 @@ RSpec.describe Ci::Build do
       it { is_expected.to be_truthy }
     end
   end
+
+  describe '#validate_schema?' do
+    subject { build.validate_schema? }
+
+    before do
+      build.options.merge!(options)
+    end
+
+    context 'when the options does not have the configuration' do
+      let(:options) { {} }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the options has the configuration' do
+      context 'when the configuration is set as `false`' do
+        let(:options) { artifacts: { validate_schema: false } }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the configuration is set as `true`' do
+        let(:options) { artifacts: { validate_schema: true } }
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
 end

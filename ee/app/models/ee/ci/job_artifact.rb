@@ -103,13 +103,13 @@ module EE
     # parsed report regardless of the `file_type` but this will
     # require more effort so we can have this security reports
     # specific method here for now.
-    def security_report
+    def security_report(validate: false)
       strong_memoize(:security_report) do
         next unless file_type.in?(SECURITY_REPORT_FILE_TYPES)
 
         report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
-            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report).parse!
+            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report, validate: (validate && validate_schema?)).parse!
           end
         end
 

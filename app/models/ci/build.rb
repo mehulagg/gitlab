@@ -500,6 +500,10 @@ module Ci
       options&.dig(:environment, :on_stop)
     end
 
+    def validate_schema?
+      options&.dig(:artifacts, :validate_schema)
+    end
+
     ##
     # All variables, including persisted environment variables.
     #
