@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import Visibility from 'visibilityjs';
 import Vue from 'vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { diffViewerModes } from '~/ide/constants';
@@ -51,6 +52,8 @@ import {
   allDiscussionWrappersExpanded,
   prepareLineForRenamedFile,
 } from './utils';
+
+let eTagPoll;
 
 export const setBaseConfig = ({ commit }, options) => {
   const {
@@ -233,8 +236,20 @@ export const fetchCoverageFiles = ({ commit, state }) => {
   coveragePoll.makeRequest();
 };
 
-export const fetchCodequality = ({ commit, state }) => {
-  const codequalityPoll = new Poll({
+export const clearEtagPoll = () => {
+  eTagPoll = null;
+};
+
+export const stopCodequalityPolling = () => {
+  if (eTagPoll) eTagPoll.stop();
+};
+
+export const restartCodequalityPolling = () => {
+  if (eTagPoll) eTagPoll.restart();
+};
+
+export const fetchCodequality = ({ commit, state, dispatch }) => {
+  eTagPoll = new Poll({
     resource: {
       getCodequalityDiffReports: (endpoint) => axios.get(endpoint),
     },
@@ -244,13 +259,23 @@ export const fetchCodequality = ({ commit, state }) => {
       if (status === httpStatusCodes.OK) {
         commit(types.SET_CODEQUALITY_DATA, data);
 
-        codequalityPoll.stop();
+        eTagPoll.stop();
       }
     },
     errorCallback: () => createFlash(__('Something went wrong on our end. Please try again!')),
   });
 
-  codequalityPoll.makeRequest();
+  if (!Visibility.hidden()) {
+    eTagPoll.makeRequest();
+  }
+
+  Visibility.change(() => {
+    if (!Visibility.hidden()) {
+      dispatch('restartCodequalityPolling');
+    } else {
+      dispatch('stopCodequalityPolling');
+    }
+  });
 };
 
 export const setHighlightedRow = ({ commit }, lineCode) => {

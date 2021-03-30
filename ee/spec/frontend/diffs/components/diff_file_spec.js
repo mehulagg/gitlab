@@ -1,6 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 
+import CodeQualityBadge from 'ee/diffs/components/code_quality_badge.vue';
 import diffFileMockDataReadable from 'jest/diffs/mock_data/diff_file';
 import DiffFileComponent from '~/diffs/components/diff_file.vue';
 
@@ -54,38 +55,35 @@ describe('EE DiffFile', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
-  describe('computed', () => {
-    describe('hasCodequalityChanges', () => {
-      it('is true when there is diff data for the file', () => {
-        ({ wrapper } = createComponent({
-          props: {
-            file: store.state.diffs.diffFiles[0],
-            codequalityDiff: [
-              { line: 1, description: 'Unexpected alert.', severity: 'minor' },
-              {
-                line: 3,
-                description: 'Arrow function has too many statements (52). Maximum allowed is 30.',
-                severity: 'minor',
-              },
-            ],
-          },
-        }));
+  describe('code quality badge', () => {
+    it('is shown when there is diff data for the file', () => {
+      ({ wrapper } = createComponent({
+        props: {
+          file: store.state.diffs.diffFiles[0],
+          codequalityDiff: [
+            { line: 1, description: 'Unexpected alert.', severity: 'minor' },
+            {
+              line: 3,
+              description: 'Arrow function has too many statements (52). Maximum allowed is 30.',
+              severity: 'minor',
+            },
+          ],
+        },
+      }));
 
-        expect(wrapper.vm.hasCodequalityChanges).toEqual(true);
-      });
+      expect(wrapper.find(CodeQualityBadge)).toExist();
+    });
 
-      it('is false when there is no diff data for the file', () => {
-        ({ wrapper } = createComponent({
-          props: {
-            file: store.state.diffs.diffFiles[0],
-          },
-        }));
+    it('is not shown when there is no diff data for the file', () => {
+      ({ wrapper } = createComponent({
+        props: {
+          file: store.state.diffs.diffFiles[0],
+        },
+      }));
 
-        expect(wrapper.vm.hasCodequalityChanges).toEqual(false);
-      });
+      expect(wrapper.find(CodeQualityBadge)).toExist();
     });
   });
 });
