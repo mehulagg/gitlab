@@ -692,13 +692,6 @@ class User < ApplicationRecord
       namespace&.owner
     end
 
-    def update_todos_count_cache(users = where(nil))
-      Todo.where(state: [:done, :pending], user_id: users).group(:user_id, :state).count.each do |user_id_and_state, todos_count|
-        user_id, state = user_id_and_state
-        Rails.cache.write(['users', user_id, "todos_#{state}_count"], todos_count, expires_in: 20.minutes)
-      end
-    end
-
     def reference_prefix
       '@'
     end
