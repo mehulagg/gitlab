@@ -4801,6 +4801,9 @@ msgstr ""
 msgid "Billable Users"
 msgstr ""
 
+msgid "Billable users"
+msgstr ""
+
 msgid "Billing"
 msgstr ""
 
@@ -19293,6 +19296,9 @@ msgstr ""
 msgid "Maximum time between updates that a mirror can have when scheduled to synchronize."
 msgstr ""
 
+msgid "Maximum users"
+msgstr ""
+
 msgid "May"
 msgstr ""
 
@@ -31605,6 +31611,9 @@ msgstr ""
 msgid "This is the highest peak of users on your installation since the license started."
 msgstr ""
 
+msgid "This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license."
+msgstr ""
+
 msgid "This is the number of %{billable_users_link_start}billable users%{link_end} on your installation, and this is the minimum number you need to purchase when you renew your license."
 msgstr ""
 
@@ -33900,10 +33909,16 @@ msgstr ""
 msgid "Users in License"
 msgstr ""
 
+msgid "Users in subscription"
+msgstr ""
+
 msgid "Users or groups set as approvers in the project's or merge request's settings."
 msgstr ""
 
 msgid "Users over License"
+msgstr ""
+
+msgid "Users over subscription"
 msgstr ""
 
 msgid "Users requesting access to"
@@ -35644,6 +35659,9 @@ msgid "You won't be able to create new projects because you have reached your pr
 msgstr ""
 
 msgid "You won't be able to pull or push repositories via %{protocol} until you %{set_password_link} on your account"
+msgstr ""
+
+msgid "You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement."
 msgstr ""
 
 msgid "You'll be charged for %{true_up_link_start}users over license%{link_end} on a quarterly or annual basis, depending on the terms of your agreement."
