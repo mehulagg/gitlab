@@ -933,6 +933,11 @@ RSpec.describe API::Users do
       post api('/users', admin), params: params
 
       expect(response).to have_gitlab_http_status(:created)
+
+      user_id = json_response['id']
+      new_user = User.find(user_id)
+
+      expect(new_user.encrypted_password).to be_present
     end
 
     it "creates user with private profile" do
