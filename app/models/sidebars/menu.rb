@@ -75,10 +75,6 @@ module Sidebars
       @items.any?
     end
 
-    def has_renderable_items?
-      renderable_items.any?
-    end
-
     def add_item(item)
       add_element(@items, item)
     end
@@ -89,6 +85,10 @@ module Sidebars
 
     def insert_item_after(after_item, new_item)
       insert_element_after(@items, after_item, new_item)
+    end
+
+    def has_renderable_items?
+      renderable_items.any?
     end
 
     def renderable_items

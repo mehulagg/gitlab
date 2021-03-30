@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# This class stores all the information needed to display and
+# render the sidebar and menus.
+#
+# It usually stores information regarding the context and caculated
+# values where the logic is in helpers.
 module Sidebars
   class Context
     attr_reader :current_user, :container

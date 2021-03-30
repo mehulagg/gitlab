@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
+# This module has the necessary methods to show
+# sprites or images next to the menu item.
 module Sidebars
   module HasIcon
     def sprite_icon
       nil
+    end
+
+    def sprite_icon_html_options
+      {}
     end
 
     def image_path
@@ -16,10 +22,6 @@ module Sidebars
 
     def icon_or_image?
       sprite_icon || image_path
-    end
-
-    def sprite_icon_html_options
-      {}
     end
   end
 end
