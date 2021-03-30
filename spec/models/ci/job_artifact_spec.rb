@@ -16,6 +16,7 @@ RSpec.describe Ci::JobArtifact do
 
   it { is_expected.to delegate_method(:open).to(:file) }
   it { is_expected.to delegate_method(:exists?).to(:file) }
+  it { is_expected.to delegate_method(:validate_schema?).to(:job) }
 
   it_behaves_like 'having unique enum values'
 
