@@ -5,13 +5,15 @@ import * as DoraApi from 'ee/api/dora_api';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
-import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 import {
   allChartDefinitions,
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
-} from './static_data';
+  LAST_WEEK,
+  LAST_MONTH,
+  LAST_90_DAYS,
+} from './static_data/deployment_frequency';
 import { apiDataToChartSeries } from './util';
 
 export default {

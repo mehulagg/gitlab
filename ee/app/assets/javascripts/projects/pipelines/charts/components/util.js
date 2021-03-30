@@ -4,7 +4,7 @@ import { CHART_TITLE } from './constants';
 
 /**
  * Converts the raw data fetched from the
- * [Deployment Frequency API](https://docs.gitlab.com/ee/api/project_analytics.html#list-project-deployment-frequencies)
+ * [DORA Metrics API](https://docs.gitlab.com/ee/api/dora/metrics.html#get-project-level-dora-metrics)
  * into series data consumable by
  * [GlAreaChart](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/charts-area-chart--default)
  *

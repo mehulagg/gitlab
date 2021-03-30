@@ -12,6 +12,8 @@ export default {
     PipelineCharts,
     DeploymentFrequencyCharts: () =>
       import('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue'),
+    LeadTimeCharts: () =>
+      import('ee_component/projects/pipelines/charts/components/lead_time_charts.vue'),
   },
   inject: {
     shouldRenderDeploymentFrequencyCharts: {
@@ -52,6 +54,9 @@ export default {
       </gl-tab>
       <gl-tab :title="__('Deployments')">
         <deployment-frequency-charts />
+      </gl-tab>
+      <gl-tab :title="__('Lead Time')">
+        <lead-time-charts />
       </gl-tab>
     </gl-tabs>
     <pipeline-charts v-else />
