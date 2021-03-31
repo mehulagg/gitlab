@@ -20,7 +20,7 @@ offline unless _absolutely necessary_.
 
 When downtime is necessary the migration has to be approved by:
 
-1. The VP of Engineering
+1. The CTO
 1. A Backend Maintainer
 1. A Database Maintainer
 
