@@ -27,7 +27,6 @@ RSpec.describe ServiceFieldEntity do
             help: 'Use a username for server version and an email for cloud version.',
             required: true,
             choices: nil,
-            help: nil,
             value: 'jira_username'
           }
 
@@ -42,12 +41,13 @@ RSpec.describe ServiceFieldEntity do
           expected_hash = {
             type: 'password',
             name: 'password',
-            title: 'Enter new password or API token',
+            title: 'Password or API token',
             placeholder: nil,
             help: 'Use a password for server version and an API token for cloud version.',
             required: true,
             choices: nil,
-            help: 'Leave blank to use your current password or API token',
+            non_empty_password_title: 'JiraService|Enter new password or API token',
+            non_empty_password_help: 'JiraService|Leave blank to use your current password or API token.',
             value: 'true'
           }
 
