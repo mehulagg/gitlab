@@ -21,6 +21,8 @@ module EE
                :verification_checksum, :verification_checksum=,
                :verification_failure, :verification_failure=,
                :verification_retry_count, :verification_retry_count=,
+               :verification_state=, :verification_state,
+               :verification_started_at=,
         to: :merge_request_diff_detail, allow_nil: true
 
       scope :has_external_diffs, -> { with_files.where(stored_externally: true) }
