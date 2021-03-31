@@ -17,7 +17,7 @@ class Groups::GroupMembersController < Groups::ApplicationController
   before_action :authorize_admin_group_member!, except: admin_not_required_endpoints
 
   skip_before_action :check_two_factor_requirement, only: :leave
-  skip_cross_project_access_check :index, :create, :update, :destroy, :request_access,
+  skip_cross_project_access_check :index, :invited, :create, :update, :destroy, :request_access,
                                   :approve_access_request, :leave, :resend_invite,
                                   :override
 
@@ -37,10 +37,10 @@ class Groups::GroupMembersController < Groups::ApplicationController
 
     if can_manage_members?
       @skip_groups = @group.related_group_ids
-
+      #
       @invited_members = @members.invite
-      @invited_members = @invited_members.search_invite_email(params[:search_invited]) if params[:search_invited].present?
-      @invited_members = present_invited_members(@invited_members)
+      # @invited_members = @invited_members.search_invite_email(params[:search_invited]) if params[:search_invited].present?
+      # @invited_members = present_invited_members(@invited_members)
     end
 
     @members = present_group_members(@members.non_invite)
@@ -50,6 +50,19 @@ class Groups::GroupMembersController < Groups::ApplicationController
     )
 
     @group_member = @group.group_members.new
+  end
+
+  def invited
+    @members = GroupMembersFinder
+                 .new(@group, current_user, params: filter_params)
+                 .execute(include_relations: requested_relations)
+
+    @skip_groups = @group.related_group_ids
+    @invited_members = @members.invite
+    @invited_members = @invited_members.search_invite_email(params[:search_invited]) if params[:search_invited].present?
+    @invited_members = present_invited_members(@invited_members)
+
+    # @members = @members.non_invite
   end
 
   # MembershipActions concern
