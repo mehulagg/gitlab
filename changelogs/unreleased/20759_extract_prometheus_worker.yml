@@ -1,5 +1,5 @@
 ---
 title: Extract CreatePrometheusServiceWorker from Projects::CreateService
-merge_request:
+merge_request: 58119
 author:
 type: added
