@@ -48,6 +48,11 @@ export default {
       required: false,
       default: null,
     },
+    file: {
+      type: Object,
+      required: false,
+      default: null,
+    },
     helpPagePath: {
       type: String,
       required: false,
@@ -167,12 +172,18 @@ export default {
       return commentLineOptions(lines, this.commentLineStart, this.line.line_code);
     },
     diffFile() {
+      let file;
+
       if (this.commentLineStart.line_code) {
         const lineCode = this.commentLineStart.line_code.split('_')[0];
-        return this.getDiffFileByHash(lineCode);
+        file = this.getDiffFileByHash(lineCode);
       }
 
-      return null;
+      if (!file && this.file) {
+        file = this.file;
+      }
+
+      return file || null;
     },
   },
   created() {
