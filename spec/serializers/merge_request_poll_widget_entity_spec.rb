@@ -6,9 +6,9 @@ RSpec.describe MergeRequestPollWidgetEntity do
   include ProjectForksHelper
   using RSpec::Parameterized::TableSyntax
 
-  let(:project)  { create :project, :repository }
-  let(:resource) { create(:merge_request, source_project: project, target_project: project) }
-  let(:user)     { create(:user) }
+  let_it_be(:project)  { create :project, :repository }
+  let_it_be(:resource) { create(:merge_request, source_project: project, target_project: project) }
+  let_it_be(:user)     { create(:user) }
 
   let(:request) { double('request', current_user: user, project: project) }
 
@@ -276,6 +276,33 @@ RSpec.describe MergeRequestPollWidgetEntity do
         { name: 'rspec', coverage: 91.5 },
         { name: 'jest', coverage: 94.1 }
       ])
+    end
+  end
+
+  describe '#mergeable' do
+    it 'shows whether a merge request is mergeable' do
+      expect(subject[:mergeable]).to eq(true)
+    end
+
+    context 'when merge request is in checking state' do
+      before do
+        resource.mark_as_unchecked!
+        resource.mark_as_checking!
+      end
+
+      it 'returns nil' do
+        expect(subject[:mergeable]).to be_nil
+      end
+
+      context 'when check_mergeability_async_in_widget is disabled' do
+        before do
+          stub_feature_flags(check_mergeability_async_in_widget: false)
+        end
+
+        it 'shows whether a merge request is mergeable' do
+          expect(subject[:mergeable]).to eq(true)
+        end
+      end
     end
   end
 end
