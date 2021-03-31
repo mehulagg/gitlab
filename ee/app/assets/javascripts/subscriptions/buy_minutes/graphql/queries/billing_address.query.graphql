@@ -1,0 +1,12 @@
+query billingAddress {
+  billingAddress @client {
+    country,
+    streetAddressLine1,
+    streetAddressLine2,
+    city,
+    countryState,
+    zipCode,
+    countryOptions,
+    stateOptions,
+  }
+}

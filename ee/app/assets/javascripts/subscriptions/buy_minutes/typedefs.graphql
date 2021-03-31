@@ -1,0 +1,42 @@
+type State {
+
+}
+
+type Plan {
+  id: String!
+  code: String!
+  name: String!
+  active: Boolean!
+  free: Boolean
+  pricePerMonth: Float!
+  pricePerYear: Float!
+}
+
+type Country {
+  states: [State]
+}
+
+type PaymentMethod {
+
+}
+
+type Namespace {
+  id: Int!
+  name: String!
+  users: Int!
+}
+
+type Customer {
+  country: Country!
+  address1: String
+  address2: String
+  city: String
+  state: State
+  zipCode: String
+  company: String
+  paymentMethods: [PaymentMethod]
+}
+
+type Subscription {
+  planId: String
+}

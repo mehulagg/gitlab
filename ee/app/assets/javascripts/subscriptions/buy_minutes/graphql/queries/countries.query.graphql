@@ -1,0 +1,6 @@
+query countries {
+  countries @client {
+    id,
+    name
+  }
+}

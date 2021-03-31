@@ -1,0 +1,3 @@
+query isNewUser {
+  isNewUser @client
+}

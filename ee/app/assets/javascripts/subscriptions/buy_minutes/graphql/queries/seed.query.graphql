@@ -1,9 +1,34 @@
-query seed {
-  seed @client {
-    plans
+query setState {
+  state @client {
+    plans {
+      deprecated
+      name
+      code
+      active
+    }
     namespaces
-    newUser
-    fullName
+    isNewUser
     setupForCompany
+    customer {
+      country
+      address1
+      address2
+      city
+      state
+      zipCode
+      company
+      paymentMethodId
+    }
+    subscription {
+      planId
+      paymentMethodId,
+      products {
+        main {
+          quantity
+        }
+      }
+      namespaceId
+      namespaceName
+    }
   }
 }
