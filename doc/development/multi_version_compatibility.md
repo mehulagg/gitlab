@@ -152,6 +152,10 @@ When making a change to any backend API (internal, REST or GraphQL) we should ma
 
 2 & 3 are problematic. In particular, 3 could occur even in non multi-version deployments (if the user has an open browser tab or cached frontend client).
 
+1. **expand**: an additive backend change is made, preserving the existing behavior.
+1. **migrate**: a redundant change is made to the frontend client to use the new behavior, falling back to the old.
+1. **contract**: nothing uses the old backend code, it can be safely removed along with the fallback from the frontend code.
+
 ## Examples of previous incidents
 
 ### Some links to issues and MRs were broken
