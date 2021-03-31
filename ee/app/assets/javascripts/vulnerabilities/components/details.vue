@@ -300,7 +300,6 @@ export default {
     </template>
     <vulnerability-detail-section
       v-if="hasRequest"
-      data-testid="request"
       :list-data="requestData"
       :heading="s__('Vulnerability|Request/Response')"
     />
@@ -309,7 +308,6 @@ export default {
       <vulnerability-detail-section
         v-if="hasRecordedResponse"
         :class="hasResponse ? 'col-6' : 'col'"
-        data-testid="recorded-response"
         :list-data="recordedResponseData"
         :icon-title="
           s__(
@@ -321,7 +319,6 @@ export default {
       <vulnerability-detail-section
         v-if="hasResponse"
         :class="hasRecordedResponse ? 'col-6' : 'col'"
-        data-testid="response"
         :list-data="responseData"
         :icon-title="
           s__(
