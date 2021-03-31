@@ -146,9 +146,9 @@ require more than one milestone. For details please refer to our [migration styl
 When making a change to any backend API (internal, REST or GraphQL) we should make sure that the existing behavior is supported in the same change. The same is true of any corresponding frontend changes. There will be a period of time where all permutations of old and new code are possible:
 
 1. New frontend code using new backend code
-2. New frontend code using old backend code
-3. Old frontend code using new backend code
-4. Old frontend code using old backend code
+1. New frontend code using old backend code
+1. Old frontend code using new backend code
+1. Old frontend code using old backend code
 
 2 & 3 are problematic. In particular, 3 could occur even in non multi-version deployments (if the user has an open browser tab or cached frontend client).
 
