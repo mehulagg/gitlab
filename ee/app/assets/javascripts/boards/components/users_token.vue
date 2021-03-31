@@ -55,10 +55,18 @@ export default {
     currentValue() {
       return this.value.data.toLowerCase();
     },
-    activeUsers() {
-      return this.users.find(
-        (label) => label.username.toLowerCase() === stripQuotes(this.currentValue),
+    activeUser() {
+      // do we need this?
+      if(this.users.length === 0) {
+        return { username: '', avatarUrl: '' }
+      }
+
+      const x = this.users.find(
+        (user) => user.username.toLowerCase() === stripQuotes(this.currentValue),
       );
+
+      console.log(x.username)
+      return x
     },
   },
   methods: {
@@ -78,10 +86,9 @@ export default {
   >
     <template #view-token="{ listeners }">
       <gl-token variant="search-value" v-on="listeners">
-        <gl-avatar :size="16" :src="activeUsers.avatarUrl" />{{
-          activeUsers.username
-        }}</gl-token
-      >
+        <gl-avatar data-testid="token-avatar" :size="16" :src="activeUser.avatarUrl" />
+        {{ activeUser.username}}
+      </gl-token>
     </template>
     <template #suggestions>
       <gl-loading-icon v-if="$apollo.loading" />
@@ -91,7 +98,7 @@ export default {
           :key="author.username"
           :value="author.username"
         >
-          <div class="gl-display-flex">
+          <div data-testid="test" class="gl-display-flex">
             <gl-avatar :size="32" :src="author.avatarUrl" />
             <div>
               <div>{{ author.name }}</div>
