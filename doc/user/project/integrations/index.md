@@ -13,10 +13,15 @@ You can find the available integrations under your project's
 ## Integrations
 
 Integrations allow you to integrate GitLab with other applications.
+Similar to plugins, they give you the freedom to add more features to GitLab.
 They are a bit like plugins in that they allow a lot of freedom in
-adding functionality to GitLab.
+adding functionality to GitLab. For more information, read the
+[overview of integrations](overview.md) or learn how to manage your integrations:
 
-Learn more [about integrations](overview.md).
+- *For GitLab 13.3 and later,* read [Project integration management](../../admin_area/settings/project_integration_management.md).
+- *For GitLab 13.2 and earlier,* read [Service Templates](services_templates.md),
+  which are deprecated and [scheduled to be removed](https://gitlab.com/gitlab-org/gitlab/-/issues/268032)
+  in GitLab 14.0.
 
 ## Project webhooks
 
