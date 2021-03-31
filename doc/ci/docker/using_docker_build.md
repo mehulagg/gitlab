@@ -22,10 +22,6 @@ To enable Docker commands for your CI/CD jobs, you can use:
 - [The Docker executor with the Docker image (Docker-in-Docker)](#use-the-docker-executor-with-the-docker-image-docker-in-docker)
 - [Docker socket binding](#use-docker-socket-binding)
 
-We recommend you use Docker-in-Docker, and
-[GitLab.com shared runners](../../user/gitlab_com/index.md#shared-runners)
-support Docker-in-Docker.
-
 If you don't want to execute a runner in privileged mode,
 but want to use `docker build`, you can also [use kaniko](using_kaniko.md).
 
@@ -94,6 +90,9 @@ Learn more about the [security of the `docker` group](https://blog.zopyx.com/on-
 The Docker image has all of the `docker` tools installed and can run
 the job script in context of the image in privileged mode.
 
+We recommend you use [Docker-in-Docker with TLS enabled](#docker-in-docker-with-tls-enabled),
+which is supported by [GitLab.com shared runners](../../user/gitlab_com/index.md#shared-runners).
+
 You should always specify a specific version of the image, like `docker:19.03.12`.
 If you use a tag like `docker:stable`, you have no control over which version is used.
 Unpredictable behavior can result, especially when new versions are released.
@@ -136,6 +135,13 @@ not without its own challenges:
 The Docker daemon supports connections over TLS. In Docker 19.03.12 and later,
 TLS is the default.
 
+WARNING:
+This task enables `--docker-privileged`. When you do this, you are effectively disabling all of
+the security mechanisms of containers and exposing your host to privilege
+escalation. Doing this can lead to container breakout. For more information,
+see the official Docker documentation about
+[runtime privilege and Linux capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities).
+
 To use Docker-in-Docker with TLS enabled:
 
 1. Install [GitLab Runner](https://docs.gitlab.com/runner/install/).
@@ -157,11 +163,6 @@ To use Docker-in-Docker with TLS enabled:
      To start the build and service containers, it's using the `privileged` mode.
      If you want to use [Docker-in-Docker](https://www.docker.com/blog/docker-can-now-run-within-docker/),
      you must always use `privileged = true` in your Docker containers.
-   - When you enable `--docker-privileged`, you are effectively disabling all of
-     the security mechanisms of containers and exposing your host to privilege
-     escalation. Doing this can lead to container breakout. For more information,
-     see the official Docker documentation about
-    [runtime privilege and Linux capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities).
    - This command mounts `/certs/client` for the service and build
      container, which is needed for the Docker client to use the
      certificates in that directory. For more information on how
@@ -677,19 +678,17 @@ to include the file.
 
 If you already have
 [`DOCKER_AUTH_CONFIG`](using_docker_images.md#determining-your-docker_auth_config-data)
-defined, you can use the variable and save it in
-`~/.docker/config.json`.
+defined, you can use the variable and save it in `~/.docker/config.json`.
 
-There are multiple ways to define this. For example:
+There are multiple ways to define this authentication:
 
 - In [`pre_build_script`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section)
   in the runner configuration file.
 - In [`before_script`](../yaml/README.md#before_script).
 - In [`script`](../yaml/README.md#script).
 
-Below is an example of
-[`before_script`](../yaml/README.md#before_script). The same command
-applies for any solution you implement.
+The following example shows [`before_script`](../yaml/README.md#before_script).
+The same commands apply for any solution you implement.
 
 ```yaml
 image: docker:19.03.13
