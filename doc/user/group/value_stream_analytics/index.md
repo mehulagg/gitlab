@@ -76,7 +76,7 @@ GitLab provides the ability to filter analytics based on a date range. To filter
 The "Time" metrics near the top of the page are measured as follows:
 
 - **Lead time**: median time from issue created to issue closed.
-- **Cycle time**: median time from first commit to issue closed. (A commit is only associated with an issue by [crosslinking in the commit message](../../project/issues/crosslinking_issues.md#from-commit-messages).)
+- **Cycle time**: median time from first commit to issue closed. (You can associate a commit with an issue by [crosslinking in the commit message](../../project/issues/crosslinking_issues.md#from-commit-messages).)
 
 ![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
 
