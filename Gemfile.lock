@@ -1,3 +1,11 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/gitlab-dangerfiles
+  revision: 0271204c84f7f10404d44005571219ae7709a958
+  branch: import-changes_size-dangerfile
+  specs:
+    gitlab-dangerfiles (1.1.0)
+      danger-gitlab
+
 PATH
   remote: vendor/shims/mimemagic
   specs:
@@ -441,8 +449,6 @@ GEM
       terminal-table (~> 1.5, >= 1.5.1)
     gitlab-chronic (0.10.5)
       numerizer (~> 0.2)
-    gitlab-dangerfiles (1.1.0)
-      danger-gitlab
     gitlab-experiment (0.5.1)
       activesupport (>= 3.0)
       scientist (~> 1.6, >= 1.6.0)
@@ -1423,7 +1429,7 @@ DEPENDENCIES
   gitaly (~> 13.9.0.pre.rc1)
   github-markup (~> 1.7.0)
   gitlab-chronic (~> 0.10.5)
-  gitlab-dangerfiles (~> 1.1.0)
+  gitlab-dangerfiles!
   gitlab-experiment (~> 0.5.1)
   gitlab-fog-azure-rm (~> 1.0.1)
   gitlab-fog-google (~> 1.13)

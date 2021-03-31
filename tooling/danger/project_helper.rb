@@ -5,7 +5,6 @@ module Tooling
     module ProjectHelper
       LOCAL_RULES ||= %w[
         changelog
-        changes_size
         commit_messages
         database
         documentation

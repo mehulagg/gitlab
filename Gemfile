@@ -399,7 +399,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 1.1.0', require: false
+  gem 'gitlab-dangerfiles', git: 'https://gitlab.com/gitlab-org/gitlab-dangerfiles', branch: 'import-changes_size-dangerfile', require: false
 end
 
 group :development, :test, :coverage do
