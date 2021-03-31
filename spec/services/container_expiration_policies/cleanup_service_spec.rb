@@ -155,7 +155,6 @@ RSpec.describe ContainerExpirationPolicies::CleanupService do
     end
   end
 
-
   def loopless_enabled?
     Feature.enabled?(:container_registry_expiration_policies_loopless)
   end
