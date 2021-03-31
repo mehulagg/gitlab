@@ -95,7 +95,7 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'renders run pipeline link' do
-          expect(page).to have_link('Run Pipeline')
+          expect(page).to have_link('Run pipeline')
         end
 
         it 'renders ci lint link' do
@@ -677,7 +677,7 @@ RSpec.describe 'Pipelines', :js do
           end
 
           it 'creates a new pipeline' do
-            expect { click_on 'Run Pipeline' }
+            expect { click_on 'Run pipeline' }
               .to change { Ci::Pipeline.count }.by(1)
 
             expect(Ci::Pipeline.last).to be_web
@@ -690,7 +690,7 @@ RSpec.describe 'Pipelines', :js do
                 fill_in "Input variable value", with: "value"
               end
 
-              expect { click_on 'Run Pipeline' }
+              expect { click_on 'Run pipeline' }
                 .to change { Ci::Pipeline.count }.by(1)
 
               expect(Ci::Pipeline.last.variables.map { |var| var.slice(:key, :secret_value) })
@@ -701,7 +701,7 @@ RSpec.describe 'Pipelines', :js do
 
         context 'without gitlab-ci.yml' do
           before do
-            click_on 'Run Pipeline'
+            click_on 'Run pipeline'
           end
 
           it { expect(page).to have_content('Missing CI config file') }
@@ -714,7 +714,7 @@ RSpec.describe 'Pipelines', :js do
               click_link 'master'
             end
 
-            expect { click_on 'Run Pipeline' }
+            expect { click_on 'Run pipeline' }
               .to change { Ci::Pipeline.count }.by(1)
           end
         end
@@ -762,7 +762,7 @@ RSpec.describe 'Pipelines', :js do
       end
 
       it 'has a clear caches button' do
-        expect(page).to have_button 'Clear Runner Caches'
+        expect(page).to have_button 'Clear runner caches'
       end
 
       describe 'user clicks the button' do
@@ -772,7 +772,7 @@ RSpec.describe 'Pipelines', :js do
           end
 
           it 'increments jobs_cache_index' do
-            click_button 'Clear Runner Caches'
+            click_button 'Clear runner caches'
             wait_for_requests
             expect(page.find('.flash-notice')).to have_content 'Project cache successfully reset.'
           end
@@ -780,7 +780,7 @@ RSpec.describe 'Pipelines', :js do
 
         context 'when project does not have jobs_cache_index' do
           it 'sets jobs_cache_index to 1' do
-            click_button 'Clear Runner Caches'
+            click_button 'Clear runner caches'
             wait_for_requests
             expect(page.find('.flash-notice')).to have_content 'Project cache successfully reset.'
           end
