@@ -503,7 +503,7 @@ for another **primary** node. All the old replication settings will be overwritt
 
 ## Promoting a secondary Geo cluster in GitLab Cloud Native Helm Charts
 
-When updating a Cloud Native Geo deployment, the process for updating any nodes that are external to the primary cluster does not differ from the non Cloud Native approach. As such you can always defer to [Promoting a secondary Geo node in single-secondary configurations](#promoting-a-secondary-geo-node-in-single-secondary-configurations) for more information.
+When updating a Cloud Native Geo deployment, the process for updating any nodes that are external to the secondary Kubernetes cluster does not differ from the non Cloud Native approach. As such you can always defer to [Promoting a secondary Geo node in single-secondary configurations](#promoting-a-secondary-geo-node-in-single-secondary-configurations) for more information.
 
 ### Step 1. Permanently disable the **primary** cluster
 
