@@ -66,6 +66,14 @@ class ApplicationRecord < ActiveRecord::Base
     end
   end
 
+  def create_or_load_association(association_name)
+    begin
+      public_send("create_#{association_name}")
+    rescue ActiveRecord::RecordNotUnique, PG::UniqueViolation
+      public_send(association_name)
+    end
+  end
+
   def self.underscore
     Gitlab::SafeRequestStore.fetch("model:#{self}:underscore") { self.to_s.underscore }
   end

@@ -10,6 +10,7 @@ module Projects
       @initialize_with_readme = Gitlab::Utils.to_boolean(@params.delete(:initialize_with_readme))
       @import_data            = @params.delete(:import_data)
       @relations_block        = @params.delete(:relations_block)
+      @reduce_db_queries      = @params.delete(:reduce_db_queries) || true
     end
 
     def execute
@@ -18,6 +19,8 @@ module Projects
       end
 
       @project = Project.new(params)
+
+      set_associations_loaded if @reduce_db_queries
 
       @project.visibility_level = @project.group.visibility_level unless @project.visibility_level_allowed_by_group?
 
@@ -39,7 +42,7 @@ module Projects
       if namespace_id
         # Find matching namespace and check if it allowed
         # for current user if namespace_id passed.
-        unless allowed_namespace?(current_user, namespace_id)
+        unless allowed_namespace?(current_user)
           @project.namespace_id = nil
           deny_namespace
           return @project
@@ -83,9 +86,8 @@ module Projects
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def allowed_namespace?(user, namespace_id)
-      namespace = Namespace.find_by(id: namespace_id)
-      current_user.can?(:create_projects, namespace)
+    def allowed_namespace?(user)
+      current_user.can?(:create_projects, project_namespace)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -135,7 +137,11 @@ module Projects
         end
 
         if Feature.enabled?(:specialized_project_authorization_workers, default_enabled: :yaml)
-          AuthorizedProjectUpdate::ProjectCreateWorker.perform_async(@project.id)
+          if @reduce_db_queries
+            AuthorizedProjectUpdate::ProjectCreateService.new(project).execute
+          else
+            AuthorizedProjectUpdate::ProjectCreateWorker.perform_async(@project.id)
+          end
           # AuthorizedProjectsWorker uses an exclusive lease per user but
           # specialized workers might have synchronization issues. Until we
           # compare the inconsistency rates of both approaches, we still run
@@ -266,6 +272,16 @@ module Projects
       @project_visibility ||= Gitlab::VisibilityLevelChecker
         .new(current_user, @project, project_params: { import_data: @import_data })
         .level_restricted?
+    end
+
+    def set_associations_loaded
+      if project_namespace.is_a?(Group)
+        @project.association(:group).target = project_namespace
+      else
+        @project.association(:group).target = nil
+      end
+
+      @project.association(:namespace).target = project_namespace
     end
   end
 end

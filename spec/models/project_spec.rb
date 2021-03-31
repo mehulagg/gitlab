@@ -191,7 +191,7 @@ RSpec.describe Project, factory_default: :keep do
       end
 
       it 'does not create another container expiration policy if there is already one' do
-        project = build(:project)
+        project = create(:project)
 
         expect do
           container_expiration_policy = create(:container_expiration_policy, project: project)
