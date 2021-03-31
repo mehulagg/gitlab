@@ -617,8 +617,8 @@ RSpec.describe API::Issues do
       post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user),
         params: { to_project_id: target_project.id, with_notes: true }
 
-       expect(response).to have_gitlab_http_status(:created)
-       expect(json_response['project_id']).to eq(target_project.id)
+      expect(response).to have_gitlab_http_status(:created)
+      expect(json_response['project_id']).to eq(target_project.id)
     end
   end
 
