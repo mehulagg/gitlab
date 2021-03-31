@@ -8463,6 +8463,15 @@ A `GitlabErrorTrackingDetailedErrorID` is a global ID. It is encoded as a string
 
 An example `GitlabErrorTrackingDetailedErrorID` is: `"gid://gitlab/Gitlab::ErrorTracking::DetailedError/1"`.
 
+### `GlobalID`
+
+A global identifier.
+
+A global identifier represents an object uniquely across the application.
+An example of such an identifier is "gid://gitlab/User/1".
+
+Global identifiers are encoded as strings.
+
 ### `GroupID`
 
 A `GroupID` is a global ID. It is encoded as a string.
