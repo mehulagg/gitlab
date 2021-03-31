@@ -163,6 +163,8 @@ class IssuableFinder
           User.where(id: params[:assignee_id])
         elsif assignee_username?
           User.where(username: params[:assignee_username])
+        elsif assignee_usernames?
+          User.where(username: params[:assignee_usernames])
         else
           User.none
         end
