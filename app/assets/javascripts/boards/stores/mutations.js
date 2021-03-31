@@ -171,50 +171,13 @@ export default {
     state.isSettingAssignees = isLoading;
   },
 
-  [mutationTypes.REQUEST_ADD_ISSUE]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_ADD_ISSUE_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_ADD_ISSUE_ERROR]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.MOVE_ISSUE]: (
-    state,
-    { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId },
-  ) => {
-    const fromList = state.boardLists[fromListId];
-    const toList = state.boardLists[toListId];
-
-    const issue = moveItemListHelper(originalIssue, fromList, toList);
-    Vue.set(state.boardItems, issue.id, issue);
-
-    removeItemFromList({ state, listId: fromListId, itemId: issue.id });
-    addItemToList({ state, listId: toListId, itemId: issue.id, moveBeforeId, moveAfterId });
-  },
-
-  [mutationTypes.MOVE_ISSUE_SUCCESS]: (state, { issue }) => {
+  [mutationTypes.UPDATE_ISSUE_SUCCESS]: (state, { issue }) => {
     const issueId = getIdFromGraphQLId(issue.id);
     Vue.set(state.boardItems, issueId, formatIssue({ ...issue, id: issueId }));
   },
 
-  [mutationTypes.MOVE_ISSUE_FAILURE]: (
-    state,
-    { originalIssue, fromListId, toListId, originalIndex },
-  ) => {
-    state.error = s__('Boards|An error occurred while moving the issue. Please try again.');
+  [mutationTypes.UPDATE_ISSUE_FAILURE]: (state, { originalIssue }) => {
     Vue.set(state.boardItems, originalIssue.id, originalIssue);
-    removeItemFromList({ state, listId: toListId, itemId: originalIssue.id });
-    addItemToList({
-      state,
-      listId: fromListId,
-      itemId: originalIssue.id,
-      atIndex: originalIndex,
-    });
   },
 
   [mutationTypes.REQUEST_UPDATE_ISSUE]: () => {
@@ -233,12 +196,17 @@ export default {
     state.error = s__('Boards|An error occurred while creating the issue. Please try again.');
   },
 
-  [mutationTypes.ADD_ISSUE_TO_LIST]: (state, { list, issue, position }) => {
+  [mutationTypes.ADD_ISSUE_TO_LIST]: (
+    state,
+    { list, issue, position, moveBeforeId = undefined, moveAfterId = undefined },
+  ) => {
     addItemToList({
       state,
       listId: list.id,
       itemId: issue.id,
       atIndex: position,
+      moveBeforeId,
+      moveAfterId,
     });
     Vue.set(state.boardItems, issue.id, issue);
   },

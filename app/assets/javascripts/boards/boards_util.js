@@ -1,4 +1,4 @@
-import { sortBy } from 'lodash';
+import { sortBy, cloneDeep } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { ListType, NOT_FILTER } from './constants';
 
@@ -114,7 +114,7 @@ export function formatIssueInput(issueInput, boardConfig) {
 }
 
 export function moveItemListHelper(item, fromList, toList) {
-  const updatedItem = item;
+  const updatedItem = cloneDeep(item);
   if (
     toList.listType === ListType.label &&
     !updatedItem.labels.find((label) => label.id === toList.label.id)

@@ -49,6 +49,7 @@ import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic
 
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
+import { dispatch } from 'codesandbox-api';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -496,25 +497,19 @@ export default {
   ) => {
     const originalIssue = state.boardItems[itemId];
     const fromList = state.boardItemsByListId[fromListId];
+    const fromList = state.boardLists[fromListId];
+    const toList = state.boardLists[toListId];
     const originalIndex = fromList.indexOf(Number(itemId));
-    commit(types.MOVE_ISSUE, {
-      originalIssue,
-      fromListId,
-      toListId,
-      moveBeforeId,
-      moveAfterId,
-      epicId,
-    });
+    const [ updatedIssue, skipRemoval ] = moveItemListHelper(originalIssue, fromList, toList);
 
-    const { boardId } = state;
-    const [fullProjectPath] = itemPath.split(/[#]/);
-
+    const rollback = dispatch('eagerMoveIssue', { originalIssue, updatedIssue, skipRemoval });
+  
     gqlClient
       .mutate({
         mutation: issueMoveListMutation,
         variables: {
-          projectPath: fullProjectPath,
-          boardId: fullBoardId(boardId),
+          projectPath: itemPath.split(/[#]/)[0],
+          boardId: fullBoardId(state.boardId),
           iid: itemIid,
           fromListId: getIdFromGraphQLId(fromListId),
           toListId: getIdFromGraphQLId(toListId),
@@ -528,12 +523,50 @@ export default {
           throw new Error();
         } else {
           const issue = data.issueMoveList?.issue;
-          commit(types.MOVE_ISSUE_SUCCESS, { issue });
+          commit(types.UPDATE_ISSUE_SUCCESS, { issue });
         }
       })
-      .catch(() =>
-        commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
-      );
+      .catch(() => {
+        commit(types.SET_ERROR, s__('Boards|An error occurred while moving the issue. Please try again.'));
+        rollback();
+      });
+  },
+
+  eagerMoveIssue: ({ originalIssue, updatedIssue, skipRemoval }) => {
+    commit(types.ADD_ISSUE_TO_LIST, {
+      updatedIssue,
+      fromListId,
+      toListId,
+      moveBeforeId,
+      moveAfterId,
+      epicId,
+    });
+
+    if (!skipRemoval) {
+      commit(types.REMOVE_ISSUE_FROM_LIST, {
+        list: fromList,
+        issue: originalIssue,
+      });
+    }
+
+    const rollback = () => {
+      commit(types.UPDATE_ISSUE_FAILURE, { originalIssue });
+      commit(types.REMOVE_ISSUE_FROM_LIST, {
+        list: toList,
+        issue: originalIssue,
+      });
+  
+      if (!skipRemoval) {
+        commit(types.ADD_ISSUE_TO_LIST, {
+          originalIssue,
+          listId: fromListId,
+          itemId: originalIssue.id,
+          atIndex: originalIndex,
+        });
+      }
+    };
+
+    return rollback;
   },
 
   moveEpic: ({ state, commit }, { itemId, fromListId, toListId, moveBeforeId, moveAfterId }) => {

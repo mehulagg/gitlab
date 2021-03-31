@@ -2,7 +2,6 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { sortableStart, sortableEnd } from '~/boards/mixins/sortable_default_options';
 import { sprintf, __ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import eventHub from '../eventhub';
@@ -153,11 +152,7 @@ export default {
         }
       });
     },
-    handleDragOnStart() {
-      sortableStart();
-    },
     handleDragOnEnd(params) {
-      sortableEnd();
       const { newIndex, oldIndex, from, to, item } = params;
       const { itemId, itemIid, itemPath } = item.dataset;
       const { children } = to;
@@ -228,7 +223,6 @@ export default {
       :class="{ 'bg-danger-100': boardItemsSizeExceedsMax }"
       class="board-list gl-w-full gl-h-full gl-list-style-none gl-mb-0 gl-p-2 js-board-list"
       data-testid="tree-root-wrapper"
-      @start="handleDragOnStart"
       @end="handleDragOnEnd"
     >
       <board-card
