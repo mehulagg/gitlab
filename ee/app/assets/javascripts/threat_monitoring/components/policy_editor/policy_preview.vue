@@ -1,8 +1,9 @@
 <script>
-import { GlTabs, GlTab, GlSafeHtmlDirective } from '@gitlab/ui';
+import { GlAlert, GlTabs, GlTab, GlSafeHtmlDirective } from '@gitlab/ui';
 
 export default {
   components: {
+    GlAlert,
     GlTabs,
     GlTab,
   },
@@ -16,7 +17,8 @@ export default {
     },
     policyDescription: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     initialTab: {
       type: Number,
@@ -40,9 +42,15 @@ export default {
     </gl-tab>
     <gl-tab :title="s__('NetworkPolicies|Rule')">
       <div
+        v-if="policyDescription"
         v-safe-html:[$options.safeHtmlConfig]="policyDescription"
         class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-py-3 gl-px-4 gl-border-1 gl-border-solid gl-border-gray-100"
       ></div>
+      <div v-else>
+        <gl-alert variant="info" :dismissible="false"
+          >{{ s__('NetworkPolicies|Unsupported attribute') }}
+        </gl-alert>
+      </div>
     </gl-tab>
   </gl-tabs>
 </template>

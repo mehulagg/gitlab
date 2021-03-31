@@ -1,0 +1,5 @@
+---
+title: Throw an error when yaml mode contains unparsable attributes
+merge_request: 54987
+author:
+type: fixed

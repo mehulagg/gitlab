@@ -17,14 +17,22 @@ export default {
     },
   },
   computed: {
+    canHumanizePolicy() {
+      console.log('to/from', toYaml(fromYaml(this.value)));
+      console.log('original', this.value);
+      return this.value.includes(toYaml(fromYaml(this.value)));
+    },
+    initialTab() {
+      return this.canHumanizePolicy ? 1 : 0;
+    },
     policy() {
-      return fromYaml(this.value);
+      return this.canHumanizePolicy ? fromYaml(this.value) : null;
     },
     humanizedPolicy() {
-      return humanizeNetworkPolicy(this.policy);
+      return this.canHumanizePolicy ? humanizeNetworkPolicy(this.policy) : null;
     },
     policyYaml() {
-      return toYaml(this.policy);
+      return this.value;
     },
   },
   methods: {
@@ -43,12 +51,14 @@ export default {
     <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Policy type') }}</h5>
     <p>{{ s__('NetworkPolicies|Network Policy') }}</p>
 
-    <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Description') }}</h5>
-    <gl-form-textarea :value="policy.description" @input="updateManifest" />
+    <div v-if="canHumanizePolicy">
+      <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Description') }}</h5>
+      <gl-form-textarea :value="policy.description" @input="updateManifest" />
+    </div>
 
     <policy-preview
       class="gl-mt-4"
-      :initial-tab="1"
+      :initial-tab="initialTab"
       :policy-yaml="policyYaml"
       :policy-description="humanizedPolicy"
     />
