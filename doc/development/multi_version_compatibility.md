@@ -59,7 +59,7 @@ Depending on the support level for the feature, the contract phase could be dela
 
 ## Expand and contract examples
 
-Route changes, changing Sidekiq worker parameters, and database migrations are all perfect examples of a breaking change.
+Route changes, changing Sidekiq worker parameters, database migrations, and interdependent frontend and backend changes are all perfect examples of a breaking change.
 Let's see how we can handle them safely.
 
 ### Route changes
@@ -141,7 +141,7 @@ With all those details in mind, let's imagine we need to replace a query, and th
 This is only an example. More complex migrations, especially when background migrations are needed may
 require more than one milestone. For details please refer to our [migration style guide](migration_style_guide.md).
 
-### Making changes to Backend APIs and Frontend clients
+### Interdependent frontend and backend changes
 
 When making a change to any backend API (internal, REST or GraphQL) we should make sure that the existing behaviour is supported in the same change. The same is true of any corresponding frontend changes. There will be a period of time where all permutations of old and new code are possible:
 
