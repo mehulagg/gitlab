@@ -677,26 +677,24 @@ RSpec.describe Group do
   end
 
   describe '#scoped_variables_available?' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:group) { create(:group) }
 
     subject { group.scoped_variables_available? }
 
-    where(:feature_enabled, :feature_available, :scoped_variables_available) do
-      true  | true  | true
-      false | true  | false
-      true  | false | false
-      false | false | false
+    before do
+      stub_licensed_features(group_scoped_ci_variables: feature_available)
     end
 
-    with_them do
-      before do
-        stub_feature_flags(scoped_group_variables: feature_enabled)
-        stub_licensed_features(group_scoped_ci_variables: feature_available)
-      end
+    context 'licensed feature is available' do
+      let(:feature_available) { true }
 
-      it { is_expected.to eq(scoped_variables_available) }
+      it { is_expected.to be true }
+    end
+
+    context 'licensed feature is not available' do
+      let(:feature_available) { false }
+
+      it { is_expected.to be false }
     end
   end
 

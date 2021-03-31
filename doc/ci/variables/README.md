@@ -407,7 +407,8 @@ when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually
 
 ## Group-level CI/CD variables
 
-> Introduced in GitLab 9.4.
+> - Introduced in GitLab 9.4.
+> - Support for [environment scopes](https://gitlab.com/gitlab-org/gitlab/-/issues/2874) added to GitLab Premium in 13.11
 
 You can define per-project or per-group variables that are set in the pipeline environment.
 Group-level variables are stored out of the repository (not in `.gitlab-ci.yml`).

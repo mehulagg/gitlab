@@ -244,8 +244,7 @@ module EE
     end
 
     def scoped_variables_available?
-      ::Feature.enabled?(:scoped_group_variables, self, default_enabled: :yaml) &&
-        feature_available?(:group_scoped_ci_variables)
+      feature_available?(:group_scoped_ci_variables)
     end
 
     def actual_size_limit

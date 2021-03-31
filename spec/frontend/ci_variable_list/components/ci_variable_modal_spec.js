@@ -152,7 +152,7 @@ describe('Ci variable modal', () => {
 
   describe('Environment scope', () => {
     describe('group level variables', () => {
-      const createGroupComponent = (scopedGroupVariables, groupScopedCiVariables) => {
+      const createGroupComponent = (groupScopedCiVariables) => {
         store = createStore();
         store.state.isGroup = true;
         wrapper = mount(CiVariableModal, {
@@ -164,7 +164,6 @@ describe('Ci variable modal', () => {
           store,
           provide: {
             glFeatures: {
-              scopedGroupVariables,
               groupScopedCiVariables,
             },
           },
@@ -172,23 +171,15 @@ describe('Ci variable modal', () => {
       };
 
       it('renders the environment dropdown', () => {
-        createGroupComponent(true, true);
+        createGroupComponent(true);
 
         expect(wrapper.find(CiEnvironmentsDropdown).exists()).toBeTruthy();
         expect(wrapper.find(CiEnvironmentsDropdown).isVisible()).toBeTruthy();
       });
 
-      describe('feature flag is disabled', () => {
-        it('hides the dropdown', () => {
-          createGroupComponent(false, true);
-
-          expect(wrapper.find(CiEnvironmentsDropdown).exists()).toBeFalsy();
-        });
-      });
-
       describe('licensed feature is not available', () => {
         it('disables the dropdown', () => {
-          createGroupComponent(true, false);
+          createGroupComponent(false);
 
           const environmentScopeInput = wrapper
             .find('[data-testid="environment-scope"]')
