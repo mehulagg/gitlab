@@ -406,8 +406,12 @@ When ready to merge:
   circling back with the author about that. Otherwise, if the MR only has a few commits, we'll
   be respecting the author's setting by not squashing them.
 
-- **Start a new merge request pipeline with the `Run Pipeline` button in the merge
-  request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).** Note that:
+**If the merge request is from a fork, review all changes thoroughly for malicious code before
+starting a [Pipeline for Merged Results](../ci/merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project).**
+
+- Start a new merge request pipeline with the `Run Pipeline` button in the merge
+  request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).
+  Note that:
   - If **[master is broken](https://about.gitlab.com/handbook/engineering/workflow/#broken-master),
     do not merge the merge request** except for
     [very specific cases](https://about.gitlab.com/handbook/engineering/workflow/#criteria-for-merging-during-broken-master).
@@ -415,10 +419,6 @@ When ready to merge:
   - If the **latest [Pipeline for Merged Results](../ci/merge_request_pipelines/pipelines_for_merged_results/#pipelines-for-merged-results)** finished less than 2 hours ago, you
     might merge without starting a new pipeline as the merge request is close
     enough to `master`.
-  - If the **merge request is from a fork**, we can use [Pipelines for Merged Results from a forked project](../ci/merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project) with caution.
-    Before triggering the pipeline, review all changes for **malicious code**.
-    If you cannot trigger the pipeline, review the status of the fork relative to `master`.
-    If it's more than 100 commits behind, ask the author to rebase it before merging.
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
   subsequent revisions for anything that would be spotted after that.
 
