@@ -160,6 +160,9 @@ export default {
         .split(EXCLUDED_URLS_SEPARATOR)
         .map((url) => url.trim());
     },
+    isTargetAPI() {
+      return this.form.fields.targetType.value === targetTypes.api.value;
+    },
   },
   async mounted() {
     if (this.isEdit) {
@@ -402,7 +405,7 @@ export default {
     </gl-form-group>
 
     <dast-site-auth-section
-      v-if="glFeatures.securityDastSiteProfilesAdditionalFields"
+      v-if="glFeatures.securityDastSiteProfilesAdditionalFields && !isTargetAPI"
       v-model="authSection"
       :disabled="isPolicyProfile"
       :show-validation="form.showValidation"

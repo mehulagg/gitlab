@@ -74,6 +74,15 @@ describe('DastSiteProfileForm', () => {
     });
   };
 
+  const setTargetType = (type) => {
+    const radio = wrapper
+      .findAll('input[type="radio"]')
+      .filter((r) => r.attributes('value') === type)
+      .at(0);
+    radio.element.selected = true;
+    radio.trigger('change');
+  };
+
   const mockClientFactory = (handlers) => {
     const mockClient = createMockClient();
 
@@ -215,6 +224,16 @@ describe('DastSiteProfileForm', () => {
         expect(findByNameAttribute('password').attributes('placeholder')).toBe('••••••••');
       });
     });
+
+    describe('when target type is API', () => {
+      beforeEach(() => {
+        setTargetType('API');
+      });
+
+      it('should hide auth section', () => {
+        expect(findAuthSection().exists()).toBe(false);
+      });
+    });
   });
 
   describe.each`
@@ -236,7 +255,6 @@ describe('DastSiteProfileForm', () => {
 
     it('populates the fields with the data passed in via the siteProfile prop', () => {
       expect(findProfileNameInput().element.value).toBe(siteProfile?.name ?? '');
-      // add here
     });
 
     describe('submission', () => {
