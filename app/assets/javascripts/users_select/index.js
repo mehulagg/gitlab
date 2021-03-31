@@ -113,23 +113,6 @@ function UsersSelect(currentUser, els, options = {}) {
       return $selectbox.find(`input[name="${$dropdown.data('fieldName')}"]`);
     };
 
-    // const dropdownHeaderNeeded = function (data, header) {
-    //   let index;
-    //   let obj;
-    //   let len;
-    //
-    //   for (index = 0, len = data.length; index < len; index += 1) {
-    //     obj = data[index];
-    //     console.log(obj, header, '***BEFORE MATCH**');
-    //
-    //     if (obj.content === header) {
-    //       console.log(obj.content, header, '***MATCH**');
-    //       return false;
-    //     }
-    //   }
-    //   return true;
-    // };
-
     const getSelected = function () {
       return getSelectedUserInputs()
         .map((index, input) => parseInt(input.value, 10))
@@ -304,6 +287,13 @@ function UsersSelect(currentUser, els, options = {}) {
             });
 
           users = data.concat(selectedUsers);
+          // since our issue of double dividers/headers only happens on mult-select case AND
+          // we have to rely on the line above creating a new array, this belongs here
+          // https://gitlab.com/gitlab-org/gitlab/-/issues/325991
+          // longterm: we should ideally handle this type of formatting outside of processing...
+          users = users.filter(
+            (user) => user.content !== $dropdown.data('dropdownHeader') && user.type !== 'divider',
+          );
         }
 
         let anyUser;
@@ -347,8 +337,6 @@ function UsersSelect(currentUser, els, options = {}) {
             users.unshift(anyUser);
           }
 
-          users = users.filter(user => (user.content !== $dropdown.data('dropdownHeader') && user.type !== 'divider'));
-
           if (showDivider) {
             users.splice(showDivider, 0, { type: 'divider' });
           }
@@ -374,10 +362,6 @@ function UsersSelect(currentUser, els, options = {}) {
               selectedUsers.forEach((selectedUser) => {
                 showDivider += 1;
                 users.splice(showDivider, 0, selectedUser);
-                // console.log(users[showDivider], users[showDivider + 1], users[showDivider + 2], '***HEADER***')
-                // if (users[showDivider + 2].content === $dropdown.data('dropdownHeader')) {
-                //   users.splice(showDivider + 2, 1);
-                // }
               });
 
               users.splice(showDivider + 1, 0, { type: 'divider' });
