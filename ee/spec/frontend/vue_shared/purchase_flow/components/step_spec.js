@@ -1,9 +1,13 @@
 import { GlButton } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import StepSummary from 'ee/vue_shared/purchase_flow/components/step_summary.vue';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
 import updateStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/update_active_step.mutation.graphql';
+import waitForPromises from 'helpers/wait_for_promises';
+import * as flash from '~/flash';
 import { STEPS } from '../mock_data';
 import { createMockApolloProvider } from '../spec_helper';
 
@@ -35,8 +39,15 @@ describe('Step', () => {
     });
   }
 
+  beforeEach(() => {
+    Sentry.captureException = jest.fn();
+    flash.default = jest.fn();
+  });
+
   afterEach(() => {
     wrapper.destroy();
+    Sentry.captureException.mockReset();
+    flash.default.mockReset();
   });
 
   describe('Step Body', () => {
@@ -62,6 +73,19 @@ describe('Step', () => {
       await activateFirstStep(mockApollo);
       wrapper = createComponent({ apolloProvider: mockApollo });
       expect(wrapper.find(StepSummary).exists()).toBe(true);
+    });
+
+    it('displays an error when editing a wrong step', async () => {
+      const mockApollo = createMockApolloProvider(STEPS, 1);
+      await activateFirstStep(mockApollo);
+      wrapper = createComponent({
+        propsData: { stepId: 'does not exist' },
+        apolloProvider: mockApollo,
+      });
+      wrapper.vm.edit();
+      await waitForPromises();
+      expect(flash.default).toHaveBeenCalledWith({ message: GENERAL_ERROR_MESSAGE });
+      expect(Sentry.captureException).toHaveBeenCalledTimes(1);
     });
 
     it('should not be shown when this step is not valid and not active', async () => {
@@ -143,6 +167,15 @@ describe('Step', () => {
       wrapper = createComponent({ apolloProvider: mockApollo });
 
       expect(wrapper.find(GlButton).attributes('disabled')).toBeUndefined();
+    });
+
+    it('displays an error if navigating too far', async () => {
+      const mockApollo = createMockApolloProvider(STEPS, 2);
+      wrapper = createComponent({ propsData: { stepId: STEPS[2].id }, apolloProvider: mockApollo });
+      wrapper.find(GlButton).vm.$emit('click');
+      await waitForPromises();
+      expect(flash.default).toHaveBeenCalledWith({ message: GENERAL_ERROR_MESSAGE });
+      expect(Sentry.captureException).toHaveBeenCalledTimes(1);
     });
   });
 });

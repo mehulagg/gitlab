@@ -1,7 +1,10 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { mapState, mapActions } from 'vuex';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow//constants';
 import activeStepQuery from 'ee/vue_shared/purchase_flow/graphql/queries/active_step.query.graphql';
+import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import { STEPS } from '../../constants';
 
@@ -19,6 +22,10 @@ export default {
     isActive: {
       query: activeStepQuery,
       update: ({ activeStep }) => activeStep.id === STEPS[3].id,
+      error: (error) => {
+        Sentry.captureException(error);
+        createFlash({ message: GENERAL_ERROR_MESSAGE });
+      },
     },
   },
   computed: {
