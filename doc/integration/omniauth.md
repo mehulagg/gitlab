@@ -27,7 +27,7 @@ on each provider's documentation, make sure to first read this document as it
 contains some settings that are common for all providers.
 
 - [Atlassian Crowd](../administration/auth/crowd.md)
-- [Atlassian](atlassian.md)
+- [Atlassian](../administration/auth/atlassian.md)
 - [Auth0](auth0.md)
 - [Authentiq](../administration/auth/authentiq.md)
 - [AWS Cognito](../administration/auth/cognito.md)
