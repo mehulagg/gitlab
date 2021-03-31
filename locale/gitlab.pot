@@ -1770,6 +1770,9 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
+msgid "Activity|An error occured while retrieving activity. Reload the page to try again."
+msgstr ""
+
 msgid "Add"
 msgstr ""
 
