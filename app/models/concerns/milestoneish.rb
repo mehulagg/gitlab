@@ -69,7 +69,9 @@ module Milestoneish
   end
 
   def sorted_merge_requests(user)
-    merge_requests_visible_to_user(user).sort_by_attribute('label_priority')
+    merge_requests_visible_to_user(user)
+      .sort_by_attribute('label_priority')
+      .preload_routables.preload(:assignees, :labels)
   end
 
   def merge_requests_visible_to_user(user)
