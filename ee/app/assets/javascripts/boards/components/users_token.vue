@@ -61,12 +61,9 @@ export default {
         return { username: '', avatarUrl: '' }
       }
 
-      const x = this.users.find(
+      return this.users.find(
         (user) => user.username.toLowerCase() === stripQuotes(this.currentValue),
       );
-
-      console.log(x.username)
-      return x
     },
   },
   methods: {
@@ -85,7 +82,7 @@ export default {
     @input="searchForToken"
   >
     <template #view-token="{ listeners }">
-      <gl-token variant="search-value" v-on="listeners">
+      <gl-token data-testid="user-selected-token" variant="search-value" v-on="listeners">
         <gl-avatar data-testid="token-avatar" :size="16" :src="activeUser.avatarUrl" />
         {{ activeUser.username}}
       </gl-token>
@@ -98,7 +95,7 @@ export default {
           :key="author.username"
           :value="author.username"
         >
-          <div data-testid="test" class="gl-display-flex">
+          <div class="gl-display-flex">
             <gl-avatar :size="32" :src="author.avatarUrl" />
             <div>
               <div>{{ author.name }}</div>

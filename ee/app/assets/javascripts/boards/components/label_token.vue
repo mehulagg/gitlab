@@ -80,7 +80,7 @@ export default {
     @input="searchForToken"
   >
     <template #view-token="{ inputValue, cssClasses, listeners }">
-      <gl-token variant="search-value" :class="cssClasses" :style="containerStyle" v-on="listeners"
+      <gl-token data-testid="label-token" variant="search-value" :class="cssClasses" :style="containerStyle" v-on="listeners"
         >~{{ activeLabel ? activeLabel.title : inputValue }}</gl-token
       >
     </template>
@@ -90,6 +90,7 @@ export default {
         <gl-filtered-search-suggestion v-for="label in labels" :key="label.id" :value="label.title">
           <div class="gl-display-flex">
             <span
+              data-testid="token-background-color"
               :style="{ backgroundColor: label.color }"
               class="gl-display-inline-block mr-2 p-2"
             ></span>

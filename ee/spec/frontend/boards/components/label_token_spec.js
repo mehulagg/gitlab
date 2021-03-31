@@ -1,8 +1,8 @@
-import { GlFilteredSearchToken, GlFilteredSearchSuggestion, GlFilteredSearchTokenSegment, GlAvatar } from '@gitlab/ui';
+import { GlFilteredSearchToken, GlFilteredSearchSuggestion, GlFilteredSearchTokenSegment } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import UsersToken from 'ee/boards/components/users_token.vue';
-import GroupUsersQuery from 'ee/boards/graphql/group_members.query.graphql';
+import LabelToken from 'ee/boards/components/label_token.vue';
+import GroupLabelsQuery from 'ee/boards/graphql/group_labels.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
@@ -10,21 +10,21 @@ const localVue = createLocalVue();
 
 localVue.use(VueApollo);
 
-const authors = [{ user: { id: 'root', username: 'root name', avatarUrl: 'rootNameAvatar', name: 'root' }}, { user: { id: 'one', username: 'one', avatarUrl: 'oneAvatar', name: 'root' }}];
+const labels = [{ node: { id: 'first label', title: 'first label', color: 'red', textColor: 'white' }}, { node: { id: 'second label', title: 'second label', color: 'green', textColor: 'white' }}];
 
-describe('UserToken', () => {
+describe('LabelToken', () => {
   let mockApollo;
   let wrapper;
   let querySpy;
 
   const createComponentWithApollo = async (active = false) => {
-    querySpy = jest.fn().mockResolvedValue({ data: { group: { groupMembers: { nodes: authors} }} })
+    querySpy = jest.fn().mockResolvedValue({ data: { group: { labels: { edges: labels} }} })
     mockApollo = createMockApollo([
-      [GroupUsersQuery, querySpy],
+      [GroupLabelsQuery, querySpy],
     ]);
 
 
-  wrapper = mount(UsersToken, {
+  wrapper = mount(LabelToken, {
       localVue,
       apolloProvider: mockApollo,
       provide: {
@@ -34,7 +34,7 @@ describe('UserToken', () => {
       },
       propsData: {
         config: { fullPath: '' },
-        value: { data: 'root name' },
+        value: { data: 'first label' },
         active,
       },
       stubs: {
@@ -52,7 +52,6 @@ describe('UserToken', () => {
     wrapper = null;
   })
 
-  // need loading
   describe('default', () => {
     it('renders GlFilteredSearchToken', async () => {
       await createComponentWithApollo();
@@ -60,23 +59,15 @@ describe('UserToken', () => {
       expect(wrapper.find(GlFilteredSearchToken).exists()).toBe(true)
     });
 
-    it('renders GlAvatar with the correct src attribute', async () => {
-      await createComponentWithApollo();
-
-      await waitForPromises();
-
-      expect(wrapper.find('[data-testid="user-selected-token"]').find('[data-testid="token-avatar"]').props('src')).toBe('rootNameAvatar')
-    });
-
     it('renders GlToken with the correct text', async () => {
       await createComponentWithApollo();
 
       await waitForPromises();
 
-      expect(wrapper.find('[data-testid="user-selected-token"]').text()).toBe('root name')
+      expect(wrapper.find('[data-testid="label-token"]').text()).toBe('~first label')
     });
 
-    it('renders GlFilteredSuggestion for every user', async () => {
+    it('renders GlFilteredSuggestion for every label', async () => {
       await createComponentWithApollo(true);
 
       await waitForPromises();
@@ -86,9 +77,8 @@ describe('UserToken', () => {
       await waitForPromises();
 
       wrapper.findAll(GlFilteredSearchSuggestion).wrappers.forEach((w, idx) => {
-        expect(w.text()).toContain(`@${authors[idx].user.username}`);
-        expect(w.text()).toContain(`${authors[idx].user.name}`);
-        expect(w.find(GlAvatar).props('src')).toBe(authors[idx].user.avatarUrl);
+        expect(w.text()).toContain(labels[idx].node.title);
+        expect(w.find('[data-testid="token-background-color"]').element.style.backgroundColor).toContain(labels[idx].node.color)
       });
 
     });
