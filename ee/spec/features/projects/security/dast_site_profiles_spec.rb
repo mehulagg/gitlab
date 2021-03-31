@@ -20,6 +20,10 @@ RSpec.describe 'User sees Scanner profile' do
   context 'when feature is available' do
     before do
       stub_licensed_features(security_on_demand_scans: true)
+      stub_feature_flags(
+        security_dast_site_profiles_additional_fields: false,
+        security_dast_site_profiles_api_option: false
+      )
       visit(profile_form_path)
     end
 
