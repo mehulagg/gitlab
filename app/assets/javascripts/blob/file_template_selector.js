@@ -38,6 +38,9 @@ export default class FileTemplateSelector {
     }
 
     this.$wrapper.removeClass('hidden');
+    setImmediate(() => {
+      this.$dropdown.focus();
+    });
   }
 
   hide() {

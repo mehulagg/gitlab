@@ -61,8 +61,6 @@ export default {
         label: this.trackLabel,
         property: this.humanAccess,
       },
-      observer: null,
-      show: true,
     };
   },
   computed: {
@@ -82,29 +80,6 @@ export default {
       return `${this.trackLabel}_${this.dismissKey}`;
     },
   },
-  created() {
-    /**
-     * The suggest_gitlab_ci_yml popover depends on the template selector being visible which
-     * remains hidden until a value has been selected in the template type selector. In this case,
-     * we need to wait until the target actually becomes visible to show the popover. Otherwise, the
-     * popover might not appear until the selector is hovered/focused.
-     */
-    const target = document.querySelector(this.target);
-    const isTargetVisible = () => target.offsetParent !== null;
-    if (!isTargetVisible()) {
-      this.show = false;
-      this.observer = new MutationObserver(() => {
-        if (isTargetVisible) {
-          this.show = true;
-          this.trackOnShow();
-          this.observer.disconnect();
-        }
-      });
-      this.observer.observe(document.querySelector(this.target), { attributes: true });
-    } else {
-      this.trackOnShow();
-    }
-  },
   mounted() {
     if (
       this.trackLabel === 'suggest_commit_first_project_gitlab_ci_yml' &&
@@ -112,9 +87,8 @@ export default {
     ) {
       scrollToElement(document.querySelector(this.target));
     }
-  },
-  beforeDestroy() {
-    this.observer?.disconnect();
+
+    this.trackOnShow();
   },
   methods: {
     onDismiss() {
@@ -131,10 +105,9 @@ export default {
 <template>
   <gl-popover
     v-if="!popoverDismissed"
-    :show="show"
+    show
     :target="target"
     placement="right"
-    triggers="manual"
     container="viewport"
     :css-classes="['suggest-gitlab-ci-yml', 'ml-4']"
   >
