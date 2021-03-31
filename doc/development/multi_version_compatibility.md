@@ -143,7 +143,7 @@ require more than one milestone. For details please refer to our [migration styl
 
 ### Interdependent frontend and backend changes
 
-When making a change to any backend API (internal, REST or GraphQL) we should make sure that the existing behaviour is supported in the same change. The same is true of any corresponding frontend changes. There will be a period of time where all permutations of old and new code are possible:
+When making a change to any backend API (internal, REST or GraphQL) we should make sure that the existing behavior is supported in the same change. The same is true of any corresponding frontend changes. There will be a period of time where all permutations of old and new code are possible:
 
 1. New frontend code using new backend code
 2. New frontend code using old backend code
