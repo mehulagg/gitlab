@@ -33,7 +33,7 @@ selected on the dashboard](#time-range-controls)
 We're currently displaying the information in 2 formats:
 
 1. Availability: This number can be compared to GitLab.com's overall
-   availability of 99.95% uptime.
+   availability target of 99.95% uptime.
 1. Budget Spent: This shows the time over the past 30 days that
    features owned by the group have not been performing satisfactory.
 
