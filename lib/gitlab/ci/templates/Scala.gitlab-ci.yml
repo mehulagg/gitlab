@@ -1,3 +1,12 @@
+# This is a GitLab CI/CD template that has the following metadata.
+# For more information, see https://docs.gitlab.com/ee/development/cicd/templates.html.
+.cicd-template-metadata:
+    name: Scala
+    description: This is a CI/CD template for <purpose> ...
+    type: pipeline
+    group: group::your-group
+    ignore_guideline_violation: true
+
 # Official OpenJDK Java image. Look for the different tagged releases at
 # https://hub.docker.com/_/openjdk/ . A Java image is not required
 # but an image with a JVM speeds up the build a bit.

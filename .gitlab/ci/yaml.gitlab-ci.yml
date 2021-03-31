@@ -8,7 +8,8 @@ lint-yaml:
   stage: test
   needs: []
   variables:
-    LINT_PATHS: .gitlab-ci.yml .gitlab/ci lib/gitlab/ci/templates changelogs
+    # lib/gitlab/ci/templates is temporairly disabled, see https://gitlab.com/gitlab-org/gitlab/-/issues/326411.
+    LINT_PATHS: .gitlab-ci.yml .gitlab/ci changelogs
   script:
     - '[[ ! -d "ee/" ]] || export LINT_PATHS="$LINT_PATHS ee/changelogs"'
     - yamllint -f colored $LINT_PATHS
