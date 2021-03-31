@@ -13,9 +13,18 @@ module Issuable
     def execute(type)
       ids = params.delete(:issuable_ids).split(",")
       set_update_params(type)
-      items = update_issuables(type, ids)
 
-      response_success(payload: { count: items.count })
+      items = nil
+      queries = ActiveRecord::QueryRecorder.new do
+        items = update_issuables(type, ids)
+      end
+
+      if $stdout.isatty
+        $stdout.puts "\nQueries:\n#{queries.log.grep(/SELECT/).join("\n")}"
+        $stdout.puts "\nDB count: #{queries.count}"
+      end
+
+      response_success(payload: { count: items.size })
     rescue ArgumentError => e
       response_error(e.message, 422)
     end
@@ -59,10 +68,17 @@ module Issuable
 
     def find_issuables(parent, model_class, ids)
       if parent.is_a?(Project)
-        model_class.id_in(ids).of_projects(parent)
+        projects = parent
       elsif parent.is_a?(Group)
-        model_class.id_in(ids).of_projects(parent.all_projects)
+        projects = parent.all_projects
+      else
+        return
       end
+
+      model_class
+        .id_in(ids)
+        .of_projects(projects)
+        .includes_for_bulk_update
     end
 
     def response_success(message: nil, payload: nil)
