@@ -507,7 +507,7 @@ When updating a Cloud Native Geo deployment, the process for updating any nodes 
 
 ### Step 1. Permanently disable the **primary** cluster
 
-Connect to your primary cluster and disable the GitLab webservice and sidekiq pods
+Connect to your primary cluster and disable the GitLab webservice and Sidekiq pods
 
 ```shell
 kubectl --namespace gitlab scale deploy gitlab-geo-webservice-default --replicas=0
@@ -515,7 +515,7 @@ kubectl --namespace gitlab scale deploy gitlab-geo-sidekiq-all-in-1-v1 --replica
 ```
 
 NOTE:
-This assumes you are using the gitlab namespace, if you used a different namespace when setting up your cluster you should also replace `--namespace gitlab` throughout the rest of this document.
+This assumes you are using the `gitlab` namespace, if you used a different namespace when setting up your cluster you should also replace `--namespace gitlab` throughout the rest of this document.
 
 ### Step 2. Promote all **secondary** nodes external to the cluster
 
@@ -559,7 +559,7 @@ This assumes you are using the gitlab namespace, if you used a different namespa
 
 1. Update existing cluster config
 
-   You can retrieve the existing config with helm:
+   You can retrieve the existing config with Helm:
 
    ```shell
    helm --namespace gitlab get values gitlab-geo > gitlab.yaml
