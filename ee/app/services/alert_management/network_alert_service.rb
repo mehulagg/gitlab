@@ -6,7 +6,9 @@ module AlertManagement
     extend ::Gitlab::Utils::Override
     include ::AlertManagement::AlertProcessing
 
+
     MONITORING_TOOL = Gitlab::AlertManagement::Payload::MONITORING_TOOLS.fetch(:cilium)
+    MONITORING_TOOL_V2 = Gitlab::AlertManagement::Payload::MONITORING_TOOLS.fetch(:cilium)
 
     def initialize(project, payload)
       @project = project
