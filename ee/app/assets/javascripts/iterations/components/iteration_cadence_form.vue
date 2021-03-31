@@ -1,54 +1,44 @@
 <script>
-import { GlButton, GlForm, GlFormInput } from '@gitlab/ui';
+import { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import DueDateSelectors from '~/due_date_select';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { __ } from '~/locale';
-import MarkdownField from '~/vue_shared/components/markdown/field.vue';
-import createIteration from '../queries/create_iteration.mutation.graphql';
-import updateIteration from '../queries/update_iteration.mutation.graphql';
+import { s__ } from '~/locale';
+import createCadence from '../queries/create_cadence.mutation.graphql';
 
 export default {
   components: {
     GlButton,
     GlForm,
+    GlFormCheckbox,
+    GlFormGroup,
     GlFormInput,
-    MarkdownField,
   },
   props: {
     groupPath: {
       type: String,
       required: true,
     },
-    previewMarkdownPath: {
+    cadencesListPath: {
       type: String,
       required: false,
       default: '',
-    },
-    iterationsListPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    isEditing: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    iteration: {
-      type: Object,
-      required: false,
-      default: () => ({}),
     },
   },
   data() {
     return {
-      iterations: [],
+      cadences: [],
       loading: false,
-      title: this.iteration.title,
-      description: this.iteration.description,
-      startDate: this.iteration.startDate,
-      dueDate: this.iteration.dueDate,
+      title: '',
+      automatic: true,
+      startDate: null,
+      durationInWeeks: null,
+      rollOverIssues: false,
+      iterationsInAdvance: null,
+      i18n: Object.freeze({
+        duration: {
+          description: s__('Iterations|The duration for each iteration (in weeks)'),
+        },
+      }),
     };
   },
   computed: {
@@ -57,9 +47,12 @@ export default {
         input: {
           groupPath: this.groupPath,
           title: this.title,
-          description: this.description,
+          automatic: true,
           startDate: this.startDate,
-          dueDate: this.dueDate,
+          durationInWeeks: this.durationInWeeks,
+          // rollOverIssues: this.rollOverIssues,
+          iterationsInAdvance: this.iterationsInAdvance,
+          active: true, // TODO: where is this toggled?
         },
       };
     },
@@ -71,61 +64,35 @@ export default {
   methods: {
     save() {
       this.loading = true;
-      return this.isEditing ? this.updateIteration() : this.createIteration();
+      return this.createCadence();
     },
     cancel() {
-      if (this.iterationsListPath) {
-        visitUrl(this.iterationsListPath);
+      if (this.cadencesListPath) {
+        visitUrl(this.cadencesListPath);
       } else {
         this.$emit('cancel');
       }
     },
-    createIteration() {
+    createCadence() {
       return this.$apollo
         .mutate({
-          mutation: createIteration,
+          mutation: createCadence,
           variables: this.variables,
         })
         .then(({ data }) => {
-          const { errors, iteration } = data.createIteration;
+          const { errors, cadence } = data.createCadence;
           if (errors.length > 0) {
             this.loading = false;
-            createFlash(errors[0]);
-            return;
+            throw new Error(errors[0]);
+            // createFlash(errors[0]);
           }
 
-          visitUrl(iteration.webUrl);
+          visitUrl(cadence.webUrl);
         })
-        .catch(() => {
+        .catch((e) => {
           this.loading = false;
-          createFlash(__('Unable to save iteration. Please try again'));
-        });
-    },
-    updateIteration() {
-      return this.$apollo
-        .mutate({
-          mutation: updateIteration,
-          variables: {
-            input: {
-              ...this.variables.input,
-              id: this.iteration.id,
-            },
-          },
-        })
-        .then(({ data }) => {
-          const { errors } = data.updateIteration;
-          if (errors.length > 0) {
-            createFlash(errors[0]);
-            return;
-          }
-
-          this.$emit('updated');
-        })
-        .catch(() => {
-          createFlash(__('Unable to save iteration. Please try again'));
-        })
-        .finally(() => {
-          this.loading = false;
+          throw e;
+          // createFlash(__('Unable to save cadence. Please try again'));
         });
     },
     updateDueDate(val) {
@@ -139,116 +106,131 @@ export default {
 </script>
 
 <template>
-  <div>
+  <article>
     <div class="gl-display-flex">
       <h3 ref="pageTitle" class="page-title">
-        {{ isEditing ? __('Edit iteration cadence') : __('New iteration cadence') }}
+        {{ __('New iteration cadence') }}
       </h3>
     </div>
-    <hr class="gl-mt-0" />
-    <gl-form class="row common-note-form">
-      <div class="col-md-6">
-        <div class="form-group row">
-          <div class="col-form-label col-sm-2">
-            <label for="iteration-title">{{ __('Name') }}</label>
-          </div>
-          <div class="col-sm-10">
-            <gl-form-input
-              id="iteration-title"
-              v-model="title"
-              autocomplete="off"
-              data-qa-selector="iteration_title_field"
-            />
-          </div>
-        </div>
+    <gl-form>
+      <gl-form-group
+        :label="__('Title')"
+        :label-cols-md="2"
+        label-class="text-right-md gl-pb-0!"
+        label-for="cadence-title"
+      >
+        <!-- :invalid-feedback=""
+              :state="validationState.name" -->
+        <gl-form-input
+          id="cadence-title"
+          v-model="title"
+          autocomplete="off"
+          data-qa-selector="iteration_cadence_title_field"
+          :placeholder="__('Cadence name')"
+        />
+      </gl-form-group>
 
-        <div class="form-group row">
-          <div class="col-form-label col-sm-2">
-            <label for="iteration-description">{{ __('Description') }}</label>
-          </div>
-          <div class="col-sm-10">
-            <markdown-field
-              :markdown-preview-path="previewMarkdownPath"
-              :can-attach-file="false"
-              :enable-autocomplete="true"
-              label="Description"
-              :textarea-value="description"
-              markdown-docs-path="/help/user/markdown"
-              :add-spacing-classes="false"
-              class="md-area"
-            >
-              <template #textarea>
-                <textarea
-                  id="iteration-description"
-                  v-model="description"
-                  class="note-textarea js-gfm-input js-autosize markdown-area"
-                  dir="auto"
-                  data-supports-quick-actions="false"
-                  :aria-label="__('Description')"
-                  data-qa-selector="iteration_description_field"
-                >
-                </textarea>
-              </template>
-            </markdown-field>
-          </div>
-        </div>
-      </div>
+      <gl-form-group
+        :label-cols-md="2"
+        class="common-note-form"
+        label-class="gl-font-weight-bold text-right-md gl-pb-0!"
+        label-for="cadence-automated-scheduling"
+        :description="s__('Iterations|Iteration scheduling will be handled automatically')"
+      >
+        <gl-form-checkbox v-model="automatic">
+          {{ s__('Iterations|Automated scheduling') }}
+        </gl-form-checkbox>
+      </gl-form-group>
 
-      <div class="col-md-6">
-        <div class="form-group row">
-          <div class="col-form-label col-sm-2">
-            <label for="iteration-start-date">{{ __('Start date') }}</label>
-          </div>
-          <div class="col-sm-10">
-            <gl-form-input
-              id="iteration-start-date"
-              v-model="startDate"
-              class="datepicker form-control"
-              :placeholder="__('Select start date')"
-              autocomplete="off"
-              data-qa-selector="iteration_start_date_field"
-              @change="updateStartDate"
-            />
-            <a class="inline float-right gl-mt-2 js-clear-start-date" href="#">{{
-              __('Clear start date')
-            }}</a>
-          </div>
-        </div>
-        <div class="form-group row">
-          <div class="col-form-label col-sm-2">
-            <label for="iteration-due-date">{{ __('Due date') }}</label>
-          </div>
-          <div class="col-sm-10">
-            <gl-form-input
-              id="iteration-due-date"
-              v-model="dueDate"
-              class="datepicker form-control"
-              :placeholder="__('Select due date')"
-              autocomplete="off"
-              data-qa-selector="iteration_due_date_field"
-              @change="updateDueDate"
-            />
-            <a class="inline float-right gl-mt-2 js-clear-due-date" href="#">{{
-              __('Clear due date')
-            }}</a>
-          </div>
-        </div>
+      <gl-form-group
+        :label="__('Start date')"
+        :label-cols-md="2"
+        label-class="text-right-md gl-pb-0!"
+        label-for="start-date"
+        :description="s__('Iterations|The start date of your first iteration')"
+      >
+        <!-- :invalid-feedback=""
+              :state="validationState.name" -->
+        <gl-form-input
+          id="start-date"
+          v-model="startDate"
+          required
+          :placeholder="__('Select start date')"
+          autocomplete="off"
+          data-qa-selector="cadence_start_date"
+        />
+      </gl-form-group>
+
+      <gl-form-group
+        :label="__('Duration')"
+        :label-cols-md="2"
+        label-class="text-right-md gl-pb-0!"
+        label-for="cadence-duration"
+        :description="i18n.duration.description"
+      >
+        <!-- :invalid-feedback=""
+              :state="validationState.name" -->
+        <gl-form-input
+          id="cadence-duration"
+          v-model.number="durationInWeeks"
+          :placeholder="__('Select duration')"
+          type="number"
+          min="1"
+          no-wheel
+          autocomplete="off"
+          data-qa-selector="iteration_cadence_name_field"
+        />
+      </gl-form-group>
+
+      <gl-form-group
+        :label-cols-md="2"
+        class="common-note-form"
+        label-class="gl-font-weight-bold text-right-md gl-pb-0!"
+        label-for="cadence-automated-scheduling"
+        :description="s__('Iterations|Move incomplete issues to the next iteration')"
+      >
+        <gl-form-checkbox>
+          {{ s__('Iterations|Roll over issues') }}
+        </gl-form-checkbox>
+      </gl-form-group>
+
+      <gl-form-group
+        :label="__('Future iterations')"
+        :label-cols-md="2"
+        :content-cols-md="2"
+        label-class="text-right-md gl-pb-0!"
+        label-for="cadence-schedule-future-iterations"
+        :description="
+          s__('Iterations|Number of future iterations you would like to have scheduled')
+        "
+      >
+        <!-- :invalid-feedback=""
+              :state="validationState.name" -->
+        <gl-form-input
+          id="cadence-schedule-future-iterations"
+          v-model.number="iterationsInAdvance"
+          type="number"
+          min="1"
+          no-wheel
+          autocomplete="off"
+          data-qa-selector="iteration_cadence_name_field"
+        />
+      </gl-form-group>
+
+      <div class="form-actions d-flex">
+        <gl-button
+          :loading="loading"
+          data-testid="save-cadence"
+          variant="confirm"
+          data-qa-selector="save_cadence_button"
+          @click="save"
+        >
+          {{ __('Create cadence') }}
+        </gl-button>
+        <gl-button class="ml-auto" data-testid="cancel-create" @click="cancel">
+          {{ __('Cancel') }}
+        </gl-button>
       </div>
     </gl-form>
-
-    <div class="form-actions d-flex">
-      <gl-button
-        :loading="loading"
-        data-testid="save-iteration"
-        variant="success"
-        data-qa-selector="save_iteration_button"
-        @click="save"
-      >
-        {{ isEditing ? __('Update iteration') : __('Create iteration') }}
-      </gl-button>
-      <gl-button class="ml-auto" data-testid="cancel-iteration" @click="cancel">
-        {{ __('Cancel') }}
-      </gl-button>
-    </div>
-  </div>
+  </article>
 </template>
