@@ -372,6 +372,7 @@ export default {
             v-show="showContent"
             :class="hasBodyClasses.content"
             :diff-file="file"
+            :codequality-diff="codequalityDiff"
             :help-page-path="helpPagePath"
           />
         </template>

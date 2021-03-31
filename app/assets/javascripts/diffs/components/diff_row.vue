@@ -1,7 +1,8 @@
 <script>
-import { GlTooltipDirective, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlTooltipDirective, GlSafeHtmlDirective as SafeHtml, GlIcon } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import { SEVERITY_CLASSES, SEVERITY_ICONS } from '~/reports/codequality_report/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   CONTEXT_LINE_CLASS_NAME,
@@ -18,6 +19,7 @@ import * as utils from './diff_row_utils';
 export default {
   components: {
     DiffGutterAvatars,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -51,6 +53,11 @@ export default {
       type: Number,
       required: true,
     },
+    codequality: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -83,6 +90,12 @@ export default {
     coverageStateRight() {
       if (!this.line.right) return {};
       return this.fileLineCoverage(this.filePath, this.line.right.new_line);
+    },
+    severityClass() {
+      return SEVERITY_CLASSES[this.codequality[0].severity] || SEVERITY_CLASSES.unknown;
+    },
+    severityIcon() {
+      return SEVERITY_ICONS[this.codequality[0].severity] || SEVERITY_ICONS.unknown;
     },
     classNameMapCellLeft() {
       return utils.classNameMapCell({
@@ -248,6 +261,19 @@ export default {
           class="diff-td line-coverage left-side"
         ></div>
         <div
+          v-gl-tooltip.hover
+          :title="codequality.length ? codequality[0].description : ''"
+          :class="[...parallelViewLeftLineType]"
+          class="diff-td line-codequality left-side"
+        >
+          <gl-icon
+            v-if="codequality.length"
+            :size="12"
+            :name="severityIcon"
+            :class="severityClass"
+          />
+        </div>
+        <div
           :id="line.left.line_code"
           :key="line.left.line_code"
           :class="[parallelViewLeftLineType, { parallel: !inline }]"
@@ -274,6 +300,10 @@ export default {
         ></div>
         <div
           class="diff-td line-coverage left-side empty-cell"
+          :class="emptyCellLeftClassMap"
+        ></div>
+        <div
+          class="diff-td line-codequality left-side empty-cell"
           :class="emptyCellLeftClassMap"
         ></div>
         <div
@@ -343,6 +373,19 @@ export default {
           class="diff-td line-coverage right-side"
         ></div>
         <div
+          v-gl-tooltip.hover
+          :title="codequality.length ? codequality[0].description : ''"
+          :class="[line.right.type, { hll: isHighlighted, hll: isCommented }]"
+          class="diff-td line-codequality right-side"
+        >
+          <gl-icon
+            v-if="codequality.length"
+            :size="12"
+            :name="severityIcon"
+            :class="severityClass"
+          />
+        </div>
+        <div
           :id="line.right.line_code"
           :key="line.right.rich_text"
           v-safe-html="line.right.rich_text"
@@ -376,6 +419,10 @@ export default {
         ></div>
         <div
           class="diff-td line-coverage right-side empty-cell"
+          :class="emptyCellRightClassMap"
+        ></div>
+        <div
+          class="diff-td line-codequality right-side empty-cell"
           :class="emptyCellRightClassMap"
         ></div>
         <div

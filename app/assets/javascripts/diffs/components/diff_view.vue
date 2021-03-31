@@ -34,6 +34,11 @@ export default {
       required: false,
       default: false,
     },
+    codequalityDiff: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -128,6 +133,13 @@ export default {
         :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         :inline="inline"
         :index="index"
+        :codequality="
+          codequalityDiff.filter(
+            (violation) =>
+              (line.left && violation.line === line.left.new_line) ||
+              (line.right && violation.line === line.right.new_line),
+          )
+        "
         @enterdragging="onDragOver"
         @startdragging="onStartDragging"
         @stopdragging="onStopDragging"

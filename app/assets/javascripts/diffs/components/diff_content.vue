@@ -47,6 +47,11 @@ export default {
       required: false,
       default: '',
     },
+    codequalityDiff: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   computed: {
     ...mapState({
@@ -131,6 +136,7 @@ export default {
         <diff-view
           :diff-file="diffFile"
           :diff-lines="mappedLines"
+          :codequality-diff="codequalityDiff"
           :help-page-path="helpPagePath"
           :inline="isInlineView"
         />
