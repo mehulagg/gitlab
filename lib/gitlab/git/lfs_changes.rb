@@ -12,6 +12,10 @@ module Gitlab
         @repository.gitaly_blob_client.get_new_lfs_pointers(@newrev, object_limit, not_in, dynamic_timeout)
       end
 
+      def object_directory_pointers(object_limit: nil, dynamic_timeout: nil)
+        @repository.gitaly_blob_client.list_all_lfs_pointers(object_limit, true, dynamic_timeout)
+      end
+
       def all_pointers
         @repository.gitaly_blob_client.get_all_lfs_pointers
       end
