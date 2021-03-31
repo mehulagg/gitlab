@@ -1,0 +1,23 @@
+---
+description:
+category: Groups::EmailCampaignsController
+action: click
+label_description:
+property_description:
+value_description:
+extra_properties:
+project_included:
+user_included:
+namespace_included:
+product_section:
+product_stage:
+product_group:
+product_category:
+milestone: "13.11"
+introduced_by_url:
+distribution:
+- ee
+# tier:
+# - free
+# - premium
+# - ultimate
