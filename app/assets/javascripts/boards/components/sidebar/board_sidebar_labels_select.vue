@@ -40,7 +40,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setActiveIssueLabels']),
+    ...mapActions(['setActiveBoardItemLabels']),
     async setLabels(payload) {
       this.loading = true;
       this.$refs.sidebarItem.collapse();
@@ -52,7 +52,7 @@ export default {
           .map((label) => label.id);
 
         const input = { addLabelIds, removeLabelIds, projectPath: this.projectPathForActiveIssue };
-        await this.setActiveIssueLabels(input);
+        await this.setActiveBoardItemLabels(input);
       } catch (e) {
         createFlash({ message: __('An error occurred while updating labels.') });
       } finally {
@@ -65,7 +65,7 @@ export default {
       try {
         const removeLabelIds = [getIdFromGraphQLId(id)];
         const input = { removeLabelIds, projectPath: this.projectPathForActiveIssue };
-        await this.setActiveIssueLabels(input);
+        await this.setActiveBoardItemLabels(input);
       } catch (e) {
         createFlash({ message: __('An error occurred when removing the label.') });
       } finally {

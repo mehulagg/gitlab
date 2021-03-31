@@ -46,6 +46,7 @@ import projectBoardAssigneesQuery from '../graphql/project_board_assignees.query
 import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
+import updateEpicLabelsMutation from '../graphql/update_epic_labels.mutation.graphql';
 
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
@@ -776,5 +777,38 @@ export default {
         commit(types.CREATE_LIST_FAILURE);
         throw e;
       });
+  },
+
+  setActiveBoardItemLabels: ({ getters, dispatch }, params) => {
+    if (!getters.isEpicBoard) {
+      dispatch('setActiveIssueLabels', params);
+    } else {
+      dispatch('setActiveEpicLabels', params);
+    }
+  },
+
+  setActiveEpicLabels: async ({ commit, getters, state }, input) => {
+    const { activeIssue } = getters;
+    const { data } = await gqlClient.mutate({
+      mutation: updateEpicLabelsMutation,
+      variables: {
+        input: {
+          iid: String(activeIssue.iid),
+          addLabelIds: input.addLabelIds ?? [],
+          removeLabelIds: input.removeLabelIds ?? [],
+          groupPath: state.fullPath,
+        },
+      },
+    });
+
+    if (data.updateEpic?.errors?.length > 0) {
+      throw new Error(data.updateEpic.errors);
+    }
+
+    commit(types.UPDATE_ISSUE_BY_ID, {
+      issueId: activeIssue.id,
+      prop: 'labels',
+      value: data.updateEpic.epic.labels.nodes,
+    });
   },
 };

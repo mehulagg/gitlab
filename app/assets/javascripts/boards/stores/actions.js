@@ -447,6 +447,10 @@ export default {
       .catch(() => commit(types.ADD_ISSUE_TO_LIST_FAILURE, { list, issueId: issueInput.id }));
   },
 
+  setActiveBoardItemLabels: ({ dispatch }, params) => {
+    dispatch('setActiveIssueLabels', params);
+  },
+
   setActiveIssueLabels: async ({ commit, getters }, input) => {
     const { activeIssue } = getters;
     const { data } = await gqlClient.mutate({
