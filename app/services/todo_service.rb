@@ -227,7 +227,7 @@ class TodoService
     users_with_pending_todos = pending_todos(users, attributes).pluck_user_id
     users.reject! { |user| users_with_pending_todos.include?(user.id) && Feature.disabled?(:multiple_todos, user) }
 
-    users.map do |user|
+    todos = users.map do |user|
       issue_type = attributes.delete(:issue_type)
       track_todo_creation(user, issue_type)
 

@@ -68,6 +68,8 @@ class Todo < ApplicationRecord
   scope :for_commit, -> (id) { where(commit_id: id) }
   scope :with_entity_associations, -> { preload(:target, :author, :note, group: :route, project: [:route, { namespace: :route }]) }
   scope :joins_issue_and_assignees, -> { left_joins(issue: :assignees) }
+  scope :by_states_and_users, -> (states, users) { where(state: [states], user_id: [users]) }
+  scope :count_grouped_by_user_id_and_state, -> { group(:user_id, :state).count }
 
   enum resolved_by_action: { system_done: 0, api_all_done: 1, api_done: 2, mark_all_done: 3, mark_done: 4 }, _prefix: :resolved_by
 
