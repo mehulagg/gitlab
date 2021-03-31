@@ -47,7 +47,6 @@ import {
   destroyIntegrationResponseWithErrors,
 } from './mocks/apollo_mock';
 import mockIntegrations from './mocks/integrations.json';
-import { defaultAlertSettingsConfig } from './util';
 
 jest.mock('~/flash');
 
@@ -58,26 +57,11 @@ describe('AlertsSettingsWrapper', () => {
   let fakeApollo;
   let destroyIntegrationHandler;
   useMockIntersectionObserver();
+
   const httpMappingData = {
     payloadExample: '{"test: : "field"}',
     payloadAttributeMappings: [],
     payloadAlertFields: [],
-  };
-  const httpIntegrations = {
-    list: [
-      {
-        id: mockIntegrations[0].id,
-        ...httpMappingData,
-      },
-      {
-        id: mockIntegrations[1].id,
-        ...httpMappingData,
-      },
-      {
-        id: mockIntegrations[2].id,
-        httpMappingData,
-      },
-    ],
   };
 
   const findLoader = () => wrapper.findComponent(IntegrationsList).findComponent(GlLoadingIcon);
@@ -109,13 +93,14 @@ describe('AlertsSettingsWrapper', () => {
           return { ...data };
         },
         provide: {
-          ...defaultAlertSettingsConfig,
           ...provide,
         },
         mocks: {
           $apollo: {
             mutate: jest.fn(),
-            query: jest.fn(),
+            addSmartQuery: jest.fn((_, options) => {
+              options.result.call(wrapper.vm);
+            }),
             queries: {
               integrations: {
                 loading,
@@ -143,9 +128,6 @@ describe('AlertsSettingsWrapper', () => {
     wrapper = mount(AlertsSettingsWrapper, {
       localVue,
       apolloProvider: fakeApollo,
-      provide: {
-        ...defaultAlertSettingsConfig,
-      },
     });
   }
 
@@ -158,17 +140,29 @@ describe('AlertsSettingsWrapper', () => {
     beforeEach(() => {
       createComponent({
         data: {
-          integrations: { list: mockIntegrations },
-          httpIntegrations: { list: [] },
+          integrations: mockIntegrations,
           currentIntegration: mockIntegrations[0],
         },
         loading: false,
       });
     });
 
-    it('renders alerts integrations list and add new integration button by default', () => {
+    it('renders alerts integrations list', () => {
       expect(findLoader().exists()).toBe(false);
       expect(findIntegrations()).toHaveLength(mockIntegrations.length);
+    });
+
+    it('renders `Add new integration` button when multiple integrations are supported ', () => {
+      createComponent({
+        data: {
+          integrations: mockIntegrations,
+          currentIntegration: mockIntegrations[0],
+        },
+        provide: {
+          multiIntegrations: true,
+        },
+        loading: false,
+      });
       expect(findAddIntegrationBtn().exists()).toBe(true);
     });
 
@@ -177,6 +171,16 @@ describe('AlertsSettingsWrapper', () => {
     });
 
     it('hides `add new integration` button and displays setting form on btn click', async () => {
+      createComponent({
+        data: {
+          integrations: mockIntegrations,
+          currentIntegration: mockIntegrations[0],
+        },
+        provide: {
+          multiIntegrations: true,
+        },
+        loading: false,
+      });
       const addNewIntegrationBtn = findAddIntegrationBtn();
       expect(addNewIntegrationBtn.exists()).toBe(true);
       await addNewIntegrationBtn.trigger('click');
@@ -186,7 +190,7 @@ describe('AlertsSettingsWrapper', () => {
 
     it('shows loading indicator inside the IntegrationsList table', () => {
       createComponent({
-        data: { integrations: {} },
+        data: { integrations: [] },
         loading: true,
       });
       expect(wrapper.find(IntegrationsList).exists()).toBe(true);
@@ -198,7 +202,7 @@ describe('AlertsSettingsWrapper', () => {
     beforeEach(() => {
       createComponent({
         data: {
-          integrations: { list: mockIntegrations },
+          integrations: mockIntegrations,
           currentIntegration: mockIntegrations[0],
           formVisible: true,
         },
@@ -283,7 +287,7 @@ describe('AlertsSettingsWrapper', () => {
     it('calls `$apollo.mutate` with `updatePrometheusIntegrationMutation`', () => {
       createComponent({
         data: {
-          integrations: { list: mockIntegrations },
+          integrations: mockIntegrations,
           currentIntegration: mockIntegrations[3],
           formVisible: true,
         },
@@ -377,9 +381,12 @@ describe('AlertsSettingsWrapper', () => {
     it('calls `$apollo.mutate` with `updateCurrentHttpIntegrationMutation` on HTTP integration edit', () => {
       createComponent({
         data: {
-          integrations: { list: mockIntegrations },
+          integrations: mockIntegrations,
           currentIntegration: mockIntegrations[0],
-          httpIntegrations,
+          currentHttpIntegration: { id: mockIntegrations[0].id, ...httpMappingData },
+        },
+        provide: {
+          multiIntegrations: true,
         },
         loading: false,
       });
@@ -395,9 +402,8 @@ describe('AlertsSettingsWrapper', () => {
     it('calls `$apollo.mutate` with `updateCurrentPrometheusIntegrationMutation` on PROMETHEUS integration edit', () => {
       createComponent({
         data: {
-          integrations: { list: mockIntegrations },
+          integrations: mockIntegrations,
           currentIntegration: mockIntegrations[3],
-          httpIntegrations,
         },
         loading: false,
       });
