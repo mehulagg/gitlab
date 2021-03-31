@@ -137,7 +137,7 @@ image. Using the `DAST_VERSION` variable, you can choose how DAST updates:
 Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/security-products/dast/-/releases)
 page.
 
-#### Crawling Web Applications dependent on JavaScript
+#### Crawling web applications dependent on JavaScript
 
 GitLab has released Browserker, a new crawler designed to effectively crawl Single Page Applications and web applications that make heavy use of JavaScript.
 
