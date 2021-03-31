@@ -17,3 +17,4 @@ tier:
 - premium
 - ultimate
 skip_validation: true
+name: "count_distinct_user_id_from_<adjective describing: '(clusters_applications_ingress.created_at BETWEEN '2021-03-01 13:10:38.946381' AND '2021-03-29 13:10:38.946445' AND clusters_applications_ingress.status IN (3, 5))'>_clusters_<with>_<adjective describing: '(clusters_applications_ingress.created_at BETWEEN '2021-03-01 13:10:38.946381' AND '2021-03-29 13:10:38.946445' AND clusters_applications_ingress.status IN (3, 5))'>_clusters_applications_ingress"

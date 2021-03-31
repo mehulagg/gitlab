@@ -17,3 +17,4 @@ tier:
 - premium
 - ultimate
 skip_validation: true
+name: "count_distinct_user_id_from_<adjective describing: '(clusters.provider_type = 1 AND (cluster_providers_gcp.status IN (3)) AND clusters.enabled = TRUE AND clusters.created_at BETWEEN '2021-03-01 13:10:34.958097' AND '2021-03-29 13:10:34.958171')'>_clusters_<with>_<adjective describing: '(clusters.provider_type = 1 AND (cluster_providers_gcp.status IN (3)) AND clusters.enabled = TRUE AND clusters.created_at BETWEEN '2021-03-01 13:10:34.958097' AND '2021-03-29 13:10:34.958171')'>_cluster_providers_gcp"
