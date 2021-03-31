@@ -44,7 +44,7 @@
                 - if Gitlab::CurrentSettings.elasticsearch_indexing?
                   .form-text
                     = link_to _('Index all projects'), admin_elasticsearch_enqueue_index_path,
-                        class: ['btn', 'btn-success'], method: :post
+                        class: ['gl-button', 'btn', 'btn-confirm'], method: :post
 
             .gl-card-body
               .form-group
@@ -234,4 +234,4 @@
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('AWS Secret Access Key. Only required if not using role instance credentials')
 
-      = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'submit_button' }
+      = f.submit _('Save changes'), class: "gl-button btn btn-confirm", data: { qa_selector: 'submit_button' }

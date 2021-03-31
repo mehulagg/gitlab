@@ -28,4 +28,4 @@
             - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: link_path }
             = s_('For more information, see the documentation on %{link_start}disabling Seat Link%{link_end}.').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
 
-  = f.submit 'Save changes', class: "gl-button btn btn-success"
+  = f.submit 'Save changes', class: "gl-button btn btn-confirm"
