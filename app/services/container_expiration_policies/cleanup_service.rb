@@ -13,28 +13,35 @@ module ContainerExpirationPolicies
     def execute
       return ServiceResponse.error(message: 'no repository') unless repository
 
-      repository.start_expiration_policy!
+      repository.start_expiration_policy! unless loopless_enabled?
 
       begin
         service_result = Projects::ContainerRepository::CleanupTagsService
                            .new(project, nil, policy_params.merge('container_expiration_policy' => true))
                            .execute(repository)
       rescue
-        repository.cleanup_unfinished!
+        # something bad happened, put repository in a resumable state
+        update_params = { expiration_policy_cleanup_status: :cleanup_unfinished }
+        update_params[:expiration_policy_completed_at] = Time.zone.now if loopless_enabled?
+        repository.update!(update_params)
 
         raise
       end
 
       if service_result[:status] == :success
-        repository.update!(
+        update_params = {
           expiration_policy_cleanup_status: :cleanup_unscheduled,
-          expiration_policy_started_at: nil,
           expiration_policy_completed_at: Time.zone.now
-        )
+        }
+        update_params[:expiration_policy_started_at] = nil unless loopless_enabled?
+
+        repository.update!(update_params)
 
         success(:finished, service_result)
       else
-        repository.cleanup_unfinished!
+        update_params = { expiration_policy_cleanup_status: :cleanup_unfinished }
+        update_params[:expiration_policy_completed_at] = Time.zone.now if loopless_enabled?
+        repository.update!(update_params)
 
         success(:unfinished, service_result)
       end
@@ -53,6 +60,10 @@ module ContainerExpirationPolicies
       end
 
       ServiceResponse.success(message: "cleanup #{cleanup_status}", payload: payload)
+    end
+
+    def loopless_enabled?
+      Feature.enabled?(:container_registry_expiration_policies_loopless)
     end
 
     def policy_params

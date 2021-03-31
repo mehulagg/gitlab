@@ -29,18 +29,6 @@ RSpec.describe ContainerRepository do
     end
   end
 
-  describe '.exists_by_path?' do
-    it 'returns true for known container repository paths' do
-      path = ContainerRegistry::Path.new("#{project.full_path}/#{repository.name}")
-      expect(described_class.exists_by_path?(path)).to be_truthy
-    end
-
-    it 'returns false for unknown container repository paths' do
-      path = ContainerRegistry::Path.new('you/dont/know/me')
-      expect(described_class.exists_by_path?(path)).to be_falsey
-    end
-  end
-
   describe '#tag' do
     it 'has a test tag' do
       expect(repository.tag('test')).not_to be_nil
@@ -211,6 +199,16 @@ RSpec.describe ContainerRepository do
     end
   end
 
+  describe '#siblings' do
+    let_it_be(:repository) { create(:container_repository) }
+    let_it_be(:repositories) { create_list(:container_repository, 5, project: repository.project) }
+    let_it_be(:other_repositories) { create_list(:container_repository, 5) }
+
+    subject { repository.siblings }
+
+    it { is_expected.to contain_exactly(*repositories) }
+  end
+
   describe '.build_from_path' do
     let(:registry_path) do
       ContainerRegistry::Path.new(project.full_path + '/some/image')
@@ -359,6 +357,17 @@ RSpec.describe ContainerRepository do
     it { is_expected.to contain_exactly(repository) }
   end
 
+  describe '.expiration_policy_completed_at_before' do
+    let_it_be(:repository1) { create(:container_repository, expiration_policy_completed_at: nil) }
+    let_it_be(:repository2) { create(:container_repository, expiration_policy_completed_at: 1.day.ago) }
+    let_it_be(:repository3) { create(:container_repository, expiration_policy_completed_at: 2.hours.ago) }
+    let_it_be(:repository4) { create(:container_repository, expiration_policy_completed_at: 1.week.ago) }
+
+    subject { described_class.expiration_policy_completed_at_before(3.hours.ago) }
+
+    it { is_expected.to contain_exactly(repository2, repository4) }
+  end
+
   describe '.waiting_for_cleanup' do
     let_it_be(:repository_cleanup_scheduled) { create(:container_repository, :cleanup_scheduled) }
     let_it_be(:repository_cleanup_unfinished) { create(:container_repository, :cleanup_unfinished) }
@@ -367,5 +376,17 @@ RSpec.describe ContainerRepository do
     subject { described_class.waiting_for_cleanup }
 
     it { is_expected.to contain_exactly(repository_cleanup_scheduled, repository_cleanup_unfinished) }
+  end
+
+  describe '.exists_by_path?' do
+    it 'returns true for known container repository paths' do
+      path = ContainerRegistry::Path.new("#{project.full_path}/#{repository.name}")
+      expect(described_class.exists_by_path?(path)).to be_truthy
+    end
+
+    it 'returns false for unknown container repository paths' do
+      path = ContainerRegistry::Path.new('you/dont/know/me')
+      expect(described_class.exists_by_path?(path)).to be_falsey
+    end
   end
 end

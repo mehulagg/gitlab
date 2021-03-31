@@ -5,11 +5,11 @@ require 'spec_helper'
 RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:repository, reload: true) { create(:container_repository, :cleanup_scheduled) }
-  let_it_be(:project) { repository.project }
-  let_it_be(:policy) { project.container_expiration_policy }
-  let_it_be(:other_repository) { create(:container_repository) }
+  let_it_be_with_reload(:repository) { create(:container_repository, :cleanup_scheduled, expiration_policy_started_at: 1.month.ago) }
+  let_it_be_with_reload(:other_repository) { create(:container_repository, expiration_policy_started_at: 15.days.ago) }
 
+  let(:project) { repository.project }
+  let(:policy) { project.container_expiration_policy }
   let(:worker) { described_class.new }
 
   describe '#perform_work' do
@@ -19,7 +19,7 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
       policy.update_column(:enabled, true)
     end
 
-    RSpec.shared_examples 'handling all repository conditions' do
+    shared_examples 'handling all repository conditions' do
       it 'sends the repository for cleaning' do
         service_response = cleanup_service_response(repository: repository)
         expect(ContainerExpirationPolicies::CleanupService)
@@ -74,9 +74,7 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
 
       context 'with policy running shortly' do
         before do
-          repository.project
-                    .container_expiration_policy
-                    .update_column(:next_run_at, 1.minute.from_now)
+          policy.update_column(:next_run_at, 1.minute.from_now)
         end
 
         it 'skips the repository' do
@@ -90,18 +88,270 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
         end
       end
 
-      context 'with disabled policy' do
+      if Feature.disabled?(:container_registry_expiration_policies_loopless)
+        # in loopless mode, container repositories linked to a disabled policy are not taken into account
+        context 'with disabled policy' do
+          before do
+            policy.disable!
+          end
+
+          it 'skips the repository' do
+            expect(ContainerExpirationPolicies::CleanupService).not_to receive(:new)
+
+            expect { subject }.to change { ContainerRepository.waiting_for_cleanup.count }.from(1).to(0)
+            expect(repository.reload.cleanup_unscheduled?).to be_truthy
+          end
+        end
+      end
+    end
+
+    context 'with loopless enabled' do
+      before do
+        stub_feature_flags(container_registry_expiration_policies_loopless: true)
+      end
+
+      context 'with repository in cleanup scheduled state' do
+        it_behaves_like 'handling all repository conditions'
+      end
+
+      context 'with repository in cleanup unfinished state' do
         before do
-          repository.project
-                    .container_expiration_policy
-                    .disable!
+          repository.cleanup_unfinished!
         end
 
-        it 'skips the repository' do
-          expect(ContainerExpirationPolicies::CleanupService).not_to receive(:new)
+        it_behaves_like 'handling all repository conditions'
+      end
 
-          expect { subject }.to change { ContainerRepository.waiting_for_cleanup.count }.from(1).to(0)
-          expect(repository.reload.cleanup_unscheduled?).to be_truthy
+      context 'container repository selection' do
+        where(:repository_cleanup_status, :repository_policy_status, :other_repository_cleanup_status, :other_repository_policy_status, :expected_selected_repository) do
+          :unscheduled | :disabled     | :unscheduled | :disabled     | :none
+          :unscheduled | :disabled     | :unscheduled | :runnable     | :other_repository
+          :unscheduled | :disabled     | :unscheduled | :not_runnable | :none
+
+          :unscheduled | :disabled     | :scheduled   | :disabled     | :none
+          :unscheduled | :disabled     | :scheduled   | :runnable     | :other_repository
+          :unscheduled | :disabled     | :scheduled   | :not_runnable | :other_repository
+
+          :unscheduled | :disabled     | :unfinished  | :disabled     | :none
+          :unscheduled | :disabled     | :unfinished  | :runnable     | :other_repository
+          :unscheduled | :disabled     | :unfinished  | :not_runnable | :other_repository
+
+          :unscheduled | :disabled     | :ongoing     | :disabled     | :none
+          :unscheduled | :disabled     | :ongoing     | :runnable     | :none
+          :unscheduled | :disabled     | :ongoing     | :not_runnable | :none
+
+          :unscheduled | :runnable     | :unscheduled | :disabled     | :repository
+          :unscheduled | :runnable     | :unscheduled | :runnable     | :repository
+          :unscheduled | :runnable     | :unscheduled | :not_runnable | :repository
+
+          :unscheduled | :runnable     | :scheduled   | :disabled     | :repository
+          :unscheduled | :runnable     | :scheduled   | :runnable     | :repository
+          :unscheduled | :runnable     | :scheduled   | :not_runnable | :repository
+
+          :unscheduled | :runnable     | :unfinished  | :disabled     | :repository
+          :unscheduled | :runnable     | :unfinished  | :runnable     | :repository
+          :unscheduled | :runnable     | :unfinished  | :not_runnable | :repository
+
+          :unscheduled | :runnable     | :ongoing     | :disabled     | :repository
+          :unscheduled | :runnable     | :ongoing     | :runnable     | :repository
+          :unscheduled | :runnable     | :ongoing     | :not_runnable | :repository
+
+          :scheduled   | :disabled     | :unscheduled | :disabled     | :none
+          :scheduled   | :disabled     | :unscheduled | :runnable     | :other_repository
+          :scheduled   | :disabled     | :unscheduled | :not_runnable | :none
+
+          :scheduled   | :disabled     | :scheduled   | :disabled     | :none
+          :scheduled   | :disabled     | :scheduled   | :runnable     | :other_repository
+          :scheduled   | :disabled     | :scheduled   | :not_runnable | :other_repository
+
+          :scheduled   | :disabled     | :unfinished  | :disabled     | :none
+          :scheduled   | :disabled     | :unfinished  | :runnable     | :other_repository
+          :scheduled   | :disabled     | :unfinished  | :not_runnable | :other_repository
+
+          :scheduled   | :disabled     | :ongoing     | :disabled     | :none
+          :scheduled   | :disabled     | :ongoing     | :runnable     | :none
+          :scheduled   | :disabled     | :ongoing     | :not_runnable | :none
+
+          :scheduled   | :runnable     | :unscheduled | :disabled     | :repository
+          :scheduled   | :runnable     | :unscheduled | :runnable     | :other_repository
+          :scheduled   | :runnable     | :unscheduled | :not_runnable | :repository
+
+          :scheduled   | :runnable     | :scheduled   | :disabled     | :repository
+          :scheduled   | :runnable     | :scheduled   | :runnable     | :repository
+          :scheduled   | :runnable     | :scheduled   | :not_runnable | :repository
+
+          :scheduled   | :runnable     | :unfinished  | :disabled     | :repository
+          :scheduled   | :runnable     | :unfinished  | :runnable     | :repository
+          :scheduled   | :runnable     | :unfinished  | :not_runnable | :repository
+
+          :scheduled   | :runnable     | :ongoing     | :disabled     | :repository
+          :scheduled   | :runnable     | :ongoing     | :runnable     | :repository
+          :scheduled   | :runnable     | :ongoing     | :not_runnable | :repository
+
+          :scheduled   | :not_runnable | :unscheduled | :disabled     | :repository
+          :scheduled   | :not_runnable | :unscheduled | :runnable     | :other_repository
+          :scheduled   | :not_runnable | :unscheduled | :not_runnable | :repository
+
+          :scheduled   | :not_runnable | :scheduled   | :disabled     | :repository
+          :scheduled   | :not_runnable | :scheduled   | :runnable     | :repository
+          :scheduled   | :not_runnable | :scheduled   | :not_runnable | :repository
+
+          :scheduled   | :not_runnable | :unfinished  | :disabled     | :repository
+          :scheduled   | :not_runnable | :unfinished  | :runnable     | :repository
+          :scheduled   | :not_runnable | :unfinished  | :not_runnable | :repository
+
+          :scheduled   | :not_runnable | :ongoing     | :disabled     | :repository
+          :scheduled   | :not_runnable | :ongoing     | :runnable     | :repository
+          :scheduled   | :not_runnable | :ongoing     | :not_runnable | :repository
+
+          :unfinished  | :disabled     | :unscheduled | :disabled     | :none
+          :unfinished  | :disabled     | :unscheduled | :runnable     | :other_repository
+          :unfinished  | :disabled     | :unscheduled | :not_runnable | :none
+
+          :unfinished  | :disabled     | :scheduled   | :disabled     | :none
+          :unfinished  | :disabled     | :scheduled   | :runnable     | :other_repository
+          :unfinished  | :disabled     | :scheduled   | :not_runnable | :other_repository
+
+          :unfinished  | :disabled     | :unfinished  | :disabled     | :none
+          :unfinished  | :disabled     | :unfinished  | :runnable     | :other_repository
+          :unfinished  | :disabled     | :unfinished  | :not_runnable | :other_repository
+
+          :unfinished  | :disabled     | :ongoing     | :disabled     | :none
+          :unfinished  | :disabled     | :ongoing     | :runnable     | :none
+          :unfinished  | :disabled     | :ongoing     | :not_runnable | :none
+
+          :unfinished  | :runnable     | :unscheduled | :disabled     | :repository
+          :unfinished  | :runnable     | :unscheduled | :runnable     | :other_repository
+          :unfinished  | :runnable     | :unscheduled | :not_runnable | :repository
+
+          :unfinished  | :runnable     | :scheduled   | :disabled     | :repository
+          :unfinished  | :runnable     | :scheduled   | :runnable     | :other_repository
+          :unfinished  | :runnable     | :scheduled   | :not_runnable | :other_repository
+
+          :unfinished  | :runnable     | :unfinished  | :disabled     | :repository
+          :unfinished  | :runnable     | :unfinished  | :runnable     | :repository
+          :unfinished  | :runnable     | :unfinished  | :not_runnable | :repository
+
+          :unfinished  | :runnable     | :ongoing     | :disabled     | :repository
+          :unfinished  | :runnable     | :ongoing     | :runnable     | :repository
+          :unfinished  | :runnable     | :ongoing     | :not_runnable | :repository
+
+          :unfinished  | :not_runnable | :unscheduled | :disabled     | :repository
+          :unfinished  | :not_runnable | :unscheduled | :runnable     | :other_repository
+          :unfinished  | :not_runnable | :unscheduled | :not_runnable | :repository
+
+          :unfinished  | :not_runnable | :scheduled   | :disabled     | :repository
+          :unfinished  | :not_runnable | :scheduled   | :runnable     | :other_repository
+          :unfinished  | :not_runnable | :scheduled   | :not_runnable | :other_repository
+
+          :unfinished  | :not_runnable | :unfinished  | :disabled     | :repository
+          :unfinished  | :not_runnable | :unfinished  | :runnable     | :repository
+          :unfinished  | :not_runnable | :unfinished  | :not_runnable | :repository
+
+          :unfinished  | :not_runnable | :ongoing     | :disabled     | :repository
+          :unfinished  | :not_runnable | :ongoing     | :runnable     | :repository
+          :unfinished  | :not_runnable | :ongoing     | :not_runnable | :repository
+
+          :ongoing     | :disabled     | :unscheduled | :disabled     | :none
+          :ongoing     | :disabled     | :unscheduled | :runnable     | :other_repository
+          :ongoing     | :disabled     | :unscheduled | :not_runnable | :none
+
+          :ongoing     | :disabled     | :scheduled   | :disabled     | :none
+          :ongoing     | :disabled     | :scheduled   | :runnable     | :other_repository
+          :ongoing     | :disabled     | :scheduled   | :not_runnable | :other_repository
+
+          :ongoing     | :disabled     | :unfinished  | :disabled     | :none
+          :ongoing     | :disabled     | :unfinished  | :runnable     | :other_repository
+          :ongoing     | :disabled     | :unfinished  | :not_runnable | :other_repository
+
+          :ongoing     | :disabled     | :ongoing     | :disabled     | :none
+          :ongoing     | :disabled     | :ongoing     | :runnable     | :none
+          :ongoing     | :disabled     | :ongoing     | :not_runnable | :none
+
+          :ongoing     | :runnable     | :unscheduled | :disabled     | :none
+          :ongoing     | :runnable     | :unscheduled | :runnable     | :other_repository
+          :ongoing     | :runnable     | :unscheduled | :not_runnable | :none
+
+          :ongoing     | :runnable     | :scheduled   | :disabled     | :none
+          :ongoing     | :runnable     | :scheduled   | :runnable     | :other_repository
+          :ongoing     | :runnable     | :scheduled   | :not_runnable | :other_repository
+
+          :ongoing     | :runnable     | :unfinished  | :disabled     | :none
+          :ongoing     | :runnable     | :unfinished  | :runnable     | :other_repository
+          :ongoing     | :runnable     | :unfinished  | :not_runnable | :other_repository
+
+          :ongoing     | :runnable     | :ongoing     | :disabled     | :none
+          :ongoing     | :runnable     | :ongoing     | :runnable     | :none
+          :ongoing     | :runnable     | :ongoing     | :not_runnable | :none
+
+          :ongoing     | :not_runnable | :unscheduled | :disabled     | :none
+          :ongoing     | :not_runnable | :unscheduled | :runnable     | :other_repository
+          :ongoing     | :not_runnable | :unscheduled | :not_runnable | :none
+
+          :ongoing     | :not_runnable | :scheduled   | :disabled     | :none
+          :ongoing     | :not_runnable | :scheduled   | :runnable     | :other_repository
+          :ongoing     | :not_runnable | :scheduled   | :not_runnable | :other_repository
+
+          :ongoing     | :not_runnable | :unfinished  | :disabled     | :none
+          :ongoing     | :not_runnable | :unfinished  | :runnable     | :other_repository
+          :ongoing     | :not_runnable | :unfinished  | :not_runnable | :other_repository
+
+          :ongoing     | :not_runnable | :ongoing     | :disabled     | :none
+          :ongoing     | :not_runnable | :ongoing     | :runnable     | :none
+          :ongoing     | :not_runnable | :ongoing     | :not_runnable | :none
+        end
+
+        with_them do
+          before do
+            update_container_repository(repository, repository_cleanup_status, repository_policy_status)
+            update_container_repository(other_repository, other_repository_cleanup_status, other_repository_policy_status)
+          end
+
+          subject { worker.container_repository }
+
+          if params[:expected_selected_repository] == :none
+            it 'does not select any repository' do
+              expect(subject).to eq(nil)
+            end
+          else
+            it 'does select a repository' do
+              selected_repository = expected_selected_repository == :repository ? repository : other_repository
+
+              expect(subject).to eq(selected_repository)
+            end
+          end
+
+          def update_container_repository(container_repository, cleanup_status, policy_status)
+            container_repository.update!(
+              expiration_policy_cleanup_status: "cleanup_#{cleanup_status}"
+            )
+
+            policy = container_repository.project.container_expiration_policy
+
+            case policy_status
+            when :disabled
+              policy.update!(enabled: false)
+            when :runnable
+              policy.update!(enabled: true)
+              policy.update_column(:next_run_at, 5.minutes.ago)
+            when :not_runnable
+              policy.update!(enabled: true)
+              policy.update_column(:next_run_at, 5.minutes.from_now)
+            end
+          end
+        end
+      end
+
+      context 'with another repository in cleanup unfinished state' do
+        let_it_be(:another_repository) { create(:container_repository, :cleanup_unfinished) }
+
+        it 'process the cleanup scheduled repository first' do
+          service_response = cleanup_service_response(repository: repository)
+          expect(ContainerExpirationPolicies::CleanupService)
+            .to receive(:new).with(repository).and_return(double(execute: service_response))
+          expect_log_extra_metadata(service_response: service_response)
+
+          subject
         end
       end
     end
@@ -236,11 +486,8 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
   describe '#remaining_work_count' do
     subject { worker.remaining_work_count }
 
-    context 'with loopless disabled' do
-      before do
-        stub_feature_flags(container_registry_expiration_policies_loopless: false)
-      end
-      context 'with container repositoires waiting for cleanup' do
+    shared_examples 'handling all conditions' do
+      context 'with container repositories waiting for cleanup' do
         let_it_be(:unfinished_repositories) { create_list(:container_repository, 2, :cleanup_unfinished) }
 
         it { is_expected.to eq(3) }
@@ -274,6 +521,27 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
         end
       end
     end
+
+    context 'with loopless enabled' do
+      let_it_be(:disabled_repository) { create(:container_repository, :cleanup_scheduled) }
+
+      before do
+        stub_feature_flags(container_registry_expiration_policies_loopless: true)
+        # loopless mode is more accurate that non loopless: policies need to be enabled
+        ContainerExpirationPolicy.update_all(enabled: true)
+        disabled_repository.project.container_expiration_policy.update_column(:enabled, false)
+      end
+
+      it_behaves_like 'handling all conditions'
+    end
+
+    context 'with loopless disabled' do
+      before do
+        stub_feature_flags(container_registry_expiration_policies_loopless: false)
+      end
+
+      it_behaves_like 'handling all conditions'
+    end
   end
 
   describe '#max_running_jobs' do
@@ -285,20 +553,14 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
       stub_application_setting(container_registry_expiration_policies_worker_capacity: capacity)
     end
 
-    context 'with loopless disabled' do
+    it { is_expected.to eq(capacity) }
+
+    context 'with feature flag disabled' do
       before do
-        stub_feature_flags(container_registry_expiration_policies_loopless: false)
+        stub_feature_flags(container_registry_expiration_policies_throttling: false)
       end
 
-      it { is_expected.to eq(capacity) }
-
-      context 'with feature flag disabled' do
-        before do
-          stub_feature_flags(container_registry_expiration_policies_throttling: false)
-        end
-
-        it { is_expected.to eq(0) }
-      end
+      it { is_expected.to eq(0) }
     end
   end
 

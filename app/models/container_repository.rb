@@ -31,12 +31,46 @@ class ContainerRepository < ApplicationRecord
   scope :for_project_id, ->(project_id) { where(project_id: project_id) }
   scope :search_by_name, ->(query) { fuzzy_search(query, [:name], use_minimum_char_limit: false) }
   scope :waiting_for_cleanup, -> { where(expiration_policy_cleanup_status: WAITING_CLEANUP_STATUSES) }
+  scope :with_enabled_policy, -> { joins(project: :container_expiration_policy).where(container_expiration_policies: { enabled: true }) }
+  scope :expiration_policy_completed_at_before, -> (timestamp) { where('expiration_policy_completed_at < ?', timestamp) }
 
   def self.exists_by_path?(path)
     where(
       project: path.repository_project,
       name: path.repository_name
     ).exists?
+  end
+
+  def self.available_for_cleanup(exclude_unfinished: false)
+    waiting_statuses = WAITING_CLEANUP_STATUSES
+
+    if exclude_unfinished
+      waiting_statuses = waiting_statuses.dup
+      waiting_statuses.delete(:cleanup_unfinished)
+    end
+
+    waiting_statuses = waiting_statuses.map { |value| ContainerRepository.expiration_policy_cleanup_statuses[value] }
+
+    with_enabled_policy
+      .where(
+        '(
+          container_repositories.expiration_policy_cleanup_status = :unscheduled_status
+          AND container_expiration_policies.next_run_at < :time_now
+          AND (container_repositories.expiration_policy_completed_at < container_expiration_policies.next_run_at OR container_repositories.expiration_policy_completed_at IS NULL)
+        )
+        OR
+        (
+          container_repositories.expiration_policy_cleanup_status IN (:waiting_statuses)
+        )',
+        unscheduled_status: expiration_policy_cleanup_statuses[:cleanup_unscheduled],
+        time_now: Time.zone.now,
+        waiting_statuses: waiting_statuses
+      )
+  end
+
+  def siblings
+    ContainerRepository.for_project_id(project_id)
+                       .where.not(id: id)
   end
 
   # rubocop: disable CodeReuse/ServiceClass
