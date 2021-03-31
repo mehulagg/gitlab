@@ -106,7 +106,11 @@ module Gitlab
       end
 
       def skip_validation?
-        !!attributes[:skip_validation] || @skip_validation
+        !!attributes[:skip_validation] || @skip_validation || status_deprecated_or_removed?
+      end
+
+      def status_deprecated_or_removed?
+        attributes[:status] == 'deprecated' || attributes[:status] == 'removed'
       end
     end
   end

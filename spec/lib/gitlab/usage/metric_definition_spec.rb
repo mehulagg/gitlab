@@ -79,6 +79,20 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
           described_class.new(path, attributes.merge( { skip_validation: true } )).validate!
         end
       end
+
+      context 'with status' do
+        it 'does not raise exception if has status: deprecated' do
+          expect(Gitlab::ErrorTracking).not_to receive(:track_and_raise_for_dev_exception)
+
+          described_class.new(path, attributes.merge( { status: 'deprecated' } )).validate!
+        end
+
+        it 'does not raise exception if has status: removed' do
+          expect(Gitlab::ErrorTracking).not_to receive(:track_and_raise_for_dev_exception)
+
+          described_class.new(path, attributes.merge( { status: 'removed' } )).validate!
+        end
+      end
     end
   end
 
