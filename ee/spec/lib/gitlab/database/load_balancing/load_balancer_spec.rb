@@ -226,9 +226,29 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       end
     end
 
-    context 'when the connection does not come from the load balancer' do
+    context 'when the connection comes from a pool managed by the host list' do
+      it 'returns :replica' do
+        connection = double(:connection)
+        allow(connection).to receive(:pool).and_return(lb.host_list.hosts.first.pool)
+
+        expect(lb.db_role_for_connection(connection)).to be(:replica)
+      end
+    end
+
+    context 'when the connection comes from the primary pool' do
+      it 'returns :primary' do
+        connection = double(:connection)
+        allow(connection).to receive(:pool).and_return(ActiveRecord::Base.connection_pool)
+
+        expect(lb.db_role_for_connection(connection)).to be(:primary)
+      end
+    end
+
+    context 'when the connection does not come from any known pool' do
       it 'returns nil' do
         connection = double(:connection)
+        pool = double(:connection_pool)
+        allow(connection).to receive(:pool).and_return(pool)
 
         expect(lb.db_role_for_connection(connection)).to be(nil)
       end

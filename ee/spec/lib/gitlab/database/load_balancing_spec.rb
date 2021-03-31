@@ -399,10 +399,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       end
 
       context 'when the load balancer returns nil' do
-        it 'returns :primary' do
+        it 'returns nil' do
           allow(load_balancer).to receive(:db_role_for_connection).and_return(nil)
 
-          expect(described_class.db_role_for_connection(connection)).to be(:primary)
+          expect(described_class.db_role_for_connection(connection)).to be(nil)
 
           expect(load_balancer).to have_received(:db_role_for_connection).with(connection)
         end
@@ -706,20 +706,22 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       where(:queries, :expected_role) do
         [
           # Reload cache. The schema loading queries should be handled by
-          # replicas.
+          # primary.
           [
             -> {
               model.connection.clear_cache!
-              model.first
+              model.connection.schema_cache.add('users')
+              model.connection.pool.release_connection
             },
-            :replica
+            :primary
           ],
 
-          # Retrieve connection via #connection
+          # Call model's connection method
           [
             -> {
-              model.connection.query('SELECT 1')
-              model.connection.pool.release_connection
+              connection = model.connection
+              connection.select_one('SELECT 1')
+              connection.pool.release_connection
             },
             :replica
           ],
@@ -728,7 +730,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           [
             -> {
               connection = model.retrieve_connection
-              connection.query('SELECT 1')
+              connection.select_one('SELECT 1')
               connection.pool.release_connection
             },
             :primary
@@ -743,7 +745,8 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           roles = []
 
           subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
-            roles << ::Gitlab::Database::LoadBalancing.db_role_for_connection(event.payload[:connection])
+            role = ::Gitlab::Database::LoadBalancing.db_role_for_connection(event.payload[:connection])
+            roles << role if role.present?
           end
 
           self.instance_exec(&queries)
