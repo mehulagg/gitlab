@@ -148,6 +148,33 @@ RSpec.describe Resolvers::IssuesResolver do
         end
       end
 
+      describe 'filters by negated params' do
+        it 'returns issues without the specified iids' do
+          expect(resolve_issues(not: { iids: [issue1.iid] })).to contain_exactly(issue2)
+        end
+
+        it 'returns issues without the specified label names' do
+          expect(resolve_issues(not: { label_name: [label1.title] })).to be_empty
+          expect(resolve_issues(not: { label_name: [label2.title] })).to contain_exactly(issue1)
+        end
+
+        it 'returns issues without the specified milestone' do
+          expect(resolve_issues(not: { milestone_title: [milestone.title] })).to contain_exactly(issue2)
+        end
+
+        it 'returns issues without the specified assignee_username' do
+          expect(resolve_issues(not: { assignee_username: assignee.username })).to contain_exactly(issue1)
+        end
+
+        it 'returns issues without the specified assignee_usernames' do
+          expect(resolve_issues(not: { assignee_usernames: [assignee.username] })).to contain_exactly(issue1)
+        end
+
+        it 'returns issues without the specified assignee_id' do
+          expect(resolve_issues(not: { assignee_id: [assignee.id] })).to contain_exactly(issue1)
+        end
+      end
+
       describe 'sorting' do
         context 'when sorting by created' do
           it 'sorts issues ascending' do

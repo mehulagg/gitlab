@@ -55,6 +55,10 @@ module IssueResolverArguments
               as: :issue_types,
               description: 'Filter issues by the given issue types.',
               required: false
+    argument :not, Types::Issues::NegatedIssueFilterInputType,
+             description: 'List of negated params.',
+             prepare: ->(negated_args, ctx) { negated_args.to_h },
+             required: false
   end
 
   def resolve_with_lookahead(**args)
