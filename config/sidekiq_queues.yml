@@ -294,6 +294,8 @@
   - 1
 - - project_update_repository_storage
   - 1
+- - projects_create_prometheus_service
+  - 1
 - - projects_git_garbage_collect
   - 1
 - - projects_schedule_bulk_repository_shard_moves
