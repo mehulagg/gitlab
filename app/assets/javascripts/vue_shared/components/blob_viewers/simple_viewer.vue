@@ -57,7 +57,6 @@ export default {
     <div
       v-else
       class="file-content code js-syntax-highlight"
-      data-qa-selector="file_content"
       :class="$options.userColorScheme"
     >
       <div class="line-numbers">
