@@ -2,6 +2,7 @@ import { GlAlert } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import getRunnerPlatforms from '~/vue_shared/components/runner_instructions/graphql/queries/get_runner_platforms.query.graphql';
 import getRunnerSetupInstructions from '~/vue_shared/components/runner_instructions/graphql/queries/get_runner_setup.query.graphql';
 import RunnerInstructions from '~/vue_shared/components/runner_instructions/runner_instructions.vue';
@@ -50,11 +51,6 @@ describe('RunnerInstructions component', () => {
     createComponent();
 
     await wrapper.vm.$nextTick();
-  });
-
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
   });
 
   it('should not show alert', () => {
@@ -132,7 +128,7 @@ describe('RunnerInstructions component', () => {
 
       createComponent();
 
-      await wrapper.vm.$nextTick();
+      await waitForPromises();
     });
 
     it('should show alert', () => {

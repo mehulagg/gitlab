@@ -8,6 +8,7 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlIcon,
+  GlLoadingIcon,
 } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { __, s__ } from '~/locale';
@@ -28,108 +29,91 @@ export default {
     GlDropdownItem,
     GlModal,
     GlIcon,
+    GlLoadingIcon,
     ModalCopyButton,
   },
   directives: {
     GlModalDirective,
   },
-  inject: {
-    projectPath: {
-      default: '',
-    },
-    groupPath: {
-      default: '',
-    },
-  },
   apollo: {
-    runnerPlatforms: {
+    platforms: {
       query: getRunnerPlatforms,
-      variables() {
-        return {
-          projectPath: this.projectPath,
-          groupPath: this.groupPath,
-        };
+      update(data) {
+        return data?.runnerPlatforms?.nodes.map(({ name, humanReadableName, architectures }) => {
+          return {
+            name,
+            humanReadableName,
+            architectures: architectures?.nodes || [],
+          };
+        });
+      },
+      result() {
+        // Select first platform by default
+        this.selectPlatform(this.platforms[0]);
       },
       error() {
-        this.showAlert = true;
+        this.toggleAlert(true);
       },
-      result({ data }) {
-        this.project = data?.project;
-        this.group = data?.group;
-
-        this.selectPlatform(this.platforms[0].name);
+    },
+    instructions: {
+      query: getRunnerSetupInstructions,
+      skip() {
+        return !this.selectedPlatform;
+      },
+      variables() {
+        return {
+          platform: this.selectedPlatform.name,
+          architecture: this.selectedArchitecture?.name || '',
+        };
+      },
+      update(data) {
+        return data?.runnerSetup;
+      },
+      error() {
+        this.toggleAlert(true);
       },
     },
   },
   data() {
     return {
+      platforms: [],
+      selectedPlatform: null,
+      selectedArchitecture: null,
       showAlert: false,
-      selectedPlatformArchitectures: [],
-      selectedPlatform: {
-        name: '',
-      },
-      selectedArchitecture: {},
-      runnerPlatforms: {},
       instructions: {},
-      project: {},
-      group: {},
     };
   },
   computed: {
-    isPlatformSelected() {
-      return Object.keys(this.selectedPlatform).length > 0;
-    },
     instructionsEmpty() {
       return isEmpty(this.instructions);
     },
-    groupId() {
-      return this.group?.id ?? '';
+    selectedPlatformName() {
+      return this.selectedPlatform?.name;
     },
-    projectId() {
-      return this.project?.id ?? '';
-    },
-    platforms() {
-      return this.runnerPlatforms?.nodes;
+    selectedArchitectureName() {
+      return this.selectedArchitecture?.name;
     },
     hasArchitecureList() {
-      return !PLATFORMS_WITHOUT_ARCHITECTURES.includes(this.selectedPlatform?.name);
+      return !PLATFORMS_WITHOUT_ARCHITECTURES.includes(this.selectedPlatformName);
     },
     instructionsWithoutArchitecture() {
-      return INSTRUCTIONS_PLATFORMS_WITHOUT_ARCHITECTURES[this.selectedPlatform.name]?.instructions;
+      return INSTRUCTIONS_PLATFORMS_WITHOUT_ARCHITECTURES[this.selectedPlatformName]?.instructions;
     },
     runnerInstallationLink() {
-      return INSTRUCTIONS_PLATFORMS_WITHOUT_ARCHITECTURES[this.selectedPlatform.name]?.link;
+      return INSTRUCTIONS_PLATFORMS_WITHOUT_ARCHITECTURES[this.selectedPlatformName]?.link;
     },
   },
   methods: {
-    selectPlatform(name) {
-      this.selectedPlatform = this.platforms.find((platform) => platform.name === name);
-      if (this.hasArchitecureList) {
-        this.selectedPlatformArchitectures = this.selectedPlatform?.architectures?.nodes;
-        [this.selectedArchitecture] = this.selectedPlatformArchitectures;
-        this.selectArchitecture(this.selectedArchitecture);
+    selectPlatform(platform) {
+      this.selectedPlatform = platform;
+
+      if (!platform.architectures?.some(({ name }) => name === this.selectedArchitectureName)) {
+        // Select first architecture when current value is not available
+        this.selectArchitecture(platform.architectures[0]);
       }
     },
     selectArchitecture(architecture) {
       this.selectedArchitecture = architecture;
-
-      this.$apollo.addSmartQuery('instructions', {
-        variables() {
-          return {
-            platform: this.selectedPlatform.name,
-            architecture: this.selectedArchitecture.name,
-            projectId: this.projectId,
-            groupId: this.groupId,
-          };
-        },
-        query: getRunnerSetupInstructions,
-        update(data) {
-          return data?.runnerSetup;
-        },
-        error() {
-          this.showAlert = true;
-        },
-      });
     },
     toggleAlert(state) {
       this.showAlert = state;
@@ -141,8 +125,7 @@ export default {
     architecture: s__('Runners|Architecture'),
     downloadInstallBinary: s__('Runners|Download and Install Binary'),
     downloadLatestBinary: s__('Runners|Download Latest Binary'),
-    registerRunner: s__('Runners|Register Runner'),
-    method: __('Method'),
+    registerRunnerCommand: s__('Runners|Register Runner Command'),
     fetchError: s__('Runners|An error has occurred fetching instructions'),
     instructions: s__('Runners|Show Runner installation instructions'),
     copyInstructions: s__('Runners|Copy instructions'),
@@ -170,38 +153,46 @@ export default {
       <gl-alert v-if="showAlert" variant="danger" @dismiss="toggleAlert(false)">
         {{ $options.i18n.fetchError }}
       </gl-alert>
-      <h5>{{ __('Environment') }}</h5>
-      <gl-button-group class="gl-mb-5">
+      <h5>
+        {{ __('Environment') }}
+      </h5>
+      <gl-button-group class="gl-mb-3">
         <gl-button
           v-for="platform in platforms"
           :key="platform.name"
+          :selected="selectedPlatform && selectedPlatform.name === platform.name"
           data-testid="platform-button"
-          @click="selectPlatform(platform.name)"
+          @click="selectPlatform(platform)"
         >
           {{ platform.humanReadableName }}
         </gl-button>
       </gl-button-group>
       <template v-if="hasArchitecureList">
-        <template v-if="isPlatformSelected">
+        <template v-if="selectedPlatform">
           <h5>
             {{ $options.i18n.architecture }}
+            <gl-loading-icon v-if="$apollo.loading" inline />
           </h5>
-          <gl-dropdown class="gl-mb-5" :text="selectedArchitecture.name">
+
+          <gl-dropdown class="gl-mb-3" :text="selectedArchitectureName">
             <gl-dropdown-item
-              v-for="architecture in selectedPlatformArchitectures"
+              v-for="architecture in selectedPlatform.architectures"
               :key="architecture.name"
+              :is-check-item="true"
+              :is-checked="selectedArchitectureName === architecture.name"
               data-testid="architecture-dropdown-item"
               @click="selectArchitecture(architecture)"
             >
               {{ architecture.name }}
             </gl-dropdown-item>
           </gl-dropdown>
-          <div class="gl-display-flex gl-align-items-center gl-mb-5">
+          <div class="gl-display-flex gl-align-items-center gl-mb-3">
             <h5>{{ $options.i18n.downloadInstallBinary }}</h5>
             <gl-button
               class="gl-ml-auto"
               :href="selectedArchitecture.downloadLocation"
               download
+              icon="download"
               data-testid="binary-download-button"
             >
               {{ $options.i18n.downloadLatestBinary }}
@@ -224,16 +215,12 @@ export default {
             />
           </div>
 
-          <hr />
-          <h5 class="gl-mb-5">{{ $options.i18n.registerRunner }}</h5>
-          <h5 class="gl-mb-5">{{ $options.i18n.method }}</h5>
+          <h5 class="gl-mb-3">{{ $options.i18n.registerRunnerCommand }}</h5>
           <div class="gl-display-flex">
             <pre
               class="gl-bg-gray gl-flex-fill-1 gl-white-space-pre-line"
               data-testid="runner-instructions"
-            >
-            {{ instructions.registerInstructions }}
-          </pre
+              >{{ instructions.registerInstructions }}</pre
             >
             <modal-copy-button
               :title="$options.i18n.copyInstructions"

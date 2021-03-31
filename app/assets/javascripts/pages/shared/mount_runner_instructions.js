@@ -10,7 +10,6 @@ export function initInstallRunner(componentId = 'js-install-runner') {
 
   if (installRunnerEl) {
     const defaultClient = createDefaultClient();
-    const { projectPath, groupPath } = installRunnerEl.dataset;
 
     const apolloProvider = new VueApollo({
       defaultClient,
@@ -20,10 +19,6 @@ export function initInstallRunner(componentId = 'js-install-runner') {
     new Vue({
       el: installRunnerEl,
       apolloProvider,
-      provide: {
-        projectPath,
-        groupPath,
-      },
       render(createElement) {
         return createElement(InstallRunnerInstructions);
       },
