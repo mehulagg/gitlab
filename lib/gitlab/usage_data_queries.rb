@@ -36,6 +36,30 @@ module Gitlab
         'SELECT ' + args.map {|arg| "(#{arg})" }.join(' + ')
       end
 
+      def user_minimum_id
+      end
+
+      def user_maximum_id
+      end
+
+      def issue_maximum_id
+      end
+
+      def issue_minimum_id
+      end
+
+      def deployment_minimum_id
+      end
+
+      def deployment_maximum_id
+      end
+
+      def project_minimum_id
+      end
+
+      def project_maximum_id
+      end
+
       private
 
       def raw_sql(relation, column, distinct = nil)

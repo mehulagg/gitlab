@@ -58,4 +58,24 @@ RSpec.describe Gitlab::UsageDataQueries do
         .to eq('SELECT (SELECT COUNT("users"."id") FROM "users") + (SELECT COUNT("issues"."id") FROM "issues")')
     end
   end
+
+  describe 'min/max methods' do
+    it 'returns nil' do
+      # user min/max
+      expect(described_class.user_minimum_id).to eq(nil)
+      expect(described_class.user_maximum_id).to eq(nil)
+
+      # issue min/max
+      expect(described_class.issue_minimum_id).to eq(nil)
+      expect(described_class.issue_maximum_id).to eq(nil)
+
+      # deployment min/max
+      expect(described_class.deployment_minimum_id).to eq(nil)
+      expect(described_class.deployment_maximum_id).to eq(nil)
+
+      # project min/max
+      expect(described_class.project_minimum_id).to eq(nil)
+      expect(described_class.project_maximum_id).to eq(nil)
+    end
+  end
 end

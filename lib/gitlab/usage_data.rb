@@ -839,54 +839,6 @@ module Gitlab
           count(::Issue.with_prometheus_alert_events, start: issue_minimum_id, finish: issue_maximum_id)
       end
 
-      def user_minimum_id
-        strong_memoize(:user_minimum_id) do
-          ::User.minimum(:id)
-        end
-      end
-
-      def user_maximum_id
-        strong_memoize(:user_maximum_id) do
-          ::User.maximum(:id)
-        end
-      end
-
-      def issue_minimum_id
-        strong_memoize(:issue_minimum_id) do
-          ::Issue.minimum(:id)
-        end
-      end
-
-      def issue_maximum_id
-        strong_memoize(:issue_maximum_id) do
-          ::Issue.maximum(:id)
-        end
-      end
-
-      def deployment_minimum_id
-        strong_memoize(:deployment_minimum_id) do
-          ::Deployment.minimum(:id)
-        end
-      end
-
-      def deployment_maximum_id
-        strong_memoize(:deployment_maximum_id) do
-          ::Deployment.maximum(:id)
-        end
-      end
-
-      def project_minimum_id
-        strong_memoize(:project_minimum_id) do
-          ::Project.minimum(:id)
-        end
-      end
-
-      def project_maximum_id
-        strong_memoize(:project_maximum_id) do
-          ::Project.maximum(:id)
-        end
-      end
-
       def self_monitoring_project
         Gitlab::CurrentSettings.self_monitoring_project
       end
