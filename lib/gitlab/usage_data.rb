@@ -389,8 +389,8 @@ module Gitlab
       # rubocop: disable CodeReuse/ActiveRecord
       def container_expiration_policies_usage
         results = {}
-        start = ::Project.minimum(:id)
-        finish = ::Project.maximum(:id)
+        start = project_minimum_id
+        finish = project_maximum_id
 
         results[:projects_with_expiration_policy_disabled] = distinct_count(::ContainerExpirationPolicy.where(enabled: false), :project_id, start: start, finish: finish)
         # rubocop: disable UsageData/LargeTable
