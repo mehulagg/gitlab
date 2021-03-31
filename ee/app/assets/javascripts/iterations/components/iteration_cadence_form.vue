@@ -1,6 +1,12 @@
 <script>
-import { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput } from '@gitlab/ui';
-import DueDateSelectors from '~/due_date_select';
+import {
+  GlButton,
+  GlDatepicker,
+  GlForm,
+  GlFormCheckbox,
+  GlFormGroup,
+  GlFormInput,
+} from '@gitlab/ui';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import createCadence from '../queries/create_cadence.mutation.graphql';
@@ -8,6 +14,7 @@ import createCadence from '../queries/create_cadence.mutation.graphql';
 export default {
   components: {
     GlButton,
+    GlDatepicker,
     GlForm,
     GlFormCheckbox,
     GlFormGroup,
@@ -47,19 +54,14 @@ export default {
         input: {
           groupPath: this.groupPath,
           title: this.title,
-          automatic: true,
+          automatic: this.automatic,
           startDate: this.startDate,
           durationInWeeks: this.durationInWeeks,
-          // rollOverIssues: this.rollOverIssues,
           iterationsInAdvance: this.iterationsInAdvance,
           active: true, // TODO: where is this toggled?
         },
       };
     },
-  },
-  mounted() {
-    // eslint-disable-next-line no-new
-    new DueDateSelectors();
   },
   methods: {
     save() {
@@ -95,9 +97,6 @@ export default {
           // createFlash(__('Unable to save cadence. Please try again'));
         });
     },
-    updateDueDate(val) {
-      this.dueDate = val;
-    },
     updateStartDate(val) {
       this.startDate = val;
     },
@@ -116,7 +115,7 @@ export default {
       <gl-form-group
         :label="__('Title')"
         :label-cols-md="2"
-        label-class="text-right-md gl-pb-0!"
+        label-class="text-right-md gl-pt-3!"
         label-for="cadence-title"
       >
         <!-- :invalid-feedback=""
@@ -132,8 +131,7 @@ export default {
 
       <gl-form-group
         :label-cols-md="2"
-        class="common-note-form"
-        label-class="gl-font-weight-bold text-right-md gl-pb-0!"
+        label-class="gl-font-weight-bold text-right-md gl-pt-3!"
         label-for="cadence-automated-scheduling"
         :description="s__('Iterations|Iteration scheduling will be handled automatically')"
       >
@@ -145,26 +143,28 @@ export default {
       <gl-form-group
         :label="__('Start date')"
         :label-cols-md="2"
-        label-class="text-right-md gl-pb-0!"
+        label-class="text-right-md gl-pt-3!"
         label-for="start-date"
         :description="s__('Iterations|The start date of your first iteration')"
       >
-        <!-- :invalid-feedback=""
-              :state="validationState.name" -->
-        <gl-form-input
-          id="start-date"
-          v-model="startDate"
-          required
-          :placeholder="__('Select start date')"
-          autocomplete="off"
-          data-qa-selector="cadence_start_date"
-        />
+        <gl-datepicker :target="null">
+          <gl-form-input
+            v-model="startDate"
+            :placeholder="__('Select start date')"
+            class="datepicker gl-datepicker-input"
+            autocomplete="off"
+            id="start-date"
+            inputmode="none"
+            required
+            data-qa-selector="cadence_start_date"
+          />
+        </gl-datepicker>
       </gl-form-group>
 
       <gl-form-group
         :label="__('Duration')"
         :label-cols-md="2"
-        label-class="text-right-md gl-pb-0!"
+        label-class="text-right-md gl-pt-3!"
         label-for="cadence-duration"
         :description="i18n.duration.description"
       >
@@ -183,22 +183,10 @@ export default {
       </gl-form-group>
 
       <gl-form-group
-        :label-cols-md="2"
-        class="common-note-form"
-        label-class="gl-font-weight-bold text-right-md gl-pb-0!"
-        label-for="cadence-automated-scheduling"
-        :description="s__('Iterations|Move incomplete issues to the next iteration')"
-      >
-        <gl-form-checkbox>
-          {{ s__('Iterations|Roll over issues') }}
-        </gl-form-checkbox>
-      </gl-form-group>
-
-      <gl-form-group
         :label="__('Future iterations')"
         :label-cols-md="2"
         :content-cols-md="2"
-        label-class="text-right-md gl-pb-0!"
+        label-class="text-right-md gl-pt-3!"
         label-for="cadence-schedule-future-iterations"
         :description="
           s__('Iterations|Number of future iterations you would like to have scheduled')

@@ -2,12 +2,14 @@
 
 class Groups::CadencesController < Groups::ApplicationController
   before_action :check_cadences_available!
-  before_action :authorize_show_cadence!, only: [:index, :show]
+  before_action :authorize_show_cadence!, only: [:index]
   before_action :authorize_create_cadence!, only: [:new]
 
   feature_category :issue_tracking
 
   def new; end
+
+  def index; end
 
   private
 

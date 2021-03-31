@@ -5475,6 +5475,9 @@ msgstr ""
 msgid "CVE|Why Request a CVE ID?"
 msgstr ""
 
+msgid "Cadence name"
+msgstr ""
+
 msgid "Callback URL"
 msgstr ""
 
@@ -8832,6 +8835,9 @@ msgid "Create blank project"
 msgstr ""
 
 msgid "Create branch"
+msgstr ""
+
+msgid "Create cadence"
 msgstr ""
 
 msgid "Create commit"
@@ -13658,6 +13664,9 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
+msgid "Future iterations"
+msgstr ""
+
 msgid "GPG Key ID:"
 msgstr ""
 
@@ -17312,6 +17321,9 @@ msgstr ""
 msgid "Iteration"
 msgstr ""
 
+msgid "Iteration cadences"
+msgstr ""
+
 msgid "Iteration changed to"
 msgstr ""
 
@@ -17325,6 +17337,30 @@ msgid "Iteration updated"
 msgstr ""
 
 msgid "Iterations"
+msgstr ""
+
+msgid "Iterations cadences"
+msgstr ""
+
+msgid "Iterations|Automated scheduling"
+msgstr ""
+
+msgid "Iterations|Iteration scheduling will be handled automatically"
+msgstr ""
+
+msgid "Iterations|Move incomplete issues to the next iteration"
+msgstr ""
+
+msgid "Iterations|Number of future iterations you would like to have scheduled"
+msgstr ""
+
+msgid "Iterations|Roll over issues"
+msgstr ""
+
+msgid "Iterations|The duration for each iteration (in weeks)"
+msgstr ""
+
+msgid "Iterations|The start date of your first iteration"
 msgstr ""
 
 msgid "Iteration|Dates cannot overlap with other existing Iterations within this group"
@@ -20648,6 +20684,9 @@ msgid "New issue title"
 msgstr ""
 
 msgid "New iteration"
+msgstr ""
+
+msgid "New iteration cadence"
 msgstr ""
 
 msgid "New iteration created"
@@ -27459,6 +27498,9 @@ msgid "Select branch"
 msgstr ""
 
 msgid "Select due date"
+msgstr ""
+
+msgid "Select duration"
 msgstr ""
 
 msgid "Select epic"

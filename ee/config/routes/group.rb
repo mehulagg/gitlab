@@ -123,7 +123,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     end
 
     resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }
-    resources :cadences , only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }
+    resources :cadences, only: [:index, :new], constraints: { id: /\d+/ }
 
     resources :issues, only: [] do
       collection do
