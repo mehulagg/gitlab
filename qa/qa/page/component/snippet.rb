@@ -29,10 +29,6 @@ module QA
             element :file_content
           end
 
-          base.view 'app/assets/javascripts/blob/components/blob_content.vue' do
-            element :file_content
-          end
-
           base.view 'app/assets/javascripts/snippets/components/snippet_header.vue' do
             element :snippet_action_button
             element :delete_snippet_button

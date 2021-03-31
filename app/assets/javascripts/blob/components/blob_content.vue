@@ -73,7 +73,6 @@ export default {
         :is-raw-content="isRawContent"
         :file-name="blob.name"
         :type="activeViewer.fileType"
-        data-qa-selector="file_content"
       />
     </template>
   </div>
