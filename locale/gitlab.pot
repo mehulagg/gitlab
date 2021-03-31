@@ -15468,6 +15468,9 @@ msgstr ""
 msgid "How do I configure runners?"
 msgstr ""
 
+msgid "How do I configure this integration?"
+msgstr ""
+
 msgid "How do I generate it?"
 msgstr ""
 
@@ -18807,6 +18810,9 @@ msgstr ""
 msgid "MattermostService|Add to Mattermost"
 msgstr ""
 
+msgid "MattermostService|After you configure the integration, view your new Mattermost commands by entering"
+msgstr ""
+
 msgid "MattermostService|Command trigger word"
 msgstr ""
 
@@ -18825,13 +18831,10 @@ msgstr ""
 msgid "MattermostService|Response username"
 msgstr ""
 
-msgid "MattermostService|See list of available commands in Mattermost after setting up this service, by entering"
-msgstr ""
-
 msgid "MattermostService|Suggestions:"
 msgstr ""
 
-msgid "MattermostService|This service allows users to perform common operations on this project by entering slash commands in Mattermost."
+msgid "MattermostService|Use this service to perform common tasks in your project by entering slash commands in Mattermost."
 msgstr ""
 
 msgid "Max 100,000 events"
@@ -24032,7 +24035,7 @@ msgstr ""
 msgid "ProjectService|TeamCity URL"
 msgstr ""
 
-msgid "ProjectService|To set up this service:"
+msgid "ProjectService|To configure this integration, you should:"
 msgstr ""
 
 msgid "ProjectSettings|%{link_start}What are description templates?%{link_end}"
