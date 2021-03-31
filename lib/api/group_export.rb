@@ -43,6 +43,24 @@ module API
           render_api_error!(message: 'Group export could not be started.')
         end
       end
+
+      desc 'Export group relation' do
+        detail 'This feature was introduced in GitLab 13.11.'
+      end
+      params do
+        requires :url, type: String, desc: 'The URL to send exported relation to'
+      end
+      post ':id/export_relation' do
+        # validate URL here
+        # check rate limit here
+
+        BulkImports::GroupRelationExportWorker.perform_async(
+          group_id: user_group.id,
+          user_id: current_user.id,
+          relation: params[:relation],
+          url: params[:url]
+        )
+      end
     end
   end
 end
