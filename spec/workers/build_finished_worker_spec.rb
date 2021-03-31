@@ -36,6 +36,7 @@ RSpec.describe BuildFinishedWorker do
 
         it 'adds a todo' do
           expect(::Ci::MergeRequests::AddTodoWhenBuildFailsWorker).to receive(:perform_async)
+          expect(::Ci::BuildRetryWorker).to receive(:perform_async)
 
           subject
         end
