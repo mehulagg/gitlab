@@ -122,7 +122,9 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
 
   # rubocop: disable CodeReuse/ActiveRecord
   def selected_target_project
-    if @project.id.to_s == params[:target_project_id] || !@project.forked?
+    if @project.id.to_s == params[:target_project_id] ||
+        !@project.forked? ||
+        @project.project_setting.mr_default_target_project_origin
       @project
     elsif params[:target_project_id].present?
       MergeRequestTargetProjectFinder.new(current_user: current_user, source_project: @project)

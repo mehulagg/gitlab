@@ -2169,6 +2169,7 @@ class Project < ApplicationRecord
   def default_merge_request_target
     return self unless forked_from_project
     return self unless forked_from_project.merge_requests_enabled?
+    return self if project_setting.mr_default_target_project_origin
 
     # When our current visibility is more restrictive than the source project,
     # (e.g., the fork is `private` but the parent is `public`), target the less
