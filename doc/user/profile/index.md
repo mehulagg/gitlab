@@ -76,6 +76,9 @@ The following is hidden from your user profile page (`https://gitlab.example.com
 - Date when account was created
 - Tabs for activity, groups, contributed projects, personal projects, starred projects, snippets
 
+NOTE:
+Making your user profile page private does not hide your public resources from other sources such as REST API or GraphQL API
+
 ## Add external accounts to your user profile page
 
 You can add links to certain other external accounts you might have, like Skype and Twitter.
@@ -103,6 +106,7 @@ To show private contributions:
 1. Select **Edit profile**.
 1. In the **Main settings** section, select the **Include private contributions on my profile** checkbox.
 1. Select **Update profile settings**.
+
 
 ## Set your current status
 
