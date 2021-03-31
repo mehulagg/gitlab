@@ -11,6 +11,21 @@ module EE
         .count
     end
 
+    def open_epics_count(group)
+      if ::Feature.enabled?(:cached_sidebar_open_epics_count, group, default_enabled: :yaml)
+        cached_issuables_count(group, type: :epics)
+      else
+        number_with_delimiter(group_epics_count(state: 'opened'))
+      end
+    end
+
+    override :issuables_count_service_class
+    def issuables_count_service_class(type)
+      return super unless type == :epics
+
+      ::Groups::EpicsCountService
+    end
+
     def group_nav_link_paths
       %w[saml_providers#show usage_quotas#index billings#index]
     end

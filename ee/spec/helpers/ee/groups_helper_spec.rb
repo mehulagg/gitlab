@@ -49,6 +49,43 @@ RSpec.describe GroupsHelper do
     end
   end
 
+  describe '#open_epics_count' do
+    let_it_be(:count_service) { ::Groups::EpicsCountService }
+
+    before do
+      allow(helper).to receive(:current_user) { current_user }
+    end
+
+    it 'returns count value from cache' do
+      allow_next_instance_of(count_service) do |service|
+        allow(service).to receive(:count).and_return(2500)
+      end
+
+      expect(helper.open_epics_count(group)).to eq('2.5k')
+    end
+
+    context 'when cached_sidebar_open_epics_count feature flag is disabled' do
+      before do
+        stub_feature_flags(cached_sidebar_open_epics_count: false)
+      end
+
+      it 'returns not cached epics count' do
+        allow(helper).to receive(:group_epics_count).and_return(2500)
+
+        expect(helper.open_epics_count(group)).to eq('2,500')
+      end
+    end
+  end
+
+  describe '#cached_issuables_count' do
+    context 'with epics type' do
+      let(:type) { :epics }
+      let(:count_service) { ::Groups::EpicsCountService }
+
+      it_behaves_like 'cached issuables count'
+    end
+  end
+
   describe '#group_sidebar_links' do
     before do
       allow(helper).to receive(:can?) { |*args| Ability.allowed?(*args) }

@@ -1,6 +1,6 @@
 - return unless group_sidebar_link?(:epics)
 
-- epics_count = group_epics_count(state: 'opened')
+- epics_count = open_epics_count(group)
 - epics_items = ['epics#show', 'epics#index', 'epic_boards#index', 'epic_boards#show', 'roadmap#show']
 
 = nav_link(path: epics_items) do
@@ -20,7 +20,7 @@
       = link_to group_epics_path(group), title: 'List' do
         %span= _('List')
 
-    - if Feature.enabled?(:epic_boards, @group)
+    - if Feature.enabled?(:epic_boards, group)
       = nav_link(path: ['epic_boards#index', 'epic_boards#show'], html_options: { class: "home" }) do
         = link_to group_epic_boards_path(group), title: 'Boards' do
           %span= _('Boards')

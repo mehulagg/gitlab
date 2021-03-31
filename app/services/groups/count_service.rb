@@ -19,9 +19,19 @@ module Groups
       cached_count = Rails.cache.read(cache_key)
       return cached_count unless cached_count.blank?
 
-      refreshed_count = uncached_count
-      update_cache_for_key(cache_key) { refreshed_count } if refreshed_count > CACHED_COUNT_THRESHOLD
-      refreshed_count
+      refresh_cache_over_threshold
+    end
+
+    def refresh_cache_over_threshold(new_count = nil)
+      new_count ||= uncached_count
+
+      if new_count > CACHED_COUNT_THRESHOLD
+        update_cache_for_key(cache_key) { new_count }
+      else
+        delete_cache
+      end
+
+      new_count
     end
 
     def cache_key
