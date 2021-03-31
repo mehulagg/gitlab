@@ -519,6 +519,17 @@ This assumes you are using the `gitlab` namespace, if you used a different names
 
 ### Step 2. Promote all **secondary** nodes external to the cluster
 
+WARNING:
+In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the
+secondary is paused fails. Do not pause replication before promoting a
+secondary. If the node is paused, be sure to resume before promoting. This
+issue has been fixed in GitLab 13.4 and later.
+
+WARNING:
+If the secondary node [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
+a point-in-time recovery to the last known state.
+Data that was created on the primary while the secondary was paused will be lost.
+
 1. SSH in to the database node in the **secondary** and trigger PostgreSQL to
    promote to read-write:
 
@@ -528,9 +539,12 @@ This assumes you are using the `gitlab` namespace, if you used a different names
 
    In GitLab 12.8 and earlier, see [Message: `sudo: gitlab-pg-ctl: command not found`](../replication/troubleshooting.md#message-sudo-gitlab-pg-ctl-command-not-found).
 
-1. Edit `/etc/gitlab/gitlab.rb` on every machine in the **secondary** to
+1. Edit `/etc/gitlab/gitlab.rb` on the database node in the **secondary** site to
    reflect its new status as **primary** by removing any lines that enabled the
    `geo_secondary_role`:
+
+   NOTE:
+   Depending on your architecture these steps will need to be run on any GitLab node that is external to the **secondary** Kubernetes cluster.
 
    ```ruby
    ## In pre-11.5 documentation, the role was enabled as follows. Remove this line.
@@ -540,8 +554,7 @@ This assumes you are using the `gitlab` namespace, if you used a different names
    roles ['geo_secondary_role']
    ```
 
-   After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) each
-   machine so the changes take effect.
+   After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) on the database node.
 
 ### Step 3. Promote the **secondary** cluster
 
@@ -580,7 +593,9 @@ This assumes you are using the `gitlab` namespace, if you used a different names
             key: geo-postgresql-password
    ```
 
-   To promote the **secondary** cluster to a **primary** cluster update `role: secondary` to `role: primary` and remove the entire `psql` section. This refers to the tracking database and is not required on the primary.
+   To promote the **secondary** cluster to a **primary** cluster update `role: secondary` to `role: primary`.
+
+   You can remove the entire `psql` section if the cluster will remain as a primary site, this refers to the tracking database and will be ignored whilst the cluster is acting as a primary site.
 
    Update the cluster with the new config:
 
