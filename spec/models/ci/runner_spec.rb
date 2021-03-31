@@ -652,7 +652,7 @@ RSpec.describe Ci::Runner do
   describe '#heartbeat' do
     let(:runner) { create(:ci_runner, :project) }
 
-    subject { runner.heartbeat(architecture: '18-bit') }
+    subject { runner.heartbeat(architecture: '18-bit', config: { gpus: "all" }) }
 
     context 'when database was updated recently' do
       before do
@@ -700,6 +700,7 @@ RSpec.describe Ci::Runner do
     def does_db_update
       expect { subject }.to change { runner.reload.read_attribute(:contacted_at) }
         .and change { runner.reload.read_attribute(:architecture) }
+        .and change { runner.reload.read_attribute(:config) }
     end
   end
 

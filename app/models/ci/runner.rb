@@ -314,7 +314,7 @@ module Ci
     end
 
     def heartbeat(values)
-      values = values&.slice(:version, :revision, :platform, :architecture, :ip_address) || {}
+      values = values&.slice(:version, :revision, :platform, :architecture, :ip_address, :config) || {}
       values[:contacted_at] = Time.current
 
       cache_attributes(values)
