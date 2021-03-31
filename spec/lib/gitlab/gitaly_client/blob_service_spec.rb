@@ -45,6 +45,60 @@ RSpec.describe Gitlab::GitalyClient::BlobService do
     end
   end
 
+  describe '#list_all_lfs_pointers' do
+    let(:limit) { 5 }
+    let(:git_object_directory) { '.git/objects' }
+    let(:git_alternate_object_directory) { ['/dir/one', '/dir/two'] }
+    let(:git_env) do
+      {
+        'GIT_OBJECT_DIRECTORY_RELATIVE' => git_object_directory,
+        'GIT_ALTERNATE_OBJECT_DIRECTORIES_RELATIVE' => git_alternate_object_directory
+      }
+    end
+
+    subject { client.list_all_lfs_pointers(limit, only_object_dir) }
+
+    shared_examples 'a request' do
+      it 'sends a list_all_lfs_pointers message' do
+        allow(Gitlab::Git::HookEnv).to receive(:all).with(repository.gl_repository).and_return(git_env)
+
+        expect_any_instance_of(Gitaly::BlobService::Stub)
+          .to receive(:list_all_lfs_pointers)
+          .with(gitaly_request_with_params(expected_params), kind_of(Hash))
+          .and_return([])
+
+        subject
+      end
+    end
+
+    context 'with object dir' do
+      let(:only_object_dir) { false }
+      let(:expected_params) do
+        {
+          limit: limit,
+          repository: repository.gitaly_repository
+        }
+      end
+
+      include_examples 'a request'
+    end
+
+    context 'without object dir' do
+      let(:only_object_dir) { true }
+      let(:expected_params) do
+        expected_repository = repository.gitaly_repository
+        expected_repository.git_alternate_object_directories = Google::Protobuf::RepeatedField.new(:string)
+
+        {
+          limit: limit,
+          repository: expected_repository
+        }
+      end
+
+      include_examples 'a request'
+    end
+  end
+
   describe '#get_all_lfs_pointers' do
     subject { client.get_all_lfs_pointers }
 

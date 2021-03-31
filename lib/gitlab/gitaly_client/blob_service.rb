@@ -107,6 +107,34 @@ module Gitlab
         map_lfs_pointers(response)
       end
 
+      def list_all_lfs_pointers(limit, only_object_dir = false, dynamic_timeout = nil)
+        repository = @gitaly_repo.dup
+        if only_object_dir
+          repository.git_alternate_object_directories = Google::Protobuf::RepeatedField.new(:string)
+        end
+
+        request = Gitaly::ListAllLFSPointersRequest.new(
+          repository: repository,
+          limit: limit || 0
+        )
+
+        timeout =
+          if dynamic_timeout
+            [dynamic_timeout, GitalyClient.medium_timeout].min
+          else
+            GitalyClient.medium_timeout
+          end
+
+        response = GitalyClient.call(
+          @gitaly_repo.storage_name,
+          :blob_service,
+          :list_all_lfs_pointers,
+          request,
+          timeout: timeout
+        )
+        map_lfs_pointers(response)
+      end
+
       def get_all_lfs_pointers
         request = Gitaly::GetAllLFSPointersRequest.new(
           repository: @gitaly_repo
