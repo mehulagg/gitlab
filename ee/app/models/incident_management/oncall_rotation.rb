@@ -36,7 +36,7 @@ module IncidentManagement
     # Note! If changing the order of participants, also change the :with_shift_generation_associations scope.
     has_many :active_participants, -> { not_removed.order(id: :asc) }, class_name: 'OncallParticipant', inverse_of: :rotation
     has_many :users, through: :participants
-    has_many :shifts, class_name: 'OncallShift', inverse_of: :rotation, foreign_key: :rotation_id
+    has_many :shifts, class_name: 'IncidentManagement::OncallShift', inverse_of: :rotation, foreign_key: :rotation_id
 
     validates :name, presence: true, uniqueness: { scope: :oncall_schedule_id }, length: { maximum: NAME_LENGTH }
     validates :starts_at, presence: true

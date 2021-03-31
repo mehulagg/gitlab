@@ -58,7 +58,7 @@ module Types
             resolver: ::Resolvers::IncidentManagement::OncallShiftsResolver
 
       def participants
-        object.participants.not_removed
+        object.active_participants
       end
     end
   end
