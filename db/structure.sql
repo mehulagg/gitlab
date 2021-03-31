@@ -12716,6 +12716,14 @@ CREATE SEQUENCE features_id_seq
 
 ALTER SEQUENCE features_id_seq OWNED BY features.id;
 
+CREATE TABLE foo (
+    id bigint NOT NULL,
+    name text,
+    status bigint,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE fork_network_members (
     id integer NOT NULL,
     fork_network_id integer NOT NULL,
@@ -19405,6 +19413,8 @@ ALTER TABLE ONLY feature_gates ALTER COLUMN id SET DEFAULT nextval('feature_gate
 
 ALTER TABLE ONLY features ALTER COLUMN id SET DEFAULT nextval('features_id_seq'::regclass);
 
+ALTER TABLE ONLY foo ALTER COLUMN id SET DEFAULT nextval('foo_id_seq'::regclass);
+
 ALTER TABLE ONLY fork_network_members ALTER COLUMN id SET DEFAULT nextval('fork_network_members_id_seq'::regclass);
 
 ALTER TABLE ONLY fork_networks ALTER COLUMN id SET DEFAULT nextval('fork_networks_id_seq'::regclass);
@@ -20664,6 +20674,9 @@ ALTER TABLE ONLY feature_gates
 
 ALTER TABLE ONLY features
     ADD CONSTRAINT features_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY foo
+    ADD CONSTRAINT foo_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY fork_network_members
     ADD CONSTRAINT fork_network_members_pkey PRIMARY KEY (id);
