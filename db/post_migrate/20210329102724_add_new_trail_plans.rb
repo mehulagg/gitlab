@@ -24,8 +24,8 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   def up
     return unless Gitlab.dev_env_org_or_com? || Gitlab.staging?
 
-    ultimate_trial = Plan.create(name: 'ultimate-trial', title: 'Ultimate Trial')
-    premium_trial = Plan.create(name: 'premium-trial', title: 'Premium Trial')
+    ultimate_trial = Plan.create(name: 'ultimate_trial', title: 'Ultimate Trial')
+    premium_trial = Plan.create(name: 'premium_trial', title: 'Premium Trial')
 
     create_plan_limits('gold', ultimate_trial)
     create_plan_limits('silver', premium_trial)
@@ -34,7 +34,7 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   def down
     return unless Gitlab.dev_env_org_or_com? || Gitlab.staging?
 
-    Plan.find_by(name: 'ultimate-trial')&.destroy
-    Plan.find_by(name: 'premium-trial')&.destroy
+    Plan.find_by(name: 'ultimate_trial')&.destroy
+    Plan.find_by(name: 'premium_trial')&.destroy
   end
 end
