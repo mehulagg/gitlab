@@ -27,14 +27,14 @@ budget for the stage group. This row shows how the features owned by
 the group are contributing to our [overall
 availability](https://about.gitlab.com/handbook/engineering/infrastructure/performance-indicators/#gitlabcom-availability).
 
-The budget is always aggregated over the 30 days before the [time
+The budget is always aggregated over the 28 days before the [time
 selected on the dashboard](#time-range-controls)
 
 We're currently displaying the information in 2 formats:
 
 1. Availability: This number can be compared to GitLab.com's overall
    availability target of 99.95% uptime.
-1. Budget Spent: This shows the time over the past 30 days that
+1. Budget Spent: This shows the time over the past 28 days that
    features owned by the group have not been performing satisfactory.
 
 We're still discussing which of these is more understandable, please
