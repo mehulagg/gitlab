@@ -6,6 +6,8 @@ module EE
 
     prepended do
       include ::Gitlab::Geo::ReplicableModel
+      include ::Gitlab::Geo::VerificationState
+
       include ObjectStorable
 
       STORE_COLUMN = :external_diff_store
