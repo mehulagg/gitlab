@@ -278,19 +278,6 @@ function UsersSelect(currentUser, els, options = {}) {
       processData(term, data, callback) {
         let users = data;
 
-        // the next 2 loops remove the duplicate header and dividers on reloads w/out refresh
-        users.forEach((user, index, object) => {
-          if (user.content === $dropdown.data('dropdownHeader')) {
-            object.splice(index, 1);
-          }
-        });
-
-        users.forEach((user, index, object) => {
-          if (user.type === 'divider') {
-            object.splice(index, 1);
-          }
-        });
-
         // Only show assigned user list when there is no search term
         if ($dropdown.hasClass('js-multiselect') && term.length === 0) {
           const selectedInputs = getSelectedUserInputs();
@@ -359,6 +346,8 @@ function UsersSelect(currentUser, els, options = {}) {
             };
             users.unshift(anyUser);
           }
+
+          users = users.filter(user => (user.content !== $dropdown.data('dropdownHeader') && user.type !== 'divider'));
 
           if (showDivider) {
             users.splice(showDivider, 0, { type: 'divider' });
