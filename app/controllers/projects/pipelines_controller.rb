@@ -130,6 +130,13 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def failures
+    # rubocop: disable CodeReuse/ActiveRecord
+    @pipeline = project
+      .all_pipelines
+      .find_by!(id: params[:id])
+      .present(current_user: current_user)
+    # rubocop: enable CodeReuse/ActiveRecord
+
     if @pipeline.failed_builds.present?
       render_show
     else
