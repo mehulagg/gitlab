@@ -7832,6 +7832,15 @@ Values for sorting projects.
 | `SIMILARITY` | Most similar to the search query. |
 | `STORAGE` | Sort by storage size. |
 
+### `NoteEnum`
+
+Values for sorting notes.
+
+| Value | Description |
+| ----- | ----------- |
+| `CREATED_AT_ASC` | Created date by ascending order. |
+| `CREATED_AT_DESC` | Created date by descending order. |
+
 ### `OncallRotationUnitEnum`
 
 Rotation length unit of an on-call rotation.
