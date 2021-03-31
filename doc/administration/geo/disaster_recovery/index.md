@@ -507,7 +507,7 @@ When updating a Cloud Native Geo deployment, the process for updating any nodes 
 
 ### Step 1. Permanently disable the **primary** cluster
 
-Connect to your primary cluster and disable GitLab
+Connect to your primary cluster and disable the GitLab webservice and sidekiq pods
 
 ```shell
 kubectl --namespace gitlab scale deploy gitlab-geo-webservice-default --replicas=0
@@ -517,7 +517,7 @@ kubectl --namespace gitlab scale deploy gitlab-geo-sidekiq-all-in-1-v1 --replica
 NOTE:
 This assumes you are using the gitlab namespace, if you used a different namespace when setting up your cluster you should also replace `--namespace gitlab` throughout the rest of this document.
 
-### Promote all **secondary** nodes external to the cluster
+### Step 2. Promote all **secondary** nodes external to the cluster
 
 1. SSH in to the database node in the **secondary** and trigger PostgreSQL to
    promote to read-write:
@@ -543,7 +543,7 @@ This assumes you are using the gitlab namespace, if you used a different namespa
    After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) each
    machine so the changes take effect.
 
-### Promote the **secondary** cluster
+### Step 3. Promote the **secondary** cluster
 
 1. Find the Task Runner Pod
 
@@ -580,7 +580,7 @@ This assumes you are using the gitlab namespace, if you used a different namespa
             key: geo-postgresql-password
    ```
 
-   To promote the **secondary** cluster to a **primary** cluster update `role: seconadry` to `role: primary` and remove the entire `psql` section. This refers to the tracking database and is no required on the primary.
+   To promote the **secondary** cluster to a **primary** cluster update `role: secondary` to `role: primary` and remove the entire `psql` section. This refers to the tracking database and is not required on the primary.
 
    Update the cluster with the new config:
 
