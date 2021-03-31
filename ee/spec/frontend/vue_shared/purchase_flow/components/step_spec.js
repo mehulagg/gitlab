@@ -20,7 +20,7 @@ describe('Step', () => {
     nextStepButtonText: 'next',
   };
 
-  async function activateFirstStep(apolloProvider) {
+  function activateFirstStep(apolloProvider) {
     return apolloProvider.clients.defaultClient.mutate({
       mutation: updateStepMutation,
       variables: { id: STEPS[0].id },

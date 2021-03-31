@@ -21,7 +21,7 @@ describe('Confirm Order', () => {
 
   const store = createStore();
 
-  async function activateStep(stepId) {
+  function activateStep(stepId) {
     return mockApolloProvider.clients.defaultClient.mutate({
       mutation: updateStepMutation,
       variables: { id: stepId },

@@ -24,7 +24,7 @@ describe('Billing Address', () => {
     fetchStates: jest.fn(),
   };
 
-  async function activateNextStep() {
+  function activateNextStep() {
     return mockApolloProvider.clients.defaultClient.mutate({
       mutation: activateNextStepMutation,
     });

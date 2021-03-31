@@ -36,7 +36,7 @@ export default {
   },
   data() {
     return {
-      activeStep: null,
+      activeStep: {},
       stepList: [],
       loading: false,
     };

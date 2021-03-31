@@ -11,8 +11,7 @@ export default {
   },
   data() {
     return {
-      activeStep: null,
-      stepList: [],
+      activeStep: {},
     };
   },
   apollo: {
