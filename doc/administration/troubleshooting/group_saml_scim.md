@@ -85,4 +85,3 @@ Adding a user:
 SSO settings:
 
 ![OneLogin SSO settings](img/OneLogin-SSOsettings.png)
-
