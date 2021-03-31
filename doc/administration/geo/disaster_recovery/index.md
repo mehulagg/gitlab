@@ -501,6 +501,97 @@ Now we need to make each **secondary** node listen to changes on the new **prima
 to [initiate the replication process](../setup/database.md#step-3-initiate-the-replication-process) again but this time
 for another **primary** node. All the old replication settings will be overwritten.
 
+## Promoting a secondary Geo cluster in GitLab Cloud Native Helm Charts
+
+When updating a Cloud Native Geo deployment, the process for updating any nodes that are external to the primary cluster does not differ from the non Cloud Native approach. As such you can always defer to [Promoting a secondary Geo node in single-secondary configurations](#promoting-a-secondary-geo-node-in-single-secondary-configurations) for more information.
+
+### Step 1. Permanently disable the **primary** cluster
+
+Connect to your primary cluster and disable GitLab
+
+```shell
+kubectl --namespace gitlab scale deploy gitlab-geo-webservice-default --replicas=0
+kubectl --namespace gitlab scale deploy gitlab-geo-sidekiq-all-in-1-v1 --replicas=0
+```
+
+NOTE:
+This assumes you are using the gitlab namespace, if you used a different namespace when setting up your cluster you should also replace `--namespace gitlab` throughout the rest of this document.
+
+### Promote all **secondary** nodes external to the cluster
+
+1. SSH in to the database node in the **secondary** and trigger PostgreSQL to
+   promote to read-write:
+
+   ```shell
+   sudo gitlab-ctl promote-db
+   ```
+
+   In GitLab 12.8 and earlier, see [Message: `sudo: gitlab-pg-ctl: command not found`](../replication/troubleshooting.md#message-sudo-gitlab-pg-ctl-command-not-found).
+
+1. Edit `/etc/gitlab/gitlab.rb` on every machine in the **secondary** to
+   reflect its new status as **primary** by removing any lines that enabled the
+   `geo_secondary_role`:
+
+   ```ruby
+   ## In pre-11.5 documentation, the role was enabled as follows. Remove this line.
+   geo_secondary_role['enable'] = true
+
+   ## In 11.5+ documentation, the role was enabled as follows. Remove this line.
+   roles ['geo_secondary_role']
+   ```
+
+   After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) each
+   machine so the changes take effect.
+
+### Promote the **secondary** cluster
+
+1. Find the Task Runner Pod
+
+   ```shell
+   kubectl --namespace gitlab get pods -lapp=task-runner
+   ```
+
+1. Run `gitlab-rake geo:set_secondary_as_primary` with `kubectl exec`
+
+   ```shell
+   kubectl --namespace gitlab exec -ti gitlab-geo-task-runner-XXX -- gitlab-rake geo:set_secondary_as_primary
+   ```
+
+1. Update existing cluster config
+
+   You can retrieve the existing config with helm:
+
+   ```shell
+   helm --namespace gitlab get values gitlab-geo > gitlab.yaml
+   ```
+
+   The existing config will contain a section for Geo that should resemble:
+
+   ```yaml
+   geo:
+      enabled: true
+      role: secondary
+      nodeName: secondary.example.com
+      psql:
+         host: geo-2.db.example.com
+         port: 5431
+         password:
+            secret: geo
+            key: geo-postgresql-password
+   ```
+
+   To promote the **secondary** cluster to a **primary** cluster update `role: seconadry` to `role: primary` and remove the entire `psql` section. This refers to the tracking database and is no required on the primary.
+
+   Update the cluster with the new config:
+
+   ```shell
+   helm upgrade --install gitlab-geo gitlab/gitlab --namespace gitlab -f gitlab.yaml
+   ```
+
+1. Verify you can connect to the newly promoted primary using the URL used previously for the secondary.
+
+1. Success! The secondary has now been promoted to primary.
+
 ## Troubleshooting
 
 This section was moved to [another location](../replication/troubleshooting.md#fixing-errors-during-a-failover-or-when-promoting-a-secondary-to-a-primary-node).
