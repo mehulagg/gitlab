@@ -18,6 +18,6 @@ export default (apolloProvider) => {
     },
     store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider,
-    render: (createElement) => createElement(EpicFilteredSearch, {}),
+    render: (createElement) => createElement(EpicFilteredSearch),
   });
 };

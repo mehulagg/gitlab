@@ -14,9 +14,7 @@ export default {
   components: { FilteredSearch },
   inject: ['search'],
   computed: {
-    ...mapState({
-      fullPath: (state) => state.fullPath, // does this support sub groups
-    }),
+    ...mapState({ fullPath: (state) => state.fullPath }),
     initialSearch() {
       return [{ type: 'filtered-search-term', value: { data: this.search } }];
     },
