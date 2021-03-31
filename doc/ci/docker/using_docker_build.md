@@ -36,7 +36,7 @@ to learn more about how these runners are configured.
 ### Use the shell executor
 
 To include Docker commands in your CI/CD jobs, you can configure your runner to
-use the `shell` executor. In this configurations, the `gitlab-runner` user runs
+use the `shell` executor. In this configuration, the `gitlab-runner` user runs
 the Docker commands, but needs permission to do so.
 
 1. [Install](https://gitlab.com/gitlab-org/gitlab-runner/#installation) GitLab Runner.
@@ -87,9 +87,9 @@ Learn more about the [security of the `docker` group](https://blog.zopyx.com/on-
 
 "Docker-in-Docker" (`dind`) means:
 
-- Your registered runner is using the Docker executor.
-- The executor is using a [container image of Docker](https://hub.docker.com/_/docker/), provided by Docker,
-  to run your CI/CD jobs.
+- Your registered runner uses the [Docker executor](https://docs.gitlab.com/runner/executors/docker.html).
+- The executor uses a [container image of Docker](https://hub.docker.com/_/docker/), provided
+  by Docker, to run your CI/CD jobs.
 
 The Docker image has all of the `docker` tools installed and can run
 the job script in context of the image in privileged mode.
@@ -110,7 +110,7 @@ not without its own challenges:
 - **Cache**: Each job runs in a new environment. Concurrent jobs work fine,
   because every build gets its own instance of Docker engine and they don't conflict with each other.
   However, jobs can be slower because there's no caching of layers.
-- **Storage drivers**: By default, earlier versions of Docker use the `vfs` storage drive,
+- **Storage drivers**: By default, earlier versions of Docker use the `vfs` storage driver,
   which copies the file system for each job. Docker 17.09 and later use `--storage-driver overlay2`, which is
   the recommended storage driver. See [Using the OverlayFS driver](#use-the-overlayfs-driver) for details.
 - **Root file system**: Because the `docker:19.03.12-dind` container and the runner container don't share their
