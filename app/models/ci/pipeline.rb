@@ -785,36 +785,38 @@ module Ci
     end
 
     def predefined_variables
-      Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        variables.append(key: 'CI_PIPELINE_IID', value: iid.to_s)
-        variables.append(key: 'CI_PIPELINE_SOURCE', value: source.to_s)
-        variables.append(key: 'CI_PIPELINE_CREATED_AT', value: created_at&.iso8601)
+      strong_memoize(:predefined_variables) do
+        Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          variables.append(key: 'CI_PIPELINE_IID', value: iid.to_s)
+          variables.append(key: 'CI_PIPELINE_SOURCE', value: source.to_s)
+          variables.append(key: 'CI_PIPELINE_CREATED_AT', value: created_at&.iso8601)
 
-        variables.concat(predefined_commit_variables)
+          variables.concat(predefined_commit_variables)
 
-        if merge_request?
-          variables.append(key: 'CI_MERGE_REQUEST_EVENT_TYPE', value: merge_request_event_type.to_s)
-          variables.append(key: 'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA', value: source_sha.to_s)
-          variables.append(key: 'CI_MERGE_REQUEST_TARGET_BRANCH_SHA', value: target_sha.to_s)
+          if merge_request?
+            variables.append(key: 'CI_MERGE_REQUEST_EVENT_TYPE', value: merge_request_event_type.to_s)
+            variables.append(key: 'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA', value: source_sha.to_s)
+            variables.append(key: 'CI_MERGE_REQUEST_TARGET_BRANCH_SHA', value: target_sha.to_s)
 
-          diff = self.merge_request_diff
-          if diff.present?
-            variables.append(key: 'CI_MERGE_REQUEST_DIFF_ID', value: diff.id.to_s)
-            variables.append(key: 'CI_MERGE_REQUEST_DIFF_BASE_SHA', value: diff.base_commit_sha)
+            diff = self.merge_request_diff
+            if diff.present?
+              variables.append(key: 'CI_MERGE_REQUEST_DIFF_ID', value: diff.id.to_s)
+              variables.append(key: 'CI_MERGE_REQUEST_DIFF_BASE_SHA', value: diff.base_commit_sha)
+            end
+
+            variables.concat(merge_request.predefined_variables)
           end
 
-          variables.concat(merge_request.predefined_variables)
-        end
+          if open_merge_requests_refs.any?
+            variables.append(key: 'CI_OPEN_MERGE_REQUESTS', value: open_merge_requests_refs.join(','))
+          end
 
-        if open_merge_requests_refs.any?
-          variables.append(key: 'CI_OPEN_MERGE_REQUESTS', value: open_merge_requests_refs.join(','))
-        end
+          variables.append(key: 'CI_KUBERNETES_ACTIVE', value: 'true') if has_kubernetes_active?
+          variables.append(key: 'CI_DEPLOY_FREEZE', value: 'true') if freeze_period?
 
-        variables.append(key: 'CI_KUBERNETES_ACTIVE', value: 'true') if has_kubernetes_active?
-        variables.append(key: 'CI_DEPLOY_FREEZE', value: 'true') if freeze_period?
-
-        if external_pull_request_event? && external_pull_request
-          variables.concat(external_pull_request.predefined_variables)
+          if external_pull_request_event? && external_pull_request
+            variables.concat(external_pull_request.predefined_variables)
+          end
         end
       end
     end
