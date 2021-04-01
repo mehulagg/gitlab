@@ -129,6 +129,8 @@ module Gitlab
           'wiki_blobs'
         elsif view_context.current_controller?(:commits)
           'commits'
+        elsif view_context.current_controller?(:epics)
+          'epics'
         elsif view_context.current_controller?(:groups)
           if %w(issues merge_requests).include?(view_context.controller.action_name)
             view_context.controller.action_name

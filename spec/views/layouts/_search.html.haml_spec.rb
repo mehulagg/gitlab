@@ -64,5 +64,15 @@ RSpec.describe 'layouts/_search' do
     end
 
     it_behaves_like 'search context scope is set'
+
+    context 'when on epics' do
+      let(:scope) { 'epics' }
+
+      it 'sets scope to merge_requests' do
+        render
+
+        expect(rendered).to have_css("input[name='scope'][value='epics']", count: 1, visible: false)
+      end
+    end
   end
 end
