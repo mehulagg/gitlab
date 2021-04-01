@@ -45,8 +45,8 @@ export default {
     activeAuthor() {
       return this.authors.find((author) => author.username.toLowerCase() === this.currentValue);
     },
-    avatarUrl() {
-      return this.activeAuthor.avatarUrl || this.activeAuthor.avatar_url;
+    activeAuthorAvatar() {
+      return this.avatarUrl(this.activeAuthor);
     },
   },
   watch: {
@@ -77,6 +77,9 @@ export default {
           this.loading = false;
         });
     },
+    avatarUrl(author) {
+      return author.avatarUrl || author.avatar_url;
+    },
     searchAuthors: debounce(function debouncedSearch({ data }) {
       this.fetchAuthorBySearchTerm(data);
     }, DEBOUNCE_DELAY),
@@ -95,11 +98,13 @@ export default {
       <gl-avatar
         v-if="activeAuthor"
         :size="16"
-        :src="avatarUrl"
+        :src="activeAuthorAvatar"
         shape="circle"
         class="gl-mr-2"
       />
-      <span data-qa-selector="selected-author">{{ activeAuthor ? activeAuthor.name : inputValue }}</span>
+      <span data-qa-selector="selected-author">{{
+        activeAuthor ? activeAuthor.name : inputValue
+      }}</span>
     </template>
     <template #suggestions>
       <gl-filtered-search-suggestion
@@ -118,7 +123,7 @@ export default {
           :value="author.username"
         >
           <div class="d-flex">
-            <gl-avatar :size="32" :src="author.avatar_url || author.avatarUrl" />
+            <gl-avatar :size="32" :src="avatarUrl(author)" />
             <div>
               <div>{{ author.name }}</div>
               <div>@{{ author.username }}</div>
