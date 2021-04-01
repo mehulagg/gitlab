@@ -80,10 +80,11 @@ describe('Filter Body component', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
-    it('emits input event on component when search box input is changed', () => {
+    it('emits input event on component when search box input is changed', async () => {
       const text = 'abc';
       createComponent({ showSearchBox: true });
       searchBox().vm.$emit('input', text);
+      await wrapper.vm.$nextTick();
 
       expect(wrapper.emitted('input')[0][0]).toBe(text);
     });
@@ -102,5 +103,16 @@ describe('Filter Body component', () => {
 
       expect(wrapper.text()).toContain('No matching results');
     });
+  });
+
+  describe('loading icon', () => {
+    it.each([true, false])(
+      'passes the expected prop value to the dropdown when isLoading prop is %s',
+      (isLoading) => {
+        createComponent({ isLoading });
+
+        expect(dropdown().props('loading')).toBe(isLoading);
+      },
+    );
   });
 });
