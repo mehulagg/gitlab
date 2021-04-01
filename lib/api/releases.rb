@@ -9,6 +9,8 @@ module API
 
     before { authorize_read_releases! }
 
+    TRACKED_USER_AGENTS = ['release_cli'].freeze
+
     feature_category :release_orchestration
 
     params do
@@ -27,6 +29,8 @@ module API
                         desc: 'Return releases sorted in `asc` or `desc` order.'
       end
       get ':id/releases' do
+        track_release_event('get_releases')
+
         releases = ::ReleasesFinder.new(user_project, current_user, declared_params.slice(:order_by, :sort)).execute
 
         present paginate(releases), with: Entities::Release, current_user: current_user
@@ -41,6 +45,8 @@ module API
       end
       get ':id/releases/:tag_name', requirements: RELEASE_ENDPOINT_REQUIREMENTS do
         authorize_download_code!
+
+        track_release_event('get_release_by_tag_name')
 
         present release, with: Entities::Release, current_user: current_user
       end
@@ -69,6 +75,8 @@ module API
       post ':id/releases' do
         authorize_create_release!
 
+        track_release_event('create_release')
+
         result = ::Releases::CreateService
           .new(user_project, current_user, declared_params(include_missing: false))
           .execute
@@ -96,6 +104,8 @@ module API
       put ':id/releases/:tag_name', requirements: RELEASE_ENDPOINT_REQUIREMENTS do
         authorize_update_release!
 
+        track_release_event('update_release')
+
         result = ::Releases::UpdateService
           .new(user_project, current_user, declared_params(include_missing: false))
           .execute
@@ -119,6 +129,8 @@ module API
       end
       delete ':id/releases/:tag_name', requirements: RELEASE_ENDPOINT_REQUIREMENTS do
         authorize_destroy_release!
+
+        track_release_event('delete_release')
 
         result = ::Releases::DestroyService
           .new(user_project, current_user, declared_params(include_missing: false))
@@ -175,6 +187,18 @@ module API
 
       def log_release_milestones_updated_audit_event
         # extended in EE
+      end
+
+      def track_release_event(event_name)
+        Gitlab::Tracking.event(self.options[:for].name, event_name.to_s, label: tracking_label,
+          property: user_project.valid?.to_s, project: user_project, user: current_user)
+      end
+
+      def tracking_label
+        user_agent = request.headers["User-Agent"].strip
+        '' unless TRACKED_USER_AGENTS.include?(user_agent)
+
+        user_agent
       end
     end
   end
