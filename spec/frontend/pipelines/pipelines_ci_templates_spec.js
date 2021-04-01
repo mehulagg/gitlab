@@ -28,11 +28,16 @@ const addCiYmlPath = "/-/new/master?commit_message='Add%20.gitlab-ci.yml'";
 describe('Pipelines CI Templates', () => {
   let wrapper;
 
+  const GlEmoji = { template: '<img/>' };
+
   const createWrapper = () => {
     return shallowMount(PipelinesCiTemplate, {
       provide: {
         addCiYmlPath,
         projectId: TEST_PROJECT_ID,
+      },
+      stubs: {
+        GlEmoji,
       },
     });
   };

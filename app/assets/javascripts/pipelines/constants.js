@@ -53,19 +53,19 @@ export const SUGGESTED_CI_TEMPLATES = {
   Go: { logoPath: '/assets/illustrations/logos/go_logo.svg' },
   Gradle: { logoPath: '/assets/illustrations/logos/gradle.svg' },
   Grails: { logoPath: '/assets/illustrations/logos/grails.svg' },
-  Dotnet: { logoPath: '/assets/illustrations/logos/dotnet.svg' },
+  dotNET: { logoPath: '/assets/illustrations/logos/dotnet.svg' },
   Rails: { logoPath: '/assets/illustrations/logos/rails.svg' },
   Julia: { logoPath: '/assets/illustrations/logos/julia.svg' },
   Laravel: { logoPath: '/assets/illustrations/logos/laravel.svg' },
   Latex: { logoPath: '/assets/illustrations/logos/latex.svg' },
   Maven: { logoPath: '/assets/illustrations/logos/maven.svg' },
   Mono: { logoPath: '/assets/illustrations/logos/mono.svg' },
-  NodeJS: { logoPath: '/assets/illustrations/logos/node.svg' },
-  NPM: { logoPath: '/assets/illustrations/logos/npm.svg' },
+  Nodejs: { logoPath: '/assets/illustrations/logos/node_js.svg' },
+  npm: { logoPath: '/assets/illustrations/logos/npm.svg' },
   OpenShift: { logoPath: '/assets/illustrations/logos/openshift.svg' },
   Packer: { logoPath: '/assets/illustrations/logos/packer.svg' },
   PHP: { logoPath: '/assets/illustrations/logos/php.svg' },
-  python: { logoPath: '/assets/illustrations/logos/python.svg' },
+  Python: { logoPath: '/assets/illustrations/logos/python.svg' },
   Ruby: { logoPath: '/assets/illustrations/logos/ruby.svg' },
   Rust: { logoPath: '/assets/illustrations/logos/rust.svg' },
   Scala: { logoPath: '/assets/illustrations/logos/scala.svg' },
@@ -73,3 +73,4 @@ export const SUGGESTED_CI_TEMPLATES = {
   Terraform: { logoPath: '/assets/illustrations/logos/terraform.svg' },
 };
 export const API_CI_TEMPLATE_TYPE = 'gitlab_ci_ymls';
+export const HELLO_WORLD_TEMPLATE_KEY = 'Hello-World';
