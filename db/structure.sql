@@ -14032,7 +14032,8 @@ CREATE TABLE keys (
     last_used_at timestamp without time zone,
     fingerprint_sha256 bytea,
     expires_at timestamp with time zone,
-    expiry_notification_delivered_at timestamp with time zone
+    expiry_notification_delivered_at timestamp with time zone,
+    before_expiry_notification_delivered_at timestamp with time zone
 );
 
 CREATE SEQUENCE keys_id_seq
@@ -21791,6 +21792,8 @@ CREATE INDEX idx_issues_on_state_id ON issues USING btree (state_id);
 CREATE INDEX idx_jira_connect_subscriptions_on_installation_id ON jira_connect_subscriptions USING btree (jira_connect_installation_id);
 
 CREATE UNIQUE INDEX idx_jira_connect_subscriptions_on_installation_id_namespace_id ON jira_connect_subscriptions USING btree (jira_connect_installation_id, namespace_id);
+
+CREATE INDEX idx_keys_expires_at_and_before_expiry_notification_undelivered ON keys USING btree (date(timezone('UTC'::text, expires_at)), before_expiry_notification_delivered_at) WHERE (before_expiry_notification_delivered_at IS NULL);
 
 CREATE INDEX idx_members_created_at_user_id_invite_token ON members USING btree (created_at) WHERE ((invite_token IS NOT NULL) AND (user_id IS NULL));
 
