@@ -18,6 +18,11 @@ export default {
       required: true,
     },
   },
+  computed: {
+    hasContent() {
+      return this.details.some(({ value }) => Boolean(value));
+    },
+  },
   methods: {
     isNotLast(index) {
       return index < this.details.length - 1;
@@ -27,9 +32,17 @@ export default {
 </script>
 
 <template>
-  <div v-if="!details.length">
-    <gl-skeleton-loader :lines="1" />
-    <gl-skeleton-loader :lines="1" />
+  <div v-if="!hasContent">
+    <gl-skeleton-loader>
+      <rect
+        v-for="index in details.length"
+        :key="index"
+        :y="(index - 1) * 20"
+        height="16"
+        rx="4"
+        width="200"
+      />
+    </gl-skeleton-loader>
   </div>
   <table v-else class="gl-m-0 gl-p-0">
     <tbody>
