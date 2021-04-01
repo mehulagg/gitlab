@@ -624,7 +624,7 @@ Data that was created on the primary while the secondary was paused will be lost
    Update the cluster with the new config:
 
    ```shell
-   helm upgrade --install gitlab-geo gitlab/gitlab --namespace gitlab -f gitlab.yaml
+   helm upgrade --install --version <current Chart version> gitlab-geo gitlab/gitlab --namespace gitlab -f gitlab.yaml
    ```
 
 1. Verify you can connect to the newly promoted primary using the URL used previously for the secondary.
