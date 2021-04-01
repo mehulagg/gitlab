@@ -4,7 +4,7 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   DOWNTIME = false
 
   class Plan < ActiveRecord::Base
-    has_one :limits, class_name: 'PlanLimits', dependent: :destroy
+    has_one :limits, class_name: 'PlanLimits'
 
     def actual_limits
       self.limits || self.build_limits
@@ -18,11 +18,14 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   def create_plan_limits(plan_limit_name, plan)
     plan_limit = Plan.find_or_initialize_by(name: plan_limit_name).actual_limits.dup
     plan_limit.plan = plan
-    plan_limit.save
+    plan_limit.save!
   end
 
   def up
-    return unless Gitlab.dev_env_org_or_com? || Gitlab.staging?
+    return unless Gitlab.dev_env_org_or_com?
+
+    Plan.reset_column_information
+    PlanLimits.reset_column_information
 
     ultimate_trial = Plan.create(name: 'ultimate_trial', title: 'Ultimate Trial')
     premium_trial = Plan.create(name: 'premium_trial', title: 'Premium Trial')
@@ -32,9 +35,8 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   end
 
   def down
-    return unless Gitlab.dev_env_org_or_com? || Gitlab.staging?
+    return unless Gitlab.dev_env_org_or_com?
 
-    Plan.find_by(name: 'ultimate_trial')&.destroy
-    Plan.find_by(name: 'premium_trial')&.destroy
+    Plan.where(name: ['ultimate_trial', 'premium_trial']).delete_all
   end
 end
