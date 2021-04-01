@@ -741,6 +741,27 @@ RSpec.describe API::Ci::Pipelines do
           expect(json_response['message']['base'].first).to eq 'Reference not found'
           expect(json_response).not_to be_an Array
         end
+
+        it 'avoids N+1 queries when there are multiple jobs defined' do
+          config = YAML.dump(test: { script: 'test', rules: [{ if: '$VAR == null' }] } )
+          stub_ci_pipeline_yaml_file(config)
+
+          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+            post api("/projects/#{project.id}/pipeline", user), params: { ref: project.default_branch }
+          end.count
+
+          config = YAML.dump(test: { script: 'test', rules: [{ if: '$VAR == null' }] },
+                             test2: { script: 'test', rules: [{ if: '$VAR == null' }] },
+                             test3: { script: 'test', rules: [{ if: '$VAR == null' }] } )
+          stub_ci_pipeline_yaml_file(config)
+
+          # there are still other N+1 issues when creating new pipeline:
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/326680
+          expected_count = control_count + 12
+          expect do
+            post api("/projects/#{project.id}/pipeline", user), params: { ref: project.default_branch }
+          end.not_to exceed_all_query_limit(expected_count)
+        end
       end
 
       context 'without gitlab-ci.yml' do

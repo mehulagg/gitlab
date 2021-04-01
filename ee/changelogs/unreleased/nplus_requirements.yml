@@ -1,0 +1,5 @@
+---
+title: Fix n+1 issue when setting CI_HAS_OPEN_REQUIREMENTS CI variable
+merge_request: 58290
+author:
+type: performance
