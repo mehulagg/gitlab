@@ -3,6 +3,8 @@
 module Gitlab
   module BackgroundMigration
     module BackfillTraversalIds
+      # A job to set namespaces.traversal_ids in sub-batches, of all namespaces
+      # without a parent and not already set.
       class BackfillRoots
         BASE_QUERY = BackgroundMigration::BackfillTraversalIds::Namespace
           .where('parent_id IS NULL')
