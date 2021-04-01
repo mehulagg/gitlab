@@ -12,8 +12,16 @@ class RemoveIndexMirrorDataOnNextExecutionAndRetryCount < ActiveRecord::Migratio
 
   INDEX_NAME = 'index_mirror_data_on_next_execution_and_retry_count'
 
-  def change
+  def up
     remove_concurrent_index(
+      :project_mirror_data,
+      %i[next_execution_timestamp retry_count],
+      name: INDEX_NAME
+    )
+  end
+
+  def down
+    add_concurrent_index(
       :project_mirror_data,
       %i[next_execution_timestamp retry_count],
       name: INDEX_NAME
