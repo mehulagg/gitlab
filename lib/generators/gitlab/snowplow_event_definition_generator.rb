@@ -13,6 +13,7 @@ module Gitlab
 
     class_option :ee, type: :boolean, optional: true, default: false, desc: 'Indicates if event is for ee'
     class_option :category, type: :string, optional: false, desc: 'Category of the event'
+    class_option :action, type: :string, optional: false, desc: 'Action of the event'
 
     def create_event_file
       template "event_definition.yml", file_path
@@ -24,8 +25,12 @@ module Gitlab
       value.join("\n")
     end
 
-    def category
+    def event_category
       options[:category]
+    end
+
+    def event_action
+      options[:action]
     end
 
     private
@@ -37,7 +42,7 @@ module Gitlab
     end
 
     def file_name
-      "#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{category}"
+      "#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{event_category}_#{event_action}"
     end
 
     def ee?

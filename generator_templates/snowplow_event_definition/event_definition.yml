@@ -1,7 +1,7 @@
 ---
 description:
-category: <%= category %>
-action:
+category: <%= event_category %>
+action: <%= event_action %>
 label:
 property:
 value:
