@@ -158,6 +158,18 @@ objects_to_update.update_all(some_field: some_value)
 This uses ActiveRecord's `update_all` method to update all rows in a single
 query. This in turn makes it much harder for this code to overload a database.
 
+## Consider using read replicas for read access
+
+In a DB cluster we have many read replicas and one primary.  A classic use of scaling the DB is to have read only actions be performed the replicas.  This allows for the replics to grow as the pressure on the DB grows.
+
+< insert example here>
+
+## Use CTEs sparingly
+
+We have found in some situations CTEs can become problematic in use (similar to the n+1 problem above).  As such if you need to use them you should make sure you are using them correctly.  See example X for considerations on how to use.  
+
+<insert example/reference/fix up here>
+
 ## Cached Queries
 
 **Summary:** a merge request **should not** execute duplicated cached queries.
