@@ -19,7 +19,6 @@ review-cleanup:
 .base-before_script: &base-before_script
   - source ./scripts/utils.sh
   - source ./scripts/review_apps/review-apps.sh
-  - install_api_client_dependencies_with_apk
 
 review-build-cng:
   extends:
@@ -29,7 +28,6 @@ review-build-cng:
   stage: review-prepare
   before_script:
     - source ./scripts/utils.sh
-    - install_api_client_dependencies_with_apk
     - install_gitlab_gem
   needs:
     - job: compile-production-assets
