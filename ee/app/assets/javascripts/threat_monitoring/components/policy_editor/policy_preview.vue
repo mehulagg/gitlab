@@ -48,7 +48,7 @@ export default {
       ></div>
       <div v-else>
         <gl-alert variant="info" :dismissible="false"
-          >{{ s__('NetworkPolicies|Unsupported attribute') }}
+          >{{ s__('NetworkPolicies|Unsupported attribute for "Rule Mode"') }}
         </gl-alert>
       </div>
     </gl-tab>

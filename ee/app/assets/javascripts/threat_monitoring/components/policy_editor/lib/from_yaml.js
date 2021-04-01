@@ -106,13 +106,80 @@ function parseRule(item, direction) {
   };
 }
 
+/**
+ * Checks for parameters unsupported by the network policy "Rule Mode"
+ * @param {String} manifest YAML of network policy
+ * @returns {Boolean} whether the YAML is valid to be parsed into "Rule Mode"
+ */
+const checkForUnsupportedAttributes = (manifest) => {
+  const primaryKeys = ['apiVersion', 'description', 'kind', 'metadata', 'spec'];
+  const metadataKeys = ['annotations', 'labels', 'name', 'namespace', 'resourceVersion'];
+  const specKeys = ['egress', 'endpointSelector', 'ingress'];
+  const ruleKeys = [
+    'fromEntities',
+    'toEntities',
+    'fromCIDR',
+    'toCIDR',
+    'toFQDNs',
+    'fromEndpoints',
+    'toEndpoints',
+    'toPorts',
+  ];
+  const toPortKeys = ['ports'];
+  const portKeys = ['port', 'protocol'];
+  let isUnsupported = false;
+  const hasInvalidKeys = (object, allowedValues) => {
+    return !Object.keys(object).every((item) => allowedValues.includes(item));
+  };
+
+  const hasInvalidPolicy = (type) => {
+    let hasUnsupportedAttributes = false;
+    manifest.spec[type].forEach((item) => {
+      hasUnsupportedAttributes = hasInvalidKeys(item, ruleKeys);
+      if (item.toPorts?.length && !hasUnsupportedAttributes) {
+        item.toPorts.forEach((entry) => {
+          hasUnsupportedAttributes = hasInvalidKeys(entry, toPortKeys);
+          if (entry.ports?.length && !hasUnsupportedAttributes) {
+            entry.ports.forEach((portEntry) => {
+              hasUnsupportedAttributes = hasInvalidKeys(portEntry, portKeys);
+            });
+          }
+        });
+      }
+    });
+    return hasUnsupportedAttributes;
+  };
+
+  isUnsupported = hasInvalidKeys(manifest, primaryKeys);
+
+  if (manifest?.metadata && !isUnsupported) {
+    isUnsupported = hasInvalidKeys(manifest.metadata, metadataKeys);
+  }
+  if (manifest?.spec && !isUnsupported) {
+    isUnsupported = hasInvalidKeys(manifest.spec, specKeys);
+  }
+  if (manifest?.spec?.ingress?.length && !isUnsupported) {
+    isUnsupported = hasInvalidPolicy('ingress');
+  }
+  if (manifest?.spec?.egress?.length && !isUnsupported) {
+    isUnsupported = hasInvalidPolicy('egress');
+  }
+
+  return isUnsupported;
+};
+
 /*
   Construct a policy object expected by the policy editor from a yaml manifest.
   Expected yaml structure is defined in the official documentation:
     https://docs.cilium.io/en/v1.8/policy/language
 */
 export default function fromYaml(manifest) {
-  const { description, metadata, spec } = safeLoad(manifest, { json: true });
+  const policy = safeLoad(manifest, { json: true });
+
+  const unsupportedAttribute = checkForUnsupportedAttributes(policy);
+  if (unsupportedAttribute) return { error: unsupportedAttribute };
+
+  const { description, metadata, spec } = policy;
   const { name, resourceVersion, annotations, labels } = metadata;
   const { endpointSelector = {}, ingress = [], egress = [] } = spec;
   const matchLabels = endpointSelector.matchLabels || {};
@@ -129,77 +196,6 @@ export default function fromYaml(manifest) {
       egress.map((item) => parseRule(item, RuleDirectionOutbound)),
     )
     .filter((rule) => Boolean(rule));
-  
-  // Check for unsupported parameters
-  const manifestObj = JSON.parse(manifest);
-  const primaryKeys = ['description', 'metadata', 'spec'];
-  const metadataKeys = ['name', 'resourceVersion', 'annotations', 'labels'];
-  const specKeys = ['endpointSelector', 'ingress', 'egress'];
-  const ruleKeys = [
-    'fromEntities',
-    'toEntities',
-    'fromCIDR',
-    'toCIDR',
-    'toFQDNs',
-    'fromEndpoints',
-    'toEndpoints',
-    'toPorts',
-  ];
-  const toPortKeys = ['ports'];
-  const portKeys = ['port', 'protocol'];
-  if (manifestObj) {
-    Object.keys(manifestObj).forEach((item) => {
-      if (!primaryKeys.includes(item)) throw new Error('Unsupported attribute');
-    });
-    if (manifestObj.metadata) {
-      Object.keys(manifestObj.metadata).forEach((item) => {
-        if (!metadataKeys.includes(item)) throw new Error('Unsupported attribute');
-      });
-    }
-    if (manifestObj.spec) {
-      Object.keys(manifestObj.spec).forEach((item) => {
-        if (!specKeys.includes(item)) throw new Error('Unsupported attribute');
-      });
-      if (manifestObj.spec.ingress) {
-        Object.keys(manifestObj.spec.ingress).forEach((item) => {
-          if (!ruleKeys.includes(item)) throw new Error('Unsupported attribute');
-        });
-        if (manifestObj.spec.ingress.toPorts) {
-          manifestObj.spec.ingress.toPorts.forEach((entry) => {
-            Object.keys(entry).forEach((item) => {
-              if (!toPortKeys.includes(item)) throw new Error('Unsupported attribute');
-            });
-            if (entry.ports) {
-              entry.ports.forEach((portEntry) => {
-                Object.keys(portEntry).forEach((item) => {
-                  if (!portKeys.includes(item)) throw new Error('Unsupported attribute');
-                });
-              });
-            }
-          });
-        }
-      }
-      if (manifestObj.spec.egress) {
-        Object.keys(manifestObj.spec.egress).forEach((item) => {
-          if (!ruleKeys.includes(item)) throw new Error('Unsupported attribute');
-        });
-        if (manifestObj.spec.egress.toPorts) {
-          manifestObj.spec.egress.toPorts.forEach((entry) => {
-            Object.keys(entry).forEach((item) => {
-              if (!toPortKeys.includes(item)) throw new Error('Unsupported attribute');
-            });
-            if (entry.ports) {
-              entry.ports.forEach((portEntry) => {
-                Object.keys(portEntry).forEach((item) => {
-                  if (!portKeys.includes(item)) throw new Error('Unsupported attribute');
-                });
-              });
-            }
-          });
-        }
-      }
-    }
-  }
 
   return {
     name,

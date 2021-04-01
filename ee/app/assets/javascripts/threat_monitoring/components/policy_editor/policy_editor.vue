@@ -165,7 +165,11 @@ export default {
       this.yamlEditorError = null;
 
       try {
-        Object.assign(this.policy, fromYaml(manifest));
+        const newPolicy = fromYaml(manifest);
+        if (newPolicy.error) {
+          throw new Error(newPolicy.error);
+        }
+        Object.assign(this.policy, newPolicy);
       } catch (error) {
         this.yamlEditorError = error;
       }

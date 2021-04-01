@@ -20588,7 +20588,7 @@ msgstr ""
 msgid "NetworkPolicies|Unable to parse policy"
 msgstr ""
 
-msgid "NetworkPolicies|Unsupported attribute"
+msgid "NetworkPolicies|Unsupported attribute for \"Rule Mode\""
 msgstr ""
 
 msgid "NetworkPolicies|YAML editor"
