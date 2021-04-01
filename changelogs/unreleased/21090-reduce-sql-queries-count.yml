@@ -1,5 +1,5 @@
 ---
 title: Use BulkUpdateService to eliminate SQL queries
-merge_request:
+merge_request: 58387
 author:
 type: performance
