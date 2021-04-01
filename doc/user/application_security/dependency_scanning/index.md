@@ -109,6 +109,27 @@ The results are saved as a
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest dependency scanning artifact available.
 
+### Enable Dependency Scanning via an automatic merge request
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4908) in GitLab 13.11.
+> - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-configure-dependency-scanning-via-a-merge-request).
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+If Dependency Scanning isn't yet enabled in your project, you can automatically create a merge request
+from the Security Configuration page.
+
+1. In the project where you want to enable Dependency Scanning, navigate to
+   **Security & Compliance > Configuration**.
+1. In the **Dependency Scanning** row, select **Configure via Merge Request**.
+
+This automatically creates a merge request with the changes necessary to enable Dependency Scanning
+that you can review and merge to complete the configuration.
+
 ### Customizing the dependency scanning settings
 
 The dependency scanning settings can be changed through [CI/CD variables](#available-variables) by using the
@@ -595,3 +616,22 @@ with a dependency on this version of Python should use `retire.js` version 2.10.
 ### Error: `dependency_scanning is used for configuration only, and its script should not be executed`
 
 For information on this, see the [GitLab Secure troubleshooting section](../index.md#error-job-is-used-for-configuration-only-and-its-script-should-not-be-executed).
+
+### Enable or disable Configure Dependency Scanning via a Merge Request
+
+Configure Dependency Scanning via a Merge Request is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:sec_dependency_scanning_ui_enable)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:sec_dependency_scanning_ui_enable)
+```
