@@ -12,3 +12,7 @@ product_category:
 introduced_by_url:
 distribution:
 <%= distribution %>
+# tier:
+# - free
+# - premium
+# - ultimate
