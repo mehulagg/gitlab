@@ -12,8 +12,7 @@ You can find the available integrations under your project's
 
 ## Integrations
 
-Integrations allow you to integrate GitLab with other applications.
-Similar to plugins, they give you the freedom to add more features to GitLab.
+Like plugins, integrations allow you to integrate GitLab with other applications, adding additional features.
 For more information, read the
 [overview of integrations](overview.md) or learn how to manage your integrations:
 

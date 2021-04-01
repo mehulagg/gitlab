@@ -82,7 +82,7 @@ When you make further changes to the group defaults:
 
 - They are immediately applied to all subgroups and projects belonging to the group that have the integration
   set to use default settings.
-- They are immediately applied to newer subgroups and projects, created after you last saved defaults for the
+- They are immediately applied to newer subgroups and projects, even those created after you last saved defaults for the
   integration. If your group-level default setting has the **Enable integration** toggle turned on,
   the integration is automatically enabled for all such subgroups and projects.
 
