@@ -4,6 +4,10 @@ import { __ } from '~/locale';
 import { STAGE_SORT_DIRECTION } from './constants';
 
 export default {
+  i18n: {
+    moveDownLabel: __('Move down'),
+    moveUpLabel: __('Move up'),
+  },
   name: 'StageFieldActions',
   components: {
     GlButton,
@@ -61,7 +65,8 @@ export default {
         :data-testid="`stage-action-move-down-${index}`"
         :disabled="isLastActiveStage"
         icon="arrow-down"
-        :title="__('Move down')"
+        :title="$options.i18n.moveDownLabel"
+        :aria-label="$options.i18n.moveDownLabel"
         @click="$emit('move', { index, direction: $options.STAGE_SORT_DIRECTION.DOWN })"
       />
       <gl-button
@@ -69,13 +74,15 @@ export default {
         :data-testid="`stage-action-move-up-${index}`"
         :disabled="isFirstActiveStage"
         icon="arrow-up"
-        :title="__('Move up')"
+        :title="$options.i18n.moveUpLabel"
+        :aria-label="$options.i18n.moveUpLabel"
         @click="$emit('move', { index, direction: $options.STAGE_SORT_DIRECTION.UP })"
       />
     </gl-button-group>
     <gl-button
       v-gl-tooltip
       :title="hideActionTooltip"
+      :aria-label="hideActionTooltip"
       :data-testid="hideActionTestId"
       :icon="hideActionIcon"
       @click="$emit(hideActionEvent, index)"

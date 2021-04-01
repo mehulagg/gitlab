@@ -21624,6 +21624,12 @@ msgstr ""
 msgid "OnCallSchedules|Try adding a rotation"
 msgstr ""
 
+msgid "OnCallSchedules|View next timeframe"
+msgstr ""
+
+msgid "OnCallSchedules|View previous timeframe"
+msgstr ""
+
 msgid "OnCallSchedules|Your schedule has been successfully created and all alerts from this project will now be routed to this schedule. Currently, only one schedule can be created per project. More coming soon! To add individual users to this schedule, use the add a rotation button."
 msgstr ""
 

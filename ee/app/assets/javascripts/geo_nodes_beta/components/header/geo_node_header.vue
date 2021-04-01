@@ -32,6 +32,9 @@ export default {
     chevronIcon() {
       return this.collapsed ? 'chevron-right' : 'chevron-down';
     },
+    chevronLabel() {
+      return this.collapsed ? __('Expand') : __('Collapse');
+    },
     statusCheckTimestamp() {
       return this.node.lastSuccessfulStatusCheckTimestamp * 1000;
     },
@@ -49,6 +52,7 @@ export default {
         category="tertiary"
         variant="confirm"
         :icon="chevronIcon"
+        :aria-label="chevronLabel"
         @click="$emit('collapse')"
       />
       <div

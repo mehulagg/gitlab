@@ -1,5 +1,6 @@
 <script>
 import { GlPopover, GlLink, GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { __ } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 import { FilterState } from '../constants';
@@ -7,6 +8,10 @@ import RequirementMeta from '../mixins/requirement_meta';
 import RequirementStatusBadge from './requirement_status_badge.vue';
 
 export default {
+  i18n: {
+    archiveLabel: __('Archive'),
+    editLabel: __('Edit'),
+  },
   components: {
     GlPopover,
     GlLink,
@@ -130,7 +135,8 @@ export default {
             <gl-button
               v-gl-tooltip
               icon="pencil"
-              :title="__('Edit')"
+              :title="$options.i18n.editLabel"
+              :aria-label="$options.i18n.editLabel"
               @click="$emit('edit-click', requirement)"
             />
           </li>
@@ -140,7 +146,8 @@ export default {
               v-gl-tooltip
               icon="archive"
               :loading="stateChangeRequestActive"
-              :title="__('Archive')"
+              :title="$options.i18n.archiveLabel"
+              :aria-label="$options.i18n.archiveLabel"
               @click.stop="handleArchiveClick"
             />
           </li>

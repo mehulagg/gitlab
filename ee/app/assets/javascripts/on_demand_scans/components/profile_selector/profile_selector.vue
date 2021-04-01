@@ -8,9 +8,13 @@ import {
   GlSearchBoxByType,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 
 export default {
+  i18n: {
+    editProfileLabel: s__('DastProfiles|Edit profile'),
+  },
   name: 'OnDemandScansProfileSelector',
   components: {
     GlButton,
@@ -125,7 +129,8 @@ export default {
           v-gl-tooltip
           category="primary"
           icon="pencil"
-          :title="s__('DastProfiles|Edit profile')"
+          :title="$options.i18n.editProfileLabel"
+          :aria-label="$options.i18n.editProfileLabel"
           :href="selectedProfile.editPath"
           class="gl-absolute gl-right-7"
         />

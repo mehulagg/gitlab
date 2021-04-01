@@ -1,9 +1,13 @@
 <script>
 import { GlBadge, GlButton, GlButtonGroup, GlTabs, GlTab, GlTooltipDirective } from '@gitlab/ui';
-
+import { __ } from '~/locale';
 import { FilterState } from '../constants';
 
 export default {
+  i18n: {
+    exportAsCsvLabel: __('Export as CSV'),
+    importRequirementsLabel: __('Import requirements'),
+  },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -87,7 +91,8 @@ export default {
       <gl-button-group>
         <gl-button
           v-gl-tooltip
-          :title="__('Export as CSV')"
+          :title="$options.i18n.exportAsCsvLabel"
+          :aria-label="$options.i18n.exportAsCsvLabel"
           category="secondary"
           :disabled="showCreateForm"
           icon="export"
@@ -95,7 +100,8 @@ export default {
         />
         <gl-button
           v-gl-tooltip
-          :title="__('Import requirements')"
+          :title="$options.i18n.importRequirementsLabel"
+          :aria-label="$options.i18n.importRequirementsLabel"
           category="secondary"
           class="js-import-requirements qa-import-requirements-button"
           :disabled="showCreateForm"

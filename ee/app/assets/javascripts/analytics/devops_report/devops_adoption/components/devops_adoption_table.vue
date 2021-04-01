@@ -232,6 +232,7 @@ export default {
             v-gl-tooltip.hover="$options.i18n.removeButton"
             category="tertiary"
             icon="remove"
+            :aria-label="$options.i18n.removeButton"
             @click="setSelectedSegment(item)"
           />
         </div>

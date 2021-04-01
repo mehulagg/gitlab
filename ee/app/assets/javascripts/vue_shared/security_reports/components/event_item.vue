@@ -90,6 +90,7 @@ export default {
         category="tertiary"
         :icon="button.iconName"
         :title="button.title"
+        :aria-label="button.title"
         @click="button.onClick"
       />
     </div>

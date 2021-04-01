@@ -184,6 +184,7 @@ export default {
       <gl-button
         v-gl-tooltip:tooltipcontainer.left
         :title="$options.i18n.discoverFeedbackLabel"
+        :aria-label="$options.i18n.discoverFeedbackLabel"
         icon="slight-smile"
         size="medium"
         class="discover-feedback-icon"

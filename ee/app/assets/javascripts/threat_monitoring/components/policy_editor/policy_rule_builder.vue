@@ -241,6 +241,7 @@ export default {
       icon="remove"
       category="tertiary"
       class="gl-absolute gl-top-3 gl-right-3"
+      :aria-label="__('Remove')"
       data-testid="remove-rule"
       @click="$emit('remove')"
     />
