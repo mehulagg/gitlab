@@ -147,6 +147,9 @@ class PushRule < ApplicationRecord
   end
 
   request_cache def read_setting_with_global_default(setting)
+    group_value = project&.group&.push_rule&.send(setting)
+    return group_value if group_value
+
     value = read_attribute(setting)
 
     # return if value is true/false or if current object is the global setting

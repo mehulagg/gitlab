@@ -126,6 +126,33 @@ RSpec.describe PushRule do
         end
       end
     end
+
+    describe 'cascading attributtes' do
+      where(:setting, :group_value, :project_value, :result) do
+        :reject_unsigned_commits | true  | true  | true
+        :reject_unsigned_commits | true  | false | true
+        :reject_unsigned_commits | false | true  | true
+        :reject_unsigned_commits | false | false | nil
+        :commit_committer_check  | true  | true  | true
+        :commit_committer_check  | true  | false | true
+        :commit_committer_check  | false | true  | true
+        :commit_committer_check  | false | false | nil
+      end
+
+      with_them do
+        before do
+          group_push_rule = build(:push_rule, setting => group_value)
+          group = build(:group, push_rule: group_push_rule)
+          project = build(:project, group: group)
+
+          push_rule.update!(project: project, setting => project_value)
+        end
+
+        it 'returns the correct result' do
+          expect(push_rule.send(setting)).to eq(result)
+        end
+      end
+    end
   end
 
   methods_and_regexes = {
