@@ -4,8 +4,10 @@ import { historyPushState } from '~/lib/utils/common_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import LabelToken from './label_token.vue';
-import UsersToken from './users_token.vue';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import GroupLabelsQuery from '../graphql/group_labels.query.graphql';
+import GroupUsersQuery from '../graphql/group_members.query.graphql';
 
 export default {
   i18n: {
@@ -42,7 +44,7 @@ export default {
           token: LabelToken,
           unique: false,
           symbol: '~',
-          fullPath: this.fullPath,
+          fetchLabels: this.fetchLabels,
         },
         {
           icon: 'pencil',
@@ -50,9 +52,9 @@ export default {
           type: 'author',
           operators: [{ value: '=', description: 'is' }],
           symbol: '@',
-          token: UsersToken,
+          token: AuthorToken,
           unique: true,
-          fullPath: this.fullPath,
+          fetchAuthors: this.fetchAuthors,
         },
       ];
     },
