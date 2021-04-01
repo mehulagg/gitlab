@@ -49,5 +49,11 @@ module Gitlab
 
       write(key, yield)
     end
+
+    def search(key, pattern)
+      with do |redis|
+        redis.sscan_each(cache_key(key), match: pattern)
+      end
+    end
   end
 end

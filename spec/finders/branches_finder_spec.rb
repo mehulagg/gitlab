@@ -134,6 +134,16 @@ RSpec.describe BranchesFinder do
           expect(result.count).to eq(0)
         end
       end
+
+      context 'by redis name' do
+        let(:params) { { redis_search: 'conflict-*' } }
+
+        it 'filters branches' do
+          result = subject
+
+          expect(result.count).to eq(5)
+        end
+      end
     end
 
     context 'filter and sort' do
@@ -168,6 +178,16 @@ RSpec.describe BranchesFinder do
 
           expect(result.first.name).to eq('feature')
           expect(result.count).to eq(2)
+        end
+      end
+
+      context 'by redis name and sorts by last_updated' do
+        let(:params) { { sort: 'updated_asc', redis_search: 'conflict-*' } }
+
+        it 'filters branches' do
+          result = subject
+
+          expect(result.count).to eq(5)
         end
       end
     end
