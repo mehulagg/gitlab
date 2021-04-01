@@ -26,9 +26,9 @@ module SystemCheck
       private
 
       def mail_room_enabled?
-        target = '/etc/systemd/system/gitlab.target'
-        service = '/etc/systemd/system/gitlab-mailroom.service'
-        wants = '/etc/systemd/system/gitlab.target.wants/gitlab-mailroom.service'
+        target = '/usr/lib/systemd/system/gitlab.target'
+        service = '/usr/lib/systemd/system/gitlab-mailroom.service'
+        wants = '/usr/lib/systemd/system/gitlab.target.wants/gitlab-mailroom.service'
 
         File.exist?(target) && File.exist?(service) && File.symlink?(wants)
       end

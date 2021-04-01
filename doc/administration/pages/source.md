@@ -132,7 +132,7 @@ The Pages daemon doesn't listen to the outside world.
    ```
 
 1. If your system is using systemd as init, copy
-   `lib/support/systemd/gitlab-pages.service` to `/etc/systemd/system` and type
+   `lib/support/systemd/gitlab-pages.service` to `/usr/lib/systemd/system` and type
 
    ```shell
    sudo systemctl daemon-reload

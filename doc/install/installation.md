@@ -753,7 +753,7 @@ Skip this step if you plan on using the init script described below.
 Copy the services and run `systemctl daemon-reload` so that systemd picks them up:
 
 ```shell
-sudo cp lib/support/systemd/* /etc/systemd/system
+sudo cp lib/support/systemd/* /usr/lib/systemd/system
 sudo systemctl daemon-reload
 ```
 

@@ -251,7 +251,7 @@ git diff origin/PREVIOUS_BRANCH:lib/support/systemd origin/BRANCH:lib/support/sy
 Copy them over:
 
 ```shell
-sudo cp lib/support/systemd/* /etc/systemd/system
+sudo cp lib/support/systemd/* /usr/lib/systemd/system
 sudo systemctl daemon-reload
 ```
 

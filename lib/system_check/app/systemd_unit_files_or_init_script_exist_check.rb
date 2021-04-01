@@ -12,13 +12,13 @@ module SystemCheck
 
       def check?
         unit_paths = [
-          '/etc/systemd/system/gitlab-gitaly.service',
-          '/etc/systemd/system/gitlab-mailroom.service',
-          '/etc/systemd/system/gitlab-puma.service',
-          '/etc/systemd/system/gitlab-sidekiq.service',
-          '/etc/systemd/system/gitlab.slice',
-          '/etc/systemd/system/gitlab.target',
-          '/etc/systemd/system/gitlab-workhorse.service'
+          '/usr/lib/systemd/system/gitlab-gitaly.service',
+          '/usr/lib/systemd/system/gitlab-mailroom.service',
+          '/usr/lib/systemd/system/gitlab-puma.service',
+          '/usr/lib/systemd/system/gitlab-sidekiq.service',
+          '/usr/lib/systemd/system/gitlab.slice',
+          '/usr/lib/systemd/system/gitlab.target',
+          '/usr/lib/systemd/system/gitlab-workhorse.service'
         ]
         script_path = '/etc/init.d/gitlab'
 
