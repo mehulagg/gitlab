@@ -9,7 +9,7 @@ class AssemblaService < Service
   end
 
   def description
-    'Project Management Software (Source Commits Endpoint)'
+    'Manage projects.'
   end
 
   def self.to_param
