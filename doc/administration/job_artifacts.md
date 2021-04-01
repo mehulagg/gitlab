@@ -602,15 +602,21 @@ gitlab_rails['artifacts_object_store_direct_upload'] = true
 To prevent this, comment out or remove those lines, or switch to their [default values](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template),
 then run `sudo gitlab-ctl reconfigure`.
 
-### Error `Job artifact upload fails with 500`
+### Job artifact upload fails with error 500
 
-If a job artifact has failed to upload, review log [Workhorse Logs](logs.md#workhorse-logs) and check for this error message
+If you are using object storage for artifacts and a job artifact fails to upload,
+you can check:
 
-```json
-==> /var/log/gitlab/gitlab-workhorse/current <==
-{"error":"MissingRegion: could not find region configuration","level":"error","msg":"error uploading S3 session","time":"2021-03-16T22:10:55-04:00"}
-```
+- The job log for an error similar to:
 
-To resolve, add `region` to the job artifact object storage definition [Jobs artifacts administration](job_artifacts.md).
+  ```plaintext
+  WARNING: Uploading artifacts as "archive" to coordinator... failed id=12345 responseStatus=500 Internal Server Error status=500 token=abcd1234
+  ```
 
-Related GitLab issue [Use GoCloud interface for S3 access](https://gitlab.com/gitlab-org/gitlab/-/issues/324867)
+- The [workhorse log](logs.md#workhorse-logs) for an error similar to:
+
+  ```json
+  {"error":"MissingRegion: could not find region configuration","level":"error","msg":"error uploading S3 session","time":"2021-03-16T22:10:55-04:00"}
+  ```
+
+In both cases, you might need to add `region` to the job artifact [object storage configuration](#connection-settings).
