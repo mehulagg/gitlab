@@ -166,7 +166,7 @@ In a DB cluster we have many read replicas and one primary.  A classic use of sc
 
 ## Use CTEs sparingly
 
-We have found in some situations CTEs can become problematic in use (similar to the n+1 problem above).  As such if you need to use them you should make sure you are using them correctly.  See example X for considerations on how to use.  
+We have found in some situations CTEs can become problematic in use (similar to the n+1 problem above).  As such if you need to use them you should make sure you are using them correctly.  See section https://docs.gitlab.com/ee/development/iterating_tables_in_batches.html#complex-queries-on-the-relation-object for considerations on how to use.  
 
 <insert example/reference/fix up here>
 
