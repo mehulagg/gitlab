@@ -25,6 +25,7 @@ type: index
 - [Proxying images](asset_proxy.md)
 - [CI/CD variables](cicd_variables.md)
 - [Token overview](token_overview.md)
+- [Project Import Decompressed Archive Size Limits](project_import_decompressed_archive_size_limits.md)
 
 ## Securing your GitLab installation
 
