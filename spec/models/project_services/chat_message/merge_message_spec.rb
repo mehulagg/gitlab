@@ -46,7 +46,7 @@ RSpec.describe ChatMessage::MergeMessage do
       end
       it 'returns a message regarding closing of merge requests' do
         expect(subject.pretext).to eq(
-          'Test User (test.user) closed merge request <http://somewhere.com/-/merge_requests/100|!100 *request title*> in <http://somewhere.com|project_name>')
+          'Test User (test.user) closed merge request <http://somewhere.com/-/merge_requests/100|!100 *Merge request title*> in <http://somewhere.com|project_name>')
         expect(subject.attachments).to be_empty
       end
     end
