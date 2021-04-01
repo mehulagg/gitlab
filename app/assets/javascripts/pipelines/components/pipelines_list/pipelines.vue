@@ -94,6 +94,10 @@ export default {
       type: Object,
       required: true,
     },
+    ciRunnerSettingsPath: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -331,6 +335,7 @@ export default {
         v-else-if="stateToRender === $options.stateMap.emptyState"
         :empty-state-svg-path="emptyStateSvgPath"
         :can-set-ci="canCreatePipeline"
+        :ci-runner-settings-path="ciRunnerSettingsPath"
       />
 
       <gl-empty-state
