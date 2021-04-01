@@ -2358,6 +2358,7 @@ in a Kubernetes cluster, named Webservice and Sidekiq respectively. In addition,
 the following other supporting services are supported: NGINX, Task Runner, Migrations,
 Prometheus and Grafana.
 
+Note that the listed components above are the **only** components we support running
 alternatively on PaaS services, such as AWS RDS for the database.
 
 Hybrid installations leverage the benefits of both cloud native and traditional
