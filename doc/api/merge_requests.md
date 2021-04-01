@@ -761,6 +761,8 @@ the `approvals_before_merge` parameter:
 }
 ```
 
+The `diff_refs` in the response correspond to the latest diff version of the merge request.
+
 ## Get single MR participants
 
 Get a list of merge request participants.
@@ -2434,6 +2436,12 @@ Example response:
   }]
 }
 ```
+
+### An explanation of the SHAs in the API response
+
+- The `head_commit_sha` in the response represents the HEAD commit of the source branch.
+- The `base_commit_sha` represents the merge-base commit SHA between the source branch and the target branches.
+- The `start_commit_sha` represents the HEAD commit SHA of the target branch when this version of diff was created.
 
 ## Set a time estimate for a merge request
 
