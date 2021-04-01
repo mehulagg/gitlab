@@ -120,7 +120,8 @@
 }
 
 .labels-container {
-  background-color: $gray-100;
+  background: var(--gray-10, $gray-10);
+  border: 1px solid var(--gray-100, $gray-100);
   border-radius: $border-radius-default;
   padding: $gl-padding $gl-padding-8;
 }
