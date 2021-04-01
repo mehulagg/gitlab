@@ -2,5 +2,52 @@
   "type": "object",
   "required": [],
   "properties": {
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "label": {
+      "type": ["string", "null"]
+    },
+    "property": {
+      "type": ["string", "null"]
+    },
+    "value": {
+      "type": ["number", "null"]
+    },
+    "product_section": {
+      "type": ["string", "null"]
+    },
+    "product_stage": {
+      "type": ["string", "null"]
+    },
+    "product_group": {
+      "type": "string"
+    },
+    "product_category": {
+      "type": ["string", "null"]
+    },
+    "introduced_by_url": {
+      "type": ["string", "null"]
+    },
+    "distribution": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["ee", "ce"]
+      }
+    },
+    "tier": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["free", "starter", "premium", "ultimate", "bronze", "silver", "gold"]
+      }
+    }
   }
 }
