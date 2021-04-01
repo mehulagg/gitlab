@@ -12,3 +12,16 @@ export function withGonExperiment(experimentKey, value = true) {
     window.gon = origGon;
   });
 }
+
+export function assignGitlabExperiment(experimentKey, variant) {
+  let origGon;
+
+  beforeEach(() => {
+    origGon = window.gon;
+    window.gon = { experiment: { [experimentKey]: { variant } } };
+  });
+
+  afterEach(() => {
+    window.gon = origGon;
+  });
+}
