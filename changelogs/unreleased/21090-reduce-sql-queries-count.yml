@@ -1,0 +1,5 @@
+---
+title: Use BulkUpdateService to eliminate SQL queries
+merge_request:
+author:
+type: performance
