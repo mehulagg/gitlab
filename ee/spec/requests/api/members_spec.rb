@@ -503,6 +503,138 @@ RSpec.describe API::Members do
       end
     end
 
+    describe 'GET /groups/:id/billable_members/:user_id/memberships' do
+      it 'returns memberships for the billable group member' do
+        group = create(:group, name: "My Root Group")
+        owner = create(:user)
+        developer = create(:user)
+        group.add_owner(owner)
+        group.add_developer(developer)
+        membership = developer.members.first
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq([{
+          "source_full_name" => "My Root Group",
+          "created_at" => membership.created_at.as_json,
+          "expires_at" => nil,
+          "access_level" => {
+            "string_value" => "Developer",
+            "integer_value" => 30
+          }
+        }])
+      end
+
+      it 'returns not found when the user does not exist' do
+        group = create(:group, name: "My Root Group")
+        owner = create(:user)
+        group.add_owner(owner)
+
+        get api("/groups/#{group.id}/billable_members/0/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response).to eq({ "message" => "404 Not found" })
+      end
+
+      it 'returns not found when the group does not exist' do
+        group = create(:group, name: "My Root Group")
+        owner = create(:user)
+        developer = create(:user)
+        group.add_owner(owner)
+        group.add_developer(developer)
+
+        get api("/groups/0/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response).to eq({ "message" => "404 Group Not Found" })
+      end
+
+      it 'returns not found when the user is not billable' do
+        group = create(:group, name: "My Root Group")
+        create(:gitlab_subscription, :ultimate, namespace: group)
+        owner = create(:user)
+        guest = create(:user)
+        group.add_owner(owner)
+        group.add_guest(guest)
+
+        get api("/groups/#{group.id}/billable_members/#{guest.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response).to eq({ "message" => "404 User Not Found" })
+      end
+
+      it 'returns bad request if the user cannot admin group members' do
+        group = create(:group, name: "My Root Group")
+        owner = create(:user)
+        developer = create(:user)
+        group.add_owner(owner)
+        group.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", developer)
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response).to eq({ "message" => "400 Bad request" })
+      end
+
+      it 'returns bad request if the group is a subgroup' do
+        group = create(:group, name: "My Root Group")
+        subgroup = create(:group, name: "My SubGroup", parent: group)
+        owner = create(:user)
+        developer = create(:user)
+        subgroup.add_owner(owner)
+        subgroup.add_developer(developer)
+
+        get api("/groups/#{subgroup.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response).to eq({ "message" => "400 Bad request" })
+      end
+
+      it 'excludes memberships outside the requested group hierarchy' do
+        group = create(:group, name: "My Root Group")
+        other_group = create(:group, name: "My Other Group")
+        owner = create(:user)
+        developer = create(:user)
+        group.add_owner(owner)
+        group.add_developer(developer)
+        other_group.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m["source_full_name"] }).to eq(["My Root Group"])
+      end
+
+      it 'includes subgroup memberships' do
+        group = create(:group, name: "My Root Group")
+        subgroup = create(:group, name: "My SubGroup", parent: group)
+        owner = create(:user)
+        developer = create(:user)
+        group.add_owner(owner)
+        subgroup.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m["source_full_name"] }).to eq(["My Root Group / My SubGroup"])
+      end
+
+      it 'includes project memberships' do
+        group = create(:group, name: "My Root Group")
+        project = create(:project, name: "My Project", group: group)
+        owner = create(:user)
+        developer = create(:user)
+        group.add_owner(owner)
+        project.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m["source_full_name"] }).to eq(["My Root Group / My Project"])
+      end
+    end
+
     describe 'DELETE /groups/:id/billable_members/:user_id' do
       context 'when the current user has insufficient rights' do
         it 'returns 400' do
