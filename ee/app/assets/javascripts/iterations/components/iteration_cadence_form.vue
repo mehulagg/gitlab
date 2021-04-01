@@ -6,10 +6,20 @@ import {
   GlFormCheckbox,
   GlFormGroup,
   GlFormInput,
+  GlFormSelect,
 } from '@gitlab/ui';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import createCadence from '../queries/create_cadence.mutation.graphql';
+
+const i18n = Object.freeze({
+  title: {},
+  automated: {},
+  duration: {
+    label: s__('Iterations|Duration'),
+    description: s__('Iterations|The duration for each iteration (in weeks)'),
+  },
+});
 
 export default {
   components: {
@@ -19,6 +29,7 @@ export default {
     GlFormCheckbox,
     GlFormGroup,
     GlFormInput,
+    GlFormSelect,
   },
   props: {
     groupPath: {
@@ -41,11 +52,7 @@ export default {
       durationInWeeks: null,
       rollOverIssues: false,
       iterationsInAdvance: null,
-      i18n: Object.freeze({
-        duration: {
-          description: s__('Iterations|The duration for each iteration (in weeks)'),
-        },
-      }),
+      i18n,
     };
   },
   computed: {
@@ -81,13 +88,15 @@ export default {
           mutation: createCadence,
           variables: this.variables,
         })
-        .then(({ data }) => {
-          const { errors, cadence } = data.createCadence;
+        .then(({ data, errors }) => {
           if (errors.length > 0) {
             this.loading = false;
             throw new Error(errors[0]);
             // createFlash(errors[0]);
           }
+
+          // todo: this also may have errors
+          const { cadence } = data.iterationCadenceCreate;
 
           visitUrl(cadence.webUrl);
         })
@@ -123,6 +132,7 @@ export default {
         <gl-form-input
           id="cadence-title"
           v-model="title"
+          required
           autocomplete="off"
           data-qa-selector="iteration_cadence_title_field"
           :placeholder="__('Cadence name')"
@@ -149,11 +159,12 @@ export default {
       >
         <gl-datepicker :target="null">
           <gl-form-input
+            id="start-date"
             v-model="startDate"
             :placeholder="__('Select start date')"
+            :disabled="!automatic"
             class="datepicker gl-datepicker-input"
             autocomplete="off"
-            id="start-date"
             inputmode="none"
             required
             data-qa-selector="cadence_start_date"
@@ -162,7 +173,7 @@ export default {
       </gl-form-group>
 
       <gl-form-group
-        :label="__('Duration')"
+        :label="i18n.duration.label"
         :label-cols-md="2"
         label-class="text-right-md gl-pt-3!"
         label-for="cadence-duration"
@@ -170,14 +181,12 @@ export default {
       >
         <!-- :invalid-feedback=""
               :state="validationState.name" -->
-        <gl-form-input
+        <gl-form-select
           id="cadence-duration"
           v-model.number="durationInWeeks"
           :placeholder="__('Select duration')"
-          type="number"
-          min="1"
-          no-wheel
-          autocomplete="off"
+          :disabled="!automatic"
+          :options="[1, 2, 3, 4, 5, 6]"
           data-qa-selector="iteration_cadence_name_field"
         />
       </gl-form-group>
@@ -194,18 +203,16 @@ export default {
       >
         <!-- :invalid-feedback=""
               :state="validationState.name" -->
-        <gl-form-input
+        <gl-form-select
           id="cadence-schedule-future-iterations"
           v-model.number="iterationsInAdvance"
-          type="number"
-          min="1"
-          no-wheel
-          autocomplete="off"
+          :disabled="!automatic"
+          :options="[2, 4, 6, 8, 10, 12]"
           data-qa-selector="iteration_cadence_name_field"
         />
       </gl-form-group>
 
-      <div class="form-actions d-flex">
+      <div class="form-actions gl-display-flex">
         <gl-button
           :loading="loading"
           data-testid="save-cadence"
