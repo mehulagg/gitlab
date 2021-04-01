@@ -1730,20 +1730,11 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       end
     end
 
-    context 'when the column to convert does not exist' do
-      let(:column) { :foobar }
-
-      it 'raises an error' do
-        expect { model.initialize_conversion_of_integer_to_bigint(table, column) }
-          .to raise_error("Column #{column} does not exist on #{table}")
-      end
-    end
-
     context 'when the column to convert is the primary key' do
       it 'creates a not-null bigint column and installs triggers' do
         expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: 0, null: false)
 
-        expect(model).to receive(:install_rename_triggers).with(table, column, tmp_column)
+        expect(model).to receive(:install_rename_triggers).with(table, [column], [tmp_column])
 
         model.initialize_conversion_of_integer_to_bigint(table, column)
       end
@@ -1755,7 +1746,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       it 'creates a not-null bigint column and installs triggers' do
         expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: 0, null: false)
 
-        expect(model).to receive(:install_rename_triggers).with(table, column, tmp_column)
+        expect(model).to receive(:install_rename_triggers).with(table, [column], [tmp_column])
 
         model.initialize_conversion_of_integer_to_bigint(table, column)
       end
@@ -1767,9 +1758,28 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       it 'creates a nullable bigint column and installs triggers' do
         expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: nil)
 
-        expect(model).to receive(:install_rename_triggers).with(table, column, tmp_column)
+        expect(model).to receive(:install_rename_triggers).with(table, [column], [tmp_column])
 
         model.initialize_conversion_of_integer_to_bigint(table, column)
+      end
+    end
+
+    context 'when multiple columns are given' do
+      it 'creates the correct columns and installs the trigger' do
+        columns_to_convert = %i[id non_nullable_column nullable_column]
+        temporary_columns = %w[
+          id_convert_to_bigint
+          non_nullable_column_convert_to_bigint
+          nullable_column_convert_to_bigint
+        ]
+
+        expect(model).to receive(:add_column).with(table, temporary_columns[0], :bigint, default: 0, null: false)
+        expect(model).to receive(:add_column).with(table, temporary_columns[1], :bigint, default: 0, null: false)
+        expect(model).to receive(:add_column).with(table, temporary_columns[2], :bigint, default: nil)
+
+        expect(model).to receive(:install_rename_triggers).with(table, columns_to_convert, temporary_columns)
+
+        model.initialize_conversion_of_integer_to_bigint(table, columns_to_convert)
       end
     end
   end
@@ -1815,7 +1825,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     context 'when the temporary column does not exist' do
       it 'raises an error' do
         expect { model.backfill_conversion_of_integer_to_bigint(table, column) }
-          .to raise_error('The temporary column does not exist, initialize it with `initialize_conversion_of_integer_to_bigint`')
+          .to raise_error("Column #{tmp_column} does not exist on #{table}")
       end
     end
 

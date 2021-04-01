@@ -2,8 +2,8 @@
 
 module Gitlab
   module BackgroundMigration
-    # Background migration that updates the value of a
-    # column using the value of another column in the same table.
+    # Background migration that updates the value of one or more
+    # columns using the value of other columns in the same table.
     #
     # - The {start_id, end_id} arguments are at the start so that it can be used
     #   with `queue_batched_background_migration`
@@ -25,17 +25,16 @@ module Gitlab
       # sub_batch_size - We don't want updates to take more than ~100ms
       #                  This allows us to run multiple smaller batches during
       #                  the minimum 2.minute interval that we can schedule jobs
-      # copy_from - The column containing the data to copy.
-      # copy_to - The column to copy the data to.
-      def perform(start_id, end_id, batch_table, batch_column, sub_batch_size, copy_from, copy_to)
-        quoted_copy_from = connection.quote_column_name(copy_from)
-        quoted_copy_to = connection.quote_column_name(copy_to)
+      # columns_to_copy - Splat of column names to copy for each batch, in the format of
+      #                   [source_column1, destination_column1, source_column2, destination_column2]
+      def perform(start_id, end_id, batch_table, batch_column, sub_batch_size, *columns_to_copy)
+        assignment_clauses = column_assignment_clauses(columns_to_copy)
 
         parent_batch_relation = relation_scoped_to_range(batch_table, batch_column, start_id, end_id)
 
         parent_batch_relation.each_batch(column: batch_column, of: sub_batch_size) do |sub_batch|
           batch_metrics.time_operation(:update_all) do
-            sub_batch.update_all("#{quoted_copy_to}=#{quoted_copy_from}")
+            sub_batch.update_all(assignment_clauses.join(', '))
           end
 
           sleep(PAUSE_SECONDS)
@@ -54,6 +53,17 @@ module Gitlab
 
       def relation_scoped_to_range(source_table, source_key_column, start_id, stop_id)
         define_batchable_model(source_table).where(source_key_column => start_id..stop_id)
+      end
+
+      def column_assignment_clauses(columns_to_copy)
+        raise ArgumentError 'uneven number of arguments given' unless columns_to_copy.size.even?
+
+        columns_to_copy.each_slice(2).map do |(from_column, to_column)|
+          from_column = connection.quote_column_name(from_column)
+          to_column = connection.quote_column_name(to_column)
+
+          "#{to_column} = #{from_column}"
+        end
       end
     end
   end
