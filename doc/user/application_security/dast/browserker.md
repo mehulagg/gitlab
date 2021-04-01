@@ -21,7 +21,7 @@ Crawling continues by taking more snapshots and finding subsequent actions.
 
 The benefit of crawling by following user actions in a browser is that Browserker can interact with the target application much like a real user would, identifying complex flows that traditional web crawlers don’t understand. This results in better coverage of both the user-facing website and their backend APIs.
 
-Scanning a web application with both Browserker and GitLab DAST should provide greater coverage, compared with only GitLab DAST.
+Scanning a web application with both Browserker and GitLab DAST should provide greater coverage, compared with only GitLab DAST. Browserker does not support API scanning or the DAST AJAX crawler.
 
 ## Enable Browserker
 
@@ -91,8 +91,6 @@ When running a full scan, active vulnerability checks executed by DAST/ZAP do no
 For example, for a target website that contains forms with Anti-CSRF tokens, a passive scan will scan as intended because the browser displays pages/forms as if a user is viewing the page.
 However, active vulnerability checks run in a full scan will not be able to submit forms containing Anti-CSRF tokens. In such cases we recommend you disable Anti-CSRF tokens when running a full scan.
 
-The DAST team is looking into full scan limitations with a solution set to be identified in the product roadmap.
-
 ## Managing scan time
 
 It is expected that running Browserker compared to the normal GitLab DAST solution will result in better coverage for many web applications.
@@ -103,11 +101,3 @@ You can manage the trade-off between coverage and scan time with the following m
 - Limit the number of actions executed by the browser with the [variable](#available-variables) `DAST_BROWSERKER_MAX_ACTIONS`. The default is `10,000`.
 - Limit the page depth that Browserker will check coverage on with the [variable](#available-variables) `DAST_BROWSERKER_MAX_DEPTH`. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
 - Vertically scaling the runner and using a higher number of browsers with [variable](#available-variables) `DAST_BROWSERKER_NUMBER_OF_BROWSERS`. The default is `3`.
-
-## AJAX Crawler
-
-The AJAX Crawler is not supported by Browserker.
-
-## API Scanning
-
-API scanning is not supported by Browserker.
