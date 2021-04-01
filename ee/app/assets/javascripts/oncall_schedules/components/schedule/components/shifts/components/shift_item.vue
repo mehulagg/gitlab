@@ -1,7 +1,5 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
-import { DAYS_IN_WEEK, HOURS_IN_DAY } from 'ee/oncall_schedules/constants';
-import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
 import { getPixelOffset, getPixelWidth } from './shift_utils';
 
 export default {
@@ -13,10 +11,6 @@ export default {
       type: Object,
       required: true,
     },
-    timeframeItem: {
-      type: [Date, Object],
-      required: true,
-    },
     timeframe: {
       type: Array,
       required: true,
@@ -25,23 +19,12 @@ export default {
       type: String,
       required: true,
     },
-    shiftTimeUnitWidth: {
-      type: Number,
-      required: true,
-    },
-    rotationLength: {
-      type: Object,
-      required: true,
-    },
     timelineWidth: {
       type: Number,
       required: true,
     },
   },
   computed: {
-    currentTimeFrameEnd() {
-      return nDaysAfter(this.timeframeEndsAt, DAYS_IN_WEEK);
-    },
     shiftStyles() {
       const { timeframe, presetType, timelineWidth, shift } = this;
 
@@ -70,37 +53,6 @@ export default {
         left: `${left}px`,
         width: `${width}px`,
       };
-    },
-    shiftStartsAt() {
-      return new Date(this.shift.startsAt);
-    },
-    shiftEndsAt() {
-      return new Date(this.shift.endsAt);
-    },
-    shiftStartDateOutOfRange() {
-      return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();
-    },
-    shiftUnitIsHour() {
-      return (
-        this.totalShiftRangeOverlap.hoursOverlap <= HOURS_IN_DAY &&
-        this.rotationLength?.lengthUnit === 'HOURS'
-      );
-    },
-    timeframeEndsAt() {
-      return this.timeframe[this.timeframe.length - 1];
-    },
-    totalShiftRangeOverlap() {
-      try {
-        return getOverlapDateInPeriods(
-          {
-            start: this.timeframeItem,
-            end: this.currentTimeFrameEnd,
-          },
-          { start: this.shiftStartsAt, end: this.shiftEndsAt },
-        );
-      } catch (error) {
-        return { hoursOverlap: 0 };
-      }
     },
   },
 };

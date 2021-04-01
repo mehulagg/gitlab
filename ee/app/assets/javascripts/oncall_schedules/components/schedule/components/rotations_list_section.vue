@@ -149,7 +149,6 @@ export default {
           <schedule-shift-wrapper
             v-if="rotation.shifts"
             :preset-type="presetType"
-            :timeframe-item="timeframe[0]"
             :timeframe="timeframe"
             :rotation="rotation"
           />
