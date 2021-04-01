@@ -1,6 +1,6 @@
 ---
 description:
-category:
+category: <%= options[:category] %>
 action:
 label:
 property:

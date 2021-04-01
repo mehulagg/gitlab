@@ -11,6 +11,7 @@ module Gitlab
 
     desc 'Generates a metric definition yml file'
 
+    class_option :category, type: :string, optional: false, desc: 'Category of the event'
     class_option :ee, type: :boolean, optional: true, default: false, desc: 'Indicates if event is for ee'
 
     def create_event_file
@@ -26,7 +27,7 @@ module Gitlab
     end
 
     def file_name
-      "#{Time.now.utc.strftime("%Y%m%d%H%M%S")}"
+      "#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{options[:category]}"
     end
 
     def ee?
