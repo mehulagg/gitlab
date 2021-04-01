@@ -817,9 +817,6 @@ msgstr ""
 msgid "%{spanStart}in%{spanEnd} %{errorFn}"
 msgstr ""
 
-msgid "%{startDate} - %{endDate}"
-msgstr ""
-
 msgid "%{start} to %{end}"
 msgstr ""
 
@@ -9564,6 +9561,24 @@ msgstr ""
 msgid "DNS"
 msgstr ""
 
+msgid "DORA4Metrics|%{startDate} - %{endDate}"
+msgstr ""
+
+msgid "DORA4Metrics|Date"
+msgstr ""
+
+msgid "DORA4Metrics|Deployments"
+msgstr ""
+
+msgid "DORA4Metrics|Deployments charts"
+msgstr ""
+
+msgid "DORA4Metrics|Something went wrong while getting deployment frequency data"
+msgstr ""
+
+msgid "DORA4Metrics|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts."
+msgstr ""
+
 msgid "Dashboard"
 msgstr ""
 
@@ -10545,24 +10560,6 @@ msgid "Deploying to AWS is easy with GitLab"
 msgstr ""
 
 msgid "Deployment Frequency"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|%{startDate} - %{endDate}"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Date"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Deployments"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Deployments charts"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Something went wrong while getting deployment frequency data"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts."
 msgstr ""
 
 msgid "Deployments"
