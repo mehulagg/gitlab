@@ -107,7 +107,6 @@ To show private contributions:
 1. In the **Main settings** section, select the **Include private contributions on my profile** checkbox.
 1. Select **Update profile settings**.
 
-
 ## Set your current status
 
 > - Introduced in GitLab 11.2.
