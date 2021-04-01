@@ -7,13 +7,20 @@ const addCiYmlPath = "/-/new/master?commit_message='Add%20.gitlab-ci.yml'";
 describe('Pipelines CI Templates', () => {
   let wrapper;
 
+  const GlEmoji = { template: '<img/>' };
+
   const createWrapper = () => {
     return shallowMount(PipelinesCiTemplate, {
       provide: {
         addCiYmlPath,
       },
+      stubs: {
+        GlEmoji,
+      },
     });
   };
+
+  const findTestTemplateLinks = () => wrapper.findAll('[data-testid="test-template-link"]');
 
   const findTemplateDescriptions = () => wrapper.findAll('[data-testid="template-description"]');
   const findTemplateLinks = () => wrapper.findAll('[data-testid="template-link"]');
@@ -24,7 +31,19 @@ describe('Pipelines CI Templates', () => {
     wrapper = null;
   });
 
-  describe('renders templates', () => {
+  describe('renders test template', () => {
+    beforeEach(() => {
+      wrapper = createWrapper();
+    });
+
+    it('links to the hello world template', () => {
+      expect(findTestTemplateLinks().at(0).attributes('href')).toEqual(
+        addCiYmlPath.concat('&template=Hello-World'),
+      );
+    });
+  });
+
+  describe('renders template list', () => {
     beforeEach(() => {
       wrapper = createWrapper();
     });
