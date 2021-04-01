@@ -8534,7 +8534,7 @@ msgstr ""
 msgid "ContributionAnalytics|Last week"
 msgstr ""
 
-msgid "ContributionAnalytics|Merge Requests"
+msgid "ContributionAnalytics|Merge requests"
 msgstr ""
 
 msgid "ContributionAnalytics|No issues for the selected time period."
@@ -11053,9 +11053,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Dismiss DevOps Report introduction"
-msgstr ""
-
-msgid "Dismiss Merge Request promotion"
 msgstr ""
 
 msgid "Dismiss Value Stream Analytics introduction box"
@@ -19342,6 +19339,9 @@ msgid "Merge request %{mr_link} was reviewed by %{mr_author}"
 msgstr ""
 
 msgid "Merge request (MR) approvals"
+msgstr ""
+
+msgid "Merge request analytics"
 msgstr ""
 
 msgid "Merge request approval settings have been updated."
