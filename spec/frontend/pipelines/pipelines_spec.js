@@ -200,7 +200,7 @@ describe('Pipelines', () => {
       });
 
       it('renders Clear Runner Cache button', () => {
-        expect(findCleanCacheButton().text()).toBe('Clear Runner Caches');
+        expect(findCleanCacheButton().text()).toBe('Clear runner caches');
       });
 
       it('renders pipelines in a table', () => {
@@ -508,7 +508,7 @@ describe('Pipelines', () => {
       });
 
       it('renders Clear Runner Cache button', () => {
-        expect(findCleanCacheButton().text()).toBe('Clear Runner Caches');
+        expect(findCleanCacheButton().text()).toBe('Clear runner caches');
       });
 
       it('renders empty state', () => {
@@ -714,7 +714,7 @@ describe('Pipelines', () => {
         expect(findRunPipelineButton().attributes('href')).toBe(paths.newPipelinePath);
 
         expect(findCiLintButton().attributes('href')).toBe(paths.ciLintPath);
-        expect(findCleanCacheButton().text()).toBe('Clear Runner Caches');
+        expect(findCleanCacheButton().text()).toBe('Clear runner caches');
       });
 
       it('shows error state', () => {
