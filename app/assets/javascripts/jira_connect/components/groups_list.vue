@@ -1,7 +1,7 @@
 <script>
 import { GlTabs, GlTab, GlLoadingIcon, GlPagination, GlAlert } from '@gitlab/ui';
 import { fetchGroups } from '~/jira_connect/api';
-import { defaultPerPage } from '~/jira_connect/constants';
+import { DEFAULT_GROUPS_PER_PAGE } from '~/jira_connect/constants';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import GroupsListItem from './groups_list_item.vue';
@@ -25,10 +25,14 @@ export default {
       groups: [],
       isLoading: false,
       page: 1,
-      perPage: defaultPerPage,
       totalItems: 0,
       errorMessage: null,
     };
+  },
+  computed: {
+    showPagination() {
+      return this.totalItems > this.$options.DEFAULT_GROUPS_PER_PAGE && this.groups.length > 0;
+    },
   },
   mounted() {
     this.loadGroups();
@@ -39,7 +43,7 @@ export default {
 
       fetchGroups(this.groupsPath, {
         page: this.page,
-        perPage: this.perPage,
+        perPage: this.$options.DEFAULT_GROUPS_PER_PAGE,
       })
         .then((response) => {
           const { page, total } = parseIntPagination(normalizeHeaders(response.headers));
@@ -55,6 +59,8 @@ export default {
         });
     },
   },
+
+  DEFAULT_GROUPS_PER_PAGE,
 };
 </script>
 
@@ -86,7 +92,7 @@ export default {
 
         <div class="gl-display-flex gl-justify-content-center gl-mt-5">
           <gl-pagination
-            v-if="totalItems > perPage && groups.length > 0"
+            v-if="showPagination"
             v-model="page"
             class="gl-mb-0"
             :per-page="perPage"
