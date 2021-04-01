@@ -4,7 +4,7 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
 
   ROOTS_MIGRATION = 'BackfillTraversalIds::BackfillRoots'
-  CHILDREN_MIIGRATION = 'BackfillTraversalIds::BackfillChildren'
+  CHILDREN_MIGRATION = 'BackfillTraversalIds::BackfillChildren'
   DOWNTIME = false
   BATCH_SIZE = 500
   SUB_BATCH_SIZE = 100
@@ -17,7 +17,7 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
 
     # Personal namespaces and top-level groups
     final_delay = queue_background_migration_jobs_by_range_at_intervals(
-      BackfillTraversalIds::BackfillRoots::BASE_QUERY,
+      ::Gitlab::BackgroundMigration::BackfillTraversalIds::BackfillRoots::BASE_QUERY,
       ROOTS_MIGRATION,
       DELAY_INTERVAL,
       batch_size: BATCH_SIZE,
@@ -28,7 +28,7 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
 
     # Subgroups
     queue_background_migration_jobs_by_range_at_intervals(
-      BackfillTraversalIds::BackfillChildren::BASE_QUERY,
+      ::Gitlab::BackgroundMigration::BackfillTraversalIds::BackfillChildren::BASE_QUERY,
       CHILDREN_MIGRATION,
       DELAY_INTERVAL,
       batch_size: BATCH_SIZE,
