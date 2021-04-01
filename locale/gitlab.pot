@@ -7659,6 +7659,9 @@ msgstr ""
 msgid "ComboSearch is not defined"
 msgstr ""
 
+msgid "Comma-separated list of email addresses."
+msgstr ""
+
 msgid "Comma-separated, e.g. '1.1.1.1, 2.2.2.0/24'"
 msgstr ""
 
@@ -11451,7 +11454,7 @@ msgstr ""
 msgid "Email sent"
 msgstr ""
 
-msgid "Email the pipelines status to a list of recipients."
+msgid "Email the pipeline status to a list of recipients."
 msgstr ""
 
 msgid "Email updates (optional)"
@@ -11500,9 +11503,6 @@ msgid "Emails sent from Service Desk have this name."
 msgstr ""
 
 msgid "Emails sent to %{email} are also supported."
-msgstr ""
-
-msgid "Emails separated by comma"
 msgstr ""
 
 msgid "EmailsOnPushService|Disable code diffs"
@@ -22580,6 +22580,9 @@ msgstr ""
 msgid "Pipeline ran in fork of project"
 msgstr ""
 
+msgid "Pipeline status emails"
+msgstr ""
+
 msgid "Pipeline subscriptions"
 msgstr ""
 
@@ -22665,9 +22668,6 @@ msgid "Pipelines"
 msgstr ""
 
 msgid "Pipelines charts"
-msgstr ""
-
-msgid "Pipelines emails"
 msgstr ""
 
 msgid "Pipelines for merge requests are configured. A detached pipeline runs in the context of the merge request, and not against the merged result. Learn more in the documentation for Pipelines for Merged Results."
