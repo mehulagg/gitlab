@@ -14,10 +14,11 @@ describe('ee/projects/pipelines/charts/components/util.js', () => {
 
       const startDate = new Date(2015, 5, 26, 10);
       const endDate = new Date(2015, 6, 4, 10);
+      const chartTitle = 'Chart title';
 
       const expected = [
         {
-          name: 'Deployments',
+          name: chartTitle,
           data: [
             ['Jun 26', 0],
             ['Jun 27', 0],
@@ -31,7 +32,7 @@ describe('ee/projects/pipelines/charts/components/util.js', () => {
         },
       ];
 
-      expect(apiDataToChartSeries(apiData, startDate, endDate)).toEqual(expected);
+      expect(apiDataToChartSeries(apiData, startDate, endDate, chartTitle)).toEqual(expected);
     });
   });
 });
