@@ -19,6 +19,13 @@
       :delete_after_delivery: true
       :expunge_deleted: <%= config[:expunge_deleted].to_json %>
 
+      <% if config[:inbox_method] %>
+      :inbox_method: <%= config[:inbox_method] %>
+      <% end %>
+      <% if config[:inbox_options] %>
+      :inbox_options: <%= config[:inbox_options].to_json %>
+      <% end %>
+
       :delivery_method: sidekiq
       :delivery_options:
         :redis_url: <%= config[:redis_url].to_json %>
