@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20210226120851_move_container_registry_enabled_to_project_features.rb')
+require Rails.root.join('db', 'post_migrate', '20210401131948_move_container_registry_enabled_to_project_features2.rb')
 
-RSpec.describe MoveContainerRegistryEnabledToProjectFeatures, :migration do
+RSpec.describe MoveContainerRegistryEnabledToProjectFeatures2, :migration do
   let(:namespace) { table(:namespaces).create!(name: 'gitlab', path: 'gitlab-org') }
 
   let!(:projects) do
@@ -29,6 +29,10 @@ RSpec.describe MoveContainerRegistryEnabledToProjectFeatures, :migration do
 
   it 'schedules jobs for ranges of projects' do
     migrate!
+
+    # Since track_jobs is true, each job should have an entry in the background_migration_jobs
+    # table.
+    expect(table(:background_migration_jobs).count).to eq(2)
 
     expect(described_class::MIGRATION)
       .to be_scheduled_delayed_migration(2.minutes, projects[0].id, projects[2].id)
