@@ -24407,6 +24407,8 @@ CREATE INDEX tmp_index_on_security_findings_scan_id ON security_findings USING b
 
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
 
+CREATE INDEX tmp_index_pages_deployments_on_file_store ON pages_deployments USING btree (file_store);
+
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_architectures_on_distribution_id_and_name ON packages_debian_group_architectures USING btree (distribution_id, name);
 
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_components_on_distribution_id_and_name ON packages_debian_group_components USING btree (distribution_id, name);
