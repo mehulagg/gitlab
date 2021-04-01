@@ -43,9 +43,10 @@ describe('CurrentDayIndicator', () => {
      * and the current day is the following Wednesday.
      * This creates a gap of two days so our generated offset should represent:
      * DayDiffOffset + weeklyOffset + weeklyHourOffset
-     * 29 + 0
+     * Note: We do not round these calculations
+     * 28.571428571428573 + 0
      */
-    const leftOffset = '29';
+    const leftOffset = '28.571428571428573';
     expect(wrapper.attributes('style')).toBe(`left: ${leftOffset}%;`);
   });
 

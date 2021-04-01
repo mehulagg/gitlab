@@ -7,8 +7,8 @@ import { __, sprintf } from '~/locale';
 
 export const SHIFT_WIDTHS = {
   md: 100,
-  sm: 50,
-  xs: 25,
+  sm: 75,
+  xs: 20,
 };
 
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
@@ -77,7 +77,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-absolute gl-h-7 gl-mt-3" :style="rotationAssigneeStyle">
+  <div class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1" :style="rotationAssigneeStyle">
     <div
       :id="rotationAssigneeUniqueID"
       class="gl-h-6"

@@ -38,12 +38,16 @@ export default {
     this.$options.currentDate = currentDate;
   },
   methods: {
-    getIndicatorStyles(presetType = PRESET_TYPES.WEEKS, timeframeStartDate = new Date()) {
+    getIndicatorStyles(
+      presetType = PRESET_TYPES.WEEKS,
+      timeframeStartDate = new Date(),
+      timelineWidth = 1,
+    ) {
       if (presetType === PRESET_TYPES.DAYS) {
         return this.getDayViewIndicatorStyles();
       }
 
-      return this.getWeekViewIndicatorStyles(timeframeStartDate);
+      return this.getWeekViewIndicatorStyles(timeframeStartDate, timelineWidth);
     },
     getDayViewIndicatorStyles() {
       const currentDate = new Date();
@@ -54,14 +58,14 @@ export default {
         left: `${hours + minutes}%`,
       };
     },
-    getWeekViewIndicatorStyles(timeframeStartDate) {
+    getWeekViewIndicatorStyles(timeframeStartDate, timelineWidth) {
       const currentDate = new Date();
       const hourOffset = oneHourOffsetWeekView * currentDate.getHours();
       const daysSinceShiftStart = getDayDifference(timeframeStartDate, currentDate);
       const leftOffset = oneDayOffsetWeekView * daysSinceShiftStart + hourOffset;
 
       return {
-        left: `${Math.round(leftOffset)}%`,
+        left: `${leftOffset / timelineWidth}%`,
       };
     },
   },
