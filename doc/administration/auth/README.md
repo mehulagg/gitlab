@@ -42,7 +42,8 @@ UltraAuth has removed their software which supports OmniAuth integration. We hav
 
 # SaaS vs Self-Managed Comparison
 
-Links are provided above for most configurations.
+The external authentication and authorization providers may support the following capabilities.
+For more information, see the links shown on this page for each external provider.
 
 | Capability                                      | SaaS                                    | Self-Managed                       |
 |-------------------------------------------------|-----------------------------------------|------------------------------------|
