@@ -162,6 +162,12 @@ RSpec.describe VulnerabilitiesHelper do
         it { is_expected.to be_falsey }
       end
     end
+
+    context 'dismissal descriptions' do
+      it 'incldues dismissal descriptions' do
+        expect(subject[:dismissal_descriptions]).to eq(Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] })
+      end
+    end
   end
 
   describe '#create_jira_issue_url_for' do
@@ -294,7 +300,6 @@ RSpec.describe VulnerabilitiesHelper do
       it 'returns dismissal feedback information', :aggregate_failures do
         dismissal_feedback = subject[:dismissal_feedback]
         expect(dismissal_feedback[:dismissal_reason]).to eq(feedback.dismissal_reason)
-        expect(dismissal_feedback[:dismissal_descriptions]).to eq(Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] })
         expect(dismissal_feedback[:comment_details][:comment]).to eq(feedback.comment)
       end
     end

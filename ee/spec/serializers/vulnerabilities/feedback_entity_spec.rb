@@ -194,12 +194,4 @@ RSpec.describe Vulnerabilities::FeedbackEntity do
       expect(subject[:dismissal_reason]).to eq(feedback.dismissal_reason)
     end
   end
-
-  context 'when dismissal descriptions are available' do
-    let(:feedback) { build_stubbed(:vulnerability_feedback, :dismissal, project: project) }
-
-    it 'exposes dismissal_descriptions' do
-      expect(subject[:dismissal_descriptions]).to eq(Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] })
-    end
-  end
 end

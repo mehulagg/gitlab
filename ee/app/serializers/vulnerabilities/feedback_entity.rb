@@ -50,9 +50,6 @@ class Vulnerabilities::FeedbackEntity < Grape::Entity
   expose :project_fingerprint
 
   expose :dismissal_reason
-  expose :dismissal_descriptions do |feedback|
-    Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] }
-  end
 
   alias_method :feedback, :object
 

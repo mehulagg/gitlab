@@ -22,7 +22,7 @@ module Types
         description(enum_mod.description) if use_description
 
         enum_mod.definition.each do |key, content|
-          desc = content.delete(:description)
+          desc = content.fetch(:description)
           value(key.to_s.upcase, description: desc, **content)
         end
       end
