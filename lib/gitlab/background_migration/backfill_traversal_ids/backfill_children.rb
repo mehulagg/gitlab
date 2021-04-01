@@ -8,7 +8,7 @@ module Gitlab
       class BackfillChildren
         BASE_QUERY = ::Gitlab::BackgroundMigration::BackfillTraversalIds::Models::Namespace
           .where('parent_id IS NOT NULL')
-          .where('traversal_ids IS NULL')
+          .where("traversal_ids = '{}'")
         PAUSE_SECONDS = 2
 
         def perform(start_id, end_id, sub_batch_size)
