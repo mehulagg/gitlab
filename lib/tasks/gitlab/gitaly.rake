@@ -24,6 +24,7 @@ Usage: rake "gitlab:gitaly:install[/installation/dir,/storage/path]")
       if Rails.env.test?
         command.push(
           'BUNDLE_FLAGS=--no-deployment',
+          "BUNDLE_PATH=#{gitaly_bundle_path}",
           "GEM_HOME=#{Bundler.bundle_path}")
       end
 
@@ -35,6 +36,14 @@ Usage: rake "gitlab:gitaly:install[/installation/dir,/storage/path]")
           Bundler.with_original_env { Gitlab::Popen.popen(command, nil, { "RUBYOPT" => nil, "BUNDLE_GEMFILE" => nil }) }
         end
       end
+    end
+
+    # Install gitaly gems outside of `tmp/tests/gitaly`.
+    # `tmp/tests/gitaly` is deleted and recreated each time gitaly is set up.
+    # Installing the gems in a different directory avoids
+    # having to install them every time, saving gitaly set up time.
+    def gitaly_bundle_path
+      File.expand_path('../../../tmp/tests/gitaly-ruby', __dir__)
     end
   end
 end
