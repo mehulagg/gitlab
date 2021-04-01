@@ -134,6 +134,7 @@ class InvitesController < ApplicationController
           activity_group_path(member.source)
         end
       end
+      e.run
     end
   end
 

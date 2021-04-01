@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe InvitesController do
+RSpec.describe InvitesController, :experiment do
   let_it_be(:user) { create(:user) }
   let_it_be(:member, reload: true) { create(:project_member, :invited, invite_email: user.email) }
   let(:raw_invite_token) { member.raw_invite_token }
@@ -15,7 +15,7 @@ RSpec.describe InvitesController do
       let(:params) { { id: '_bogus_token_' } }
 
       it 'renders the 404 page' do
-        request
+        make_request
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -23,7 +23,7 @@ RSpec.describe InvitesController do
   end
 
   describe 'GET #show' do
-    subject(:request) { get :show, params: params }
+    subject(:make_request) { get :show, params: params }
 
     context 'when logged in' do
       before do
@@ -32,7 +32,7 @@ RSpec.describe InvitesController do
 
       it 'accepts user if invite email matches signed in user' do
         expect do
-          request
+          make_request
         end.to change { project_members.include?(user) }.from(false).to(true)
 
         expect(response).to have_gitlab_http_status(:found)
@@ -43,7 +43,7 @@ RSpec.describe InvitesController do
         member.update!(invite_email: 'bogus@email.com')
 
         expect do
-          request
+          make_request
         end.not_to change { project_members.include?(user) }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -56,21 +56,24 @@ RSpec.describe InvitesController do
         let(:params) { { id: raw_invite_token, invite_type: Members::InviteEmailExperiment::INVITE_TYPE } }
 
         it 'tracks via experiment', :aggregate_failures do
-          experiment = double(track: true)
-          allow(controller).to receive(:experiment).and_return(experiment)
+          experiment = experiment('members/invite_email', actor: member)
+          allow(Members::InviteEmailExperiment).to receive(:new).and_return(experiment)
 
-          request
+          expect(experiment).to track(:opened)
+          expect(experiment).to track(:accepted)
 
-          expect(experiment).to have_received(:track).with(:opened)
-          expect(experiment).to have_received(:track).with(:accepted)
+          make_request
         end
       end
 
       context 'when invite does not come from initial email invite' do
         it 'does not track via experiment' do
-          expect(controller).not_to receive(:experiment)
+          experiment = experiment('members/invite_email', actor: member)
+          allow(Members::InviteEmailExperiment).to receive(:new).and_return(experiment)
 
-          request
+          expect(experiment).not_to track(:opened)
+
+          make_request
         end
       end
     end
@@ -79,14 +82,14 @@ RSpec.describe InvitesController do
       context 'when inviter is a member' do
         context 'when instance allows sign up' do
           it 'indicates an account can be created in notice' do
-            request
+            make_request
 
             expect(flash[:notice]).to include('or create an account')
           end
 
           context 'when user exists with the invited email' do
             it 'is redirected to a new session with invite email param' do
-              request
+              make_request
 
               expect(response).to redirect_to(new_user_session_path(invite_email: member.invite_email))
             end
@@ -99,7 +102,7 @@ RSpec.describe InvitesController do
             end
 
             it 'is redirected to a new session with invite email param' do
-              request
+              make_request
 
               expect(response).to redirect_to(new_user_session_path(invite_email: member.invite_email))
             end
@@ -111,13 +114,13 @@ RSpec.describe InvitesController do
             end
 
             it 'indicates an account can be created in notice' do
-              request
+              make_request
 
               expect(flash[:notice]).to include('create an account or sign in')
             end
 
             it 'is redirected to a new registration with invite email param' do
-              request
+              make_request
 
               expect(response).to redirect_to(new_user_registration_path(invite_email: member.invite_email))
             end
@@ -130,14 +133,14 @@ RSpec.describe InvitesController do
           end
 
           it 'does not indicate an account can be created in notice' do
-            request
+            make_request
 
             expect(flash[:notice]).not_to include('or create an account')
           end
 
           context 'when user exists with the invited email' do
             it 'is redirected to a new session with invite email param' do
-              request
+              make_request
 
               expect(response).to redirect_to(new_user_session_path(invite_email: member.invite_email))
             end
@@ -149,7 +152,7 @@ RSpec.describe InvitesController do
             end
 
             it 'is redirected to a new session with invite email param' do
-              request
+              make_request
 
               expect(response).to redirect_to(new_user_session_path(invite_email: member.invite_email))
             end
@@ -161,7 +164,7 @@ RSpec.describe InvitesController do
         let(:params) { { id: '_bogus_token_' } }
 
         it 'is redirected to a new session' do
-          request
+          make_request
 
           expect(response).to redirect_to(new_user_session_path)
         end
@@ -174,26 +177,26 @@ RSpec.describe InvitesController do
       sign_in(user)
     end
 
-    subject(:request) { post :accept, params: params }
+    subject(:make_request) { post :accept, params: params }
 
     it_behaves_like 'invalid token'
 
     context 'when invite comes from the initial email invite' do
       it 'tracks via experiment' do
-        experiment = double(track: true)
-        allow(controller).to receive(:experiment).and_return(experiment)
+        expect(experiment('members/invite_email')).to track(:accepted).on_next_instance
 
         post :accept, params: params, session: { invite_type: Members::InviteEmailExperiment::INVITE_TYPE }
-
-        expect(experiment).to have_received(:track).with(:accepted)
       end
     end
 
     context 'when invite does not come from initial email invite' do
       it 'does not track via experiment' do
-        expect(controller).not_to receive(:experiment)
+        experiment = experiment('members/invite_email', actor: member)
+        allow(Members::InviteEmailExperiment).to receive(:new).and_return(experiment)
 
-        request
+        expect(experiment).not_to track
+
+        make_request
       end
     end
   end
@@ -203,7 +206,7 @@ RSpec.describe InvitesController do
       sign_in(user)
     end
 
-    subject(:request) { post :decline, params: params }
+    subject(:make_request) { post :decline, params: params }
 
     it_behaves_like 'invalid token'
   end
@@ -213,7 +216,7 @@ RSpec.describe InvitesController do
       sign_in(user)
     end
 
-    subject(:request) { get :decline, params: params }
+    subject(:make_request) { get :decline, params: params }
 
     it_behaves_like 'invalid token'
   end
