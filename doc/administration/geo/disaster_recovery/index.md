@@ -503,30 +503,54 @@ for another **primary** node. All the old replication settings will be overwritt
 
 ## Promoting a secondary Geo cluster in GitLab Cloud Native Helm Charts
 
-When updating a Cloud Native Geo deployment, the process for updating any nodes that are external to the secondary Kubernetes cluster does not differ from the non Cloud Native approach. As such you can always defer to [Promoting a secondary Geo node in single-secondary configurations](#promoting-a-secondary-geo-node-in-single-secondary-configurations) for more information.
+When updating a Cloud Native Geo deployment, the process for updating any node that is external to the secondary Kubernetes cluster does not differ from the non Cloud Native approach. As such you can always defer to [Promoting a secondary Geo node in single-secondary configurations](#promoting-a-secondary-geo-node-in-single-secondary-configurations) for more information.
 
 ### Step 1. Permanently disable the **primary** cluster
 
-Connect to your primary cluster and disable the GitLab webservice and Sidekiq pods
+WARNING:
+If the **primary** site goes offline, there may be data saved on the **primary** site
+that has not been replicated to the **secondary** site. This data should be treated
+as lost if you proceed.
 
-```shell
-kubectl --namespace gitlab scale deploy gitlab-geo-webservice-default --replicas=0
-kubectl --namespace gitlab scale deploy gitlab-geo-sidekiq-all-in-1-v1 --replicas=0
-```
+If an outage on the **primary** site happens, you should do everything possible to
+avoid a split-brain situation where writes can occur in two different GitLab
+instances, complicating recovery efforts. So to prepare for the failover, we
+must disable the **primary** site.
 
-NOTE:
-This assumes you are using the `gitlab` namespace, if you used a different namespace when setting up your cluster you should also replace `--namespace gitlab` throughout the rest of this document.
+1. Connect to your primary Kubernetes cluster and disable the GitLab webservice and
+   Sidekiq pods
+
+   ```shell
+   kubectl --namespace gitlab scale deploy gitlab-geo-webservice-default --replicas=0
+   kubectl --namespace gitlab scale deploy gitlab-geo-sidekiq-all-in-1-v1 --replicas=0
+   ```
+
+   NOTE:
+   This assumes you are using the `gitlab` namespace, if you used a different namespace when setting up your cluster you should also replace `--namespace gitlab` throughout the rest of this document.
+
+1. If you do not have access to the **primary** Kubernetes cluster, take the cluster offline and
+   prevent it from coming back online by any means at your disposal.
+   Since there are many ways you may prefer to accomplish this, we will avoid a
+   single recommendation. You may need to:
+
+   - Reconfigure the load balancers.
+   - Change DNS records (for example, point the primary DNS record to the
+     **secondary** site to stop usage of the **primary** site).
+   - Stop the virtual servers.
+   - Block traffic through a firewall.
+   - Revoke object storage permissions from the **primary** site.
+   - Physically disconnect a machine.
 
 ### Step 2. Promote all **secondary** nodes external to the cluster
 
 WARNING:
-In GitLab 13.2 and 13.3, promoting a secondary node to a primary while the
+In GitLab 13.2 and 13.3, promoting a secondary site to a primary while the
 secondary is paused fails. Do not pause replication before promoting a
-secondary. If the node is paused, be sure to resume before promoting. This
+secondary. If the site is paused, be sure to resume before promoting. This
 issue has been fixed in GitLab 13.4 and later.
 
 WARNING:
-If the secondary node [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
+If the secondary site [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
 a point-in-time recovery to the last known state.
 Data that was created on the primary while the secondary was paused will be lost.
 
