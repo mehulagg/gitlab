@@ -1,5 +1,5 @@
 import { GlIcon } from '@gitlab/ui';
-import { shallowMount, mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import TimeAgo from '~/pipelines/components/pipelines_list/time_ago.vue';
 
@@ -8,9 +8,9 @@ describe('Timeago component', () => {
 
   const defaultProps = { duration: 0, finished_at: '' };
 
-  const createComponent = (props = defaultProps, stuck = false, mountFn = shallowMount) => {
+  const createComponent = (props = defaultProps, stuck = false) => {
     wrapper = extendedWrapper(
-      mountFn(TimeAgo, {
+      shallowMount(TimeAgo, {
         propsData: {
           pipeline: {
             details: {
@@ -113,7 +113,7 @@ describe('Timeago component', () => {
     it('should show warning icon beside in progress if pipeline is stuck', () => {
       const stuck = true;
 
-      createComponent(defaultProps, stuck, mount);
+      createComponent(defaultProps, stuck);
 
       expect(findWarningIcon().exists()).toBe(true);
       expect(findHourGlassIcon().exists()).toBe(false);

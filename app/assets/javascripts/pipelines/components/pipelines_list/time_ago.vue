@@ -70,8 +70,20 @@ export default {
     </div>
     <div :class="legacyTableMobileClass">
       <span v-if="showInProgress" data-testid="pipeline-in-progress">
-        <gl-icon v-if="stuck" name="warning" class="gl-mr-2" :size="12" />
-        <gl-icon v-else name="hourglass" class="gl-vertical-align-baseline! gl-mr-2" :size="12" />
+        <gl-icon
+          v-if="stuck"
+          name="warning"
+          class="gl-mr-2"
+          :size="12"
+          data-testid="warning-icon"
+        />
+        <gl-icon
+          v-else
+          name="hourglass"
+          class="gl-vertical-align-baseline! gl-mr-2"
+          :size="12"
+          data-testid="hourglass-icon"
+        />
         {{ s__('Pipeline|In progress') }}
       </span>
 
