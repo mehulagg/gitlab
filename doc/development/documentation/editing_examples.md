@@ -7,7 +7,7 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 
 # Editing examples
 
-The following examples show tips for how to edit your content so it's easier to scan.
+Use these examples to help guide you when you're editing GitLab content.
 
 ## Don't repeat text from the navigation
 
