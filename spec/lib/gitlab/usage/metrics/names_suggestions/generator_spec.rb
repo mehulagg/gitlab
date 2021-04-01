@@ -64,7 +64,7 @@ RSpec.describe Gitlab::Usage::Metrics::NamesSuggestions::Generator do
       it_behaves_like 'name suggestion' do
         # corresponding metric is collected with distinct_count(::Clusters::Cluster.aws_installed.enabled.where(time_period), :user_id)
         let(:key_path) { 'usage_activity_by_stage_monthly.configure.clusters_platforms_eks' }
-        let(:constraints) { /<adjective describing\: '\(clusters.provider_type = \d+ AND \("cluster_providers_aws"\."status" IN \(\d+\)\) AND clusters\.enabled = TRUE\)'>/ }
+        let(:constraints) { /<adjective describing\: '\(clusters.provider_type = \d+ AND \(cluster_providers_aws\.status IN \(\d+\)\) AND clusters\.enabled = TRUE\)'>/ }
         let(:name_suggestion) { /count_distinct_user_id_from_#{constraints}_clusters_<with>_#{constraints}_cluster_providers_aws/ }
       end
     end

@@ -85,7 +85,7 @@ module Gitlab
 
               parts << actual_source
               parts += process_joined_relations(actual_source, arel, relation, constraints)
-              parts.compact.join('_')
+              parts.compact.join('_').gsub('"', '')
             end
 
             def append_constraints_prompt(target, constraints, parts)
