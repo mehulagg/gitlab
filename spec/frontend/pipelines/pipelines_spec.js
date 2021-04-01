@@ -191,7 +191,7 @@ describe('Pipelines', () => {
         expect(findNavigationControls().exists()).toBe(true);
       });
 
-      it('renders Run Pipeline link', () => {
+      it('renders Run pipeline link', () => {
         expect(findRunPipelineButton().attributes('href')).toBe(paths.newPipelinePath);
       });
 
@@ -199,7 +199,7 @@ describe('Pipelines', () => {
         expect(findCiLintButton().attributes('href')).toBe(paths.ciLintPath);
       });
 
-      it('renders Clear Runner Cache button', () => {
+      it('renders Clear runner cache button', () => {
         expect(findCleanCacheButton().text()).toBe('Clear runner caches');
       });
 
@@ -499,7 +499,7 @@ describe('Pipelines', () => {
         expect(findTab('all').text()).toMatchInterpolatedText('All 0');
       });
 
-      it('renders Run Pipeline link', () => {
+      it('renders Run pipeline link', () => {
         expect(findRunPipelineButton().attributes('href')).toBe(paths.newPipelinePath);
       });
 
@@ -507,7 +507,7 @@ describe('Pipelines', () => {
         expect(findCiLintButton().attributes('href')).toBe(paths.ciLintPath);
       });
 
-      it('renders Clear Runner Cache button', () => {
+      it('renders Clear runner cache button', () => {
         expect(findCleanCacheButton().text()).toBe('Clear runner caches');
       });
 
