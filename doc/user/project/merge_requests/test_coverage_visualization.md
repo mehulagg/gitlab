@@ -84,7 +84,8 @@ Auth/User.cs
 Lib/Utils/User.cs
 src/main/java
 ```
-the `filename` of `class` from Cobertura XML with path relative to project root.
+
+In the Cobertura XML, the `filename` attribute in the `class` element assumes the value is the relative path to project's root.
 
 ```xml
 <class name="packet.name" filename="src/main/java" line-rate="0.0" branch-rate="0.0" complexity="5">
@@ -159,7 +160,7 @@ coverage-jdk11:
   stage: visualize
   image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
   script:
-    # convert report from jacoco to cobertura, use relative prorject path
+    # convert report from jacoco to cobertura, use relative project path
     - 'python /opt/cover2cover.py target/site/jacoco/jacoco.xml src/main/java > target/site/cobertura.xml'
     # read the <source></source> tag and prepend the path to every filename attribute
     - 'python /opt/source2filename.py target/site/cobertura.xml'
@@ -199,7 +200,7 @@ coverage-jdk11:
   stage: visualize
   image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
   script:
-    # convert report from jacoco to cobertura, use relative prorject path
+    # convert report from jacoco to cobertura, use relative project path
     - 'python /opt/cover2cover.py build/jacoco/jacoco.xml src/main/java > build/cobertura.xml'
     # read the <source></source> tag and prepend the path to every filename attribute
     - 'python /opt/source2filename.py build/cobertura.xml'
