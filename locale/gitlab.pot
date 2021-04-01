@@ -4615,6 +4615,12 @@ msgstr ""
 msgid "Average per day: %{average}"
 msgstr ""
 
+msgid "Award added"
+msgstr ""
+
+msgid "Award removed"
+msgstr ""
+
 msgid "AwardEmoji|No emojis found."
 msgstr ""
 
