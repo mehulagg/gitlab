@@ -10,3 +10,5 @@ product_stage:
 product_group:
 product_category:
 introduced_by_url:
+distribution:
+<%= distribution %>

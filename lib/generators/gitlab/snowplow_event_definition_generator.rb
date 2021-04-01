@@ -18,6 +18,12 @@ module Gitlab
       template "event_definition.yml", file_path
     end
 
+    def distribution
+      value = ['- ce']
+      value << '- ee' if ee?
+      value.join("\n")
+    end
+
     private
 
     def file_path
