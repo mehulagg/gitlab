@@ -17264,7 +17264,7 @@ msgstr ""
 msgid "Issue label"
 msgstr ""
 
-msgid "Issue or Merge Request ID is required"
+msgid "Issue or merge request ID is required"
 msgstr ""
 
 msgid "Issue published on status page."
@@ -21758,7 +21758,7 @@ msgstr ""
 msgid "Only 1 appearances row can exist"
 msgstr ""
 
-msgid "Only Issue ID or Merge Request ID is required"
+msgid "Only Issue ID or merge request ID is required"
 msgstr ""
 
 msgid "Only Project Members"
