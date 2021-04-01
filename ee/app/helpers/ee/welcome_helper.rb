@@ -69,7 +69,7 @@ module EE
     end
 
     def signup_onboarding_enabled?
-      ::Gitlab.dev_env_or_com? && ::Feature.enabled?(:signup_onboarding, default_enabled: true)
+      ::Gitlab.dev_env_or_com?
     end
   end
 end
