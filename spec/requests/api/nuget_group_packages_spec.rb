@@ -115,7 +115,7 @@ RSpec.describe API::NugetGroupPackages do
 
     context 'with a reporter of subgroup' do
       let_it_be(:package_name) { 'Dummy.Package' }
-      let_it_be(:package) { create(:nuget_package, :with_metadatum, name: 'Dummy.Package', project: project) }
+      let_it_be(:package) { create(:nuget_package, :with_metadatum, name: package_name, project: project) }
 
       let(:headers) { basic_auth_header(user.username, personal_access_token.token) }
 
