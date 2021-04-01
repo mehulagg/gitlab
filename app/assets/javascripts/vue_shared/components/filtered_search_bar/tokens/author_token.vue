@@ -45,6 +45,9 @@ export default {
     activeAuthor() {
       return this.authors.find((author) => author.username.toLowerCase() === this.currentValue);
     },
+    avatarUrl() {
+      return this.activeAuthor.avatarUrl || this.activeAuthor.avatar_url;
+    },
   },
   watch: {
     active: {
@@ -92,7 +95,7 @@ export default {
       <gl-avatar
         v-if="activeAuthor"
         :size="16"
-        :src="activeAuthor.avatar_url"
+        :src="avatarUrl"
         shape="circle"
         class="gl-mr-2"
       />
@@ -115,7 +118,7 @@ export default {
           :value="author.username"
         >
           <div class="d-flex">
-            <gl-avatar :size="32" :src="author.avatar_url" />
+            <gl-avatar :size="32" :src="author.avatar_url || author.avatarUrl" />
             <div>
               <div>{{ author.name }}</div>
               <div>@{{ author.username }}</div>
