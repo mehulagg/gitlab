@@ -23,6 +23,17 @@ module Gitlab
           current.ignore_writes(&block)
         end
 
+        def self.with_session_tracing
+          session = current
+          session_traced = LoadBalancing::Tracing.new(session)
+
+          RequestStore[CACHE_KEY] = session_traced
+
+          yield session_traced
+        ensure
+          RequestStore[CACHE_KEY] = session
+        end
+
         def initialize
           @use_primary = false
           @performed_write = false
@@ -35,7 +46,7 @@ module Gitlab
 
         alias_method :using_primary?, :use_primary?
 
-        def use_primary!
+        def use_primary!(namespace = nil)
           @use_primary = true
         end
 
@@ -53,6 +64,10 @@ module Gitlab
           yield
         ensure
           @ignore_writes = false
+        end
+
+        def writes_ignored?
+          !!@ignore_writes
         end
 
         # Indicate that all the SQL statements from anywhere inside this block

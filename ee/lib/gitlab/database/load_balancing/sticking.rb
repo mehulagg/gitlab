@@ -41,7 +41,7 @@ module Gitlab
         # Sticks to the primary if necessary, otherwise unsticks an object (if
         # it was previously stuck to the primary).
         def self.unstick_or_continue_sticking(namespace, id)
-          Session.current.use_primary! unless all_caught_up?(namespace, id)
+          Session.current.use_primary!(namespace) unless all_caught_up?(namespace, id)
         end
 
         # Starts sticking to the primary for the given namespace and id, using
@@ -50,7 +50,7 @@ module Gitlab
           return unless LoadBalancing.enable?
 
           mark_primary_write_location(namespace, id)
-          Session.current.use_primary!
+          Session.current.use_primary!(namespace)
         end
 
         def self.bulk_stick(namespace, ids)
@@ -62,7 +62,7 @@ module Gitlab
             end
           end
 
-          Session.current.use_primary!
+          Session.current.use_primary!(namespace)
         end
 
         def self.with_primary_write_location
