@@ -1,0 +1,5 @@
+---
+title: Drop unused mirror_data index
+merge_request:
+author:
+type: performance
