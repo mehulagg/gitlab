@@ -22,6 +22,9 @@ export default {
     hasContent() {
       return this.details.some(({ value }) => Boolean(value));
     },
+    placeholderHeight() {
+      return `${this.details.length * 25}px`;
+    },
   },
   methods: {
     isNotLast(index) {
@@ -32,13 +35,13 @@ export default {
 </script>
 
 <template>
-  <div v-if="!hasContent">
+  <div v-if="!hasContent" :style="{ height: placeholderHeight }">
     <gl-skeleton-loader>
       <rect
         v-for="index in details.length"
         :key="index"
-        :y="(index - 1) * 20"
-        height="16"
+        :y="(index - 1) * 24"
+        height="12"
         rx="4"
         width="200"
       />
