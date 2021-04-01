@@ -8,7 +8,7 @@ module Gitlab
       class BackfillRoots
         BASE_QUERY = BackgroundMigration::BackfillTraversalIds::Namespace
           .where('parent_id IS NULL')
-          .where('traversal_ids IS NULL')
+          .where("traversal_ids = '{}'")
         PAUSE_SECONDS = 2
 
         def perform(start_id, end_id, sub_batch_size)
