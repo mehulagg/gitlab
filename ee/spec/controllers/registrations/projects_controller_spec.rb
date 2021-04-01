@@ -82,7 +82,7 @@ RSpec.describe Registrations::ProjectsController do
       it 'tracks the registrations_group_invite experiment as expected', :experiment do
         expect(experiment(:registrations_group_invite))
           .to track(:signup_successful, { property: namespace.id.to_s })
-                .on_any_instance
+                .on_next_instance
                 .with_context(actor: user)
 
         subject

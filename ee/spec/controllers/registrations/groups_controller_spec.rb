@@ -256,7 +256,7 @@ RSpec.describe Registrations::GroupsController do
                   it 'tracks experiment as expected', :experiment do
                     expect(experiment(:registrations_group_invite))
                       .to track(:created, { property: group.id.to_s })
-                            .on_any_instance
+                            .on_next_instance
                             .with_context(actor: user)
 
                     subject
@@ -322,7 +322,7 @@ RSpec.describe Registrations::GroupsController do
 
                   expect(experiment(:registrations_group_invite))
                     .to track(:created, { property: group.id.to_s })
-                          .on_any_instance
+                          .on_next_instance
                           .with_context(actor: user)
 
                   subject
@@ -358,7 +358,7 @@ RSpec.describe Registrations::GroupsController do
               end
               expect(experiment(:registrations_group_invite))
                 .to track(:created, { property: group.id.to_s })
-                      .on_any_instance
+                      .on_next_instance
                       .with_context(actor: user)
 
               subject
