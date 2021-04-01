@@ -4,15 +4,8 @@ module Milestones
   class DestroyService < Milestones::BaseService
     def execute(milestone)
       Milestone.transaction do
-        update_params = { milestone: nil, skip_milestone_email: true }
-
-        milestone.issues.each do |issue|
-          Issues::UpdateService.new(parent, current_user, update_params).execute(issue)
-        end
-
-        milestone.merge_requests.each do |merge_request|
-          MergeRequests::UpdateService.new(parent, current_user, update_params).execute(merge_request)
-        end
+        Issuable::BulkUpdateService.new(parent, current_user, update_params(milestone.issues)).execute('issue')
+        Issuable::BulkUpdateService.new(parent, current_user, update_params(milestone.merge_requests)).execute('merge_request')
 
         log_destroy_event_for(milestone)
 
@@ -30,5 +23,17 @@ module Milestones
         event.save
       end
     end
+
+    private
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def update_params(issuables)
+      {
+        milestone: nil,
+        skip_milestone_email: true,
+        issuable_ids: issuables.pluck(:id)
+      }
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
   end
 end
