@@ -745,6 +745,24 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     end
   end
 
+  describe '.runners_usage' do
+    before do
+      project = build(:project)
+      create_list(:ci_runner, 2, :instance_type)
+      create(:ci_runner, :group)
+      create_list(:ci_runner, 3, :project_type, projects: [project])
+    end
+
+    subject { described_class.runners_usage }
+
+    it 'gathers runner usage counts correctly' do
+      expect(subject[:ci_runners]).to eq(6)
+      expect(subject[:ci_runners_instance_type]).to eq(2)
+      expect(subject[:ci_runners_group_type]).to eq(1)
+      expect(subject[:ci_runners_project_type]).to eq(3)
+    end
+  end
+
   describe '.usage_counters' do
     subject { described_class.usage_counters }
 

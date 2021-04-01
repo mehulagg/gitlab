@@ -98,7 +98,6 @@ module Gitlab
             ci_external_pipelines: count(::Ci::Pipeline.external),
             ci_pipeline_config_auto_devops: count(::Ci::Pipeline.auto_devops_source),
             ci_pipeline_config_repository: count(::Ci::Pipeline.repository_source),
-            ci_runners: count(::Ci::Runner),
             ci_triggers: count(::Ci::Trigger),
             ci_pipeline_schedules: count(::Ci::PipelineSchedule),
             auto_devops_enabled: count(::ProjectAutoDevops.enabled),
@@ -186,6 +185,7 @@ module Gitlab
             merge_requests: count(MergeRequest),
             notes: count(Note)
           }.merge(
+            runners_usage,
             services_usage,
             usage_counters,
             user_preferences_usage,
@@ -198,6 +198,15 @@ module Gitlab
         }
       end
       # rubocop: enable Metrics/AbcSize
+
+      def runners_usage
+        {
+          ci_runners: count(::Ci::Runner),
+          ci_runners_instance_type: count(::Ci::Runner.instance_type),
+          ci_runners_group_type: count(::Ci::Runner.group_type),
+          ci_runners_project_type: count(::Ci::Runner.project_type)
+        }
+      end
 
       def snowplow_event_counts(time_period)
         return {} unless report_snowplow_events?
