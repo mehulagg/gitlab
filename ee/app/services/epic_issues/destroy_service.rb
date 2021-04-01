@@ -6,10 +6,16 @@ module EpicIssues
       result = super
       Epics::UpdateDatesService.new([link.epic]).execute
 
+      track_usage_ping_event if result[:status] == :success
+
       result
     end
 
     private
+
+    def track_usage_ping_event
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_issue_removed(author: current_user)
+    end
 
     def source
       @source ||= link.epic

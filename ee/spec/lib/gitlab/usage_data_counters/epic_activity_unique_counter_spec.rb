@@ -188,6 +188,18 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
     it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
   end
 
+  context 'for removing issue from epic event' do
+    def track_action(params)
+      described_class.track_epic_issue_removed(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_ISSUE_REMOVED }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
+
   context 'for promoting issue to epic' do
     def track_action(params)
       described_class.track_issue_promoted_to_epic(**params)
