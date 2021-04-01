@@ -2330,7 +2330,8 @@ Example response:
 
 ## Get MR diff versions
 
-Get a list of merge request diff versions.
+Get a list of merge request diff versions. For an explanation of the SHAs in the response,
+read [SHAs in the API response](#shas-in-the-api-response).
 
 ```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/versions
@@ -2369,9 +2370,16 @@ Example response:
 }]
 ```
 
+### SHAs in the API response
+
+- `head_commit_sha`: The HEAD commit of the source branch.
+- `base_commit_sha`: The merge-base commit SHA between the source branch and the target branches.
+- `start_commit_sha`: The HEAD commit SHA of the target branch when this version of the diff was created.
+
 ## Get a single MR diff version
 
-Get a single merge request diff version.
+Get a single merge request diff version. For an explanation of the SHAs in the response,
+read [SHAs in the API response](#shas-in-the-api-response).
 
 ```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/versions/:version_id
@@ -2436,12 +2444,6 @@ Example response:
   }]
 }
 ```
-
-### An explanation of the SHAs in the API response
-
-- The `head_commit_sha` in the response represents the HEAD commit of the source branch.
-- The `base_commit_sha` represents the merge-base commit SHA between the source branch and the target branches.
-- The `start_commit_sha` represents the HEAD commit SHA of the target branch when this version of diff was created.
 
 ## Set a time estimate for a merge request
 
