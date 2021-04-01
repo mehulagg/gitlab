@@ -64,6 +64,7 @@ export default {
 
 <template>
   <filtered-search
+    data-qa-selector="epic-filtered-search"
     class="gl-w-full"
     namespace=""
     :tokens="tokens()"
