@@ -78,7 +78,7 @@ describe('RotationsListSectionComponent', () => {
     });
 
     it('render the correct amount of rotation assignees with their related information', () => {
-      expect(findRotationAssignees()).toHaveLength(2);
+      expect(findRotationAssignees()).toHaveLength(4);
       expect(findRotationAssignees().at(0).props().assignee.user).toEqual(
         mockRotations[0].shifts.nodes[0].participant.user,
       );

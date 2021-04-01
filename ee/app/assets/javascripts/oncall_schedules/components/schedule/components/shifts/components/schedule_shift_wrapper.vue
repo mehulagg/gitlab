@@ -1,15 +1,12 @@
 <script>
-import { PRESET_TYPES, SHIFT_WIDTH_CALCULATION_DELAY } from 'ee/oncall_schedules/constants';
+import { SHIFT_WIDTH_CALCULATION_DELAY } from 'ee/oncall_schedules/constants';
 import getShiftTimeUnitWidthQuery from 'ee/oncall_schedules/graphql/queries/get_shift_time_unit_width.query.graphql';
 import getTimelineWidthQuery from 'ee/oncall_schedules/graphql/queries/get_timeline_width.query.graphql';
-import DaysScheduleShift from './days_schedule_shift.vue';
-import { shiftsToRender } from './shift_utils';
-import WeeksScheduleShift from './weeks_schedule_shift.vue';
+import ShiftItem from './shift_item.vue';
 
 export default {
   components: {
-    DaysScheduleShift,
-    WeeksScheduleShift,
+    ShiftItem,
   },
   props: {
     presetType: {
@@ -32,10 +29,6 @@ export default {
   data() {
     return {
       shiftTimeUnitWidth: 0,
-      componentByPreset: {
-        [PRESET_TYPES.DAYS]: DaysScheduleShift,
-        [PRESET_TYPES.WEEKS]: WeeksScheduleShift,
-      },
       timelineWidth: 0,
     };
   },
@@ -55,17 +48,7 @@ export default {
       return { length, lengthUnit };
     },
     shiftsToRender() {
-      return Object.freeze(
-        shiftsToRender(
-          this.rotation.shifts.nodes,
-          this.timeframeItem,
-          this.presetType,
-          this.timeframeIndex,
-        ),
-      );
-    },
-    timeframeIndex() {
-      return this.timeframe.indexOf(this.timeframeItem);
+      return Object.freeze(this.rotation.shifts.nodes);
     },
   },
 };
@@ -73,12 +56,10 @@ export default {
 
 <template>
   <div>
-    <component
-      :is="componentByPreset[presetType]"
-      v-for="(shift, shiftIndex) in shiftsToRender"
+    <shift-item
+      v-for="shift in shiftsToRender"
       :key="shift.startAt"
       :shift="shift"
-      :shift-index="shiftIndex"
       :preset-type="presetType"
       :timeframe-item="timeframeItem"
       :timeframe="timeframe"
