@@ -37,6 +37,10 @@ export default {
       type: Object,
       required: true,
     },
+    timelineWidth: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     currentTimeFrameEnd() {
