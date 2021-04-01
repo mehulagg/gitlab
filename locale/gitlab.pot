@@ -22625,7 +22625,7 @@ msgstr ""
 msgid "Pipelines|Child pipeline"
 msgstr ""
 
-msgid "Pipelines|Clear Runner Caches"
+msgid "Pipelines|Clear runner caches"
 msgstr ""
 
 msgid "Pipelines|Copy trigger token"
@@ -22692,6 +22692,9 @@ msgid "Pipelines|Revoke"
 msgstr ""
 
 msgid "Pipelines|Run Pipeline"
+msgstr ""
+
+msgid "Pipelines|Run pipeline"
 msgstr ""
 
 msgid "Pipelines|Something went wrong while cleaning runners cache."
