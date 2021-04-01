@@ -24116,6 +24116,9 @@ msgstr ""
 msgid "ProjectSettings|Customize this project's badges."
 msgstr ""
 
+msgid "ProjectSettings|Decide which project to be a default target for a new merge request. This setting is only available for a forked project."
+msgstr ""
+
 msgid "ProjectSettings|Determine what happens to the commit history when you merge a merge request."
 msgstr ""
 
@@ -24305,6 +24308,9 @@ msgstr ""
 msgid "ProjectSettings|Supported variables:"
 msgstr ""
 
+msgid "ProjectSettings|Target project"
+msgstr ""
+
 msgid "ProjectSettings|The commit message used when applying merge request suggestions. %{link_start}Learn more about suggestions.%{link_end}"
 msgstr ""
 
@@ -24324,6 +24330,12 @@ msgid "ProjectSettings|To enable this feature, configure pipelines. %{link_start
 msgstr ""
 
 msgid "ProjectSettings|Transfer project"
+msgstr ""
+
+msgid "ProjectSettings|Use the upstream project to be a default target for a new merge request."
+msgstr ""
+
+msgid "ProjectSettings|Use this project to be a default target for a new merge request."
 msgstr ""
 
 msgid "ProjectSettings|Used for every new merge request."
