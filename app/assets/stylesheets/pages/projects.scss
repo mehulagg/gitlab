@@ -839,6 +839,7 @@ pre.light-well {
   }
 
   .form-control {
+    @include gl-font-monospace;
     background-color: $white;
     border-color: $border-color;
     font-size: 14px;
