@@ -85,7 +85,8 @@ Lib/Utils/User.cs
 src/main/java
 ```
 
-In the Cobertura XML, the `filename` attribute in the `class` element assumes the value is the relative path to project's root.
+In the Cobertura XML, the `filename` attribute in the `class` element assumes the value is a
+relative path to project's root.
 
 ```xml
 <class name="packet.name" filename="src/main/java" line-rate="0.0" branch-rate="0.0" complexity="5">
