@@ -37,6 +37,6 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   def down
     return unless Gitlab.dev_env_org_or_com?
 
-    Plan.where(name: ['ultimate_trial', 'premium_trial']).delete_all
+    Plan.where(name: %w(ultimate_trial premium_trial)).delete_all
   end
 end
