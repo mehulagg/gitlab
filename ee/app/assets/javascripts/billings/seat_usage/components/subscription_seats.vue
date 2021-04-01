@@ -185,7 +185,7 @@ export default {
 
       <template #cell(lastActivityTime)="data">
         <span>
-          {{ data.item.user.last_activity_on ? data.item.user.last_activity_on : __('Never') }}
+          {{ data.item.user.last_activity_on ?? __('Never') }}
         </span>
       </template>
 
