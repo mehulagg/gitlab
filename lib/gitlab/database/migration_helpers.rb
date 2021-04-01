@@ -905,7 +905,7 @@ module Gitlab
         end
       end
 
-      # Initializes the conversion of an integer column to bigint
+      # Initializes the conversion of a set of integer columns to bigint
       #
       # It can be used for converting both a Primary Key and any Foreign Keys
       # that may reference it or any other integer column that we may want to
@@ -923,14 +923,14 @@ module Gitlab
       #   Note: this helper is intended to be used in a regular (pre-deployment) migration.
       #
       #   This helper is part 1 of a multi-step migration process:
-      #   1. initialize_conversion_of_integer_to_bigint to create the new column and database triggers
+      #   1. initialize_conversion_of_integer_to_bigint to create the new columns and database trigger
       #   2. backfill_conversion_of_integer_to_bigint to copy historic data using background migrations
       #   3. remaining steps TBD, see #288005
       #
       # table - The name of the database table containing the column
-      # column - The name of the column that we want to convert to bigint.
+      # column - The name, or array of names, of the column(s) that we want to convert to bigint.
       # primary_key - The name of the primary key column (most often :id)
-      def initialize_conversion_of_integer_to_bigint(table, column, primary_key: :id)
+      def initialize_conversion_of_integer_to_bigint(table, columns, primary_key: :id)
         unless table_exists?(table)
           raise "Table #{table} does not exist"
         end
@@ -939,34 +939,36 @@ module Gitlab
           raise "Column #{primary_key} does not exist on #{table}"
         end
 
-        unless column_exists?(table, column)
-          raise "Column #{column} does not exist on #{table}"
-        end
-
         check_trigger_permissions!(table)
 
-        old_column = column_for(table, column)
-        tmp_column = "#{column}_convert_to_bigint"
+        columns = Array.wrap(columns)
+
+        column_definitions = columns.map { |column| column_for(table, column) }
+        temporary_columns = columns.map { |column| "#{column}_convert_to_bigint" }
 
         with_lock_retries do
-          if (column.to_s == primary_key.to_s) || !old_column.null
-            # If the column to be converted is either a PK or is defined as NOT NULL,
-            # set it to `NOT NULL DEFAULT 0` and we'll copy paste the correct values bellow
-            # That way, we skip the expensive validation step required to add
-            #  a NOT NULL constraint at the end of the process
-            add_column(table, tmp_column, :bigint, default: old_column.default || 0, null: false)
-          else
-            add_column(table, tmp_column, :bigint, default: old_column.default)
+          column_definitions.each_with_index do |column, i|
+            temporary_name = temporary_columns[i]
+
+            if (column.name.to_s == primary_key.to_s) || !column.null
+              # If the column to be converted is either a PK or is defined as NOT NULL,
+              # set it to `NOT NULL DEFAULT 0` and we'll copy paste the correct values bellow
+              # That way, we skip the expensive validation step required to add
+              #  a NOT NULL constraint at the end of the process
+              add_column(table, temporary_name, :bigint, default: column.default || 0, null: false)
+            else
+              add_column(table, temporary_name, :bigint, default: column.default)
+            end
           end
 
-          install_rename_triggers(table, column, tmp_column)
+          install_rename_triggers(table, columns, temporary_columns)
         end
       end
 
-      # Backfills the new column used in the conversion of an integer column to bigint using background migrations.
+      # Backfills the new columns used in an integer-to-bigint conversion using background migrations.
       #
       # - This helper should be called from a post-deployment migration.
-      # - In order for this helper to work properly,  the new column must be first initialized with
+      # - In order for this helper to work properly,  the new columns must be first initialized with
       #   the `initialize_conversion_of_integer_to_bigint` helper.
       # - It tracks the scheduled background jobs through Gitlab::Database::BackgroundMigration::BatchedMigration,
       #   which allows a more thorough check that all jobs succeeded in the
@@ -976,12 +978,12 @@ module Gitlab
       #   deployed (including background job changes) before we begin processing the background migration.
       #
       #   This helper is part 2 of a multi-step migration process:
-      #   1. initialize_conversion_of_integer_to_bigint to create the new column and database triggers
+      #   1. initialize_conversion_of_integer_to_bigint to create the new columns and database trigger
       #   2. backfill_conversion_of_integer_to_bigint to copy historic data using background migrations
       #   3. remaining steps TBD, see #288005
       #
       # table - The name of the database table containing the column
-      # column - The name of the column that we want to convert to bigint.
+      # columns - The name, or an array of names, of the column(s) we want to convert to bigint.
       # primary_key - The name of the primary key column (most often :id)
       # batch_size - The number of rows to schedule in a single background migration
       # sub_batch_size - The smaller batches that will be used by each scheduled job
@@ -1001,7 +1003,7 @@ module Gitlab
       #  between the scheduled jobs
       def backfill_conversion_of_integer_to_bigint(
         table,
-        column,
+        columns,
         primary_key: :id,
         batch_size: 20_000,
         sub_batch_size: 1000,
@@ -1016,22 +1018,19 @@ module Gitlab
           raise "Column #{primary_key} does not exist on #{table}"
         end
 
-        unless column_exists?(table, column)
-          raise "Column #{column} does not exist on #{table}"
-        end
+        columns = Array.wrap(columns)
+        temporary_columns = columns.map { |column| "#{column}_convert_to_bigint" }
+        job_arguments = columns.zip(temporary_columns).flatten
 
-        tmp_column = "#{column}_convert_to_bigint"
-
-        unless column_exists?(table, tmp_column)
-          raise 'The temporary column does not exist, initialize it with `initialize_conversion_of_integer_to_bigint`'
+        job_arguments.each do |column|
+          raise "Column #{column} does not exist on #{table}" unless column_exists?(table, column)
         end
 
         batched_migration = queue_batched_background_migration(
           'CopyColumnUsingBackgroundMigrationJob',
           table,
           primary_key,
-          column,
-          tmp_column,
+          *job_arguments,
           job_interval: interval,
           batch_size: batch_size,
           sub_batch_size: sub_batch_size)
