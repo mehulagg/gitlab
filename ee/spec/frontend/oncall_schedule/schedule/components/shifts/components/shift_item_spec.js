@@ -27,11 +27,8 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
     wrapper = shallowMount(ShiftItem, {
       propsData: {
         shift,
-        timeframeItem,
         timeframe,
         presetType: PRESET_TYPES.WEEKS,
-        shiftTimeUnitWidth: CELL_WIDTH,
-        rotationLength: { lengthUnit: 'DAYS' },
         timelineWidth: CELL_WIDTH * 14,
         ...props,
       },
