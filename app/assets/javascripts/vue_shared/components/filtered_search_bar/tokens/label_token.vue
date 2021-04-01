@@ -114,7 +114,12 @@ export default {
     @input="searchLabels"
   >
     <template #view-token="{ inputValue, cssClasses, listeners }">
-      <gl-token data-qa-selector="selected-label" variant="search-value" :class="cssClasses" :style="containerStyle" v-on="listeners"
+      <gl-token
+        data-qa-selector="selected-label"
+        variant="search-value"
+        :class="cssClasses"
+        :style="containerStyle"
+        v-on="listeners"
         >~{{ activeLabel ? getLabelName(activeLabel) : inputValue }}</gl-token
       >
     </template>
