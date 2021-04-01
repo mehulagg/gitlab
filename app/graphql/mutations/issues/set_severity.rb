@@ -12,7 +12,7 @@ module Mutations
         issue = authorized_find!(project_path: project_path, iid: iid)
         project = issue.project
 
-        ::Issues::UpdateService.new(project, current_user, severity: severity)
+        ::Issues::UpdateService.new(project, current_user, { severity: severity })
           .execute(issue)
 
         {

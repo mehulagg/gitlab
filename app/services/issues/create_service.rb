@@ -4,10 +4,18 @@ module Issues
   class CreateService < Issues::BaseService
     include ResolveDiscussions
 
-    def execute(skip_system_notes: false)
-      @request = params.delete(:request)
-      @spam_params = Spam::SpamActionService.filter_spam_params!(params, @request)
+    # NOTE: For Issues::CreateService, we require the spam_params and do not default it to nil, because
+    # spam_checking is likely to be necessary.
+    def initialize(project, user, params, spam_params:)
+      # TODO: We can't assign default values for optional arguments in the signature while still
+      # having spam_params as a named last argument. We should convert the entire constructor
+      # hierarchy to use named arguments by subclassing BaseContainerService instead of BaseService
+      params ||= {}
+      super(project, user, params)
+      @spam_params = spam_params
+    end
 
+    def execute(skip_system_notes: false)
       @issue = BuildService.new(project, current_user, params).execute
 
       filter_resolve_discussion_params
@@ -18,10 +26,10 @@ module Issues
     def before_create(issue)
       Spam::SpamActionService.new(
         spammable: issue,
-        request: request,
+        spam_params: spam_params,
         user: current_user,
         action: :create
-      ).execute(spam_params: spam_params)
+      ).execute
 
       # current_user (defined in BaseService) is not available within run_after_commit block
       user = current_user
@@ -53,10 +61,10 @@ module Issues
 
     private
 
-    attr_reader :request, :spam_params
+    attr_reader :spam_params
 
     def user_agent_detail_service
-      UserAgentDetailService.new(@issue, request)
+      UserAgentDetailService.new(spammable: @issue, spam_params: spam_params)
     end
 
     # Applies label "incident" (creates it if missing) to incident issues.

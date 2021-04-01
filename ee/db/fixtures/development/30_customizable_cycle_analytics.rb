@@ -110,14 +110,14 @@ class Gitlab::Seeder::CustomizableCycleAnalytics
       Issues::UpdateService.new(
         project,
         user,
-        label_ids: [in_dev_label.id]
+        { label_ids: [in_dev_label.id] }
       ).execute(issue)
 
       Timecop.travel(random_duration_in_hours.hours.from_now)
       Issues::UpdateService.new(
         project,
         user,
-        label_ids: [in_review_label.id]
+        { label_ids: [in_review_label.id] }
       ).execute(issue)
     end
   end

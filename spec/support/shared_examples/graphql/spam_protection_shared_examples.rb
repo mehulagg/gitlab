@@ -28,7 +28,7 @@ RSpec.shared_examples 'has spam protection' do
       let(:spam) { false }
       let(:render_captcha) { false }
 
-      it 'does not return a to-level error' do
+      it 'does not return a top-level error' do
         send_request
 
         expect(graphql_errors).to be_blank

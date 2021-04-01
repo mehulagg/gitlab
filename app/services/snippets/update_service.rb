@@ -6,12 +6,12 @@ module Snippets
 
     UpdateError = Class.new(StandardError)
 
-    def execute(snippet)
-      # NOTE: disable_spam_action_service can be removed when the ':snippet_spam' feature flag is removed.
-      disable_spam_action_service = params.delete(:disable_spam_action_service) == true
-      @request = params.delete(:request)
-      @spam_params = Spam::SpamActionService.filter_spam_params!(params, @request)
+    def initialize(project, user = nil, params = {}, spam_params:)
+      super(project, user, params)
+      @spam_params = spam_params
+    end
 
+    def execute(snippet)
       return invalid_params_error(snippet) unless valid_params?
 
       if visibility_changed?(snippet) && !visibility_allowed?(snippet, visibility_level)
@@ -20,13 +20,13 @@ module Snippets
 
       update_snippet_attributes(snippet)
 
-      unless disable_spam_action_service
+      if Feature.enabled?(:snippet_spam)
         Spam::SpamActionService.new(
           spammable: snippet,
-          request: request,
+          spam_params: spam_params,
           user: current_user,
           action: :update
-        ).execute(spam_params: spam_params)
+        ).execute
       end
 
       if save_and_commit(snippet)
@@ -40,7 +40,7 @@ module Snippets
 
     private
 
-    attr_reader :request, :spam_params
+    attr_reader :spam_params
 
     def visibility_changed?(snippet)
       visibility_level && visibility_level.to_i != snippet.visibility_level

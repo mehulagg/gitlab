@@ -44,6 +44,7 @@ RSpec.describe Mutations::Issues::Create do
       project.add_guest(assignee1)
       project.add_guest(assignee2)
       stub_licensed_features(issuable_health_status: true)
+      stub_spam_services
     end
 
     subject { mutation.resolve(**mutation_params) }

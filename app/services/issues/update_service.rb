@@ -4,11 +4,20 @@ module Issues
   class UpdateService < Issues::BaseService
     extend ::Gitlab::Utils::Override
 
+    # NOTE: For Issues::UpdateService, we default the spam_params to nil, because spam_checking is not
+    # necessary in many cases, and we don't want every caller to have to explicitly pass it as nil
+    # to disable spam checking.
+    def initialize(project, user, params, spam_params: nil)
+      # TODO: We can't assign default values for optional arguments in the signature while still
+      # having spam_params as a named last argument. We should convert the entire constructor
+      # hierarchy to use named arguments by subclassing BaseContainerService instead of BaseService
+      params ||= {}
+      super(project, user, params)
+      @spam_params = spam_params
+    end
+
     def execute(issue)
       handle_move_between_ids(issue)
-
-      @request = params.delete(:request)
-      @spam_params = Spam::SpamActionService.filter_spam_params!(params, @request)
 
       change_issue_duplicate(issue)
       move_issue_to_new_project(issue) || clone_issue(issue) || update_task_event(issue) || update(issue)
@@ -36,10 +45,10 @@ module Issues
 
       Spam::SpamActionService.new(
         spammable: issue,
-        request: request,
+        spam_params: spam_params,
         user: current_user,
         action: :update
-      ).execute(spam_params: spam_params)
+      ).execute
     end
 
     def after_update(issue)
@@ -131,7 +140,7 @@ module Issues
 
     private
 
-    attr_reader :request, :spam_params
+    attr_reader :spam_params
 
     def clone_issue(issue)
       target_project = params.delete(:target_clone_project)

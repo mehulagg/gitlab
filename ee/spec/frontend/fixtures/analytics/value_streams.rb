@@ -92,7 +92,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
       Issues::UpdateService.new(
         project,
         user,
-        label_ids: [label.id]
+        { label_ids: [label.id] }
       ).execute(issue)
     end
 
@@ -100,7 +100,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
       Issues::UpdateService.new(
         project,
         user,
-        label_ids: []
+        { label_ids: [] }
       ).execute(issue)
     end
   end

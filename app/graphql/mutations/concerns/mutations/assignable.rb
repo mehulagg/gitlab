@@ -24,7 +24,7 @@ module Mutations
       update_service_class.new(
         resource.project,
         current_user,
-        assignee_ids: assignee_ids(resource, assignee_usernames, operation_mode)
+        { assignee_ids: assignee_ids(resource, assignee_usernames, operation_mode) }
       ).execute(resource)
 
       {

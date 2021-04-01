@@ -189,7 +189,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           Issues::UpdateService.new(
             example_class.project,
             user,
-            label_ids: [example_class.label.id]
+            { label_ids: [example_class.label.id] }
           ).execute(issue)
 
           issue
@@ -199,7 +199,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           Issues::UpdateService.new(
             example_class.project,
             user,
-            label_ids: []
+            { label_ids: [] }
           ).execute(resource)
         end
 
@@ -221,7 +221,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           Issues::UpdateService.new(
             example_class.project,
             user,
-            label_ids: [example_class.label.id]
+            { label_ids: [example_class.label.id] }
           ).execute(issue)
 
           issue
@@ -231,7 +231,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           Issues::UpdateService.new(
             example_class.project,
             user,
-            label_ids: [example_class.label.id, example_class.other_label.id]
+            { label_ids: [example_class.label.id, example_class.other_label.id] }
           ).execute(issue)
         end
 
@@ -271,7 +271,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           Issues::UpdateService.new(
             example_class.project,
             user,
-            label_ids: [example_class.label.id]
+            { label_ids: [example_class.label.id] }
           ).execute(issue)
         end
 

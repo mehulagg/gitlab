@@ -132,12 +132,14 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def create
-    create_params = issue_create_params.merge(spammable_params).merge(
+    extract_legacy_spam_params_to_headers
+    create_params = issue_create_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
-    service = ::Issues::CreateService.new(project, current_user, create_params)
+    spam_params = ::Spam::SpamParams.new_from_request(request: request)
+    service = ::Issues::CreateService.new(project, current_user, create_params, spam_params: spam_params)
     @issue = service.execute
 
     create_vulnerability_issue_feedback(issue)
@@ -164,7 +166,7 @@ class Projects::IssuesController < Projects::ApplicationController
       new_project = Project.find(params[:move_to_project_id])
       return render_404 unless issue.can_move?(current_user, new_project)
 
-      @issue = ::Issues::UpdateService.new(project, current_user, target_project: new_project).execute(issue)
+      @issue = ::Issues::UpdateService.new(project, current_user, { target_project: new_project }).execute(issue)
     end
 
     respond_to do |format|
@@ -346,8 +348,10 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def update_service
-    update_params = issue_params.merge(spammable_params)
-    ::Issues::UpdateService.new(project, current_user, update_params)
+    extract_legacy_spam_params_to_headers
+    update_params = issue_params
+    spam_params = ::Spam::SpamParams.new_from_request(request: request)
+    ::Issues::UpdateService.new(project, current_user, update_params, spam_params: spam_params)
   end
 
   def finder_type

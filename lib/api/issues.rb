@@ -256,7 +256,7 @@ module API
         begin
           issue = ::Issues::CreateService.new(user_project,
                                               current_user,
-                                              issue_params.merge(request: request, api: true)).execute
+                                              issue_params.merge(request: request)).execute
 
           if issue.spam?
             render_api_error!({ error: 'Spam detected' }, 400)
@@ -295,7 +295,7 @@ module API
 
         issue.system_note_timestamp = params[:updated_at]
 
-        update_params = declared_params(include_missing: false).merge(request: request, api: true)
+        update_params = declared_params(include_missing: false).merge(request: request)
 
         update_params = convert_parameters_from_legacy_format(update_params)
 

@@ -5,9 +5,8 @@ module Spam
     include AkismetMethods
     include SpamConstants
 
-    def initialize(user:, target:, request:, options:, context: {})
+    def initialize(user:, target:, options:, context: {})
       @target = target
-      @request = request
       @user = user
       @options = options
       @verdict_params = assemble_verdict_params(context)
@@ -28,7 +27,7 @@ module Spam
 
     private
 
-    attr_reader :user, :target, :request, :options, :verdict_params
+    attr_reader :user, :target, :options, :verdict_params
 
     def akismet_verdict
       if akismet.spam?

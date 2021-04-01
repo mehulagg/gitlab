@@ -14,7 +14,8 @@ module Mutations
         issue = authorized_find!(project_path: project_path, iid: iid)
         project = issue.project
 
-        ::Issues::UpdateService.new(project, current_user, weight: weight)
+        # TODO: Switch constructor hierarchy to use named arguments, in order to avoid needing to pass spam_params: nil
+        ::Issues::UpdateService.new(project, current_user, { weight: weight }, spam_params: nil)
           .execute(issue)
 
         {
