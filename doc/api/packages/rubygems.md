@@ -17,7 +17,7 @@ package registry, see the [Ruby gems registry documentation](../../user/packages
 
 NOTE:
 These endpoints do not adhere to the standard API authentication methods.
-See [Ruby gems registry documentation](../../user/packages/rubygems_registry/index.md)
+See the [Ruby gems registry documentation](../../user/packages/rubygems_registry/index.md)
 for details on which headers and token types are supported.
 
 ## Enable the Ruby gems API
@@ -112,16 +112,16 @@ Download a gem:
 GET projects/:id/packages/rubygems/gems/:file_name
 ```
 
-| Attribute | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `id`              | string | yes | The ID or full path of the project. |
-| `file_name`  | string | yes | The name of the `.gem` file. |
+| Attribute    | Type   | Required | Description |
+| ------------ | ------ | -------- | ----------- |
+| `id`         | string | yes      | The ID or full path of the project. |
+| `file_name`  | string | yes      | The name of the `.gem` file. |
 
 ```shell
 curl --header "Authorization:<personal_access_token>" "https://gitlab.example.com/api/v4/projects/1/packages/rubygems/gems/my_gem-1.0.0.gem"
 ```
 
-To write the output to file:
+Write the output to file:
 
 ```shell
 curl --header "Authorization:<personal_access_token>" "https://gitlab.example.com/api/v4/projects/1/packages/rubygems/gems/my_gem-1.0.0.gem" >> my_gem-1.0.0.gem
@@ -133,23 +133,25 @@ This writes the downloaded file to `my_gem-1.0.0.gem` in the current directory.
 
 > Introduced in GitLab 13.10.
 
-Fetch a list of dependencies for a given list of gems.
+Fetch a list of dependencies for a list of gems:
 
 ```plaintext
 GET projects/:id/packages/rubygems/api/v1/dependencies
 ```
 
-| Attribute | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `id` | string | yes | The ID or full path of the project. |
-| `gems` | string | no | Comma separated list of gems to fetch dependencies for. |
+| Attribute | Type   | Required | Description |
+| --------- | ------ | -------- | ----------- |
+| `id`      | string | yes      | The ID or full path of the project. |
+| `gems`    | string | no       | Comma-separated list of gems to fetch dependencies for. |
 
 ```shell
 curl --header "Authorization:<personal_access_token>" "https://gitlab.example.com/api/v4/projects/1/packages/rubygems/api/v1/dependencies?gems=my_gem,foo"
 ```
 
-This endpoint returns a marshalled array of hashes for all versions of the requested gems. Since the response is marshalled, it can be stored in a file, or if Ruby
-is installed, it can be read using the following Ruby command. You must have your [credentials set in `~/.gem/credentials`](../../user/packages/rubygems_registry/index.md#authenticate-with-a-personal-access-token-or-deploy-token) for this to work.
+This endpoint returns a marshalled array of hashes for all versions of the requested gems. Since the
+response is marshalled, you can store it in a file. If Ruby is installed, you can use the following
+Ruby command to read the response. For this to work, you must
+[set your credentials in `~/.gem/credentials`](../../user/packages/rubygems_registry/index.md#authenticate-with-a-personal-access-token-or-deploy-token):
 
 ```shell
 $ ruby -ropen-uri -rpp -e \
@@ -192,9 +194,9 @@ Upload a gem:
 POST projects/:id/packages/rubygems/api/v1/gems
 ```
 
-| Attribute | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `id` | string | yes | The ID or full path of the project. |
+| Attribute | Type   | Required | Description |
+| --------- | ------ | -------- | ----------- |
+| `id`      | string | yes      | The ID or full path of the project. |
 
 ```shell
 curl --request POST \

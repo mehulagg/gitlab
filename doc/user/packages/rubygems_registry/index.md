@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Ruby gems in the Package Registry
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/803) in [GitLab Free](https://about.gitlab.com/pricing/) 13.10.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/803) in [GitLab Free](https://about.gitlab.com/pricing/) 13.10.
 
 Publish Ruby gems in your project’s Package Registry. Then install the
 packages whenever you need to use them as a dependency.
