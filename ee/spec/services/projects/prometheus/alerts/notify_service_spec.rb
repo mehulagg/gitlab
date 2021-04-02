@@ -23,6 +23,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
     let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
     let(:payload_alert_firing) { payload_raw['alerts'].first }
     let(:token) { 'token' }
+    let(:source) { 'Prometheus' }
 
     context 'with environment specific clusters' do
       let(:prd_cluster) do
@@ -51,11 +52,11 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
       context 'without token' do
         let(:token_input) { nil }
 
-        it_behaves_like 'Alert Notification Service sends notification email'
+        include_examples 'processes one firing and one resolved prometheus alerts'
       end
 
       context 'with token' do
-        it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+        it_behaves_like 'alerts service responds with an error', :unauthorized
       end
     end
   end
