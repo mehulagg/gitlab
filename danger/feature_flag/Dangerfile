@@ -69,7 +69,8 @@ if feature_flag_file_added_or_removed?
     gitlab.api.update_merge_request(
       gitlab.mr_json['project_id'],
       gitlab.mr_json['iid'],
-      title: new_mr_title
+      title: new_mr_title,
+      add_labels: 'feature flag'
     )
     gitlab.api.post("/projects/#{gitlab.mr_json['project_id']}/merge_requests/#{gitlab.mr_json['iid']}/pipelines")
   else
