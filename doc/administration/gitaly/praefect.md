@@ -947,6 +947,8 @@ They reflect configuration defined for this instance of Praefect.
 > - Entered [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) in GitLab 13.2, disabled by default.
 > - From GitLab 13.3, disabled unless primary-wins reference transactions strategy is disabled.
 > - From GitLab 13.4, enabled by default.
+> - From GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable trong consistency.
+> - From GitLab 13.6, primary-wins voting strategy and `gitaly_reference_transactions_primary_wins` feature flag removed from the source code.
 
 Praefect guarantees eventual consistency by replicating all writes to secondary nodes
 after the write to the primary Gitaly node has happened.
@@ -958,18 +960,12 @@ information, see the [strong consistency epic](https://gitlab.com/groups/gitlab-
 
 To enable strong consistency:
 
-- In GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable
-  strong consistency.
-- In GitLab 13.4 and later, the strong consistency voting strategy has been
-  improved. Instead of requiring all nodes to agree, only the primary and half
-  of the secondaries need to agree. This strategy is enabled by default. To
-  disable it and continue using the primary-wins strategy, enable the
-  `:gitaly_reference_transactions_primary_wins` feature flag.
-- In GitLab 13.3, reference transactions are enabled by default with a
-  primary-wins strategy. This strategy causes all transactions to succeed for
-  the primary and thus does not ensure strong consistency. To enable strong
-  consistency, disable the `:gitaly_reference_transactions_primary_wins`
-  feature flag.
+- In GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable strong consistency.
+- In GitLab 13.4 and later, the strong consistency voting strategy has been improved and enabled by default.
+  Instead of requiring all nodes to agree, only the primary and half of the secondaries need to agree.
+- In GitLab 13.3, reference transactions are enabled by default with a primary-wins strategy.
+  This strategy causes all transactions to succeed for the primary and thus does not ensure strong consistency.
+  To enable strong consistency, disable the `:gitaly_reference_transactions_primary_wins` feature flag.
 - In GitLab 13.2, enable the `:gitaly_reference_transactions` feature flag.
 - In GitLab 13.1, enable the `:gitaly_reference_transactions` and `:gitaly_hooks_rpc`
   feature flags.
@@ -981,6 +977,9 @@ In the Rails console, enable or disable the flags as required. For example:
 Feature.enable(:gitaly_reference_transactions)
 Feature.disable(:gitaly_reference_transactions_primary_wins)
 ```
+
+NOTE:
+If _unset_ in Rails, Praefect will use the default value for the flags, which depends on the GitLab version in use.
 
 To monitor strong consistency, you can use the following Prometheus metrics:
 
@@ -1345,3 +1344,4 @@ Here are common errors and potential causes:
   - **GRPC::Unavailable (14:all SubCons are in TransientFailure...)**
     - Praefect cannot reach one or more of its child Gitaly nodes. Try running
       the Praefect connection checker to diagnose.
+
