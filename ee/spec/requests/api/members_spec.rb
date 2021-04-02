@@ -504,11 +504,15 @@ RSpec.describe API::Members do
     end
 
     describe 'GET /groups/:id/billable_members/:user_id/memberships' do
-      it 'returns memberships for the billable group member' do
-        group = create(:group, name: "My Root Group")
-        owner = create(:user)
-        developer = create(:user)
+      let_it_be(:group) { create(:group, name: "My Root Group") }
+      let_it_be(:owner) { create(:user) }
+
+      before_all do
         group.add_owner(owner)
+      end
+
+      it 'returns memberships for the billable group member' do
+        developer = create(:user)
         group.add_developer(developer)
         membership = developer.members.first
 
@@ -527,10 +531,6 @@ RSpec.describe API::Members do
       end
 
       it 'returns not found when the user does not exist' do
-        group = create(:group, name: "My Root Group")
-        owner = create(:user)
-        group.add_owner(owner)
-
         get api("/groups/#{group.id}/billable_members/0/memberships", owner)
 
         expect(response).to have_gitlab_http_status(:not_found)
@@ -538,10 +538,7 @@ RSpec.describe API::Members do
       end
 
       it 'returns not found when the group does not exist' do
-        group = create(:group, name: "My Root Group")
-        owner = create(:user)
         developer = create(:user)
-        group.add_owner(owner)
         group.add_developer(developer)
 
         get api("/groups/0/billable_members/#{developer.id}/memberships", owner)
@@ -551,11 +548,8 @@ RSpec.describe API::Members do
       end
 
       it 'returns not found when the user is not billable' do
-        group = create(:group, name: "My Root Group")
         create(:gitlab_subscription, :ultimate, namespace: group)
-        owner = create(:user)
         guest = create(:user)
-        group.add_owner(owner)
         group.add_guest(guest)
 
         get api("/groups/#{group.id}/billable_members/#{guest.id}/memberships", owner)
@@ -565,10 +559,7 @@ RSpec.describe API::Members do
       end
 
       it 'returns bad request if the user cannot admin group members' do
-        group = create(:group, name: "My Root Group")
-        owner = create(:user)
         developer = create(:user)
-        group.add_owner(owner)
         group.add_developer(developer)
 
         get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", developer)
@@ -578,11 +569,8 @@ RSpec.describe API::Members do
       end
 
       it 'returns bad request if the group is a subgroup' do
-        group = create(:group, name: "My Root Group")
         subgroup = create(:group, name: "My SubGroup", parent: group)
-        owner = create(:user)
         developer = create(:user)
-        subgroup.add_owner(owner)
         subgroup.add_developer(developer)
 
         get api("/groups/#{subgroup.id}/billable_members/#{developer.id}/memberships", owner)
@@ -592,11 +580,8 @@ RSpec.describe API::Members do
       end
 
       it 'excludes memberships outside the requested group hierarchy' do
-        group = create(:group, name: "My Root Group")
         other_group = create(:group, name: "My Other Group")
-        owner = create(:user)
         developer = create(:user)
-        group.add_owner(owner)
         group.add_developer(developer)
         other_group.add_developer(developer)
 
@@ -607,11 +592,8 @@ RSpec.describe API::Members do
       end
 
       it 'includes subgroup memberships' do
-        group = create(:group, name: "My Root Group")
         subgroup = create(:group, name: "My SubGroup", parent: group)
-        owner = create(:user)
         developer = create(:user)
-        group.add_owner(owner)
         subgroup.add_developer(developer)
 
         get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
@@ -621,11 +603,8 @@ RSpec.describe API::Members do
       end
 
       it 'includes project memberships' do
-        group = create(:group, name: "My Root Group")
         project = create(:project, name: "My Project", group: group)
-        owner = create(:user)
         developer = create(:user)
-        group.add_owner(owner)
         project.add_developer(developer)
 
         get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
