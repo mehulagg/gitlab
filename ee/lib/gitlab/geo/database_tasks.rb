@@ -114,7 +114,7 @@ module Gitlab
               ['up', version, '********** NO FILE **********']
             end
             # output
-            puts "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
+            puts "\ndatabase: #{ActiveRecord::Base.connection_db_config.database}\n\n"
             puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
             puts "-" * 50
             (db_list + file_list).sort_by { |_, version, _| version }.each do |status, version, name|
