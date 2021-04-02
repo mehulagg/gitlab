@@ -182,3 +182,7 @@ $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradi
     transform: translateX(-50%);
   }
 }
+
+.rotation-assignee {
+  @include gl-text-white;
+}

@@ -4,6 +4,7 @@ import { uniqueId } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
+import {LIGHT_TO_DARK_MODE_SHADE_MAPPING} from '../../../constants';
 
 export const SHIFT_WIDTHS = {
   md: 100,
@@ -51,7 +52,10 @@ export default {
       return this.assignee.user.username;
     },
     chevronClass() {
-      return `gl-bg-data-viz-${this.assignee.colorPalette}-${this.assignee.colorWeight}`;
+      const isDarkMode = true;
+      const {colorWeight, colorPalette} = this.assignee;
+      const adjustedWeight = isDarkMode ? LIGHT_TO_DARK_MODE_SHADE_MAPPING[colorWeight] : colorWeight;
+      return `gl-bg-data-viz-${colorPalette}-${adjustedWeight}`;
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
@@ -84,7 +88,7 @@ export default {
       :class="[chevronClass, $options.ROTATION_CENTER_CLASS]"
       data-testid="rotation-assignee"
     >
-      <div class="gl-text-white" :class="$options.ROTATION_CENTER_CLASS">
+      <div class="rotation-assignee" :class="$options.ROTATION_CENTER_CLASS">
         <gl-avatar v-if="!hasRotationMobileViewAvatar" :src="assignee.user.avatarUrl" :size="16" />
         <span
           v-if="!hasRotationMobileViewText"
