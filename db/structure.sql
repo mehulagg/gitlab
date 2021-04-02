@@ -24342,6 +24342,8 @@ CREATE INDEX tmp_index_on_security_findings_scan_id ON security_findings USING b
 
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
 
+CREATE INDEX todos_on_user_id_where_status_pending_or_done ON todos USING btree (user_id) WHERE ((state)::text = ANY ('{done,pending}'::text[]));
+
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_architectures_on_distribution_id_and_name ON packages_debian_group_architectures USING btree (distribution_id, name);
 
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_components_on_distribution_id_and_name ON packages_debian_group_components USING btree (distribution_id, name);
