@@ -24,7 +24,7 @@ export const i18n = {
   deleteIntegration: s__('AlertSettings|Delete integration'),
   editIntegration: s__('AlertSettings|Edit integration'),
   title: s__('AlertsIntegrations|Current integrations'),
-  emptyState: s__('AlertsIntegrations|No integrations have been added yet'),
+  emptyState: s__('AlertsIntegrations|No integrations have been added yet.'),
   status: {
     enabled: {
       name: __('Enabled'),
