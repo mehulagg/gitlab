@@ -4723,7 +4723,7 @@ msgstr ""
 msgid "BambooService|The user with API access to the Bamboo server."
 msgstr ""
 
-msgid "BambooService|Use Atlassian Bamboo to run CI/CD pipelines. You must set up automatic revision labeling and a repository trigger in Bamboo."
+msgid "BambooService|Use Atlassian Bamboo to run CI/CD pipelines. You must set up automatic revision labeling and a repository trigger in Bamboo. %{docs_link}"
 msgstr ""
 
 msgid "BambooService|Use the Atlassian Bamboo CI/CD server with GitLab."
