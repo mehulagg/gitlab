@@ -1,10 +1,9 @@
-#import "../fragments/project.fragment.graphql"
-
-query group($fullPath: ID!) {
+query groupProjects($fullPath: ID!) {
   group(fullPath: $fullPath) {
     projects(includeSubgroups: true) {
       nodes {
-        ...Project
+        id
+        name
       }
     }
   }
