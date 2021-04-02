@@ -46,7 +46,12 @@ module EE
       def after_update(merge_request)
         super
 
-        ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(merge_request.id)
+        # We shouldn't attempt to queue async workers while in a transaction, as
+        #   workers can't recognize any potential transaction rollback.
+        #
+        unless ActiveRecord::Base.connection.transaction_open?
+          ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(merge_request.id)
+        end
       end
 
       override :create_branch_change_note

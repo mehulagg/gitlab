@@ -323,10 +323,22 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
     end
 
-    it 'attempts to update code owner approval rules' do
-      expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).to receive(:perform_async)
+    context 'when called outside an ActiveRecord transaction' do
+      it 'attempts to update code owner approval rules' do
+        allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
+        expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).to receive(:perform_async)
 
-      update_merge_request(title: 'Title')
+        update_merge_request(title: 'Title')
+      end
+    end
+
+    context 'when called inside an ActiveRecord transaction' do
+      it 'does not attempt to update code owner approval rules' do
+        allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(true)
+        expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).not_to receive(:perform_async)
+
+        update_merge_request(title: 'Title')
+      end
     end
 
     context 'updating assignee_ids' do
