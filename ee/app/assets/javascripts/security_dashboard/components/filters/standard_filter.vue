@@ -10,10 +10,11 @@ export default {
       type: Object,
       required: true,
     },
-    showSearchBox: {
-      type: Boolean,
+    // Number of options that must exist for the search box to show.
+    searchBoxShowThreshold: {
+      type: Number,
       required: false,
-      default: false,
+      default: 20,
     },
   },
   data() {
@@ -61,6 +62,9 @@ export default {
       }
 
       return hasAllId ? [] : this.filter.defaultOptions;
+    },
+    showSearchBox() {
+      return this.options.length >= this.searchBoxShowThreshold;
     },
   },
   watch: {
