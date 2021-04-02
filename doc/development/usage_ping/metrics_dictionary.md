@@ -27,6 +27,7 @@ Each metric is defined in a separate YAML file consisting of a number of fields:
 | Field               | Required | Additional information                                         |
 |---------------------|----------|----------------------------------------------------------------|
 | `key_path`          | yes      | JSON key path for the metric, location in Usage Ping payload.  |
+| `name`              | no       | Metric name suggestion, that can be used to replace last part of `key_path` | 
 | `description`       | yes      |                                                                |
 | `product_section`   | yes      | The [section](https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/data/sections.yml). |
 | `product_stage`     | no       | The [stage](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml) for the metric. |
@@ -52,6 +53,66 @@ Metric definitions can have one of the following statuses:
   status for newly added metrics awaiting inclusion in a new release.
 - `not_used`: Metric is not used in any dashboard.
 - `deprecated`: Metric is deprecated and possibly planned to be removed.
+
+### Metric name
+
+In order to improve metric discoverability by wider audience each metric that 
+has with instrumentation added at appointed `key_path` will get `name` attribute 
+filled with the name suggestion, corresponding to the metric `data_source` and instrumentation.
+
+Metric name suggestions can contains two types of elements:
+1. User input prompts - enclosed by `<>`, this pieces are expected to be replaced by users
+creating metrics YAML file
+1. Fixed suggestion - plain text parts that are generated according to well defined algorithm, based on underlying instrumentation and should not be changed
+
+### Metric name suggestion examples
+
+**Metric with `data_source: database`**
+
+For metric instrumented with SQL
+```sql
+SELECT COUNT(DISTINCT user_id) FROM clusters WHERE clusters.management_project_id IS NOT NULL
+```
+Suggested name would look like:
+`count_distinct_user_id_from_<adjective describing: '(clusters.management_project_id IS NOT NULL)'>_clusters`
+
+Part `<adjective describing: '(clusters.management_project_id IS NOT NULL)'>` is a prompt that is expected to be replaced with adjective that best represent filter conditions,
+for example `project_managment`. So final metric name, would look like: `count_distinct_user_id_from_project_managment_clusters`
+
+For metric instrumented with SQL 
+```sql
+SELECT COUNT(DISTINCT clusters.user_id) 
+FROM clusters_applications_helm 
+INNER JOIN clusters ON clusters.id = clusters_applications_helm.cluster_id 
+WHERE clusters_applications_helm.status IN (3, 5)
+```
+Suggested name would look like:
+`count_distinct_user_id_from_<adjective describing: '(clusters_applications_helm.status IN (3, 5))'>_clusters_<with>_<adjective describing: '(clusters_applications_helm.status IN (3, 5))'>_clusters_applications_helm`
+
+Part `<adjective describing: '(clusters_applications_helm.status IN (3, 5))'>` is a prompt that is expected to be replaced with adjective that best represent filter conditions.
+In above example, in first place prompt is not relevant, and user can decided to skip it all together, while it's second occurrence corresponds with `available` scope defined in `Clusters::Concerns::ApplicationStatus`
+and it can be used as right adjective to replace prompt. 
+
+Part `<with>` represents suggested conjunction for joined relation suggested name. Person documenting metric can use it by simple removing surrounding `<>` or decided to use different conjunction for example `having` or `including` etc.
+
+Final metric name, could look like: `count_distinct_user_id_from_clusters_with_available_clusters_applications_helm`
+
+**Metric with `data_source: redis` or `redis_hll`**
+
+For metrics instrumented with Redis based counter suggested name would include only single prompt that should be replaced
+by person working with metrics YAML.
+
+Prompt: `<please fill metric name, suggested format is: who_is_doing_what eg: users_creating_epics>`
+
+It is recommended that metric name would follow format of `who_is_doing_what` eg: `user_creating_epics`, `users_triggering_security_scans` etc.
+
+**Metric with `data_source: prometheus` or `ruby`**
+
+For metrics instrumented with Prometheus or Ruby suggested name would include only single prompt that should be replaced
+by person working with metrics YAML.
+
+Prompt: `<please fill metric name>`
+ 
 
 ### Example YAML metric definition
 
