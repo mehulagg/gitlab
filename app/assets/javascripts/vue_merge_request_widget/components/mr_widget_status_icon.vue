@@ -46,6 +46,7 @@ export default {
       category="primary"
       variant="success"
       data-testid="disabled-merge-button"
+      data-qa-selector="disabled_merge_button"
       :disabled="true"
     >
       {{ s__('mrWidget|Merge') }}

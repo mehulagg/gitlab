@@ -170,6 +170,7 @@ export default {
         :disabled="isMakingRequest"
         :loading="isMakingRequest"
         class="js-remove-wip gl-ml-3"
+        data-qa-selector="mark_as_ready_button"
         @click="handleRemoveWIP"
       >
         {{ s__('mrWidget|Mark as ready') }}

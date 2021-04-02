@@ -20,6 +20,14 @@ module QA
           element :file_name_content
         end
 
+        view 'app/views/shared/issuable/form/_title.html.haml' do
+          element :mark_as_draft_link
+        end
+
+        view 'app/views/shared/issuable/_form.html.haml' do
+          element :save_changes_button
+        end
+
         def create_merge_request
           click_element(:issuable_create_button, Page::MergeRequest::Show)
         end
@@ -35,6 +43,14 @@ module QA
 
         def has_file?(file_name)
           has_element?(:file_name_content, text: file_name)
+        end
+
+        def mark_as_draft!
+          click_element(:mark_as_draft_link)
+        end
+
+        def save_changes!
+          click_element(:save_changes_button)
         end
       end
     end

@@ -110,6 +110,14 @@ module QA
         view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_merged.vue' do
           element :cherry_pick_button
         end
+        
+        view 'app/assets/javascripts/vue_merge_request_widget/components/mr_widget_status_icon.vue' do
+          element :disabled_merge_button
+        end
+
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/work_in_progress.vue' do
+          element :mark_as_ready_button
+        end
 
         def start_review
           click_element(:start_review_button)
@@ -367,6 +375,14 @@ module QA
         def cherry_pick!
           click_element(:cherry_pick_button, Page::Component::CommitModal)
           click_element(:submit_commit_button)
+        end
+
+        def has_merge_disabled?
+          has_element?(:disabled_merge_button)
+        end
+
+        def mark_as_ready!
+          click_element(:mark_as_ready_button)
         end
       end
     end

@@ -3,7 +3,7 @@
 - form = local_assigns.fetch(:form)
 - no_issuable_templates = issuable_templates(ref_project, issuable.to_ability_name).empty?
 - div_class = no_issuable_templates ? 'col-sm-10' : 'col-sm-7 col-lg-8'
-- toggle_wip_link_start = '<a href="" class="js-toggle-wip">'
+- toggle_wip_link_start = '<a href="" data-qa-selector="mark_as_draft_link" class="js-toggle-wip">'
 - toggle_wip_link_end = '</a>'
 - draft_snippet = '<code>Draft:</code>'.html_safe
 - wip_snippet = '<code>WIP:</code>'.html_safe
