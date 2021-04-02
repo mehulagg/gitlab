@@ -36,7 +36,9 @@ module Gitlab
     EXTRA_SCHEMAS = [DYNAMIC_PARTITIONS_SCHEMA, STATIC_PARTITIONS_SCHEMA].freeze
 
     def self.config
-      ActiveRecord::Base.configurations[Rails.env]
+      configs = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env)
+      default_config_hash = configs.first&.configuration_hash || {}
+      default_config_hash.with_indifferent_access
     end
 
     def self.username
@@ -207,9 +209,9 @@ module Gitlab
       env = Rails.env
       original_config = ActiveRecord::Base.configurations.to_h
 
-      env_config = original_config[env].merge('pool' => pool_size)
-      env_config['host'] = host if host
-      env_config['port'] = port if port
+      env_config = original_config[env].merge(pool: pool_size)
+      env_config[:host] = host if host
+      env_config[:port] = port if port
 
       config = ActiveRecord::DatabaseConfigurations.new(
         original_config.merge(env => env_config)
