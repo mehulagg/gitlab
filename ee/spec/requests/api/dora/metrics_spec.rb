@@ -10,6 +10,10 @@ RSpec.describe API::Dora::Metrics do
     let_it_be(:production) { create(:environment, :production, project: project) }
     let_it_be(:maintainer) { create(:user) }
     let_it_be(:guest) { create(:user) }
+    let_it_be(:first_daily_metric) { create(:dora_daily_metrics, deployment_frequency: 1, environment: production, date: 1.month.ago.to_date) }
+    let_it_be(:second_daily_metric) { create(:dora_daily_metrics, deployment_frequency: 2, environment: production, date: 2.month.ago.to_date) }
+    let_it_be(:third_daily_metric) { create(:dora_daily_metrics, deployment_frequency: 1, environment: production, date: 4.month.ago.to_date) }
+
     let(:url) { "/projects/#{project.id}/dora/metrics" }
     let(:params) { { metric: :deployment_frequency } }
     let(:user) { maintainer }
@@ -23,8 +27,6 @@ RSpec.describe API::Dora::Metrics do
     before_all do
       project.add_maintainer(maintainer)
       project.add_guest(guest)
-      create(:dora_daily_metrics, deployment_frequency: 1, environment: production, date: '2021-01-01')
-      create(:dora_daily_metrics, deployment_frequency: 2, environment: production, date: '2021-01-02')
     end
 
     before do
@@ -35,8 +37,10 @@ RSpec.describe API::Dora::Metrics do
       subject
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response).to eq([{ '2021-01-01' => 1, 'date' => '2021-01-01', 'value' => 1 },
-                                   { '2021-01-02' => 2, 'date' => '2021-01-02', 'value' => 2 }])
+      expect(json_response).to eq([
+        { second_daily_metric.date.to_s => 2, 'date' => second_daily_metric.date.to_s, 'value' => 2 },
+        { first_daily_metric.date.to_s => 1, 'date' => first_daily_metric.date.to_s, 'value' => 1 }
+      ])
     end
 
     context 'when user is guest' do
