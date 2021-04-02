@@ -12,7 +12,7 @@ module Autocomplete
 
     attr_reader :current_user, :project, :group, :search, :skip_users,
                 :author_id, :todo_filter, :todo_state_filter,
-                :filter_by_current_user
+                :filter_by_current_user, :participant_ids
 
     def initialize(params:, current_user:, project:, group:)
       @current_user = current_user

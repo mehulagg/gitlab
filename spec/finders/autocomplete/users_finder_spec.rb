@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Autocomplete::UsersFinder do
   describe '#execute' do
-    let!(:user1) { create(:user, username: 'johndoe') }
+    let!(:user1) { create(:user, username: 'john-doe') }
     let!(:user2) { create(:user, :blocked, username: 'notsorandom') }
     let!(:external_user) { create(:user, :external) }
     let!(:omniauth_user) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
@@ -70,9 +70,21 @@ RSpec.describe Autocomplete::UsersFinder do
     it { is_expected.to match_array([user1, external_user, omniauth_user, current_user]) }
 
     context 'when filtered by search' do
-      let(:params) { { search: 'johndoe' } }
+      let(:params) { { search: user1.username } }
 
       it { is_expected.to match_array([user1]) }
+
+      context 'when the author matches the search' do
+        let(:author) { create(:user, username: "z#{user1.username}z") }
+
+        before do
+          params[:author_id] = author.id
+        end
+
+        it 'returns the author first' do
+          is_expected.to eq [author, user1]
+        end
+      end
     end
 
     context 'when filtered by skip_users' do
