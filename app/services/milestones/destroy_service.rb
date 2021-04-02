@@ -3,6 +3,8 @@
 module Milestones
   class DestroyService < Milestones::BaseService
     def execute(milestone)
+      milestone_mr_ids = milestone.merge_requests.to_a.collect(&:id)
+
       Milestone.transaction do
         update_params = { milestone: nil, skip_milestone_email: true }
 
@@ -18,6 +20,14 @@ module Milestones
 
         milestone.destroy
       end
+
+      if milestone.destroyed?
+        milestone_mr_ids.each do |mr_id|
+          ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(mr_id)
+        end
+      end
+
+      milestone
     end
 
     def log_destroy_event_for(milestone)
