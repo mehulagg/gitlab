@@ -22,61 +22,38 @@ of the configured mechanisms.
 
 ## Supported Providers
 
-This is a list of the current supported OmniAuth providers. Before proceeding
+This is a list of the current supported OmniAuth providers with a mapping to the
+OmniAuth provider name needed to configure some options. Before proceeding
 on each provider's documentation, make sure to first read this document as it
 contains some settings that are common for all providers.
 
-- [Atlassian Crowd](../administration/auth/crowd.md)
-- [Atlassian](../administration/auth/atlassian.md)
-- [Auth0](auth0.md)
-- [Authentiq](../administration/auth/authentiq.md)
-- [AWS Cognito](../administration/auth/cognito.md)
-- [Azure](azure.md)
-- [Bitbucket Cloud](bitbucket.md)
-- [CAS](cas.md)
-- [Facebook](facebook.md)
-- [Generic OAuth2](oauth2_generic.md)
-- [GitHub](github.md)
-- [GitLab.com](gitlab.md)
-- [Google](google.md)
-- [JWT](../administration/auth/jwt.md)
-- [Kerberos](kerberos.md)
-- [OpenID Connect](../administration/auth/oidc.md)
-- [Salesforce](salesforce.md)
-- [SAML](saml.md)
-- [Shibboleth](shibboleth.md)
-- [Twitter](twitter.md)
+|Provider documentation                                           |OmniAuth provider name    |
+|-----------------------------------------------------------------|--------------------------|
+|[Atlassian Crowd](../administration/auth/crowd.md)               |`crowd`                   |
+|[Atlassian](../administration/auth/atlassian.md)                 |`atlassian_oauth2`        |
+|[Auth0](auth0.md)                                                |`auth0`                   |
+|[Authentiq](../administration/auth/authentiq.md)                 |`authentiq`               |
+|[AWS Cognito](../administration/auth/cognito.md)                 |`cognito`                 |
+|[Azure v2](azure.md#microsoft-azure-oauth2-omniauth-provider-v2) |`azure_activedirectory_v2`|
+|[Azure v1](azure.md)                                             |`azure_oauth2`            |
+|[Bitbucket Cloud](bitbucket.md)                                  |`bitbucket`               |
+|[CAS](cas.md)                                                    |`cas3`                    |
+|[Facebook](facebook.md)                                          |`facebook`                |
+|[Generic OAuth2](oauth2_generic.md)                              |`oauth2_generic`          |
+|[GitHub](github.md)                                              |`github`                  |
+|[GitLab.com](gitlab.md)                                          |`gitlab`                  |
+|[Google](google.md)                                              |`google_oauth2`           |
+|[JWT](../administration/auth/jwt.md)                             |`jwt`                     |
+|[Kerberos](kerberos.md)                                          |`kerberos`                |
+|[OpenID Connect](../administration/auth/oidc.md)                 |`openid_connect`          |
+|[Salesforce](salesforce.md)                                      |`salesforce`              |
+|[SAML](saml.md)                                                  |`saml`                    |
+|[Shibboleth](shibboleth.md)                                      |`shibboleth`              |
+|[Twitter](twitter.md)                                            |`twitter`                 |
 
 ## Initial OmniAuth Configuration
 
-To configure the behavior of OmniAuth providers, first obtain the names of
-the providers as shown in the table below:
-
-|Provider name     |OmniAuth provider name    |
-|------------------|--------------------------|
-|Atlassian Crowd   |`crowd`                   |
-|Atlassian         |`atlassian_oauth2`        |
-|Auth0             |`auth0`                   |
-|Authentiq         |`authentiq`               |
-|AWS Cognito       |`cognito`                 |
-|Azure (v2)        |`azure_activedirectory_v2`|
-|Azure (v1)        |`azure_oauth2`            |
-|Bitbucket Cloud   |`bitbucket`               |
-|CAS               |`cas3`                    |
-|Facebook          |`facebook`                |
-|Generic OAuth2    |`oauth2_generic`          |
-|GitHub            |`github`                  |
-|GitLab            |`gitlab`                  |
-|Google            |`google_oauth2`           |
-|JWT               |`jwt`                     |
-|Kerberos          |`kerberos`                |
-|OpenID Connect    |`openid_connect`          |
-|Salesforce        |`salesforce`              |
-|SAML              |`saml`                    |
-|Shibboleth        |`shibboleth`              |
-|Twitter           |`twitter`                 |
-
-The OmniAuth names are needed to configure a few global settings that are in common for all providers.
+The OmniAuth provider names from the table above are needed to configure a few global settings that are in common for all providers.
 
 NOTE:
 Starting from GitLab 11.4, OmniAuth is enabled by default. If you're using an
