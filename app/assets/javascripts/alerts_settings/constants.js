@@ -30,7 +30,7 @@ export const i18n = {
         "AlertSettings|Use the URL and authorization key below to configure how an external service sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure the endpoint.",
       ),
       prometheusHelp: s__(
-        'AlertSettings|Use the URL and authorization key below to confiugre how Prometheus sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure your endpoint.',
+        'AlertSettings|Use the URL and authorization key below to configure how Prometheus sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure your endpoint.',
       ),
       webhookUrl: s__('AlertSettings|Webhook URL'),
       authorizationKey: s__('AlertSettings|Authorization key'),
@@ -49,7 +49,7 @@ export const i18n = {
       ),
       resetHeader: s__('AlertSettings|Reset the mapping'),
       resetBody: s__(
-        "AlertSettings|If you edit the payload, you'll need to re-map the fields.",
+        "AlertSettings|If you edit the payload, you must re-map the fields.",
       ),
       resetOk: s__('AlertSettings|Proceed with editing'),
       mapIntro: s__(
