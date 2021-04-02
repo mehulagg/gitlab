@@ -82,8 +82,8 @@ NOTE:
 Starting from GitLab 11.4, OmniAuth is enabled by default. If you're using an
 earlier version, you must explicitly enable it.
 
-- `allow_single_sign_on` allows you to specify the providers that you want to allow to
-  automatically create an account. For example, if you wish to enable Azure (v2) and Google,
+- `allow_single_sign_on` allows you to specify the providers that automatically
+  create a GitLab account. For example, if you wish to enable Azure (v2) and Google,
   in Omnibus, specify a list of provider names:
 
   ```ruby
