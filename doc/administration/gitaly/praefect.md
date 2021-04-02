@@ -945,7 +945,7 @@ They reflect configuration defined for this instance of Praefect.
 
 > - Introduced in GitLab 13.1 in [alpha](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga), disabled by default.
 > - Entered [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) in GitLab 13.2, disabled by default.
-> - From GitLab 13.3, disabled unless primary-wins reference transactions strategy is disabled.
+> - In GitLab 13.3, disabled unless primary-wins reference transactions strategy is disabled.
 > - From GitLab 13.4, enabled by default.
 > - From GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable trong consistency.
 > - From GitLab 13.6, primary-wins voting strategy and `gitaly_reference_transactions_primary_wins` feature flag removed from the source code.
@@ -979,7 +979,7 @@ Feature.disable(:gitaly_reference_transactions_primary_wins)
 ```
 
 NOTE:
-If _unset_ in Rails, Praefect will use the default value for the flags, which depends on the GitLab version in use.
+If _unset_ in Rails, flags will read false from the console and Praefect will use their default value, which depends on the GitLab version in use.
 
 To monitor strong consistency, you can use the following Prometheus metrics:
 
@@ -1344,4 +1344,3 @@ Here are common errors and potential causes:
   - **GRPC::Unavailable (14:all SubCons are in TransientFailure...)**
     - Praefect cannot reach one or more of its child Gitaly nodes. Try running
       the Praefect connection checker to diagnose.
-
