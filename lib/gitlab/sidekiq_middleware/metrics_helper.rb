@@ -17,11 +17,13 @@ module Gitlab
                    urgency: "",
                    external_dependencies: FALSE_LABEL,
                    feature_category: "",
-                   boundary: "" }
+                   boundary: "",
+                   data_consistency: "" }
 
         return labels unless worker.respond_to?(:get_urgency)
 
         labels[:urgency] = worker.get_urgency.to_s
+        labels[:data_consistency] = worker.get_data_consistency.to_s if worker.respond_to?(:get_data_consistency)
         labels[:external_dependencies] = bool_as_label(worker.worker_has_external_dependencies?)
 
         feature_category = worker.get_feature_category

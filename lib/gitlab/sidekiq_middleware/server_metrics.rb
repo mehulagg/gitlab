@@ -20,7 +20,7 @@ module Gitlab
         # in metrics and can use them in the `ThreadsSampler` for setting a label
         Thread.current.name ||= Gitlab::Metrics::Samplers::ThreadsSampler::SIDEKIQ_WORKER_THREAD_NAME
 
-        labels = create_labels(worker.class, queue, job)
+        @labels = create_labels(worker.class, queue, job)
         queue_duration = ::Gitlab::InstrumentationHelper.queue_duration_for_job(job)
 
         @metrics[:sidekiq_jobs_queue_duration_seconds].observe(labels, queue_duration) if queue_duration
@@ -61,6 +61,10 @@ module Gitlab
           @metrics[:sidekiq_elasticsearch_requests_duration_seconds].observe(labels, get_elasticsearch_time(instrumentation))
         end
       end
+
+      protected
+
+      attr_reader :metrics, :labels
 
       private
 
@@ -108,3 +112,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::SidekiqMiddleware::ServerMetrics.prepend_if_ee('EE::Gitlab::SidekiqMiddleware::ServerMetrics')
