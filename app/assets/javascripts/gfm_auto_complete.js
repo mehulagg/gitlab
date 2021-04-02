@@ -331,12 +331,20 @@ class GfmAutoComplete {
 
           return members.sort((a, b) => {
             if (nameOrUsernameStartsWith(a, lowercaseQuery)) {
+              if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
+                return GfmAutoComplete.comparePriority(a, b);
+              }
+
               return -1;
             }
             if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
               return 1;
             }
             if (nameOrUsernameIncludes(a, lowercaseQuery)) {
+              if (nameOrUsernameIncludes(b, lowercaseQuery)) {
+                return GfmAutoComplete.comparePriority(a, b);
+              }
+
               return -1;
             }
             if (nameOrUsernameIncludes(b, lowercaseQuery)) {
@@ -828,6 +836,13 @@ GfmAutoComplete.Members = {
     return `<li>${avatarTag} ${username} <small>${escape(
       title,
     )}${availabilityStatus}</small> ${icon}</li>`;
+  },
+  comparePriority(memberA, memberB) {
+    if (memberA.position && memberB.position) {
+      return memberA.position - memberB.position;
+    } else {
+      return String.localeCompare(memberA.search, memberB.search);
+    }
   },
   nameOrUsernameStartsWith(member, query) {
     // `member.search` is a name:username string like `MargeSimpson msimpson`

@@ -36,7 +36,10 @@ module Users
     end
 
     def render_participants_as_hash(participants)
-      participants.map(&method(:participant_as_hash))
+      participants
+        .map { |participant| participant_as_hash(participant) }
+        .map { |hash| hash.transform_values(&:itself) } # force lazy leaves
+        .each_with_index.map { |hash, i| hash.merge(position: i) }
     end
 
     def participant_as_hash(participant)
@@ -56,7 +59,7 @@ module Users
         username: user.username,
         name: user.name,
         avatar_url: user.avatar_url,
-        availability: lazy_user_availability(user).itself # calling #itself to avoid returning a BatchLoader instance
+        availability: lazy_user_availability(user)
       }
     end
 
