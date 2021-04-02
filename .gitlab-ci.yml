@@ -68,7 +68,7 @@ variables:
   DOCKER_VERSION: "20.10.1"
   CACHE_CLASSES: "true"
   FUZZAPI_PROFILE: Quick-10
-  
+  FUZZAPI_TARGET_URL: ${CI_ENVIRONMENT_URL}
 
   # Preparing custom clone path to reduce space used by all random forks
   # on GitLab.com's Shared Runners. Our main forks - especially the security
