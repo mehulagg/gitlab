@@ -4,7 +4,7 @@ group: Adoption
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Whats New **(ALL TIERS)**
+# What's New **(ALL TIERS)**
 
 With each monthly release, GitLab includes some of the highlights in the `What's new` feature. To access it, select the `?` icon and select `What's new` from the menu.
 
