@@ -2948,7 +2948,7 @@ msgstr ""
 msgid "AlertSettings|HTTP Endpoint"
 msgstr ""
 
-msgid "AlertSettings|If you edit the payload, you'll need to re-map the fields."
+msgid "AlertSettings|If you edit the payload, you must re-map the fields."
 msgstr ""
 
 msgid "AlertSettings|If you reset the authorization key for this project, you must update the key in every enable alert source."
@@ -3011,10 +3011,10 @@ msgstr ""
 msgid "AlertSettings|URL cannot be blank and must start with http or https"
 msgstr ""
 
-msgid "AlertSettings|Use the URL and authorization key below to configure how an external service sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure the endpoint."
+msgid "AlertSettings|Use the URL and authorization key below to configure how Prometheus sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure your endpoint."
 msgstr ""
 
-msgid "AlertSettings|Use the URL and authorization key below to confiugre how Prometheus sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure your endpoint."
+msgid "AlertSettings|Use the URL and authorization key below to configure how an external service sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure the endpoint."
 msgstr ""
 
 msgid "AlertSettings|View URL and authorization key"
