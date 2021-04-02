@@ -44,12 +44,11 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
   end
 
   shared_examples 'locked update query' do
-    it 'locks query with FOR UPDATE' do
+    it 'locks root ancestor with FOR UPDATE' do
       qr = ActiveRecord::QueryRecorder.new do
         subject
       end
-      expect(qr.count).to eq 1
-      expect(qr.log.first).to match /FOR UPDATE/
+      expect(qr.log).to include(match /SELECT.+"namespaces"."id" = 1.+FOR UPDATE/)
     end
   end
 
@@ -63,12 +62,6 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
     end
 
     it { is_expected.to match_array Namespace.all }
-
-    context 'when lock is true' do
-      subject { hierarchy.incorrect_traversal_ids(lock: true).load }
-
-      it_behaves_like 'locked update query'
-    end
   end
 
   describe '#sync_traversal_ids!' do
@@ -83,10 +76,7 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
 
     context 'when deadlocked' do
       before do
-        connection_double = double(:connection)
-
-        allow(Namespace).to receive(:connection).and_return(connection_double)
-        allow(connection_double).to receive(:exec_query) { raise ActiveRecord::Deadlocked.new }
+        expect(root).to receive(:lock!) { raise ActiveRecord::Deadlocked.new }
       end
 
       it { expect { subject }.to raise_error(ActiveRecord::Deadlocked) }
