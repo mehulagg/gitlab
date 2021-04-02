@@ -34,14 +34,13 @@ RSpec.describe Gitlab::Database::LoadBalancing do
 
   describe '.configuration' do
     it 'returns a Hash' do
-      config = { 'hosts' => %w(foo) }
+      lb_config = { 'hosts' => %w(foo) }
 
-      allow(ActiveRecord::Base.configurations[Rails.env])
-        .to receive(:[])
-        .with('load_balancing')
-        .and_return(config)
+      original_db_config = Gitlab::Database.config
+      modified_db_config = original_db_config.merge(load_balancing: lb_config)
+      expect(Gitlab::Database).to receive(:config).and_return(modified_db_config)
 
-      expect(described_class.configuration).to eq(config)
+      expect(described_class.configuration).to eq(lb_config)
     end
   end
 
@@ -436,7 +435,8 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     end
 
     shared_context 'LoadBalancing setup' do
-      let(:hosts) { [ActiveRecord::Base.configurations["development"]['host']] }
+      let(:development_db_config) { ActiveRecord::Base.configurations.default_hash("development").with_indifferent_access }
+      let(:hosts) { [development_db_config[:host]] }
       let(:model) do
         Class.new(ApplicationRecord) do
           self.table_name = "load_balancing_test"
@@ -452,10 +452,11 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         clear_load_balancing_configuration
         allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
         subject.configure_proxy(::Gitlab::Database::LoadBalancing::ConnectionProxy.new(hosts))
-        allow(ActiveRecord::Base.configurations[Rails.env])
-          .to receive(:[])
-          .with('load_balancing')
-          .and_return('hosts' => hosts)
+
+        original_db_config = Gitlab::Database.config
+        modified_db_config = original_db_config.merge(load_balancing: { hosts: hosts })
+        allow(Gitlab::Database).to receive(:config).and_return(modified_db_config)
+
         ::Gitlab::Database::LoadBalancing::Session.clear_session
       end
     end

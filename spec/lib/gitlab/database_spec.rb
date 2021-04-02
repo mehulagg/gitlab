@@ -16,8 +16,8 @@ RSpec.describe Gitlab::Database do
   end
 
   describe '.config' do
-    it 'returns a Hash' do
-      expect(described_class.config).to be_an_instance_of(Hash)
+    it 'returns a HashWithIndifferentAccess' do
+      expect(described_class.config).to be_an_instance_of(HashWithIndifferentAccess)
     end
   end
 
