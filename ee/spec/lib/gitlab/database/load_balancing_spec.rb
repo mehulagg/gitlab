@@ -451,6 +451,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         # Setup load balancing
         clear_load_balancing_configuration
         allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
+
         subject.configure_proxy(::Gitlab::Database::LoadBalancing::ConnectionProxy.new(hosts))
 
         original_db_config = Gitlab::Database.config
