@@ -63,7 +63,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
       expect(::Gitlab::HTTP).to receive(:post) do |_url, params|
         expect(params[:body]).to match_schema('/external_validation')
         expect(params[:timeout]).to eq(described_class::DEFAULT_VALIDATION_REQUEST_TIMEOUT)
-        expect(params[:headers]).to eq({ 'X-Request-ID' => nil })
+        expect(params[:headers]).to eq({})
       end
 
       perform!
