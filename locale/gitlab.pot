@@ -3014,7 +3014,7 @@ msgstr ""
 msgid "AlertSettings|Use the URL and authorization key below to configure how Prometheus sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure your endpoint."
 msgstr ""
 
-msgid "AlertSettings|Use the URL and authorization key below to configure how an external service sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure the endpoint."
+msgid "AlertSettings|Use the URL and authorization key below to configure how an external service sends alerts to GitLab. %{linkStart}How do I configure the endpoint?%{linkEnd}"
 msgstr ""
 
 msgid "AlertSettings|View URL and authorization key"
@@ -3045,6 +3045,9 @@ msgid "AlertsIntegrations|Alerts will not be created through this integration"
 msgstr ""
 
 msgid "AlertsIntegrations|Current integrations"
+msgstr ""
+
+msgid "AlertsIntegrations|If you delete the %{integrationName} integration, alerts are no longer sent from this endpoint. This action cannot be undone."
 msgstr ""
 
 msgid "AlertsIntegrations|Integration Name"
@@ -3078,9 +3081,6 @@ msgid "AlertsIntegrations|The integration token could not be reset. Please try a
 msgstr ""
 
 msgid "AlertsIntegrations|The test alert should now be visible in your alerts list."
-msgstr ""
-
-msgid "AlertsIntegrations|You have opted to delete the %{integrationName} integration. Do you want to proceed? It means you will no longer receive alerts from this endpoint in your alert list, and this action cannot be undone."
 msgstr ""
 
 msgid "Algorithm"

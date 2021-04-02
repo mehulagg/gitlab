@@ -213,7 +213,7 @@ export default {
       <gl-sprintf
         :message="
           s__(
-            'AlertsIntegrations|You have opted to delete the %{integrationName} integration. Do you want to proceed? It means you will no longer receive alerts from this endpoint in your alert list, and this action cannot be undone.',
+            'AlertsIntegrations|If you delete the %{integrationName} integration, alerts are no longer sent from this endpoint. This action cannot be undone.',
           )
         "
       >

@@ -27,7 +27,7 @@ export const i18n = {
     },
     setupCredentials: {
       help: s__(
-        "AlertSettings|Use the URL and authorization key below to configure how an external service sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure the endpoint.",
+        "AlertSettings|Use the URL and authorization key below to configure how an external service sends alerts to GitLab. %{linkStart}How do I configure the endpoint?%{linkEnd}",
       ),
       prometheusHelp: s__(
         'AlertSettings|Use the URL and authorization key below to configure how Prometheus sends alerts to GitLab. Review the %{linkStart}GitLab documentation%{linkEnd} to learn how to configure your endpoint.',
