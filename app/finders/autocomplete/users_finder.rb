@@ -21,6 +21,7 @@ module Autocomplete
       @search = params[:search]
       @skip_users = params[:skip_users]
       @author_id = params[:author_id]
+      @participant_ids = params.fetch(:participant_ids, [])
       @todo_filter = params[:todo_filter]
       @todo_state_filter = params[:todo_state_filter]
       @filter_by_current_user = params[:current_user]
@@ -33,10 +34,20 @@ module Autocomplete
         # Include current user if available to filter by "Me"
         items.unshift(current_user) if prepend_current_user?
 
-        if prepend_author? && author&.active?
-          items.unshift(author)
-        end
+        items.unshift(author) if prepend_author? && author&.active?
+      else
+        to_prepend = find_users
+          .active
+          .id_in(prependable.map(&:id))
+          .optionally_search(search)
+          .to_a
+
+        items = to_prepend + items
       end
+
+      items = items.each_with_index
+        .sort_by { |(user, i)| [*sort_order(user), i] }
+        .map(&:first)
 
       items.uniq.tap do |unique_items|
         preload_associations(unique_items)
@@ -45,16 +56,33 @@ module Autocomplete
 
     private
 
+    def prependable
+      [
+        prepend_author? && author,
+        prepend_current_user? && current_user,
+        *participants
+      ].select(&:itself)
+    end
+
+    def sort_order(user)
+      [user == current_user ? 0 : 1, user == author ? 0 : 1, participants.include?(user) ? 0 : 1]
+    end
+
     def author
       strong_memoize(:author) do
         User.find_by_id(author_id)
       end
     end
 
+    def participants
+      strong_memoize(:participants) do
+        User.id_in(participant_ids)
+      end
+    end
+
     # Returns the users based on the input parameters, as an Array.
     #
     # This method is separate so it is easier to extend in EE.
-    # rubocop: disable CodeReuse/ActiveRecord
     def limited_users
       # When changing the order of these method calls, make sure that
       # reorder_by_name() is called _before_ optionally_search(), otherwise
@@ -72,7 +100,6 @@ module Autocomplete
         .limit(LIMIT)
         .to_a
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def prepend_current_user?
       filter_by_current_user.present? && current_user
