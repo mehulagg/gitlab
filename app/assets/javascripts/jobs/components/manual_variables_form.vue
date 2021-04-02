@@ -149,6 +149,7 @@ export default {
               category="tertiary"
               icon="clear"
               :aria-label="__('Delete variable')"
+              data-testid="delete-variable-btn"
               @click="deleteVariable(variable.id)"
             />
           </div>
@@ -181,7 +182,7 @@ export default {
       </div>
     </div>
     <div class="d-flex gl-mt-3 justify-content-center">
-      <p class="text-muted" v-html="helpText"></p>
+      <p class="text-muted" v-html="helpText" data-testid="form-help-text"></p>
     </div>
     <div class="d-flex justify-content-center">
       <gl-button
