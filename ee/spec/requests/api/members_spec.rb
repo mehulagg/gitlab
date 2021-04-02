@@ -612,6 +612,19 @@ RSpec.describe API::Members do
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response.map { |m| m["source_full_name"] }).to eq(["My Root Group / My Project"])
       end
+
+      it 'paginates results' do
+        developer = create(:user)
+        subgroup_a = create(:group, name: "SubGroup A", parent: group)
+        subgroup_b = create(:group, name: "SubGroup B", parent: group)
+        subgroup_a.add_developer(developer)
+        subgroup_b.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner), params: { page: 2, per_page: 1 }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m["source_full_name"] }).to eq(["My Root Group / SubGroup B"])
+      end
     end
 
     describe 'DELETE /groups/:id/billable_members/:user_id' do

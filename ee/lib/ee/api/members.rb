@@ -83,6 +83,7 @@ module EE
           end
           params do
             requires :user_id, type: Integer, desc: 'The user ID of the member'
+            use :pagination
           end
           get ":id/billable_members/:user_id/memberships" do
             group = find_group!(params[:id])
@@ -96,7 +97,7 @@ module EE
 
             memberships = user.members.in_hierarchy(group).including_source
 
-            present memberships, with: ::EE::API::Entities::BillableMembership
+            present paginate(memberships), with: ::EE::API::Entities::BillableMembership
           end
 
           desc 'Removes a billable member from a group or project.'
