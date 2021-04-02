@@ -520,6 +520,8 @@ RSpec.describe API::Members do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to eq([{
+          "id" => membership.id,
+          "source_id" => group.id,
           "source_full_name" => "My Root Group",
           "created_at" => membership.created_at.as_json,
           "expires_at" => nil,

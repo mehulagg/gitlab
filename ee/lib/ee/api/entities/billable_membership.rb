@@ -4,6 +4,8 @@ module EE
   module API
     module Entities
       class BillableMembership < Grape::Entity
+        expose :id
+        expose :source_id
         expose :source_full_name do |member|
           member.source.full_name
         end
