@@ -57,7 +57,7 @@ module Namespaces
       end
 
       def object_hierarchy(ancestors_base)
-        Gitlab::ObjectHierarchy.new(ancestors_base, options: { use_distinct: Feature.enabled?(:use_distinct_in_object_hierarchy, self) })
+        Gitlab::ObjectHierarchy.new(ancestors_base)
       end
     end
   end
