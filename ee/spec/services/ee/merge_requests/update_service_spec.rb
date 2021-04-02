@@ -323,10 +323,8 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
     end
 
-    it 'updates code owner approval rules' do
-      expect_next_instance_of(::MergeRequests::SyncCodeOwnerApprovalRules) do |instance|
-        expect(instance).to receive(:execute)
-      end
+    it 'attempts to update code owner approval rules' do
+      expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).to receive(:perform_async)
 
       update_merge_request(title: 'Title')
     end

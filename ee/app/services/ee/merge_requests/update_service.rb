@@ -46,7 +46,7 @@ module EE
       def after_update(merge_request)
         super
 
-        ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute
+        ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(merge_request.id)
       end
 
       override :create_branch_change_note
