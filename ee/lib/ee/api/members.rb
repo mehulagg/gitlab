@@ -86,12 +86,17 @@ module EE
           end
           get ":id/billable_members/:user_id/memberships" do
             group = find_group!(params[:id])
+
             bad_request! unless can?(current_user, :admin_group_member, group)
             bad_request! if group.subgroup?
+
             user = ::User.find(params[:user_id])
+
             not_found!('User') unless group.billed_user_ids.include?(user.id)
 
-            present user.members.in_hierarchy(group).including_source, with: ::EE::API::Entities::BillableMembership
+            memberships = user.members.in_hierarchy(group).including_source
+
+            present memberships, with: ::EE::API::Entities::BillableMembership
           end
 
           desc 'Removes a billable member from a group or project.'
