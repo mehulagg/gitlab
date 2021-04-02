@@ -7,7 +7,12 @@ description: 'Learn how to install, configure, update, and maintain your GitLab 
 
 # Administrator documentation **(FREE SELF)**
 
-Learn how to administer your self-managed GitLab instance.
+If you use GitLab.com, only GitLab team members have access to administration tools and settings.
+If you use a self-managed GitLab instance, learn how to administer it.
+
+Only administrator users can access GitLab administration tools and settings.
+
+## Available distributions
 
 GitLab has two product distributions available through [different subscriptions](https://about.gitlab.com/pricing/):
 
@@ -15,11 +20,9 @@ GitLab has two product distributions available through [different subscriptions]
 - The open core [GitLab Enterprise Edition (EE)](https://gitlab.com/gitlab-org/gitlab).
 
 You can [install either GitLab CE or GitLab EE](https://about.gitlab.com/install/ce-or-ee/).
-However, the features you have access to depend on your chosen [subscription](https://about.gitlab.com/pricing/).
+However, the features you have access to depend on your chosen subscription.
 
 GitLab Community Edition installations have access only to Free features.
-
-Non-administrator users can't access GitLab administration tools and settings.
 
 ## Installing and maintaining GitLab
 
