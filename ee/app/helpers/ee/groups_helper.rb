@@ -112,12 +112,10 @@ module EE
       group.feature_available?(:adjourned_deletion_for_projects_and_groups)
     end
 
-    override :render_project_access_token_creation_permission?
-    def render_project_access_token_creation_permission?(group)
-      value_from_super = super
-      return value_from_super unless ::Gitlab.com?
+    def render_setting_to_allow_project_access_token_creation?(group)
+      return super unless ::Gitlab.com?
 
-      value_from_super && group.feature_available_non_trial?(:resource_access_token)
+      group.root? && current_user.can?(:admin_setting_to_allow_project_access_token_creation, group)
     end
 
     private

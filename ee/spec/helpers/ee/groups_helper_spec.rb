@@ -109,17 +109,17 @@ RSpec.describe GroupsHelper do
     end
   end
 
-  describe '#render_project_access_token_creation_permission?' do
+  describe '#render_setting_to_allow_project_access_token_creation?' do
     context 'with self-managed' do
       let_it_be(:parent) { create(:group) }
       let_it_be(:group) { create(:group, parent: parent) }
 
       it 'returns true if group is root' do
-        expect(helper.render_project_access_token_creation_permission?(parent)).to be_truthy
+        expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
       end
 
       it 'returns false if group is subgroup' do
-        expect(helper.render_project_access_token_creation_permission?(group)).to be_falsey
+        expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
       end
     end
 
@@ -133,7 +133,7 @@ RSpec.describe GroupsHelper do
         let_it_be(:group) { create(:group) }
 
         it 'returns false' do
-          expect(helper.render_project_access_token_creation_permission?(group)).to be_falsey
+          expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
         end
       end
 
@@ -141,12 +141,16 @@ RSpec.describe GroupsHelper do
         let_it_be(:parent) { create(:group_with_plan, plan: :bronze_plan) }
         let_it_be(:group) { create(:group, parent: parent) }
 
+        before do
+          parent.add_owner(owner)
+        end
+
         it 'returns true if group is root' do
-          expect(helper.render_project_access_token_creation_permission?(parent)).to be_truthy
+          expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
         end
 
         it 'returns false if group is subgroup' do
-          expect(helper.render_project_access_token_creation_permission?(group)).to be_falsey
+          expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
         end
       end
     end

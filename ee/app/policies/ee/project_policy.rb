@@ -434,16 +434,9 @@ module EE
 
     override :resource_access_token_creation_allowed?
     def resource_access_token_creation_allowed?
-      value_from_super = super
+      return super unless ::Gitlab.com?
 
-      return value_from_super unless ::Gitlab.com?
-
-      namespace = project.namespace
-      feature_available_in_namespace = namespace.feature_available_non_trial?(:resource_access_token)
-
-      return feature_available_in_namespace if namespace.user? # always enable for projects in personal namespaces.
-
-      value_from_super && feature_available_in_namespace
+      super && resource_access_token_feature_available?
     end
   end
 end
