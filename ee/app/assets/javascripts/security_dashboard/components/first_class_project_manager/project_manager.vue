@@ -19,17 +19,6 @@ export default {
     ProjectList,
     ProjectSelector,
   },
-  props: {
-    isManipulatingProjects: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    projects: {
-      type: Array,
-      required: true,
-    },
-  },
   data() {
     return {
       searchQuery: '',
@@ -49,7 +38,7 @@ export default {
   },
   computed: {
     canAddProjects() {
-      return !this.isManipulatingProjects && this.selectedProjects.length > 0;
+      return this.selectedProjects.length > 0;
     },
     isSearchingProjects() {
       return this.searchCount > 0;
@@ -288,12 +277,7 @@ export default {
       </div>
     </div>
     <div class="row justify-content-center mt-md-3">
-      <project-list
-        :projects="projects"
-        :show-loading-indicator="isManipulatingProjects"
-        class="col col-lg-7"
-        @projectRemoved="removeProject"
-      />
+      <project-list class="col col-lg-7" @projectRemoved="removeProject" />
     </div>
   </section>
 </template>

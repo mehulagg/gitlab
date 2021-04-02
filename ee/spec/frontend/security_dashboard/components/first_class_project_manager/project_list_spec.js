@@ -1,6 +1,5 @@
-import { GlBadge, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlBadge, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-
 import ProjectList from 'ee/security_dashboard/components/first_class_project_manager/project_list.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
@@ -11,12 +10,16 @@ const generateMockProjects = (projectsCount, mockProject = {}) =>
 describe('Project List component', () => {
   let wrapper;
 
-  const factory = ({ projects = [], stubs = {}, showLoadingIndicator = false } = {}) => {
+  const createWrapper = ({ loading = false } = {}) => {
     wrapper = shallowMount(ProjectList, {
-      stubs,
-      propsData: {
-        projects,
-        showLoadingIndicator,
+      mocks: {
+        $apollo: {
+          queries: {
+            projects: {
+              loading,
+            },
+          },
+        },
       },
     });
   };
@@ -28,77 +31,62 @@ describe('Project List component', () => {
   afterEach(() => wrapper.destroy());
 
   it('shows an empty state if there are no projects', () => {
-    factory();
+    createWrapper();
 
-    expect(wrapper.text()).toContain(
-      'Select a project to add by using the project search field above.',
-    );
+    expect(wrapper.find('.js-projects-list-empty-message').exists()).toBe(true);
   });
 
-  it('does not show a loading indicator when showLoadingIndicator = false', () => {
-    factory();
+  it.each`
+    phrase             | loading
+    ${'shows'}         | ${true}
+    ${'does not show'} | ${false}
+  `('$phrase the loading indicator when Apollo query loading is $loading', ({ loading }) => {
+    createWrapper({ loading });
 
-    expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-  });
-
-  it('shows a loading indicator when showLoadingIndicator = true', () => {
-    factory({ showLoadingIndicator: true });
-
-    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(loading);
   });
 
   it.each([0, 1, 2])(
-    'renders a list of projects and displays a count of how many there are',
-    (projectsCount) => {
-      factory({ projects: generateMockProjects(projectsCount) });
+    'renders a list of projects and displays the correct count for %s projects',
+    async (projectsCount) => {
+      createWrapper();
+      await wrapper.setData({ projects: generateMockProjects(projectsCount) });
 
       expect(getAllProjectItems()).toHaveLength(projectsCount);
-      expect(wrapper.find(GlBadge).text()).toBe(`${projectsCount}`);
+      expect(wrapper.find(GlBadge).text()).toBe(projectsCount.toString());
     },
   );
 
-  it('renders a project-item with an avatar', () => {
-    factory({ projects: generateMockProjects(1) });
+  it('renders a project item with an avatar', async () => {
+    createWrapper();
+    await wrapper.setData({ projects: generateMockProjects(1) });
 
     expect(getFirstProjectItem().find(ProjectAvatar).exists()).toBe(true);
   });
 
-  it('renders a project-item with a project name', () => {
-    const projectNameWithNamespace = 'foo';
+  it('renders a project item with a project name', async () => {
+    const nameWithNamespace = 'foo';
+    createWrapper();
+    await wrapper.setData({ projects: generateMockProjects(1, { nameWithNamespace }) });
 
-    factory({
-      projects: generateMockProjects(1, { name_with_namespace: projectNameWithNamespace }),
-    });
-
-    expect(getFirstProjectItem().text()).toContain(projectNameWithNamespace);
+    expect(getFirstProjectItem().text()).toContain(nameWithNamespace);
   });
 
-  it('renders a project-item with a GraphQL project name', () => {
-    const projectNameWithNamespace = 'foo';
-
-    factory({
-      projects: generateMockProjects(1, { nameWithNamespace: projectNameWithNamespace }),
-    });
-
-    expect(getFirstProjectItem().text()).toContain(projectNameWithNamespace);
-  });
-  it('renders a project-item with a remove button', () => {
-    factory({ projects: generateMockProjects(1) });
+  it('renders a project item with a remove button', async () => {
+    createWrapper();
+    await wrapper.setData({ projects: generateMockProjects(1) });
 
     expect(getFirstRemoveButton().exists()).toBe(true);
   });
 
-  it(`emits a 'projectRemoved' event when a project's remove button has been clicked`, () => {
-    const mockProjects = generateMockProjects(1);
-    const [projectData] = mockProjects;
+  it(`emits a 'projectRemoved' event when a project's remove button has been clicked`, async () => {
+    const projects = generateMockProjects(1);
 
-    factory({ projects: mockProjects, stubs: { GlButton } });
-
+    createWrapper();
+    await wrapper.setData({ projects });
     getFirstRemoveButton().vm.$emit('click');
 
-    return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.emitted('projectRemoved')).toHaveLength(1);
-      expect(wrapper.emitted('projectRemoved')).toEqual([[projectData]]);
-    });
+    expect(wrapper.emitted('projectRemoved')).toHaveLength(1);
+    expect(wrapper.emitted('projectRemoved')[0][0]).toEqual(projects[0]);
   });
 });
