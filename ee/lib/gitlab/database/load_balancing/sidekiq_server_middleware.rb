@@ -9,7 +9,7 @@ module Gitlab
         JobReplicaNotUpToDate = Class.new(StandardError)
 
         def call(worker, job, _queue)
-          if (job[:use_primary] = requires_primary?(worker.class, job))
+          if requires_primary?(worker.class, job)
             Session.current.use_primary!
           end
 
@@ -27,22 +27,22 @@ module Gitlab
 
         def requires_primary?(worker_class, job)
           return true unless worker_class.include?(::ApplicationWorker)
-
-          job[:worker_data_consistency] = worker_class.get_data_consistency
-
           return true if worker_class.get_data_consistency == :always
           return true unless worker_class.get_data_consistency_feature_flag_enabled?
 
           if job['database_replica_location'] || replica_caught_up?(job['database_write_location'])
-            false
+            job[:database_chosen] = 'replica'
+            true
           elsif worker_class.get_data_consistency == :delayed && job['retry_count'].to_i == 0
-            job[:wait_for_replica] = true
+            job[:database_chosen] = 'retry'
             raise JobReplicaNotUpToDate, "Sidekiq job #{worker_class} JID-#{job['jid']} couldn't use the replica."\
                "  Replica was not up to date."
           else
-            job[:fallback_to_primary] = true
+            job[:database_chosen] = 'primary'
             true
           end
+
+          job[:use_primary]
         end
 
         def load_balancer

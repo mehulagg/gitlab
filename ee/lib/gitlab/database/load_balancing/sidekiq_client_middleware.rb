@@ -19,6 +19,9 @@ module Gitlab
           return unless worker_class
           return unless worker_class.include?(::ApplicationWorker)
           return unless worker_class.get_data_consistency_feature_flag_enabled?
+
+          job['worker_data_consistency'] = worker_class.get_data_consistency
+
           return if worker_class.get_data_consistency == :always
 
           if Session.current.performed_write?

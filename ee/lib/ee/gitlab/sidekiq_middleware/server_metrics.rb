@@ -25,24 +25,16 @@ module EE
 
           metrics.merge!(
             {
-              sidekiq_load_balancing_caught_up_fallbacks_count: ::Gitlab::Metrics.counter(:sidekiq_load_balancing_caught_up_fallbacks_count, 'Sidekiq jobs fallen back to the primary'),
-              sidekiq_load_balancing_use_primary_count:         ::Gitlab::Metrics.counter(:sidekiq_load_balancing_use_primary_count, 'Sidekiq jobs using primary'),
-              sidekiq_load_balancing_use_replica_count:         ::Gitlab::Metrics.counter(:sidekiq_load_balancing_use_replica_count, 'Sidekiq jobs using replica'),
-              sidekiq_load_balancing_wait_for_replica_count:    ::Gitlab::Metrics.counter(:sidekiq_load_balancing_wait_for_replica_count, 'Sidekiq jobs retried, replica was not up to date')
+              sidekiq_load_balancing_count: ::Gitlab::Metrics.counter(:sidekiq_load_balancing_count, 'Sidekiq jobs with load balancing')
             })
         end
 
         def record_load_balancing(job, labels)
           return unless ::Gitlab::Database::LoadBalancing.enable?
+          return unless job[:database_chosen]
 
-          if job[:wait_for_replica]
-            metrics[:sidekiq_load_balancing_wait_for_replica_count].increment(labels, 1)
-          elsif job[:use_primary]
-            metrics[:sidekiq_load_balancing_use_primary_count].increment(labels, 1)
-            metrics[:sidekiq_load_balancing_caught_up_fallbacks_count].increment(labels, 1) if job[:fallback_to_primary]
-          else
-            metrics[:sidekiq_load_balancing_use_replica_count].increment(labels, 1)
-          end
+          labels[:database_chosen] = job[:database_chosen]
+          metrics[:sidekiq_load_balancing_count].increment(labels, 1)
         end
       end
     end
