@@ -4570,7 +4570,7 @@ msgstr ""
 msgid "Automatic deployment rollbacks"
 msgstr ""
 
-msgid "Automatically close incidents when the associated Prometheus alert resolves."
+msgid "Automatically close associated incident when an alert is resolved via recovery alert notification"
 msgstr ""
 
 msgid "Automatically create merge requests for vulnerabilities that have fixes available."
