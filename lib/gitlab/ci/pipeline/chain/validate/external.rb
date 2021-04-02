@@ -70,6 +70,7 @@ module Gitlab
 
             def validate_service_request
               headers = {}
+              headers['X-Request-ID'] = Labkit::Correlation::CorrelationId.current_id
               headers['X-Gitlab-Token'] = validation_service_token if validation_service_token
 
               Gitlab::HTTP.post(
