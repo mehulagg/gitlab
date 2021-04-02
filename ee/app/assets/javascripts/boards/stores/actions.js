@@ -1,4 +1,4 @@
-import { pick } from 'lodash';
+import { pick, cloneDeep } from 'lodash';
 import {
   formatBoardLists,
   formatListIssues,
@@ -12,7 +12,6 @@ import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import actionsCE from '~/boards/stores/actions';
 import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
 import {
@@ -21,6 +20,7 @@ import {
   urlParamsToObject,
 } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 import {
   fullEpicId,
   fullEpicBoardId,
@@ -37,7 +37,6 @@ import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import groupBoardAssigneesQuery from '../graphql/group_board_assignees.query.graphql';
 import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
-import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
 import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
@@ -482,58 +481,52 @@ export default {
     });
   },
 
-  moveItem: ({ getters, dispatch }, params) => {
+  moveItem: async ({ getters, dispatch, commit, state }, params) => {
     if (!getters.isEpicBoard) {
-      dispatch('moveIssue', params);
+      const prevStates = {
+        boardItems: cloneDeep(state.boardItems),
+        boardLists: cloneDeep(state.boardLists),
+        boardItemsByListId: cloneDeep(state.boardItemsByListId),
+      };
+
+      try {
+        dispatch('moveIssueCard', params);
+        dispatch('updateEpicForIssue', params);
+
+        await dispatch('requestIssueMoveListMutation', {
+          params,
+          mutationVariables: { epicId: params.epicId },
+        });
+        // TODO: Reconcile the frontend lists states with the backend lists state.
+      } catch (e) {
+        commit(
+          types.SET_ERROR,
+          s__('Boards|An error occurred while moving the issue. Please try again.'),
+        );
+
+        dispatch('restoreStates', prevStates);
+      }
     } else {
       dispatch('moveEpic', params);
     }
   },
 
-  moveIssue: (
-    { state, commit },
-    { itemId, itemIid, itemPath, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
-  ) => {
-    const originalIssue = state.boardItems[itemId];
-    const fromList = state.boardItemsByListId[fromListId];
-    const originalIndex = fromList.indexOf(Number(itemId));
-    commit(types.MOVE_ISSUE, {
-      originalIssue,
-      fromListId,
-      toListId,
-      moveBeforeId,
-      moveAfterId,
-      epicId,
-    });
+  updateEpicForIssue: ({ commit, state: { boardItems } }, { itemId, epicId }) => {
+    const issue = boardItems[itemId];
 
-    const { boardId } = state;
-    const [fullProjectPath] = itemPath.split(/[#]/);
-
-    gqlClient
-      .mutate({
-        mutation: issueMoveListMutation,
-        variables: {
-          projectPath: fullProjectPath,
-          boardId: fullBoardId(boardId),
-          iid: itemIid,
-          fromListId: getIdFromGraphQLId(fromListId),
-          toListId: getIdFromGraphQLId(toListId),
-          moveBeforeId,
-          moveAfterId,
-          epicId,
-        },
-      })
-      .then(({ data }) => {
-        if (data?.issueMoveList?.errors.length) {
-          throw new Error();
-        } else {
-          const issue = data.issueMoveList?.issue;
-          commit(types.MOVE_ISSUE_SUCCESS, { issue });
-        }
-      })
-      .catch(() =>
-        commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
-      );
+    if (epicId === null) {
+      commit(types.UPDATE_ISSUE_BY_ID, {
+        issueId: issue.id,
+        prop: 'epic',
+        value: null,
+      });
+    } else if (epicId !== undefined) {
+      commit(types.UPDATE_ISSUE_BY_ID, {
+        issueId: issue.id,
+        prop: 'epic',
+        value: { id: epicId },
+      });
+    }
   },
 
   moveEpic: ({ state, commit }, { itemId, fromListId, toListId, moveBeforeId, moveAfterId }) => {

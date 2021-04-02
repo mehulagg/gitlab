@@ -102,7 +102,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['moveIssue', 'moveIssueEpic', 'fetchItemsForList']),
+    ...mapActions(['moveItem', 'fetchItemsForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {
@@ -145,9 +145,8 @@ export default {
           moveAfterId = Number(children[newIndex].dataset.itemId);
         }
       }
-
-      this.moveIssue({
-        itemId,
+      this.moveItem({
+        itemId: Number(itemId),
         itemIid,
         itemPath,
         fromListId: from.dataset.listId,

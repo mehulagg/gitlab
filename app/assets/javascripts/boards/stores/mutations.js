@@ -2,7 +2,7 @@ import { pull, union } from 'lodash';
 import Vue from 'vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
-import { formatIssue, moveItemListHelper } from '../boards_util';
+import { formatIssue } from '../boards_util';
 import { issuableTypes } from '../constants';
 import * as mutationTypes from './mutation_types';
 
@@ -183,38 +183,28 @@ export default {
     notImplemented();
   },
 
-  [mutationTypes.MOVE_ISSUE]: (
-    state,
-    { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId },
-  ) => {
-    const fromList = state.boardLists[fromListId];
-    const toList = state.boardLists[toListId];
-
-    const issue = moveItemListHelper(originalIssue, fromList, toList);
-    Vue.set(state.boardItems, issue.id, issue);
-
-    removeItemFromList({ state, listId: fromListId, itemId: issue.id });
-    addItemToList({ state, listId: toListId, itemId: issue.id, moveBeforeId, moveAfterId });
+  [mutationTypes.RESTORE_STATE]: (state, { stateName, prevState }) => {
+    Vue.set(state, stateName, prevState);
   },
 
-  [mutationTypes.MOVE_ISSUE_SUCCESS]: (state, { issue }) => {
+  [mutationTypes.UPDATE_ISSUE]: (state, issue) => {
+    Vue.set(state.boardItems, issue.id, issue);
+  },
+
+  [mutationTypes.MUTATE_ISSUE_SUCCESS]: (state, issue) => {
     const issueId = getIdFromGraphQLId(issue.id);
     Vue.set(state.boardItems, issueId, formatIssue({ ...issue, id: issueId }));
   },
 
-  [mutationTypes.MOVE_ISSUE_FAILURE]: (
+  [mutationTypes.INSERT_ITEM_TO_LIST]: (
     state,
-    { originalIssue, fromListId, toListId, originalIndex },
+    { itemId, listId, moveBeforeId, moveAfterId, atIndex },
   ) => {
-    state.error = s__('Boards|An error occurred while moving the issue. Please try again.');
-    Vue.set(state.boardItems, originalIssue.id, originalIssue);
-    removeItemFromList({ state, listId: toListId, itemId: originalIssue.id });
-    addItemToList({
-      state,
-      listId: fromListId,
-      itemId: originalIssue.id,
-      atIndex: originalIndex,
-    });
+    addItemToList({ state, listId, itemId, moveBeforeId, moveAfterId, atIndex });
+  },
+
+  [mutationTypes.DELETE_ITEM_FROM_LIST]: (state, { itemId, listId }) => {
+    removeItemFromList({ state, listId, itemId });
   },
 
   [mutationTypes.REQUEST_UPDATE_ISSUE]: () => {
