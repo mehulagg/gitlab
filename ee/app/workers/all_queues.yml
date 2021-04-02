@@ -873,7 +873,7 @@
   :urgency: :high
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: new_epic
   :feature_category: :epics
