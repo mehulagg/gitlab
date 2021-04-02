@@ -123,6 +123,10 @@ describe('Standard Filter component', () => {
 
       expect(filterBody().props('loading')).toBe(loading);
     });
+
+    it('if is loading, does not add popstate handler to window and emits querystring value', () => {});
+
+    it('if is not loading, adds popstate handler to window and emits selected value', () => {});
   });
 
   describe('selecting options', () => {

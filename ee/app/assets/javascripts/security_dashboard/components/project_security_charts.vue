@@ -29,16 +29,12 @@ export default {
     GlLoadingIcon,
     GlLineChart,
   },
+  inject: ['hasVulnerabilities'],
   props: {
     projectFullPath: {
       type: String,
       required: false,
       default: '',
-    },
-    hasVulnerabilities: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   apollo: {
@@ -175,7 +171,7 @@ export default {
 
 <template>
   <security-charts-layout ref="layout">
-    <template v-if="shouldShowEmptyState" #empty-state>
+    <template v-if="!hasVulnerabilities" #empty-state>
       <dashboard-not-configured />
     </template>
     <template v-else-if="shouldShowCharts" #default>

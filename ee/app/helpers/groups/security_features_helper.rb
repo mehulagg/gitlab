@@ -39,6 +39,7 @@ module Groups::SecurityFeaturesHelper
 
   def group_level_security_dashboard_data(group)
     {
+      has_projects: group.projects.any?.to_s,
       projects_endpoint: expose_url(api_v4_groups_projects_path(id: group.id)),
       group_full_path: group.full_path,
       no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
