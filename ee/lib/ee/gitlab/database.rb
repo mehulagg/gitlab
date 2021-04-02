@@ -20,7 +20,7 @@ module EE
         # Disables prepared statements for the current database connection.
         def disable_prepared_statements
           config = ActiveRecord::Base.configurations[Rails.env]
-          config['prepared_statements'] = false
+          config[:prepared_statements] = false
 
           ActiveRecord::Base.establish_connection(config)
         end
