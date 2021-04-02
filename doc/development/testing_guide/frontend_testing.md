@@ -104,6 +104,15 @@ describe('Component', () => {
 
 Remember that the performance of each test depends on the environment.
 
+### Test-specific stylesheets
+
+Occasionally we need to do things like disable animations or surface elements which may be the target of Capybara click events in order for our integration tests to function properly without cumbersome workarounds. Therefore, when running RSpec integration tests, two test-specific stylesheets are included:
+
+- app/assets/stylesheets/disable_animations.scss
+- app/assets/stylesheets/test_environment.scss
+
+Custom styles here should be kept to a minimum and added only when necessary.
+
 ## What and how to test
 
 Before jumping into more gritty details about Jest-specific workflows like mocks and spies, we should briefly cover what to test with Jest.
