@@ -4,7 +4,6 @@
 
 The access levels are defined in the `Gitlab::Access` module. Currently, these levels are recognized:
 
-
 - No access (`0`)
 - Guest (`10`)
 - Reporter (`20`)
