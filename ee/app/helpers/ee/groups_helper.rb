@@ -112,12 +112,6 @@ module EE
       group.feature_available?(:adjourned_deletion_for_projects_and_groups)
     end
 
-    def render_setting_to_allow_project_access_token_creation?(group)
-      return super unless ::Gitlab.com?
-
-      group.root? && current_user.can?(:admin_setting_to_allow_project_access_token_creation, group)
-    end
-
     private
 
     def get_group_sidebar_links

@@ -114,6 +114,10 @@ RSpec.describe GroupsHelper do
       let_it_be(:parent) { create(:group) }
       let_it_be(:group) { create(:group, parent: parent) }
 
+      before do
+        parent.add_owner(owner)
+      end
+
       it 'returns true if group is root' do
         expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
       end
