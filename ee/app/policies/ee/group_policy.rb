@@ -396,10 +396,5 @@ module EE
 
       group.feature_available_non_trial?(:resource_access_token)
     end
-
-    override :resource_access_token_creation_allowed?
-    def resource_access_token_creation_allowed?
-      super && resource_access_token_feature_available?
-    end
   end
 end
