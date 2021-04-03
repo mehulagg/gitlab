@@ -39,7 +39,7 @@ export default {
   },
   data() {
     return {
-      filters: {},
+      filters: null,
       projects: [],
       projectsWereFetched: false,
     };

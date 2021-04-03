@@ -28,7 +28,7 @@ export default {
     filters: {
       type: Object,
       required: false,
-      default: () => ({}),
+      default: null,
     },
   },
   data() {
@@ -60,6 +60,9 @@ export default {
       error() {
         this.errorLoadingVulnerabilities = true;
       },
+      skip() {
+        return !this.filters;
+      },
     },
     securityScanners: {
       query: securityScannersQuery,
@@ -81,6 +84,9 @@ export default {
           enabled: enabled.map(translateScannerName),
           pipelineRun: pipelineRun.map(translateScannerName),
         };
+      },
+      skip() {
+        return !this.filters;
       },
     },
   },
