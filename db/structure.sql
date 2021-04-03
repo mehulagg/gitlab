@@ -25074,7 +25074,7 @@ ALTER TABLE ONLY protected_branch_merge_access_levels
     ADD CONSTRAINT fk_8a3072ccb3 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY timelogs
-    ADD CONSTRAINT fk_8d058cd571 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_8d058cd571 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY releases
     ADD CONSTRAINT fk_8e4456f90f FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
