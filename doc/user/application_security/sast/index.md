@@ -709,6 +709,15 @@ documentation for instructions.
 
 ## Troubleshooting
 
+### SAST Debug Logging
+
+Increasing the [Secure scanner log verbosity](https://docs.gitlab.com/ee/user/application_security/sast/index.html#logging-level) to `debug` in a global CI variable is often helpful when troubleshooting SAST jobs.
+
+```yaml
+variables:
+  SECURE_LOG_LEVEL: "debug"
+```
+
 ### `Error response from daemon: error processing tar file: docker-tar: relocation error`
 
 This error occurs when the Docker version that runs the SAST job is `19.03.0`.
