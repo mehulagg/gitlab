@@ -311,7 +311,7 @@ request created to automatically solve the issue.
 If this action is available:
 
 1. Select the **Resolve with merge request** dropdown, then select **Resolve with merge request**.
-   
+
    ![Create merge request from vulnerability](img/create_mr_from_vulnerability_v13_4.png)
 
 A merge request is created. It that applies the solution to the source branch.
@@ -407,7 +407,7 @@ to pass a username and password. You can set it under your project's settings
 so that your credentials aren't exposed in `.gitlab-ci.yml`.
 
 If the username is `myuser` and the password is `verysecret` then you would
-[set the following variable](../../ci/variables/README.md#create-a-custom-variable-in-the-ui)
+[set the following variable](../../ci/variables/README.md#custom-cicd-variables)
 under your project's settings:
 
 | Type     | Key              | Value |

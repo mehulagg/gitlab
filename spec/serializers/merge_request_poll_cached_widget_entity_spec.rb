@@ -248,14 +248,6 @@ RSpec.describe MergeRequestPollCachedWidgetEntity do
 
           expect(subject[:pipeline]).to eq(pipeline_payload)
         end
-
-        context 'when merge_request_cached_pipeline_serializer is disabled' do
-          it 'does not return pipeline' do
-            stub_feature_flags(merge_request_cached_pipeline_serializer: false)
-
-            expect(subject[:pipeline]).to be_nil
-          end
-        end
       end
 
       context 'when user does not have access to pipelines' do
@@ -272,6 +264,51 @@ RSpec.describe MergeRequestPollCachedWidgetEntity do
           pipeline.update!(sha: "not up to date")
 
           expect(subject[:pipeline]).to eq(nil)
+        end
+      end
+    end
+  end
+
+  describe 'merge_pipeline' do
+    it 'returns nil' do
+      expect(subject[:merge_pipeline]).to be_nil
+    end
+
+    context 'when is merged' do
+      let(:resource) { create(:merged_merge_request, source_project: project, merge_commit_sha: project.commit.id) }
+      let(:pipeline) { create(:ci_empty_pipeline, project: project, ref: resource.target_branch, sha: resource.merge_commit_sha) }
+
+      before do
+        project.add_maintainer(user)
+      end
+
+      it 'returns merge_pipeline' do
+        pipeline.reload
+        pipeline_payload =
+          MergeRequests::PipelineEntity
+            .represent(pipeline, request: request)
+            .as_json
+
+        expect(subject[:merge_pipeline]).to eq(pipeline_payload)
+      end
+
+      context 'when user cannot read pipelines on target project' do
+        before do
+          project.add_guest(user)
+        end
+
+        it 'returns nil' do
+          expect(subject[:merge_pipeline]).to be_nil
+        end
+      end
+
+      context 'when merge_request_cached_merge_pipeline_serializer is disabled' do
+        before do
+          stub_feature_flags(merge_request_cached_merge_pipeline_serializer: false)
+        end
+
+        it 'returns nil' do
+          expect(subject[:merge_pipeline]).to be_nil
         end
       end
     end

@@ -96,6 +96,7 @@ module QA
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
     autoload :Design, 'qa/resource/design'
     autoload :RegistryRepository, 'qa/resource/registry_repository'
+    autoload :Package, 'qa/resource/package'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -499,6 +500,7 @@ module QA
       autoload :Wiki, 'qa/page/component/wiki'
       autoload :WikiSidebar, 'qa/page/component/wiki_sidebar'
       autoload :WikiPageForm, 'qa/page/component/wiki_page_form'
+      autoload :CommitModal, 'qa/page/component/commit_modal'
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'
@@ -576,7 +578,9 @@ module QA
     autoload :LoopRunner, 'qa/specs/loop_runner'
 
     module Helpers
+      autoload :ContextSelector, 'qa/specs/helpers/context_selector'
       autoload :Quarantine, 'qa/specs/helpers/quarantine'
+      autoload :RSpec, 'qa/specs/helpers/rspec'
     end
   end
 

@@ -17,18 +17,32 @@ RSpec.describe EE::Emails::MergeRequests do
     subject { Notify.add_merge_request_approver_email(recipient.id, merge_request.id, current_user.id) }
 
     context 'when email_author_in_body is set' do
-      it 'includes the name of the person who added the approver' do
+      it 'has the correct body with the name of the person who added the approver' do
         stub_application_setting(email_author_in_body: true)
 
-        expect(subject).to have_body_text(current_user.name)
+        aggregate_failures do
+          is_expected.to have_body_text(current_user.name)
+          is_expected.to have_body_text('added you as an approver')
+          is_expected.to have_text_part_content(assignee.name)
+          is_expected.to have_html_part_content(assignee.name)
+          is_expected.to have_text_part_content(reviewer.name)
+          is_expected.to have_html_part_content(reviewer.name)
+        end
       end
     end
 
     context 'when email_author_in_body is not set' do
-      it 'does not include the name of the person who added the approver' do
+      it 'has the correct body without the name of the person who added the approver' do
         stub_application_setting(email_author_in_body: false)
 
-        expect(subject).not_to have_body_text(current_user.name)
+        aggregate_failures do
+          is_expected.not_to have_body_text(current_user.name)
+          is_expected.not_to have_body_text('added you as an approver')
+          is_expected.to have_text_part_content(assignee.name)
+          is_expected.to have_html_part_content(assignee.name)
+          is_expected.to have_text_part_content(reviewer.name)
+          is_expected.to have_html_part_content(reviewer.name)
+        end
       end
     end
   end

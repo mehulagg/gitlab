@@ -79,6 +79,9 @@ module EE
             end
             delete ':metric_image_id' do
               issue = find_project_issue(params[:issue_iid])
+
+              authorize!(:destroy_issuable_metric_image, issue)
+
               metric_image = issue.metric_images.find_by_id(params[:metric_image_id])
 
               render_api_error!('Metric image not found', 404) unless metric_image
@@ -93,12 +96,6 @@ module EE
         end
 
         helpers do
-          include ::API::Helpers::Packages::BasicAuthHelpers
-
-          def project
-            authorized_user_project
-          end
-
           def max_file_size_exceeded?
             params[:file].size > ::IssuableMetricImage::MAX_FILE_SIZE
           end

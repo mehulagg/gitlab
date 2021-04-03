@@ -1,23 +1,23 @@
 import {
-  deleteSegmentFromCache,
-  addSegmentToCache,
+  deleteSegmentsFromCache,
+  addSegmentsToCache,
 } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import { devopsAdoptionSegmentsData } from '../mock_data';
 
-describe('addSegmentToCache', () => {
+describe('addSegmentsToCache', () => {
   const store = {
     readQuery: jest.fn(() => ({ devopsAdoptionSegments: { nodes: [] } })),
     writeQuery: jest.fn(),
   };
 
   it('calls writeQuery with the correct response', () => {
-    addSegmentToCache(store, devopsAdoptionSegmentsData.nodes[0]);
+    addSegmentsToCache(store, devopsAdoptionSegmentsData.nodes);
 
     expect(store.writeQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         data: {
           devopsAdoptionSegments: {
-            nodes: [devopsAdoptionSegmentsData.nodes[0]],
+            nodes: devopsAdoptionSegmentsData.nodes,
           },
         },
       }),
@@ -25,7 +25,7 @@ describe('addSegmentToCache', () => {
   });
 });
 
-describe('deleteSegmentFromCache', () => {
+describe('deleteSegmentsFromCache', () => {
   const store = {
     readQuery: jest.fn(() => ({ devopsAdoptionSegments: devopsAdoptionSegmentsData })),
     writeQuery: jest.fn(),
@@ -33,7 +33,7 @@ describe('deleteSegmentFromCache', () => {
 
   it('calls writeQuery with the correct response', () => {
     // Remove the item at the first index
-    deleteSegmentFromCache(store, devopsAdoptionSegmentsData.nodes[0].id);
+    deleteSegmentsFromCache(store, [devopsAdoptionSegmentsData.nodes[0].id]);
 
     expect(store.writeQuery).toHaveBeenCalledWith(
       expect.not.objectContaining({

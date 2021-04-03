@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'getting Incident Management on-call shifts' do
   include GraphqlHelpers
 
-  let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access) }
+  let_it_be(:participant) { create(:incident_management_oncall_participant, :utc, :with_developer_access) }
   let_it_be(:rotation) { participant.rotation }
   let_it_be(:project) { rotation.project }
   let_it_be(:current_user) { participant.user }

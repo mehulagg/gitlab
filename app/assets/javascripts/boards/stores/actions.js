@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import { pick } from 'lodash';
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
@@ -68,6 +69,7 @@ export default {
       'milestoneTitle',
       'releaseTag',
       'search',
+      'myReactionEmoji',
     ]);
     filterParams.not = transformNotFilters(filters);
     commit(types.SET_FILTERS, filterParams);
@@ -134,7 +136,7 @@ export default {
 
   createIssueList: (
     { state, commit, dispatch, getters },
-    { backlog, labelId, milestoneId, assigneeId },
+    { backlog, labelId, milestoneId, assigneeId, iterationId },
   ) => {
     const { boardId } = state;
 
@@ -154,6 +156,7 @@ export default {
           labelId,
           milestoneId,
           assigneeId,
+          iterationId,
         },
       })
       .then(({ data }) => {
@@ -325,8 +328,8 @@ export default {
     commit(types.RESET_ISSUES);
   },
 
-  moveItem: ({ dispatch }) => {
-    dispatch('moveIssue');
+  moveItem: ({ dispatch }, payload) => {
+    dispatch('moveIssue', payload);
   },
 
   moveIssue: (
@@ -605,6 +608,18 @@ export default {
     } else {
       dispatch('setActiveId', { id: boardItem.id, sidebarType });
     }
+  },
+
+  setError: ({ commit }, { message, error, captureError = false }) => {
+    commit(types.SET_ERROR, message);
+
+    if (captureError) {
+      Sentry.captureException(error);
+    }
+  },
+
+  unsetError: ({ commit }) => {
+    commit(types.SET_ERROR, undefined);
   },
 
   fetchBacklog: () => {

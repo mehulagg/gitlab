@@ -169,11 +169,11 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
     });
 
     it('displays a dropdown option for each scan profile', () => {
-      findScanProfileDropdownInput()
-        .findAll('li')
-        .wrappers.forEach((item, index) => {
-          expect(item.text()).toBe(apiFuzzingCiConfiguration.scanProfiles[index].description);
-        });
+      const dropdownItems = findScanProfileDropdownInput().findAll('li').wrappers;
+      dropdownItems.shift(); // Skip section header
+      dropdownItems.forEach((item, index) => {
+        expect(item.text()).toBe(apiFuzzingCiConfiguration.scanProfiles[index].description);
+      });
     });
 
     it('by default, YAML viewer is not visible', () => {

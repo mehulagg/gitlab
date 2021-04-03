@@ -27,11 +27,11 @@ module Elastic
       end
 
       # @return [Kaminari::PaginatableArray]
-      def elastic_search_as_found_blob(query, page: 1, per: 20, options: {})
+      def elastic_search_as_found_blob(query, page: 1, per: 20, options: {}, preload_method: nil)
         # Highlight is required for parse_search_result to locate relevant line
         options = options.merge(highlight: true)
 
-        elastic_search_and_wrap(query, type: es_type, page: page, per: per, options: options) do |result, project|
+        elastic_search_and_wrap(query, type: es_type, page: page, per: per, options: options, preload_method: preload_method) do |result, project|
           ::Gitlab::Elastic::SearchResults.parse_search_result(result, project)
         end
       end

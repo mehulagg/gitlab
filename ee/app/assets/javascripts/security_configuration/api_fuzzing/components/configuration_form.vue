@@ -58,8 +58,10 @@ export default {
       targetUrl: {
         field: 'targetUrl',
         label: s__('APIFuzzing|Target URL'),
-        description: s__('APIFuzzing|Base URL of API fuzzing target.'),
-        placeholder: __('Ex: Example.com'),
+        description: s__(
+          'APIFuzzing|Base URL of API testing target. For example, http://www.example.com.',
+        ),
+        placeholder: __('http://www.example.com'),
         value: '',
       },
       scanMode: {
@@ -84,9 +86,9 @@ export default {
           field: 'username',
           label: s__('APIFuzzing|Username for basic authentication'),
           description: s__(
-            'APIFuzzing|Instead of entering the username directly, enter the key of the CI variable set to the username.',
+            'APIFuzzing|Enter the name of the variable containing the username. For example, $VariableWithUsername.',
           ),
-          placeholder: s__('APIFuzzing|Ex: $TestUsername'),
+          placeholder: s__('APIFuzzing|$VariableWithUsername'),
           value: '',
         },
         {
@@ -94,18 +96,18 @@ export default {
           field: 'password',
           label: s__('APIFuzzing|Password for basic authentication'),
           description: s__(
-            'APIFuzzing|Instead of entering the password directly, enter the key of the CI variable set to the password.',
+            'APIFuzzing|Enter the name of the variable containing the password. For example, $VariableWithPassword.',
           ),
-          placeholder: s__('APIFuzzing|Ex: $TestPassword'),
+          placeholder: s__('APIFuzzing|$VariableWithPassword'),
           value: '',
         },
       ],
       scanProfile: {
         field: 'scanProfile',
         label: s__('APIFuzzing|Scan profile'),
-        description: 'Pre-defined profiles by GitLab.',
         value: '',
         defaultText: s__('APIFuzzing|Choose a profile'),
+        sectionHeader: s__('APIFuzzing|Predefined profiles'),
         options: this.apiFuzzingCiConfiguration.scanProfiles.map(
           ({ name: value, description: text }) => ({
             value,
@@ -227,7 +229,7 @@ export default {
           <gl-sprintf
             :message="
               s__(
-                'APIFuzzing|Authentication is handled by providing HTTP basic authentication token as a header or cookie. %{linkStart}More information%{linkEnd}.',
+                'APIFuzzing|Configure HTTP basic authentication values. Other authentication methods are supported. %{linkStart}Learn more%{linkEnd}.',
               )
             "
           >
@@ -273,7 +275,7 @@ export default {
 
     <dropdown-input v-model="scanProfile.value" v-bind="scanProfile" />
     <template v-if="scanProfileYaml">
-      <gl-accordion>
+      <gl-accordion :header-level="3">
         <gl-accordion-item :title="s__('APIFuzzing|Show code snippet for the profile')">
           <pre data-testid="api-fuzzing-scan-profile-yaml-viewer">{{ scanProfileYaml }}</pre>
         </gl-accordion-item>

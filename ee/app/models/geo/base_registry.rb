@@ -2,6 +2,7 @@
 
 class Geo::BaseRegistry < Geo::TrackingBase
   include BulkInsertSafe
+  include EachBatch
 
   self.abstract_class = true
 

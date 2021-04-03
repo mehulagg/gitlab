@@ -28,9 +28,9 @@ module EE
     end
 
     def size_limit_message_for_group(group)
-      show_lfs = group.lfs_enabled? ? 'and their respective LFS files' : ''
+      show_lfs = group.lfs_enabled? ? 'including LFS files' : ''
 
-      "Repositories within this group #{show_lfs} will be restricted to this maximum size. Can be overridden inside each project. 0 for unlimited. Leave empty to inherit the global value."
+      "Max size for repositories within this group #{show_lfs}. Can be overridden inside each project. For no limit, enter 0. To inherit the global value, leave blank."
     end
 
     override :group_packages_nav_link_paths

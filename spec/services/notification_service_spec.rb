@@ -105,7 +105,7 @@ RSpec.describe NotificationService, :mailer do
       recipient_1 = NotificationRecipient.new(user_1, :custom, custom_action: :new_release)
       allow(NotificationRecipients::BuildService).to receive(:build_new_release_recipients).and_return([recipient_1])
 
-      expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: object.class, object_id: object.id)
+      expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: object.class.to_s, object_id: object.id)
 
       action
 
@@ -288,6 +288,27 @@ RSpec.describe NotificationService, :mailer do
         end
       end
     end
+
+    describe '#ssh_key_expired' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:fingerprints) { ["aa:bb:cc:dd:ee:zz"] }
+
+      subject { notification.ssh_key_expired(user, fingerprints) }
+
+      it 'sends email to the token owner' do
+        expect { subject }.to have_enqueued_email(user, fingerprints, mail: "ssh_key_expired_email")
+      end
+
+      context 'when user is not allowed to receive notifications' do
+        before do
+          user.block!
+        end
+
+        it 'does not send email to the token owner' do
+          expect { subject }.not_to have_enqueued_email(user, fingerprints, mail: "ssh_key_expired_email")
+        end
+      end
+    end
   end
 
   describe '#unknown_sign_in' do
@@ -315,17 +336,17 @@ RSpec.describe NotificationService, :mailer do
   describe 'Notes' do
     context 'issue note' do
       let_it_be(:project) { create(:project, :private) }
-      let_it_be(:issue) { create(:issue, project: project, assignees: [assignee]) }
+      let_it_be_with_reload(:issue) { create(:issue, project: project, assignees: [assignee]) }
       let_it_be(:mentioned_issue) { create(:issue, assignees: issue.assignees) }
       let_it_be_with_reload(:author) { create(:user) }
       let(:note) { create(:note_on_issue, author: author, noteable: issue, project_id: issue.project_id, note: '@mention referenced, @unsubscribed_mentioned and @outsider also') }
 
       subject { notification.new_note(note) }
 
-      context 'on service desk issue' do
+      context 'issue_email_participants' do
         before do
           allow(Notify).to receive(:service_desk_new_note_email)
-                             .with(Integer, Integer).and_return(mailer)
+                             .with(Integer, Integer, String).and_return(mailer)
 
           allow(::Gitlab::IncomingEmail).to receive(:enabled?) { true }
           allow(::Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
@@ -336,7 +357,7 @@ RSpec.describe NotificationService, :mailer do
 
         def should_email!
           expect(Notify).to receive(:service_desk_new_note_email)
-            .with(issue.id, note.id)
+            .with(issue.id, note.id, issue.external_author)
         end
 
         def should_not_email!
@@ -365,33 +386,19 @@ RSpec.describe NotificationService, :mailer do
         let(:project) { issue.project }
         let(:note) { create(:note, noteable: issue, project: project) }
 
-        context 'a non-service-desk issue' do
+        context 'do not exist' do
           it_should_not_email!
         end
 
-        context 'a service-desk issue' do
+        context 'do exist' do
+          let!(:issue_email_participant) { issue.issue_email_participants.create!(email: 'service.desk@example.com') }
+
           before do
             issue.update!(external_author: 'service.desk@example.com')
             project.update!(service_desk_enabled: true)
           end
 
           it_should_email!
-
-          context 'where the project has disabled the feature' do
-            before do
-              project.update!(service_desk_enabled: false)
-            end
-
-            it_should_not_email!
-          end
-
-          context 'when the support bot has unsubscribed' do
-            before do
-              issue.unsubscribe(User.support_bot, project)
-            end
-
-            it_should_not_email!
-          end
         end
       end
 
@@ -1676,7 +1683,7 @@ RSpec.describe NotificationService, :mailer do
         notification.issue_due(issue)
         email = find_email_for(@subscriber)
 
-        expect(email.header[:from].display_names).to eq([issue.author.name])
+        expect(email.header[:from].display_names).to eq(["#{issue.author.name} (@#{issue.author.username})"])
       end
 
       it_behaves_like 'participating notifications' do

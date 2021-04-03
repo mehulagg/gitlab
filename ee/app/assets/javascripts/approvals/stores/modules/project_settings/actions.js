@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import {
@@ -18,7 +18,9 @@ export const receiveRulesSuccess = ({ commit }, approvalSettings) => {
 };
 
 export const receiveRulesError = () => {
-  createFlash(__('An error occurred fetching the approval rules.'));
+  createFlash({
+    message: __('An error occurred fetching the approval rules.'),
+  });
 };
 
 export const fetchRules = ({ rootState, dispatch }) => {
@@ -59,7 +61,9 @@ export const deleteRuleSuccess = ({ dispatch }) => {
 };
 
 export const deleteRuleError = () => {
-  createFlash(__('An error occurred while deleting the approvers group'));
+  createFlash({
+    message: __('An error occurred while deleting the approvers group'),
+  });
 };
 
 export const deleteRule = ({ rootState, dispatch }, id) => {

@@ -36,7 +36,7 @@ module EE
 
     def add_to_slack_data(projects)
       {
-        projects: projects,
+        projects: projects.as_json(only: [:id, :name]),
         sign_in_path: new_session_path(:user, redirect_to_referer: 'yes'),
         is_signed_in: current_user.present?,
         slack_link_profile_slack_path: slack_link_profile_slack_path,

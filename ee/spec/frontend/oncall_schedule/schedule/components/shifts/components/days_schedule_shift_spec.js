@@ -3,7 +3,6 @@ import RotationsAssignee from 'ee/oncall_schedules/components/rotations/componen
 import DaysScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/days_schedule_shift.vue';
 import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import { nDaysAfter } from '~/lib/utils/datetime_utility';
-import mockTimezones from '../../../../mocks/mock_timezones.json';
 
 const shift = {
   participant: {
@@ -32,7 +31,6 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/d
         timeframe,
         presetType: PRESET_TYPES.WEEKS,
         shiftTimeUnitWidth: CELL_WIDTH,
-        selectedTimezone: mockTimezones[0],
         ...props,
       },
     });
@@ -67,8 +65,8 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/d
 
     it('calculates the correct rotation assignee styles when the shift does not start at the beginning of the time-frame cell', () => {
       /**
-       * Where left should be 500px i.e. ((HOURS_IN_DAY - (HOURS_IN_DAY - overlapStartTime)) * CELL_WIDTH)(((24 - (24 - 10)) * 50))
-       * and width should be overlapping hours * CELL_WIDTH(12 * 50 - 2)
+       * Where left should be 500px i.e. ((HOURS_IN_DAY - (HOURS_IN_DAY - overlapStartTime)) * CELL_WIDTH) (((24 - (24 - 10)) * 50))
+       * and width should be overlapping hours * CELL_WIDTH (12 * 50 - 2)
        */
       createComponent({
         props: {
@@ -83,6 +81,31 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/d
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '500px',
         width: '598px',
+      });
+    });
+
+    it('handles the offset for timezone changes', () => {
+      const DLSTimeframeItem = new Date(2021, 2, 14);
+      const DSLTimeframe = [timeframeItem, nDaysAfter(timeframeItem, DAYS_IN_WEEK)];
+      /**
+       * Where left should be: ((HOURS_IN_DAY - (HOURS_IN_DAY - overlapStartTime)) * CELL_WIDTH)
+       * and width should be: (overlappingHours + timezoneOffset) * CELL_WIDTH
+       */
+      createComponent({
+        props: {
+          shift: {
+            ...shift,
+            startsAt: '2021-03-14T05:00:00Z',
+            endsAt: '2021-03-14T07:00:00Z',
+          },
+          timeframeItem: DLSTimeframeItem,
+          timeframe: DSLTimeframe,
+        },
+        data: { shiftTimeUnitWidth: CELL_WIDTH },
+      });
+      expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
+        left: '250px',
+        width: '98px',
       });
     });
   });

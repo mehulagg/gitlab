@@ -1,11 +1,11 @@
 <script>
 import {
+  GlAvatar,
   GlAvatarLabeled,
+  GlIcon,
   GlFormGroup,
   GlFormRadio,
   GlFormRadioGroup,
-  GlFormSelect,
-  GlLabel,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -16,40 +16,63 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
+export const listTypeInfo = {
+  [ListType.label]: {
+    listPropertyName: 'labels',
+    loadingPropertyName: 'labelsLoading',
+    fetchMethodName: 'fetchLabels',
+    noneSelected: __('Select a label'),
+    searchPlaceholder: __('Search labels'),
+  },
+  [ListType.assignee]: {
+    listPropertyName: 'assignees',
+    loadingPropertyName: 'assigneesLoading',
+    fetchMethodName: 'fetchAssignees',
+    noneSelected: __('Select an assignee'),
+    searchPlaceholder: __('Search assignees'),
+  },
+  [ListType.milestone]: {
+    listPropertyName: 'milestones',
+    loadingPropertyName: 'milestonesLoading',
+    fetchMethodName: 'fetchMilestones',
+    noneSelected: __('Select a milestone'),
+    searchPlaceholder: __('Search milestones'),
+  },
+  [ListType.iteration]: {
+    listPropertyName: 'iterations',
+    loadingPropertyName: 'iterationsLoading',
+    fetchMethodName: 'fetchIterations',
+    noneSelected: __('Select an iteration'),
+    searchPlaceholder: __('Search iterations'),
+  },
+};
+
 export default {
   i18n: {
-    listType: __('List type'),
-    labelListDescription: __('A label list displays issues with the selected label.'),
-    assigneeListDescription: __('An assignee list displays issues assigned to the selected user'),
-    milestoneListDescription: __('A milestone list displays issues in the selected milestone.'),
-    selectLabel: __('Select label'),
-    selectAssignee: __('Select assignee'),
-    selectMilestone: __('Select milestone'),
-    searchLabels: __('Search labels'),
-    searchAssignees: __('Search assignees'),
-    searchMilestones: __('Search milestones'),
+    value: __('Value'),
   },
-  columnTypes: [
-    { value: ListType.label, text: __('Label') },
-    { value: ListType.assignee, text: __('Assignee') },
-    { value: ListType.milestone, text: __('Milestone') },
-  ],
   components: {
     BoardAddNewColumnForm,
+    GlAvatar,
     GlAvatarLabeled,
+    GlIcon,
     GlFormGroup,
     GlFormRadio,
     GlFormRadioGroup,
-    GlFormSelect,
-    GlLabel,
   },
   directives: {
     GlTooltip,
   },
-  inject: ['scopedLabelsAvailable'],
+  inject: [
+    'scopedLabelsAvailable',
+    'milestoneListsAvailable',
+    'assigneeListsAvailable',
+    'iterationListsAvailable',
+  ],
   data() {
     return {
       selectedId: null,
+      selectedItem: null,
       columnType: ListType.label,
     };
   },
@@ -57,24 +80,25 @@ export default {
     ...mapState([
       'labels',
       'labelsLoading',
-      'assignees',
-      'assigneesLoading',
       'milestones',
       'milestonesLoading',
+      'iterations',
+      'iterationsLoading',
+      'assignees',
+      'assigneesLoading',
     ]),
     ...mapGetters(['getListByTypeId', 'shouldUseGraphQL', 'isEpicBoard']),
 
+    info() {
+      return listTypeInfo[this.columnType] || {};
+    },
+
     items() {
-      if (this.labelTypeSelected) {
-        return this.labels;
-      }
-      if (this.assigneeTypeSelected) {
-        return this.assignees;
-      }
-      if (this.milestoneTypeSelected) {
-        return this.milestones;
-      }
-      return [];
+      return this[this.info.listPropertyName] || [];
+    },
+
+    hasItems() {
+      return this.items.length > 0;
     },
 
     labelTypeSelected() {
@@ -86,111 +110,68 @@ export default {
     milestoneTypeSelected() {
       return this.columnType === ListType.milestone;
     },
+    iterationTypeSelected() {
+      return this.columnType === ListType.iteration;
+    },
 
-    selectedLabel() {
-      if (!this.labelTypeSelected) {
-        return null;
-      }
-      return this.labels.find(({ id }) => id === this.selectedId);
+    hasLabelSelection() {
+      return this.labelTypeSelected && this.selectedItem;
     },
-    selectedAssignee() {
-      if (!this.assigneeTypeSelected) {
-        return null;
-      }
-      return this.assignees.find(({ id }) => id === this.selectedId);
+    hasMilestoneSelection() {
+      return this.milestoneTypeSelected && this.selectedItem;
     },
-    selectedMilestone() {
-      if (!this.milestoneTypeSelected) {
-        return null;
-      }
-      return this.milestones.find(({ id }) => id === this.selectedId);
+    hasIterationSelection() {
+      return this.iterationTypeSelected && this.selectedItem;
     },
-    selectedItem() {
-      if (!this.selectedId) {
-        return null;
-      }
-      if (this.labelTypeSelected) {
-        return this.selectedLabel;
-      }
-      if (this.assigneeTypeSelected) {
-        return this.selectedAssignee;
-      }
-      if (this.milestoneTypeSelected) {
-        return this.selectedMilestone;
-      }
-      return null;
+    hasAssigneeSelection() {
+      return this.assigneeTypeSelected && this.selectedItem;
     },
 
     columnForSelected() {
-      if (!this.columnType) {
+      if (!this.columnType || !this.selectedId) {
         return false;
       }
 
-      const key = `${this.columnType}Id`;
-      return this.getListByTypeId({
-        [key]: this.selectedId,
-      });
+      if (this.shouldUseGraphQL || this.isEpicBoard) {
+        const key = `${this.columnType}Id`;
+        return this.getListByTypeId({
+          [key]: this.selectedId,
+        });
+      }
+
+      return boardsStore.state.lists.find(
+        (list) => list[this.columnType]?.id === getIdFromGraphQLId(this.selectedId),
+      );
     },
 
     loading() {
-      if (this.columnType === ListType.label) {
-        return this.labelsLoading;
-      }
-      if (this.assigneeTypeSelected) {
-        return this.assigneesLoading;
-      }
-      if (this.columnType === ListType.milestone) {
-        return this.milestonesLoading;
-      }
-      return false;
+      return this[this.info.loadingPropertyName];
     },
 
-    formDescription() {
-      if (this.labelTypeSelected) {
-        return this.$options.i18n.labelListDescription;
+    columnTypes() {
+      const types = [{ value: ListType.label, text: __('Label') }];
+
+      if (this.assigneeListsAvailable) {
+        types.push({ value: ListType.assignee, text: __('Assignee') });
       }
 
-      if (this.assigneeTypeSelected) {
-        return this.$options.i18n.assigneeListDescription;
+      if (this.milestoneListsAvailable) {
+        types.push({ value: ListType.milestone, text: __('Milestone') });
       }
 
-      if (this.milestoneTypeSelected) {
-        return this.$options.i18n.milestoneListDescription;
+      if (this.iterationListsAvailable) {
+        types.push({ value: ListType.iteration, text: __('Iteration') });
       }
 
-      return null;
+      return types;
     },
 
     searchLabel() {
-      if (this.labelTypeSelected) {
-        return this.$options.i18n.selectLabel;
-      }
-
-      if (this.assigneeTypeSelected) {
-        return this.$options.i18n.selectAssignee;
-      }
-
-      if (this.milestoneTypeSelected) {
-        return this.$options.i18n.selectMilestone;
-      }
-
-      return null;
+      return this.showListTypeSelector ? this.$options.i18n.value : null;
     },
 
-    searchPlaceholder() {
-      if (this.labelTypeSelected) {
-        return this.$options.i18n.searchLabels;
-      }
-
-      if (this.assigneeTypeSelected) {
-        return this.$options.i18n.searchAssignees;
-      }
-
-      if (this.milestoneTypeSelected) {
-        return this.$options.i18n.searchMilestones;
-      }
-
-      return null;
+    showListTypeSelector() {
+      return !this.isEpicBoard && this.columnTypes.length > 1;
     },
   },
   created() {
@@ -203,6 +184,7 @@ export default {
       'highlightList',
       'setAddColumnFormVisibility',
       'fetchAssignees',
+      'fetchIterations',
       'fetchMilestones',
     ]),
     highlight(listId) {
@@ -244,16 +226,21 @@ export default {
         };
 
         if (this.labelTypeSelected) {
-          listObj.label = this.selectedLabel;
+          listObj.label = this.selectedItem;
         } else if (this.milestoneTypeSelected) {
           listObj.milestone = {
-            ...this.selectedMilestone,
-            id: getIdFromGraphQLId(this.selectedMilestone.id),
+            ...this.selectedItem,
+            id: getIdFromGraphQLId(this.selectedItem.id),
+          };
+        } else if (this.iterationTypeSelected) {
+          listObj.iteration = {
+            ...this.selectedItem,
+            id: getIdFromGraphQLId(this.selectedItem.id),
           };
         } else if (this.assigneeTypeSelected) {
           listObj.assignee = {
-            ...this.selectedAssignee,
-            id: getIdFromGraphQLId(this.selectedAssignee.id),
+            ...this.selectedItem,
+            id: getIdFromGraphQLId(this.selectedItem.id),
           };
         }
 
@@ -262,17 +249,7 @@ export default {
     },
 
     filterItems(searchTerm) {
-      switch (this.columnType) {
-        case ListType.milestone:
-          this.fetchMilestones(searchTerm);
-          break;
-        case ListType.assignee:
-          this.fetchAssignees(searchTerm);
-          break;
-        case ListType.label:
-        default:
-          this.fetchLabels(searchTerm);
-      }
+      this[this.info.fetchMethodName](searchTerm);
     },
 
     showScopedLabels(label) {
@@ -282,7 +259,17 @@ export default {
     setColumnType(type) {
       this.columnType = type;
       this.selectedId = null;
+      this.setSelectedItem(null);
       this.filterItems();
+    },
+
+    setSelectedItem(selectedId) {
+      const item = this.items.find(({ id }) => id === selectedId);
+      if (!selectedId || !item) {
+        this.selectedItem = null;
+      } else {
+        this.selectedItem = { ...item };
+      }
     },
   },
 };
@@ -291,59 +278,83 @@ export default {
 <template>
   <board-add-new-column-form
     :loading="loading"
-    :form-description="formDescription"
+    :none-selected="info.noneSelected"
     :search-label="searchLabel"
-    :search-placeholder="searchPlaceholder"
+    :search-placeholder="info.searchPlaceholder"
     :selected-id="selectedId"
     @filter-items="filterItems"
     @add-list="addList"
   >
-    <template slot="select-list-type">
+    <template #select-list-type>
       <gl-form-group
-        v-if="!isEpicBoard"
-        :label="$options.i18n.listType"
-        class="gl-px-5 gl-py-0 gl-mt-5"
+        v-if="showListTypeSelector"
+        :description="$options.i18n.scopeDescription"
+        class="gl-px-5 gl-py-0 gl-mb-3"
         label-for="list-type"
       >
-        <gl-form-select
-          id="list-type"
-          v-model="columnType"
-          :options="$options.columnTypes"
-          @change="setColumnType"
-        />
+        <gl-form-radio-group v-model="columnType">
+          <gl-form-radio
+            v-for="{ text, value } in columnTypes"
+            :key="value"
+            :value="value"
+            class="gl-mb-0 gl-align-self-center"
+            @change="setColumnType"
+          >
+            {{ text }}
+          </gl-form-radio>
+        </gl-form-radio-group>
       </gl-form-group>
     </template>
 
-    <template slot="selected">
-      <div v-if="selectedLabel">
-        <gl-label
-          v-gl-tooltip
-          :title="selectedLabel.title"
-          :description="selectedLabel.description"
-          :background-color="selectedLabel.color"
-          :scoped="showScopedLabels(selectedLabel)"
-        />
-      </div>
-      <div v-else-if="selectedMilestone" class="gl-text-truncate">
-        {{ selectedMilestone.title }}
-      </div>
+    <template #selected>
+      <template v-if="hasLabelSelection">
+        <span
+          class="dropdown-label-box gl-top-0 gl-flex-shrink-0"
+          :style="{
+            backgroundColor: selectedItem.color,
+          }"
+        ></span>
+        <div class="gl-text-truncate">{{ selectedItem.title }}</div>
+      </template>
+
+      <template v-else-if="hasMilestoneSelection">
+        <gl-icon class="gl-flex-shrink-0" name="clock" />
+        <span class="gl-text-truncate">{{ selectedItem.title }}</span>
+      </template>
+
+      <template v-else-if="hasIterationSelection">
+        <gl-icon class="gl-flex-shrink-0" name="iteration" />
+        <span class="gl-text-truncate">{{ selectedItem.title }}</span>
+      </template>
+
+      <template v-else-if="hasAssigneeSelection">
+        <gl-avatar class="gl-mr-2 gl-flex-shrink-0" :size="16" :src="selectedItem.avatarUrl" />
+        <div class="gl-text-truncate">
+          <b class="gl-mr-2">{{ selectedItem.name }}</b>
+          <span class="gl-text-gray-700">@{{ selectedItem.username }}</span>
+        </div>
+      </template>
     </template>
 
-    <template slot="items">
+    <template v-if="hasItems" #items>
       <gl-form-radio-group
-        v-if="items.length > 0"
         v-model="selectedId"
-        class="gl-overflow-y-auto gl-px-5 gl-pt-3"
+        class="gl-overflow-y-auto gl-px-5"
+        data-testid="selectItem"
+        @change="setSelectedItem"
       >
         <label
           v-for="item in items"
           :key="item.id"
-          class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
+          class="gl-display-flex gl-font-weight-normal gl-overflow-break-word gl-py-3 gl-mb-0"
         >
-          <gl-form-radio :value="item.id" class="gl-mb-0 gl-align-self-center" />
+          <gl-form-radio
+            :value="item.id"
+            :class="assigneeTypeSelected ? 'gl-align-self-center' : ''"
+          />
           <span
             v-if="labelTypeSelected"
-            class="dropdown-label-box gl-top-0"
+            class="dropdown-label-box gl-top-0 gl-flex-shrink-0"
             :style="{
               backgroundColor: item.color,
             }"
@@ -351,14 +362,17 @@ export default {
 
           <gl-avatar-labeled
             v-if="assigneeTypeSelected"
+            class="gl-display-flex gl-align-items-center"
             :size="32"
             :label="item.name"
-            :sub-label="item.username"
+            :sub-label="`@${item.username}`"
             :src="item.avatarUrl"
           />
           <span v-else>{{ item.title }}</span>
         </label>
       </gl-form-radio-group>
+
+      <div class="dropdown-content-faded-mask gl-fixed gl-bottom-0 gl-w-full"></div>
     </template>
   </board-add-new-column-form>
 </template>

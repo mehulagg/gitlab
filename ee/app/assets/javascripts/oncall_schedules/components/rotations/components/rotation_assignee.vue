@@ -4,16 +4,15 @@ import { uniqueId } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
-import { selectedTimezoneFormattedOffset } from '../../schedule/utils';
 
 export const SHIFT_WIDTHS = {
-  md: 140,
-  sm: 90,
-  xs: 40,
+  md: 100,
+  sm: 50,
+  xs: 25,
 };
 
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
-export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
+export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM ("UTC:" o)';
 
 export default {
   ROTATION_CENTER_CLASS,
@@ -21,7 +20,6 @@ export default {
     GlAvatar,
     GlPopover,
   },
-  inject: ['selectedTimezone'],
   props: {
     assignee: {
       type: Object,
@@ -46,7 +44,7 @@ export default {
   },
   computed: {
     assigneeName() {
-      if (this.shiftWidth <= SHIFT_WIDTHS.sm) {
+      if (this.shiftWidth <= SHIFT_WIDTHS.md) {
         return truncate(this.assignee.user.username, 3);
       }
 
@@ -57,26 +55,22 @@ export default {
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)} ${
-          this.timezoneOffset
-        }`,
+        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)}`,
       });
     },
     rotationAssigneeUniqueID() {
       return uniqueId('rotation-assignee-');
     },
-    rotationMobileView() {
+    hasRotationMobileViewAvatar() {
       return this.shiftWidth <= SHIFT_WIDTHS.xs;
+    },
+    hasRotationMobileViewText() {
+      return this.shiftWidth <= SHIFT_WIDTHS.sm;
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)} ${
-          this.timezoneOffset
-        }`,
+        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)}`,
       });
-    },
-    timezoneOffset() {
-      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
   },
 };
@@ -91,18 +85,16 @@ export default {
       data-testid="rotation-assignee"
     >
       <div class="gl-text-white" :class="$options.ROTATION_CENTER_CLASS">
-        <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
-        <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
-          assigneeName
-        }}</span>
+        <gl-avatar v-if="!hasRotationMobileViewAvatar" :src="assignee.user.avatarUrl" :size="16" />
+        <span
+          v-if="!hasRotationMobileViewText"
+          class="gl-ml-2"
+          data-testid="rotation-assignee-name"
+          >{{ assigneeName }}</span
+        >
       </div>
     </div>
-    <gl-popover
-      :target="rotationAssigneeUniqueID"
-      :title="assignee.user.username"
-      triggers="hover"
-      placement="top"
-    >
+    <gl-popover :target="rotationAssigneeUniqueID" :title="assignee.user.username" placement="top">
       <p class="gl-m-0" data-testid="rotation-assignee-starts-at">
         {{ startsAt }}
       </p>

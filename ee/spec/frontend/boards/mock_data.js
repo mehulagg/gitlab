@@ -104,6 +104,17 @@ export const mockMilestones = [
   },
 ];
 
+export const mockIterations = [
+  {
+    id: 'gid://gitlab/Iteration/1',
+    title: 'Iteration 1',
+  },
+  {
+    id: 'gid://gitlab/Iteration/2',
+    title: 'Iteration 2',
+  },
+];
+
 const labels = [
   {
     id: 'gid://gitlab/GroupLabel/5',

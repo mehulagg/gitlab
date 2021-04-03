@@ -372,7 +372,7 @@ export default {
         :can-manage-licenses="mr.licenseScanning.can_manage_licenses"
         :full-report-path="mr.licenseScanning.full_report_path"
         :license-management-settings-path="mr.licenseScanning.settings_path"
-        :security-approvals-help-page-path="mr.securityApprovalsHelpPagePath"
+        :license-compliance-docs-path="mr.licenseComplianceDocsPath"
         report-section-class="mr-widget-border-top"
       />
 
@@ -380,6 +380,7 @@ export default {
         v-if="mr.testResultsPath"
         class="js-reports-container"
         :endpoint="mr.testResultsPath"
+        :head-blob-path="mr.headBlobPath"
         :pipeline-path="mr.pipeline.path"
       />
 
@@ -424,7 +425,6 @@ export default {
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />
         </div>
       </div>
-      <div v-if="shouldRenderMergeHelp" class="mr-widget-footer"><mr-widget-merge-help /></div>
     </div>
     <mr-widget-pipeline-container
       v-if="shouldRenderMergedPipeline"

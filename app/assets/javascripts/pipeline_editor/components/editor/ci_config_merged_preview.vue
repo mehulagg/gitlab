@@ -2,7 +2,6 @@
 import { GlAlert, GlIcon } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { __, s__ } from '~/locale';
-import { CI_CONFIG_STATUS_INVALID } from '~/pipeline_editor/constants';
 import { DEFAULT, INVALID_CI_CONFIG } from '~/pipelines/constants';
 import EditorLite from '~/vue_shared/components/editor_lite.vue';
 
@@ -21,6 +20,10 @@ export default {
   },
   inject: ['ciConfigPath'],
   props: {
+    isValid: {
+      type: Boolean,
+      required: true,
+    },
     ciConfigData: {
       type: Object,
       required: true,
@@ -46,9 +49,6 @@ export default {
     hasError() {
       return this.failureType;
     },
-    isInvalidConfiguration() {
-      return this.ciConfigData.status === CI_CONFIG_STATUS_INVALID;
-    },
     mergedYaml() {
       return this.ciConfigData.mergedYaml;
     },
@@ -57,7 +57,7 @@ export default {
     ciConfigData: {
       immediate: true,
       handler() {
-        if (this.isInvalidConfiguration) {
+        if (!this.isValid) {
           this.reportFailure(INVALID_CI_CONFIG);
         } else if (this.hasError) {
           this.resetFailure();
@@ -82,7 +82,7 @@ export default {
     </gl-alert>
     <div v-else>
       <div class="gl-display-flex gl-align-items-center">
-        <gl-icon :size="18" name="lock" use-deprecated-sizes class="gl-text-gray-500 gl-mr-3" />
+        <gl-icon :size="16" name="lock" class="gl-text-gray-500 gl-mr-3" />
         {{ $options.i18n.viewOnlyMessage }}
       </div>
       <div class="gl-mt-3 gl-border-solid gl-border-gray-100 gl-border-1">

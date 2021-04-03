@@ -91,6 +91,11 @@
   redis_slot: analytics
   aggregation: weekly
   feature_flag: track_unique_visits
+- name: i_analytics_dev_ops_adoption
+  category: analytics
+  redis_slot: analytics
+  aggregation: weekly
+  feature_flag: track_unique_visits
 - name: g_analytics_merge_request
   category: analytics
   redis_slot: analytics
@@ -444,13 +449,3 @@
   redis_slot: pipeline_authoring
   aggregation: weekly
   feature_flag: usage_data_o_pipeline_authoring_unique_users_pushing_mr_ciconfigfile
-# Epic events
-#
-# We are using the same slot of issue events 'project_management' for
-# epic events to allow data aggregation.
-# More information in: https://gitlab.com/gitlab-org/gitlab/-/issues/322405
-- name: g_project_management_epic_created
-  category: epics_usage
-  redis_slot: project_management
-  aggregation: daily
-  feature_flag: track_epics_activity

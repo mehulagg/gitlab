@@ -79,6 +79,13 @@ class NotificationService
     mailer.access_token_expired_email(user).deliver_later
   end
 
+  # Notify the user when at least one of their ssh key has expired today
+  def ssh_key_expired(user, fingerprints)
+    return unless user.can?(:receive_notifications)
+
+    mailer.ssh_key_expired_email(user, fingerprints).deliver_later
+  end
+
   # Notify a user when a previously unknown IP or device is used to
   # sign in to their account
   def unknown_sign_in(user, ip, time)
@@ -369,18 +376,19 @@ class NotificationService
   end
 
   def send_service_desk_notification(note)
-    return unless Gitlab::ServiceDesk.supported?
     return unless note.noteable_type == 'Issue'
 
     issue = note.noteable
+    recipients = issue.email_participants_emails
+
+    return unless recipients.any?
+
     support_bot = User.support_bot
+    recipients.delete(issue.external_author) if note.author == support_bot
 
-    return unless issue.external_author.present?
-    return unless issue.project.service_desk_enabled?
-    return if note.author == support_bot
-    return unless issue.subscribed?(support_bot, issue.project)
-
-    mailer.service_desk_new_note_email(issue.id, note.id).deliver_later
+    recipients.each do |recipient|
+      mailer.service_desk_new_note_email(issue.id, note.id, recipient).deliver_later
+    end
   end
 
   # Notify users when a new release is created
@@ -856,7 +864,7 @@ class NotificationService
   end
 
   def warn_skipping_notifications(user, object)
-    Gitlab::AppLogger.warn(message: "Skipping sending notifications", user: user.id, klass: object.class, object_id: object.id)
+    Gitlab::AppLogger.warn(message: "Skipping sending notifications", user: user.id, klass: object.class.to_s, object_id: object.id)
   end
 end
 

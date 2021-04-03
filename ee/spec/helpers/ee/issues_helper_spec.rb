@@ -122,4 +122,25 @@ RSpec.describe EE::IssuesHelper do
       it_behaves_like 'with license'
     end
   end
+
+  describe '#issues_list_data' do
+    it 'returns expected result' do
+      current_user = double.as_null_object
+      finder = double.as_null_object
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:finder).and_return(finder)
+      allow(helper).to receive(:can?).and_return(true)
+      allow(helper).to receive(:url_for).and_return('#')
+      allow(helper).to receive(:import_csv_namespace_project_issues_path).and_return('#')
+      allow(project).to receive(:feature_available?).and_return(true)
+
+      expected = {
+        has_blocked_issues_feature: 'true',
+        has_issuable_health_status_feature: 'true',
+        has_issue_weights_feature: 'true'
+      }
+
+      expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
+    end
+  end
 end

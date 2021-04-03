@@ -6,7 +6,6 @@ module Projects
 
     before_action do
       push_frontend_feature_flag(:security_dast_site_profiles_additional_fields, @project, default_enabled: :yaml)
-      push_frontend_feature_flag(:dast_saved_scans, @project, default_enabled: :yaml)
       push_frontend_feature_flag(:dast_branch_selection, @project, default_enabled: :yaml)
     end
 
@@ -19,12 +18,9 @@ module Projects
     end
 
     def new
-      not_found unless Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml)
     end
 
     def edit
-      not_found unless Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml)
-
       dast_profile = Dast::ProfilesFinder.new(project_id: @project.id, id: params[:id]).execute.first! # rubocop: disable CodeReuse/ActiveRecord
 
       @dast_profile = {

@@ -22,61 +22,7 @@ RSpec.describe Dora::AggregateMetricsService do
       end
     end
 
-    context 'when container is project' do
-      let_it_be(:project) { create(:project) }
-      let_it_be(:production) { create(:environment, :production, project: project) }
-      let_it_be(:staging) { create(:environment, :staging, project: project) }
-      let_it_be(:maintainer) { create(:user) }
-      let_it_be(:guest) { create(:user) }
-      let(:container) { project }
-      let(:user) { maintainer }
-      let(:params) { { metric: 'deployment_frequency' }.merge(extra_params) }
-      let(:extra_params) { {} }
-
-      before_all do
-        project.add_maintainer(maintainer)
-        project.add_guest(guest)
-
-        create(:dora_daily_metrics, deployment_frequency: 2, environment: production)
-        create(:dora_daily_metrics, deployment_frequency: 1, environment: staging)
-      end
-
-      before do
-        stub_licensed_features(dora4_analytics: true)
-      end
-
-      it 'returns the aggregated data' do
-        expect(subject[:status]).to eq(:success)
-        expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 2 }])
-      end
-
-      context 'when interval is monthly' do
-        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_MONTHLY } }
-
-        it 'returns the aggregated data' do
-          expect(subject[:status]).to eq(:success)
-          expect(subject[:data]).to eq([{ Time.current.beginning_of_month.to_date.to_s => 2 }])
-        end
-      end
-
-      context 'when interval is all' do
-        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_ALL } }
-
-        it 'returns the aggregated data' do
-          expect(subject[:status]).to eq(:success)
-          expect(subject[:data]).to eq(2)
-        end
-      end
-
-      context 'when environment tier is changed' do
-        let(:extra_params) { { environment_tier: 'staging' } }
-
-        it 'returns the aggregated data' do
-          expect(subject[:status]).to eq(:success)
-          expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 1 }])
-        end
-      end
-
+    shared_examples_for 'correct validations' do
       context 'when data range is too wide' do
         let(:extra_params) { { start_date: 1.year.ago.to_date } }
 
@@ -141,16 +87,122 @@ RSpec.describe Dora::AggregateMetricsService do
       end
     end
 
-    context 'when container is group' do
+    context 'when container is project' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:production) { create(:environment, :production, project: project) }
+      let_it_be(:staging) { create(:environment, :staging, project: project) }
+      let_it_be(:maintainer) { create(:user) }
+      let_it_be(:guest) { create(:user) }
+      let(:container) { project }
+      let(:user) { maintainer }
+      let(:params) { { metric: 'deployment_frequency' }.merge(extra_params) }
+      let(:extra_params) { {} }
+
+      before_all do
+        project.add_maintainer(maintainer)
+        project.add_guest(guest)
+
+        create(:dora_daily_metrics, deployment_frequency: 2, environment: production)
+        create(:dora_daily_metrics, deployment_frequency: 1, environment: staging)
+      end
+
+      before do
+        stub_licensed_features(dora4_analytics: true)
+      end
+
+      it_behaves_like 'correct validations'
+
+      it 'returns the aggregated data' do
+        expect(subject[:status]).to eq(:success)
+        expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 2, 'date' => Time.current.to_date.to_s, 'value' => 2 }])
+      end
+
+      context 'when interval is monthly' do
+        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_MONTHLY } }
+
+        it 'returns the aggregated data' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:data]).to eq([{ Time.current.beginning_of_month.to_date.to_s => 2, 'date' => Time.current.beginning_of_month.to_date.to_s, 'value' => 2 }])
+        end
+      end
+
+      context 'when interval is all' do
+        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_ALL } }
+
+        it 'returns the aggregated data' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:data]).to eq(2)
+        end
+      end
+
+      context 'when environment tier is changed' do
+        let(:extra_params) { { environment_tier: 'staging' } }
+
+        it 'returns the aggregated data' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 1, 'date' => Time.current.to_date.to_s, 'value' => 1 }])
+        end
+      end
+    end
+
+    context 'when container is a group' do
       let_it_be(:group) { create(:group) }
+      let_it_be(:project_1) { create(:project, group: group) }
+      let_it_be(:project_2) { create(:project, group: group) }
+      let_it_be(:production_1) { create(:environment, :production, project: project_1) }
+      let_it_be(:production_2) { create(:environment, :production, project: project_2) }
       let_it_be(:maintainer) { create(:user) }
       let_it_be(:guest) { create(:user) }
       let(:container) { group }
       let(:user) { maintainer }
-      let(:params) { { metric: 'deployment_frequency' } }
+      let(:params) { { metric: 'deployment_frequency' }.merge(extra_params) }
+      let(:extra_params) { {} }
+
+      before_all do
+        group.add_maintainer(maintainer)
+        group.add_guest(guest)
+
+        create(:dora_daily_metrics, deployment_frequency: 2, environment: production_1)
+        create(:dora_daily_metrics, deployment_frequency: 1, environment: production_2)
+      end
+
+      before do
+        stub_licensed_features(dora4_analytics: true)
+      end
+
+      it_behaves_like 'correct validations'
+
+      it 'returns the aggregated data' do
+        expect(subject[:status]).to eq(:success)
+        expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 3, 'date' => Time.current.to_date.to_s, 'value' => 3 }])
+      end
+
+      context 'when interval is monthly' do
+        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_MONTHLY } }
+
+        it 'returns the aggregated data' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:data]).to eq([{ Time.current.beginning_of_month.to_date.to_s => 3, 'date' => Time.current.beginning_of_month.to_date.to_s, 'value' => 3 }])
+        end
+      end
+
+      context 'when interval is all' do
+        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_ALL } }
+
+        it 'returns the aggregated data' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:data]).to eq(3)
+        end
+      end
+    end
+
+    context 'when container is nil' do
+      let(:container) { nil }
+      let(:user) { nil }
+      let(:params) { {} }
 
       it_behaves_like 'request failure' do
-        let(:message) { 'Container must be a project.' }
+        let(:message) { 'Container must be a project or a group.' }
         let(:http_status) { :bad_request }
       end
     end

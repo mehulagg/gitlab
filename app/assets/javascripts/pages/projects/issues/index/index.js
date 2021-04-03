@@ -5,7 +5,7 @@ import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
 import initCsvImportExportButtons from '~/issuable/init_csv_import_export_buttons';
 import initIssuableByEmail from '~/issuable/init_issuable_by_email';
 import IssuableIndex from '~/issuable_index';
-import initIssuablesList from '~/issues_list';
+import initIssuablesList, { initIssuesListApp } from '~/issues_list';
 import initManualOrdering from '~/manual_ordering';
 import { FILTERED_SEARCH } from '~/pages/constants';
 import { ISSUABLE_INDEX } from '~/pages/projects/constants';
@@ -20,7 +20,12 @@ initFilteredSearch({
   useDefaultState: true,
 });
 
-new IssuableIndex(ISSUABLE_INDEX.ISSUE);
+if (gon.features?.vueIssuesList) {
+  new IssuableIndex();
+} else {
+  new IssuableIndex(ISSUABLE_INDEX.ISSUE);
+}
+
 new ShortcutsNavigation();
 new UsersSelect();
 
@@ -28,3 +33,4 @@ initManualOrdering();
 initIssuablesList();
 initIssuableByEmail();
 initCsvImportExportButtons();
+initIssuesListApp();

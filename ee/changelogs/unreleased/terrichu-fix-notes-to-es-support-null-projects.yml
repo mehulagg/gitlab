@@ -1,5 +1,0 @@
----
-title: Only set note visibility_level if associated to a project
-merge_request: 55111
-author:
-type: fixed

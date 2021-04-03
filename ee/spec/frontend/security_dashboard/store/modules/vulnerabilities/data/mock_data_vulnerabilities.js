@@ -5,6 +5,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'critical',
     confidence: 'high',
+    url: '/testgroup/testproject/-/security/vulnerabilities/1',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -73,6 +74,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'critical',
     confidence: 'high',
+    url: '/testgroup/testproject/-/security/vulnerabilities/2',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -127,6 +129,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'medium',
     confidence: '',
+    url: '/testgroup/testproject/-/security/vulnerabilities/3',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -205,6 +208,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'high',
     confidence: 'low',
+    url: '/testgroup/testproject/-/security/vulnerabilities/4',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -284,6 +288,7 @@ export default [
       'Remote command execution due to flaw in the include params attribute of URL and Anchor tags for org.apache.struts/struts2core',
     severity: 'low',
     confidence: '',
+    url: '/testgroup/testproject/-/security/vulnerabilities/5',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -386,6 +391,7 @@ export default [
     name: 'Doorkeeper Gem does not revoke token for public clients',
     severity: 'unknown',
     confidence: '',
+    url: '/testgroup/testproject/-/security/vulnerabilities/6',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -440,6 +446,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'high',
     confidence: 'low',
+    url: '/testgroup/testproject/-/security/vulnerabilities/7',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -518,6 +525,7 @@ export default [
     name: 'CVE-2018-1000001 in glibc',
     severity: 'high',
     confidence: 'unknown',
+    url: '/testgroup/testproject/-/security/vulnerabilities/8',
     scanner: {
       external_id: 'clair',
       name: 'Clair',
@@ -575,6 +583,7 @@ export default [
     name: 'CVE-2018-1000001 in glibc',
     severity: 'high',
     confidence: 'unknown',
+    url: '/testgroup/testproject/-/security/vulnerabilities/9',
     scanner: {
       external_id: 'clair',
       name: 'Clair',

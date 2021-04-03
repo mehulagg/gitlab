@@ -376,33 +376,61 @@ describe('Diffs Module Getters', () => {
     });
   });
 
+  describe('fileCodequalityDiff', () => {
+    beforeEach(() => {
+      Object.assign(localState.codequalityDiff, {
+        files: { 'app.js': [{ line: 1, description: 'Unexpected alert.', severity: 'minor' }] },
+      });
+    });
+
+    it('returns empty array when no codequality data is available', () => {
+      Object.assign(localState.codequalityDiff, {});
+
+      expect(getters.fileCodequalityDiff(localState)('test.js')).toEqual([]);
+    });
+
+    it('returns array when codequality data is available for given file', () => {
+      expect(getters.fileCodequalityDiff(localState)('app.js')).toEqual([
+        { line: 1, description: 'Unexpected alert.', severity: 'minor' },
+      ]);
+    });
+  });
+
   describe('suggestionCommitMessage', () => {
+    let rootState;
+
     beforeEach(() => {
       Object.assign(localState, {
         defaultSuggestionCommitMessage:
           '%{branch_name}%{project_path}%{project_name}%{username}%{user_full_name}%{file_paths}%{suggestions_count}%{files_count}',
-        branchName: 'branch',
-        projectPath: '/path',
-        projectName: 'name',
-        username: 'user',
-        userFullName: 'user userton',
       });
+      rootState = {
+        page: {
+          mrMetadata: {
+            branch_name: 'branch',
+            project_path: '/path',
+            project_name: 'name',
+            username: 'user',
+            user_full_name: 'user userton',
+          },
+        },
+      };
     });
 
     it.each`
-      specialState              | output
-      ${{}}                     | ${'branch/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
-      ${{ userFullName: null }} | ${'branch/pathnameuser%{user_full_name}%{file_paths}%{suggestions_count}%{files_count}'}
-      ${{ username: null }}     | ${'branch/pathname%{username}user userton%{file_paths}%{suggestions_count}%{files_count}'}
-      ${{ projectName: null }}  | ${'branch/path%{project_name}useruser userton%{file_paths}%{suggestions_count}%{files_count}'}
-      ${{ projectPath: null }}  | ${'branch%{project_path}nameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
-      ${{ branchName: null }}   | ${'%{branch_name}/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      specialState                | output
+      ${{}}                       | ${'branch/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ user_full_name: null }} | ${'branch/pathnameuser%{user_full_name}%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ username: null }}       | ${'branch/pathname%{username}user userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ project_name: null }}   | ${'branch/path%{project_name}useruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ project_path: null }}   | ${'branch%{project_path}nameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ branch_name: null }}    | ${'%{branch_name}/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
     `(
       'provides the correct "base" default commit message based on state ($specialState)',
       ({ specialState, output }) => {
-        Object.assign(localState, specialState);
+        Object.assign(rootState.page.mrMetadata, specialState);
 
-        expect(getters.suggestionCommitMessage(localState)()).toBe(output);
+        expect(getters.suggestionCommitMessage(localState, null, rootState)()).toBe(output);
       },
     );
 
@@ -417,7 +445,9 @@ describe('Diffs Module Getters', () => {
     `(
       "properly overrides state values ($stateOverrides) if they're provided",
       ({ stateOverrides, output }) => {
-        expect(getters.suggestionCommitMessage(localState)(stateOverrides)).toBe(output);
+        expect(getters.suggestionCommitMessage(localState, null, rootState)(stateOverrides)).toBe(
+          output,
+        );
       },
     );
 
@@ -431,7 +461,9 @@ describe('Diffs Module Getters', () => {
     `(
       "fills in any missing interpolations ($providedValues) when they're provided at the getter callsite",
       ({ providedValues, output }) => {
-        expect(getters.suggestionCommitMessage(localState)(providedValues)).toBe(output);
+        expect(getters.suggestionCommitMessage(localState, null, rootState)(providedValues)).toBe(
+          output,
+        );
       },
     );
   });

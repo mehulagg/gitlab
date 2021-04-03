@@ -1,0 +1,5 @@
+---
+title: Add billable_members_count to GraphQL Group type
+merge_request: 57712
+author:
+type: changed

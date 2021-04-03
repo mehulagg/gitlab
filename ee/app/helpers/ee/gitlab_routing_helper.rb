@@ -2,9 +2,6 @@
 
 module EE
   module GitlabRoutingHelper
-    include ::ProjectsHelper
-    include ::ApplicationSettingsHelper
-
     def geo_primary_web_url(container)
       File.join(::Gitlab::Geo.primary_node.url, container.full_path)
     end

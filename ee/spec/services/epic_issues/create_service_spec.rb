@@ -66,11 +66,17 @@ RSpec.describe EpicIssues::CreateService do
         expect(note.noteable_type).to eq('Issue')
         expect(note.system_note_metadata.action).to eq('issue_added_to_epic')
       end
+
+      it 'records action on usage ping' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_issue_added).with(author: user)
+
+        subject
+      end
     end
 
     shared_examples 'returns an error' do
       it 'returns an error' do
-        expect(subject).to eq(message: 'No Issue found for given params', status: :error, http_status: 404)
+        expect(subject).to eq(message: 'No matching issue found. Make sure that you are adding a valid issue URL.', status: :error, http_status: 404)
       end
 
       it 'no relationship is created' do

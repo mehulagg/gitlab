@@ -11,7 +11,7 @@ module EE
 
           override :preload_relation
           def preload_relation(projects_relation, options = {})
-            super(projects_relation).with_compliance_framework_settings
+            super(projects_relation).with_compliance_framework_settings.with_group_saml_provider
           end
         end
 

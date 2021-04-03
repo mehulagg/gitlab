@@ -5,6 +5,8 @@ import createFlash from '~/flash';
 import { historyReplaceState } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import { SHOW_DELETE_SUCCESS_ALERT } from '~/packages/shared/constants';
+import { FILTERED_SEARCH_TERM } from '~/packages_and_registries/shared/constants';
+import { getQueryParams, extractFilterAndSorting } from '~/packages_and_registries/shared/utils';
 import { DELETE_PACKAGE_SUCCESS_MESSAGE } from '../constants';
 import PackageSearch from './package_search.vue';
 import PackageTitle from './package_title.vue';
@@ -30,7 +32,7 @@ export default {
     }),
     emptySearch() {
       return (
-        this.filter.filter((f) => f.type !== 'filtered-search-term' || f.value?.data).length === 0
+        this.filter.filter((f) => f.type !== FILTERED_SEARCH_TERM || f.value?.data).length === 0
       );
     },
 
@@ -41,11 +43,21 @@ export default {
     },
   },
   mounted() {
+    const queryParams = getQueryParams(window.document.location.search);
+    const { sorting, filters } = extractFilterAndSorting(queryParams);
+    this.setSorting(sorting);
+    this.setFilter(filters);
     this.requestPackagesList();
     this.checkDeleteAlert();
   },
   methods: {
-    ...mapActions(['requestPackagesList', 'requestDeletePackage', 'setSelectedType']),
+    ...mapActions([
+      'requestPackagesList',
+      'requestDeletePackage',
+      'setSelectedType',
+      'setSorting',
+      'setFilter',
+    ]),
     onPageChanged(page) {
       return this.requestPackagesList({ page });
     },

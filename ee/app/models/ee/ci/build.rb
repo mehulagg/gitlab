@@ -43,6 +43,17 @@ module EE
         end
       end
 
+      override :variables
+      def variables
+        strong_memoize(:variables) do
+          super.tap do |collection|
+            if pipeline.triggered_for_ondemand_dast_scan? && pipeline.dast_profile
+              collection.concat(pipeline.dast_profile.ci_variables)
+            end
+          end
+        end
+      end
+
       def shared_runners_minutes_limit_enabled?
         project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
       end

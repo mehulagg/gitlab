@@ -7,7 +7,7 @@ module Gitlab
       # API calls are handled separately as different API endpoints need to
       # stick based on different objects.
       class RackMiddleware
-        STICK_OBJECT = 'load_balancing.stick_object'.freeze
+        STICK_OBJECT = 'load_balancing.stick_object'
 
         # Unsticks or continues sticking the current request.
         #

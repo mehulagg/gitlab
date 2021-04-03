@@ -90,6 +90,27 @@ RSpec.describe API::Projects do
         expect(json_response.first['id']).to eq project.id
       end
     end
+
+    context 'when there are several projects owned by groups' do
+      let_it_be(:admin) { create(:admin) }
+
+      it 'avoids N+1 queries' do
+        create(:project, :public, namespace: create(:group))
+
+        # Warming up context
+        get api('/projects', admin)
+
+        control = ActiveRecord::QueryRecorder.new do
+          get api('/projects', admin)
+        end
+
+        create_list(:project, 2, :public, namespace: create(:group))
+
+        expect do
+          get api('/projects', admin)
+        end.not_to exceed_query_limit(control.count)
+      end
+    end
   end
 
   describe 'GET /projects/:id' do
@@ -1064,7 +1085,11 @@ RSpec.describe API::Projects do
       end
 
       context 'delayed project removal is enabled for group' do
-        let(:group) { create(:group, delayed_project_removal: true) }
+        let(:group) { create(:group) }
+
+        before do
+          group.namespace_settings.update(delayed_project_removal: true)
+        end
 
         it_behaves_like 'marks project for deletion'
 

@@ -16,6 +16,7 @@ class Group < Namespace
   include Gitlab::Utils::StrongMemoize
   include GroupAPICompatibility
   include EachBatch
+  include HasTimelogsReport
 
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
@@ -70,6 +71,7 @@ class Group < Namespace
   has_many :group_deploy_keys, through: :group_deploy_keys_groups
   has_many :group_deploy_tokens
   has_many :deploy_tokens, through: :group_deploy_tokens
+  has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
   has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
@@ -117,6 +119,7 @@ class Group < Namespace
   end
 
   delegate :default_branch_name, to: :namespace_settings
+  delegate :resource_access_token_creation_allowed, :resource_access_token_creation_allowed=, :resource_access_token_creation_allowed?, to: :namespace_settings
 
   class << self
     def sort_by_attribute(method)
@@ -338,6 +341,13 @@ class Group < Namespace
   # Check if user is a last owner of the group.
   def last_owner?(user)
     has_owner?(user) && members_with_parents.owners.size == 1
+  end
+
+  def last_blocked_owner?(user)
+    return false if members_with_parents.owners.any?
+
+    blocked_owners = members.blocked.where(access_level: Gitlab::Access::OWNER)
+    blocked_owners.size == 1 && blocked_owners.exists?(user_id: user)
   end
 
   def ldap_synced?

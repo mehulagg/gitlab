@@ -56,13 +56,22 @@ RSpec.describe ::API::ExternalApprovalRules do
       create(:external_approval_rule) # Creating an orphaned rule to make sure project scoping works as expected
     end
 
-    it 'responds with expected JSON', :aggregate_failures do
+    before do
       stub_licensed_features(compliance_approval_gates: true)
+    end
+
+    it 'responds with expected JSON', :aggregate_failures do
       get api(collection_url, project.owner)
 
       expect(json_response.size).to eq(2)
       expect(json_response.map { |r| r['name'] }).to contain_exactly('Rule 1', 'Rule 2')
       expect(json_response.map { |r| r['external_url'] }).to contain_exactly('http://rule1.example', 'https://rule2.example')
+    end
+
+    it 'paginates correctly' do
+      get api(collection_url, project.owner), params: { per_page: 1 }
+
+      expect_paginated_array_response([1])
     end
 
     context 'when feature is disabled, unlicensed or user has permission' do

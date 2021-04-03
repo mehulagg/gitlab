@@ -22,12 +22,20 @@ invalidated.
 Response Code Legend:
 
 - `200` - Accepted
-- `4xx` - Not Accepted
+- `406` - Not Accepted
 - Other Codes - Accepted and Logged
 
 ## Configuration
 
-Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
+To configure external pipeline validation:
+
+1. Set the `EXTERNAL_VALIDATION_SERVICE_URL` environment variable to the external
+   service URL.
+1. Enable the `ci_external_validation_service` feature flag.
+
+By default, requests to the external service time out after five seconds. To override
+the default, set the `EXTERNAL_VALIDATION_SERVICE_TIMEOUT` environment variable to the
+required number of seconds.
 
 ## Payload Schema
 
@@ -38,18 +46,21 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
     "project",
     "user",
     "pipeline",
-    "builds"
+    "builds",
+    "namespace"
   ],
   "properties" : {
     "project": {
       "type": "object",
       "required": [
         "id",
-        "path"
+        "path",
+        "created_at"
       ],
       "properties": {
         "id": { "type": "integer" },
-        "path": { "type": "string" }
+        "path": { "type": "string" },
+        "created_at": { "type": ["string", "null"], "format": "date-time" }
       }
     },
     "user": {
@@ -57,12 +68,14 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
       "required": [
         "id",
         "username",
-        "email"
+        "email",
+        "created_at"
       ],
       "properties": {
         "id": { "type": "integer" },
         "username": { "type": "string" },
-        "email": { "type": "string" }
+        "email": { "type": "string" },
+        "created_at": { "type": ["string", "null"], "format": "date-time" }
       }
     },
     "pipeline": {
@@ -103,8 +116,18 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
           }
         }
       }
+    },
+    "namespace": {
+      "type": "object",
+      "required": [
+        "plan",
+        "trial"
+      ],
+      "properties": {
+        "plan": { "type": "string" },
+        "trial": { "type": "boolean" }
+      }
     }
-  },
-  "additionalProperties": false
+  }
 }
 ```

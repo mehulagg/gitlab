@@ -139,5 +139,11 @@ RSpec.describe Projects::MergeRequests::CreationsController do
         end
       end
     end
+
+    it 'disables query limiting' do
+      expect(Gitlab::QueryLimiting).to receive(:disable!)
+
+      create_merge_request
+    end
   end
 end

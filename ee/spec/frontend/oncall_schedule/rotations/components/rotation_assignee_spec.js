@@ -4,19 +4,17 @@ import RotationAssignee, {
   SHIFT_WIDTHS,
   TIME_DATE_FORMAT,
 } from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
-import { selectedTimezoneFormattedOffset } from 'ee/oncall_schedules/components/schedule/utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import mockRotations from '../../mocks/mock_rotation.json';
-import mockTimezones from '../../mocks/mock_timezones.json';
 
 jest.mock('lodash/uniqueId', () => (prefix) => `${prefix}fakeUniqueId`);
 
 describe('RotationAssignee', () => {
   let wrapper;
 
-  const shiftWidth = 100;
+  const shiftWidth = SHIFT_WIDTHS.md;
   const assignee = mockRotations[0].shifts.nodes[0];
   const findToken = () => wrapper.findByTestId('rotation-assignee');
   const findAvatar = () => wrapper.findComponent(GlAvatar);
@@ -29,14 +27,9 @@ describe('RotationAssignee', () => {
     return formatDate(date, TIME_DATE_FORMAT);
   };
 
-  const selectedTimezone = mockTimezones[0];
-
   function createComponent({ props = {} } = {}) {
     wrapper = extendedWrapper(
       shallowMount(RotationAssignee, {
-        provide: {
-          selectedTimezone,
-        },
         propsData: {
           assignee: { ...assignee.participant },
           rotationAssigneeStartsAt: assignee.startsAt,
@@ -59,18 +52,24 @@ describe('RotationAssignee', () => {
 
   describe('rotation assignee token', () => {
     it('should render an assignee name and avatar', () => {
+      const LARGE_SHIFT_WIDTH = 150;
+      createComponent({ props: { shiftWidth: LARGE_SHIFT_WIDTH } });
       expect(findAvatar().props('src')).toBe(assignee.participant.user.avatarUrl);
       expect(findName().text()).toBe(assignee.participant.user.username);
     });
 
     it('truncate the rotation name on small screens', () => {
-      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.sm } });
       expect(findName().text()).toBe(truncate(assignee.participant.user.username, 3));
     });
 
-    it('hide the rotation name on mobile screens', () => {
-      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.xs } });
+    it('hides the rotation name on mobile screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.sm } });
       expect(findName().exists()).toBe(false);
+    });
+
+    it('hides the avatar on the smallest screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.xs } });
+      expect(findAvatar().exists()).toBe(false);
     });
 
     it('should render an assignee color based on the chevron skipping color pallette', () => {
@@ -81,10 +80,9 @@ describe('RotationAssignee', () => {
     });
 
     it('should render an assignee schedule and rotation information in a popover', () => {
-      const timezone = selectedTimezoneFormattedOffset(selectedTimezone.formatted_offset);
       expect(findPopOver().attributes('target')).toBe('rotation-assignee-fakeUniqueId');
-      expect(findStartsAt().text()).toContain(`${formattedDate(assignee.startsAt)} ${timezone}`);
-      expect(findEndsAt().text()).toContain(`${formattedDate(assignee.endsAt)} ${timezone}`);
+      expect(findStartsAt().text()).toContain(formattedDate(assignee.startsAt));
+      expect(findEndsAt().text()).toContain(formattedDate(assignee.endsAt));
     });
   });
 });

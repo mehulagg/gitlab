@@ -136,6 +136,16 @@ export const fileLineCoverage = (state) => (file, line) => {
 };
 
 /**
+ * Returns the codequality diff data for a given file
+ * @param {string} filePath
+ * @returns {Array}
+ */
+export const fileCodequalityDiff = (state) => (filePath) => {
+  if (!state.codequalityDiff.files || !state.codequalityDiff.files[filePath]) return [];
+  return state.codequalityDiff.files[filePath];
+};
+
+/**
  * Returns index of a currently selected diff in diffFiles
  * @returns {number}
  */
@@ -156,16 +166,16 @@ export const diffLines = (state) => (file, unifiedDiffComponents) => {
   );
 };
 
-export function suggestionCommitMessage(state) {
+export function suggestionCommitMessage(state, _, rootState) {
   return (values = {}) =>
     computeSuggestionCommitMessage({
       message: state.defaultSuggestionCommitMessage,
       values: {
-        branch_name: state.branchName,
-        project_path: state.projectPath,
-        project_name: state.projectName,
-        username: state.username,
-        user_full_name: state.userFullName,
+        branch_name: rootState.page.mrMetadata.branch_name,
+        project_path: rootState.page.mrMetadata.project_path,
+        project_name: rootState.page.mrMetadata.project_name,
+        username: rootState.page.mrMetadata.username,
+        user_full_name: rootState.page.mrMetadata.user_full_name,
         ...values,
       },
     });

@@ -107,6 +107,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
                                       variables: {},
+                                      job_variables: {},
+                                      root_variables_inheritance: true,
                                       scheduling_type: :stage)
         end
       end
@@ -130,6 +132,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
                                       variables: {},
+                                      job_variables: {},
+                                      root_variables_inheritance: true,
                                       scheduling_type: :stage)
         end
       end
@@ -241,6 +245,54 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
         it 'returns an error message' do
           expect(subject.errors)
             .to include(/allow failure should be a boolean value/)
+        end
+      end
+    end
+
+    context 'when bridge config contains parallel' do
+      let(:config) { { trigger: 'some/project', parallel: parallel_config } }
+
+      context 'when parallel config is a number' do
+        let(:parallel_config) { 2 }
+
+        describe '#valid?' do
+          it { is_expected.not_to be_valid }
+        end
+
+        describe '#errors' do
+          it 'returns an error message' do
+            expect(subject.errors)
+              .to include(/cannot use "parallel: <number>"/)
+          end
+        end
+      end
+
+      context 'when parallel config is a matrix' do
+        let(:parallel_config) do
+          { matrix: [{ PROVIDER: 'aws', STACK: %w[monitoring app1] },
+                     { PROVIDER: 'gcp', STACK: %w[data] }] }
+        end
+
+        describe '#valid?' do
+          it { is_expected.to be_valid }
+        end
+
+        describe '#value' do
+          it 'is returns a bridge job configuration' do
+            expect(subject.value).to eq(
+              name: :my_bridge,
+              trigger: { project: 'some/project' },
+              ignore: false,
+              stage: 'test',
+              only: { refs: %w[branches tags] },
+              parallel: { matrix: [{ 'PROVIDER' => ['aws'], 'STACK' => %w(monitoring app1) },
+                                   { 'PROVIDER' => ['gcp'], 'STACK' => %w(data) }] },
+              variables: {},
+              job_variables: {},
+              root_variables_inheritance: true,
+              scheduling_type: :stage
+            )
+          end
         end
       end
     end

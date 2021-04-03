@@ -85,18 +85,14 @@ RSpec.describe Issue do
   describe 'callbacks' do
     describe '#ensure_metrics' do
       it 'creates metrics after saving' do
-        issue = create(:issue, project: reusable_project)
-
-        expect(issue.metrics).to be_persisted
+        expect(subject.metrics).to be_persisted
         expect(Issue::Metrics.count).to eq(1)
       end
 
       it 'does not create duplicate metrics for an issue' do
-        issue = create(:issue, project: reusable_project)
+        subject.close!
 
-        issue.close!
-
-        expect(issue.metrics).to be_persisted
+        expect(subject.metrics).to be_persisted
         expect(Issue::Metrics.count).to eq(1)
       end
 
@@ -104,6 +100,20 @@ RSpec.describe Issue do
         expect_any_instance_of(Issue::Metrics).to receive(:record!)
 
         create(:issue, project: reusable_project)
+      end
+
+      context 'when metrics record is missing' do
+        before do
+          subject.metrics.delete
+          subject.reload
+          subject.metrics # make sure metrics association is cached (currently nil)
+        end
+
+        it 'creates the metrics record' do
+          subject.update!(title: 'title')
+
+          expect(subject.metrics).to be_present
+        end
       end
     end
 
@@ -1259,11 +1269,22 @@ RSpec.describe Issue do
     end
   end
 
+  describe '#email_participants_emails' do
+    let_it_be(:issue) { create(:issue) }
+
+    it 'returns a list of emails' do
+      participant1 = issue.issue_email_participants.create(email: 'a@gitlab.com')
+      participant2 = issue.issue_email_participants.create(email: 'b@gitlab.com')
+
+      expect(issue.email_participants_emails).to contain_exactly(participant1.email, participant2.email)
+    end
+  end
+
   describe '#email_participants_downcase' do
     it 'returns a list of emails with all uppercase letters replaced with their lowercase counterparts' do
       participant = create(:issue_email_participant, email: 'SomEoNe@ExamPLe.com')
 
-      expect(participant.issue.email_participants_downcase).to match([participant.email.downcase])
+      expect(participant.issue.email_participants_emails_downcase).to match([participant.email.downcase])
     end
   end
 end

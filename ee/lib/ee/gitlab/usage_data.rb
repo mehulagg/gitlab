@@ -610,7 +610,7 @@ module EE
             ::ApprovalMergeRequestRule
               .code_owner
               .joins(:merge_request)
-              .where("section != ?", ::Gitlab::CodeOwners::Entry::DEFAULT_SECTION)
+              .where.not(section: ::Gitlab::CodeOwners::Entry::DEFAULT_SECTION)
               .where(time_period),
             'merge_requests.target_project_id',
             start: project_minimum_id,

@@ -55,14 +55,6 @@ RSpec.describe IncidentManagement::OncallParticipant do
     end
   end
 
-  describe '#mark_as_removed' do
-    subject { participant.mark_as_removed }
-
-    it 'updates is_removed to true' do
-      expect { subject }.to change { participant.reload.is_removed }.to(true)
-    end
-  end
-
   private
 
   def remove_user_from_project(user, project)

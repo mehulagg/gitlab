@@ -1,6 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import { OPENED, REOPENED } from '~/notes/constants';
 import Status from './status.vue';
@@ -27,7 +27,9 @@ export default {
   methods: {
     handleDropdownClick(status) {
       this.mediator.updateStatus(status).catch(() => {
-        Flash(__('Error occurred while updating the issue status'));
+        createFlash({
+          message: __('Error occurred while updating the issue status'),
+        });
       });
     },
   },

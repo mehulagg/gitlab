@@ -55,6 +55,10 @@ class GeoNodeStatus < ApplicationRecord
     end.flatten.map(&:to_s)
   end
 
+  def self.usage_data_fields
+    Geo::SecondaryUsageData::PAYLOAD_COUNT_FIELDS
+  end
+
   RESOURCE_STATUS_FIELDS = (%w(
     repository_verification_enabled
     repositories_replication_enabled
@@ -103,7 +107,7 @@ class GeoNodeStatus < ApplicationRecord
     design_repositories_count
     design_repositories_synced_count
     design_repositories_failed_count
-  ) + replicator_class_status_fields).freeze
+  ) + replicator_class_status_fields + usage_data_fields).freeze
 
   # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
   def self.replicator_class_prometheus_metrics
@@ -186,8 +190,8 @@ class GeoNodeStatus < ApplicationRecord
   }.merge(replicator_class_prometheus_metrics).freeze
 
   EXPIRATION_IN_MINUTES = 10
-  HEALTHY_STATUS = 'Healthy'.freeze
-  UNHEALTHY_STATUS = 'Unhealthy'.freeze
+  HEALTHY_STATUS = 'Healthy'
+  UNHEALTHY_STATUS = 'Unhealthy'
 
   def self.alternative_status_store_accessor(attr_names)
     attr_names.each do |attr_name|
@@ -276,7 +280,7 @@ class GeoNodeStatus < ApplicationRecord
     return if val.nil?
 
     case attr_name
-    when /_count\z/ then val.to_i
+    when /_count(?:_weekly)?\z/ then val.to_i
     when /_enabled\z/ then val.to_s == 'true'
     else raise "Unhandled status attribute name format \"#{attr_name}\""
     end
@@ -480,6 +484,7 @@ class GeoNodeStatus < ApplicationRecord
     load_container_registry_data
     load_designs_data
     load_ssf_replicable_data
+    load_secondary_usage_data
   end
 
   def load_repositories_data
@@ -544,6 +549,15 @@ class GeoNodeStatus < ApplicationRecord
       public_send("#{replicator.replicable_name_plural}_registry_count=", replicator.registry_count) # rubocop:disable GitlabSecurity/PublicSend
       public_send("#{replicator.replicable_name_plural}_synced_count=", replicator.synced_count) # rubocop:disable GitlabSecurity/PublicSend
       public_send("#{replicator.replicable_name_plural}_failed_count=", replicator.failed_count) # rubocop:disable GitlabSecurity/PublicSend
+    end
+  end
+
+  def load_secondary_usage_data
+    usage_data = Geo::SecondaryUsageData.last
+    return unless usage_data
+
+    self.class.usage_data_fields.each do |field|
+      status[field] = usage_data.payload[field]
     end
   end
 

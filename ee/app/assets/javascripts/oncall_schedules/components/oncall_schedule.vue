@@ -3,6 +3,7 @@ import { GlCard, GlButtonGroup, GlButton, GlModalDirective, GlTooltipDirective }
 import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
 import {
+  getStartOfWeek,
   formatDate,
   nWeeksBefore,
   nWeeksAfter,
@@ -54,11 +55,6 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: ['projectPath', 'timezones'],
-  provide() {
-    return {
-      selectedTimezone: this.selectedTimezone,
-    };
-  },
   props: {
     schedule: {
       type: Object,
@@ -92,19 +88,17 @@ export default {
   data() {
     return {
       presetType: this.$options.PRESET_TYPES.WEEKS,
-      timeframeStartDate: new Date(),
+      timeframeStartDate: getStartOfWeek(new Date()),
       rotations: this.schedule.rotations.nodes,
+      rotationToUpdate: {},
     };
   },
   computed: {
-    selectedTimezone() {
-      return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
+    loading() {
+      return this.$apollo.queries.rotations.loading;
     },
     offset() {
       return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
-    },
-    timeframe() {
-      return getTimeframeForWeeksView(this.timeframeStartDate);
     },
     scheduleRange() {
       switch (this.presetType) {
@@ -124,14 +118,24 @@ export default {
           return '';
       }
     },
-    loading() {
-      return this.$apollo.queries.rotations.loading;
+    scheduleInfo() {
+      if (this.schedule.description) {
+        return `${this.schedule.description} | ${this.offset} ${this.schedule.timezone}`;
+      }
+      return `${this.schedule.timezone} | ${this.offset}`;
+    },
+    selectedTimezone() {
+      return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
+    },
+    timeframe() {
+      return getTimeframeForWeeksView(this.timeframeStartDate);
     },
   },
   methods: {
     switchPresetType(type) {
       this.presetType = type;
-      this.timeframeStartDate = new Date();
+      this.timeframeStartDate =
+        type === PRESET_TYPES.WEEKS ? getStartOfWeek(new Date()) : new Date();
     },
     formatPresetType(type) {
       return capitalize(type);
@@ -162,6 +166,9 @@ export default {
     },
     fetchRotationShifts() {
       this.$apollo.queries.rotations.refetch();
+    },
+    setRotationToUpdate(rotation) {
+      this.rotationToUpdate = rotation;
     },
   },
 };
@@ -194,8 +201,8 @@ export default {
           </gl-button-group>
         </div>
       </template>
-      <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
-        {{ schedule.timezone }} | {{ offset }}
+      <p class="gl-text-gray-500 gl-mb-5" data-testid="scheduleBody">
+        {{ scheduleInfo }}
       </p>
       <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
         <div class="gl-display-flex gl-align-items-center">
@@ -249,6 +256,7 @@ export default {
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
             :loading="loading"
+            @set-rotation-to-update="setRotationToUpdate"
           />
         </div>
       </gl-card>
@@ -262,12 +270,14 @@ export default {
     <add-edit-rotation-modal
       :schedule="schedule"
       :modal-id="$options.addRotationModalId"
-      @fetchRotationShifts="fetchRotationShifts"
+      @fetch-rotation-shifts="fetchRotationShifts"
     />
     <add-edit-rotation-modal
       :schedule="schedule"
       :modal-id="$options.editRotationModalId"
+      :rotation="rotationToUpdate"
       is-edit-mode
+      @fetch-rotation-shifts="fetchRotationShifts"
     />
   </div>
 </template>

@@ -10,7 +10,7 @@ export const returnToPreviousPageFactory = ({
   onDemandScansPath,
   profilesLibraryPath,
   urlParamKey,
-}) => (gid) => {
+}) => ({ id } = {}) => {
   // when previous page is not On-demand scans page
   // redirect user to profiles library page
   if (!document.referrer?.includes(onDemandScansPath)) {
@@ -20,9 +20,9 @@ export const returnToPreviousPageFactory = ({
   // Otherwise, redirect them back to On-demand scans page
   // with corresponding profile id, if available
   // for example, /on_demand_scans?site_profile_id=35
-  const previousPagePath = gid
+  const previousPagePath = id
     ? setUrlParams(
-        { [urlParamKey]: getIdFromGraphQLId(gid) },
+        { [urlParamKey]: getIdFromGraphQLId(id) },
         relativePathToAbsolute(onDemandScansPath, getBaseURL()),
       )
     : onDemandScansPath;

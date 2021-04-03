@@ -179,7 +179,7 @@ RSpec.describe 'group epic roadmap', :js do
 
       it 'is removed after dismissal and even after reload' do
         page.within('[data-testid="epics_limit_callout"]') do
-          find('.gl-alert-dismiss').click
+          find('.gl-dismiss-btn').click
         end
 
         expect(page).not_to have_selector('[data-testid="epics_limit_callout"]')

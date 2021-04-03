@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 
@@ -66,7 +66,9 @@ export default class UsernameSuggester {
         this.usernameElement.value = data.username;
       })
       .catch(() => {
-        Flash(__('An error occurred while generating a username. Please try again.'));
+        createFlash({
+          message: __('An error occurred while generating a username. Please try again.'),
+        });
       })
       .finally(() => {
         this.isLoading = false;

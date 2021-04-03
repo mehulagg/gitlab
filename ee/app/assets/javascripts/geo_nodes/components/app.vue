@@ -1,6 +1,6 @@
 <script>
 import { GlLoadingIcon, GlModal } from '@gitlab/ui';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import { __, s__ } from '~/locale';
 import SmartInterval from '~/smart_interval';
@@ -96,7 +96,9 @@ export default {
         })
         .catch(() => {
           this.isLoading = false;
-          Flash(s__('GeoNodes|Something went wrong while fetching nodes'));
+          createFlash({
+            message: s__('GeoNodes|Something went wrong while fetching nodes'),
+          });
         });
     },
     fetchNodeDetails(node) {
@@ -135,7 +137,9 @@ export default {
         })
         .catch(() => {
           this.setNodeActionStatus(targetNode, false);
-          Flash(s__('GeoNodes|Something went wrong while repairing node'));
+          createFlash({
+            message: s__('GeoNodes|Something went wrong while repairing node'),
+          });
         });
     },
     toggleNode(targetNode) {
@@ -151,7 +155,9 @@ export default {
         })
         .catch(() => {
           this.setNodeActionStatus(targetNode, false);
-          Flash(s__('GeoNodes|Something went wrong while changing node status'));
+          createFlash({
+            message: s__('GeoNodes|Something went wrong while changing node status'),
+          });
         });
     },
     removeNode(targetNode) {
@@ -164,7 +170,9 @@ export default {
         })
         .catch(() => {
           this.setNodeActionStatus(targetNode, false);
-          Flash(s__('GeoNodes|Something went wrong while removing node'));
+          createFlash({
+            message: s__('GeoNodes|Something went wrong while removing node'),
+          });
         });
     },
     handleNodeAction() {

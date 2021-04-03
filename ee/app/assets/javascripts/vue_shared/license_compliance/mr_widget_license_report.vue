@@ -63,7 +63,7 @@ export default {
       required: false,
       default: false,
     },
-    securityApprovalsHelpPagePath: {
+    licenseComplianceDocsPath: {
       type: String,
       required: false,
       default: '',
@@ -168,9 +168,9 @@ export default {
         <div class="pr-3">
           {{ licenseSummaryText }}
           <gl-link
-            v-if="reportContainsBlacklistedLicense && securityApprovalsHelpPagePath"
-            :href="securityApprovalsHelpPagePath"
-            class="js-security-approval-help-link"
+            v-if="reportContainsBlacklistedLicense && licenseComplianceDocsPath"
+            :href="licenseComplianceDocsPath"
+            data-testid="security-approval-help-link"
             target="_blank"
           >
             <gl-icon :size="12" name="question" />
@@ -191,7 +191,6 @@ export default {
         <gl-button
           v-if="licenseManagementSettingsPath"
           data-testid="manage-licenses-button"
-          size="small"
           :class="{ 'gl-mr-3': isCollapsible }"
           :href="licenseManagementSettingsPath"
           data-qa-selector="manage_licenses_button"

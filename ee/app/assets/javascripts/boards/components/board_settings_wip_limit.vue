@@ -3,7 +3,7 @@ import { GlButton, GlFormInput } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import { inactiveId } from '~/boards/constants';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { __, n__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 
@@ -84,7 +84,9 @@ export default {
           })
           .catch(() => {
             this.unsetActiveId();
-            flash(__('Something went wrong while updating your list settings'));
+            createFlash({
+              message: __('Something went wrong while updating your list settings'),
+            });
           })
           .finally(() => {
             this.resetStateAfterUpdate();
@@ -102,7 +104,9 @@ export default {
         })
         .catch(() => {
           this.unsetActiveId();
-          flash(__('Something went wrong while updating your list settings'));
+          createFlash({
+            message: __('Something went wrong while updating your list settings'),
+          });
         })
         .finally(() => {
           this.resetStateAfterUpdate();

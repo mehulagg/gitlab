@@ -10,6 +10,6 @@
       = render @path_locks
 
     = paginate @path_locks, theme: 'gitlab'
-  - else
-    .nothing-here-block
-      = _("Repository has no locks.")
+
+  .nothing-here-block{ class: ('hidden' if @path_locks.any?) }
+    = _("Repository has no locks.")

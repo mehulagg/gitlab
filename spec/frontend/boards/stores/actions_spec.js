@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import testAction from 'helpers/vuex_action_helper';
 import {
   fullBoardId,
@@ -638,10 +639,13 @@ describe('resetIssues', () => {
 });
 
 describe('moveItem', () => {
-  it('should dispatch moveIssue action', () => {
+  it('should dispatch moveIssue action with payload', () => {
+    const payload = { mock: 'payload' };
+
     testAction({
       action: actions.moveItem,
-      expectedActions: [{ type: 'moveIssue' }],
+      payload,
+      expectedActions: [{ type: 'moveIssue', payload }],
     });
   });
 });
@@ -1373,6 +1377,51 @@ describe('toggleBoardItem', () => {
       expectedActions: [
         { type: 'resetBoardItemMultiSelection' },
         { type: 'setActiveId', payload: { id: mockIssue.id, sidebarType: ISSUABLE } },
+      ],
+    });
+  });
+});
+
+describe('setError', () => {
+  it('should commit mutation SET_ERROR', () => {
+    testAction({
+      action: actions.setError,
+      payload: { message: 'mayday' },
+      expectedMutations: [
+        {
+          payload: 'mayday',
+          type: types.SET_ERROR,
+        },
+      ],
+    });
+  });
+
+  it('should capture error using Sentry when captureError is true', () => {
+    jest.spyOn(Sentry, 'captureException');
+
+    const mockError = new Error();
+    actions.setError(
+      { commit: () => {} },
+      {
+        message: 'mayday',
+        error: mockError,
+        captureError: true,
+      },
+    );
+
+    expect(Sentry.captureException).toHaveBeenNthCalledWith(1, mockError);
+  });
+});
+
+describe('unsetError', () => {
+  it('should commit mutation SET_ERROR with undefined as payload', () => {
+    testAction({
+      action: actions.unsetError,
+      expectedMutations: [
+        {
+          payload: undefined,
+          type: types.SET_ERROR,
+        },
       ],
     });
   });

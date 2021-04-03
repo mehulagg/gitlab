@@ -705,7 +705,7 @@ RSpec.describe API::Issues, :mailer do
     using RSpec::Parameterized::TableSyntax
 
     let_it_be(:project) do
-      create(:project, :private, creator_id: user.id, namespace: user.namespace)
+      create(:project, :public, creator_id: user.id, namespace: user.namespace)
     end
 
     let!(:image) { create(:issuable_metric_image, issue: issue) }
@@ -725,6 +725,15 @@ RSpec.describe API::Issues, :mailer do
       it 'cannot delete the metric image' do
         subject
 
+        expect(response).to have_gitlab_http_status(:forbidden)
+        expect(image.reload).to eq(image)
+      end
+    end
+
+    shared_examples 'not_found' do
+      it 'cannot delete the metric image' do
+        subject
+
         expect(response).to have_gitlab_http_status(:not_found)
         expect(image.reload).to eq(image)
       end
@@ -734,9 +743,9 @@ RSpec.describe API::Issues, :mailer do
       :not_member | false | false | :unauthorized_delete
       :not_member | true  | false | :unauthorized_delete
       :not_member | true  | true  | :unauthorized_delete
-      :guest      | false | true  | :unauthorized_delete
+      :guest      | false | true  | :not_found
+      :guest      | false | false | :unauthorized_delete
       :guest      | true  | false | :can_delete_metric_image
-      :guest      | false | false | :can_delete_metric_image
       :reporter   | true  | false | :can_delete_metric_image
       :reporter   | false | false | :can_delete_metric_image
     end

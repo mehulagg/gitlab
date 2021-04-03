@@ -34,11 +34,7 @@ describe('MemberTableCell', () => {
 
   const createStore = (state = {}) => {
     return new Vuex.Store({
-      state: {
-        sourceId: 1,
-        currentUserId: 1,
-        ...state,
-      },
+      state,
     });
   };
 
@@ -49,6 +45,10 @@ describe('MemberTableCell', () => {
       localVue,
       propsData,
       store: createStore(state),
+      provide: {
+        sourceId: 1,
+        currentUserId: 1,
+      },
       scopedSlots: {
         default: `
           <wrapped-component

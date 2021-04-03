@@ -202,7 +202,7 @@ RSpec.describe Ci::CreatePipelineService do
         YAML
       end
 
-      it 'creates a pipeline with build_a and test_b pending; deploy_b manual' do
+      it 'creates a pipeline with build_a and test_b pending; deploy_b manual', :sidekiq_inline do
         processables = pipeline.processables
 
         build_a = processables.find { |processable| processable.name == 'build_a' }
@@ -236,6 +236,52 @@ RSpec.describe Ci::CreatePipelineService do
       it 'raises error' do
         expect(pipeline.yaml_errors)
           .to eq('jobs:invalid_dag_job:needs config can not be an empty hash')
+      end
+    end
+
+    context 'when the needed job has rules' do
+      let(:config) do
+        <<~YAML
+          build:
+            stage: build
+            script: exit 0
+            rules:
+              - if: $CI_COMMIT_REF_NAME == "invalid"
+
+          test:
+            stage: test
+            script: exit 0
+            needs: [build]
+        YAML
+      end
+
+      it 'returns error' do
+        expect(pipeline.yaml_errors)
+          .to eq("'test' job needs 'build' job, but it was not added to the pipeline")
+      end
+
+      context 'when need is optional' do
+        let(:config) do
+          <<~YAML
+            build:
+              stage: build
+              script: exit 0
+              rules:
+                - if: $CI_COMMIT_REF_NAME == "invalid"
+
+            test:
+              stage: test
+              script: exit 0
+              needs:
+                - job: build
+                  optional: true
+          YAML
+        end
+
+        it 'creates the pipeline without an error' do
+          expect(pipeline).to be_persisted
+          expect(pipeline.builds.pluck(:name)).to contain_exactly('test')
+        end
       end
     end
   end

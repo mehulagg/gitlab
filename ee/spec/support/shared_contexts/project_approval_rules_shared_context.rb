@@ -3,8 +3,7 @@
 RSpec.shared_context 'with project with approval rules' do
   let_it_be(:approver) { create(:user) }
   let_it_be(:author) { create(:user) }
-  let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, :public, :repository, group: group) }
+  let_it_be(:project) { create(:project, :public, :repository) }
 
   before do
     stub_licensed_features(multiple_approval_rules: true)

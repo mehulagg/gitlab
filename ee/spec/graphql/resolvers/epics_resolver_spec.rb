@@ -134,6 +134,17 @@ RSpec.describe Resolvers::EpicsResolver do
         end
       end
 
+      context 'with my_reaction_emoji' do
+        it 'filters epics by reaction emoji' do
+          create(:award_emoji, name: 'man_in_business_suit_levitating', user: current_user, awardable: epic1)
+          create(:award_emoji, name: 'thumbsdown', user: current_user, awardable: epic2)
+
+          epics = resolve_epics(my_reaction_emoji: 'man_in_business_suit_levitating')
+
+          expect(epics).to contain_exactly(epic1)
+        end
+      end
+
       context 'with milestone_title' do
         let_it_be(:milestone1) { create(:milestone, group: group) }
 

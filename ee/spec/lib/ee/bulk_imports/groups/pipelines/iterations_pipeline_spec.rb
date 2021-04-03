@@ -5,11 +5,10 @@ require 'spec_helper'
 RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:cursor) { 'cursor' }
   let_it_be(:timestamp) { Time.new(2020, 01, 01).utc }
   let_it_be(:bulk_import) { create(:bulk_import, user: user) }
 
-  let(:entity) do
+  let_it_be(:entity) do
     create(
       :bulk_import_entity,
       bulk_import: bulk_import,
@@ -20,7 +19,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
     )
   end
 
-  let(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
   subject { described_class.new(context) }
 
@@ -29,31 +29,10 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
     group.add_owner(user)
   end
 
-  def iteration_data(title, start_date: Date.today)
-    {
-      'title' => title,
-      'description' => 'desc',
-      'state' => 'upcoming',
-      'start_date' => start_date,
-      'due_date' => start_date + 1.day,
-      'created_at' => timestamp.to_s,
-      'updated_at' => timestamp.to_s
-    }
-  end
-
-  def extracted_data(title:, has_next_page:, cursor: nil, start_date: Date.today)
-    page_info = {
-      'end_cursor' => cursor,
-      'has_next_page' => has_next_page
-    }
-
-    BulkImports::Pipeline::ExtractedData.new(data: [iteration_data(title, start_date: start_date)], page_info: page_info)
-  end
-
   describe '#run' do
     it 'imports group iterations' do
-      first_page = extracted_data(title: 'iteration1', has_next_page: true, cursor: cursor)
-      last_page = extracted_data(title: 'iteration2', has_next_page: false, start_date: Date.today + 2.days)
+      first_page = extracted_data(title: 'iteration1', has_next_page: true)
+      last_page = extracted_data(title: 'iteration2', start_date: Date.today + 2.days)
 
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
         allow(extractor)
@@ -73,38 +52,6 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
       expect(iteration.due_date).to eq(Date.today + 3.days)
       expect(iteration.created_at).to eq(timestamp)
       expect(iteration.updated_at).to eq(timestamp)
-    end
-  end
-
-  describe '#after_run' do
-    context 'when extracted data has next page' do
-      it 'updates tracker information and runs pipeline again' do
-        data = extracted_data(title: 'iteration', has_next_page: true, cursor: cursor)
-
-        expect(subject).to receive(:run)
-
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :iterations)
-
-        expect(tracker.has_next_page).to eq(true)
-        expect(tracker.next_page).to eq(cursor)
-      end
-    end
-
-    context 'when extracted data has no next page' do
-      it 'updates tracker information and does not run pipeline' do
-        data = extracted_data(title: 'iteration', has_next_page: false)
-
-        expect(subject).not_to receive(:run)
-
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :iterations)
-
-        expect(tracker.has_next_page).to eq(false)
-        expect(tracker.next_page).to be_nil
-      end
     end
   end
 
@@ -148,5 +95,29 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
           { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil }
         )
     end
+  end
+
+  def iteration_data(title, start_date: Date.today)
+    {
+      'title' => title,
+      'description' => 'desc',
+      'state' => 'upcoming',
+      'start_date' => start_date,
+      'due_date' => start_date + 1.day,
+      'created_at' => timestamp.to_s,
+      'updated_at' => timestamp.to_s
+    }
+  end
+
+  def extracted_data(title:, start_date: Date.today, has_next_page: false)
+    page_info = {
+      'has_next_page' => has_next_page,
+      'next_page' => has_next_page ? 'cursor' : nil
+    }
+
+    BulkImports::Pipeline::ExtractedData.new(
+      data: iteration_data(title, start_date: start_date),
+      page_info: page_info
+    )
   end
 end

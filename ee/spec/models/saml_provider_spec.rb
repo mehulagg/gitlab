@@ -98,6 +98,27 @@ RSpec.describe SamlProvider do
         end
       end
     end
+
+    describe 'git_check_enforced' do
+      let_it_be(:group) { create(:group) }
+
+      context 'sso is enforced' do
+        it 'git_check_enforced is valid' do
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: true, git_check_enforced: true)).to be_valid
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: true, git_check_enforced: false)).to be_valid
+        end
+      end
+
+      context 'sso is not enforced' do
+        it 'git_check_enforced is invalid when set to true' do
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: false, git_check_enforced: true)).to be_invalid
+        end
+
+        it 'git_check_enforced is valid when set to false' do
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: false, git_check_enforced: false)).to be_valid
+        end
+      end
+    end
   end
 
   describe 'Default values' do
@@ -212,6 +233,34 @@ RSpec.describe SamlProvider do
         expect(subject).not_to be_enforced_group_managed_accounts
         subject.enforced_group_managed_accounts = false
         expect(subject).not_to be_enforced_group_managed_accounts
+      end
+    end
+  end
+
+  describe '#git_check_enforced?' do
+    context 'without enforced sso' do
+      before do
+        allow(subject).to receive(:enforced_sso?).and_return(false)
+      end
+
+      it 'does not enforce git activity check' do
+        subject.git_check_enforced = true
+        expect(subject).not_to be_git_check_enforced
+        subject.git_check_enforced = false
+        expect(subject).not_to be_git_check_enforced
+      end
+    end
+
+    context 'with enforced sso' do
+      before do
+        allow(subject).to receive(:enforced_sso?).and_return(true)
+      end
+
+      it 'enforces git activity check when attribute is set to true' do
+        subject.git_check_enforced = true
+        expect(subject).to be_git_check_enforced
+        subject.git_check_enforced = false
+        expect(subject).not_to be_git_check_enforced
       end
     end
   end

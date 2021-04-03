@@ -103,3 +103,12 @@ export const savedScans = [
     },
   },
 ];
+
+export const failedSiteValidations = [
+  {
+    normalizedTargetUrl: 'http://example.com:80',
+  },
+  {
+    normalizedTargetUrl: 'https://example.com:443',
+  },
+];

@@ -26,6 +26,10 @@ module Resolvers
              required: false,
              description: 'Filter vulnerabilities by VulnerabilityScanner.externalId.'
 
+    argument :scanner_id, [GraphQL::INT_TYPE],
+             required: false,
+             description: 'Filter vulnerabilities by scanner ID.'
+
     argument :sort, Types::VulnerabilitySortEnum,
              required: false,
              default_value: 'severity_desc',

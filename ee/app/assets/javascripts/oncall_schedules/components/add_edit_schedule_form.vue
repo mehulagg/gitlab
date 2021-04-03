@@ -1,11 +1,13 @@
 <script>
 import {
+  GlIcon,
   GlForm,
   GlFormGroup,
   GlFormInput,
   GlDropdown,
   GlDropdownItem,
   GlSearchBoxByType,
+  GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { isEqual, isEmpty } from 'lodash';
 import { s__, __ } from '~/locale';
@@ -39,12 +41,16 @@ export const i18n = {
 export default {
   i18n,
   components: {
+    GlIcon,
     GlForm,
     GlFormGroup,
     GlFormInput,
     GlDropdown,
     GlDropdownItem,
     GlSearchBoxByType,
+  },
+  directives: {
+    SafeHtml,
   },
   inject: ['projectPath', 'timezones'],
   props: {
@@ -138,12 +144,15 @@ export default {
     >
       <gl-dropdown
         id="schedule-timezone"
-        :text="selectedTimezone"
         class="timezone-dropdown gl-w-full"
         :header-text="$options.i18n.selectTimezone"
         :class="{ 'invalid-dropdown': !validationState.timezone }"
         @hide="$emit('update-schedule-form', { type: 'timezone', value: selectedDropdownTimezone })"
       >
+        <template #button-content>
+          <span v-safe-html="selectedTimezone" class="gl-new-dropdown-button-text"></span>
+          <gl-icon class="dropdown-chevron" name="chevron-down" />
+        </template>
         <gl-search-box-by-type v-model.trim="tzSearchTerm" />
         <gl-dropdown-item
           v-for="tz in filteredTimezones"
@@ -152,7 +161,7 @@ export default {
           is-check-item
           @click="setTimezone(tz)"
         >
-          <span class="gl-white-space-nowrap"> {{ getFormattedTimezone(tz) }}</span>
+          <span v-safe-html="getFormattedTimezone(tz)" class="gl-white-space-nowrap"> </span>
         </gl-dropdown-item>
         <gl-dropdown-item v-if="noResults">
           {{ $options.i18n.noResults }}

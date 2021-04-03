@@ -145,8 +145,9 @@ module QA
           autoload :Integrations, 'qa/ee/page/project/settings/integrations'
           autoload :Repository, 'qa/ee/page/project/settings/repository'
           autoload :PushRules, 'qa/ee/page/project/settings/push_rules'
-          autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance'
           autoload :IssueTemplateDefault, 'qa/ee/page/project/settings/issue_template_default.rb'
+          autoload :CICD, 'qa/ee/page/project/settings/ci_cd'
+          autoload :PipelineSubscriptions, 'qa/ee/page/project/settings/pipeline_subscriptions'
         end
 
         module Operations
@@ -166,6 +167,7 @@ module QA
           autoload :SecurityDashboard, 'qa/ee/page/project/secure/security_dashboard'
           autoload :VulnerabilityDetails, 'qa/ee/page/project/secure/vulnerability_details'
           autoload :LicenseCompliance, 'qa/ee/page/project/secure/license_compliance'
+          autoload :ConfigurationForm, 'qa/ee/page/project/secure/configuration_form'
         end
 
         module PathLocks
@@ -216,6 +218,7 @@ module QA
       autoload :GroupLabel, 'qa/ee/resource/group_label'
       autoload :GroupIteration, 'qa/ee/resource/group_iteration'
       autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
+      autoload :PipelineSubscriptions, 'qa/ee/resource/pipeline_subscriptions'
 
       module Board
         autoload :BaseBoard, 'qa/ee/resource/board/base_board'

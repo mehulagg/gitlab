@@ -1,7 +1,7 @@
 import { find } from 'lodash';
 import Visibility from 'visibilityjs';
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
 import { __, s__, n__, sprintf } from '~/locale';
@@ -70,8 +70,8 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
     } else {
       invalidProjects = firstProject;
     }
-    createFlash(
-      sprintf(
+    createFlash({
+      message: sprintf(
         s__(
           'Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Premium plan.',
         ),
@@ -79,7 +79,7 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
           invalidProjects,
         },
       ),
-    );
+    });
   }
 
   if (added.length) {
@@ -88,11 +88,11 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
 };
 
 export const receiveAddProjectsToDashboardError = ({ state }) => {
-  createFlash(
-    sprintf(__('Something went wrong, unable to add %{project} to dashboard'), {
+  createFlash({
+    message: sprintf(__('Something went wrong, unable to add %{project} to dashboard'), {
       project: n__('project', 'projects', state.selectedProjects.length),
     }),
-  );
+  });
 };
 
 export const fetchProjects = ({ state, dispatch, commit }, page) => {
@@ -134,7 +134,9 @@ export const requestProjects = ({ commit }) => {
 
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
-  createFlash(__('Something went wrong, unable to get projects'));
+  createFlash({
+    message: __('Something went wrong, unable to get projects'),
+  });
 };
 
 export const removeProject = ({ dispatch }, removePath) => {
@@ -147,7 +149,9 @@ export const removeProject = ({ dispatch }, removePath) => {
 export const receiveRemoveProjectSuccess = ({ dispatch }) => dispatch('forceProjectsRequest');
 
 export const receiveRemoveProjectError = () => {
-  createFlash(__('Something went wrong, unable to delete project'));
+  createFlash({
+    message: __('Something went wrong, unable to delete project'),
+  });
 };
 
 export const setSearchQuery = ({ commit }, query) => commit(types.SET_SEARCH_QUERY, query);

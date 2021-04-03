@@ -5,11 +5,11 @@ describe('ee/projects/pipelines/charts/components/util.js', () => {
     it('transforms the data from the API into data the chart component can use', () => {
       const apiData = [
         // This is the date format we expect from the API
-        { value: 5, from: '2015-06-28T00:00:00.000Z', to: '2015-06-29T00:00:00.000Z' },
+        { value: 5, date: '2015-06-28' },
 
         // But we should support _any_ date format
-        { value: 1, from: '2015-06-28T20:00:00.000-0400', to: '2015-06-19T20:00:00.000-0400' },
-        { value: 8, from: '2015-07-01', to: '2015-07-02' },
+        { value: 1, date: '2015-06-28T20:00:00.000-0400' },
+        { value: 8, date: '2015-07-01T00:00:00.000Z' },
       ];
 
       const startDate = new Date(2015, 5, 26, 10);

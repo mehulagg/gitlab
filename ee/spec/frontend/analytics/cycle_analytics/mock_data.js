@@ -2,6 +2,7 @@ import { uniq } from 'lodash';
 import {
   DEFAULT_DAYS_IN_PAST,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
+  OVERVIEW_STAGE_CONFIG,
 } from 'ee/analytics/cycle_analytics/constants';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import mutations from 'ee/analytics/cycle_analytics/store/mutations';
@@ -117,20 +118,24 @@ const stageFixtures = defaultStages.reduce((acc, stage) => {
   };
 }, {});
 
-export const stageMedians = defaultStages.reduce((acc, stage) => {
-  const { value } = getJSONFixture(fixtureEndpoints.stageMedian(stage));
-  return {
-    ...acc,
-    [stage]: value,
-  };
-}, {});
+export const rawStageMedians = defaultStages.map((id) => ({
+  id,
+  ...getJSONFixture(fixtureEndpoints.stageMedian(id)),
+}));
 
-export const stageMediansWithNumericIds = defaultStages.reduce((acc, stage) => {
-  const { value } = getJSONFixture(fixtureEndpoints.stageMedian(stage));
-  const { id } = getStageByTitle(dummyState.stages, stage);
-  return {
+export const stageMedians = rawStageMedians.reduce(
+  (acc, { id, value }) => ({
     ...acc,
     [id]: value,
+  }),
+  {},
+);
+
+export const stageMediansWithNumericIds = rawStageMedians.reduce((acc, { id, value }) => {
+  const { id: stageId } = getStageByTitle(dummyState.stages, id);
+  return {
+    ...acc,
+    [stageId]: value,
   };
 }, {});
 
@@ -205,7 +210,7 @@ export const rawTasksByTypeData = transformRawTasksByTypeData(apiTasksByTypeData
 export const transformedTasksByTypeData = getTasksByTypeData(apiTasksByTypeData);
 
 export const transformedStagePathData = transformStagesForPathNavigation({
-  stages: allowedStages,
+  stages: [{ ...OVERVIEW_STAGE_CONFIG }, ...allowedStages],
   medians,
   selectedStage: issueStage,
 });
@@ -296,5 +301,4 @@ export const selectedProjects = [
   },
 ];
 
-// Value returned from JSON fixture is 172800 for issue stage which equals 2d
-export const pathNavIssueMetric = '2d';
+export const pathNavIssueMetric = 172800;

@@ -8,7 +8,7 @@ module Gitlab
 
       attr_accessor :previous_id
 
-      GEO_EVENT_LOG_GAPS = 'geo:event_log:gaps'.freeze
+      GEO_EVENT_LOG_GAPS = 'geo:event_log:gaps'
       GAP_GRACE_PERIOD = 10.minutes
       GAP_OUTDATED_PERIOD = 1.hour
 

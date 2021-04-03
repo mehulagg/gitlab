@@ -14,10 +14,10 @@ module Types
       field :title, GraphQL::STRING_TYPE, null: false,
         description: 'Title of the iteration cadence.'
 
-      field :duration_in_weeks, GraphQL::INT_TYPE, null: false,
+      field :duration_in_weeks, GraphQL::INT_TYPE, null: true,
         description: 'Duration in weeks of the iterations within this cadence.'
 
-      field :iterations_in_advance, GraphQL::INT_TYPE, null: false,
+      field :iterations_in_advance, GraphQL::INT_TYPE, null: true,
         description: 'Future iterations to be created when iteration cadence is set to automatic.'
 
       field :start_date, Types::TimeType, null: true,

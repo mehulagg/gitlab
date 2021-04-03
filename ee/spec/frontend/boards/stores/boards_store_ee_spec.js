@@ -1,7 +1,7 @@
 import AxiosMockAdapter from 'axios-mock-adapter';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
 import { TEST_HOST } from 'helpers/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');

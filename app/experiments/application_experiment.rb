@@ -10,9 +10,10 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
   end
 
   def publish(_result = nil)
+    return unless should_track? # don't track events for excluded contexts
+
     track(:assignment) # track that we've assigned a variant for this context
 
-    # push the experiment data to the client
     begin
       Gon.push({ experiment: { name => signature } }, true) # push the experiment data to the client
     rescue NoMethodError
@@ -26,7 +27,7 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     # track the event, and mix in the experiment signature data
     Gitlab::Tracking.event(name, action.to_s, **event_args.merge(
       context: (event_args[:context] || []) << SnowplowTracker::SelfDescribingJson.new(
-        'iglu:com.gitlab/gitlab_experiment/jsonschema/0-3-0', signature
+        'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0', signature
       )
     ))
   end

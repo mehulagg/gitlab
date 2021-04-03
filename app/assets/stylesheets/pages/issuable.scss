@@ -225,8 +225,7 @@
     }
   }
 
-  .cross-project-reference,
-  .sidebar-mr-source-branch {
+  .cross-project-reference {
     color: inherit;
 
     span {
@@ -236,10 +235,6 @@
       position: relative;
       display: inline-block;
       text-overflow: ellipsis;
-    }
-
-    cite {
-      font-style: normal;
     }
 
     button {
@@ -638,7 +633,7 @@
   }
 
   .btn-link:hover {
-    @extend a:hover;
+    color: $blue-800;
     text-decoration: none;
   }
 

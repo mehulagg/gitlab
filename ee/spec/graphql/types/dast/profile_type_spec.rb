@@ -31,7 +31,7 @@ RSpec.describe GitlabSchema.types['DastProfile'] do
 
     context 'when the feature flag is enabled' do
       it 'correctly resolves the field' do
-        expected_result = Dast::Branch.new(project)
+        expected_result = Dast::Branch.new(object)
 
         expect(resolve_field(:branch, object, current_user: user)).to eq(expected_result)
       end

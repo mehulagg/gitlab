@@ -30,6 +30,7 @@ describe('Timeago component', () => {
   const duration = () => wrapper.find('.duration');
   const finishedAt = () => wrapper.find('.finished-at');
   const findInProgress = () => wrapper.find('[data-testid="pipeline-in-progress"]');
+  const findSkipped = () => wrapper.find('[data-testid="pipeline-skipped"]');
 
   describe('with duration', () => {
     beforeEach(() => {
@@ -89,10 +90,25 @@ describe('Timeago component', () => {
     `(
       'progress state shown: $shouldShow when pipeline duration is $durationTime and finished_at is $finishedAtTime',
       ({ durationTime, finishedAtTime, shouldShow }) => {
-        createComponent({ duration: durationTime, finished_at: finishedAtTime });
+        createComponent({
+          duration: durationTime,
+          finished_at: finishedAtTime,
+        });
 
         expect(findInProgress().exists()).toBe(shouldShow);
+        expect(findSkipped().exists()).toBe(false);
       },
     );
+  });
+
+  describe('skipped', () => {
+    it('should show skipped if pipeline was skipped', () => {
+      createComponent({
+        status: { label: 'skipped' },
+      });
+
+      expect(findSkipped().exists()).toBe(true);
+      expect(findInProgress().exists()).toBe(false);
+    });
   });
 });

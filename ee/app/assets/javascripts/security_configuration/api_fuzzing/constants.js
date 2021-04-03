@@ -10,11 +10,11 @@ export const SCAN_MODES = {
     ),
   },
   OPENAPI: {
-    scanModeLabel: __('Open API'),
-    label: __('Open API specification file path'),
-    placeholder: s__('APIFuzzing|Ex: Project_Test/File/example_fuzz.json'),
+    scanModeLabel: __('OpenAPI'),
+    label: __('OpenAPI specification file path'),
+    placeholder: s__('APIFuzzing|/folder/example_file.json'),
     description: s__(
-      'APIFuzzing|We recommend that you review the JSON specifications file before adding it to a repository.',
+      'APIFuzzing|File path containing APIs to be tested. For example, /folder/example_file.json.',
     ),
   },
   POSTMAN: {

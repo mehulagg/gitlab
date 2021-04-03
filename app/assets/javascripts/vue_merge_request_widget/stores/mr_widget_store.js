@@ -163,7 +163,7 @@ export default class MergeRequestStore {
 
   setGraphqlData(project) {
     const { mergeRequest } = project;
-    const pipeline = mergeRequest.pipelines?.nodes?.[0];
+    const pipeline = mergeRequest.headPipeline;
 
     this.projectArchived = project.archived;
     this.onlyAllowMergeIfPipelineSucceeds = project.onlyAllowMergeIfPipelineSucceeds;
@@ -241,6 +241,7 @@ export default class MergeRequestStore {
     this.reviewingDocsPath = data.reviewing_and_managing_merge_requests_docs_path;
     this.ciEnvironmentsStatusPath = data.ci_environments_status_path;
     this.securityApprovalsHelpPagePath = data.security_approvals_help_page_path;
+    this.licenseComplianceDocsPath = data.license_compliance_docs_path;
     this.eligibleApproversDocsPath = data.eligible_approvers_docs_path;
     this.mergeImmediatelyDocsPath = data.merge_immediately_docs_path;
     this.approvalsHelpPath = data.approvals_help_path;

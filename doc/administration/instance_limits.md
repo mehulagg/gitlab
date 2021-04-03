@@ -105,7 +105,7 @@ Limit the maximum daily member invitations allowed per group hierarchy.
 
 ## Gitaly concurrency limit
 
-Clone traffic can put a large strain on your Gitaly service. To prevent such workloads from overwhelming your Gitaly server, you can set concurrency limits in Gitaly’s configuration file.
+Clone traffic can put a large strain on your Gitaly service. To prevent such workloads from overwhelming your Gitaly server, you can set concurrency limits in Gitaly's configuration file.
 
 Read more on [Gitaly concurrency limits](gitaly/configure_gitaly.md#limit-rpc-concurrency).
 
@@ -149,7 +149,7 @@ limited to 1KiB, and descriptions (the rest of the message) will be limited to
 
 The maximum number of issues loaded on the milestone overview page is 3000.
 When the number exceeds the limit the page displays an alert and links to a paginated
-[issue list](../user/project/issues/index.md#issues-list) of all issues in the milestone.
+[issue list](../user/project/issues/managing_issues.md) of all issues in the milestone.
 
 - **Limit:** 3000 issues
 

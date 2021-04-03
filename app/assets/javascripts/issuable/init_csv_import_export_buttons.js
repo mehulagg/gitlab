@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import ImportExportButtons from './components/csv_import_export_buttons.vue';
+import CsvImportExportButtons from './components/csv_import_export_buttons.vue';
 
 export default () => {
   const el = document.querySelector('.js-csv-import-export-buttons');
@@ -19,6 +19,7 @@ export default () => {
     canEdit,
     projectImportJiraPath,
     maxAttachmentSize,
+    showLabel,
   } = el.dataset;
 
   return new Vue({
@@ -27,17 +28,21 @@ export default () => {
       showExportButton: parseBoolean(showExportButton),
       showImportButton: parseBoolean(showImportButton),
       issuableType,
-      issuableCount,
       email,
-      exportCsvPath,
       importCsvIssuesPath,
       containerClass,
       canEdit: parseBoolean(canEdit),
       projectImportJiraPath,
       maxAttachmentSize,
+      showLabel,
     },
     render(h) {
-      return h(ImportExportButtons);
+      return h(CsvImportExportButtons, {
+        props: {
+          exportCsvPath,
+          issuableCount: parseInt(issuableCount, 10),
+        },
+      });
     },
   });
 };

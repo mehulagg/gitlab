@@ -47,10 +47,6 @@ module EE
           .where(plans: { name: [nil, *::Plan.default_plans] })
       end
 
-      scope :eligible_for_subscription, -> do
-        top_most.in_active_trial.or(top_most.in_default_plan)
-      end
-
       scope :eligible_for_trial, -> do
         left_joins(gitlab_subscription: :hosted_plan)
           .where(
@@ -94,13 +90,18 @@ module EE
                                 less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
       delegate :trial?, :trial_ends_on, :trial_starts_on, :trial_days_remaining,
-        :trial_percentage_complete, :upgradable?,
+        :trial_percentage_complete, :upgradable?, :trial_extended_or_reactivated?,
         to: :gitlab_subscription, allow_nil: true
 
       before_create :sync_membership_lock_with_parent
 
       # Changing the plan or other details may invalidate this cache
       before_save :clear_feature_available_cache
+    end
+
+    # Only groups can be marked for deletion
+    def marked_for_deletion?
+      false
     end
 
     def namespace_limit
@@ -141,8 +142,8 @@ module EE
     # Checks features (i.e. https://about.gitlab.com/pricing/) availabily
     # for a given Namespace plan. This method should consider ancestor groups
     # being licensed.
-    override :feature_available?
-    def feature_available?(feature)
+    override :licensed_feature_available?
+    def licensed_feature_available?(feature)
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
           h[f] = load_feature_available(f)
@@ -202,22 +203,15 @@ module EE
 
     def total_repository_size_excess
       strong_memoize(:total_repository_size_excess) do
-        namespace_size_limit = actual_size_limit
-        namespace_limit_arel = Arel::Nodes::SqlLiteral.new(namespace_size_limit.to_s.presence || 'NULL')
+        total_excess = (total_repository_size_arel - repository_size_limit_arel).sum
 
-        total_excess = total_repository_size_excess_calculation(::Project.arel_table[:repository_size_limit])
-        total_excess += total_repository_size_excess_calculation(namespace_limit_arel, project_level: false) if namespace_size_limit.to_i > 0
-        total_excess
+        projects_for_repository_size_excess.pluck(total_excess).first || 0
       end
     end
 
     def repository_size_excess_project_count
       strong_memoize(:repository_size_excess_project_count) do
-        namespace_size_limit = actual_size_limit
-
-        count = projects_for_repository_size_excess.count
-        count += projects_for_repository_size_excess(namespace_size_limit).count if namespace_size_limit.to_i > 0
-        count
+        projects_for_repository_size_excess.count
       end
     end
 
@@ -295,6 +289,14 @@ module EE
 
     def trial_active?
       trial? && trial_ends_on.present? && trial_ends_on >= Date.today
+    end
+
+    def can_extend?
+      trial_active? && !trial_extended_or_reactivated?
+    end
+
+    def can_reactivate?
+      !trial_active? && !never_had_trial? && !trial_extended_or_reactivated? && free_plan?
     end
 
     def never_had_trial?
@@ -428,26 +430,34 @@ module EE
       )
     end
 
-    def total_repository_size_excess_calculation(repository_size_limit, project_level: true)
-      total_excess = (total_repository_size_arel - repository_size_limit).sum
-      relation = projects_for_repository_size_excess((repository_size_limit unless project_level))
-      relation.pluck(total_excess).first || 0 # rubocop:disable Rails/Pick
-    end
-
     def total_repository_size_arel
       arel_table = ::ProjectStatistics.arel_table
       arel_table[:repository_size] + arel_table[:lfs_objects_size]
     end
 
-    def projects_for_repository_size_excess(limit = nil)
-      if limit
-        all_projects
-          .with_total_repository_size_greater_than(limit)
-          .without_repository_size_limit
+    def projects_for_repository_size_excess
+      projects_with_limits = ::Project.without_unlimited_repository_size_limit
+
+      if actual_size_limit.to_i > 0
+        # When the instance or namespace level limit is set, we need to include those without project level limits
+        projects_with_limits = projects_with_limits.or(::Project.without_repository_size_limit)
+      end
+
+      all_projects
+        .merge(projects_with_limits)
+        .with_total_repository_size_greater_than(repository_size_limit_arel)
+    end
+
+    def repository_size_limit_arel
+      instance_size_limit = actual_size_limit.to_i
+
+      if instance_size_limit > 0
+        self.class.arel_table.coalesce(
+          ::Project.arel_table[:repository_size_limit],
+          instance_size_limit
+        )
       else
-        all_projects
-          .with_total_repository_size_greater_than(::Project.arel_table[:repository_size_limit])
-          .without_unlimited_repository_size_limit
+        ::Project.arel_table[:repository_size_limit]
       end
     end
 

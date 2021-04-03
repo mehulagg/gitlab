@@ -9,11 +9,17 @@ import Tracking from '~/tracking';
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
 
 export default {
+  tracking: {
+    event: 'click_button',
+    labels: { upgrade: 'upgrade_to_ultimate', compare: 'compare_all_plans' },
+    property: 'experiment:show_trial_status_in_sidebar',
+  },
   components: {
     GlButton,
     GlPopover,
     GlSprintf,
   },
+  mixins: [Tracking.mixin()],
   props: {
     containerId: {
       type: [String, null],
@@ -54,15 +60,15 @@ export default {
     compareAllButtonTitle: s__('Trials|Compare all plans'),
     popoverTitle: s__('Trials|Hey there'),
     popoverContent: s__(`Trials|Your trial ends on
-      %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab
-      %{planName}. To continue using GitLab %{planName} after your trial ends,
-      you will need to buy a subscription. You can also choose GitLab Premium
-      if its features are sufficient for your needs.`),
+      %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the
+      features of GitLab %{planName}. To keep those features after your trial
+      ends, you’ll need to buy a subscription. (You can also choose GitLab
+      Premium if it meets your needs.)`),
     upgradeButtonTitle: s__('Trials|Upgrade %{groupName} to %{planName}'),
   },
   computed: {
     formattedTrialEndDate() {
-      return formatDate(this.trialEndDate, 'yyyy-mm-dd');
+      return formatDate(this.trialEndDate, 'mmmm d');
     },
   },
   created() {
@@ -80,7 +86,7 @@ export default {
       this.updateDisabledState();
     },
     onShown() {
-      Tracking.event(undefined, 'popover_shown', {
+      this.track('popover_shown', {
         label: 'trial_status_popover',
         property: 'experiment:show_trial_status_in_sidebar',
       });
@@ -97,7 +103,6 @@ export default {
     :container="containerId"
     :target="targetId"
     :disabled="disabled"
-    triggers="hover focus"
     placement="rightbottom"
     boundary="viewport"
     :delay="{ hide: 400 }"
@@ -123,6 +128,10 @@ export default {
         size="small"
         class="gl-mb-0"
         block
+        data-testid="upgradeBtn"
+        :data-track-event="$options.tracking.event"
+        :data-track-label="$options.tracking.labels.upgrade"
+        :data-track-property="$options.tracking.property"
       >
         <span class="gl-font-sm">
           <gl-sprintf :message="$options.i18n.upgradeButtonTitle">
@@ -138,7 +147,11 @@ export default {
         size="small"
         class="gl-mb-0"
         block
+        data-testid="compareBtn"
         :title="$options.i18n.compareAllButtonTitle"
+        :data-track-event="$options.tracking.event"
+        :data-track-label="$options.tracking.labels.compare"
+        :data-track-property="$options.tracking.property"
       >
         <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
       </gl-button>

@@ -33,7 +33,6 @@ RSpec.describe 'CreateApiFuzzingCiConfiguration' do
   end
 
   before do
-    stub_feature_flags(api_fuzzing_configuration_ui: true)
     stub_licensed_features(security_dashboard: true)
   end
 

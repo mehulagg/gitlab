@@ -10,10 +10,18 @@
       %label.gl-mt-2.mb-0.js-group-saml-enforced-sso-toggle-area
         = render "shared/buttons/project_feature_toggle", is_checked: saml_provider.enforced_sso, disabled: !saml_provider.enabled?, label: s_("GroupSAML|Enforced SSO"), class_list: "js-project-feature-toggle js-group-saml-enforced-sso-toggle project-feature-toggle d-inline", data: { qa_selector: 'enforced_sso_toggle_button' } do
           = f.hidden_field :enforced_sso, { class: 'js-group-saml-enforced-sso-input js-project-feature-toggle-input'}
-        %span.form-text.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Enforce SSO-only authentication for this group.')
+        %span.form-text.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Enforce SSO-only authentication for web activity for this group.')
       .form-text.text-muted.js-helper-text{ style: "display: #{'none' if saml_provider.enabled?} #{'block' unless saml_provider.enabled?}" }
         %span
-          = s_('GroupSAML|To be able to enable enforced SSO, you first need to enable SAML authentication.')
+          = s_('GroupSAML|Before enforcing SSO, enable SAML authentication.')
+    .form-group
+      %label.gl-mt-2.mb-0.js-group-saml-enforced-git-check-toggle-area
+        = render "shared/buttons/project_feature_toggle", is_checked: saml_provider.git_check_enforced, disabled: !saml_provider.enabled?, label: s_("GroupSAML|Check SSO on git activity"), class_list: "js-project-feature-toggle js-group-saml-enforced-git-check-toggle-area project-feature-toggle d-inline", data: { qa_selector: 'git_activity_check_toggle_button' } do
+          = f.hidden_field :git_check_enforced, { class: 'js-group-enforced-git-check-input js-project-feature-toggle-input'}
+        %span.form-text.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Enforce SSO-access for Git in this group.')
+      .form-text.text-muted.js-helper-text{ style: "display: #{saml_provider.enabled? ? 'none' : 'block'}" }
+        %span
+          = s_('GroupSAML|Before enforcing SSO, enable SAML authentication.')
     - if Feature.enabled?(:group_managed_accounts, group)
       .form-group
         %label.gl-mt-2.mb-0.js-group-saml-enforced-group-managed-accounts-toggle-area

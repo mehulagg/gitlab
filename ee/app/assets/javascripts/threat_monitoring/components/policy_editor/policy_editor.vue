@@ -16,7 +16,6 @@ import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import EnvironmentPicker from '../environment_picker.vue';
-import NetworkPolicyEditor from '../network_policy_editor.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
@@ -35,6 +34,9 @@ import PolicyPreview from './policy_preview.vue';
 import PolicyRuleBuilder from './policy_rule_builder.vue';
 
 export default {
+  i18n: {
+    toggleLabel: s__('NetworkPolicies|Policy status'),
+  },
   components: {
     GlFormGroup,
     GlFormSelect,
@@ -46,7 +48,8 @@ export default {
     GlAlert,
     GlModal,
     EnvironmentPicker,
-    NetworkPolicyEditor,
+    NetworkPolicyEditor: () =>
+      import(/* webpackChunkName: 'network_policy_editor' */ '../network_policy_editor.vue'),
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
@@ -253,8 +256,8 @@ export default {
     </div>
     <div class="row">
       <div class="col-md-auto">
-        <gl-form-group :label="s__('NetworkPolicies|Policy status')" label-for="policyStatus">
-          <gl-toggle id="policyStatus" v-model="policy.isEnabled" />
+        <gl-form-group>
+          <gl-toggle v-model="policy.isEnabled" :label="$options.i18n.toggleLabel" />
         </gl-form-group>
       </div>
     </div>
@@ -364,8 +367,8 @@ export default {
           </h5>
           <div class="gl-p-4">
             <network-policy-editor
+              data-testid="network-policy-editor"
               :value="yamlEditorValue"
-              :height="400"
               :read-only="false"
               @input="loadYaml"
             />

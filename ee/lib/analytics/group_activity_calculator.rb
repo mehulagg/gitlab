@@ -15,8 +15,14 @@ module Analytics
     end
 
     def merge_requests_count
+      # Clear db load balancing session so that primary sticking
+      # does not apply in case a write has happened recently.
+      # We want to make sure the load of the following query
+      # does not land on the primary db.
+      ::Gitlab::Database::LoadBalancing::Session.clear_session
+
       @merge_requests_count ||=
-        MergeRequestsFinder.new(@current_user, params).execute.count
+        Groups::RecentMergeRequestsCountService.new(@group, @current_user, params).count
     end
 
     def new_members_count

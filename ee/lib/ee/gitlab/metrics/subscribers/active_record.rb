@@ -17,6 +17,11 @@ module EE
           class_methods do
             extend ::Gitlab::Utils::Override
 
+            override :known_payload_keys
+            def known_payload_keys
+              super + DB_LOAD_BALANCING_COUNTERS
+            end
+
             override :db_counter_payload
             def db_counter_payload
               super.tap do |payload|
@@ -25,7 +30,7 @@ module EE
                     payload[counter] = ::Gitlab::SafeRequestStore[counter].to_i
                   end
                   DB_LOAD_BALANCING_DURATIONS.each do |duration|
-                    payload[duration] = ::Gitlab::SafeRequestStore[duration].to_f.round(6)
+                    payload[duration] = ::Gitlab::SafeRequestStore[duration].to_f.round(3)
                   end
                 end
               end
@@ -54,7 +59,9 @@ module EE
           end
 
           def observe_db_role_duration(db_role, event)
-            observe("gitlab_sql_#{db_role}_duration_seconds".to_sym, event)
+            observe("gitlab_sql_#{db_role}_duration_seconds".to_sym, event) do
+              buckets ::Gitlab::Metrics::Subscribers::ActiveRecord::SQL_DURATION_BUCKET
+            end
 
             duration = event.duration / 1000.0
             duration_key = "db_#{db_role}_duration_s".to_sym

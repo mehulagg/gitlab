@@ -10,6 +10,7 @@ RSpec.describe 'epics swimlanes', :js do
   let_it_be(:board) { create(:board, project: project) }
   let_it_be(:label) { create(:label, project: project, name: 'Label1') }
   let_it_be(:list) { create(:list, board: board, label: label, position: 0) }
+  let_it_be(:backlog_list) { create(:backlog_list, board: board) }
 
   let_it_be(:issue1) { create(:issue, project: project, labels: [label]) }
   let_it_be(:issue2) { create(:issue, project: project) }
@@ -30,6 +31,8 @@ RSpec.describe 'epics swimlanes', :js do
 
     it 'displays epics swimlanes when link to boards with group_by epic in URL' do
       expect(page).to have_selector('[data-testid="board-swimlanes"]')
+
+      wait_for_all_requests
 
       epic_lanes = page.all(:css, '.board-epic-lane')
       expect(epic_lanes.length).to eq(2)
@@ -136,7 +139,7 @@ RSpec.describe 'epics swimlanes', :js do
 
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('bug')
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
 
       wait_for_all_requests

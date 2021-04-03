@@ -4,12 +4,13 @@ import Api from 'ee/api';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import VulnerabilityFooter from 'ee/vulnerabilities/components/footer.vue';
+import GenericReportSection from 'ee/vulnerabilities/components/generic_report/report_section.vue';
 import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
 import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import initUserPopovers from '~/user_popovers';
 
@@ -329,5 +330,37 @@ describe('Vulnerability Footer', () => {
         });
       },
     );
+  });
+
+  describe('generic report', () => {
+    const mockDetails = { foo: { type: 'bar' } };
+
+    const genericReportSection = () => wrapper.findComponent(GenericReportSection);
+
+    describe('when a vulnerability contains a details property', () => {
+      beforeEach(() => {
+        createWrapper({ details: mockDetails });
+      });
+
+      it('renders the report section', () => {
+        expect(genericReportSection().exists()).toBe(true);
+      });
+
+      it('passes the correct props to the report section', () => {
+        expect(genericReportSection().props()).toMatchObject({
+          details: mockDetails,
+        });
+      });
+    });
+
+    describe('when a vulnerability does not contain a details property', () => {
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('does not render the report section', () => {
+        expect(genericReportSection().exists()).toBe(false);
+      });
+    });
   });
 });

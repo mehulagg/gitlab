@@ -20,11 +20,7 @@ module Dast
         response = ::DastOnDemandScans::CreateService.new(
           container: container,
           current_user: current_user,
-          params: {
-            branch: dast_profile.branch_name,
-            dast_site_profile: dast_site_profile,
-            dast_scanner_profile: dast_scanner_profile
-          }
+          params: { dast_profile: dast_profile }
         ).execute
 
         return response if response.error?
@@ -39,8 +35,7 @@ module Dast
       private
 
       def allowed?
-        container.feature_available?(:security_on_demand_scans) &&
-          Feature.enabled?(:dast_saved_scans, container, default_enabled: :yaml)
+        container.feature_available?(:security_on_demand_scans)
       end
 
       def dast_site_profile

@@ -1,5 +1,12 @@
 <script>
-import { GlTable, GlButton, GlModalDirective, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import {
+  GlTable,
+  GlButton,
+  GlModalDirective,
+  GlTooltipDirective,
+  GlIcon,
+  GlBadge,
+} from '@gitlab/ui';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import {
   DEVOPS_ADOPTION_TABLE_TEST_IDS,
@@ -58,6 +65,7 @@ export default {
     LocalStorageSync,
     DevopsAdoptionDeleteModal,
     GlIcon,
+    GlBadge,
   },
   i18n,
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
@@ -65,6 +73,11 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
     GlModal: GlModalDirective,
+  },
+  inject: {
+    groupGid: {
+      default: null,
+    },
   },
   tableHeaderFields: [
     ...headers,
@@ -101,6 +114,9 @@ export default {
     },
     slotName(key) {
       return `head(${key})`;
+    },
+    isCurrentGroup(item) {
+      return item.namespace?.id === this.groupGid;
     },
   },
 };
@@ -140,20 +156,16 @@ export default {
         </div>
       </template>
 
-      <template
-        #cell(name)="{
-          item: {
-            namespace: { fullName },
-            latestSnapshot,
-          },
-        }"
-      >
+      <template #cell(name)="{ item }">
         <div :data-testid="$options.testids.SEGMENT">
-          <strong v-if="latestSnapshot">{{ fullName }}</strong>
+          <strong v-if="item.latestSnapshot">{{ item.namespace.fullName }}</strong>
           <template v-else>
-            <span class="gl-text-gray-400">{{ fullName }}</span>
+            <span class="gl-text-gray-400">{{ item.namespace.fullName }}</span>
             <gl-icon name="hourglass" class="gl-text-gray-400" />
           </template>
+          <gl-badge v-if="isCurrentGroup(item)" class="gl-ml-1" variant="info">{{
+            __('This group')
+          }}</gl-badge>
         </div>
       </template>
 

@@ -23,7 +23,6 @@ module Dast
 
       def allowed?
         container.feature_available?(:security_on_demand_scans) &&
-          Feature.enabled?(:dast_saved_scans, container, default_enabled: :yaml) &&
           can?(current_user, :create_on_demand_dast_scan, container)
       end
 
@@ -48,16 +47,10 @@ module Dast
       end
 
       def create_scan(dast_profile)
-        params = {
-          branch: dast_profile.branch_name,
-          dast_site_profile: dast_profile.dast_site_profile,
-          dast_scanner_profile: dast_profile.dast_scanner_profile
-        }
-
         ::DastOnDemandScans::CreateService.new(
           container: container,
           current_user: current_user,
-          params: params
+          params: { dast_profile: dast_profile }
         ).execute
       end
     end

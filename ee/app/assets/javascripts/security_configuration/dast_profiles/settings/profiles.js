@@ -10,56 +10,54 @@ import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graph
 import dastSiteProfilesDelete from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles_delete.mutation.graphql';
 import { s__ } from '~/locale';
 
-export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnabled }) => ({
-  ...(isDastSavedScansEnabled
-    ? {
-        dastProfiles: {
-          profileType: 'dastProfiles',
-          createNewProfilePath: createNewProfilePaths.savedScan,
-          graphQL: {
-            query: dastProfilesQuery,
-            deletion: {
-              mutation: dastProfileDelete,
-              optimisticResponse: dastProfilesDeleteResponse({
-                mutationName: 'dastProfileDelete',
-                payloadTypeName: 'DastProfileDeletePayload',
-              }),
-            },
-          },
-          component: DastSavedScansList,
-          tableFields: [
-            {
-              label: s__('DastProfiles|Scan'),
-              key: 'name',
-            },
-            {
-              label: s__('DastProfiles|Target'),
-              key: 'dastSiteProfile.targetUrl',
-            },
-            {
-              label: s__('DastProfiles|Scan mode'),
-              key: 'dastScannerProfile.scanType',
-            },
-          ],
-          i18n: {
-            createNewLinkText: s__('DastProfiles|DAST Scan'),
-            name: s__('DastProfiles|Saved Scans'),
-            errorMessages: {
-              fetchNetworkError: s__(
-                'DastProfiles|Could not fetch saved scans. Please refresh the page, or try again later.',
-              ),
-              deletionNetworkError: s__(
-                'DastProfiles|Could not delete saved scan. Please refresh the page, or try again later.',
-              ),
-              deletionBackendError: s__('DastProfiles|Could not delete saved scans:'),
-            },
-            noProfilesMessage: s__('DastProfiles|No scans saved yet'),
-          },
-        },
-      }
-    : {}),
+export const getProfileSettings = ({ createNewProfilePaths }) => ({
+  dastProfiles: {
+    profileType: 'dastProfiles',
+    tabName: 'saved-scans',
+    createNewProfilePath: createNewProfilePaths.savedScan,
+    graphQL: {
+      query: dastProfilesQuery,
+      deletion: {
+        mutation: dastProfileDelete,
+        optimisticResponse: dastProfilesDeleteResponse({
+          mutationName: 'dastProfileDelete',
+          payloadTypeName: 'DastProfileDeletePayload',
+        }),
+      },
+    },
+    component: DastSavedScansList,
+    tableFields: [
+      {
+        label: s__('DastProfiles|Scan'),
+        key: 'name',
+      },
+      {
+        label: s__('DastProfiles|Target'),
+        key: 'dastSiteProfile.targetUrl',
+      },
+      {
+        label: s__('DastProfiles|Scan mode'),
+        key: 'dastScannerProfile.scanType',
+      },
+    ],
+    i18n: {
+      createNewLinkText: s__('DastProfiles|DAST Scan'),
+      name: s__('DastProfiles|Saved Scans'),
+      errorMessages: {
+        fetchNetworkError: s__(
+          'DastProfiles|Could not fetch saved scans. Please refresh the page, or try again later.',
+        ),
+        deletionNetworkError: s__(
+          'DastProfiles|Could not delete saved scan. Please refresh the page, or try again later.',
+        ),
+        deletionBackendError: s__('DastProfiles|Could not delete saved scans:'),
+      },
+      noProfilesMessage: s__('DastProfiles|No scans saved yet'),
+    },
+  },
   siteProfiles: {
     profileType: 'siteProfiles',
+    tabName: 'site-profiles',
     createNewProfilePath: createNewProfilePaths.siteProfile,
     graphQL: {
       query: dastSiteProfilesQuery,
@@ -94,6 +92,7 @@ export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnab
   },
   scannerProfiles: {
     profileType: 'scannerProfiles',
+    tabName: 'scanner-profiles',
     createNewProfilePath: createNewProfilePaths.scannerProfile,
     graphQL: {
       query: dastScannerProfilesQuery,

@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
 import dateFormat from 'dateformat';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
@@ -183,7 +183,9 @@ export default {
         })
         .catch(() => {
           this.fetchedLegacyData = false;
-          createFlash(__('Error loading burndown chart data'));
+          createFlash({
+            message: __('Error loading burndown chart data'),
+          });
         });
     },
     pluckBurnupDataProperties(total, completed) {

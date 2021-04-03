@@ -22,6 +22,9 @@ export default {
     finishedTime() {
       return this.pipeline?.details?.finished_at;
     },
+    skipped() {
+      return this.pipeline?.details?.status?.label === 'skipped';
+    },
     durationFormatted() {
       const date = new Date(this.duration * 1000);
 
@@ -49,7 +52,10 @@ export default {
       return !this.glFeatures.newPipelinesTable ? 'table-mobile-content' : '';
     },
     showInProgress() {
-      return !this.duration && !this.finishedTime;
+      return !this.duration && !this.finishedTime && !this.skipped;
+    },
+    showSkipped() {
+      return !this.duration && !this.finishedTime && this.skipped;
     },
   },
 };
@@ -63,6 +69,11 @@ export default {
       <span v-if="showInProgress" data-testid="pipeline-in-progress">
         <gl-icon name="hourglass" class="gl-vertical-align-baseline! gl-mr-2" :size="12" />
         {{ s__('Pipeline|In progress') }}
+      </span>
+
+      <span v-if="showSkipped" data-testid="pipeline-skipped">
+        <gl-icon name="status_skipped_borderless" class="gl-mr-2" :size="16" />
+        {{ s__('Pipeline|Skipped') }}
       </span>
 
       <p v-if="duration" class="duration">

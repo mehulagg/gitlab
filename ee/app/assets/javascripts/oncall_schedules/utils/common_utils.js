@@ -1,3 +1,4 @@
+import { newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
 import { sprintf, __ } from '~/locale';
 import { ASSIGNEE_COLORS_COMBO } from '../constants';
 
@@ -52,3 +53,36 @@ export const getParticipantsForSave = (participants) =>
       colorPalette,
     };
   });
+
+/**
+ * Parses a activePeriod string into an integer value
+ *
+ * @param {String} hourString
+ */
+export const parseHour = (hourString) => parseInt(hourString.slice(0, 2), 10);
+
+/**
+ * Parses a rotation date for use in the add/edit rotation form
+ *
+ * @param {ISOString} dateTimeString
+ * @param {Timezone string - long} scheduleTimezone
+ */
+export const parseRotationDate = (dateTimeString, scheduleTimezone) => {
+  const options = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hourCycle: 'h23',
+    timeZone: scheduleTimezone,
+    timeZoneName: 'long',
+  };
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const parts = formatter.formatToParts(Date.parse(dateTimeString));
+  const [month, , day, , year, , hour] = parts.map((part) => part.value);
+  // The datepicker uses local time
+  const date = newDateAsLocaleTime(`${year}-${month}-${day}`);
+  const time = parseInt(hour, 10);
+
+  return { date, time };
+};

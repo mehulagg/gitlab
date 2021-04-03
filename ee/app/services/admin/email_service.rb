@@ -5,7 +5,7 @@ module Admin
     include ExclusiveLeaseGuard
 
     DEFAULT_LEASE_TIMEOUT = 10.minutes.to_i
-    LEASE_KEY = 'admin/email_service'.freeze
+    LEASE_KEY = 'admin/email_service'
 
     def initialize(recipients, subject, body)
       @recipients, @subject, @body = recipients, subject, body

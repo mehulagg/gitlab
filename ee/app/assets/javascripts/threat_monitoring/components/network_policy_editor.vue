@@ -1,7 +1,10 @@
 <script>
-import { editor as monacoEditor } from 'monaco-editor';
+import EditorLite from '~/vue_shared/components/editor_lite.vue';
 
 export default {
+  components: {
+    EditorLite,
+  },
   props: {
     value: {
       type: String,
@@ -12,56 +15,35 @@ export default {
       required: false,
       default: true,
     },
-    height: {
-      type: Number,
-      required: false,
-      default: 300,
-    },
   },
-  data() {
-    return { editor: null };
-  },
-  watch: {
-    value(val) {
-      if (val === this.editor.getValue()) return;
-      this.editor.setValue(val);
-    },
-  },
-  beforeDestroy() {
-    this.editor.dispose();
-  },
-  mounted() {
-    if (!this.editor) {
-      this.setupEditor();
-    }
-  },
-  methods: {
-    setupEditor() {
-      this.editor = monacoEditor.create(this.$refs.editor, {
-        value: this.value,
-        language: 'yaml',
+  computed: {
+    editorOptions() {
+      return {
         lineNumbers: 'off',
         minimap: { enabled: false },
         folding: false,
+        // Investigate the necessity of `glyphMargin` with #326746
+        glyphMargin: false,
         renderIndentGuides: false,
         renderWhitespace: 'boundary',
         renderLineHighlight: 'none',
-        glyphMargin: false,
         lineDecorationsWidth: 0,
         lineNumbersMinChars: 0,
         occurrencesHighlight: false,
         hideCursorInOverviewRuler: true,
         overviewRulerBorder: false,
         readOnly: this.readOnly,
-      });
-      this.editor.onDidChangeModelContent(() => {
-        this.$emit('input', this.editor.getValue());
-      });
+      };
+    },
+  },
+  methods: {
+    onInput(val) {
+      this.$emit('input', val);
     },
   },
 };
 </script>
 
 <template>
-  <div ref="editor" class="gl-overflow-hidden" :style="{ height: `${height}px` }"></div>
+  <editor-lite :value="value" file-name="*.yaml" :editor-options="editorOptions" @input="onInput" />
 </template>

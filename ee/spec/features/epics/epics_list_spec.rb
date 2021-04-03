@@ -27,7 +27,7 @@ RSpec.describe 'epics list', :js do
     it 'shows epics tabs for each status type' do
       page.within('.epics-state-filters') do
         expect(page).to have_selector('li > a#state-opened')
-        expect(find('li > a#state-opened')[:title]).to eq('Filter by epics that are currently opened.')
+        expect(find('li > a#state-opened')[:title]).to eq('Filter by epics that are currently open.')
 
         expect(page).to have_selector('li > a#state-closed')
         expect(find('li > a#state-closed')[:title]).to eq('Filter by epics that are currently closed.')

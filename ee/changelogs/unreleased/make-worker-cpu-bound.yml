@@ -1,5 +1,0 @@
----
-title: Make StoreSecurityReportsWorker cpu-bound
-merge_request: 56149
-author:
-type: performance

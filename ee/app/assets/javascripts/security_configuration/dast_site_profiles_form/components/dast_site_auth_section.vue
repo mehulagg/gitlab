@@ -1,7 +1,6 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
 import { initFormField } from 'ee/security_configuration/utils';
-import { __ } from '~/locale';
 import validation from '~/vue_shared/directives/validation';
 
 export default {
@@ -65,8 +64,8 @@ export default {
     showValidationOrInEditMode() {
       return this.showValidation || this.isEditMode;
     },
-    sensitiveFieldPlaceholder() {
-      return this.isEditMode ? __('[Unchanged]') : '';
+    passwordFieldPlaceholder() {
+      return this.isEditMode ? '••••••••' : '';
     },
   },
   watch: {
@@ -132,7 +131,7 @@ export default {
               autocomplete="off"
               name="password"
               type="password"
-              :placeholder="sensitiveFieldPlaceholder"
+              :placeholder="passwordFieldPlaceholder"
               :required="isSensitiveFieldRequired"
               :state="form.fields.password.state"
             />

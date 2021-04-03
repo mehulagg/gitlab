@@ -11,6 +11,8 @@ module EE
             query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
 
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
+          transformer ::BulkImports::Common::Transformers::UserReferenceTransformer,
+            reference: :author
           transformer EE::BulkImports::Groups::Transformers::EpicAttributesTransformer
 
           def transform(_, data)
@@ -21,18 +23,6 @@ module EE
             raise ::BulkImports::Pipeline::NotAllowedError unless authorized?
 
             context.group.epics.create!(data)
-          end
-
-          def after_run(extracted_data)
-            context.entity.update_tracker_for(
-              relation: :epics,
-              has_next_page: extracted_data.has_next_page?,
-              next_page: extracted_data.next_page
-            )
-
-            if extracted_data.has_next_page?
-              run
-            end
           end
 
           private

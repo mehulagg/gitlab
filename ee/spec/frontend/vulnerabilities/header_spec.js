@@ -14,7 +14,7 @@ import { FEEDBACK_TYPES, VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/
 import createMockApollo from 'helpers/mock_apollo_helper';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
@@ -260,9 +260,9 @@ describe('Vulnerability Header', () => {
         findGlButton().vm.$emit('click');
         return waitForPromises().then(() => {
           expect(mockAxios.history.post).toHaveLength(1);
-          expect(createFlash).toHaveBeenCalledWith(
-            'There was an error creating the merge request. Please try again.',
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error creating the merge request. Please try again.',
+          });
         });
       });
     });

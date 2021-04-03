@@ -124,8 +124,11 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           let(:start_time) { '17:00' }
           let(:end_time) { '08:00' }
 
-          it 'raises an error' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "'start_time' time must be before 'end_time' time")
+          it 'saves the on-call rotation with active period times' do
+            rotation = resolve[:oncall_rotation]
+
+            expect(rotation.active_period_start.strftime('%H:%M')).to eql('17:00')
+            expect(rotation.active_period_end.strftime('%H:%M')).to eql('08:00')
           end
         end
 
@@ -179,7 +182,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
 
         context 'too many users' do
           before do
-            stub_const('Mutations::IncidentManagement::OncallRotation::Create::MAXIMUM_PARTICIPANTS', 0)
+            stub_const('Mutations::IncidentManagement::OncallRotation::Base::MAXIMUM_PARTICIPANTS', 0)
           end
 
           it 'raises an error' do

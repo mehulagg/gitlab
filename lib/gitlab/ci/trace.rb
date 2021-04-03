@@ -11,7 +11,7 @@ module Gitlab
       LOCK_SLEEP = 0.001.seconds
       WATCH_FLAG_TTL = 10.seconds
 
-      UPDATE_FREQUENCY_DEFAULT = 30.seconds
+      UPDATE_FREQUENCY_DEFAULT = 60.seconds
       UPDATE_FREQUENCY_WHEN_BEING_WATCHED = 3.seconds
 
       ArchiveError = Class.new(StandardError)
@@ -114,7 +114,11 @@ module Gitlab
       end
 
       def update_interval
-        being_watched? ? UPDATE_FREQUENCY_WHEN_BEING_WATCHED : UPDATE_FREQUENCY_DEFAULT
+        if being_watched?
+          UPDATE_FREQUENCY_WHEN_BEING_WATCHED
+        else
+          UPDATE_FREQUENCY_DEFAULT
+        end
       end
 
       def being_watched!

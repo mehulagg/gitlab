@@ -178,7 +178,7 @@ export default {
       v-if="hasGroupData"
       :key="modalKey"
       :groups="groups.nodes"
-      :segment="selectedSegment"
+      :enabled-groups="devopsAdoptionSegments.nodes"
       @trackModalOpenState="trackModalOpenState"
     />
     <div v-if="hasSegmentsData" class="gl-mt-3">

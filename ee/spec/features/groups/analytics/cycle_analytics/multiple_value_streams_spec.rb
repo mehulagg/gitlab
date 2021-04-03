@@ -97,7 +97,7 @@ RSpec.describe 'Multiple value streams', :js do
       create_value_stream
 
       expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
-      expect(page.all("[data-testid='gl-path-nav'] .gl-path-button").count).to eq(4)
+      expect(page.find('[data-testid="gl-path-nav"]')).to have_text("Cool custom stage - name")
     end
   end
 

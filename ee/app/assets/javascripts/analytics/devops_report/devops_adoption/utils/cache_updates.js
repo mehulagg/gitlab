@@ -1,13 +1,16 @@
 import produce from 'immer';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 
-export const addSegmentToCache = (store, segment) => {
+export const addSegmentsToCache = (store, segments) => {
   const sourceData = store.readQuery({
     query: devopsAdoptionSegmentsQuery,
   });
 
   const data = produce(sourceData, (draftData) => {
-    draftData.devopsAdoptionSegments.nodes = [...draftData.devopsAdoptionSegments.nodes, segment];
+    draftData.devopsAdoptionSegments.nodes = [
+      ...draftData.devopsAdoptionSegments.nodes,
+      ...segments,
+    ];
   });
 
   store.writeQuery({
@@ -16,14 +19,14 @@ export const addSegmentToCache = (store, segment) => {
   });
 };
 
-export const deleteSegmentFromCache = (store, segmentId) => {
+export const deleteSegmentsFromCache = (store, segmentIds) => {
   const sourceData = store.readQuery({
     query: devopsAdoptionSegmentsQuery,
   });
 
   const updatedData = produce(sourceData, (draftData) => {
     draftData.devopsAdoptionSegments.nodes = draftData.devopsAdoptionSegments.nodes.filter(
-      ({ id }) => id !== segmentId,
+      ({ id }) => !segmentIds.includes(id),
     );
   });
 

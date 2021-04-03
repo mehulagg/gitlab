@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Version-specific update instructions
+# Version-specific update instructions **(PREMIUM SELF)**
 
 Review this page for update instructions for your version. These steps
 accompany the [general steps](updating_the_geo_nodes.md#general-update-steps)
@@ -13,11 +13,12 @@ for updating Geo nodes.
 
 ## Updating to GitLab 13.9
 
-We've detected an issue [with a column rename](https://gitlab.com/gitlab-org/gitlab/-/issues/322991)
-that prevents regular downtime upgrades to GitLab 13.9.0, 13.9.1 and 13.9.2. Zero-downtime upgrades are not
-affected. To avoid this issue, upgrade to GitLab 13.9.3 or later.
+We've detected an issue [with a column rename](https://gitlab.com/gitlab-org/gitlab/-/issues/324160)
+that may prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3.
+We are working on a patch and recommend delaying any upgrade attempt until a fixed version
+is released.
 
-More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/322991).
+More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160).
 
 ## Updating to GitLab 13.7
 

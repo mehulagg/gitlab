@@ -18,22 +18,9 @@ RSpec.describe Dast::Profiles::DestroyService do
   end
 
   describe '#execute' do
-    context 'when the feature flag dast_saved_scans is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: false)
-
-        expect(subject).to have_attributes(
-          status: :error,
-          message: 'You are not authorized to update this profile'
-        )
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(dast_saved_scans: true)
 
         expect(subject).to have_attributes(
           status: :error,
@@ -45,7 +32,6 @@ RSpec.describe Dast::Profiles::DestroyService do
     context 'when the feature is enabled' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: true)
       end
 
       context 'when the user cannot destroy a DAST profile' do

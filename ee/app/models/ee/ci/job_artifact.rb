@@ -23,9 +23,6 @@ module EE
       API_FUZZING_REPORT_TYPES = %w[api_fuzzing].freeze
       BROWSER_PERFORMANCE_REPORT_FILE_TYPES = %w[browser_performance performance].freeze
 
-      scope :project_id_in, ->(ids) { where(project_id: ids) }
-      scope :with_files_stored_remotely, -> { where(file_store: ::JobArtifactUploader::Store::REMOTE) }
-
       scope :security_reports, -> (file_types: SECURITY_REPORT_FILE_TYPES) do
         requested_file_types = *file_types
 
@@ -70,28 +67,6 @@ module EE
         return BROWSER_PERFORMANCE_REPORT_FILE_TYPES if BROWSER_PERFORMANCE_REPORT_FILE_TYPES.include?(file_type)
 
         super
-      end
-
-      # @param primary_key_in [Range, Ci::JobArtifact] arg to pass to primary_key_in scope
-      # @return [ActiveRecord::Relation<Ci::JobArtifact>] everything that should be synced to this node, restricted by primary key
-      def replicables_for_current_secondary(primary_key_in)
-        node = ::Gitlab::Geo.current_node
-
-        primary_key_in(primary_key_in)
-          .merge(selective_sync_scope(node))
-          .merge(object_storage_scope(node))
-      end
-
-      def object_storage_scope(node)
-        return all if node.sync_object_storage?
-
-        with_files_stored_locally
-      end
-
-      def selective_sync_scope(node)
-        return all unless node.selective_sync?
-
-        project_id_in(node.projects)
       end
     end
 

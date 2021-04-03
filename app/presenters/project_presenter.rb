@@ -93,10 +93,6 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     filename_path(repository.license_blob&.name)
   end
 
-  def ci_configuration_path
-    filename_path(repository.gitlab_ci_yml&.name)
-  end
-
   def contribution_guide_path
     if project && contribution_guide = repository.contribution_guide
       project_blob_path(
@@ -129,10 +125,6 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
 
   def add_contribution_guide_ide_path
     ide_edit_path(project, default_branch_or_master, 'CONTRIBUTING.md')
-  end
-
-  def add_ci_yml_path
-    add_special_file_path(file_name: ci_config_path_or_default)
   end
 
   def add_readme_path
@@ -253,8 +245,11 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
                          nil,
                          nil,
                          {
-                           'toggle' => 'modal',
-                           'target' => '#modal-upload-blob'
+                           'target_branch' => default_branch_or_master,
+                           'original_branch' => default_branch_or_master,
+                           'can_push_code' => 'true',
+                           'path' => project_create_blob_path(project, default_branch_or_master),
+                           'project_path' => project.path
                          }
                         )
         end
@@ -381,11 +376,11 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     if cicd_missing?
       AnchorData.new(false,
                      statistic_icon + _('Set up CI/CD'),
-                     add_ci_yml_path)
+                     project_ci_pipeline_editor_path(project))
     elsif repository.gitlab_ci_yml.present?
       AnchorData.new(false,
                      statistic_icon('doc-text') + _('CI/CD configuration'),
-                     ci_configuration_path,
+                     project_ci_pipeline_editor_path(project),
                     'btn-default')
     end
   end

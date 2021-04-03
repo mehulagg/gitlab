@@ -42,6 +42,11 @@ module Types
             null: true,
             resolver: ::Resolvers::Geo::GroupWikiRepositoryRegistriesResolver,
             description: 'Find group wiki repository registries on this Geo node.'
+      field :pipeline_artifact_registries, ::Types::Geo::PipelineArtifactRegistryType.connection_type,
+            null: true,
+            resolver: ::Resolvers::Geo::PipelineArtifactRegistriesResolver,
+            description: 'Find pipeline artifact registries on this Geo node.',
+            feature_flag: :geo_pipeline_artifact_replication
     end
   end
 end

@@ -30,8 +30,10 @@ tracking_files = [
   'app/assets/javascripts/tracking.js',
   'spec/frontend/tracking_spec.js',
   'generator_templates/usage_metric_definition/metric_definition.yml',
-  'lib/generators/rails/usage_metric_definition_generator.rb',
-  'spec/lib/generators/usage_metric_definition_generator_spec.rb',
+  'lib/generators/gitlab/usage_metric_definition_generator.rb',
+  'lib/generators/gitlab/usage_metric_definition/redis_hll_generator.rb',
+  'spec/lib/generators/gitlab/usage_metric_definition_generator_spec.rb',
+  'spec/lib/generators/gitlab/usage_metric_definition/redis_hll_generator_spec.rb',
   'config/metrics/schema.json'
 ]
 
@@ -49,7 +51,8 @@ end
 js_patterns = Regexp.union(
   'Tracking.event',
   /\btrack\(/,
-  'data-track-event'
+  'data-track-event',
+  'data-track-action'
 )
 
 dictionary_pattern = Regexp.union(
@@ -81,12 +84,7 @@ matching_changed_files = usage_data_changed_files +
 
 if matching_changed_files.any?
 
-  mention = if helper.draft_mr?
-              "`#{ENGINEERS_GROUP}`"
-            else
-              ENGINEERS_GROUP
-            end
-
+  mention = "`#{ENGINEERS_GROUP}`"
   warn format(CHANGED_FILES_MESSAGE, changed_files: helper.markdown_list(matching_changed_files), engineers_group: mention)
 
   fail format(UPDATE_DICTIONARY_MESSAGE) if required_dictionary_update_changed_files.any? && dictionary_changed_file.empty?

@@ -3,10 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::UsageDataCounters::IssueActivityUniqueCounter, :clean_gitlab_redis_shared_state do
-  let(:user1) { build(:user, id: 1) }
-  let(:user2) { build(:user, id: 2) }
-  let(:user3) { build(:user, id: 3) }
-  let(:time) { Time.zone.now }
+  let_it_be(:user1) { build(:user, id: 1) }
+  let_it_be(:user2) { build(:user, id: 2) }
 
   context 'for Issue health status changed actions' do
     it_behaves_like 'a daily tracked issuable event' do

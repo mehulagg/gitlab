@@ -3,6 +3,18 @@
 RSpec.shared_examples 'a Geo framework registry' do
   let(:registry_class_factory) { described_class.underscore.tr('/', '_').to_sym }
 
+  context 'scopes' do
+    describe 'sync_timed_out' do
+      it 'return correct records' do
+        record = create(registry_class_factory, :started, last_synced_at: 9.hours.ago)
+        create(registry_class_factory, :started, last_synced_at: 1.hour.ago)
+        create(registry_class_factory, :failed, last_synced_at: 9.hours.ago)
+
+        expect(described_class.sync_timed_out).to eq [record]
+      end
+    end
+  end
+
   context 'finders' do
     let!(:failed_item1) { create(registry_class_factory, :failed) }
     let!(:failed_item2) { create(registry_class_factory, :failed) }
@@ -50,6 +62,18 @@ RSpec.shared_examples 'a Geo framework registry' do
 
         expect(result.first).to eq failed_item2
       end
+    end
+  end
+
+  describe '.fail_sync_timeouts' do
+    it 'marks started records as failed if they are expired' do
+      record1 = create(registry_class_factory, :started, last_synced_at: 9.hours.ago)
+      record2 = create(registry_class_factory, :started, last_synced_at: 1.hour.ago) # not yet expired
+
+      described_class.fail_sync_timeouts
+
+      expect(record1.reload.state).to eq described_class::STATE_VALUES[:failed]
+      expect(record2.reload.state).to eq described_class::STATE_VALUES[:started]
     end
   end
 end

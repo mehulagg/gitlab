@@ -7,10 +7,9 @@ product_group: group::composition analysis
 product_category: license_compliance
 value_type: string
 status: data_available
-time_frame: none
-data_source: database
+time_frame: all
+data_source: redis
 distribution:
 - ee
 tier:
 - ultimate
-skip_validation: true

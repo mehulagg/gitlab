@@ -1,3 +1,4 @@
+import { GlToggle } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
@@ -42,7 +43,7 @@ describe('Filter component', () => {
     });
 
     it('should display "Hide dismissed vulnerabilities" toggle', () => {
-      expect(wrapper.findAll('.js-toggle')).toHaveLength(1);
+      expect(wrapper.findComponent(GlToggle).props('label')).toBe(Filters.i18n.toggleLabel);
     });
   });
 

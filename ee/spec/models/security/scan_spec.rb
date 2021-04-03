@@ -40,6 +40,10 @@ RSpec.describe Security::Scan do
     it { is_expected.to delegate_method(:project).to(:build) }
   end
 
+  describe '#name' do
+    it { is_expected.to delegate_method(:name).to(:build) }
+  end
+
   describe '.by_scan_types' do
     let!(:sast_scan) { create(:security_scan, scan_type: :sast) }
     let!(:dast_scan) { create(:security_scan, scan_type: :dast) }

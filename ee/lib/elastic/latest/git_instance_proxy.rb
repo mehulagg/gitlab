@@ -22,10 +22,10 @@ module Elastic
       end
 
       # @return [Kaminari::PaginatableArray]
-      def elastic_search_as_found_blob(query, page: 1, per: 20, options: {})
+      def elastic_search_as_found_blob(query, page: 1, per: 20, options: {}, preload_method: nil)
         options = repository_specific_options(options)
 
-        self.class.elastic_search_as_found_blob(query, page: page, per: per, options: options)
+        self.class.elastic_search_as_found_blob(query, page: page, per: per, options: options, preload_method: preload_method)
       end
 
       def delete_index_for_commits_and_blobs(wiki: false)

@@ -1,4 +1,4 @@
-import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import { GlIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import EpicLane from 'ee/boards/components/epic_lane.vue';
@@ -16,29 +16,21 @@ describe('EpicLane', () => {
 
   const updateBoardEpicUserPreferencesSpy = jest.fn();
 
-  const createStore = ({ isLoading = false, boardItemsByListId = mockIssuesByListId }) => {
+  const createStore = ({ boardItemsByListId = mockIssuesByListId }) => {
     return new Vuex.Store({
       actions: {
-        fetchIssuesForEpic: jest.fn(),
         updateBoardEpicUserPreferences: updateBoardEpicUserPreferencesSpy,
       },
       state: {
         boardItemsByListId,
         boardItems: issues,
-        epicsFlags: {
-          [mockEpic.id]: { isLoading },
-        },
       },
       getters,
     });
   };
 
-  const createComponent = ({
-    props = {},
-    isLoading = false,
-    boardItemsByListId = mockIssuesByListId,
-  } = {}) => {
-    const store = createStore({ isLoading, boardItemsByListId });
+  const createComponent = ({ props = {}, boardItemsByListId = mockIssuesByListId } = {}) => {
+    const store = createStore({ boardItemsByListId });
 
     const defaultProps = {
       epic: mockEpic,
@@ -91,16 +83,6 @@ describe('EpicLane', () => {
         expect(wrapper.findAll(IssuesLaneList)).toHaveLength(0);
         expect(wrapper.vm.isCollapsed).toBe(true);
       });
-    });
-
-    it('does not display loading icon when issues are not loading', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-    });
-
-    it('displays loading icon and hides issues count when issues are loading', () => {
-      createComponent({ isLoading: true });
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
-      expect(findByTestId('epic-lane-issue-count').exists()).toBe(false);
     });
 
     it('invokes `updateBoardEpicUserPreferences` method on collapse', () => {

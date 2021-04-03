@@ -12,7 +12,7 @@ users, and then maintain uptime and access for those users. You can also use
 this architecture to provide improved GitLab uptime and availability for fewer
 than 3,000 users. For fewer users, reduce the stated node sizes as needed.
 
-If maintining a high level of uptime for your GitLab environment isn't a
+If maintaining a high level of uptime for your GitLab environment isn't a
 requirement, or if you don't have the expertise to maintain this sort of
 environment, we recommend using the [2,000-user reference architecture](2k_users.md)
 for your GitLab installation.
@@ -26,20 +26,20 @@ For a full list of reference architectures, see
 
 | Service                                    | Nodes       | Configuration         | GCP            | AWS         | Azure   |
 |--------------------------------------------|-------------|-----------------------|----------------|-------------|---------|
-| External load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Redis                                      | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | m5.large    | D2s v3  |
-| Consul + Sentinel                          | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| PostgreSQL                                 | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | m5.large    | D2s v3  |
-| PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Gitaly                                     | 3           | 4 vCPU, 15 GB memory  | n1-standard-4  | m5.xlarge   | D4s v3  |
-| Praefect                                   | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Praefect PostgreSQL                        | 1+*         | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory | n1-standard-2  | m5.large    | D2s v3  |
-| GitLab Rails                               | 3           | 8 vCPU, 7.2 GB memory | n1-highcpu-8   | c5.2xlarge  | F8s v2  |
-| Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
+| External load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Redis                                      | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | `m5.large`    | D2s v3  |
+| Consul + Sentinel                          | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| PostgreSQL                                 | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | `m5.large`    | D2s v3  |
+| PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Gitaly                                     | 3           | 4 vCPU, 15 GB memory  | n1-standard-4  | `m5.xlarge`   | D4s v3  |
+| Praefect                                   | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Praefect PostgreSQL                        | 1+*         | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory | n1-standard-2  | `m5.large`    | D2s v3  |
+| GitLab Rails                               | 3           | 8 vCPU, 7.2 GB memory | n1-highcpu-8   | `c5.2xlarge`  | F8s v2  |
+| Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
 | Object storage                             | n/a         | n/a                   | n/a            | n/a         | n/a     |
-| NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory | n1-highcpu-4   | c5.xlarge   | F4s v2  |
+| NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory | n1-highcpu-4   | `c5.xlarge`   | F4s v2  |
 
 ```plantuml
 @startuml 3k
@@ -2028,10 +2028,10 @@ to use GitLab Pages, this currently [requires NFS](troubleshooting.md#gitlab-pag
 See how to [configure NFS](../nfs.md).
 
 WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated.
-From GitLab 14.0, technical support for NFS for Git repositories
-will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
-as soon as possible.
+From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
+considered and customer technical support will be considered out of scope.
+[Read more about Gitaly and NFS](../gitaly/index.md#nfs-deprecation-notice) and
+[the correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

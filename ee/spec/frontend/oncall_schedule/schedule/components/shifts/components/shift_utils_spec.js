@@ -213,6 +213,7 @@ describe('~ee/oncall_schedules/components/schedule/components/shifts/components/
 
     it.each`
       shiftUnitIsHour | shiftRangeOverlapObject                 | shiftStartDateOutOfRange | value
+      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 1 }}  | ${false}                 | ${1}
       ${true}         | ${{ daysOverlap: 1, hoursOverlap: 4 }}  | ${false}                 | ${6}
       ${true}         | ${{ daysOverlap: 1, hoursOverlap: 8 }}  | ${false}                 | ${14}
       ${true}         | ${{ daysOverlap: 1, hoursOverlap: 24 }} | ${false}                 | ${48}

@@ -35,6 +35,27 @@ RSpec.describe Groups::Analytics::CycleAnalyticsController do
 
       expect(response).to render_template :show
     end
+
+    context 'when the initial, default value stream is requested' do
+      let(:value_stream_id) { Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME }
+
+      before do
+        get(:show, params: { group_id: group, value_stream_id: value_stream_id })
+      end
+
+      it 'renders the default in memory value stream' do
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(assigns[:value_stream].name).to eq(value_stream_id)
+      end
+
+      context 'when invalid name is given' do
+        let(:value_stream_id) { 'not_default' }
+
+        it 'renders 404 error' do
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
   end
 
   context 'when the license is missing' do

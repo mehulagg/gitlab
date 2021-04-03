@@ -26,6 +26,9 @@ module EE
         labels: board.labels.to_json(only: [:id, :title, :color, :text_color] ),
         board_weight: board.weight,
         weight_feature_available: current_board_parent.feature_available?(:issue_weights).to_s,
+        milestone_lists_available: current_board_parent.feature_available?(:board_milestone_lists).to_s,
+        assignee_lists_available: current_board_parent.feature_available?(:board_assignee_lists).to_s,
+        iteration_lists_available: current_board_parent.feature_available?(:board_iteration_lists).to_s,
         show_promotion: show_feature_promotion,
         scoped_labels: current_board_parent.feature_available?(:scoped_labels)&.to_s
       }

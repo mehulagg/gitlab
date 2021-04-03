@@ -8,9 +8,9 @@ import {
   PIPELINES_DETAIL_LINKS_JOB_RATIO,
 } from '~/performance/constants';
 import * as perfUtils from '~/performance/utils';
-import * as sentryUtils from '~/pipelines/components/graph/utils';
 import * as Api from '~/pipelines/components/graph_shared/api';
 import LinksInner from '~/pipelines/components/graph_shared/links_inner.vue';
+import * as sentryUtils from '~/pipelines/utils';
 import { createJobsHash } from '~/pipelines/utils';
 import {
   jobRect,
@@ -284,7 +284,7 @@ describe('Links Inner component', () => {
       const numLinks = 1;
       const metricsData = {
         histograms: [
-          { name: PIPELINES_DETAIL_LINK_DURATION, value: duration },
+          { name: PIPELINES_DETAIL_LINK_DURATION, value: duration / 1000 },
           { name: PIPELINES_DETAIL_LINKS_TOTAL, value: numLinks },
           {
             name: PIPELINES_DETAIL_LINKS_JOB_RATIO,

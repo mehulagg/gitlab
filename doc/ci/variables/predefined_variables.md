@@ -35,6 +35,7 @@ There are also [Kubernetes-specific deployment variables](../../user/project/clu
 | `CI_COMMIT_TAG`                          | 9.0    | 0.5    | The commit tag name. Available only in pipelines for tags. |
 | `CI_COMMIT_TIMESTAMP`                    | 13.4   | all    | The timestamp of the commit in the ISO 8601 format. |
 | `CI_COMMIT_TITLE`                        | 10.8   | all    | The title of the commit. The full first line of the message. |
+| `CI_COMMIT_AUTHOR`                       | 13.10  | all    | The author of the commit in `Name <email>` format. |
 | `CI_CONCURRENT_ID`                       | all    | 11.10  | The unique ID of build execution in a single executor. |
 | `CI_CONCURRENT_PROJECT_ID`               | all    | 11.10  | The unique ID of build execution in a single executor and project. |
 | `CI_CONFIG_PATH`                         | 9.4    | 0.5    | The path to the CI/CD configuration file. Defaults to `.gitlab-ci.yml`. |
@@ -59,7 +60,7 @@ There are also [Kubernetes-specific deployment variables](../../user/project/clu
 | `CI_JOB_NAME`                            | 9.0    | 0.5    | The name of the job. |
 | `CI_JOB_STAGE`                           | 9.0    | 0.5    | The name of the job's stage. |
 | `CI_JOB_STATUS`                          | all    | 13.5   | The status of the job as each runner stage is executed. Use with [`after_script`](../yaml/README.md#after_script). Can be `success`, `failed`, or `canceled`. |
-| `CI_JOB_TOKEN`                           | 9.0    | 1.2    | A token to authenticate with [certain API endpoints](../../api/README.md#gitlab-ci-job-token) or download [dependent repositories](../../user/project/new_ci_build_permissions_model.md#dependent-repositories). The token is valid as long as the job is running. |
+| `CI_JOB_TOKEN`                           | 9.0    | 1.2    | A token to authenticate with [certain API endpoints](../../api/README.md#gitlab-cicd-job-token). The token is valid as long as the job is running. |
 | `CI_JOB_URL`                             | 11.1   | 0.5    | The job details URL. |
 | `CI_JOB_STARTED_AT`                      | 13.10  | all    | The UTC datetime when a job started, in [ISO 8601](https://tools.ietf.org/html/rfc3339#appendix-A) format. |
 | `CI_KUBERNETES_ACTIVE`                   | 13.0   | all    | Only available if the pipeline has a Kubernetes cluster available for deployments. `true` when available. |

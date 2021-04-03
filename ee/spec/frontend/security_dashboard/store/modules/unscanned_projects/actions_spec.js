@@ -5,7 +5,7 @@ import * as types from 'ee/security_dashboard/store/modules/unscanned_projects/m
 import createState from 'ee/security_dashboard/store/modules/unscanned_projects/state';
 import testAction from 'helpers/vuex_action_helper';
 
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
@@ -114,7 +114,9 @@ describe('EE Unscanned Projects actions', () => {
       actions.receiveUnscannedProjectsError(mockDispatchContext);
 
       expect(createFlash).toHaveBeenCalledTimes(1);
-      expect(createFlash).toHaveBeenCalledWith('Unable to fetch unscanned projects');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Unable to fetch unscanned projects',
+      });
     });
   });
 });

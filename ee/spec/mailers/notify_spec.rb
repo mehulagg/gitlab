@@ -106,9 +106,7 @@ RSpec.describe Notify do
         it_behaves_like 'an unsubscribeable thread'
 
         it 'is sent as the last approver' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(last_approver.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(last_approver)
         end
 
         it 'has the correct subject' do
@@ -170,9 +168,7 @@ RSpec.describe Notify do
         it_behaves_like 'an unsubscribeable thread'
 
         it 'is sent as the last unapprover' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(last_unapprover.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(last_unapprover)
         end
 
         it 'has the correct subject' do
@@ -396,5 +392,11 @@ RSpec.describe Notify do
       is_expected.to have_body_text 'To get started, click the link below to confirm your account'
       is_expected.to have_body_text recipient.confirmation_token
     end
+  end
+
+  def expect_sender(user)
+    sender = subject.header[:from].addrs[0]
+    expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
+    expect(sender.address).to eq(gitlab_sender)
   end
 end

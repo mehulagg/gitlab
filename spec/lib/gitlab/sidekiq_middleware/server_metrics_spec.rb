@@ -84,18 +84,22 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
           let(:elasticsearch_calls) { 8 }
           let(:elasticsearch_duration) { 0.54 }
 
+          let(:instrumentation) do
+            {
+              gitaly_duration_s: gitaly_duration,
+              redis_calls: redis_calls,
+              redis_duration_s: redis_duration,
+              elasticsearch_calls: elasticsearch_calls,
+              elasticsearch_duration_s: elasticsearch_duration
+            }
+          end
+
           before do
             allow(subject).to receive(:get_thread_cputime).and_return(thread_cputime_before, thread_cputime_after)
             allow(Gitlab::Metrics::System).to receive(:monotonic_time).and_return(monotonic_time_before, monotonic_time_after)
             allow(Gitlab::InstrumentationHelper).to receive(:queue_duration_for_job).with(job).and_return(queue_duration_for_job)
             allow(ActiveRecord::LogSubscriber).to receive(:runtime).and_return(db_duration * 1000)
-
-            job[:gitaly_duration_s] = gitaly_duration
-            job[:redis_calls] = redis_calls
-            job[:redis_duration_s] = redis_duration
-
-            job[:elasticsearch_calls] = elasticsearch_calls
-            job[:elasticsearch_duration_s] = elasticsearch_duration
+            job[:instrumentation] = instrumentation
 
             allow(running_jobs_metric).to receive(:increment)
             allow(redis_requests_total).to receive(:increment)
@@ -227,6 +231,15 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
       let(:labels) { default_labels.merge(urgency: "") }
 
       it_behaves_like "a metrics middleware"
+    end
+
+    context 'for ActionMailer::MailDeliveryJob' do
+      let(:job) { { 'class' => ActionMailer::MailDeliveryJob } }
+      let(:worker) { ActionMailer::MailDeliveryJob.new }
+      let(:worker_class) { ActionMailer::MailDeliveryJob }
+      let(:labels) { default_labels.merge(feature_category: 'issue_tracking') }
+
+      it_behaves_like 'a metrics middleware'
     end
 
     context "when workers are attributed" do

@@ -20,7 +20,6 @@ The GitLab [SCIM API](../../../api/scim.md) implements part of [the RFC7644 prot
 The following actions are available:
 
 - Create users
-- Update users (Azure only)
 - Deactivate users
 
 The following identity providers are supported:
@@ -168,6 +167,10 @@ As the app is developed by OneLogin, please reach out to OneLogin if you encount
 
 ## User access and linking setup
 
+During the synchronization process, all of your users get GitLab accounts, welcoming them
+to their respective groups, with an invitation email. When implementing SCIM provisioning,
+you may want to warn your security-conscious employees about this email.
+
 The following diagram is a general outline on what happens when you add users to your SCIM app:
 
 ```mermaid
@@ -208,10 +211,6 @@ graph TD
   B -->|No| C[Nothing to do]
   B -->|Yes| D[GitLab removes user from GitLab group]
 ```
-
-During the synchronization process, all of your users get GitLab accounts, welcoming them
-to their respective groups, with an invitation email. When implementing SCIM provisioning,
-you may want to warn your security-conscious employees about this email.
 
 ## Troubleshooting
 

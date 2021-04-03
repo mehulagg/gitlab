@@ -40,6 +40,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   it { is_expected.to respond_to :git_author_name }
   it { is_expected.to respond_to :git_author_email }
+  it { is_expected.to respond_to :git_author_full_text }
   it { is_expected.to respond_to :short_sha }
   it { is_expected.to delegate_method(:full_path).to(:project).with_prefix }
 
@@ -819,6 +820,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         CI_COMMIT_DESCRIPTION
         CI_COMMIT_REF_PROTECTED
         CI_COMMIT_TIMESTAMP
+        CI_COMMIT_AUTHOR
         CI_BUILD_REF
         CI_BUILD_BEFORE_SHA
         CI_BUILD_REF_NAME
@@ -3776,6 +3778,26 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     context 'when pipeline does not have any builds with codequality reports' do
       it 'returns codequality reports without degradations' do
         expect(codequality_reports.degradations).to be_empty
+      end
+    end
+  end
+
+  describe '#uses_needs?' do
+    let_it_be(:pipeline) { create(:ci_pipeline) }
+
+    context 'when the scheduling type is `dag`' do
+      it 'returns true' do
+        create(:ci_build, pipeline: pipeline, scheduling_type: :dag)
+
+        expect(pipeline.uses_needs?).to eq(true)
+      end
+    end
+
+    context 'when the scheduling type is nil or stage' do
+      it 'returns false' do
+        create(:ci_build, pipeline: pipeline, scheduling_type: :stage)
+
+        expect(pipeline.uses_needs?).to eq(false)
       end
     end
   end

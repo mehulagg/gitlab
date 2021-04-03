@@ -28,6 +28,35 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
     end
   end
 
+  describe '.for_namespaces' do
+    subject(:segments) { described_class.for_namespaces(namespaces) }
+
+    let_it_be(:segment1) { create(:devops_adoption_segment) }
+    let_it_be(:segment2) { create(:devops_adoption_segment) }
+    let_it_be(:segment3) { create(:devops_adoption_segment) }
+    let_it_be(:namespaces) { [segment1.namespace, segment2.namespace]}
+
+    it 'selects segments for given namespaces only' do
+      expect(segments).to match_array([segment1, segment2])
+    end
+  end
+
+  describe '.for_parent' do
+    let_it_be(:group) { create :group }
+    let_it_be(:subgroup) { create :group, parent: group }
+    let_it_be(:group2) { create :group }
+
+    let_it_be(:segment1) { create(:devops_adoption_segment, namespace: group) }
+    let_it_be(:segment2) { create(:devops_adoption_segment, namespace: subgroup) }
+    let_it_be(:segment3) { create(:devops_adoption_segment, namespace: group2) }
+
+    subject(:segments) { described_class.for_parent(group) }
+
+    it 'selects segments for given namespace only' do
+      expect(segments).to match_array([segment1, segment2])
+    end
+  end
+
   describe '.latest_snapshot' do
     it 'loads the latest snapshot' do
       segment = create(:devops_adoption_segment)

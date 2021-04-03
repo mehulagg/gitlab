@@ -7,9 +7,9 @@ module EE
 
     prepended do
       WEIGHT_RANGE = (0..20).freeze
-      WEIGHT_ALL = 'Everything'.freeze
-      WEIGHT_ANY = 'Any'.freeze
-      WEIGHT_NONE = 'None'.freeze
+      WEIGHT_ALL = 'Everything'
+      WEIGHT_ANY = 'Any'
+      WEIGHT_NONE = 'None'
       ELASTICSEARCH_PERMISSION_TRACKED_FIELDS = %w(assignee_ids author_id confidential).freeze
 
       include Elastic::ApplicationVersionedSearch
@@ -30,6 +30,7 @@ module EE
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
       scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
+      scope :sorted_by_epic_position, -> { joins(:epic_issue).select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id').order('epic_issues.relative_position, epic_issues.id') }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
@@ -78,6 +79,11 @@ module EE
     class_methods do
       def with_api_entity_associations
         super.preload(:epic)
+      end
+
+      # override
+      def use_separate_indices?
+        Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
       end
     end
 
@@ -173,21 +179,6 @@ module EE
 
       persisted? && supports_epic? && !promoted? &&
         user.can?(:admin_issue, project) && user.can?(:create_epic, group)
-    end
-
-    # Issue position on boards list should be relative to all group projects
-    def parent_ids
-      return super unless has_group_boards?
-
-      board_group.all_projects.select(:id)
-    end
-
-    def has_group_boards?
-      board_group && board_group.boards.any?
-    end
-
-    def board_group
-      @group ||= project.group
     end
 
     def promoted?

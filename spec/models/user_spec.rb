@@ -85,6 +85,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:group_members) }
     it { is_expected.to have_many(:groups) }
     it { is_expected.to have_many(:keys).dependent(:destroy) }
+    it { is_expected.to have_many(:expired_today_and_unnotified_keys) }
     it { is_expected.to have_many(:deploy_keys).dependent(:nullify) }
     it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:events).dependent(:delete_all) }
@@ -108,6 +109,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:merge_request_assignees).inverse_of(:assignee) }
     it { is_expected.to have_many(:merge_request_reviewers).inverse_of(:reviewer) }
     it { is_expected.to have_many(:created_custom_emoji).inverse_of(:creator) }
+    it { is_expected.to have_many(:in_product_marketing_emails) }
 
     describe "#user_detail" do
       it 'does not persist `user_detail` by default' do
@@ -999,6 +1001,18 @@ RSpec.describe User do
       end
     end
 
+    describe '.with_ssh_key_expired_today' do
+      let_it_be(:user1) { create(:user) }
+      let_it_be(:expired_today_not_notified) { create(:key, expires_at: Time.current, user: user1) }
+
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:expired_today_already_notified) { create(:key, expires_at: Time.current, user: user2, expiry_notification_delivered_at: Time.current) }
+
+      it 'returns users whose token has expired today' do
+        expect(described_class.with_ssh_key_expired_today).to contain_exactly(user1)
+      end
+    end
+
     describe '.active_without_ghosts' do
       let_it_be(:user1) { create(:user, :external) }
       let_it_be(:user2) { create(:user, state: 'blocked') }
@@ -1766,7 +1780,7 @@ RSpec.describe User do
   end
 
   describe 'blocking user' do
-    let(:user) { create(:user, name: 'John Smith') }
+    let_it_be_with_refind(:user) { create(:user, name: 'John Smith') }
 
     it 'blocks user' do
       user.block
@@ -1776,17 +1790,22 @@ RSpec.describe User do
 
     context 'when user has running CI pipelines' do
       let(:service) { double }
+      let(:pipelines) { build_list(:ci_pipeline, 3, :running) }
 
-      before do
-        pipeline = create(:ci_pipeline, :running, user: user)
-        create(:ci_build, :running, pipeline: pipeline)
-      end
-
-      it 'cancels all running pipelines and related jobs' do
-        expect(Ci::CancelUserPipelinesService).to receive(:new).and_return(service)
-        expect(service).to receive(:execute).with(user)
+      it 'aborts all running pipelines and related jobs' do
+        expect(user).to receive(:pipelines).and_return(pipelines)
+        expect(Ci::AbortPipelinesService).to receive(:new).and_return(service)
+        expect(service).to receive(:execute).with(pipelines)
 
         user.block
+      end
+    end
+
+    context 'when user has active CI pipeline schedules' do
+      let_it_be(:schedule) { create(:ci_pipeline_schedule, active: true, owner: user) }
+
+      it 'disables any pipeline schedules' do
+        expect { user.block }.to change { schedule.reload.active? }.to(false)
       end
     end
   end

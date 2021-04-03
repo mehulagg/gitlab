@@ -3,18 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe BulkImports::Importers::GroupImporter do
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:bulk_import) { create(:bulk_import) }
-  let(:bulk_import_entity) { create(:bulk_import_entity, :started, bulk_import: bulk_import, group: group) }
-  let(:bulk_import_configuration) { create(:bulk_import_configuration, bulk_import: bulk_import) }
-  let(:context) { BulkImports::Pipeline::Context.new(bulk_import_entity) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:bulk_import) { create(:bulk_import) }
+  let_it_be(:entity) { create(:bulk_import_entity, :started, group: group) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity, pipeline_name: described_class.name) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
   before do
     allow(BulkImports::Pipeline::Context).to receive(:new).and_return(context)
   end
 
-  subject { described_class.new(bulk_import_entity) }
+  subject { described_class.new(entity) }
 
   describe '#execute' do
     it 'starts the entity and run its pipelines' do
@@ -23,6 +23,7 @@ RSpec.describe BulkImports::Importers::GroupImporter do
       expect_to_run_pipeline BulkImports::Groups::Pipelines::MembersPipeline, context: context
       expect_to_run_pipeline BulkImports::Groups::Pipelines::LabelsPipeline, context: context
       expect_to_run_pipeline BulkImports::Groups::Pipelines::MilestonesPipeline, context: context
+      expect_to_run_pipeline BulkImports::Groups::Pipelines::BadgesPipeline, context: context
 
       if Gitlab.ee?
         expect_to_run_pipeline('EE::BulkImports::Groups::Pipelines::EpicsPipeline'.constantize, context: context)
@@ -33,18 +34,18 @@ RSpec.describe BulkImports::Importers::GroupImporter do
 
       subject.execute
 
-      expect(bulk_import_entity.reload).to be_finished
+      expect(entity).to be_finished
     end
 
     context 'when failed' do
-      let(:bulk_import_entity) { create(:bulk_import_entity, :failed, bulk_import: bulk_import, group: group) }
+      let(:entity) { create(:bulk_import_entity, :failed, bulk_import: bulk_import, group: group) }
 
       it 'does not transition entity to finished state' do
-        allow(bulk_import_entity).to receive(:start!)
+        allow(entity).to receive(:start!)
 
         subject.execute
 
-        expect(bulk_import_entity.reload).to be_failed
+        expect(entity.reload).to be_failed
       end
     end
   end

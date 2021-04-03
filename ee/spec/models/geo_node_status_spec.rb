@@ -1156,6 +1156,28 @@ RSpec.describe GeoNodeStatus, :geo do
     end
   end
 
+  context 'secondary usage data' do
+    shared_examples_for 'a field from secondary_usage_data' do |field|
+      describe '#load_secondary_usage_data' do
+        it 'loads the latest data from Geo::SecondaryUsageData' do
+          data = create(:geo_secondary_usage_data)
+
+          expect(described_class.current_node_status.status[field]).to eq(data.payload[field])
+        end
+
+        it 'reports nil if there is no collected data in Geo::SecondaryUsageData' do
+          expect(status.status[field]).to be_nil
+        end
+      end
+    end
+
+    described_class.usage_data_fields.each do |field|
+      context "##{field}" do
+        it_behaves_like 'a field from secondary_usage_data', field
+      end
+    end
+  end
+
   context 'Replicator stats' do
     where(:replicator, :model_factory, :registry_factory) do
       Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry

@@ -1,67 +1,97 @@
 import { shallowMount } from '@vue/test-utils';
-import { merge } from 'lodash';
+import ManageDastProfiles from 'ee/security_configuration/components/manage_dast_profiles.vue';
 import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
+import ManageGeneric from 'ee/security_configuration/components/manage_generic.vue';
+import ManageViaMr from 'ee/security_configuration/components/manage_via_mr.vue';
+import {
+  REPORT_TYPE_DAST_PROFILES,
+  REPORT_TYPE_DEPENDENCY_SCANNING,
+  REPORT_TYPE_SECRET_DETECTION,
+} from '~/vue_shared/security_reports/constants';
 import { generateFeatures } from './helpers';
+
+const attrs = {
+  'data-qa-selector': 'foo',
+};
 
 describe('ManageFeature component', () => {
   let wrapper;
-  let feature;
 
   const createComponent = (options) => {
-    wrapper = shallowMount(
-      ManageFeature,
-      merge(
-        {
-          propsData: {
-            autoDevopsEnabled: false,
-          },
+    wrapper = shallowMount(ManageFeature, {
+      provide: {
+        glFeatures: {
+          secDependencyScanningUiEnable: true,
+          secSecretDetectionUiEnable: true,
         },
-        options,
-      ),
-    );
+      },
+      ...options,
+    });
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findTestId = (id) => wrapper.find(`[data-testid="${id}"]`);
+  describe('always', () => {
+    beforeEach(() => {
+      const [feature] = generateFeatures(1);
+      createComponent({ attrs, propsData: { feature } });
+    });
 
-  describe.each`
-    configured | expectedTestId
-    ${true}    | ${'configureButton'}
-    ${false}   | ${'enableButton'}
-  `('given feature.configured is $configured', ({ configured, expectedTestId }) => {
-    describe('given a configuration path', () => {
-      beforeEach(() => {
-        [feature] = generateFeatures(1, { configured, configuration_path: 'foo' });
+    it('passes through attributes to the expected component', () => {
+      expect(wrapper.attributes()).toMatchObject(attrs);
+    });
 
-        createComponent({
-          propsData: { feature },
-        });
-      });
+    it('re-emits caught errors', () => {
+      const component = wrapper.findComponent(ManageGeneric);
+      component.vm.$emit('error', 'testerror');
 
-      it('shows a button to configure the feature', () => {
-        const button = findTestId(expectedTestId);
-        expect(button.exists()).toBe(true);
-        expect(button.attributes('href')).toBe(feature.configuration_path);
-      });
+      expect(wrapper.emitted('error')).toEqual([['testerror']]);
     });
   });
 
-  describe('given a feature with type "dast-profiles"', () => {
+  describe.each`
+    type                               | expectedComponent
+    ${REPORT_TYPE_DAST_PROFILES}       | ${ManageDastProfiles}
+    ${REPORT_TYPE_DEPENDENCY_SCANNING} | ${ManageViaMr}
+    ${REPORT_TYPE_SECRET_DETECTION}    | ${ManageViaMr}
+    ${'foo'}                           | ${ManageGeneric}
+  `('given a $type feature', ({ type, expectedComponent }) => {
+    let feature;
+    let component;
+
     beforeEach(() => {
-      [feature] = generateFeatures(1, { type: 'dast_profiles', configuration_path: 'foo' });
+      [feature] = generateFeatures(1, { type });
 
-      createComponent({
-        propsData: { feature, autoDevopsEnabled: true },
-      });
+      createComponent({ propsData: { feature } });
+      component = wrapper.findComponent(expectedComponent);
     });
 
-    it('shows the DAST Profiles manage button', () => {
-      const button = findTestId('manageButton');
-      expect(button.exists()).toBe(true);
-      expect(button.attributes('href')).toBe(feature.configuration_path);
+    it('renders expected component', () => {
+      expect(component.exists()).toBe(true);
     });
+
+    it('passes through props to expected component', () => {
+      expect(component.props()).toEqual({ feature });
+    });
+  });
+
+  it.each`
+    type                               | featureFlag
+    ${REPORT_TYPE_DEPENDENCY_SCANNING} | ${'secDependencyScanningUiEnable'}
+    ${REPORT_TYPE_SECRET_DETECTION}    | ${'secSecretDetectionUiEnable'}
+  `('renders generic component for $type if $featureFlag is disabled', ({ type, featureFlag }) => {
+    const [feature] = generateFeatures(1, { type });
+    createComponent({
+      propsData: { feature },
+      provide: {
+        glFeatures: {
+          [featureFlag]: false,
+        },
+      },
+    });
+
+    expect(wrapper.findComponent(ManageGeneric).exists()).toBe(true);
   });
 });

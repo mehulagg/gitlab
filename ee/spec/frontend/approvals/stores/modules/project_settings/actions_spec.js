@@ -3,7 +3,7 @@ import { mapApprovalRuleRequest, mapApprovalSettingsResponse } from 'ee/approval
 import * as types from 'ee/approvals/stores/modules/base/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/project_settings/actions';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
@@ -82,7 +82,9 @@ describe('EE approvals project settings module actions', () => {
       actions.receiveRulesError();
 
       expect(createFlash).toHaveBeenCalledTimes(1);
-      expect(createFlash).toHaveBeenCalledWith(expect.stringMatching('error occurred'));
+      expect(createFlash).toHaveBeenCalledWith({
+        message: expect.stringMatching('error occurred'),
+      });
     });
   });
 
@@ -193,7 +195,9 @@ describe('EE approvals project settings module actions', () => {
 
       actions.deleteRuleError();
 
-      expect(createFlash.mock.calls[0]).toEqual([expect.stringMatching('error occurred')]);
+      expect(createFlash.mock.calls[0]).toEqual([
+        { message: expect.stringMatching('error occurred') },
+      ]);
     });
   });
 

@@ -5,7 +5,7 @@ import ProjectList from 'ee/security_dashboard/components/first_class_project_ma
 import ProjectManager from 'ee/security_dashboard/components/first_class_project_manager/project_manager.vue';
 import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 
 jest.mock('~/flash');
@@ -163,9 +163,10 @@ describe('Project Manager component', () => {
       findAddProjectsButton().vm.$emit('click');
       return waitForPromises().then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(
-          'Unable to add Sample Project 1: Project was not found or you do not have permission to add this project to Security Dashboards.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message:
+            'Unable to add Sample Project 1: Project was not found or you do not have permission to add this project to Security Dashboards.',
+        });
       });
     });
 
@@ -179,9 +180,10 @@ describe('Project Manager component', () => {
       findAddProjectsButton().vm.$emit('click');
       return waitForPromises().then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(
-          'Unable to add Sample Project 2 and Sample Project 3: Project was not found or you do not have permission to add this project to Security Dashboards.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message:
+            'Unable to add Sample Project 2 and Sample Project 3: Project was not found or you do not have permission to add this project to Security Dashboards.',
+        });
       });
     });
   });

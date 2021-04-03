@@ -24,22 +24,9 @@ RSpec.describe Dast::Profiles::CreateService do
   subject { described_class.new(container: project, current_user: developer, params: params).execute }
 
   describe 'execute' do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: false)
-
-        aggregate_failures do
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to eq('Insufficient permissions')
-        end
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(dast_saved_scans: true)
 
         aggregate_failures do
           expect(subject.status).to eq(:error)
@@ -51,7 +38,6 @@ RSpec.describe Dast::Profiles::CreateService do
     context 'when the feature is enabled' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: true)
       end
 
       it 'communicates success' do
@@ -66,9 +52,7 @@ RSpec.describe Dast::Profiles::CreateService do
         let(:params) { default_params.merge(run_after_create: true) }
 
         it_behaves_like 'it delegates scan creation to another service' do
-          let(:delegated_params) do
-            { branch: default_params[:branch_name], dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile }
-          end
+          let(:delegated_params) { hash_including(dast_profile: instance_of(Dast::Profile)) }
         end
 
         it 'creates a ci_pipeline' do

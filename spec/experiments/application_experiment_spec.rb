@@ -58,6 +58,15 @@ RSpec.describe ApplicationExperiment, :experiment do
   end
 
   describe "publishing results" do
+    it "doesn't track or push data to the client if we shouldn't track", :snowplow do
+      allow(subject).to receive(:should_track?).and_return(false)
+      expect(Gon).not_to receive(:push)
+
+      subject.publish(:action)
+
+      expect_no_snowplow_event
+    end
+
     it "tracks the assignment" do
       expect(subject).to receive(:track).with(:assignment)
 
@@ -105,7 +114,7 @@ RSpec.describe ApplicationExperiment, :experiment do
             data: { data: '_data_' }
           },
           {
-            schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/0-3-0',
+            schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0',
             data: { experiment: 'namespaced/stub', key: '86208ac54ca798e11f127e8b23ec396a', variant: 'control' }
           }
         ]

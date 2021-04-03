@@ -3,6 +3,7 @@
 RSpec.shared_examples 'status page quick actions' do
   describe '/publish' do
     let_it_be(:status_page_setting) { create(:status_page_setting, :enabled, project: project) }
+
     let(:user) { project.owner }
 
     before do
@@ -35,7 +36,7 @@ RSpec.shared_examples 'status page quick actions' do
 
         fill_in('Title', with: 'Title')
         fill_in('Description', with: "Published issue \n\n/publish")
-        click_button('Submit issue')
+        click_button('Create issue')
 
         wait_for_requests
 

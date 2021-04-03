@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
@@ -125,11 +125,11 @@ export const receiveCreateIssueError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_CREATE_ISSUE_ERROR);
 
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error creating the issue.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error creating the issue.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -197,11 +197,11 @@ export const receiveDismissSelectedVulnerabilitiesSuccess = ({ commit, getters }
 export const receiveDismissSelectedVulnerabilitiesError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_ERROR);
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -284,11 +284,11 @@ export const receiveDismissVulnerabilitySuccess = ({ commit }, payload) => {
 export const receiveDismissVulnerabilityError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_DISMISS_VULNERABILITY_ERROR);
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error dismissing the vulnerability.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error dismissing the vulnerability.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -407,11 +407,11 @@ export const receiveUndoDismissSuccess = ({ commit }, payload) => {
 export const receiveUndoDismissError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_REVERT_DISMISSAL_ERROR);
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error reverting this dismissal.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error reverting this dismissal.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -475,11 +475,11 @@ export const receiveCreateMergeRequestError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_CREATE_MERGE_REQUEST_ERROR);
 
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error creating the merge request.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error creating the merge request.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 

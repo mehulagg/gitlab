@@ -11,13 +11,13 @@ import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_an
 jest.mock('~/flash');
 
 const lastWeekData = getJSONFixture(
-  'api/project_analytics/daily_deployment_frequencies_for_last_week.json',
+  'api/dora/metrics/daily_deployment_frequencies_for_last_week.json',
 );
 const lastMonthData = getJSONFixture(
-  'api/project_analytics/daily_deployment_frequencies_for_last_month.json',
+  'api/dora/metrics/daily_deployment_frequencies_for_last_month.json',
 );
 const last90DaysData = getJSONFixture(
-  'api/project_analytics/daily_deployment_frequencies_for_last_90_days.json',
+  'api/dora/metrics/daily_deployment_frequencies_for_last_90_days.json',
 );
 
 describe('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue', () => {
@@ -49,15 +49,15 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
 
   // Initializes the mock endpoint to return a specific set of deployment
   // frequency data for a given "from" date.
-  const setUpMockDeploymentFrequencies = ({ from, data }) => {
+  const setUpMockDeploymentFrequencies = ({ start_date, data }) => {
     mock
-      .onGet(/projects\/test%2Fproject\/analytics\/deployment_frequency/, {
+      .onGet(/projects\/test%2Fproject\/dora\/metrics/, {
         params: {
-          environment: 'production',
+          metric: 'deployment_frequency',
           interval: 'daily',
           per_page: 100,
-          to: '2015-07-04T00:00:00+0000',
-          from,
+          end_date: '2015-07-04T00:00:00+0000',
+          start_date,
         },
       })
       .replyOnce(httpStatus.OK, data);
@@ -77,15 +77,15 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
       mock = new MockAdapter(axios);
 
       setUpMockDeploymentFrequencies({
-        from: '2015-06-27T00:00:00+0000',
+        start_date: '2015-06-27T00:00:00+0000',
         data: lastWeekData,
       });
       setUpMockDeploymentFrequencies({
-        from: '2015-06-04T00:00:00+0000',
+        start_date: '2015-06-04T00:00:00+0000',
         data: lastMonthData,
       });
       setUpMockDeploymentFrequencies({
-        from: '2015-04-05T00:00:00+0000',
+        start_date: '2015-04-05T00:00:00+0000',
         data: last90DaysData,
       });
 

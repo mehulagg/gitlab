@@ -5,9 +5,10 @@ require 'spec_helper'
 RSpec.describe Banzai::Filter::LabelReferenceFilter do
   include FilterSpecHelper
 
-  let(:project)      { create(:project, :public, name: 'sample-project') }
-  let(:label)        { create(:label, name: 'label', project: project) }
-  let(:scoped_label) { create(:label, name: 'key::value', project: project) }
+  let(:project) { create(:project, :public, name: 'sample-project') }
+  let(:label) { create(:label, name: 'label', project: project) }
+  let(:scoped_description) { 'xss <script>alert("scriptAlert");</script> &<a>lt;svg id=&quot;svgId&quot;&gt;&lt;/svg&gt;' }
+  let(:scoped_label) { create(:label, name: 'key::value', project: project, description: scoped_description) }
 
   context 'with scoped labels enabled' do
     before do
@@ -23,6 +24,10 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
 
       it 'renders HTML tooltips' do
         expect(doc.at_css('.gl-label-scoped a').attr('data-html')).to eq('true')
+      end
+
+      it "escapes HTML in the label's title" do
+        expect(doc.at_css('.gl-label-scoped a').attr('title')).to include('xss  &lt;svg id="svgId"&gt;')
       end
     end
 

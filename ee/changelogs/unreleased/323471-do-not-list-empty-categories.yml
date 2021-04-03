@@ -1,5 +1,0 @@
----
-title: Do not display empty description template lists in the dropdown
-merge_request: 55762
-author:
-type: fixed

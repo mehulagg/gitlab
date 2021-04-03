@@ -35,7 +35,7 @@ RSpec.describe NullifyFeatureFlagPlaintextTokens do
       }
 
       migration.after -> {
-        expect(feature_flags_clients.where('token IS NOT NULL').count).to eq(0)
+        expect(feature_flags_clients.where.not(token: nil).count).to eq(0)
 
         feature_flag1.reload
         expect(feature_flag1.token).to be_nil

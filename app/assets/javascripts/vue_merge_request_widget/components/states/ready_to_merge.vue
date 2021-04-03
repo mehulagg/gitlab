@@ -15,10 +15,12 @@ import { isEmpty } from 'lodash';
 import readyToMergeMixin from 'ee_else_ce/vue_merge_request_widget/mixins/ready_to_merge';
 import readyToMergeQuery from 'ee_else_ce/vue_merge_request_widget/queries/states/ready_to_merge.query.graphql';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
+import createFlash from '~/flash';
+import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
 import simplePoll from '~/lib/utils/simple_poll';
 import { __ } from '~/locale';
+import SmartInterval from '~/smart_interval';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { deprecatedCreateFlash as Flash } from '../../../flash';
 import MergeRequest from '../../../merge_request';
 import { AUTO_MERGE_STRATEGIES, DANGER, INFO, WARNING } from '../../constants';
 import eventHub from '../../event_hub';
@@ -66,6 +68,10 @@ export default {
         this.isSquashReadOnly = data.project.squashReadOnly;
         this.squashCommitMessage = data.project.mergeRequest.defaultSquashCommitMessage;
         this.loading = false;
+
+        if (this.state.mergeTrainsCount !== null) {
+          this.initPolling();
+        }
       },
     },
   },
@@ -124,7 +130,7 @@ export default {
     },
     pipeline() {
       if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.pipelines?.nodes?.[0];
+        return this.state.headPipeline;
       }
 
       return this.mr.pipeline;
@@ -291,8 +297,23 @@ export default {
     if (this.glFeatures.mergeRequestWidgetGraphql) {
       eventHub.$off('ApprovalUpdated', this.updateGraphqlState);
     }
+
+    if (this.pollingInterval) {
+      this.pollingInterval.destroy();
+    }
   },
   methods: {
+    initPolling() {
+      const startingPollInterval = secondsToMilliseconds(5);
+
+      this.pollingInterval = new SmartInterval({
+        callback: () => this.$apollo.queries.state.refetch(),
+        startingInterval: startingPollInterval,
+        maxInterval: startingPollInterval + secondsToMilliseconds(4 * 60),
+        hiddenInterval: secondsToMilliseconds(6 * 60),
+        incrementByFactorOf: 2,
+      });
+    },
     updateGraphqlState() {
       return this.$apollo.queries.state.refetch();
     },
@@ -351,7 +372,9 @@ export default {
         })
         .catch(() => {
           this.isMakingRequest = false;
-          new Flash(__('Something went wrong. Please try again.')); // eslint-disable-line
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          });
         });
     },
     handleMergeImmediatelyButtonClick() {
@@ -402,7 +425,9 @@ export default {
           }
         })
         .catch(() => {
-          new Flash(__('Something went wrong while merging this merge request. Please try again.')); // eslint-disable-line
+          createFlash({
+            message: __('Something went wrong while merging this merge request. Please try again.'),
+          });
           stopPolling();
         });
     },
@@ -432,7 +457,9 @@ export default {
           }
         })
         .catch(() => {
-          new Flash(__('Something went wrong while deleting the source branch. Please try again.')); // eslint-disable-line
+          createFlash({
+            message: __('Something went wrong while deleting the source branch. Please try again.'),
+          });
         });
     },
   },
@@ -460,7 +487,8 @@ export default {
               <gl-button
                 size="medium"
                 category="primary"
-                class="qa-merge-button accept-merge-request"
+                class="accept-merge-request"
+                data-testid="merge-button"
                 :variant="mergeButtonVariant"
                 :disabled="isMergeButtonDisabled"
                 :loading="isMakingRequest"
@@ -483,7 +511,7 @@ export default {
                 <gl-dropdown-item
                   icon-name="warning"
                   button-class="accept-merge-request js-merge-immediately-button"
-                  data-qa-selector="merge_immediately_option"
+                  data-qa-selector="merge_immediately_menu_item"
                   @click="handleMergeImmediatelyButtonClick"
                 >
                   {{ __('Merge immediately') }}
@@ -562,7 +590,11 @@ export default {
         :merge-train-when-pipeline-succeeds-docs-path="mr.mergeTrainWhenPipelineSucceedsDocsPath"
       />
       <template v-if="shouldShowMergeControls">
-        <div v-if="!shouldShowMergeEdit" class="mr-fast-forward-message">
+        <div
+          v-if="!shouldShowMergeEdit"
+          class="mr-fast-forward-message"
+          data-qa-selector="fast_forward_message_content"
+        >
           {{ __('Fast-forward merge without a merge commit') }}
         </div>
         <commits-header

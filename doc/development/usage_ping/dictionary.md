@@ -2056,7 +2056,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2068,7 +2068,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2080,7 +2080,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2092,7 +2092,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2104,7 +2104,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2116,7 +2116,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2128,7 +2128,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `ultimate`
 
@@ -3547,6 +3547,42 @@ Group: ``
 Status: `data_available`
 
 Tiers: `free`
+
+### `counts.package_events_i_package_rubygems_delete_package`
+
+Total count of RubyGems packages delete events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210303153000_package_events_i_package_rubygems_delete_package.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_rubygems_pull_package`
+
+Total count of pull RubyGems packages events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210303153002_package_events_i_package_rubygems_pull_package.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_rubygems_push_package`
+
+Total count of push RubyGems packages events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210303153004_package_events_i_package_rubygems_push_package.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_tag_delete_package`
 
@@ -5904,7 +5940,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of users who set personal preference to see Details on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182203_user_preferences_group_overview_details.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182203_user_preferences_group_overview_details.yml)
 
 Group: `group::threat insights`
 
@@ -5916,7 +5952,7 @@ Tiers: `ultimate`
 
 Count of users who set personal preference to see Security Dashboard on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
 
 Group: `group::threat insights`
 
@@ -6380,30 +6416,6 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
-### `g_project_management_epic_created_monthly`
-
-Count of MAU creating epics
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210305144719_g_product_planning_epic_created_monthly.yml)
-
-Group: `group::product planning`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
-### `g_project_management_epic_created_weekly`
-
-Count of WAU creating epics
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210305145820_g_product_planning_epic_created_weekly.yml)
-
-Group: `group::product planning`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
 ### `geo_enabled`
 
 Is Geo enabled?
@@ -6580,7 +6592,7 @@ Whether or not ModSecurity is enabled within Ingress
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -7146,7 +7158,7 @@ Group: `group::product intelligence`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `recording_ee_finished_at`
 
@@ -7351,6 +7363,30 @@ Group: `group::analytics`
 Status: `data_available`
 
 Tiers:
+
+### `redis_hll_counters.analytics.i_analytics_dev_ops_adoption_monthly`
+
+Counts visits to DevOps Adoption page per month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210401092244_i_analytics_dev_ops_adoption_monthly.yml)
+
+Group: `group::optimize`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.analytics.i_analytics_dev_ops_adoption_weekly`
+
+Counts visits to DevOps Adoption page per week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210401092244_i_analytics_dev_ops_adoption_weekly.yml)
+
+Group: `group::optimize`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.analytics.i_analytics_dev_ops_score_monthly`
 
@@ -9392,6 +9428,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_monthly`
+
+Distinct user count events for RubyGems packages in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154626_i_package_rubygems_deploy_token_monthly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_weekly`
+
+Distinct RubyGems pakages deployed in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154624_i_package_rubygems_deploy_token_weekly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.deploy_token_packages.i_package_tag_deploy_token_monthly`
 
 Missing description
@@ -9751,6 +9811,414 @@ Group: `group::ecosystem`
 Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.epics_usage_total_unique_counts_monthly`
+
+Total monthly users count for epics_usage
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210318183733_epics_usage_total_unique_counts_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.epics_usage_total_unique_counts_weekly`
+
+Total weekly users count for epics_usage
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210318183220_epics_usage_total_unique_counts_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_closed_monthly`
+
+Counts of MAU closing epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210310163213_g_project_management_epic_closed_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_closed_weekly`
+
+Counts of WAU closing epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210310162703_g_project_management_epic_closed_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_created_monthly`
+
+Count of MAU creating epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210305144719_g_product_planning_epic_created_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_created_weekly`
+
+Count of WAU creating epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210305145820_g_product_planning_epic_created_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_issue_added_monthly`
+
+Count of MAU adding issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312144719_g_product_planning_epic_issue_added_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_issue_added_weekly`
+
+Count of WAU adding issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312181918_g_product_planning_epic_issue_added_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_reopened_monthly`
+
+Counts of MAU closing epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210310164247_g_project_management_epic_reopened_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_reopened_weekly`
+
+Counts of WAU re-opening epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210310164112_g_project_management_epic_reopened_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_issue_promoted_to_epic_monthly`
+
+Count of MAU promoting issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210331193236_g_project_management_issue_promoted_to_epic_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_issue_promoted_to_epic_weekly`
+
+Counts of WAU promoting issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210331192332_g_project_management_issue_promoted_to_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_creating_epic_notes_monthly`
+
+Counts of MAU adding epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210314215451_g_project_management_users_creating_epic_notes_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_creating_epic_notes_weekly`
+
+Counts of WAU adding epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210314231518_g_project_management_users_creating_epic_notes_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_destroying_epic_notes_monthly`
+
+Counts of MAU destroying epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315034808_g_project_management_users_destroying_epic_notes_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_destroying_epic_notes_weekly`
+
+Counts of WAU destroying epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315034846_g_project_management_users_destroying_epic_notes_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_fixed_monthly`
+
+Counts of MAU setting epic due date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210325060507_g_project_management_users_setting_epic_due_date_as_fixed_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_fixed_weekly`
+
+Counts of WAU setting epic due date as fixed
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210325060623_g_project_management_users_setting_epic_due_date_as_fixed_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_inherited_monthly`
+
+Counts of MAU setting epic due date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210325060315_g_project_management_users_setting_epic_due_date_as_inherited_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_inherited_weekly`
+
+Counts of WAU setting epic due date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210325060903_g_project_management_users_setting_epic_due_date_as_inherited_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_fixed_monthly`
+
+Counts of MAU setting epic start date as fixed
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055624_g_project_management_users_setting_epic_start_date_as_fixed_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_fixed_weekly`
+
+Counts of WAU setting epic start date as fixed
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315054905_g_project_management_users_setting_epic_start_date_as_fixed_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_inherited_monthly`
+
+Counts of MAU setting epic start date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055439_g_project_management_users_setting_epic_start_date_as_inherited_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_start_date_as_inherited_weekly`
+
+Counts of WAU setting epic start date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315055342_g_project_management_users_setting_epic_start_date_as_inherited_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_descriptions_monthly`
+
+Counts of MAU changing epic descriptions
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312102051_g_project_management_users_updating_epic_descriptions_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_descriptions_weekly`
+
+Counts of WAU changing epic descriptions
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312101753_g_project_management_users_updating_epic_descriptions_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_notes_monthly`
+
+Counts of MAU updating epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210314234202_g_project_management_users_updating_epic_notes_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_notes_weekly`
+
+Counts of WAU updating epic notes
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210314234041_g_project_management_users_updating_epic_notes_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_titles_monthly`
+
+Counts of MAU changing epic titles
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312101935_g_project_management_users_updating_epic_titles_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_epic_titles_weekly`
+
+Counts of WAU changing epic titles
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312101826_g_project_management_users_updating_epic_titles_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_due_date_monthly`
+
+Counts of MAU manually updating fixed due date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043548_g_project_management_users_updating_fixed_epic_due_date_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_due_date_weekly`
+
+Counts of WAU manually updating fixed due date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210329042536_g_project_management_users_updating_fixed_epic_due_date_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_start_date_monthly`
+
+Counts of MAU manually updating fixed start date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043509_g_project_management_users_updating_fixed_epic_start_date_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_start_date_weekly`
+
+Counts of WAU manually updating fixed start date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210329043402_g_project_management_users_updating_fixed_epic_start_date_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sfe_monthly`
 
@@ -11626,7 +12094,7 @@ Tiers:
 
 ### `redis_hll_counters.quickactions.i_quickactions_invite_email_multiple_monthly`
 
-Missing description
+Unique users using the /invite_email quick action to add a multiple email participants to an issue within 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210222041235_i_quickactions_invite_email_multiple_monthly.yml)
 
@@ -11634,11 +12102,23 @@ Group: `group::product planning`
 
 Status: `implemented`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.quickactions.i_quickactions_invite_email_multiple_weekly`
+
+Unique users using the /invite_email quick action to add a multiple email participants to an issue within 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154600_i_quickactions_invite_email_multiple_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.quickactions.i_quickactions_invite_email_single_monthly`
 
-Missing description
+Unique users using the /invite_email quick action to add a single email participant to an issue within 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210222041219_i_quickactions_invite_email_single_monthly.yml)
 
@@ -11646,7 +12126,19 @@ Group: `group::product planning`
 
 Status: `implemented`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.quickactions.i_quickactions_invite_email_single_weekly`
+
+Unique users using the /invite_email quick action to add a single email participant to an issue within 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154557_i_quickactions_invite_email_single_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.quickactions.i_quickactions_iteration_monthly`
 
@@ -13472,6 +13964,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.user_packages.i_package_rubygems_user_monthly`
+
+Distinct user count events for RubyGems packages in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154654_i_package_rubygems_user_monthly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.user_packages.i_package_rubygems_user_weekly`
+
+Distinct user count events for RubyGems packages in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154652_i_package_rubygems_user_weekly.yml)
+
+Group: `group::package`
+
+Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.user_packages.i_package_tag_user_monthly`
 
 Missing description
@@ -13628,23 +14144,13 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
-### `topology.duration_s`
+### `topology`
 
-Time it took to collect topology data
+Topology data
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180922_duration_s.yml)
+[Object JSON schema](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/objects_schemas/topology_schema.json)
 
-Group: `group::memory`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
-### `topology.failures`
-
-Contains information about failed queries
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180924_failures.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210323120839_topology.yml)
 
 Group: `group::memory`
 
@@ -14200,7 +14706,7 @@ Distinct count of users that triggered an import using the Group Migration tool
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14284,7 +14790,7 @@ Distinct count of users that imported groups using Group Import
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14344,7 +14850,7 @@ Distinct count of users that imported issues into projects using CSV upload
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14356,7 +14862,7 @@ Distinct count of users that imported issues into projects using FogBugz
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14368,7 +14874,7 @@ Distinct count of users that imported issues into projects using Jira
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14380,7 +14886,7 @@ Distinct count of users that imported issues into projects using Phabricator
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14572,7 +15078,7 @@ Distinct count of users that imported projects from Bitbucket Cloud
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14584,7 +15090,7 @@ Distinct count of users that imported projects from Bitbucket Server
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14596,7 +15102,7 @@ Distinct count of users that imported projects using Import by URL
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14608,7 +15114,7 @@ Distinct count of users that imported projects from Gitea
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14620,7 +15126,7 @@ Distinct count of users that imported projects from GitHub
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14632,7 +15138,7 @@ Distinct count of users that imported projects from GitLab.com
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14644,7 +15150,7 @@ Distinct count of users that imported projects using Project Import/Export
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14656,7 +15162,7 @@ Distinct count of users that imported projects using Manifest file
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -14668,7 +15174,7 @@ Total count of all projects imported with import_source NOT NULL
 
 Group: `group::import`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -15238,7 +15744,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.secure.user_container_scanning_jobs`
 
-no idea, Count of Container Scanning jobs run, it implies user but AFAIK we don't track per user
+Distinct count per user of Container Scanning jobs run
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175501_user_container_scanning_jobs.yml)
 
@@ -15300,7 +15806,7 @@ Tiers: `ultimate`
 
 Users who set personal preference to see Details on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182207_user_preferences_group_overview_security_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182207_user_preferences_group_overview_security_dashboard.yml)
 
 Group: `group::threat insights`
 
@@ -16132,7 +16638,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16216,7 +16722,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16276,7 +16782,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16288,7 +16794,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16300,7 +16806,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16312,7 +16818,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16504,7 +17010,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16516,7 +17022,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16528,7 +17034,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16540,7 +17046,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16552,7 +17058,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16564,7 +17070,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16576,7 +17082,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16588,7 +17094,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -16600,7 +17106,7 @@ Missing description
 
 Group: ``
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -17074,7 +17580,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.container_scanning_pipeline`
 
-no idea, what is this when did it get added? guess pipelines containing a CS job
+Pipelines containing a Container Scanning job
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175507_container_scanning_pipeline.yml)
 
@@ -17242,7 +17748,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.user_container_scanning_jobs`
 
-no idea, Count of Container Scanning jobs run, it implies user and monthly, but AFAIK we don't track per user
+Distinct count per user of Container Scanning jobs run monthly
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175505_user_container_scanning_jobs.yml)
 
@@ -17304,7 +17810,7 @@ Tiers: `ultimate`
 
 Users who set personal preference to see Security Dashboard on Group overview page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182209_user_preferences_group_overview_security_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182209_user_preferences_group_overview_security_dashboard.yml)
 
 Group: `group::threat insights`
 

@@ -4,8 +4,8 @@ require 'faker'
 
 module QA
   RSpec.describe 'Verify' do
-    describe 'Merge train', :runner, :requires_admin do
-      let(:file_name) { 'custom_file.txt' }
+    describe 'Merge train', :runner, :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/324122', type: :bug } do
+      let(:file_name) { Faker::Lorem.word }
       let(:mr_title) { Faker::Lorem.sentence }
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(8)}" }
 
@@ -23,25 +23,29 @@ module QA
         end
       end
 
-      let!(:ci_file) do
+      let!(:original_files) do
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.commit_message = 'Add .gitlab-ci.yml'
           commit.add_files(
             [
-                {
-                    file_path: '.gitlab-ci.yml',
-                    content: <<~YAML
-                      test_merge_train:
-                        tags:
-                          - #{executor}
-                        script:
-                          - sleep 3
-                          - echo 'OK!'
-                        only:
-                          - merge_requests
-                    YAML
-                }
+              {
+                file_path: '.gitlab-ci.yml',
+                content: <<~YAML
+                  test_merge_train:
+                    tags:
+                      - #{executor}
+                    script:
+                      - sleep 3
+                      - echo 'OK!'
+                    only:
+                      - merge_requests
+                YAML
+              },
+              {
+                file_path: file_name,
+                content: Faker::Lorem.sentence
+              }
             ]
           )
         end
@@ -56,8 +60,15 @@ module QA
       let(:user_api_client) { Runtime::API::Client.new(:gitlab, user: user) }
       let(:admin_api_client) { Runtime::API::Client.as_admin }
 
-      let(:merge_request) do
-        Resource::MergeRequest.fabricate_via_api! do |merge_request|
+      before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
+
+        Flow::Login.sign_in
+        project.visit!
+        Flow::MergeRequest.enable_merge_trains
+        project.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
+
+        merge_request = Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.api_client = user_api_client
           merge_request.title = mr_title
           merge_request.project = project
@@ -66,45 +77,35 @@ module QA
           merge_request.file_name = file_name
           merge_request.file_content = Faker::Lorem.sentence
         end
-      end
 
-      before do
-        Runtime::Feature.enable(:invite_members_group_modal, project: project)
-        Flow::Login.sign_in
-        project.visit!
-        Flow::MergeRequest.enable_merge_trains
-        project.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
-
-        create_user_personal_access_token
         Flow::Login.sign_in(as: user)
         merge_request.visit!
 
         Page::MergeRequest::Show.perform do |show|
           show.has_pipeline_status?('passed')
           show.try_to_merge!
-
-          show.wait_until(reload: false) { show.has_content? 'started a merge train' }
         end
       end
 
       after do
         runner.remove_via_api!
         user.remove_via_api!
+        project.remove_via_api!
       end
 
       context 'when system cancels a merge request' do
-        it 'creates a TODO task', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/927' do
+        it 'creates a TODO task', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1741' do
           # Create a merge conflict
           Resource::Repository::Commit.fabricate_via_api! do |commit|
             commit.api_client = user_api_client
             commit.project = project
             commit.commit_message = 'changing text file'
-            commit.add_files(
+            commit.update_files(
               [
-                  {
-                      file_path: file_name,
-                      content: Faker::Lorem.sentence
-                  }
+                {
+                  file_path: file_name,
+                  content: 'Has to be different than before.'
+                }
               ]
             )
           end
@@ -123,12 +124,6 @@ module QA
             expect(todos).to have_latest_todo_item_with_content("Removed from Merge Train:", "#{mr_title}")
           end
         end
-      end
-
-      private
-
-      def create_user_personal_access_token
-        user_api_client.personal_access_token
       end
     end
   end
