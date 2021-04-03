@@ -374,7 +374,7 @@ RSpec.configure do |config|
     stub_all_feature_flags
 
     # Re-enable query limiting in case it was disabled
-    Gitlab::QueryLimiting.enable!
+    ::Gitlab::QueryLimiting.enable!
   end
 
   config.before(:example, :mailer) do
