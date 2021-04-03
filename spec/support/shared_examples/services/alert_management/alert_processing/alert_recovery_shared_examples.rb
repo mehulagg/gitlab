@@ -108,17 +108,12 @@ RSpec.shared_examples 'processes recovery alert' do
     context 'which is resolved' do
       let(:status) { :resolved }
 
-      include_examples 'processes never-before-seen recovery alert'
-
-      xit "doesn't create a bunch of resolved alerts for self-resolving payloads if there have already been an occurrance" do
-        # Ideal behavior for this situtation
-        it_behaves_like 'creates expected system notes for alert', :recovery_alert
-        it_behaves_like 'does not create an alert management alert'
-        it_behaves_like 'does not send alert notification emails'
-        it_behaves_like 'does not change the alert end time'
-        it_behaves_like 'does not process incident issues'
-        it_behaves_like 'does not add an alert management alert event'
-      end
+      it_behaves_like 'creates expected system notes for alert', :recovery_alert
+      it_behaves_like 'does not an create alert management alert'
+      it_behaves_like 'does not send alert notification emails'
+      it_behaves_like 'does not change the alert end time'
+      it_behaves_like 'does not process incident issues'
+      it_behaves_like 'does not add an alert management alert event'
     end
   end
 end

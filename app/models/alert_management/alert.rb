@@ -125,6 +125,7 @@ module AlertManagement
     scope :for_assignee_username, -> (assignee_username) { joins(:assignees).merge(User.by_username(assignee_username)) }
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
     scope :open, -> { with_status(open_statuses) }
+    scope :resolved, -> { with_status(:resolved) }
     scope :not_resolved, -> { without_status(:resolved) }
     scope :with_prometheus_alert, -> { includes(:prometheus_alert) }
     scope :with_threat_monitoring_alerts, -> { where(domain: :threat_monitoring ) }

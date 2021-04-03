@@ -35,6 +35,8 @@ module AlertManagement
     def process_resolved_alert
       SystemNoteService.log_resolving_alert(alert, alert_source)
 
+      return if @already_resolved
+
       if alert.resolve(incoming_payload.ends_at)
         SystemNoteService.change_alert_status(alert, User.alert_bot)
 
@@ -97,7 +99,7 @@ module AlertManagement
 
     def alert
       strong_memoize(:alert) do
-        find_existing_alert || build_new_alert
+        find_existing_alert || find_resolved_alert || build_new_alert
       end
     end
 
@@ -105,6 +107,12 @@ module AlertManagement
       return unless incoming_payload.gitlab_fingerprint
 
       AlertManagement::Alert.not_resolved.for_fingerprint(project, incoming_payload.gitlab_fingerprint).first
+    end
+
+    def find_resolved_alert
+      return unless incoming_payload.gitlab_fingerprint && resolving_alert?
+
+      @already_resolved = AlertManagement::Alert.resolved.for_fingerprint(project, incoming_payload.gitlab_fingerprint).last
     end
 
     def build_new_alert
@@ -116,7 +124,7 @@ module AlertManagement
     end
 
     def notifying_alert?
-      alert.triggered? || alert.resolved?
+      alert.triggered? || (alert.resolved? && !@already_resolved)
     end
 
     def alert_source
