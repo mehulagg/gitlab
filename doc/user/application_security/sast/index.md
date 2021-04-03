@@ -711,7 +711,7 @@ documentation for instructions.
 
 ### SAST Debug Logging
 
-Increasing the [Secure scanner log verbosity](https://docs.gitlab.com/ee/user/application_security/sast/index.html#logging-level) to `debug` in a global CI variable is often helpful when troubleshooting SAST jobs.
+Increasing the [Secure scanner log verbosity](#logging-level) to `debug` in a global CI variable is often helpful when troubleshooting SAST jobs.
 
 ```yaml
 variables:
